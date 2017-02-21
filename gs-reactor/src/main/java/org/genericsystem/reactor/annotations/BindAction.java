@@ -9,16 +9,16 @@ import java.lang.annotation.Target;
 import java.util.function.BiConsumer;
 
 import org.genericsystem.reactor.Context;
-import org.genericsystem.reactor.ExtendedAnnotationsManager.IGenericAnnotationProcessor;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.BindAction.BindActionGenericProcessor;
 import org.genericsystem.reactor.annotations.BindAction.BindActionProcessor;
 import org.genericsystem.reactor.annotations.BindAction.BindActions;
 import org.genericsystem.reactor.context.ContextAction;
 import org.genericsystem.reactor.contextproperties.ActionDefaults;
-import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTag;
-import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagAnnotation;
-import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagAnnotationContent;
+import org.genericsystem.reactor.extended.ExtendedAnnotationsManager.IGenericAnnotationProcessor;
+import org.genericsystem.reactor.extended.ExtendedRootTag.GTag;
+import org.genericsystem.reactor.extended.ExtendedRootTag.GTagAnnotation;
+import org.genericsystem.reactor.extended.ExtendedRootTag.GTagAnnotationContent;
 import org.genericsystem.reactor.gscomponents.TagImpl;
 
 @Retention(RetentionPolicy.RUNTIME)
@@ -56,7 +56,7 @@ public @interface BindAction {
 
 		@Override
 		public void onRemove(Tag tag, Context context, GTagAnnotation gTagAnnotation, GTagAnnotationContent annotationContent) {
-			context.getProperties(tag).remove(ActionDefaults.ACTION);
+			context.getAttributes(tag).remove(ActionDefaults.ACTION);
 		}
 
 		@Override

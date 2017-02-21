@@ -17,7 +17,8 @@ import org.genericsystem.common.GSVertx;
 import org.genericsystem.common.Root;
 import org.genericsystem.kernel.Cache;
 import org.genericsystem.reactor.HtmlDomNode;
-import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
+import org.genericsystem.reactor.ReactorStatics;
+import org.genericsystem.reactor.RootHtmlDomNode;
 import org.genericsystem.reactor.RootTag;
 import org.genericsystem.reactor.appserver.WebAppsConfig.SimpleWebAppConfig;
 import org.genericsystem.reactor.gscomponents.RootTagImpl;
@@ -180,11 +181,11 @@ public class ApplicationServer extends AbstractBackEnd {
 				JsonObject json = new JsonObject(message);
 				RootHtmlDomNode rootHtmlDomNode = domNodeVerticle.getRootHtmlDomNode();
 				if (rootHtmlDomNode != null) {
-					HtmlDomNode node = rootHtmlDomNode.getNodeById(json.getString(HtmlDomNode.ID));
+					HtmlDomNode node = rootHtmlDomNode.getNodeById(json.getString(ReactorStatics.ID));
 					if (node != null) {
 						cache.safeConsum((x) -> node.handleMessage(json));
 					} else
-						log.info("Can't find node id : " + json.getString(HtmlDomNode.ID));
+						log.info("Can't find node id : " + json.getString(ReactorStatics.ID));
 				} else
 					log.info("The DOM node tree has not been fully built yet.");
 			};

@@ -2,13 +2,14 @@ package org.genericsystem.reactor.gscomponents;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.ReactorStatics;
+import org.genericsystem.reactor.annotations.TagName;
 import org.genericsystem.reactor.contextproperties.ConvertedValueDefaults;
 import org.genericsystem.reactor.contextproperties.SelectionDefaults;
-import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlCheckBox;
 
 import javafx.beans.property.Property;
 
-public class CheckBoxWithValue extends HtmlCheckBox implements ConvertedValueDefaults {
+@TagName(value = TagName.INPUT, type = TagName.CHECKBOX)
+public class CheckBoxWithValue extends TagImpl implements ConvertedValueDefaults {
 
 	public CheckBoxWithValue() {
 		createConvertedValueProperty();

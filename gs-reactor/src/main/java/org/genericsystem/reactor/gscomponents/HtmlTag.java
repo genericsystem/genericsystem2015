@@ -1,212 +1,56 @@
 package org.genericsystem.reactor.gscomponents;
 
-import java.util.function.Consumer;
-
-import org.genericsystem.reactor.Context;
-import org.genericsystem.reactor.HtmlDomNode;
-import org.genericsystem.reactor.ReactorStatics;
-import org.genericsystem.reactor.annotations.Attribute;
-import org.genericsystem.reactor.contextproperties.ActionDefaults;
-import org.genericsystem.reactor.contextproperties.GSBuilderDefaults;
-import org.genericsystem.reactor.contextproperties.SelectionDefaults;
-import org.genericsystem.reactor.contextproperties.StepperDefaults;
-
-import io.vertx.core.json.JsonObject;
-import javafx.beans.property.Property;
+import org.genericsystem.reactor.annotations.TagName;
 
 public class HtmlTag {
 
-	public static class HtmlButton extends TagImpl implements ActionDefaults, GSBuilderDefaults, SelectionDefaults {
+	@TagName(TagName.BUTTON)
+	public static class HtmlButton extends TagImpl {
 
-		@Override
-		public String getTag() {
-			return "button";
-		}
-
-		@Override
-		public HtmlDomNode createNode(HtmlDomNode parent, Context modelContext) {
-			return new HtmlDomNode(parent, modelContext, this) {
-
-				@Override
-				public void handleMessage(JsonObject json) {
-					((ActionDefaults) getTag()).getActionProperty(getModelContext()).getValue().accept(new Object());
-				}
-			};
-		}
 	}
 
-	@Attribute(name = "type", value = "checkbox")
-	public static class HtmlCheckBox extends TagImpl {
-
-		@Override
-		public String getTag() {
-			return "input";
-		}
-
-		@Override
-		public HtmlDomNode createNode(HtmlDomNode parent, Context modelContext) {
-			return new HtmlDomNode(parent, modelContext, this) {
-				@Override
-				public void handleMessage(JsonObject json) {
-					getTag().getDomNodeAttributes(getModelContext()).put(ReactorStatics.CHECKED, json.getBoolean(ReactorStatics.CHECKED) ? ReactorStatics.CHECKED : "");
-				}
-			};
-		}
-	}
-
+	@TagName(TagName.DATALIST)
 	public static class HtmlDatalist extends TagImpl {
 
-		@Override
-		public String getTag() {
-			return "datalist";
-		}
-
-		@Override
-		public HtmlDomNode createNode(HtmlDomNode parent, Context modelContext) {
-			return new HtmlDomNode(parent, modelContext, this) {
-
-				@Override
-				public void handleMessage(JsonObject json) {
-					if (UPDATE.equals(json.getString(MSG_TYPE))) {
-						((SelectionDefaults) getTag()).getSelectionIndex(getModelContext()).setValue(json.getInteger(SELECTED_INDEX));
-					}
-				}
-			};
-		}
 	}
 
+	@TagName(TagName.DIV)
 	public static class HtmlDiv extends TagImpl {
 
-		@Override
-		public String getTag() {
-			return "div";
-		}
 	}
 
-	public static class HtmlFooter extends TagImpl {
-
-		@Override
-		public String getTag() {
-			return "footer";
-		}
-	}
-
+	@TagName(TagName.H1)
 	public static class HtmlH1 extends TagImpl {
 
-		@Override
-		public String getTag() {
-			return "h1";
-		}
 	}
 
+	@TagName(TagName.H2)
 	public static class HtmlH2 extends TagImpl {
 
-		@Override
-		public String getTag() {
-			return "h2";
-		}
 	}
 
-	public static class HtmlH3 extends TagImpl {
-
-		@Override
-		public String getTag() {
-			return "h3";
-		}
-	}
-
+	@TagName(TagName.H4)
 	public static class HtmlH4 extends TagImpl {
 
-		@Override
-		public String getTag() {
-			return "h4";
-		}
 	}
 
-	public static class HtmlH5 extends TagImpl {
+	@TagName(TagName.A)
+	public static class HtmlHyperLink extends TagImpl {
 
-		@Override
-		public String getTag() {
-			return "h5";
-		}
 	}
 
-	public static class HtmlH6 extends TagImpl {
-
-		@Override
-		public String getTag() {
-			return "h6";
-		}
-	}
-
-	public static class HtmlHeader extends TagImpl {
-
-		@Override
-		public String getTag() {
-			return "header";
-		}
-	}
-
-	public static class HtmlHyperLink extends TagImpl implements SelectionDefaults, StepperDefaults, ActionDefaults {
-
-		@Override
-		public String getTag() {
-			return "a";
-		}
-
-		@Override
-		public HtmlDomNode createNode(HtmlDomNode parent, Context modelContext) {
-			return new HtmlDomNode(parent, modelContext, this) {
-
-				@Override
-				public void handleMessage(JsonObject json) {
-					((ActionDefaults) getTag()).getActionProperty(getModelContext()).getValue().accept(new Object());
-				}
-			};
-		}
-	}
-
+	@TagName(TagName.IMG)
 	public static class HtmlImg extends TagImpl {
 
-		@Override
-		public String getTag() {
-			return "img";
-		}
 	}
 
-	@Attribute(name = "type", value = "text")
-	public static class HtmlInputText extends TagImpl implements ActionDefaults {
+	@TagName(TagName.INPUT)
+	public static class HtmlInputText extends TagImpl {
 
-		@Override
-		public String getTag() {
-			return "input";
-		}
-
-		@Override
-		public HtmlDomNode createNode(HtmlDomNode parent, Context modelContext) {
-			return new HtmlDomNode(parent, modelContext, this) {
-
-				@Override
-				public void handleMessage(JsonObject json) {
-					super.handleMessage(json);
-					if (ADD.equals(json.getString(MSG_TYPE))) {
-						Property<Consumer<Object>> action = ((ActionDefaults) getTag()).getActionProperty(getModelContext());
-						if (action != null)
-							action.getValue().accept(new Object());
-					}
-					if (UPDATE.equals(json.getString(MSG_TYPE)))
-						getTag().getDomNodeAttributes(getModelContext()).put("value", json.getString(TEXT_CONTENT));
-				}
-			};
-		}
 	}
 
+	@TagName(TagName.LABEL)
 	public static class HtmlLabel extends TagImpl {
-
-		@Override
-		public String getTag() {
-			return "label";
-		}
 
 		public static class GSLabelDisplayer extends HtmlLabel {
 
@@ -216,89 +60,28 @@ public class HtmlTag {
 		}
 	}
 
+	@TagName(TagName.LI)
 	public static class HtmlLi extends TagImpl {
 
-		@Override
-		public String getTag() {
-			return "li";
-		}
 	}
 
+	@TagName(TagName.OPTION)
 	public static class HtmlOption extends TagImpl {
 
-		@Override
-		public String getTag() {
-			return "option";
-		}
 	}
 
+	@TagName(TagName.P)
 	public static class HtmlP extends TagImpl {
 
-		@Override
-		public String getTag() {
-			return "p";
-		}
 	}
 
-	@Attribute(name = "type", value = "radio")
-	public static class HtmlRadio extends TagImpl {
-
-		@Override
-		public String getTag() {
-			return "input";
-		}
-	}
-
-	public static class HtmlSection extends TagImpl {
-
-		@Override
-		public String getTag() {
-			return "section";
-		}
-	}
-
-	public static class HtmlSelect extends TagImpl {
-
-		@Override
-		public String getTag() {
-			return "select";
-		}
-
-		@Override
-		public HtmlDomNode createNode(HtmlDomNode parent, Context modelContext) {
-			return new HtmlDomNode(parent, modelContext, this) {
-
-				@Override
-				public void handleMessage(JsonObject json) {
-					if (UPDATE.equals(json.getString(MSG_TYPE))) {
-						((SelectionDefaults) getTag()).getSelectionIndex(getModelContext()).setValue(json.getInteger(SELECTED_INDEX));
-					}
-				}
-			};
-		}
-	}
-
+	@TagName(TagName.SPAN)
 	public static class HtmlSpan extends TagImpl {
 
-		@Override
-		public String getTag() {
-			return "span";
-		}
 	}
 
-	public static class HtmlStrong extends TagImpl {
-
-		@Override
-		public String getTag() {
-			return "strong";
-		}
-	}
-
+	@TagName(TagName.UL)
 	public static class HtmlUl extends TagImpl {
 
-		@Override
-		public String getTag() {
-			return "ul";
-		}
 	}
 }

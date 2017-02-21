@@ -1,4 +1,4 @@
-package org.genericsystem.reactor.gscomponents;
+package org.genericsystem.reactor.extended;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayDeque;
@@ -33,16 +33,17 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
 import org.genericsystem.reactor.AnnotationsManager;
 import org.genericsystem.reactor.Context;
-import org.genericsystem.reactor.ExtendedAnnotationsManager;
-import org.genericsystem.reactor.ExtendedAnnotationsManager.IGenericAnnotationProcessor;
 import org.genericsystem.reactor.HtmlDomNode;
-import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
 import org.genericsystem.reactor.HtmlDomNode.Sender;
+import org.genericsystem.reactor.RootHtmlDomNode;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.TagNode;
 import org.genericsystem.reactor.annotations.Children;
-import org.genericsystem.reactor.gscomponents.ExtendedRootTag.TagType.TagAnnotationAttribute;
-import org.genericsystem.reactor.gscomponents.ExtendedRootTag.TagType.TagAnnotationContentAttribute;
+import org.genericsystem.reactor.extended.ExtendedAnnotationsManager.IGenericAnnotationProcessor;
+import org.genericsystem.reactor.extended.ExtendedRootTag.TagType.TagAnnotationAttribute;
+import org.genericsystem.reactor.extended.ExtendedRootTag.TagType.TagAnnotationContentAttribute;
+import org.genericsystem.reactor.gscomponents.RootTagImpl;
+import org.genericsystem.reactor.gscomponents.TagImpl;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -137,7 +138,7 @@ public class ExtendedRootTag extends RootTagImpl {
 	}
 
 	@SuppressWarnings({ "unchecked" })
-	public ListChangeListener<? super GenericAnnotationWithContent> getApplyingAnnotationsListener(Tag tag, Context context, Class<? extends Annotation> annotationClass) {
+	ListChangeListener<? super GenericAnnotationWithContent> getApplyingAnnotationsListener(Tag tag, Context context, Class<? extends Annotation> annotationClass) {
 		return c -> {
 			if (!context.isDestroyed()) {
 				Map<Class<? extends Annotation>, IGenericAnnotationProcessor> processors = ((ExtendedAnnotationsManager) annotationsManager).getProcessors();
@@ -163,7 +164,7 @@ public class ExtendedRootTag extends RootTagImpl {
 		};
 	}
 
-	public ListChangeListener<? super GenericAnnotationWithContent> getApplyingAnnotationsListener(Tag tag, Class<? extends Annotation> annotationClass) {
+	ListChangeListener<? super GenericAnnotationWithContent> getApplyingAnnotationsListener(Tag tag, Class<? extends Annotation> annotationClass) {
 		return c -> {
 			Map<Class<? extends Annotation>, IGenericAnnotationProcessor> processors = ((ExtendedAnnotationsManager) annotationsManager).getProcessors();
 			if (processors.containsKey(annotationClass)) {
@@ -222,7 +223,7 @@ public class ExtendedRootTag extends RootTagImpl {
 		return result;
 	}
 
-	public static class AnnotationClassName {
+	static class AnnotationClassName {
 		private Class<? extends Annotation> annotationClass;
 		private String name;
 
@@ -253,7 +254,7 @@ public class ExtendedRootTag extends RootTagImpl {
 		}
 	}
 
-	public class GenericAnnotationWithContent {
+	class GenericAnnotationWithContent {
 		private GTagAnnotation gTagAnnotation;
 		private GTagAnnotationContent annotationContent;
 
@@ -290,7 +291,7 @@ public class ExtendedRootTag extends RootTagImpl {
 	}
 
 	// Stores all the (generic) annotations applying to a tag.
-	public class GenericTagNode extends SimpleTagNode {
+	class GenericTagNode extends SimpleTagNode {
 
 		private Map<AnnotationClassName, SortedList<GenericAnnotationWithContent>> sortedAnnotationsLists = new TreeMap<>((an1, an2) -> {
 			List<Class<? extends Annotation>> processors = ((ExtendedAnnotationsManager) annotationsManager).getProcessors().keySet().stream().collect(Collectors.toList());

@@ -27,16 +27,11 @@ public class Controller {
 	private Property<Boolean> activeProperty = new SimpleBooleanProperty(true);
 
 	public static void initialize(Tag tag, Class<? extends TagImpl> firstClass) {
-		tag.addPrefixBinding(context -> {
-			if (context.containsProperty(tag, CONTROLLER))
-				tag.getProperty(CONTROLLER, context).setValue(new Controller(tag, firstClass));
-			else
-				tag.createNewInitializedProperty(CONTROLLER, context, context_ -> new Controller(tag, firstClass));
-		});
+		tag.setContextAttribute(CONTROLLER, c -> new Controller(tag, firstClass));
 	}
 
 	public static Controller get(Tag tag, Context context) {
-		return tag.<Controller> getProperty(CONTROLLER, context).getValue();
+		return tag.getContextAttribute(CONTROLLER, context);
 	}
 
 	public Controller(Tag containerTag, Class<? extends TagImpl> firstClass) {

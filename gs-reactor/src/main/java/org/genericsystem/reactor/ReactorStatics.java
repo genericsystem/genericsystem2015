@@ -33,6 +33,33 @@ public class ReactorStatics {
 	public static final String CHECKED = "checked";
 	public static final String DISABLED = "disabled";
 
+	// Constants used by HtmlDomNode
+	static final String MSG_TYPE = "msgType";
+	static final String ADD = "A";
+	static final String UPDATE = "U";
+	static final String REMOVE = "R";
+	static final String UPDATE_TEXT = "UT";
+	static final String UPDATE_SELECTION = "US";
+	static final String ADD_STYLECLASS = "AC";
+	static final String REMOVE_STYLECLASS = "RC";
+	static final String ADD_STYLE = "AS";
+	static final String REMOVE_STYLE = "RS";
+	static final String ADD_ATTRIBUTE = "AA";
+	static final String REMOVE_ATTRIBUTE = "RA";
+
+	static final String PARENT_ID = "parentId";
+	public static final String ID = "nodeId";
+	static final String NEXT_ID = "nextId";
+	static final String STYLE_PROPERTY = "styleProperty";
+	static final String STYLE_VALUE = "styleValue";
+	static final String ATTRIBUTE_NAME = "attributeName";
+	static final String ATTRIBUTE_VALUE = "attributeValue";
+	static final String STYLECLASS = "styleClass";
+	static final String TEXT_CONTENT = "textContent";
+	static final String TAG_HTML = "tagHtml";
+	static final String ELT_TYPE = "eltType";
+	static final String SELECTED_INDEX = "selectedIndex";
+
 	public static <T> T fromString(String s) {
 		byte[] data = Base64.getDecoder().decode(s);
 		ObjectInputStream ois;

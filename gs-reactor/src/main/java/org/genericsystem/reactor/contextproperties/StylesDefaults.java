@@ -4,7 +4,6 @@ import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.HtmlDomNode;
 import org.genericsystem.reactor.Tag;
 
-import javafx.beans.property.Property;
 import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableMap;
 
@@ -12,7 +11,7 @@ public interface StylesDefaults extends MapStringDefaults {
 
 	public static final String STYLES = "styles";
 
-	<T> Property<T> getInheritedProperty(String propertyName, Context[] model, Tag[] tag);
+	<T> T getInheritedContextAttribute(String propertyName, Context[] model, Tag[] tag);
 
 	default ObservableMap<String, String> getDomNodeStyles(Context model) {
 		return getDomNodeMap(model, STYLES, HtmlDomNode::getStylesListener);
@@ -21,12 +20,12 @@ public interface StylesDefaults extends MapStringDefaults {
 	default void inheritStyle(Context context, String styleName) {
 		Context[] modelArray = new Context[] { context };
 		Tag[] tagArray = new Tag[] { (Tag) this };
-		Property<ObservableMap<String, String>> ancestorStyles = getInheritedProperty(STYLES, modelArray, tagArray);
+		ObservableMap<String, String> ancestorStyles = getInheritedContextAttribute(STYLES, modelArray, tagArray);
 		while (ancestorStyles != null)
-			if (ancestorStyles.getValue().containsKey(styleName)) {
+			if (ancestorStyles.containsKey(styleName)) {
 				ObservableMap<String, String> styles = getDomNodeStyles(context);
-				styles.put(styleName, ancestorStyles.getValue().get(styleName));
-				ancestorStyles.getValue().addListener((MapChangeListener<String, String>) c -> {
+				styles.put(styleName, ancestorStyles.get(styleName));
+				ancestorStyles.addListener((MapChangeListener<String, String>) c -> {
 					if (c.getKey().equals(styleName)) {
 						if (c.wasRemoved())
 							styles.remove(styleName);
@@ -36,7 +35,7 @@ public interface StylesDefaults extends MapStringDefaults {
 				});
 				break;
 			} else
-				ancestorStyles = getInheritedProperty(STYLES, modelArray, tagArray);
+				ancestorStyles = getInheritedContextAttribute(STYLES, modelArray, tagArray);
 	}
 
 	default void inheritStyle(String styleName) {

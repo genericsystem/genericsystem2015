@@ -13,13 +13,11 @@ import javafx.collections.ObservableMap;
 public interface MapStringDefaults extends ContextProperty {
 
 	default ObservableMap<String, String> getDomNodeMap(Context model, String propertyName, Function<HtmlDomNode, MapChangeListener<String, String>> getListener) {
-		if (!model.containsProperty((Tag) this, propertyName)) {
-			createNewInitializedProperty(propertyName, model, m -> {
-				ObservableMap<String, String> map = FXCollections.observableHashMap();
-				map.addListener(getListener.apply(model.getHtmlDomNode((Tag) this)));
-				return map;
-			});
+		if (!model.containsAttribute((Tag) this, propertyName)) {
+			ObservableMap<String, String> map = FXCollections.observableHashMap();
+			map.addListener(getListener.apply(model.getHtmlDomNode((Tag) this)));
+			addContextAttribute(propertyName, model, map);
 		}
-		return (ObservableMap<String, String>) getProperty(propertyName, model).getValue();
+		return getContextAttribute(propertyName, model);
 	}
 }

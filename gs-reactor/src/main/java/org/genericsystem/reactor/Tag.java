@@ -1,6 +1,7 @@
 package org.genericsystem.reactor;
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -13,9 +14,13 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.BindingsTools;
 import org.genericsystem.reactor.context.ObservableListExtractor;
 import org.genericsystem.reactor.context.TagSwitcher;
+import org.genericsystem.reactor.contextproperties.ActionDefaults;
 import org.genericsystem.reactor.contextproperties.AttributesDefaults;
 import org.genericsystem.reactor.contextproperties.DisplayDefaults;
+import org.genericsystem.reactor.contextproperties.GSBuilderDefaults;
 import org.genericsystem.reactor.contextproperties.GenericStringDefaults;
+import org.genericsystem.reactor.contextproperties.SelectionDefaults;
+import org.genericsystem.reactor.contextproperties.StepperDefaults;
 import org.genericsystem.reactor.contextproperties.StyleClassesDefaults;
 import org.genericsystem.reactor.contextproperties.StylesDefaults;
 import org.genericsystem.reactor.contextproperties.TextPropertyDefaults;
@@ -39,11 +44,17 @@ import javafx.util.StringConverter;
  *
  * @param <N>
  */
-public interface Tag extends TagNode, TextPropertyDefaults, StylesDefaults, AttributesDefaults, StyleClassesDefaults, GenericStringDefaults, DisplayDefaults, UserRoleDefaults {
+public interface Tag extends TagNode, ActionDefaults, SelectionDefaults, StepperDefaults, GSBuilderDefaults, TextPropertyDefaults, StylesDefaults, AttributesDefaults, StyleClassesDefaults, GenericStringDefaults, DisplayDefaults, UserRoleDefaults {
 
 	public static final Logger log = LoggerFactory.getLogger(Tag.class);
 
 	public String getTag();
+
+	public void setTag(String tagName);
+
+	public Class<? extends HtmlDomNode> getDomNodeClass();
+
+	public void setDomNodeClass(Class<? extends HtmlDomNode> domNodeClass);
 
 	public List<Consumer<Context>> getPreFixedBindings();
 
@@ -67,7 +78,7 @@ public interface Tag extends TagNode, TextPropertyDefaults, StylesDefaults, Attr
 
 	default void bindOptionalStyleClass(String styleClass, String propertyName) {
 		addPrefixBinding(modelContext -> {
-			ObservableValue<Boolean> optional = getObservableValue(propertyName, modelContext);
+			ObservableValue<Boolean> optional = getContextObservableValue(propertyName, modelContext);
 			Set<String> styleClasses = getDomNodeStyleClasses(modelContext);
 			Consumer<Boolean> consumer = bool -> {
 				if (Boolean.TRUE.equals(bool))
@@ -81,7 +92,7 @@ public interface Tag extends TagNode, TextPropertyDefaults, StylesDefaults, Attr
 	}
 
 	default void bindOptionalStyleClass(String styleClass, String modelPropertyName, Function<Context, ObservableValue<Boolean>> applyOnModel) {
-		storeProperty(modelPropertyName, applyOnModel);
+		addContextAttribute(modelPropertyName, applyOnModel);
 		bindOptionalStyleClass(styleClass, modelPropertyName);
 	}
 
@@ -133,59 +144,164 @@ public interface Tag extends TagNode, TextPropertyDefaults, StylesDefaults, Attr
 	}
 
 	@Override
-	default <T> Property<T> getProperty(String propertyName, Context context) {
-		class PropertyComputer {
-			Property<T> getProperty(String propertyName, Context[] models) {
+	default <T> T getContextAttribute(String attributeName, Context context) {
+		class AttributeComputer {
+			T getAttribute(String attributeName, Context[] contexts) {
 				Tag tag = Tag.this;
-				while (tag != null && models[0] != null) {
-					if (models[0].containsProperty(tag, propertyName))
-						return models[0].getProperty(tag, propertyName);
-					if (tag.getMetaBinding() != null && models[0].getHtmlDomNode(tag.getParent()) == null)
-						models[0] = models[0].getParent();
+				while (tag != null && contexts[0] != null) {
+					if (contexts[0].containsAttribute(tag, attributeName))
+						return contexts[0].<T> getAttribute(tag, attributeName);
+					if (tag.getMetaBinding() != null && contexts[0].getHtmlDomNode(tag.getParent()) == null)
+						contexts[0] = contexts[0].getParent();
 					tag = tag.getParent();
 				}
 				return null;
 			}
 		}
-		return new PropertyComputer().getProperty(propertyName, new Context[] { context });
+		return new AttributeComputer().getAttribute(attributeName, new Context[] { context });
 	}
 
 	@Override
-	default <T> Property<T> getInheritedProperty(String propertyName, Context[] model, Tag[] tag) {
-		while (tag[0] != null && model[0] != null) {
-			if (tag[0].getMetaBinding() != null && model[0].getHtmlDomNode(tag[0].getParent()) == null)
-				model[0] = model[0].getParent();
+	default <T> Property<T> getContextProperty(String propertyName, Context context) {
+		return getContextAttribute(propertyName, context);
+	}
+
+	@Override
+	default <T> ObservableValue<T> getContextObservableValue(String propertyName, Context context) {
+		return getContextAttribute(propertyName, context);
+	}
+
+	@Override
+	default <T> T getInheritedContextAttribute(String attributeName, Context[] context, Tag[] tag) {
+		while (tag[0] != null && context[0] != null) {
+			if (tag[0].getMetaBinding() != null && context[0].getHtmlDomNode(tag[0].getParent()) == null)
+				context[0] = context[0].getParent();
 			tag[0] = tag[0].getParent();
-			if (model[0] != null && model[0].containsProperty(tag[0], propertyName))
-				return model[0].<T> getProperty(tag[0], propertyName);
+			if (context[0] != null && context[0].containsAttribute(tag[0], attributeName))
+				return context[0].<T> getAttribute(tag[0], attributeName);
 		}
 		return null;
 	}
 
 	@Override
-	default <T> ObservableValue<T> getObservableValue(String propertyName, Context model) {
+	default <T extends Serializable> void addContextPropertyChangeListener(String propertyName, BiConsumer<Context, T> listener) {
+		addPrefixBinding(context -> {
+			ObservableValue<T> observable = getContextObservableValue(propertyName, context);
+			observable.addListener((o, old, nva) -> listener.accept(context, nva));
+		});
+	}
 
-		class ObservableValueComputer {
-			ObservableValue<T> getObservableValue(String propertyName, Context[] model) {
-				Tag tag = Tag.this;
-				while (tag != null && model[0] != null) {
-					if (model[0].containsProperty(tag, propertyName))
-						return model[0].<T> getObservableValue(tag, propertyName);
-					if (tag.getMetaBinding() != null && model[0].getHtmlDomNode(tag.getParent()) == null)
-						model[0] = model[0].getParent();
-					tag = tag.getParent();
-				}
-				return null;
-			}
-		}
-		return new ObservableValueComputer().getObservableValue(propertyName, new Context[] { model });
+	/**
+	 * Creates a new context attribute with the given name and value. Throws an exception if an attribute with this name already exists.
+	 * 
+	 * @throws IllegalStateException
+	 *             If an attribute with this name already exists.
+	 */
+	@Override
+	default <T> void addContextAttribute(String attributeName, Function<Context, T> applyOnModel) {
+		addPrefixBinding(context -> context.addContextAttribute(this, attributeName, applyOnModel.apply(context)));
+	}
+
+	/**
+	 * Creates a new context attribute for the given context with the given name and value. Throws an exception if an attribute with this name already exists.
+	 * 
+	 * @throws IllegalStateException
+	 *             If an attribute with this name already exists.
+	 */
+	@Override
+	default <T> void addContextAttribute(String attributeName, Context context, T value) {
+		context.addContextAttribute(this, attributeName, value);
+	}
+
+	/**
+	 * Sets the attribute with the given name to the given value. If the attribute does not exist yet, it is created, otherwise it is replaced.
+	 */
+	@Override
+	default <T> void setContextAttribute(String attributeName, Context context, T value) {
+		context.setContextAttribute(this, attributeName, value);
+	}
+
+	/**
+	 * Sets the attribute with the given name to the given value. If the attribute does not exist yet, it is created, otherwise it is replaced.
+	 */
+	@Override
+	default <T> void setContextAttribute(String attributeName, Function<Context, T> getValue) {
+		addPrefixBinding(context -> setContextAttribute(attributeName, context, getValue.apply(context)));
+	}
+
+	/**
+	 * Sets the value of a context attribute that is a property. If no attribute with the given name exists, one is created, otherwise the existing property’s value is replaced.
+	 * 
+	 * @param attributeName
+	 *            The attribute’s name.
+	 * @param context
+	 *            The context to use.
+	 * @param value
+	 *            The value of the property contained in the attribute.
+	 */
+	@Override
+	default <T> void setContextPropertyValue(String attributeName, Context context, T value) {
+		context.setContextPropertyValue(this, attributeName, value);
+	}
+
+	/**
+	 * Sets the value of a context attribute that is a property. If no attribute with the given name exists, one is created, otherwise the existing property’s value is replaced.
+	 * 
+	 * @param attributeName
+	 *            The attribute’s name.
+	 * @param getValue
+	 *            The method to apply to the context to retrieve the value to use.
+	 */
+	@Override
+	default <T> void setContextPropertyValue(String attributeName, Function<Context, T> getValue) {
+		addPrefixBinding(context -> setContextPropertyValue(attributeName, context, getValue.apply(context)));
+	}
+
+	default <T> void setInheritedContextPropertyValue(String attributeName, Context context, T value) {
+		Property<T> contextProperty = getContextProperty(attributeName, context);
+		if (contextProperty == null)
+			setContextPropertyValue(attributeName, context, value);
+		else
+			contextProperty.setValue(value);
+	}
+
+	/**
+	 * Creates a new context attribute with the given name containing an empty property. Throws an exception if an attribute with this name already exists.
+	 */
+	@Override
+	default void createNewContextProperty(String propertyName) {
+		addPrefixBinding(context -> context.createNewContextProperty(this, propertyName));
+	}
+
+	/**
+	 * Creates a new context attribute with the given name containing an empty property. Throws an exception if an attribute with this name already exists.
+	 */
+	default void createNewContextProperty(String propertyName, Context context) {
+		context.createNewContextProperty(this, propertyName);
+	}
+
+	/**
+	 * Creates a new context attribute with the given name containing a property with the given value. Throws an exception if an attribute with this name already exists.
+	 */
+	@Override
+	default <T> void createNewInitializedProperty(String propertyName, Context context, T initialValue) {
+		context.createNewContextProperty(this, propertyName);
+		getContextProperty(propertyName, context).setValue(initialValue);
+	}
+
+	/**
+	 * Creates a new context attribute with the given name containing a property with the value obtained by applying getInitialValue to the context. Throws an exception if an attribute with this name already exists.
+	 */
+	@Override
+	default <T> void createNewInitializedProperty(String propertyName, Function<Context, T> getInitialValue) {
+		addPrefixBinding(context -> createNewInitializedProperty(propertyName, context, getInitialValue.apply(context)));
 	}
 
 	default void bindMapElement(String name, String propertyName, Function<Context, Map<String, String>> getMap) {
 		addPrefixBinding(model -> {
 			Map<String, String> map = getMap.apply(model);
 			ChangeListener<String> listener = (o, old, newValue) -> map.put(name, newValue);
-			ObservableValue<String> observable = getObservableValue(propertyName, model);
+			ObservableValue<String> observable = getContextObservableValue(propertyName, model);
 			observable.addListener(listener);
 			map.put(name, observable.getValue());
 		});
@@ -204,7 +320,7 @@ public interface Tag extends TagNode, TextPropertyDefaults, StylesDefaults, Attr
 			ObservableMap<String, String> map = getMap.apply(modelContext);
 			StringConverter<T> stringConverter = getStringConverter.apply(modelContext);
 			ChangeListener<T> listener = (o, old, newValue) -> map.put(name, stringConverter.toString(newValue));
-			Property<T> observable = getProperty(propertyName, modelContext);
+			Property<T> observable = getContextProperty(propertyName, modelContext);
 			observable.addListener(listener);
 			map.addListener((MapChangeListener<String, String>) c -> {
 				if (!name.equals(c.getKey()))
@@ -217,50 +333,6 @@ public interface Tag extends TagNode, TextPropertyDefaults, StylesDefaults, Attr
 			});
 			map.put(name, stringConverter.toString(observable.getValue()));
 		});
-	}
-
-	@Override
-	default <T extends Serializable> void addPropertyChangeListener(String propertyName, BiConsumer<Context, T> listener) {
-		addPrefixBinding(modelContext -> {
-			ObservableValue<T> observable = getObservableValue(propertyName, modelContext);
-			observable.addListener((o, old, nva) -> listener.accept(modelContext, nva));
-		});
-	}
-
-	@Override
-	default void createNewProperty(String propertyName) {
-		addPrefixBinding(modelContext -> modelContext.createNewProperty(this, propertyName));
-	}
-
-	default void createNewProperty(String propertyName, Context context) {
-		context.createNewProperty(this, propertyName);
-	}
-
-	@Override
-	default <T> void createNewInitializedProperty(String propertyName, Context context, Function<Context, T> getInitialValue) {
-		context.createNewProperty(this, propertyName);
-		getProperty(propertyName, context).setValue(getInitialValue.apply(context));
-	}
-
-	@Override
-	default <T> void createNewInitializedProperty(String propertyName, Function<Context, T> getInitialValue) {
-		createNewProperty(propertyName);
-		initProperty(propertyName, getInitialValue);
-	}
-
-	@Override
-	default <T> void initProperty(String propertyName, Function<Context, T> getInitialValue) {
-		addPrefixBinding(modelContext -> getProperty(propertyName, modelContext).setValue(getInitialValue.apply(modelContext)));
-	}
-
-	@Override
-	default <T> void storeProperty(String propertyName, Function<Context, ObservableValue<T>> applyOnModel) {
-		addPrefixBinding(modelContext -> modelContext.storeProperty(this, propertyName, applyOnModel.apply(modelContext)));
-	}
-
-	@Override
-	default <T> void storeProperty(String propertyName, Context context, Function<Context, ObservableValue<T>> applyOnModel) {
-		context.storeProperty(this, propertyName, applyOnModel.apply(context));
 	}
 
 	default void addStyle(String propertyName, String value) {
@@ -277,7 +349,7 @@ public interface Tag extends TagNode, TextPropertyDefaults, StylesDefaults, Attr
 	}
 
 	default void bindStyle(String style, String propertyName, Function<Context, ObservableValue<String>> applyOnModel) {
-		storeProperty(propertyName, applyOnModel);
+		addContextAttribute(propertyName, applyOnModel);
 		bindMapElement(style, propertyName, model -> getDomNodeStyles(model));
 	}
 
@@ -314,7 +386,7 @@ public interface Tag extends TagNode, TextPropertyDefaults, StylesDefaults, Attr
 	}
 
 	default void bindAttribute(String attributeName, String propertyName, Function<Context, ObservableValue<String>> applyOnModel) {
-		storeProperty(propertyName, applyOnModel);
+		addContextAttribute(propertyName, applyOnModel);
 		bindMapElement(attributeName, propertyName, model -> getDomNodeAttributes(model));
 	}
 
@@ -349,8 +421,12 @@ public interface Tag extends TagNode, TextPropertyDefaults, StylesDefaults, Attr
 		});
 	}
 
-	default HtmlDomNode createNode(HtmlDomNode parent, Context modelContext) {
-		return new HtmlDomNode(parent, modelContext, this);
+	default HtmlDomNode createNode(HtmlDomNode parent, Context context) {
+		try {
+			return getDomNodeClass().getConstructor(HtmlDomNode.class, Context.class, Tag.class).newInstance(parent, context, this);
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+			throw new IllegalStateException(e);
+		}
 	};
 
 	default <T extends TagImpl> TagImpl createChild(Class<T> clazz) {

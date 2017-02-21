@@ -13,22 +13,22 @@ public interface StepperDefaults extends ContextProperty {
 	public static final String STEPPER_TAG = "steppedTag";
 
 	default Tag getInstanceNameTag(Context context) {
-		return this.<Tag> getProperty(INSTANCE_NAME_TAG, context).getValue();
+		return this.<Tag> getContextProperty(INSTANCE_NAME_TAG, context).getValue();
 	}
 
 	default Tag getStepperTag(Context context) {
-		return this.<Tag> getProperty(STEPPER_TAG, context).getValue();
+		return this.<Tag> getContextProperty(STEPPER_TAG, context).getValue();
 	}
 
 	default Property<Integer> getIteratorIndexProperty(Context context) {
-		return getProperty(INDEX, context);
+		return getContextProperty(INDEX, context);
 	}
 
 	default void stepper(Tag switchedTag, Tag instanceNameTag) {
 		addPrefixBinding(context -> {
-			createNewInitializedProperty(INDEX, context, m -> -1);
-			createNewInitializedProperty(INSTANCE_NAME_TAG, context, c -> instanceNameTag);
-			createNewInitializedProperty(STEPPER_TAG, context, c -> switchedTag);
+			createNewInitializedProperty(INDEX, context, -1);
+			createNewInitializedProperty(INSTANCE_NAME_TAG, context, instanceNameTag);
+			createNewInitializedProperty(STEPPER_TAG, context, switchedTag);
 		});
 		instanceNameTag.addStyle("display", "flex");
 		switchedTag.addPostfixBinding(context -> switchedTag.getDomNodeStyles(context).put("display", "none"));
