@@ -1,11 +1,15 @@
 package org.genericsystem.quiz.app.pages.components;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.genericsystem.common.Generic;
 import org.genericsystem.quiz.app.pages.components.QuizResult.AllResults;
 import org.genericsystem.quiz.app.pages.components.QuizResult.AllResults.ScoreDiv;
 import org.genericsystem.quiz.app.pages.components.QuizResult.AllResults.ScoreDiv.QuizDiv;
 import org.genericsystem.quiz.app.pages.components.QuizResult.AllResults.ScoreDiv.Score01;
 import org.genericsystem.quiz.app.pages.components.QuizResult.AllResults.ScoreDiv.Score02;
+import org.genericsystem.quiz.app.pages.components.QuizResult.AllResults.ScoreDiv.Score03;
 import org.genericsystem.quiz.app.pages.components.QuizResult.AllResults.ScoreDiv.UserDiv;
 import org.genericsystem.quiz.app.pages.components.QuizResult.AllResults.Search;
 import org.genericsystem.quiz.app.pages.components.QuizResult.AllResults.TitleResult;
@@ -13,12 +17,13 @@ import org.genericsystem.quiz.app.pages.components.QuizResult.MySumResult.MyResu
 import org.genericsystem.quiz.app.pages.components.QuizResult.MySumResult.TitleResultH1;
 import org.genericsystem.quiz.app.pages.components.QuizResult.SummaryResults;
 import org.genericsystem.quiz.model.ScoreUserQuiz;
-import org.genericsystem.quiz.utils.QuizContextAction;
+import org.genericsystem.quiz.utils.QuizContextAction.ADD_LISTENED_PROPERTY;
 import org.genericsystem.quiz.utils.QuizExtractors.QUIZ_EXTRACTOR;
 import org.genericsystem.quiz.utils.QuizExtractors.SCORES_FILTERED;
 import org.genericsystem.quiz.utils.QuizExtractors.USER_EXTRACTOR;
 import org.genericsystem.quiz.utils.ScoreUtils;
 import org.genericsystem.reactor.annotations.Attribute;
+import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.DirectSelect;
@@ -36,8 +41,6 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlH1;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlInputText;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlP;
-
-import javafx.collections.MapChangeListener;
 
 @Children({ SummaryResults.class, AllResults.class })
 @Style(name = "align-items", value = "center")
@@ -109,35 +112,37 @@ public class QuizResult extends FlexDiv {
 
 		@Attribute(name = "placeholder", value = "Entrer un nom d'utilisateur")
 		@StyleClass({ "inputTextQ", "inputTextSearchQ" })
+		@BindAction(ADD_LISTENED_PROPERTY.class)
 		public static class Search extends HtmlInputText {
 
-			@Override
-			public void init() {
-				addPrefixBinding(context -> {
-					this.getDomNodeAttributes(context).addListener((MapChangeListener<String, String>) change -> {
-
-						if ("value".equals(change.getKey())) {
-							if (change.wasAdded())
-								getProperty(QuizContextAction.SELECTED_USER, context).setValue(change.getValueAdded());
-						}
-
-					});
-				});
-			}
+			// @Override
+			// public void init() {
+			// addPrefixBinding(context -> {
+			// this.getDomNodeAttributes(context).addListener((MapChangeListener<String, String>) change -> {
+			//
+			// if ("value".equals(change.getKey())) {
+			// if (change.wasAdded())
+			// getContextProperty(QuizContextAction.SELECTED_USER, context).setValue(change.getValueAdded());
+			// }
+			//
+			// });
+			// });
+			// }
 		}
 
-		@Children({ FlexDiv.class, FlexDiv.class, FlexDiv.class, FlexDiv.class, FlexDiv.class })
+		@Children({ FlexDiv.class, FlexDiv.class, FlexDiv.class, FlexDiv.class, FlexDiv.class, FlexDiv.class })
 		@SetText(path = FlexDiv.class, pos = 0, value = "Pseudo")
 		@SetText(path = FlexDiv.class, pos = 1, value = "Réponses correctes")
 		@SetText(path = FlexDiv.class, pos = 2, value = "Score 1")
 		@SetText(path = FlexDiv.class, pos = 3, value = "Score 2")
-		@SetText(path = FlexDiv.class, pos = 4, value = "Quiz")
+		@SetText(path = FlexDiv.class, pos = 4, value = "Score 3")
+		@SetText(path = FlexDiv.class, pos = 5, value = "Quiz")
 		public static class TitleResult extends FlexRow {
 
 		}
 
 		@ForEachContext(SCORES_FILTERED.class)
-		@Children({ UserDiv.class, FlexDiv.class, Score01.class, Score02.class, QuizDiv.class })
+		@Children({ UserDiv.class, FlexDiv.class, Score01.class, Score02.class, Score03.class, QuizDiv.class })
 		@Select(path = UserDiv.class, value = USER_EXTRACTOR.class)
 		@Select(path = QuizDiv.class, value = QUIZ_EXTRACTOR.class)
 		@BindText(path = UserDiv.class)
@@ -196,6 +201,18 @@ public class QuizResult extends FlexDiv {
 					addPrefixBinding(context -> {
 						Double grade01 = ScoreUtils.calculateDualGrade(context, context.getGeneric().getComponent(1), context.getGeneric().getComponent(0));
 						this.setText(context, grade01 + " / 20 ");
+					});
+				}
+			}
+
+			public static class Score03 extends FlexDiv {
+
+				@Override
+				public void init() {
+					addPrefixBinding(context -> {
+						List<Double> percentsList = ScoreUtils.getPercents(context, context.getGeneric().getComponent(1)).collect(Collectors.toList());
+						Double variance = (double) Math.round(Math.sqrt(ScoreUtils.variance(percentsList)) * 100) / 100;
+						this.setText(context, "" + variance);
 					});
 				}
 			}
