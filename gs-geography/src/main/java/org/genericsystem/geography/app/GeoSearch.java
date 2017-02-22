@@ -5,7 +5,6 @@ import org.genericsystem.geography.app.GeoSearch.AdmDiv;
 import org.genericsystem.geography.model.AdministrativeTerritory;
 import org.genericsystem.geography.model.Building;
 import org.genericsystem.geography.model.City;
-import org.genericsystem.geography.model.Continent;
 import org.genericsystem.geography.model.Country;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
@@ -30,7 +29,7 @@ import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 
-@DependsOnModel({ AdministrativeTerritory.class, Continent.class, Country.class, City.class, Building.class })
+@DependsOnModel({ AdministrativeTerritory.class, Country.class, City.class, Building.class })
 @Children(AdmDiv.class)
 @Style(name = "background-color", value = "#8dde6d")
 public class GeoSearch extends RootTagImpl {

@@ -9,19 +9,12 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.geography.model.AdministrativeTerritory.Adm1;
 import org.genericsystem.geography.model.AdministrativeTerritory.Adm2;
 import org.genericsystem.geography.model.AdministrativeTerritory.Adm3;
-import org.genericsystem.geography.model.AdministrativeTerritory.AdmCode;
 import org.genericsystem.geography.model.AdministrativeTerritory.AdministrativeTerritoryInstance;
 
 @SystemGeneric
 @InstanceClass(AdministrativeTerritoryInstance.class)
-@Dependencies({ AdmCode.class, Adm1.class, Adm2.class, Adm3.class, AdministrativeTerritoryInstance.class })
+@Dependencies({ Adm1.class, Adm2.class, Adm3.class, AdministrativeTerritoryInstance.class })
 public class AdministrativeTerritory implements Generic {
-
-	// Attribute
-	@SystemGeneric
-	@Components(AdministrativeTerritory.class)
-	public static class AdmCode {
-	}
 
 	// Inheritance
 
