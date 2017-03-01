@@ -57,6 +57,7 @@ public @interface TagName {
 	public static final String STRONG = "strong";
 	public static final String TEXT = "text";
 	public static final String UL = "ul";
+	public static final String BR = "br";
 
 	Class<? extends TagImpl>[] path() default {};
 
@@ -85,12 +86,16 @@ public @interface TagName {
 		@Override
 		public void setAnnotation(GTag gTag, Annotation annotation) {
 			TagName tagName = (TagName) annotation;
-			GTagAnnotation tagNameAnnotation = (GTagAnnotation) gTag.setHolder(gTag.getRoot().find(TagAnnotationAttribute.class), new TagAnnotation(TagName.class, tagName.path(), tagName.pos()));
-			tagNameAnnotation.setHolder(gTag.getRoot().find(TagAnnotationContentAttribute.class), new JsonObject().put("value", tagName.value()).put("type", tagName.type()).encodePrettily());
+			GTagAnnotation tagNameAnnotation = (GTagAnnotation) gTag.setHolder(
+					gTag.getRoot().find(TagAnnotationAttribute.class),
+					new TagAnnotation(TagName.class, tagName.path(), tagName.pos()));
+			tagNameAnnotation.setHolder(gTag.getRoot().find(TagAnnotationContentAttribute.class),
+					new JsonObject().put("value", tagName.value()).put("type", tagName.type()).encodePrettily());
 		}
 
 		@Override
-		public void onRemove(Tag tag, Context context, GTagAnnotation gTagAnnotation, GTagAnnotationContent annotationContent) {
+		public void onRemove(Tag tag, Context context, GTagAnnotation gTagAnnotation,
+				GTagAnnotationContent annotationContent) {
 			if (tag.getMetaBinding() == null)
 				context.removeTag(tag);
 			else
@@ -98,7 +103,8 @@ public @interface TagName {
 		}
 
 		@Override
-		public void onAdd(Tag tag, Context context, GTagAnnotation gTagAnnotation, GTagAnnotationContent annotationContent) {
+		public void onAdd(Tag tag, Context context, GTagAnnotation gTagAnnotation,
+				GTagAnnotationContent annotationContent) {
 			if (tag.getMetaBinding() == null)
 				context.addTag(tag);
 			else

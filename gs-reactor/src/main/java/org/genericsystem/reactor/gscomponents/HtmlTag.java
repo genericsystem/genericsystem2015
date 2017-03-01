@@ -60,6 +60,11 @@ public class HtmlTag {
 		}
 	}
 
+	@TagName(TagName.BR)
+	public static class HtmlBr extends TagImpl {
+
+	}
+
 	@TagName(TagName.LI)
 	public static class HtmlLi extends TagImpl {
 
