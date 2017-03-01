@@ -13,7 +13,7 @@ public interface ComponentsDefaults extends ContextProperty {
 
 	public static final String COMPONENTS = "components";
 
-	default void createComponentsList() {
+	default void createComponentsMap() {
 		setContextAttribute(COMPONENTS, context -> new HashMap<Generic, Property<Serializable>>());
 	}
 
