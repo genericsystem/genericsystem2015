@@ -24,6 +24,7 @@ import org.genericsystem.reactor.context.ContextAction.MOUNT;
 import org.genericsystem.reactor.context.ContextAction.SHIFTTS;
 import org.genericsystem.reactor.context.ContextAction.UNMOUNT;
 import org.genericsystem.reactor.context.TagSwitcher;
+import org.genericsystem.reactor.context.TagSwitcher.ADMIN_MODE_ONLY;
 import org.genericsystem.reactor.context.TextBinding;
 import org.genericsystem.reactor.contextproperties.PasswordDefaults;
 import org.genericsystem.reactor.contextproperties.UserRoleDefaults;
@@ -43,6 +44,7 @@ import org.genericsystem.security.model.User.Password;
 import org.genericsystem.security.model.User.Salt;
 
 @Children({ HtmlButton.class, HtmlLabel.class, HtmlButton.class })
+@Switch(path = HtmlButton.class, value = ADMIN_MODE_ONLY.class)
 @SetText(path = HtmlButton.class, pos = 0, value = "Save")
 @BindAction(path = HtmlButton.class, pos = 0, value = FLUSH.class)
 @SetText(path = HtmlButton.class, pos = 1, value = "Cancel")
