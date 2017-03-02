@@ -1,7 +1,10 @@
 package org.genericsystem.geography.app;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.geography.app.GeoSearch.AdmDiv;
+import org.genericsystem.geography.app.GeoSearchPerso.Input1;
+import org.genericsystem.geography.app.GeoSearchPerso.Input2;
+import org.genericsystem.geography.app.GeoSearchPerso.Test1;
+import org.genericsystem.geography.app.GeoSearchPerso.Test2;
 import org.genericsystem.geography.model.AdministrativeTerritory;
 import org.genericsystem.geography.model.Building;
 import org.genericsystem.geography.model.City;
@@ -12,116 +15,74 @@ import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.annotations.DirectSelect;
-import org.genericsystem.reactor.annotations.ForEachContext;
-import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.appserver.ApplicationServer;
-import org.genericsystem.reactor.context.ObservableListExtractorFromContext;
-import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlDiv;
-import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlHyperLink;
-import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlInputText;
-import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLi;
-import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlUl;
+import org.genericsystem.reactor.context.StringExtractor;
+import org.genericsystem.reactor.context.TextBinding;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlP;
 import org.genericsystem.reactor.gscomponents.RootTagImpl;
 
-import javafx.beans.binding.ListBinding;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
-import javafx.collections.MapChangeListener;
-import javafx.collections.ObservableList;
-import javafx.collections.transformation.FilteredList;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.transformation.SortedList;
 
 @DependsOnModel({ AdministrativeTerritory.class, Country.class, City.class, Building.class })
-@Children(AdmDiv.class)
-@Style(name = "background-color", value = "#8dde6d")
-public class GeoSearch extends RootTagImpl {
+@Children({ Input1.class, Input2.class, Test1.class, Test2.class })
+public class GeoSearchPerso extends RootTagImpl {
 
 	public static void main(String[] mainArgs) {
-		ApplicationServer.startSimpleGenericApp(mainArgs, GeoSearch.class, "/GeoApp");
+		ApplicationServer.startSimpleGenericApp(mainArgs, GeoSearchPerso.class, "/GeoApp");
 	}
 
-	@DirectSelect(AdministrativeTerritory.class)
-	@Children({ SearchInput.class, AdmUl.class })
-	public static class AdmDiv extends HtmlDiv {
-
-	}
-
-	@Children(AdmLi.class)
-	@Style(name = "background-color", value = "yellow")
-	@Style(name = "display", value = "inline-block")
-	@Style(name = "list-style-type", value = "none")
-	@Style(name = "position", value = "absolute")
-	@Style(name = "z-index", value = "none")
-	public static class AdmUl extends HtmlUl {
-	}
-
-	@ForEachContext(TEXT_FILTERED.class)
-	@Children({ AdmLink.class })
-	public static class AdmLi extends HtmlLi {
-	}
-
-	@BindText
-	public static class AdmLink extends HtmlHyperLink {
-
-	}
-
-	public static class SearchInput extends HtmlInputText {
-
+	@DirectSelect(City.class)
+	public static class Input1 extends InputSelectInstance {
 		@Override
-		public void init() {
-			addPrefixBinding(context -> {
-				this.getDomNodeAttributes(context).addListener((MapChangeListener<String, String>) change -> {
-					if ("value".equals(change.getKey())) {
-						if (change.wasAdded())
-							getParent().getContextProperty(TextAction.TEXT, context.getParent())
-									.setValue(change.getValueAdded());
-					}
-				});
-			});
+		public String displayInstance(Generic g) {
+			String str = StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(g);
+			while (g.getBaseComponent() != null) {
+				g = g.getBaseComponent();
+				str += ", " + g.getValue();
+			}
+			return str;
 		}
 	}
 
-	public static class TextAction {
-		public final static String TEXT = "text";
+	@DirectSelect(City.class)
+	public static class Input2 extends InputSelectInstance {
+		@Override
+		public SortedList<Generic> filterInstances(Context c, Property<String> t) {
+			return c.getGeneric().getObservableSubInstances()
+					.filtered(res -> (t.getValue() != null && t.getValue().length() > 1)
+							? ((String) res.getValue()).toLowerCase().contains(t.getValue().toLowerCase()) : false)
+					.sorted();
+		}
 	}
 
-	public static class TEXT_FILTERED implements ObservableListExtractorFromContext {
+	@BindText(GENERIC_TEXT.class)
+	public static class Test1 extends HtmlP {
+	}
 
+	@BindText(GENERIC_TEXT2.class)
+	public static class Test2 extends HtmlP {
+	}
+
+	public static class GENERIC_TEXT implements TextBinding {
 		@Override
-		public ObservableList<Generic> apply(Context context, Tag tag) {
+		public ObservableValue<String> apply(Context context, Tag tag) {
+			Tag inputTag = tag.getParent().find(Input1.class);
+			Context ctx = context.getSubContexts(inputTag).get(0);
+			Property<?> prop = inputTag.getContextProperty("selected", ctx);
+			return Bindings.createStringBinding(() -> prop.getValue() != null ? prop.getValue().toString() : "", prop);
+		}
+	}
 
-			if (tag.getParent().getParent().getContextProperty(TextAction.TEXT, context.getParent()) == null)
-				tag.getParent().getParent().createNewContextProperty(TextAction.TEXT, context.getParent());
-			Property<String> text = tag.getParent().getParent().getContextProperty(TextAction.TEXT,
-					context.getParent());
-
-			// Map<Object, Object> map = context.getGeneric().getObservableSubInstances().filtered(adm -> {
-			// boolean belongsTo = false;
-			// if (text.getValue() != null && !text.getValue().trim().isEmpty())
-			// belongsTo = ((String) adm.getValue()).trim().toLowerCase()
-			// .contains(text.getValue().trim().toLowerCase());
-			// return belongsTo;
-			// }).stream().collect(Collectors.toMap(p -> p, p -> p));
-			//
-			// System.out.println(map);
-
-			return new ListBinding<Generic>() {
-				{
-					bind(text);
-				}
-
-				@Override
-				protected ObservableList<Generic> computeValue() {
-
-					FilteredList<Generic> results = context.getGeneric().getObservableSubInstances().filtered(adm -> {
-						// System.out.println(((AdministrativeTerritoryInstance) adm).getCode());
-						return (text.getValue() != null && text.getValue().length() > 1) ? ((String) adm.getValue())
-								.trim().toLowerCase().contains(text.getValue().trim().toLowerCase()) : false;
-					});
-
-					// Map<Object, Object> map = results.stream().collect(Collectors.toMap(p -> p, p -> p.getCode()));
-
-					return results;
-				}
-			};
+	public static class GENERIC_TEXT2 implements TextBinding {
+		@Override
+		public ObservableValue<String> apply(Context context, Tag tag) {
+			Tag inputTag = tag.getParent().find(Input2.class);
+			Context ctx = context.getSubContexts(inputTag).get(0);
+			Property<?> prop = inputTag.getContextProperty("selected", ctx);
+			return Bindings.createStringBinding(() -> prop.getValue() != null ? prop.getValue().toString() : "", prop);
 		}
 	}
 
