@@ -6,6 +6,7 @@ import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.context.ContextAction;
 import org.genericsystem.reactor.contextproperties.SelectionDefaults;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlInputText;
 import org.genericsystem.security.model.User;
 
 import javafx.beans.property.Property;
@@ -22,23 +23,15 @@ public class QuizContextAction {
 		@Override
 		public void accept(Context context, Tag tag) {
 
+			if (!tag.getClass().isAssignableFrom(HtmlInputText.class))
+				return;
+
 			Property<String> inputProperty = tag.getContextProperty(INPUTTEXT_VALUE, context);
 
 			if (inputProperty == null)
 				tag.getParent().createNewInitializedProperty(INPUTTEXT_VALUE, value -> null);
 
 			tag.getContextProperty(INPUTTEXT_VALUE, context).setValue(tag.getDomNodeAttributes(context).get("value"));
-
-			// tag.getContextProperty(QuizContextAction.SELECTED_USER, context).setValue(tag.getDomNodeAttributes(context).get("value"));
-
-			// tag.getDomNodeAttributes(context).addListener((MapChangeListener<String, String>) change -> {
-			//
-			// if ("value".equals(change.getKey())) {
-			// if (change.wasAdded())
-			// tag.getContextProperty(QuizContextAction.SELECTED_USER, context).setValue(change.getValueAdded());
-			// }
-			//
-			// });
 
 		}
 

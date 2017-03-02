@@ -17,13 +17,12 @@ import org.genericsystem.quiz.app.pages.components.QuizResult.MySumResult.MyResu
 import org.genericsystem.quiz.app.pages.components.QuizResult.MySumResult.TitleResultH1;
 import org.genericsystem.quiz.app.pages.components.QuizResult.SummaryResults;
 import org.genericsystem.quiz.model.ScoreUserQuiz;
-import org.genericsystem.quiz.utils.QuizContextAction.ADD_LISTENED_PROPERTY;
+import org.genericsystem.quiz.utils.QuizContextAction;
 import org.genericsystem.quiz.utils.QuizExtractors.QUIZ_EXTRACTOR;
 import org.genericsystem.quiz.utils.QuizExtractors.SCORES_FILTERED;
 import org.genericsystem.quiz.utils.QuizExtractors.USER_EXTRACTOR;
 import org.genericsystem.quiz.utils.ScoreUtils;
 import org.genericsystem.reactor.annotations.Attribute;
-import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.DirectSelect;
@@ -41,6 +40,8 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlH1;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlInputText;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlP;
+
+import javafx.collections.MapChangeListener;
 
 @Children({ SummaryResults.class, AllResults.class })
 @Style(name = "align-items", value = "center")
@@ -112,22 +113,22 @@ public class QuizResult extends FlexDiv {
 
 		@Attribute(name = "placeholder", value = "Entrer un nom d'utilisateur")
 		@StyleClass({ "inputTextQ", "inputTextSearchQ" })
-		@BindAction(ADD_LISTENED_PROPERTY.class)
+		// @BindAction(ADD_LISTENED_PROPERTY.class)
 		public static class Search extends HtmlInputText {
 
-			// @Override
-			// public void init() {
-			// addPrefixBinding(context -> {
-			// this.getDomNodeAttributes(context).addListener((MapChangeListener<String, String>) change -> {
-			//
-			// if ("value".equals(change.getKey())) {
-			// if (change.wasAdded())
-			// getContextProperty(QuizContextAction.SELECTED_USER, context).setValue(change.getValueAdded());
-			// }
-			//
-			// });
-			// });
-			// }
+			@Override
+			public void init() {
+				addPrefixBinding(context -> {
+					this.getDomNodeAttributes(context).addListener((MapChangeListener<String, String>) change -> {
+
+						if ("value".equals(change.getKey())) {
+							if (change.wasAdded())
+								getContextProperty(QuizContextAction.SELECTED_USER, context).setValue(change.getValueAdded());
+						}
+
+					});
+				});
+			}
 		}
 
 		@Children({ FlexDiv.class, FlexDiv.class, FlexDiv.class, FlexDiv.class, FlexDiv.class, FlexDiv.class })
@@ -211,8 +212,10 @@ public class QuizResult extends FlexDiv {
 				public void init() {
 					addPrefixBinding(context -> {
 						List<Double> percentsList = ScoreUtils.getPercents(context, context.getGeneric().getComponent(1)).collect(Collectors.toList());
-						Double variance = (double) Math.round(Math.sqrt(ScoreUtils.variance(percentsList)) * 100) / 100;
-						this.setText(context, "" + variance);
+						Double variance = (double) Math.round(ScoreUtils.variance(percentsList) * 100) / 100;
+						Double standardDeviation = (double) Math.round(Math.sqrt(variance) * 100) / 100;
+						Double mean = (double) Math.round(ScoreUtils.expectation(percentsList) * 100) / 100;
+						this.setText(context, "(sd²)" + variance + " (sd)" + standardDeviation + " (µ)" + mean);
 					});
 				}
 			}
