@@ -16,6 +16,7 @@ import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.DirectSelect;
 import org.genericsystem.reactor.annotations.ForEach;
+import org.genericsystem.reactor.annotations.ForEachContext;
 import org.genericsystem.reactor.annotations.GenericProcess;
 import org.genericsystem.reactor.annotations.InheritStyle;
 import org.genericsystem.reactor.annotations.Select;
@@ -29,15 +30,15 @@ import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.Style.GenericValueBackgroundColor;
 import org.genericsystem.reactor.annotations.Style.KeepFlexDirection;
 import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection;
+import org.genericsystem.reactor.annotations.StyleClass;
+import org.genericsystem.reactor.annotations.Switch;
+import org.genericsystem.reactor.annotations.TagName;
 import org.genericsystem.reactor.extended.ExtendedRootTag.AnnotationClassName;
 import org.genericsystem.reactor.extended.ExtendedRootTag.GTag;
 import org.genericsystem.reactor.extended.ExtendedRootTag.GTagAnnotation;
 import org.genericsystem.reactor.extended.ExtendedRootTag.GTagAnnotationContent;
 import org.genericsystem.reactor.extended.ExtendedRootTag.GenericAnnotationWithContent;
 import org.genericsystem.reactor.extended.ExtendedRootTag.GenericTagNode;
-import org.genericsystem.reactor.annotations.StyleClass;
-import org.genericsystem.reactor.annotations.Switch;
-import org.genericsystem.reactor.annotations.TagName;
 
 import javafx.collections.transformation.SortedList;
 
@@ -61,6 +62,7 @@ public class ExtendedAnnotationsManager extends AnnotationsManager {
 		registerAnnotation(Select.class);
 		registerAnnotation(SelectContext.class);
 		registerAnnotation(ForEach.class);
+		registerAnnotation(ForEachContext.class);
 		registerAnnotation(Stepper.class);
 		registerAnnotation(Step.class);
 		// super.registerAnnotation(Stepper2.class);

@@ -92,7 +92,6 @@ public class QuestionDiv extends FlexDiv implements StepperDefaults, SelectionDe
 	@Style(path = HtmlLabel.class, name = "hyphens", value = "auto")
 	@Style(path = HtmlLabel.class, name = "max-width", value = "100%")
 	@StyleClass("width-35-35-90")
-	@StyleClass(path = HtmlLabel.class, value = "vertical-align")
 	@StyleClass(path = QuizCheckBox.class, value = "vertical-align")
 	//
 	@ForEach(ANSWERS_EXTRACTOR.class)

@@ -179,16 +179,22 @@ public class ScoreUtils {
 
 		int size = percents.size();
 		if (size <= 1)
-			return null;
+			return 0d;
 
 		double expectation = expectation(percents);
+		System.out.println("expectation -> " + expectation + "%");
 		double sum = 0d;
 		for (double p : percents) {
 			sum += Math.pow((p - expectation), 2);
-			// sumSquare = sumSquare + p * p;
+			System.out.println("\tscore -> " + p + "%");
 		}
 
-		return sum / (size - 1);
+		return sum / size;
+	}
+
+	public static Double normalization() {
+
+		return null;
 	}
 
 	// DAO
