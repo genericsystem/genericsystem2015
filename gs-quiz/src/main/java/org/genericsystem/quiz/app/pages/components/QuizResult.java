@@ -1,15 +1,11 @@
 package org.genericsystem.quiz.app.pages.components;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.genericsystem.common.Generic;
 import org.genericsystem.quiz.app.pages.components.QuizResult.AllResults;
 import org.genericsystem.quiz.app.pages.components.QuizResult.AllResults.ScoreDiv;
 import org.genericsystem.quiz.app.pages.components.QuizResult.AllResults.ScoreDiv.QuizDiv;
 import org.genericsystem.quiz.app.pages.components.QuizResult.AllResults.ScoreDiv.Score01;
 import org.genericsystem.quiz.app.pages.components.QuizResult.AllResults.ScoreDiv.Score02;
-import org.genericsystem.quiz.app.pages.components.QuizResult.AllResults.ScoreDiv.Score03;
 import org.genericsystem.quiz.app.pages.components.QuizResult.AllResults.ScoreDiv.UserDiv;
 import org.genericsystem.quiz.app.pages.components.QuizResult.AllResults.Search;
 import org.genericsystem.quiz.app.pages.components.QuizResult.AllResults.TitleResult;
@@ -113,7 +109,6 @@ public class QuizResult extends FlexDiv {
 
 		@Attribute(name = "placeholder", value = "Entrer un nom d'utilisateur")
 		@StyleClass({ "inputTextQ", "inputTextSearchQ" })
-		// @BindAction(ADD_LISTENED_PROPERTY.class)
 		public static class Search extends HtmlInputText {
 
 			@Override
@@ -131,19 +126,18 @@ public class QuizResult extends FlexDiv {
 			}
 		}
 
-		@Children({ FlexDiv.class, FlexDiv.class, FlexDiv.class, FlexDiv.class, FlexDiv.class, FlexDiv.class })
+		@Children({ FlexDiv.class, FlexDiv.class, FlexDiv.class, FlexDiv.class, FlexDiv.class })
 		@SetText(path = FlexDiv.class, pos = 0, value = "Pseudo")
 		@SetText(path = FlexDiv.class, pos = 1, value = "Réponses correctes")
 		@SetText(path = FlexDiv.class, pos = 2, value = "Score 1")
 		@SetText(path = FlexDiv.class, pos = 3, value = "Score 2")
-		@SetText(path = FlexDiv.class, pos = 4, value = "Score 3")
-		@SetText(path = FlexDiv.class, pos = 5, value = "Quiz")
+		@SetText(path = FlexDiv.class, pos = 4, value = "Quiz")
 		public static class TitleResult extends FlexRow {
 
 		}
 
 		@ForEachContext(SCORES_FILTERED.class)
-		@Children({ UserDiv.class, FlexDiv.class, Score01.class, Score02.class, Score03.class, QuizDiv.class })
+		@Children({ UserDiv.class, FlexDiv.class, Score01.class, Score02.class, QuizDiv.class })
 		@Select(path = UserDiv.class, value = USER_EXTRACTOR.class)
 		@Select(path = QuizDiv.class, value = QUIZ_EXTRACTOR.class)
 		@BindText(path = UserDiv.class)
@@ -206,19 +200,19 @@ public class QuizResult extends FlexDiv {
 				}
 			}
 
-			public static class Score03 extends FlexDiv {
-
-				@Override
-				public void init() {
-					addPrefixBinding(context -> {
-						List<Double> percentsList = ScoreUtils.getPercents(context, context.getGeneric().getComponent(1)).collect(Collectors.toList());
-						Double variance = (double) Math.round(ScoreUtils.variance(percentsList) * 100) / 100;
-						Double standardDeviation = (double) Math.round(Math.sqrt(variance) * 100) / 100;
-						Double mean = (double) Math.round(ScoreUtils.expectation(percentsList) * 100) / 100;
-						this.setText(context, "(sd²)" + variance + " (sd)" + standardDeviation + " (µ)" + mean);
-					});
-				}
-			}
+			// public static class Score03 extends FlexDiv {
+			//
+			// @Override
+			// public void init() {
+			// addPrefixBinding(context -> {
+			// List<Double> percentsList = ScoreUtils.getPercents(context, context.getGeneric().getComponent(1)).collect(Collectors.toList());
+			// Double variance = (double) Math.round(ScoreUtils.variance(percentsList) * 100) / 100;
+			// Double standardDeviation = (double) Math.round(Math.sqrt(variance) * 100) / 100;
+			// Double mean = (double) Math.round(ScoreUtils.expectation(percentsList) * 100) / 100;
+			// this.setText(context, "(sd²)" + variance + " (sd)" + standardDeviation + " (µ)" + mean);
+			// });
+			// }
+			// }
 
 			public static class QuizDiv extends FlexDiv {
 
