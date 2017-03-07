@@ -1,20 +1,7 @@
 package org.genericsystem.quiz.app.pages.components;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.genericsystem.common.Generic;
 import org.genericsystem.quiz.app.pages.components.QuizResult.AllResults;
-import org.genericsystem.quiz.app.pages.components.QuizResult.AllResults.ScoreDiv;
-import org.genericsystem.quiz.app.pages.components.QuizResult.AllResults.ScoreDiv.QuizDiv;
-import org.genericsystem.quiz.app.pages.components.QuizResult.AllResults.ScoreDiv.Score01;
-import org.genericsystem.quiz.app.pages.components.QuizResult.AllResults.ScoreDiv.Score02;
-import org.genericsystem.quiz.app.pages.components.QuizResult.AllResults.ScoreDiv.Score03;
-import org.genericsystem.quiz.app.pages.components.QuizResult.AllResults.ScoreDiv.UserDiv;
-import org.genericsystem.quiz.app.pages.components.QuizResult.AllResults.Search;
-import org.genericsystem.quiz.app.pages.components.QuizResult.AllResults.TitleResult;
-import org.genericsystem.quiz.app.pages.components.QuizResult.MySumResult.MyResultP;
-import org.genericsystem.quiz.app.pages.components.QuizResult.MySumResult.TitleResultH1;
 import org.genericsystem.quiz.app.pages.components.QuizResult.SummaryResults;
 import org.genericsystem.quiz.model.ScoreUserQuiz;
 import org.genericsystem.quiz.utils.QuizContextAction;
@@ -57,44 +44,42 @@ public class QuizResult extends FlexDiv {
 	}
 
 	@Children({ TitleResultH1.class, MyResultP.class })
-	//
 	@Style(name = "width", value = "90%")
 	@StyleClass("myResultDiv")
 	public static class MySumResult extends FlexDiv {
+	}
 
-		public static class TitleResultH1 extends HtmlH1 {
+	public static class TitleResultH1 extends HtmlH1 {
 
-			@Override
-			public void init() {
-				addPrefixBinding(context -> this.setText(context, "Récapitulatif des résultats pour le quiz : " + context.getGeneric()));
-			}
+		@Override
+		public void init() {
+			addPrefixBinding(context -> this.setText(context, "Récapitulatif des résultats pour le quiz : " + context.getGeneric()));
 		}
+	}
 
-		public static class MyResultP extends HtmlP {
+	public static class MyResultP extends HtmlP {
 
-			@Override
-			public void init() {
+		@Override
+		public void init() {
 
-				addPrefixBinding(context -> {
-					Generic quiz = context.getGeneric();
-					Generic user = this.getLoggedUserProperty(context).getValue();
-					Generic scoreUserQuiz = user.getLink(context.find(ScoreUserQuiz.class), quiz);
+			addPrefixBinding(context -> {
+				Generic quiz = context.getGeneric();
+				Generic user = this.getLoggedUserProperty(context).getValue();
+				Generic scoreUserQuiz = user.getLink(context.find(ScoreUserQuiz.class), quiz);
 
-					Double grade02 = ScoreUtils.calculateDualGrade(context, quiz, user);
+				Double grade02 = ScoreUtils.calculateDualGrade(context, quiz, user);
 
-					String goodAnswer = (Integer) scoreUserQuiz.getValue() > 1 ? " bonnes réponses" : " bonne réponse";
-					String point = grade02 > 1 ? " points" : " point";
+				String goodAnswer = (Integer) scoreUserQuiz.getValue() > 1 ? " bonnes réponses" : " bonne réponse";
+				String point = grade02 > 1 ? " points" : " point";
 
-					this.setText(context, "Vous venez de terminer le quiz.\nVotre Score est de " + grade02 + point + "\nVous avez eu " + scoreUserQuiz + goodAnswer);
-				});
-			}
+				this.setText(context, "Vous venez de terminer le quiz.\nVotre Score est de " + grade02 + point + "\nVous avez eu " + scoreUserQuiz + goodAnswer);
+			});
 		}
 	}
 
 	@DirectSelect(ScoreUserQuiz.class)
 	@Children({ HtmlDiv.class, TitleResult.class, ScoreDiv.class })
 	@Children(path = HtmlDiv.class, pos = 0, value = Search.class)
-	//
 	@Style(name = "width", value = "90%")
 	@Style(path = FlexDiv.class, name = "flex", value = "1")
 	@Style(path = { FlexDiv.class, FlexDiv.class }, name = "flex", value = "1")
@@ -106,124 +91,120 @@ public class QuizResult extends FlexDiv {
 	@StyleClass(path = { ScoreDiv.class, FlexDiv.class }, value = "scoreTableCellQ")
 	@Style(path = { ScoreDiv.class, UserDiv.class }, name = "border-left", value = "0.5px solid grey")
 	@Style(path = { ScoreDiv.class, QuizDiv.class }, name = "border-right", value = "0.5px solid grey")
-	//
-	// L'étape suivant est de se passer du bouton "Rechercher" et permettre une recherche active pendant que l'on tape le texte.
 	@SetText(path = { HtmlDiv.class, HtmlButton.class }, value = "Rechercher")
 	public static class AllResults extends FlexDiv {
+	}
 
-		@Attribute(name = "placeholder", value = "Entrer un nom d'utilisateur")
-		@StyleClass({ "inputTextQ", "inputTextSearchQ" })
-		// @BindAction(ADD_LISTENED_PROPERTY.class)
-		public static class Search extends HtmlInputText {
+	@Attribute(name = "placeholder", value = "Entrer un nom d'utilisateur")
+	@StyleClass({ "inputTextQ", "inputTextSearchQ" })
+	public static class Search extends HtmlInputText {
 
-			@Override
-			public void init() {
-				addPrefixBinding(context -> {
-					this.getDomNodeAttributes(context).addListener((MapChangeListener<String, String>) change -> {
+		@Override
+		public void init() {
+			addPrefixBinding(context -> {
+				this.getDomNodeAttributes(context).addListener((MapChangeListener<String, String>) change -> {
 
-						if ("value".equals(change.getKey())) {
-							if (change.wasAdded())
-								getContextProperty(QuizContextAction.SELECTED_USER, context).setValue(change.getValueAdded());
-						}
-
-					});
-				});
-			}
-		}
-
-		@Children({ FlexDiv.class, FlexDiv.class, FlexDiv.class, FlexDiv.class, FlexDiv.class, FlexDiv.class })
-		@SetText(path = FlexDiv.class, pos = 0, value = "Pseudo")
-		@SetText(path = FlexDiv.class, pos = 1, value = "Réponses correctes")
-		@SetText(path = FlexDiv.class, pos = 2, value = "Score 1")
-		@SetText(path = FlexDiv.class, pos = 3, value = "Score 2")
-		@SetText(path = FlexDiv.class, pos = 4, value = "Score 3")
-		@SetText(path = FlexDiv.class, pos = 5, value = "Quiz")
-		public static class TitleResult extends FlexRow {
-
-		}
-
-		@ForEachContext(SCORES_FILTERED.class)
-		@Children({ UserDiv.class, FlexDiv.class, Score01.class, Score02.class, Score03.class, QuizDiv.class })
-		@Select(path = UserDiv.class, value = USER_EXTRACTOR.class)
-		@Select(path = QuizDiv.class, value = QUIZ_EXTRACTOR.class)
-		@BindText(path = UserDiv.class)
-		@BindText(path = HtmlDiv.class, pos = 1)
-		@BindText(path = QuizDiv.class)
-		public static class ScoreDiv extends FlexRow {
-
-			@Override
-			public void init() {
-				addPrefixBinding(context -> {
-
-					if (context.getGeneric().getComponent(0).equals(getLoggedUserProperty(context).getValue())) {
-						this.addStyle(context, "background-color", "#FFE9C5");
-						this.addStyle(context, "font-weight", "bold");
+					if ("value".equals(change.getKey())) {
+						if (change.wasAdded())
+							getContextProperty(QuizContextAction.SELECTED_USER, context).setValue(change.getValueAdded());
 					}
 
-					getLoggedUserProperty(context).addListener((observable, oldValue, newValue) -> {
-						if (!context.isDestroyed()) {
-
-							if (newValue == null) {
-								this.addStyle(context, "background-color", "inherit");
-								this.addStyle(context, "font-weight", "normal");
-							}
-
-							if (newValue != null && newValue.equals(context.getGeneric().getComponent(0))) {
-								this.addStyle(context, "background-color", "#FFE9C5");
-								this.addStyle(context, "font-weight", "bold");
-							}
-
-						}
-					});
-
 				});
-			}
-
-			public static class UserDiv extends FlexDiv {
-
-			}
-
-			public static class Score01 extends FlexDiv {
-
-				@Override
-				public void init() {
-					addPrefixBinding(context -> {
-						Double grade = ScoreUtils.calculateSimpleGrade(context, context.getGeneric().getComponent(1), context.getGeneric().getComponent(0));
-						this.setText(context, grade + " / 20");
-					});
-				}
-			}
-
-			public static class Score02 extends FlexDiv {
-
-				@Override
-				public void init() {
-
-					addPrefixBinding(context -> {
-						Double grade01 = ScoreUtils.calculateDualGrade(context, context.getGeneric().getComponent(1), context.getGeneric().getComponent(0));
-						this.setText(context, grade01 + " / 20 ");
-					});
-				}
-			}
-
-			public static class Score03 extends FlexDiv {
-
-				@Override
-				public void init() {
-					addPrefixBinding(context -> {
-						List<Double> percentsList = ScoreUtils.getPercents(context, context.getGeneric().getComponent(1)).collect(Collectors.toList());
-						Double variance = (double) Math.round(ScoreUtils.variance(percentsList) * 100) / 100;
-						Double standardDeviation = (double) Math.round(Math.sqrt(variance) * 100) / 100;
-						Double mean = (double) Math.round(ScoreUtils.expectation(percentsList) * 100) / 100;
-						this.setText(context, "(sd²)" + variance + " (sd)" + standardDeviation + " (µ)" + mean);
-					});
-				}
-			}
-
-			public static class QuizDiv extends FlexDiv {
-
-			}
+			});
 		}
+	}
+
+	@Children({ FlexDiv.class, FlexDiv.class, FlexDiv.class, FlexDiv.class, FlexDiv.class })
+	@SetText(path = FlexDiv.class, pos = 0, value = "Pseudo")
+	@SetText(path = FlexDiv.class, pos = 1, value = "Réponses correctes")
+	@SetText(path = FlexDiv.class, pos = 2, value = "Score 1")
+	@SetText(path = FlexDiv.class, pos = 3, value = "Score 2")
+	@SetText(path = FlexDiv.class, pos = 4, value = "Quiz")
+	public static class TitleResult extends FlexRow {
 
 	}
+
+	@ForEachContext(SCORES_FILTERED.class)
+	@Children({ UserDiv.class, FlexDiv.class, Score01.class, Score02.class, QuizDiv.class })
+	@Select(path = UserDiv.class, value = USER_EXTRACTOR.class)
+	@Select(path = QuizDiv.class, value = QUIZ_EXTRACTOR.class)
+	@BindText(path = UserDiv.class)
+	@BindText(path = HtmlDiv.class, pos = 1)
+	@BindText(path = QuizDiv.class)
+	public static class ScoreDiv extends FlexRow {
+
+		@Override
+		public void init() {
+			addPrefixBinding(context -> {
+
+				if (context.getGeneric().getComponent(0).equals(getLoggedUserProperty(context).getValue())) {
+					this.addStyle(context, "background-color", "#FFE9C5");
+					this.addStyle(context, "font-weight", "bold");
+				}
+
+				getLoggedUserProperty(context).addListener((observable, oldValue, newValue) -> {
+					if (!context.isDestroyed()) {
+
+						if (newValue == null) {
+							this.addStyle(context, "background-color", "inherit");
+							this.addStyle(context, "font-weight", "normal");
+						}
+
+						if (newValue != null && newValue.equals(context.getGeneric().getComponent(0))) {
+							this.addStyle(context, "background-color", "#FFE9C5");
+							this.addStyle(context, "font-weight", "bold");
+						}
+
+					}
+				});
+
+			});
+		}
+	}
+
+	public static class UserDiv extends FlexDiv {
+
+	}
+
+	public static class Score01 extends FlexDiv {
+
+		@Override
+		public void init() {
+			addPrefixBinding(context -> {
+				Double grade = ScoreUtils.calculateSimpleGrade(context, context.getGeneric().getComponent(1), context.getGeneric().getComponent(0));
+				this.setText(context, grade + " / 20");
+			});
+		}
+	}
+
+	public static class Score02 extends FlexDiv {
+
+		@Override
+		public void init() {
+
+			addPrefixBinding(context -> {
+				Double grade01 = ScoreUtils.calculateDualGrade(context, context.getGeneric().getComponent(1), context.getGeneric().getComponent(0));
+				this.setText(context, grade01 + " / 20 ");
+			});
+		}
+	}
+
+	// public static class Score03 extends FlexDiv {
+	//
+	// @Override
+	// public void init() {
+	// addPrefixBinding(context -> {
+	// List<Double> percentsList = ScoreUtils.getPercents(context, context.getGeneric().getComponent(1)).collect(Collectors.toList());
+	// Double variance = (double) Math.round(ScoreUtils.variance(percentsList) * 100) / 100;
+	// Double standardDeviation = (double) Math.round(Math.sqrt(variance) * 100) / 100;
+	// Double mean = (double) Math.round(ScoreUtils.expectation(percentsList) * 100) / 100;
+	// this.setText(context, "(sd²)" + variance + " (sd)" + standardDeviation + " (µ)" + mean);
+	// });
+	// }
+	// }
+
+	public static class QuizDiv extends FlexDiv {
+
+	}
+
 }

@@ -13,6 +13,7 @@ import javafx.beans.property.Property;
 
 public class QuizContextAction {
 
+	public final static String SUPER_USER = "superUser";
 	public final static String SELECTED_QUIZ = "selectedQuiz";
 	public final static String SELECTED_USER = "selectedUser";
 
@@ -117,7 +118,7 @@ public class QuizContextAction {
 		public void accept(Context context, Tag tag) {
 
 			Generic quiz = ((SelectionDefaults) tag).getSelectionProperty(context).getValue().getGeneric();
-			Generic sUser = context.find(User.class).getInstance("Anti-Seche");
+			Generic sUser = context.find(User.class).getInstance(SUPER_USER);
 			Generic loggedUser = tag.getLoggedUserProperty(context).getValue();
 
 			ScoreUtils.setResult(context, quiz, sUser, loggedUser);
