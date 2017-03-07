@@ -44,9 +44,7 @@ import org.genericsystem.security.model.User.Salt;
 public class QuizLogin extends HtmlDiv {
 
 	@Switch(TagSwitcher.NO_LOGGED_USER.class)
-	//
 	@Children({ InputTextLogin.class, InputTextPassword.class, QuizChoiceOptions.class })
-	//
 	@StyleClass("loginQ")
 	@StyleClass(path = { HtmlDiv.class, HtmlInputText.class }, value = { "inputTextQ", "vertical-align" })
 	@Style(path = HtmlDiv.class, name = "margin-top", value = "10px")
@@ -54,10 +52,8 @@ public class QuizLogin extends HtmlDiv {
 	public static class QuizLoginDiv extends QuizLogin {
 
 		@Children({ HtmlLabel.class, HtmlInputText.class, HtmlSpan.class })
-		//
 		@SetText(path = HtmlLabel.class, value = "Login: ")
 		@SetText(path = HtmlSpan.class, value = "Invalid username.")
-		//
 		@Style(path = HtmlSpan.class, name = "display", value = "none")
 		@StyleClass(path = HtmlLabel.class, value = { "margin-lr-10", "vertical-align" })
 		@StyleClass(path = HtmlSpan.class, value = { "margin-lr-10", "vertical-align" })
@@ -67,7 +63,6 @@ public class QuizLogin extends HtmlDiv {
 
 		@SetText(path = HtmlLabel.class, value = "Password: ")
 		@SetText(path = HtmlSpan.class, value = "Invalid password.")
-		//
 		@Attribute(path = HtmlInputText.class, name = "type", value = "password")
 		public static class InputTextPassword extends InputTextLogin {
 
@@ -75,9 +70,7 @@ public class QuizLogin extends HtmlDiv {
 
 		@Children({ QuizValidateButton.class, ModalWithDisplay.class, HtmlHyperLink.class })
 		@Children(path = { ModalWithDisplay.class, FlexDiv.class }, value = QuizUserCreation.class)
-		//
 		@SetText(path = HtmlHyperLink.class, value = "Sign up")
-		//
 		@StyleClass("vertical-align")
 		@Style(name = "justify-content", value = "space-between")
 		@Style(name = "padding-right", value = "1em")
@@ -86,12 +79,10 @@ public class QuizLogin extends HtmlDiv {
 		@StyleClass(path = QuizValidateButton.class, value = { "choiceResponsive", "monitorButton", "white" })
 		@Style(path = QuizValidateButton.class, name = "text-align", value = "center")
 		@Style(path = QuizValidateButton.class, name = "background-color", value = "green")
-		//
 		@BindAction(path = HtmlHyperLink.class, value = QUIZ_MODAL_DISPLAY_FLEX.class)
 		public static class QuizChoiceOptions extends FlexRow {
 
 			@SetText("<strong>OK</strong>")
-			//
 			@Style(name = "text-align", value = "center")
 			public static class QuizValidateButton extends HtmlButton implements PasswordDefaults {
 				@Override
