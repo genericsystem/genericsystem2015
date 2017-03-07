@@ -2,15 +2,11 @@ package org.genericsystem.quiz.app.pages.components;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.quiz.app.pages.components.QuizResult.AllResults;
+import org.genericsystem.quiz.app.pages.components.QuizResult.AllResults.QuizDiv;
 import org.genericsystem.quiz.app.pages.components.QuizResult.AllResults.ScoreDiv;
-import org.genericsystem.quiz.app.pages.components.QuizResult.AllResults.ScoreDiv.QuizDiv;
-import org.genericsystem.quiz.app.pages.components.QuizResult.AllResults.ScoreDiv.Score01;
-import org.genericsystem.quiz.app.pages.components.QuizResult.AllResults.ScoreDiv.Score02;
-import org.genericsystem.quiz.app.pages.components.QuizResult.AllResults.ScoreDiv.UserDiv;
 import org.genericsystem.quiz.app.pages.components.QuizResult.AllResults.Search;
 import org.genericsystem.quiz.app.pages.components.QuizResult.AllResults.TitleResult;
-import org.genericsystem.quiz.app.pages.components.QuizResult.MySumResult.MyResultP;
-import org.genericsystem.quiz.app.pages.components.QuizResult.MySumResult.TitleResultH1;
+import org.genericsystem.quiz.app.pages.components.QuizResult.AllResults.UserDiv;
 import org.genericsystem.quiz.app.pages.components.QuizResult.SummaryResults;
 import org.genericsystem.quiz.model.ScoreUserQuiz;
 import org.genericsystem.quiz.utils.QuizContextAction;
@@ -57,33 +53,33 @@ public class QuizResult extends FlexDiv {
 	@Style(name = "width", value = "90%")
 	@StyleClass("myResultDiv")
 	public static class MySumResult extends FlexDiv {
+	}
 
-		public static class TitleResultH1 extends HtmlH1 {
+	public static class TitleResultH1 extends HtmlH1 {
 
-			@Override
-			public void init() {
-				addPrefixBinding(context -> this.setText(context, "Récapitulatif des résultats pour le quiz : " + context.getGeneric()));
-			}
+		@Override
+		public void init() {
+			addPrefixBinding(context -> this.setText(context, "Récapitulatif des résultats pour le quiz : " + context.getGeneric()));
 		}
+	}
 
-		public static class MyResultP extends HtmlP {
+	public static class MyResultP extends HtmlP {
 
-			@Override
-			public void init() {
+		@Override
+		public void init() {
 
-				addPrefixBinding(context -> {
-					Generic quiz = context.getGeneric();
-					Generic user = this.getLoggedUserProperty(context).getValue();
-					Generic scoreUserQuiz = user.getLink(context.find(ScoreUserQuiz.class), quiz);
+			addPrefixBinding(context -> {
+				Generic quiz = context.getGeneric();
+				Generic user = this.getLoggedUserProperty(context).getValue();
+				Generic scoreUserQuiz = user.getLink(context.find(ScoreUserQuiz.class), quiz);
 
-					Double grade02 = ScoreUtils.calculateDualGrade(context, quiz, user);
+				Double grade02 = ScoreUtils.calculateDualGrade(context, quiz, user);
 
-					String goodAnswer = (Integer) scoreUserQuiz.getValue() > 1 ? " bonnes réponses" : " bonne réponse";
-					String point = grade02 > 1 ? " points" : " point";
+				String goodAnswer = (Integer) scoreUserQuiz.getValue() > 1 ? " bonnes réponses" : " bonne réponse";
+				String point = grade02 > 1 ? " points" : " point";
 
-					this.setText(context, "Vous venez de terminer le quiz.\nVotre Score est de " + grade02 + point + "\nVous avez eu " + scoreUserQuiz + goodAnswer);
-				});
-			}
+				this.setText(context, "Vous venez de terminer le quiz.\nVotre Score est de " + grade02 + point + "\nVous avez eu " + scoreUserQuiz + goodAnswer);
+			});
 		}
 	}
 
@@ -172,52 +168,52 @@ public class QuizResult extends FlexDiv {
 
 				});
 			}
+		}
 
-			public static class UserDiv extends FlexDiv {
+		public static class UserDiv extends FlexDiv {
 
-			}
+		}
 
-			public static class Score01 extends FlexDiv {
+		public static class Score01 extends FlexDiv {
 
-				@Override
-				public void init() {
-					addPrefixBinding(context -> {
-						Double grade = ScoreUtils.calculateSimpleGrade(context, context.getGeneric().getComponent(1), context.getGeneric().getComponent(0));
-						this.setText(context, grade + " / 20");
-					});
-				}
-			}
-
-			public static class Score02 extends FlexDiv {
-
-				@Override
-				public void init() {
-
-					addPrefixBinding(context -> {
-						Double grade01 = ScoreUtils.calculateDualGrade(context, context.getGeneric().getComponent(1), context.getGeneric().getComponent(0));
-						this.setText(context, grade01 + " / 20 ");
-					});
-				}
-			}
-
-			// public static class Score03 extends FlexDiv {
-			//
-			// @Override
-			// public void init() {
-			// addPrefixBinding(context -> {
-			// List<Double> percentsList = ScoreUtils.getPercents(context, context.getGeneric().getComponent(1)).collect(Collectors.toList());
-			// Double variance = (double) Math.round(ScoreUtils.variance(percentsList) * 100) / 100;
-			// Double standardDeviation = (double) Math.round(Math.sqrt(variance) * 100) / 100;
-			// Double mean = (double) Math.round(ScoreUtils.expectation(percentsList) * 100) / 100;
-			// this.setText(context, "(sd²)" + variance + " (sd)" + standardDeviation + " (µ)" + mean);
-			// });
-			// }
-			// }
-
-			public static class QuizDiv extends FlexDiv {
-
+			@Override
+			public void init() {
+				addPrefixBinding(context -> {
+					Double grade = ScoreUtils.calculateSimpleGrade(context, context.getGeneric().getComponent(1), context.getGeneric().getComponent(0));
+					this.setText(context, grade + " / 20");
+				});
 			}
 		}
 
+		public static class Score02 extends FlexDiv {
+
+			@Override
+			public void init() {
+
+				addPrefixBinding(context -> {
+					Double grade01 = ScoreUtils.calculateDualGrade(context, context.getGeneric().getComponent(1), context.getGeneric().getComponent(0));
+					this.setText(context, grade01 + " / 20 ");
+				});
+			}
+		}
+
+		// public static class Score03 extends FlexDiv {
+		//
+		// @Override
+		// public void init() {
+		// addPrefixBinding(context -> {
+		// List<Double> percentsList = ScoreUtils.getPercents(context, context.getGeneric().getComponent(1)).collect(Collectors.toList());
+		// Double variance = (double) Math.round(ScoreUtils.variance(percentsList) * 100) / 100;
+		// Double standardDeviation = (double) Math.round(Math.sqrt(variance) * 100) / 100;
+		// Double mean = (double) Math.round(ScoreUtils.expectation(percentsList) * 100) / 100;
+		// this.setText(context, "(sd²)" + variance + " (sd)" + standardDeviation + " (µ)" + mean);
+		// });
+		// }
+		// }
+
+		public static class QuizDiv extends FlexDiv {
+
+		}
 	}
+
 }
