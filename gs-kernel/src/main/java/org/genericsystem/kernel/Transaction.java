@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import org.genericsystem.api.core.Filters;
+import org.genericsystem.api.core.IGeneric;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
@@ -88,7 +90,27 @@ public class Transaction extends CheckedContext implements IDifferential<Generic
 			}
 
 			@Override
+			public <U extends IGeneric<U>> Snapshot<Generic> filter(Filters filter, U generic) {
+				System.out.println("===================== Filtre avec index 2");
+				return new Snapshot<Generic>() {
+
+					@Override
+					public Stream<Generic> stream() {
+						return ((RootServerHandler) ancestor.getProxyHandler()).getDependencies().stream(getTs(), filter.getFilter(generic));
+					}
+				};
+			}
+
+			@Override
+			public Snapshot<Generic> filter(Filters filter) {
+				System.out.println("===================== Filtre avec index");
+				return filter(filter, ancestor);
+			}
+
+			@Override
 			public Generic get(Object o) {
+				Generic result = ((RootServerHandler) ancestor.getProxyHandler()).getDependencies().get((Generic) o, getTs());
+				System.out.println("get " + o + ", résultat : " + result);
 				return ((RootServerHandler) ancestor.getProxyHandler()).getDependencies().get((Generic) o, getTs());
 			}
 
