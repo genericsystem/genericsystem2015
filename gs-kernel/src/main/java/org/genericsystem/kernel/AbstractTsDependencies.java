@@ -1,6 +1,5 @@
 package org.genericsystem.kernel;
 
-import java.util.Map;
 import java.util.Spliterators;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
@@ -29,6 +28,11 @@ abstract class AbstractTsDependencies {
 	private class IndexImpl implements Index {
 		private Node head = null;
 		private Node tail = null;
+		private long ts;
+
+		IndexImpl(long ts) {
+			this.ts = ts;
+		}
 
 		@Override
 		public void add(Generic generic) {
@@ -78,7 +82,10 @@ abstract class AbstractTsDependencies {
 
 		@Override
 		public Stream<Generic> stream(long ts) {
-			return StreamSupport.stream(Spliterators.spliteratorUnknownSize(new InternalIterator(ts), 0), false);
+			if (ts >= this.ts)
+				return StreamSupport.stream(Spliterators.spliteratorUnknownSize(new InternalIterator(ts), 0), false);
+			else
+				throw new IllegalStateException("Requested ts (" + ts + ") inferior to creation ts (" + this.ts + ").");
 		}
 
 		private class InternalIterator extends AbstractIterator<Node, Generic> {
@@ -146,52 +153,39 @@ abstract class AbstractTsDependencies {
 	}
 
 	public Stream<Generic> stream(long ts, IndexFilter filter) {
-		return indexs.get(filter).stream(ts);
+		return indexs.get(filter, ts).stream(ts);
 
 	}
 
 	public Stream<Generic> stream(long ts) {
-		return indexs.get(Filters.NO_FILTER).stream(ts);
+		return indexs.get(Filters.NO_FILTER, ts).stream(ts);
 	}
 
-	// public static interface IndexFilter {
-	// boolean test(Generic generic);
-	// }
-	//
-	// private static NoFilter NO_FILTER = new NoFilter();
-	//
-	// public static class NoFilter implements IndexFilter {
-	// @Override
-	// public boolean test(Generic generic) {
-	// return true;
-	// }
-	// }
-
-	private final Map<IndexFilter, Index> indexs = new ConcurrentHashMap<IndexFilter, Index>() {
+	private final ExtendedMap indexs = new ExtendedMap() {
 		{
-			put(Filters.NO_FILTER, new IndexImpl());
+			put(Filters.NO_FILTER, new IndexImpl(0));
 		}
 
-		@Override
-		public Index get(Object key) {
-			System.out.println("GGGGGGGGGGGGGGGGGGG get " + key);
-			return computeIfAbsent((IndexFilter) key, k -> {
+	};
+
+	private class ExtendedMap extends ConcurrentHashMap<IndexFilter, Index> {
+		public Index get(Object key, long ts) {
+			return super.computeIfAbsent((IndexFilter) key, k -> {
 				System.out.println("               computeIfAbsent");
-				return new IndexImpl() {
+				return new IndexImpl(ts) {
 
 					@Override
-					public Stream<Generic> stream(long ts) {
-						return super.stream(ts).filter(g -> ((IndexFilter) key).test(g));
+					public Stream<Generic> stream(long ts_) {
+						return super.stream(ts_).filter(g -> ((IndexFilter) key).test(g));
 					}
 				};
 			});
 		};
-	};
+	}
 
 	public void add(Generic generic) {
 		indexs.entrySet().forEach(entry -> {
 			if (entry.getKey().test(generic)) {
-				System.out.println("AAAAAAAAA ajout générique " + generic.info() + ", clef :  " + entry.getKey());
 				entry.getValue().add(generic);
 			}
 		});
@@ -214,5 +208,4 @@ abstract class AbstractTsDependencies {
 			this.content = content;
 		}
 	}
-
 }
