@@ -33,23 +33,17 @@ public interface DefaultContext<T extends DefaultGeneric<T>> extends IContext<T>
 		assert vertex != null;
 		class AliveFinder {
 			T find(T vertex) {
-				if (vertex.isRoot()) {
-					System.out.println("isAlive, isRoot " + vertex);
+				if (vertex.isRoot())
 					return vertex;
-				}
 				if (vertex.isMeta()) {
 					T aliveSuper = new AliveFinder().find(vertex.getSupers().get(0));
-					System.out.println("isAlive, isMeta " + vertex.info() + ", aliveSuper : " + aliveSuper.info() + ", résultat : " + (aliveSuper != null ? getInheritings(aliveSuper).get(vertex) : null));
 					return aliveSuper != null ? getInheritings(aliveSuper).get(vertex) : null;
 				}
 				T aliveMeta = new AliveFinder().find(vertex.getMeta());
-				System.out.println("aliveMeta : " + aliveMeta + ", getInstances(aliveMeta).get(vertex) : " + getInstances(aliveMeta).get(vertex) + ", vertex : " + vertex);
 				return aliveMeta != null ? getInstances(aliveMeta).get(vertex) : null;
 			}
 		}
-		boolean result = vertex.equals(new AliveFinder().find(vertex));
-		System.out.println("isAlive ? " + result);
-		return /* vertex != null && */result;
+		return /* vertex != null && */vertex.equals(new AliveFinder().find(vertex));
 	}
 
 	default Snapshot<T> getInstances(T vertex) {
