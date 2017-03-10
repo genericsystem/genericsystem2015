@@ -91,7 +91,6 @@ public class Transaction extends CheckedContext implements IDifferential<Generic
 
 			@Override
 			public <U extends IGeneric<U>> Snapshot<Generic> filter(Filters filter, U generic) {
-				System.out.println("===================== Filtre avec index 2");
 				return new Snapshot<Generic>() {
 
 					@Override
@@ -103,14 +102,12 @@ public class Transaction extends CheckedContext implements IDifferential<Generic
 
 			@Override
 			public Snapshot<Generic> filter(Filters filter) {
-				System.out.println("===================== Filtre avec index");
 				return filter(filter, ancestor);
 			}
 
 			@Override
 			public Generic get(Object o) {
 				Generic result = ((RootServerHandler) ancestor.getProxyHandler()).getDependencies().get((Generic) o, getTs());
-				System.out.println("get " + o + ", résultat : " + result);
 				return ((RootServerHandler) ancestor.getProxyHandler()).getDependencies().get((Generic) o, getTs());
 			}
 

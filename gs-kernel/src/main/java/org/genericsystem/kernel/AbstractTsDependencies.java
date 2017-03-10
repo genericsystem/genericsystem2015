@@ -30,8 +30,13 @@ abstract class AbstractTsDependencies {
 		private Node tail = null;
 		private long ts;
 
-		IndexImpl(long ts) {
+		IndexImpl(IndexFilter filter, long ts) {
 			this.ts = ts;
+			if (!Filters.NO_FILTER.equals(filter))
+				indexs.get(Filters.NO_FILTER, ts).stream(ts).forEach(generic -> {
+					if (filter.test(generic))
+						add(generic);
+				});
 		}
 
 		@Override
@@ -45,7 +50,7 @@ abstract class AbstractTsDependencies {
 				tail.next = newNode;
 			tail = newNode;
 			Generic result = map.put(generic, generic);
-			assert result == null;
+			// assert result == null;
 		}
 
 		@Override
@@ -163,23 +168,14 @@ abstract class AbstractTsDependencies {
 
 	private final ExtendedMap indexs = new ExtendedMap() {
 		{
-			put(Filters.NO_FILTER, new IndexImpl(0));
+			put(Filters.NO_FILTER, new IndexImpl(Filters.NO_FILTER, 0));
 		}
 
 	};
 
 	private class ExtendedMap extends ConcurrentHashMap<IndexFilter, Index> {
 		public Index get(Object key, long ts) {
-			return super.computeIfAbsent((IndexFilter) key, k -> {
-				System.out.println("               computeIfAbsent");
-				return new IndexImpl(ts) {
-
-					@Override
-					public Stream<Generic> stream(long ts_) {
-						return super.stream(ts_).filter(g -> ((IndexFilter) key).test(g));
-					}
-				};
-			});
+			return super.computeIfAbsent((IndexFilter) key, k -> new IndexImpl(k, ts));
 		};
 	}
 
