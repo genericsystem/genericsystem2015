@@ -2,6 +2,7 @@ package org.genericsystem.common;
 
 import java.util.stream.Stream;
 
+import org.genericsystem.api.core.Filters;
 import org.genericsystem.api.core.Snapshot;
 
 /**
@@ -13,6 +14,8 @@ public interface IDependencies<T> extends Snapshot<T> {
 
 	@Override
 	Stream<T> stream();
+
+	Snapshot<Generic> filter(Filters filter);
 
 	@Override
 	T get(Object generic);

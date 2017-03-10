@@ -321,9 +321,10 @@ public class Archiver {
 			List<Generic> supers = loadAncestors(ts, vertexMap);
 			List<Generic> components = loadAncestors(ts, vertexMap);
 			vertexMap.put(ts, new SetArchiverHandler(ts, context, meta, supers, value, components, otherTs).resolve());
-			// log.info("load dependency : " + vertexMap.get(ts).info() + " " + ts + " " + vertexMap.get(ts).getTs() + " birthTs : " +
-			// vertexMap.get(ts).getLifeManager().getBirthTs());
-			assert ((Transaction) context.getTransaction()).isAlive(vertexMap.get(ts)) : vertexMap.get(ts).info();
+			log.info("load dependency : " + vertexMap.get(ts).info() + " " + ts + " " + vertexMap.get(ts).getTs() + " birthTs : " + ((RootServerHandler) vertexMap.get(ts).getProxyHandler()).getLifeManager().getBirthTs());
+			System.out.println("alive ? " + vertexMap.get(ts) + " : " + ((Transaction) context.getTransaction()).isAlive(vertexMap.get(ts)));
+			assert ((Transaction) context.getTransaction()).isAlive(vertexMap.get(ts)) : ((RootServerHandler) vertexMap.get(ts).getProxyHandler()).getLifeManager().getBirthTs() + " "
+					+ ((RootServerHandler) vertexMap.get(ts).getProxyHandler()).getLifeManager().getDeathTs() + " " + vertexMap.get(ts).info();
 		}
 
 		protected List<Generic> loadAncestors(long ts, Map<Long, Generic> vertexMap) throws IOException {
