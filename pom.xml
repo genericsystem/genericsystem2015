@@ -54,6 +54,7 @@
 		<module>gs-security-model</module>
 		<module>gs-security</module>
         <module>gs-geography</module>
+        <module>gs-quiz</module>
   </modules>
 
 	<distributionManagement>

@@ -129,7 +129,7 @@ public class InstanceBuilder extends Composite implements GSBuilderDefaults, Pas
 
 		@Override
 		public void init() {
-			createComponentsList();
+			createComponentsMap();
 			addPostfixBinding(context -> {
 				if (getGenericValueComponentsMap(context) != null)
 					getGenericValueComponentsMap(context).get(context.getGeneric()).setComponents(getComponentsMap(context));

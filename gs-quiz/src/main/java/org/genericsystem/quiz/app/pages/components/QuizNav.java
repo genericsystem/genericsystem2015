@@ -21,16 +21,13 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlUl;
 @Children(path = HtmlUl.class, value = { HtmlLi.class, HtmlLi.class, HtmlLi.class })
 @Children(path = { HtmlUl.class, HtmlLi.class }, value = HtmlHyperLink.class)
 @Switch(path = { HtmlUl.class, HtmlLi.class }, pos = { 0, 2 }, value = LOGGED_USER.class)
-//
 @BindAction(path = { HtmlUl.class, HtmlLi.class, HtmlHyperLink.class }, pos = { 0, 0, 0 }, value = CALL_HOME_PAGE.class)
 @BindAction(path = { HtmlUl.class, HtmlLi.class, HtmlHyperLink.class }, pos = { 0, 1, 0 }, value = { CLEAR_QUIZCONTEXT_PROPERTIES.class, CALL_RESULT_PAGE.class })
 @BindAction(path = { HtmlUl.class, HtmlLi.class, HtmlHyperLink.class }, pos = { 0, 2, 0 }, value = { CLEAR_QUIZ.class, SELECT_LOGGEDUSER.class, CALL_RESULT_PAGE.class })
-//
 @Style(name = "justify-content", value = "center")
 @Style(path = HtmlUl.class, name = "padding", value = "0px")
 @StyleClass(path = { HtmlUl.class, HtmlLi.class }, value = "navQLi")
 @StyleClass(path = { HtmlUl.class, HtmlLi.class, HtmlHyperLink.class }, value = { "navQA", "vertical-align" })
-//
 @SetText(path = { HtmlUl.class, HtmlLi.class, HtmlHyperLink.class }, pos = { 0, 0, 0 }, value = "<strong>ACCUEIL</strong>")
 @SetText(path = { HtmlUl.class, HtmlLi.class, HtmlHyperLink.class }, pos = { 0, 1, 0 }, value = "<strong>RESULTATS</strong>")
 @SetText(path = { HtmlUl.class, HtmlLi.class, HtmlHyperLink.class }, pos = { 0, 2, 0 }, value = "<strong>MES SCORES</strong>")

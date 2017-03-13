@@ -111,11 +111,11 @@ public class AnnotationsManager {
 		if (!processor.isRepeatable()) {
 			Annotation applyingAnnotation = null;
 			while (current != null) {
-				List<Annotation> annotationsFound = selectAnnotations(current.getClass(), processor.getAnnotationClass(), classesToResult, tag);
+				List<Annotation> annotationsFound = selectAnnotations(current.getClass(), processor, classesToResult, tag);
 				if (!DirectSelect.class.equals(processor.getAnnotationClass())) {
 					Class<?> superClass = current.getClass().getSuperclass();
 					while (annotationsFound.isEmpty() && Tag.class.isAssignableFrom(superClass)) {
-						annotationsFound = selectAnnotations(superClass, processor.getAnnotationClass(), classesToResult, tag);
+						annotationsFound = selectAnnotations(superClass, processor, classesToResult, tag);
 						superClass = superClass.getSuperclass();
 					}
 				}
@@ -132,7 +132,7 @@ public class AnnotationsManager {
 				Class<?> superClass = current.getClass();
 				List<Annotation> annotationsFound = new ArrayList<>();
 				while (Tag.class.isAssignableFrom(superClass)) {
-					annotationsFound.addAll(selectAnnotations(superClass, processor.getAnnotationClass(), classesToResult, tag));
+					annotationsFound.addAll(selectAnnotations(superClass, processor, classesToResult, tag));
 					superClass = superClass.getSuperclass();
 				}
 				Collections.reverse(annotationsFound);
@@ -169,7 +169,8 @@ public class AnnotationsManager {
 		return result;
 	}
 
-	static List<Annotation> selectAnnotations(Class<?> annotatedClass, Class<? extends Annotation> annotationClass, Deque<Class<?>> classesToResult, Tag tag) {
+	static List<Annotation> selectAnnotations(Class<?> annotatedClass, AnnotationProcessor processor, Deque<Class<?>> classesToResult, Tag tag) {
+		Class<? extends Annotation> annotationClass = processor.getAnnotationClass();
 		List<Annotation> annotationsFound = new ArrayList<>();
 		Annotation[] annotations = annotatedClass.getAnnotationsByType(annotationClass);
 		for (Annotation annotation : annotations)
@@ -180,7 +181,7 @@ public class AnnotationsManager {
 					throw new IllegalStateException("The annotation " + annotationClass.getSimpleName() + " contains a path and an array of class positions of different lengths. path: "
 							+ Arrays.asList(path).stream().map(c -> c.getSimpleName()).collect(Collectors.toList()) + ", positions: " + IntStream.of(pos).boxed().collect(Collectors.toList()) + " found on class " + annotatedClass.getSimpleName());
 				if (isAssignableFrom(Arrays.asList(path), new ArrayList<>(classesToResult)) && posMatches(pos, path, tag)) {
-					if (!annotationsFound.isEmpty() && !(Style.class.equals(annotationClass) || Attribute.class.equals(annotationClass)))
+					if (!annotationsFound.isEmpty() && !processor.isRepeatable())
 						throw new IllegalStateException("Multiple annotations applicable to same tag defined at same level. Annotation: " + annotationClass.getSimpleName() + ", path to tag: "
 								+ Arrays.asList(path).stream().map(c -> c.getSimpleName()).collect(Collectors.toList()));
 					annotationsFound.add(annotation);
