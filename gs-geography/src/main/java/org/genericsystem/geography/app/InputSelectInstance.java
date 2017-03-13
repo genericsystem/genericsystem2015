@@ -11,6 +11,7 @@ import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.ForEachContext;
 import org.genericsystem.reactor.annotations.Style;
+import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.context.ContextAction;
 import org.genericsystem.reactor.context.ObservableListExtractorFromContext;
 import org.genericsystem.reactor.context.StringExtractor;
@@ -54,6 +55,7 @@ public class InputSelectInstance extends HtmlDiv {
 	@ForEachContext(TEXT_FILTERED.class)
 	@Children({ ResultLink.class })
 	@Style(name = "background-color", value = "1.4em")
+	@StyleClass("autocomplete")
 	public static class ResultLi extends HtmlLi {
 	}
 
@@ -101,7 +103,6 @@ public class InputSelectInstance extends HtmlDiv {
 	public static class AutocompleteAction implements ContextAction {
 		@Override
 		public void accept(Context context, Tag tag) {
-			System.out.println("Hello:" + context.getGeneric());
 			tag.getParent().getParent().getParent().find(SearchInput.class).getDomNodeAttributes(context.getParent())
 					.put("value", ((InputSelectInstance) tag.getParent().getParent().getParent())
 							.displayInstance(context.getGeneric()));
