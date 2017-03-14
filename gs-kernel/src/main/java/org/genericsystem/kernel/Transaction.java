@@ -107,7 +107,6 @@ public class Transaction extends CheckedContext implements IDifferential<Generic
 
 			@Override
 			public Generic get(Object o) {
-				Generic result = ((RootServerHandler) ancestor.getProxyHandler()).getDependencies().get((Generic) o, getTs());
 				return ((RootServerHandler) ancestor.getProxyHandler()).getDependencies().get((Generic) o, getTs());
 			}
 

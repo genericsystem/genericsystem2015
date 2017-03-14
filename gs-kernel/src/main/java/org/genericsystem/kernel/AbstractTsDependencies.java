@@ -28,10 +28,12 @@ abstract class AbstractTsDependencies {
 	private class IndexImpl implements Index {
 		private Node head = null;
 		private Node tail = null;
-		private long ts;
+		private final long ts;
+		private final IndexFilter<Generic> filter;
 
-		IndexImpl(IndexFilter filter, long ts) {
+		IndexImpl(IndexFilter<Generic> filter, long ts) {
 			this.ts = ts;
+			this.filter = filter;
 			if (!Filters.NO_FILTER.equals(filter))
 				indexs.get(Filters.NO_FILTER, ts).stream(ts).forEach(generic -> {
 					if (filter.test(generic))
@@ -87,10 +89,9 @@ abstract class AbstractTsDependencies {
 
 		@Override
 		public Stream<Generic> stream(long ts) {
-			if (ts >= this.ts)
-				return StreamSupport.stream(Spliterators.spliteratorUnknownSize(new InternalIterator(ts), 0), false);
-			else
-				throw new IllegalStateException("Requested ts (" + ts + ") inferior to creation ts (" + this.ts + ").");
+			if (ts < this.ts)
+				indexs.updateIndex(filter, ts);
+			return StreamSupport.stream(Spliterators.spliteratorUnknownSize(new InternalIterator(ts), 0), false);
 		}
 
 		private class InternalIterator extends AbstractIterator<Node, Generic> {
@@ -157,7 +158,7 @@ abstract class AbstractTsDependencies {
 		return null;
 	}
 
-	public Stream<Generic> stream(long ts, IndexFilter filter) {
+	public Stream<Generic> stream(long ts, IndexFilter<Generic> filter) {
 		return indexs.get(filter, ts).stream(ts);
 
 	}
@@ -167,16 +168,26 @@ abstract class AbstractTsDependencies {
 	}
 
 	private final ExtendedMap indexs = new ExtendedMap() {
+
+		private static final long serialVersionUID = 1067462646727512744L;
+
 		{
-			put(Filters.NO_FILTER, new IndexImpl(Filters.NO_FILTER, 0));
+			put((IndexFilter<Generic>) Filters.NO_FILTER, new IndexImpl((IndexFilter<Generic>) Filters.NO_FILTER, 0));
 		}
 
 	};
 
-	private class ExtendedMap extends ConcurrentHashMap<IndexFilter, Index> {
+	private class ExtendedMap extends ConcurrentHashMap<IndexFilter<Generic>, Index> {
+
+		private static final long serialVersionUID = 2969395358619269789L;
+
 		public Index get(Object key, long ts) {
-			return super.computeIfAbsent((IndexFilter) key, k -> new IndexImpl(k, ts));
+			return super.computeIfAbsent((IndexFilter<Generic>) key, k -> new IndexImpl(k, ts));
 		};
+
+		public Index updateIndex(IndexFilter<Generic> key, long ts) {
+			return super.put(key, new IndexImpl(key, ts));
+		}
 	}
 
 	public void add(Generic generic) {
