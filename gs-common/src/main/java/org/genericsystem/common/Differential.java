@@ -93,7 +93,6 @@ public class Differential implements IDifferential<Generic> {
 						return Stream.concat(adds.contains(generic) ? Stream.empty() : subDifferential.getDependencies(generic).filter(filter, vertices).stream().filter(x -> !removes.contains(x)),
 								adds.filter(filter, vertices).stream().filter(x -> generic.isDirectAncestorOf(x)));
 					}
-
 				};
 			}
 		};
