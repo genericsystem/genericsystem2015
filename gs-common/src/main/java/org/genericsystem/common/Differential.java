@@ -85,13 +85,13 @@ public class Differential implements IDifferential<Generic> {
 			}
 
 			@Override
-			public <U extends IGeneric<U>> Snapshot<Generic> filter(Filters filter, U vertex) {
+			public <U extends IGeneric<U>> Snapshot<Generic> filter(Filters filter, U... vertices) {
 				return new Snapshot<Generic>() {
 
 					@Override
 					public Stream<Generic> stream() {
-						return Stream.concat(adds.contains(generic) ? Stream.empty() : subDifferential.getDependencies(generic).filter(filter, vertex).stream().filter(x -> !removes.contains(x)),
-								adds.stream().filter(x -> generic.isDirectAncestorOf(x) && filter.getFilter(vertex).test(x)));
+						return Stream.concat(adds.contains(generic) ? Stream.empty() : subDifferential.getDependencies(generic).filter(filter, vertices).stream().filter(x -> !removes.contains(x)),
+								adds.filter(filter, vertices).stream().filter(x -> generic.isDirectAncestorOf(x)));
 					}
 
 				};
