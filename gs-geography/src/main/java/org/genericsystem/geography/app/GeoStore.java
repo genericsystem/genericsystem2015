@@ -12,10 +12,12 @@ import org.genericsystem.geography.model.AdministrativeTerritory;
 import org.genericsystem.geography.model.AdministrativeTerritory.Adm1;
 import org.genericsystem.geography.model.AdministrativeTerritory.Adm2;
 import org.genericsystem.geography.model.AdministrativeTerritory.Adm3;
+import org.genericsystem.geography.model.Building;
 import org.genericsystem.geography.model.City;
-import org.genericsystem.geography.model.City.Latitude;
-import org.genericsystem.geography.model.City.Longitude;
 import org.genericsystem.geography.model.Country;
+import org.genericsystem.geography.model.Place;
+import org.genericsystem.geography.model.Place.Latitude;
+import org.genericsystem.geography.model.Place.Longitude;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.annotations.DirectSelect;
@@ -31,7 +33,7 @@ import org.genericsystem.reactor.gscomponents.Responsive;
 import org.genericsystem.reactor.gscomponents.RootTagImpl;
 
 @RunScript(GeoScript.class)
-@DependsOnModel({ AdministrativeTerritory.class, Country.class, City.class })
+@DependsOnModel({ AdministrativeTerritory.class, Country.class, Place.class, City.class, Building.class })
 @Style(name = "background-color", value = "#00afeb")
 @Children({ ModalEditor.class, AppHeader.class, Responsive.class, Monitor.class })
 @Children(path = Responsive.class, value = { TitledInstancesTable.class, TitledInstancesTable.class,
@@ -79,7 +81,6 @@ public class GeoStore extends RootTagImpl {
 				hm.put(currentCode, currentInstance);
 			} else {
 				String componentCode = componentCode(parts, n);
-				// System.out.println(componentCode);
 				currentCode = componentCode + "_" + parts[n - 1];
 				Generic componentInstance = hm.get(componentCode);
 				if (componentInstance != null) {
@@ -125,6 +126,22 @@ public class GeoStore extends RootTagImpl {
 			readFile("src/main/resources/adm3.csv", engine, engine.find(Adm3.class), 4);
 
 			readFile("src/main/resources/populated.csv", engine, engine.find(City.class), 5);
+
+			// Generic castle = engine.find(Castle.class);
+			// System.out.println(castle);
+			//
+			// Generic cityInstance = engine.find(City.class).getInstance("Nantes", hm.get("FR_52_44_442"));
+			// System.out.println(cityInstance.info());
+			// Generic castleInstance = castle.addInstance("château des ducs de Bretagne", cityInstance);
+			// Generic latInstance = engine.getCurrentCache().buildAndPlug(null, engine.find(Latitude.class),
+			// Collections.emptyList(), 47.2162, Collections.singletonList(castleInstance));
+			// Generic lonInstance = engine.getCurrentCache().buildAndPlug(null, engine.find(Longitude.class),
+			// Collections.emptyList(), -1.5497, Collections.singletonList(castleInstance));
+			//
+			// engine.getCurrentCache().flush();
+			//
+			// System.out.println(castleInstance.info());
+			// System.out.println(engine.find(Castle.class).getInstances().stream().collect(Collectors.toList()));
 
 		}
 
