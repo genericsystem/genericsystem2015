@@ -309,7 +309,7 @@ public class InstanceEditor extends FlexDiv implements SelectionDefaults, Steppe
 	public static class HolderAdder extends ValueComponents implements ComponentsDefaults, ConvertedValueDefaults {
 		@Override
 		public void init() {
-			createComponentsList();
+			createComponentsMap();
 			createConvertedValueProperty();
 			addConvertedValueChangeListener((context, nva) -> {
 				if (nva != null)

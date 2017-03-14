@@ -3,10 +3,6 @@ package org.genericsystem.quiz.app.pages.components;
 import java.util.List;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.quiz.app.pages.components.QuestionDiv.AnswerDiv.QuizCheckBox;
-import org.genericsystem.quiz.app.pages.components.QuestionDiv.FooterDiv.FinishBtn;
-import org.genericsystem.quiz.app.pages.components.QuestionDiv.FooterDiv.NextBtn;
-import org.genericsystem.quiz.app.pages.components.QuestionDiv.FooterDiv.PreviousBtn;
 import org.genericsystem.quiz.app.pages.components.QuestionDiv.UnitDiv;
 import org.genericsystem.quiz.model.UserAnswer;
 import org.genericsystem.quiz.utils.QuizExtractors.ANSWERS_EXTRACTOR;
@@ -92,7 +88,6 @@ public class QuestionDiv extends FlexDiv implements StepperDefaults, SelectionDe
 	@Style(path = HtmlLabel.class, name = "hyphens", value = "auto")
 	@Style(path = HtmlLabel.class, name = "max-width", value = "100%")
 	@StyleClass("width-35-35-90")
-	@StyleClass(path = HtmlLabel.class, value = "vertical-align")
 	@StyleClass(path = QuizCheckBox.class, value = "vertical-align")
 	//
 	@ForEach(ANSWERS_EXTRACTOR.class)
@@ -121,29 +116,28 @@ public class QuestionDiv extends FlexDiv implements StepperDefaults, SelectionDe
 			});
 
 		}
+	}
 
-		public static class QuizCheckBox extends CheckBoxWithValue {
+	public static class QuizCheckBox extends CheckBoxWithValue {
 
-			@Override
-			public void init() {
+		@Override
+		public void init() {
 
-				// affiche les réponses précédentes du User logged
-				initValueProperty(context -> {
+			// affiche les réponses précédentes du User logged
+			initValueProperty(context -> {
 
-					Generic userA = context.getGeneric().getLink(context.find(UserAnswer.class), getLoggedUserProperty(context).getValue());
+				Generic userA = context.getGeneric().getLink(context.find(UserAnswer.class), getLoggedUserProperty(context).getValue());
 
-					if (userA == null)
-						userA = context.getGeneric().setLink(context.find(UserAnswer.class), false, getLoggedUserProperty(context).getValue());
+				if (userA == null)
+					userA = context.getGeneric().setLink(context.find(UserAnswer.class), false, getLoggedUserProperty(context).getValue());
 
-					return (Boolean) userA.getValue();
+				return (Boolean) userA.getValue();
 
-				});
+			});
 
-				// Place un listener sur la checkbox qui écoute l'état de la checkbox et modifie la valeur de UserAnswer en conséquence
-				addConvertedValueChangeListener((context, nva) -> context.getGeneric().getLink(context.find(UserAnswer.class), getLoggedUserProperty(context).getValue()).updateValue(nva));
-			}
+			// Place un listener sur la checkbox qui écoute l'état de la checkbox et modifie la valeur de UserAnswer en conséquence
+			addConvertedValueChangeListener((context, nva) -> context.getGeneric().getLink(context.find(UserAnswer.class), getLoggedUserProperty(context).getValue()).updateValue(nva));
 		}
-
 	}
 
 	@Children({ PreviousBtn.class, NextBtn.class, FinishBtn.class })
@@ -153,29 +147,28 @@ public class QuestionDiv extends FlexDiv implements StepperDefaults, SelectionDe
 	@Style(name = "width", value = "100%")
 	@StyleClass(path = HtmlButton.class, value = "monitorButton")
 	public static class FooterDiv extends FlexRow {
+	}
 
-		@SetText("Next >")
-		//
-		@BindAction(Controller.NextAction.class)
-		@Switch(Controller.NextSwitcher.class)
-		public static class NextBtn extends HtmlButton {
+	@SetText("Next >")
+	//
+	@BindAction(Controller.NextAction.class)
+	@Switch(Controller.NextSwitcher.class)
+	public static class NextBtn extends HtmlButton {
 
-		}
+	}
 
-		@SetText("< Previous")
-		//
-		@BindAction(Controller.PrevAction.class)
-		@Switch(Controller.PrevSwitcher.class)
-		public static class PreviousBtn extends HtmlButton {
+	@SetText("< Previous")
+	//
+	@BindAction(Controller.PrevAction.class)
+	@Switch(Controller.PrevSwitcher.class)
+	public static class PreviousBtn extends HtmlButton {
 
-		}
+	}
 
-		@SetText("Finish")
-		//
-		@Switch(Controller.LastSwitcher.class)
-		public static class FinishBtn extends HtmlButton {
-
-		}
+	@SetText("Finish")
+	//
+	@Switch(Controller.LastSwitcher.class)
+	public static class FinishBtn extends HtmlButton {
 
 	}
 

@@ -9,15 +9,16 @@ import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
 
-import javafx.collections.ObservableList;
-
 import org.genericsystem.api.core.ApiStatics;
+import org.genericsystem.api.core.Filters;
 import org.genericsystem.api.core.IContext;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ReferentialIntegrityConstraintViolationException;
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.api.core.exceptions.UnreachableOverridesException;
 import org.genericsystem.defaults.tools.SupersComputer;
+
+import javafx.collections.ObservableList;
 
 /**
  * @author Nicolas Feybesse
@@ -46,7 +47,7 @@ public interface DefaultContext<T extends DefaultGeneric<T>> extends IContext<T>
 	}
 
 	default Snapshot<T> getInstances(T vertex) {
-		return getDependencies(vertex).filter(x -> vertex.equals(x.getMeta()));
+		return getDependencies(vertex).filter(Filters.INSTANCES, vertex);
 	}
 
 	default ObservableList<T> getObservableInstances(T vertex) {
@@ -54,7 +55,7 @@ public interface DefaultContext<T extends DefaultGeneric<T>> extends IContext<T>
 	}
 
 	default Snapshot<T> getInheritings(T vertex) {
-		return getDependencies(vertex).filter(x -> x.getSupers().contains(vertex));
+		return getDependencies(vertex).filter(Filters.INHERITINGS, vertex);
 	}
 
 	default ObservableList<T> getObservableInheritings(T vertex) {
@@ -62,7 +63,7 @@ public interface DefaultContext<T extends DefaultGeneric<T>> extends IContext<T>
 	}
 
 	default Snapshot<T> getComposites(T vertex) {
-		return getDependencies(vertex).filter(x -> x.getComponents().contains(vertex));
+		return getDependencies(vertex).filter(Filters.COMPOSITES, vertex);
 	}
 
 	default ObservableList<T> getObservableComposites(T vertex) {
@@ -114,21 +115,17 @@ public interface DefaultContext<T extends DefaultGeneric<T>> extends IContext<T>
 			OrderedRemoveDependencies visit(T node) {
 				if (!contains(node)) {
 					if (!getInheritings(node).isEmpty())
-						discardWithException(new ReferentialIntegrityConstraintViolationException("Ancestor : " + node + " has a inheriting dependencies : "
-								+ getInheritings(node).info()));
+						discardWithException(new ReferentialIntegrityConstraintViolationException("Ancestor : " + node + " has a inheriting dependencies : " + getInheritings(node).info()));
 					getInheritings(node).forEach(this::visit);
 
 					if (!getInstances(node).isEmpty())
-						discardWithException(new ReferentialIntegrityConstraintViolationException("Ancestor : " + node + " has a instance dependencies : "
-								+ getInstances(node).info()));
+						discardWithException(new ReferentialIntegrityConstraintViolationException("Ancestor : " + node + " has a instance dependencies : " + getInstances(node).info()));
 					getInstances(node).forEach(this::visit);
 
 					for (T composite : getComposites(node)) {
 						for (int componentPos = 0; componentPos < composite.getComponents().size(); componentPos++)
-							if (composite.getComponents().get(componentPos).equals(node) && !contains(composite)
-									&& composite.getMeta().isReferentialIntegrityEnabled(componentPos))
-								discardWithException(new ReferentialIntegrityConstraintViolationException(composite + " is Referential Integrity for ancestor "
-										+ node + " by composite position : " + componentPos));
+							if (composite.getComponents().get(componentPos).equals(node) && !contains(composite) && composite.getMeta().isReferentialIntegrityEnabled(componentPos))
+								discardWithException(new ReferentialIntegrityConstraintViolationException(composite + " is Referential Integrity for ancestor " + node + " by composite position : " + componentPos));
 						visit(composite);
 					}
 					add(node);

@@ -2,15 +2,17 @@ package org.genericsystem.common;
 
 import java.util.stream.Stream;
 
-import javafx.beans.Observable;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-
+import org.genericsystem.api.core.Filters;
+import org.genericsystem.api.core.IGeneric;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.defaults.tools.BindingsTools;
+
+import javafx.beans.Observable;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 
 /**
  * @author Nicolas Feybesse
@@ -80,6 +82,19 @@ public class Differential implements IDifferential<Generic> {
 			@Override
 			public Stream<Generic> stream() {
 				return Stream.concat(adds.contains(generic) ? Stream.empty() : subDifferential.getDependencies(generic).stream().filter(x -> !removes.contains(x)), adds.stream().filter(x -> generic.isDirectAncestorOf(x)));
+			}
+
+			@Override
+			public <U extends IGeneric<U>> Snapshot<Generic> filter(Filters filter, U vertex) {
+				return new Snapshot<Generic>() {
+
+					@Override
+					public Stream<Generic> stream() {
+						return Stream.concat(adds.contains(generic) ? Stream.empty() : subDifferential.getDependencies(generic).filter(filter, vertex).stream().filter(x -> !removes.contains(x)),
+								adds.stream().filter(x -> generic.isDirectAncestorOf(x) && filter.getFilter(vertex).test(x)));
+					}
+
+				};
 			}
 		};
 	}
