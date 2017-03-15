@@ -81,18 +81,30 @@ public class InputSelectInstance extends HtmlDiv {
 		return StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(g);
 	}
 
+	@BindText(DEFAULT_TEXT.class)
 	public static class SearchInput extends HtmlInputText {
 
 		@Override
 		public void init() {
 			addPrefixBinding(context -> {
-				this.getDomNodeAttributes(context).addListener((MapChangeListener<String, String>) change -> {
+				getDomNodeAttributes(context).addListener((MapChangeListener<String, String>) change -> {
 					if ("value".equals(change.getKey())) {
 						if (change.wasAdded())
 							getContextProperty("txt", context).setValue(change.getValueAdded());
 					}
 				});
 			});
+		}
+	}
+
+	public static class DEFAULT_TEXT implements TextBinding {
+		@Override
+		public ObservableValue<String> apply(Context context, Tag tag) {
+			String str = "";
+			if (tag.getContextProperty("selected", context).getValue() != null)
+				str = ((InputSelectInstance) tag.getParent())
+						.displayInstance((Generic) tag.getContextProperty("selected", context).getValue());
+			return new ReadOnlyStringWrapper(str);
 		}
 	}
 
@@ -108,7 +120,6 @@ public class InputSelectInstance extends HtmlDiv {
 							.displayInstance(context.getGeneric()));
 			tag.getContextProperty("txt", context).setValue("");
 			tag.getContextProperty("selected", context).setValue(context.getGeneric());
-
 		}
 	}
 
