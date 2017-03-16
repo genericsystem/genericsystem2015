@@ -1,5 +1,6 @@
 package org.genericsystem.common;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.genericsystem.api.core.Filters;
@@ -18,7 +19,10 @@ public interface IDependencies<T> extends Snapshot<T> {
 	Snapshot<Generic> filter(Filters filter);
 
 	@Override
-	T get(Object generic);
+	public default T get(Object generic) {
+		Optional<T> findFirst = stream().filter(generic::equals).findFirst();
+		return findFirst.isPresent() ? findFirst.get() : null;
+	}
 
 	void add(T add);
 

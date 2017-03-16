@@ -90,12 +90,12 @@ public class Transaction extends CheckedContext implements IDifferential<Generic
 			}
 
 			@Override
-			public <U extends IGeneric<U>> Snapshot<Generic> filter(Filters filter, U generic) {
+			public <U extends IGeneric<U>> Snapshot<Generic> filter(Filters filter, U... generics) {
 				return new Snapshot<Generic>() {
 
 					@Override
 					public Stream<Generic> stream() {
-						return ((RootServerHandler) ancestor.getProxyHandler()).getDependencies().stream(getTs(), filter.getFilter(generic));
+						return ((RootServerHandler) ancestor.getProxyHandler()).getDependencies().stream(getTs(), filter.getFilter(generics));
 					}
 				};
 			}

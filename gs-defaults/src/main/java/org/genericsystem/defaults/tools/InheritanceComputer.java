@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.genericsystem.api.core.Filters;
 import org.genericsystem.defaults.DefaultGeneric;
 
 /**
@@ -77,12 +78,14 @@ public class InheritanceComputer<T extends DefaultGeneric<T>> extends HashSet<T>
 			return Stream.concat(Stream.of(holder), indexStream.flatMap(x -> getStream(x)).distinct());
 		}
 
+		@SuppressWarnings("unchecked")
 		protected Stream<T> compositesByMeta(T holder) {
-			return localBase.getComposites().stream().filter(x -> !x.equals(holder) && x.getMeta().equals(holder));
+			return localBase.getDependencies().filter(Filters.COMPOSITES_BY_META, localBase, holder).stream(); // getComposites().stream().filter(x -> !x.equals(holder) && x.getMeta().equals(holder));
 		}
 
+		@SuppressWarnings("unchecked")
 		protected Stream<T> compositesBySuper(T holder) {
-			return localBase.getComposites().stream().filter(x -> x.getSupers().contains(holder));
+			return localBase.getDependencies().filter(Filters.COMPOSITES_BY_SUPER, localBase, holder).stream(); // getComposites().stream().filter(x -> x.getSupers().contains(holder));
 		}
 
 	}
