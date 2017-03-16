@@ -74,7 +74,6 @@ public class PseudoConcurrentCollection<T> implements IteratorSnapshot<T> {
 				tail.next = newNode;
 			tail = newNode;
 			map.put(element, element);
-			addProperty.set(element);
 		}
 
 		@Override
@@ -83,7 +82,6 @@ public class PseudoConcurrentCollection<T> implements IteratorSnapshot<T> {
 			while (iterator.hasNext())
 				if (element.equals(iterator.next())) {
 					iterator.remove();
-					// map.remove(element);
 					return true;
 				}
 			return false;
@@ -128,7 +126,6 @@ public class PseudoConcurrentCollection<T> implements IteratorSnapshot<T> {
 					if (next.next == null)
 						tail = last;
 				}
-				removeProperty.set(content);
 			}
 		}
 	}
@@ -175,6 +172,7 @@ public class PseudoConcurrentCollection<T> implements IteratorSnapshot<T> {
 				entry.getValue().add(element);
 			}
 		});
+		addProperty.set(element);
 	}
 
 	public boolean remove(T element) {
@@ -183,6 +181,7 @@ public class PseudoConcurrentCollection<T> implements IteratorSnapshot<T> {
 			if (entry.getKey().test(element))
 				result[0] = result[0] | entry.getValue().remove(element);
 		});
+		removeProperty.set(element);
 		return result[0];
 	}
 
