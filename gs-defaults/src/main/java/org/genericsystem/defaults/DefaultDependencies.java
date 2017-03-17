@@ -39,6 +39,11 @@ public interface DefaultDependencies<T extends DefaultGeneric<T>> extends IGener
 	}
 
 	@SuppressWarnings("unchecked")
+	default Snapshot<T> getDependencies() {
+		return getCurrentCache().getDependencies((T) this);
+	}
+
+	@SuppressWarnings("unchecked")
 	@Override
 	default T getInstance(Serializable value, T... components) {
 		return getNonAmbiguousResult(getInstances(value, components).stream());

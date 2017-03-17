@@ -133,18 +133,18 @@ public interface Snapshot<T> extends Iterable<T> {
 		};
 	}
 
-	default <U extends IGeneric<U>> Snapshot<T> filter(Filters filter, U generic) {
+	default <U extends IGeneric<U>> Snapshot<T> filter(Filters filter, U... generics) {
 		return new Snapshot<T>() {
 
 			@Override
 			public Stream<T> stream() {
-				return Snapshot.this.stream().filter(g -> filter.getFilter(generic).test((U) g));
+				return Snapshot.this.stream().filter(g -> filter.getFilter(generics).test((U) g));
 			}
 
 			@Override
 			public T get(Object o) {
 				T result = Snapshot.this.get(o);
-				return result != null && filter.getFilter(generic).test((U) result) ? result : null;
+				return result != null && filter.getFilter(generics).test((U) result) ? result : null;
 			}
 		};
 	}

@@ -92,10 +92,10 @@ public class GeoStore extends RootTagImpl {
 									Collections.emptyList(), parts[n - 1],
 									Collections.singletonList(componentInstance));
 							Generic latInstance = engine.getCurrentCache().buildAndPlug(null,
-									engine.find(Latitude.class), Collections.emptyList(), parts[n],
+									engine.find(Latitude.class), Collections.emptyList(), Double.valueOf(parts[n]),
 									Collections.singletonList(currentInstance));
 							Generic lonInstance = engine.getCurrentCache().buildAndPlug(null,
-									engine.find(Longitude.class), Collections.emptyList(), parts[n + 1],
+									engine.find(Longitude.class), Collections.emptyList(), Double.valueOf(parts[n + 1]),
 									Collections.singletonList(currentInstance));
 							hm.put(currentCode, currentInstance);
 						}
@@ -125,7 +125,7 @@ public class GeoStore extends RootTagImpl {
 
 			readFile("src/main/resources/adm3.csv", engine, engine.find(Adm3.class), 4);
 
-			readFile("src/main/resources/populated.csv", engine, engine.find(City.class), 5);
+			readFile("src/main/resources/populated_fr.csv", engine, engine.find(City.class), 5);
 
 			// Generic castle = engine.find(Castle.class);
 			// System.out.println(castle);

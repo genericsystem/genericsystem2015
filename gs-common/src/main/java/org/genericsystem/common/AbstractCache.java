@@ -311,8 +311,7 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 			listener.triggersMutationEvent(oldDependency, newDependency);
 	}
 
-	Generic buildAndPlug(Class<?> clazz, Generic meta, List<Generic> supers, Serializable value,
-			List<Generic> components) {
+	public Generic buildAndPlug(Class<?> clazz, Generic meta, List<Generic> supers, Serializable value, List<Generic> components) {
 		return plug(getRoot().build(null, clazz, meta, supers, value, components));
 	}
 
