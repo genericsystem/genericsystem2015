@@ -113,7 +113,6 @@ public class Checker {
 		checkDependsSuperComponents(vertex);
 		checkLevel(vertex);
 		checkLevelComponents(vertex);
-		checkSignatureUnicity(vertex);
 		checkRemoveGenericAnnoted(isOnAdd, vertex);
 	}
 
@@ -198,13 +197,6 @@ public class Checker {
 		for (Generic component : vertex.getComponents())
 			if (component.getLevel() > vertex.getLevel())
 				context.discardWithException(new LevelConstraintViolationException("Inappropriate component meta level : " + component.getLevel() + " for component : " + component + ". Component meta level for added node is : " + vertex.getLevel()));
-	}
-
-	private void checkSignatureUnicity(Generic vertex) {
-		// if (context.getInstances(vertex.getMeta()).get().filter(x ->
-		// ((AbstractVertex<?>) x).equalsRegardlessSupers(vertex.getMeta(),
-		// vertex.getValue(), vertex.getComponents())).count() > 1)
-		// context.discardWithException(new ExistsException(vertex.info()));
 	}
 
 	private void checkConstraints(boolean isOnAdd, boolean isFlushTime, Generic vertex) {

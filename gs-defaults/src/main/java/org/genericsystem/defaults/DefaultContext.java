@@ -105,7 +105,10 @@ public interface DefaultContext<T extends DefaultGeneric<T>> extends IContext<T>
 				return this;
 			}
 		}
-		return new PotentialDependenciesComputer().visit(meta);
+		if (components.isEmpty())
+			return meta.isMeta() ? new PotentialDependenciesComputer().visit(meta) : new TreeSet<>();
+		else
+			return new PotentialDependenciesComputer().visit(components.get(0));
 	}
 
 	default NavigableSet<T> computeRemoveDependencies(T node) {
