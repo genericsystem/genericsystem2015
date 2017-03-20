@@ -15,13 +15,8 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlInputText;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlP;
-import org.gs.events.components.InputDate.DateLabel;
-import org.gs.events.components.InputDate.DaySelect;
-import org.gs.events.components.InputDate.ErrorMsg;
-import org.gs.events.components.InputDate.MonthSelect;
-import org.gs.events.components.InputDate.Slash1;
-import org.gs.events.components.InputDate.Slash2;
-import org.gs.events.components.InputDate.YearSelect;
+import org.gs.events.components.InputDate.DivContainer;
+import org.gs.events.model.Date;
 import org.gs.events.model.Date.Day;
 import org.gs.events.model.Date.Month;
 import org.gs.events.model.Date.Year;
@@ -32,16 +27,27 @@ import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.MapChangeListener;
 
-@Children({ DateLabel.class, YearSelect.class, Slash1.class, MonthSelect.class, Slash2.class, DaySelect.class,
-		ErrorMsg.class })
+@Children(DivContainer.class)
 public class InputDate extends HtmlDiv {
 
 	@Override
 	public void init() {
-		createNewContextProperty("year");
-		createNewContextProperty("month");
-		createNewContextProperty("day");
 		createNewContextProperty("error");
+		createNewContextProperty("selected");
+	}
+
+	@Children({ DateLabel.class, YearSelect.class, Slash1.class, MonthSelect.class, Slash2.class, DaySelect.class,
+			ErrorMsg.class })
+	public static class DivContainer extends HtmlDiv {
+
+		@Override
+		public void init() {
+			addPrefixBinding(context -> {
+				if (context.getGeneric().isInstanceOf(context.find(Date.class)))
+					getContextProperty("selected", context.getParent()).setValue(context.getGeneric());
+			});
+		}
+
 	}
 
 	@SetText(value = "Date yyyy/mm/dd : ")
@@ -58,27 +64,9 @@ public class InputDate extends HtmlDiv {
 			addPrefixBinding(context -> {
 				this.getDomNodeAttributes(context).addListener((MapChangeListener<String, String>) change -> {
 					if ("value".equals(change.getKey())) {
-						if (change.wasAdded()) {
-							if (!"".equals(change.getValueAdded())) {
-								try {
-									int yr = Integer.parseInt(change.getValueAdded());
-									getContextProperty("error", context).setValue(null);
-									getContextProperty("year", context).setValue(yr);
-								} catch (Exception e) {
-									getContextProperty("error", context).setValue("Incorrect year !");
-									getContextProperty("year", context).setValue(null);
-								}
-							} else {
-								if (getContextProperty("month", context).getValue() != null
-										|| getContextProperty("day", context).getValue() != null)
-									getContextProperty("error", context).setValue("The year is not set !");
-								else
-									getContextProperty("error", context).setValue(null);
-								getContextProperty("year", context).setValue(null);
-								getContextProperty("month", context).setValue(null);
-								getContextProperty("day", context).setValue(null);
-							}
-						}
+						if (change.wasAdded())
+							getContextProperty("selected", context.getParent())
+									.setValue(checkDate(context, this.getParent()));
 					}
 				});
 			});
@@ -88,6 +76,82 @@ public class InputDate extends HtmlDiv {
 	@SetText(value = "/")
 	@Style(name = "margin", value = "3px")
 	public static class Slash1 extends HtmlLabel {
+	}
+
+	public static Generic checkDate(Context context, Tag tag) {
+		String yyyy = tag.find(YearSelect.class).getDomNodeAttributes(context).get("value");
+		if (yyyy == "")
+			yyyy = null;
+		String mm = tag.find(MonthSelect.class).getDomNodeAttributes(context).get("value");
+		if (mm == "")
+			mm = null;
+		String dd = tag.find(DaySelect.class).getDomNodeAttributes(context).get("value");
+		if (dd == "")
+			dd = null;
+		if (yyyy != null) {
+			try {
+				int yr = Integer.parseInt(yyyy);
+				Generic year = context.find(Year.class);
+				Generic y = year.setInstance(yr);
+				if (mm != null) {
+					try {
+						int mo = Integer.parseInt(mm);
+						if (mo < 1 || mo > 12) {
+							tag.getContextProperty("error", context)
+									.setValue("The month must be an integer between 1 and 12");
+							return null;
+						} else {
+							Generic month = context.find(Month.class);
+							Generic m = month.setInstance(mo, y);
+							if (dd != null) {
+								try {
+									int da = Integer.parseInt(dd);
+									Calendar cal = Calendar.getInstance();
+									cal.set(yr, mo - 1, 15); // the month starts with 0
+									int maxVal = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
+									if (da >= 1 && da <= maxVal) {
+										Generic day = context.find(Day.class);
+										tag.getContextProperty("error", context).setValue(null);
+										return day.setInstance(da, m);
+									} else {
+										tag.getContextProperty("error", context)
+												.setValue("The day must be an integer between 1 and " + maxVal);
+										return null;
+									}
+								} catch (Exception e) {
+									tag.getContextProperty("error", context).setValue("The day must be an integer");
+									return null;
+								}
+							} else {
+								tag.getContextProperty("error", context).setValue(null);
+								return m;
+							}
+						}
+					} catch (Exception e) {
+						tag.getContextProperty("error", context).setValue("The month must be an integer");
+						return null;
+					}
+				} else {
+					if (dd == null) {
+						tag.getContextProperty("error", context).setValue(null);
+						return y;
+					} else {
+						tag.getContextProperty("error", context).setValue("The month is not set");
+						return null;
+					}
+				}
+			} catch (Exception e) {
+				tag.getContextProperty("error", context).setValue("The year must be an integer");
+				return null;
+			}
+		} else {
+			if (mm != null || dd != null)
+				tag.getContextProperty("error", context).setValue("The year is not set");
+			else
+				tag.getContextProperty("error", context).setValue(null);
+			return null;
+		}
+
 	}
 
 	@Attribute(name = "maxlength", value = "2")
@@ -100,38 +164,9 @@ public class InputDate extends HtmlDiv {
 			addPrefixBinding(context -> {
 				this.getDomNodeAttributes(context).addListener((MapChangeListener<String, String>) change -> {
 					if ("value".equals(change.getKey())) {
-						if (change.wasAdded()) {
-							if (getContextProperty("year", context).getValue() != null) {
-								if (!"".equals(change.getValueAdded())) {
-									try {
-										int mo = Integer.parseInt(change.getValueAdded());
-										if (mo >= 1 && mo <= 12) {
-											getContextProperty("error", context).setValue(null);
-											getContextProperty("month", context).setValue(mo - 1); // starts with 0
-										} else {
-											getContextProperty("error", context).setValue("Incorrect month !");
-											getContextProperty("month", context).setValue(null);
-										}
-									} catch (Exception e) {
-										getContextProperty("error", context).setValue("Incorrect month !");
-										getContextProperty("month", context).setValue(null);
-									}
-								} else {
-									getContextProperty("error", context).setValue(null);
-									getContextProperty("month", context).setValue(null);
-									getContextProperty("day", context).setValue(null);
-								}
-							} else {
-								if (!"".equals(change.getValueAdded())
-										|| getContextProperty("day", context).getValue() != null)
-									getContextProperty("error", context).setValue("The year is not set !");
-								else
-									getContextProperty("error", context).setValue(null);
-								getContextProperty("month", context).setValue(null);
-								getContextProperty("day", context).setValue(null);
-							}
-
-						}
+						if (change.wasAdded())
+							getContextProperty("selected", context.getParent())
+									.setValue(checkDate(context, this.getParent()));
 					}
 				});
 			});
@@ -153,46 +188,9 @@ public class InputDate extends HtmlDiv {
 			addPrefixBinding(context -> {
 				this.getDomNodeAttributes(context).addListener((MapChangeListener<String, String>) change -> {
 					if ("value".equals(change.getKey())) {
-						if (change.wasAdded()) {
-							if (getContextProperty("year", context).getValue() != null) {
-								if (getContextProperty("month", context).getValue() != null) {
-									if (!"".equals(change.getValueAdded())) {
-										try {
-											int day = Integer.parseInt(change.getValueAdded());
-											Calendar cal = Calendar.getInstance();
-											cal.set((int) getContextProperty("year", context).getValue(),
-													(int) getContextProperty("month", context).getValue(), 15);
-											int maxVal = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
-											if (day >= 1 && day <= maxVal) {
-												getContextProperty("error", context).setValue(null);
-												getContextProperty("day", context).setValue(day);
-											} else {
-												getContextProperty("error", context).setValue("Incorrect day !");
-												getContextProperty("day", context).setValue(null);
-											}
-										} catch (Exception e) {
-											getContextProperty("error", context).setValue("Incorrect day !");
-											getContextProperty("day", context).setValue(null);
-										}
-									} else {
-										getContextProperty("error", context).setValue(null);
-										getContextProperty("day", context).setValue(null);
-									}
-								} else {
-									if (!"".equals(change.getValueAdded()))
-										getContextProperty("error", context).setValue("The month is not set !");
-									else
-										getContextProperty("error", context).setValue(null);
-									getContextProperty("day", context).setValue(null);
-								}
-							} else {
-								if (!"".equals(change.getValueAdded()))
-									getContextProperty("error", context).setValue("The year is not set !");
-								else
-									getContextProperty("error", context).setValue(null);
-								getContextProperty("day", context).setValue(null);
-							}
-						}
+						if (change.wasAdded())
+							getContextProperty("selected", context.getParent())
+									.setValue(checkDate(context, this.getParent()));
 					}
 				});
 			});
@@ -216,8 +214,10 @@ public class InputDate extends HtmlDiv {
 				return (Integer) g.getBaseComponent().getBaseComponent().getValue();
 			else if (g.isInstanceOf(month))
 				return (Integer) g.getBaseComponent().getValue();
-			else
+			else if (g.isInstanceOf(year))
 				return (Integer) g.getValue();
+			else
+				return null;
 		}
 	}
 

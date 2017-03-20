@@ -17,14 +17,15 @@ import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.appserver.Script;
 import org.genericsystem.reactor.context.ObservableValueSelector;
 import org.genericsystem.reactor.context.StringExtractor;
-import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
 import org.genericsystem.reactor.gscomponents.RootTagImpl;
 import org.gs.events.TestEvent.CityInput;
 import org.gs.events.TestEvent.CityLabel;
-import org.gs.events.TestEvent.Div;
+import org.gs.events.TestEvent.DateInput;
+import org.gs.events.TestEvent.DateInput2;
 import org.gs.events.TestEvent.InitTest;
 import org.gs.events.components.InputDate;
+import org.gs.events.components.InputDate.DivContainer;
 import org.gs.events.model.Date;
 import org.gs.events.model.Date.Day;
 import org.gs.events.model.Date.Month;
@@ -33,7 +34,7 @@ import org.gs.events.model.Event;
 
 @RunScript(InitTest.class)
 @DependsOnModel({ AdministrativeTerritory.class, Country.class, City.class, Date.class })
-@Children({ CityLabel.class, CityInput.class, Div.class })
+@Children({ CityLabel.class, CityInput.class, DateInput.class, DateInput2.class })
 public class TestEvent extends RootTagImpl {
 
 	@SetText(value = "City")
@@ -65,13 +66,12 @@ public class TestEvent extends RootTagImpl {
 	}
 
 	@DirectSelect(Date.class)
-	@Children(InputDate1.class)
-	public static class Div extends HtmlDiv {
-
+	@Select(path = DivContainer.class, value = DATE_SELECTOR.class)
+	public static class DateInput extends InputDate {
 	}
 
-	@Select(value = DATE_SELECTOR.class)
-	public static class InputDate1 extends InputDate {
+	@DirectSelect(Date.class)
+	public static class DateInput2 extends InputDate {
 	}
 
 	public static class DATE_SELECTOR implements ObservableValueSelector {
