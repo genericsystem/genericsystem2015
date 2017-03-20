@@ -2,7 +2,7 @@ package org.gs.events;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
-import org.genericsystem.geography.app.InputSelectInstance;
+import org.genericsystem.geography.components.InputSelectInstance;
 import org.genericsystem.geography.model.AdministrativeTerritory;
 import org.genericsystem.geography.model.City;
 import org.genericsystem.geography.model.Country;
@@ -29,6 +29,7 @@ import org.gs.events.model.Date;
 import org.gs.events.model.Date.Day;
 import org.gs.events.model.Date.Month;
 import org.gs.events.model.Date.Year;
+import org.gs.events.model.Event;
 
 @RunScript(InitTest.class)
 @DependsOnModel({ AdministrativeTerritory.class, Country.class, City.class, Date.class })
@@ -58,7 +59,7 @@ public class TestEvent extends RootTagImpl {
 		public void init() {
 			super.init();
 			addPrefixBinding(context -> {
-				getContextProperty("selected", context).setValue(context.getGeneric().getSubInstances().first());
+				getContextProperty("selected", context).setValue(context.getGeneric().getInstance("Nantes"));
 			});
 		}
 	}
@@ -82,16 +83,6 @@ public class TestEvent extends RootTagImpl {
 
 	}
 
-	public static class DEFAULT_SELECTOR implements ObservableValueSelector {
-
-		@Override
-		public Generic apply(Generic[] generics) {
-			System.out.println(generics[0].getSubInstances().first());
-			return generics[0].getSubInstances().first();
-		}
-
-	}
-
 	public static void main(String[] mainArgs) {
 		ApplicationServer.startSimpleGenericApp(mainArgs, TestEvent.class, "/GeoApp");
 	}
@@ -108,6 +99,18 @@ public class TestEvent extends RootTagImpl {
 			Generic year2004 = year.setInstance(2004);
 			Generic month200411 = month.setInstance(11, year2004);
 			Generic day20041112 = day.setInstance(12, month200411);
+			Generic day20041113 = day.setInstance(13, month200411);
+
+			Generic city = engine.find(City.class);
+			Generic nantes = city.getInstance("Nantes");
+
+			Generic event = engine.find(Event.class);
+			Generic myEvent = engine.setInstance("Meeting", nantes, day20041112, day20041113);
+
+			System.out.println(myEvent.getComponent(0));
+			System.out.println(myEvent.getComponent(1));
+			System.out.println(myEvent);
+
 			engine.getCurrentCache().flush();
 
 		}
