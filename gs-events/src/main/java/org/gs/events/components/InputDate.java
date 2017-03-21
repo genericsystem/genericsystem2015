@@ -36,8 +36,7 @@ public class InputDate extends HtmlDiv {
 		createNewContextProperty("selected");
 	}
 
-	@Children({ DateLabel.class, YearSelect.class, Slash1.class, MonthSelect.class, Slash2.class, DaySelect.class,
-			ErrorMsg.class })
+	@Children({ YearSelect.class, Slash1.class, MonthSelect.class, Slash2.class, DaySelect.class, ErrorMsg.class })
 	public static class DivContainer extends HtmlDiv {
 
 		@Override
@@ -48,10 +47,6 @@ public class InputDate extends HtmlDiv {
 			});
 		}
 
-	}
-
-	@SetText(value = "Date yyyy/mm/dd : ")
-	public static class DateLabel extends HtmlLabel {
 	}
 
 	@Attribute(name = "maxlength", value = "4")

@@ -28,6 +28,8 @@ import org.gs.events.TestEvent.CityInput;
 import org.gs.events.TestEvent.CityLabel;
 import org.gs.events.TestEvent.DateInput;
 import org.gs.events.TestEvent.DateInput2;
+import org.gs.events.TestEvent.DateLabel1;
+import org.gs.events.TestEvent.DateLabel2;
 import org.gs.events.TestEvent.InitTest;
 import org.gs.events.TestEvent.Test;
 import org.gs.events.components.InputDate;
@@ -44,7 +46,8 @@ import javafx.beans.value.ObservableValue;
 
 @RunScript(InitTest.class)
 @DependsOnModel({ AdministrativeTerritory.class, Country.class, City.class, Date.class })
-@Children({ CityLabel.class, CityInput.class, DateInput.class, DateInput2.class, Test.class })
+@Children({ CityLabel.class, CityInput.class, DateLabel1.class, DateInput.class, DateLabel2.class, DateInput2.class,
+		Test.class })
 public class TestEvent extends RootTagImpl {
 
 	@SetText(value = "City")
@@ -75,9 +78,17 @@ public class TestEvent extends RootTagImpl {
 		}
 	}
 
+	@SetText(value = "Date 1 yyyy/mm/dd : ")
+	public static class DateLabel1 extends HtmlLabel {
+	}
+
 	@DirectSelect(Date.class)
 	@Select(path = DivContainer.class, value = DATE_SELECTOR.class)
 	public static class DateInput extends InputDate {
+	}
+
+	@SetText(value = "Date 2 yyyy/mm/dd : ")
+	public static class DateLabel2 extends HtmlLabel {
 	}
 
 	@DirectSelect(Date.class)
