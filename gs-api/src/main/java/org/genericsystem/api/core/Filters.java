@@ -1,50 +1,47 @@
 package org.genericsystem.api.core;
 
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Objects;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import com.sun.javafx.UnmodifiableArrayList;
 
-public enum Filters {
+public class Filters {
 
-	INSTANCES(vertices -> (x -> vertices.get(0).equals(((IGeneric<?>) x).getMeta()))), INHERITINGS(vertices -> (x -> ((IGeneric<?>) x).getSupers().contains(vertices.get(0)))), COMPOSITES(
-			vertices -> (x -> ((IGeneric<?>) x).getComponents().contains(vertices.get(0)))), BY_META(
-					vertices -> (x -> !x.equals(vertices.get(1)) && ((IGeneric<?>) x).getMeta().equals(vertices.get(1)))), BY_SUPER(vertices -> (x -> ((IGeneric<?>) x).getSupers().contains(vertices.get(1))));
+	public static interface GetFilter extends Function<UnmodifiableArrayList<IGeneric<?>>, Predicate<IGeneric<?>>> {
+	}
 
-	private Function<UnmodifiableArrayList<IGeneric<?>>, IndexFilter> getFilter;
-	private static ConcurrentHashMap<Filters, ConcurrentHashMap<UnmodifiableArrayList<IGeneric<?>>, IndexFilter>> filters = new ConcurrentHashMap<Filters, ConcurrentHashMap<UnmodifiableArrayList<IGeneric<?>>, IndexFilter>>() {
+	public static final GetFilter NO_FILTER = params -> (x -> true);
+	public static final GetFilter INSTANCES = params -> (x -> params.get(0).equals(x.getMeta()));
+	public static final GetFilter INHERITINGS = params -> (x -> ((IGeneric<?>) x).getSupers().contains(params.get(0)));
+	public static final GetFilter COMPOSITES = params -> (x -> ((IGeneric<?>) x).getComponents().contains(params.get(0)));
+	public static final GetFilter BY_META = params -> (x -> !x.equals(params.get(0)) && ((IGeneric<?>) x).getMeta().equals(params.get(0)));
+	public static final GetFilter BY_SUPER = params -> (x -> ((IGeneric<?>) x).getSupers().contains(params.get(0)));
 
-		@Override
-		public ConcurrentHashMap<UnmodifiableArrayList<IGeneric<?>>, IndexFilter> get(Object key) {
-			return computeIfAbsent((Filters) key, filter -> new ConcurrentHashMap<UnmodifiableArrayList<IGeneric<?>>, IndexFilter>() {
+	public static class IndexFilter {
+		private final GetFilter getFilter;
+		private final UnmodifiableArrayList<IGeneric<?>> params;
 
-				@Override
-				public IndexFilter get(Object key_) {
-					return computeIfAbsent((UnmodifiableArrayList<IGeneric<?>>) key_, gs -> ((Filters) key).getFilter.apply(gs));
-				}
-
-			});
+		public IndexFilter(GetFilter getFilter, IGeneric<?>... params) {
+			this.getFilter = getFilter;
+			this.params = new UnmodifiableArrayList<>(params, params.length);
 		}
-	};
 
-	Filters(Function<UnmodifiableArrayList<IGeneric<?>>, IndexFilter> getFilter) {
-		this.getFilter = getFilter;
-	}
+		public final boolean test(IGeneric<?> generic) {
+			return getFilter.apply(params).test(generic);
+		}
 
-	public <T extends IGeneric<T>> IndexFilter getFilter(T... generics) {
-		return filters.get(this).get(new UnmodifiableArrayList<>(generics, generics.length));
-	}
-
-	public static interface IndexFilter<T> {
-		boolean test(T generic);
-	}
-
-	public static NoFilter<?> NO_FILTER = new NoFilter<>();
-
-	public static class NoFilter<T> implements IndexFilter<T> {
 		@Override
-		public boolean test(T generic) {
-			return true;
+		public int hashCode() {
+			return getFilter.hashCode() * 31 + (params.isEmpty() ? 0 : params.get(0).hashCode());
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (!(obj instanceof IndexFilter))
+				return false;
+			IndexFilter other = (IndexFilter) obj;
+			return getFilter == other.getFilter && Objects.deepEquals(params, other.params);
 		}
 	}
 }

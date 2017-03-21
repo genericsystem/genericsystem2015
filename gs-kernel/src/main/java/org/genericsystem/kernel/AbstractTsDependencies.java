@@ -25,15 +25,15 @@ abstract class AbstractTsDependencies {
 
 		public Stream<Generic> stream(long ts);
 
-		public IndexFilter<Generic> getFilter();
+		public IndexFilter getFilter();
 	}
 
 	private class IndexImpl implements Index {
 		private Node head = null;
 		private Node tail = null;
-		private final IndexFilter<Generic> filter;
+		private final IndexFilter filter;
 
-		IndexImpl(IndexFilter<Generic> filter, long ts, Index parent) {
+		IndexImpl(IndexFilter filter, long ts, Index parent) {
 			this.filter = filter;
 			if (parent != null)
 				parent.stream(ts).forEach(generic -> {
@@ -97,7 +97,7 @@ abstract class AbstractTsDependencies {
 		}
 
 		@Override
-		public IndexFilter<Generic> getFilter() {
+		public IndexFilter getFilter() {
 			return filter;
 		}
 
@@ -165,7 +165,7 @@ abstract class AbstractTsDependencies {
 		return null;
 	}
 
-	public Stream<Generic> stream(long ts, List<IndexFilter<Generic>> filters) {
+	public Stream<Generic> stream(long ts, List<IndexFilter> filters) {
 		return indexesTree.getIndex(filters, ts).stream(ts);
 
 	}
@@ -182,9 +182,9 @@ abstract class AbstractTsDependencies {
 
 		private ExtendedHashMap children = new ExtendedHashMap();
 
-		private class ExtendedHashMap extends ConcurrentHashMap<IndexFilter<Generic>, IndexNode> {
+		private class ExtendedHashMap extends ConcurrentHashMap<IndexFilter, IndexNode> {
 			public IndexNode get(Object key, long ts) {
-				return super.computeIfAbsent((IndexFilter<Generic>) key, k -> new IndexNode(new IndexImpl(k, ts, index), ts, IndexNode.this));
+				return super.computeIfAbsent((IndexFilter) key, k -> new IndexNode(new IndexImpl(k, ts, index), ts, IndexNode.this));
 			};
 		}
 
@@ -194,7 +194,7 @@ abstract class AbstractTsDependencies {
 			this.parent = parent;
 		}
 
-		Index getIndex(List<IndexFilter<Generic>> filters, long ts) {
+		Index getIndex(List<IndexFilter> filters, long ts) {
 			if (ts < this.ts)
 				index = new IndexImpl(index.getFilter(), ts, parent.index);
 			if (filters.isEmpty())
@@ -215,7 +215,7 @@ abstract class AbstractTsDependencies {
 		}
 	}
 
-	private final IndexNode indexesTree = new IndexNode(new IndexImpl((IndexFilter<Generic>) Filters.NO_FILTER, 0, null), 0, null);
+	private final IndexNode indexesTree = new IndexNode(new IndexImpl(new IndexFilter(Filters.NO_FILTER), 0, null), 0, null);
 
 	public void add(Generic generic) {
 		indexesTree.add(generic);

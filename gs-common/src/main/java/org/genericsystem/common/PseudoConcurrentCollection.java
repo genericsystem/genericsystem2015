@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Spliterators;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -28,7 +27,7 @@ import javafx.beans.value.WeakChangeListener;
  *
  * @param <T>
  */
-public class PseudoConcurrentCollection<T> implements IteratorSnapshot<T> {
+public class PseudoConcurrentCollection<T extends IGeneric<?>> implements IteratorSnapshot<T> {
 	private static interface Index<T> {
 		public boolean add(T generic);
 
@@ -38,21 +37,21 @@ public class PseudoConcurrentCollection<T> implements IteratorSnapshot<T> {
 
 		public Stream<T> stream();
 
-		public IndexFilter<T> getFilter();
+		public IndexFilter getFilter();
 	}
 
 	final Map<T, T> map = new HashMap<>();
 
-	private final IndexNode indexesTree = new IndexNode(new IndexImpl((IndexFilter<T>) Filters.NO_FILTER, null), null);
+	private final IndexNode indexesTree = new IndexNode(new IndexImpl(new IndexFilter(Filters.NO_FILTER), null), null);
 
 	private class IndexNode {
 		private Index<T> index;
 		private final IndexNode parent;
 
-		private ConcurrentHashMap<IndexFilter<T>, IndexNode> children = new ConcurrentHashMap<IndexFilter<T>, IndexNode>() {
+		private ConcurrentHashMap<IndexFilter, IndexNode> children = new ConcurrentHashMap<IndexFilter, IndexNode>() {
 			@Override
 			public IndexNode get(Object key) {
-				return super.computeIfAbsent((IndexFilter<T>) key, k -> new IndexNode(new IndexImpl(k, index), IndexNode.this));
+				return super.computeIfAbsent((IndexFilter) key, k -> new IndexNode(new IndexImpl(k, index), IndexNode.this));
 			};
 		};
 
@@ -61,13 +60,13 @@ public class PseudoConcurrentCollection<T> implements IteratorSnapshot<T> {
 			this.parent = parent;
 		}
 
-		Index<T> getIndex(List<IndexFilter<T>> filters) {
+		Index<T> getIndex(List<IndexFilter> filters) {
 			if (filters.isEmpty())
 				return index;
 			return children.get(filters.get(0)).getIndex(filters.subList(1, filters.size()));
 		}
 
-		public void updateIndex(IndexFilter<T> key) {
+		public void updateIndex(IndexFilter key) {
 			index = new IndexImpl(key, parent.index);
 		}
 
@@ -87,9 +86,9 @@ public class PseudoConcurrentCollection<T> implements IteratorSnapshot<T> {
 	private class IndexImpl implements Index<T> {
 		private Node<T> head = null;
 		private Node<T> tail = null;
-		private final IndexFilter<T> filter;
+		private final IndexFilter filter;
 
-		IndexImpl(IndexFilter<T> filter, Index<T> parent) {
+		IndexImpl(IndexFilter filter, Index<T> parent) {
 			this.filter = filter;
 			if (parent != null)
 				parent.stream().forEach(generic -> {
@@ -126,7 +125,7 @@ public class PseudoConcurrentCollection<T> implements IteratorSnapshot<T> {
 		}
 
 		@Override
-		public IndexFilter<T> getFilter() {
+		public IndexFilter getFilter() {
 			return filter;
 		}
 
@@ -195,12 +194,12 @@ public class PseudoConcurrentCollection<T> implements IteratorSnapshot<T> {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <U extends IGeneric<U>> Snapshot<T> filter(List<Filters> filters, U... generics) {
+	public Snapshot<T> filter(List<IndexFilter> filters) {
 		return new Snapshot<T>() {
 
 			@Override
 			public Stream<T> stream() {
-				return indexesTree.getIndex(filters.stream().map(filter -> filter.getFilter(generics)).collect(Collectors.toList())).stream();
+				return indexesTree.getIndex(filters).stream();
 			}
 		};
 	}

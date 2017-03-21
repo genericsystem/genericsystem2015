@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.genericsystem.api.core.Filters;
+import org.genericsystem.api.core.Filters.IndexFilter;
 import org.genericsystem.defaults.DefaultGeneric;
 
 /**
@@ -79,14 +80,12 @@ public class InheritanceComputer<T extends DefaultGeneric<T>> extends HashSet<T>
 			return Stream.concat(Stream.of(holder), indexStream.flatMap(x -> getStream(x)).distinct());
 		}
 
-		@SuppressWarnings("unchecked")
 		protected Stream<T> compositesByMeta(T holder) {
-			return localBase.getDependencies().filter(Arrays.asList(Filters.COMPOSITES, Filters.BY_META), localBase, holder).stream();
+			return localBase.getDependencies().filter(Arrays.asList(new IndexFilter(Filters.COMPOSITES, localBase), new IndexFilter(Filters.BY_META, holder))).stream();
 		}
 
-		@SuppressWarnings("unchecked")
 		protected Stream<T> compositesBySuper(T holder) {
-			return localBase.getDependencies().filter(Arrays.asList(Filters.COMPOSITES, Filters.BY_SUPER), localBase, holder).stream();
+			return localBase.getDependencies().filter(Arrays.asList(new IndexFilter(Filters.COMPOSITES, localBase), new IndexFilter(Filters.BY_SUPER, holder))).stream();
 		}
 
 	}
