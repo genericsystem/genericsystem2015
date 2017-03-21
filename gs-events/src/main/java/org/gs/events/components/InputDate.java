@@ -65,8 +65,7 @@ public class InputDate extends HtmlDiv {
 				this.getDomNodeAttributes(context).addListener((MapChangeListener<String, String>) change -> {
 					if ("value".equals(change.getKey())) {
 						if (change.wasAdded())
-							getContextProperty("selected", context.getParent())
-									.setValue(checkDate(context, this.getParent()));
+							getContextProperty("selected", context).setValue(checkDate(context, this.getParent()));
 					}
 				});
 			});
@@ -165,8 +164,7 @@ public class InputDate extends HtmlDiv {
 				this.getDomNodeAttributes(context).addListener((MapChangeListener<String, String>) change -> {
 					if ("value".equals(change.getKey())) {
 						if (change.wasAdded())
-							getContextProperty("selected", context.getParent())
-									.setValue(checkDate(context, this.getParent()));
+							getContextProperty("selected", context).setValue(checkDate(context, this.getParent()));
 					}
 				});
 			});
@@ -189,8 +187,7 @@ public class InputDate extends HtmlDiv {
 				this.getDomNodeAttributes(context).addListener((MapChangeListener<String, String>) change -> {
 					if ("value".equals(change.getKey())) {
 						if (change.wasAdded())
-							getContextProperty("selected", context.getParent())
-									.setValue(checkDate(context, this.getParent()));
+							getContextProperty("selected", context).setValue(checkDate(context, this.getParent()));
 					}
 				});
 			});
