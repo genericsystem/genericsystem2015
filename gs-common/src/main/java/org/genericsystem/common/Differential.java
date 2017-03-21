@@ -1,5 +1,6 @@
 package org.genericsystem.common;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 import org.genericsystem.api.core.Filters;
@@ -85,13 +86,13 @@ public class Differential implements IDifferential<Generic> {
 			}
 
 			@Override
-			public <U extends IGeneric<U>> Snapshot<Generic> filter(Filters filter, U... vertices) {
+			public <U extends IGeneric<U>> Snapshot<Generic> filter(List<Filters> filters, U... vertices) {
 				return new Snapshot<Generic>() {
 
 					@Override
 					public Stream<Generic> stream() {
-						return Stream.concat(adds.contains(generic) ? Stream.empty() : subDifferential.getDependencies(generic).filter(filter, vertices).stream().filter(x -> !removes.contains(x)),
-								adds.filter(filter, vertices).stream().filter(x -> generic.isDirectAncestorOf(x)));
+						return Stream.concat(adds.contains(generic) ? Stream.empty() : subDifferential.getDependencies(generic).filter(filters, vertices).stream().filter(x -> !removes.contains(x)),
+								adds.filter(filters, vertices).stream().filter(x -> generic.isDirectAncestorOf(x)));
 					}
 				};
 			}

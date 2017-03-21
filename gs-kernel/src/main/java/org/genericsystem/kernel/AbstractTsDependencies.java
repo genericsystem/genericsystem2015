@@ -1,5 +1,7 @@
 package org.genericsystem.kernel;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Spliterators;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
@@ -17,42 +19,44 @@ import org.genericsystem.kernel.AbstractServer.RootServerHandler;
  */
 abstract class AbstractTsDependencies {
 	private static interface Index {
-		public void add(Generic generic);
+		public boolean add(Generic generic);
 
 		public boolean remove(Generic generic);
 
 		public Stream<Generic> stream(long ts);
 
+		public IndexFilter<Generic> getFilter();
 	}
 
 	private class IndexImpl implements Index {
 		private Node head = null;
 		private Node tail = null;
-		private final long ts;
 		private final IndexFilter<Generic> filter;
 
-		IndexImpl(IndexFilter<Generic> filter, long ts) {
-			this.ts = ts;
+		IndexImpl(IndexFilter<Generic> filter, long ts, Index parent) {
 			this.filter = filter;
-			if (!Filters.NO_FILTER.equals(filter))
-				indexs.get(Filters.NO_FILTER, ts).stream(ts).forEach(generic -> {
+			if (parent != null)
+				parent.stream(ts).forEach(generic -> {
 					if (filter.test(generic))
 						add(generic);
 				});
 		}
 
 		@Override
-		public void add(Generic generic) {
+		public boolean add(Generic generic) {
 			assert generic != null;
 			// assert getLifeManager().isWriteLockedByCurrentThread();
-			Node newNode = new Node(generic);
-			if (head == null)
-				head = newNode;
-			else
-				tail.next = newNode;
-			tail = newNode;
-			Generic result = map.put(generic, generic);
-			// assert result == null;
+			if (filter.test(generic)) {
+				Node newNode = new Node(generic);
+				if (head == null)
+					head = newNode;
+				else
+					tail.next = newNode;
+				tail = newNode;
+				Generic result = map.put(generic, generic);
+				return true;
+			}
+			return false;
 		}
 
 		@Override
@@ -89,9 +93,12 @@ abstract class AbstractTsDependencies {
 
 		@Override
 		public Stream<Generic> stream(long ts) {
-			if (ts < this.ts)
-				indexs.updateIndex(filter, ts);
 			return StreamSupport.stream(Spliterators.spliteratorUnknownSize(new InternalIterator(ts), 0), false);
+		}
+
+		@Override
+		public IndexFilter<Generic> getFilter() {
+			return filter;
 		}
 
 		private class InternalIterator extends AbstractIterator<Node, Generic> {
@@ -158,53 +165,64 @@ abstract class AbstractTsDependencies {
 		return null;
 	}
 
-	public Stream<Generic> stream(long ts, IndexFilter<Generic> filter) {
-		return indexs.get(filter, ts).stream(ts);
+	public Stream<Generic> stream(long ts, List<IndexFilter<Generic>> filters) {
+		return indexesTree.getIndex(filters, ts).stream(ts);
 
 	}
 
 	public Stream<Generic> stream(long ts) {
-		return indexs.get(Filters.NO_FILTER, ts).stream(ts);
+		return indexesTree.getIndex(new ArrayList<>(), ts).stream(ts);
 	}
 
-	private final ExtendedMap indexs = new ExtendedMap() {
+	// TODO: Extend PseudoConcurrentCollection.IndexNode.
+	private class IndexNode {
+		private long ts;
+		private Index index;
+		private final IndexNode parent;
 
-		private static final long serialVersionUID = 1067462646727512744L;
+		private ExtendedHashMap children = new ExtendedHashMap();
 
-		{
-			put((IndexFilter<Generic>) Filters.NO_FILTER, new IndexImpl((IndexFilter<Generic>) Filters.NO_FILTER, 0));
+		private class ExtendedHashMap extends ConcurrentHashMap<IndexFilter<Generic>, IndexNode> {
+			public IndexNode get(Object key, long ts) {
+				return super.computeIfAbsent((IndexFilter<Generic>) key, k -> new IndexNode(new IndexImpl(k, ts, index), ts, IndexNode.this));
+			};
 		}
 
-	};
+		IndexNode(Index index, long ts, IndexNode parent) {
+			this.index = index;
+			this.ts = ts;
+			this.parent = parent;
+		}
 
-	private class ExtendedMap extends ConcurrentHashMap<IndexFilter<Generic>, Index> {
+		Index getIndex(List<IndexFilter<Generic>> filters, long ts) {
+			if (ts < this.ts)
+				index = new IndexImpl(index.getFilter(), ts, parent.index);
+			if (filters.isEmpty())
+				return index;
+			return children.get(filters.get(0), ts).getIndex(filters.subList(1, filters.size()), ts);
+		}
 
-		private static final long serialVersionUID = 2969395358619269789L;
+		public void add(Generic generic) {
+			if (index.add(generic))
+				children.values().forEach(childNode -> childNode.add(generic));
+		}
 
-		public Index get(Object key, long ts) {
-			return super.computeIfAbsent((IndexFilter<Generic>) key, k -> new IndexImpl(k, ts));
-		};
-
-		public Index updateIndex(IndexFilter<Generic> key, long ts) {
-			return super.put(key, new IndexImpl(key, ts));
+		public boolean remove(Generic generic) {
+			boolean result = index.remove(generic);
+			if (result)
+				children.values().forEach(childNode -> childNode.remove(generic));
+			return result;
 		}
 	}
+
+	private final IndexNode indexesTree = new IndexNode(new IndexImpl((IndexFilter<Generic>) Filters.NO_FILTER, 0, null), 0, null);
 
 	public void add(Generic generic) {
-		indexs.entrySet().forEach(entry -> {
-			if (entry.getKey().test(generic)) {
-				entry.getValue().add(generic);
-			}
-		});
+		indexesTree.add(generic);
 	}
 
 	public boolean remove(Generic generic) {
-		boolean[] result = new boolean[] { false };
-		indexs.entrySet().forEach(entry -> {
-			if (entry.getKey().test(generic))
-				result[0] = result[0] | entry.getValue().remove(generic);
-		});
-		return result[0];
+		return indexesTree.remove(generic);
 	}
 
 	private static class Node {

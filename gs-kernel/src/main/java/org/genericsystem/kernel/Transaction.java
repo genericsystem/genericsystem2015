@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.genericsystem.api.core.Filters;
@@ -90,19 +91,14 @@ public class Transaction extends CheckedContext implements IDifferential<Generic
 			}
 
 			@Override
-			public <U extends IGeneric<U>> Snapshot<Generic> filter(Filters filter, U... generics) {
+			public <U extends IGeneric<U>> Snapshot<Generic> filter(List<Filters> filters, U... generics) {
 				return new Snapshot<Generic>() {
 
 					@Override
 					public Stream<Generic> stream() {
-						return ((RootServerHandler) ancestor.getProxyHandler()).getDependencies().stream(getTs(), filter.getFilter(generics));
+						return ((RootServerHandler) ancestor.getProxyHandler()).getDependencies().stream(getTs(), filters.stream().map(filter -> filter.getFilter(generics)).collect(Collectors.toList()));
 					}
 				};
-			}
-
-			@Override
-			public Snapshot<Generic> filter(Filters filter) {
-				return filter(filter, ancestor);
 			}
 
 			@Override

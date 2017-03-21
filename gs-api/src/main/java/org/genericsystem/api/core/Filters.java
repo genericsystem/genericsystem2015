@@ -8,9 +8,8 @@ import com.sun.javafx.UnmodifiableArrayList;
 public enum Filters {
 
 	INSTANCES(vertices -> (x -> vertices.get(0).equals(((IGeneric<?>) x).getMeta()))), INHERITINGS(vertices -> (x -> ((IGeneric<?>) x).getSupers().contains(vertices.get(0)))), COMPOSITES(
-			vertices -> (x -> ((IGeneric<?>) x).getComponents().contains(vertices.get(0)))), COMPOSITES_BY_META(
-					vertices -> (x -> ((IGeneric<?>) x).getComponents().contains(vertices.get(0)) && !x.equals(vertices.get(1)) && ((IGeneric<?>) x).getMeta().equals(vertices.get(1)))), COMPOSITES_BY_SUPER(
-							vertices -> (x -> ((IGeneric<?>) x).getComponents().contains(vertices.get(0)) && ((IGeneric<?>) x).getSupers().contains(vertices.get(1))));
+			vertices -> (x -> ((IGeneric<?>) x).getComponents().contains(vertices.get(0)))), BY_META(
+					vertices -> (x -> !x.equals(vertices.get(1)) && ((IGeneric<?>) x).getMeta().equals(vertices.get(1)))), BY_SUPER(vertices -> (x -> ((IGeneric<?>) x).getSupers().contains(vertices.get(1))));
 
 	private Function<UnmodifiableArrayList<IGeneric<?>>, IndexFilter> getFilter;
 	private static ConcurrentHashMap<Filters, ConcurrentHashMap<UnmodifiableArrayList<IGeneric<?>>, IndexFilter>> filters = new ConcurrentHashMap<Filters, ConcurrentHashMap<UnmodifiableArrayList<IGeneric<?>>, IndexFilter>>() {

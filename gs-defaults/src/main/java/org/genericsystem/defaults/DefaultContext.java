@@ -47,7 +47,7 @@ public interface DefaultContext<T extends DefaultGeneric<T>> extends IContext<T>
 	}
 
 	default Snapshot<T> getInstances(T vertex) {
-		return getDependencies(vertex).filter(Filters.INSTANCES, vertex);
+		return getDependencies(vertex).filter(Arrays.asList(Filters.INSTANCES), vertex);
 	}
 
 	default ObservableList<T> getObservableInstances(T vertex) {
@@ -55,7 +55,7 @@ public interface DefaultContext<T extends DefaultGeneric<T>> extends IContext<T>
 	}
 
 	default Snapshot<T> getInheritings(T vertex) {
-		return getDependencies(vertex).filter(Filters.INHERITINGS, vertex);
+		return getDependencies(vertex).filter(Arrays.asList(Filters.INHERITINGS), vertex);
 	}
 
 	default ObservableList<T> getObservableInheritings(T vertex) {
@@ -63,7 +63,7 @@ public interface DefaultContext<T extends DefaultGeneric<T>> extends IContext<T>
 	}
 
 	default Snapshot<T> getComposites(T vertex) {
-		return getDependencies(vertex).filter(Filters.COMPOSITES, vertex);
+		return getDependencies(vertex).filter(Arrays.asList(Filters.COMPOSITES), vertex);
 	}
 
 	default ObservableList<T> getObservableComposites(T vertex) {
@@ -81,7 +81,7 @@ public interface DefaultContext<T extends DefaultGeneric<T>> extends IContext<T>
 			OrderedDependencies visit(T node) {
 				if (!contains(node)) {
 					add(node);
-					getDependencies(node).forEach(this::visit);
+					getDependencies(node).stream().forEach(this::visit);
 				}
 				return this;
 			}
@@ -100,7 +100,7 @@ public interface DefaultContext<T extends DefaultGeneric<T>> extends IContext<T>
 						super.addAll(computeDependencies(node));
 					else {
 						alreadyVisited.add(node);
-						getDependencies(node).forEach(this::visit);
+						getDependencies(node).stream().forEach(this::visit);
 					}
 				return this;
 			}
