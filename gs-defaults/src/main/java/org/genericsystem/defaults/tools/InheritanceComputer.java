@@ -81,11 +81,11 @@ public class InheritanceComputer<T extends DefaultGeneric<T>> extends HashSet<T>
 		}
 
 		protected Stream<T> compositesByMeta(T holder) {
-			return localBase.getDependencies().filter(Arrays.asList(new IndexFilter(Filters.COMPOSITES, localBase), new IndexFilter(Filters.BY_META, holder))).stream();
+			return localBase.getDependencies().filter(Arrays.asList(new IndexFilter(Filters.COMPOSITES, localBase), new IndexFilter(Filters.HAS_META, holder))).stream();
 		}
 
 		protected Stream<T> compositesBySuper(T holder) {
-			return localBase.getDependencies().filter(Arrays.asList(new IndexFilter(Filters.COMPOSITES, localBase), new IndexFilter(Filters.BY_SUPER, holder))).stream();
+			return localBase.getDependencies().filter(Arrays.asList(new IndexFilter(Filters.COMPOSITES, localBase), new IndexFilter(Filters.HAS_SUPER, holder))).stream();
 		}
 
 	}

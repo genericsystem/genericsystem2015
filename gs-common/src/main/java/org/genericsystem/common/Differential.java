@@ -80,7 +80,7 @@ public class Differential implements IDifferential<Generic> {
 			}
 
 			@Override
-			public Stream<Generic> stream() {
+			public Stream<Generic> rootStream() {
 				return Stream.concat(adds.contains(generic) ? Stream.empty() : subDifferential.getDependencies(generic).stream().filter(x -> !removes.contains(x)), adds.stream().filter(x -> generic.isDirectAncestorOf(x)));
 			}
 
@@ -89,7 +89,7 @@ public class Differential implements IDifferential<Generic> {
 				return new Snapshot<Generic>() {
 
 					@Override
-					public Stream<Generic> stream() {
+					public Stream<Generic> rootStream() {
 						return Stream.concat(adds.contains(generic) ? Stream.empty() : subDifferential.getDependencies(generic).filter(filters).stream().filter(x -> !removes.contains(x)),
 								adds.filter(filters).stream().filter(x -> generic.isDirectAncestorOf(x)));
 					}

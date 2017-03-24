@@ -10,18 +10,18 @@ import org.genericsystem.api.core.Snapshot;
  *
  * @param <T>
  */
-public interface IDependencies<T> extends Snapshot<T> {
+public abstract class IDependencies<T> extends Snapshot<T> {
 
 	@Override
-	Stream<T> stream();
+	public abstract Stream<T> rootStream();
 
 	@Override
-	public default T get(Object generic) {
+	public T get(Object generic) {
 		Optional<T> findFirst = stream().filter(generic::equals).findFirst();
 		return findFirst.isPresent() ? findFirst.get() : null;
 	}
 
-	void add(T add);
+	public abstract void add(T add);
 
-	public boolean remove(T remove);
+	public abstract boolean remove(T remove);
 }

@@ -84,17 +84,16 @@ public class Transaction extends CheckedContext implements IDifferential<Generic
 		return new IDependencies<Generic>() {
 
 			@Override
-			public Stream<Generic> stream() {
+			public Stream<Generic> rootStream() {
 				return ((RootServerHandler) ancestor.getProxyHandler()).getDependencies().stream(getTs());
 			}
 
-			@SuppressWarnings("unchecked")
 			@Override
 			public Snapshot<Generic> filter(List<IndexFilter> filters) {
 				return new Snapshot<Generic>() {
 
 					@Override
-					public Stream<Generic> stream() {
+					public Stream<Generic> rootStream() {
 						return ((RootServerHandler) ancestor.getProxyHandler()).getDependencies().stream(getTs(), filters);
 					}
 				};

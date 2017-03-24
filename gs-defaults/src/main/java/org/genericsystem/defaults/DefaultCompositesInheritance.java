@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.genericsystem.api.core.ApiStatics;
+import org.genericsystem.api.core.Filters;
+import org.genericsystem.api.core.Filters.IndexFilter;
 import org.genericsystem.api.core.IGeneric;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.defaults.DefaultConfig.NonHeritableProperty;
@@ -42,8 +44,7 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 
 	@SuppressWarnings("unchecked")
 	default ObservableValue<T> getObservableAttribute(Serializable value, T... targets) {
-		return BindingsTools
-				.transmitSuccessiveInvalidations(Bindings.valueAt(getObservableAttributes(value, targets), 0));
+		return BindingsTools.transmitSuccessiveInvalidations(Bindings.valueAt(getObservableAttributes(value, targets), 0));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -60,7 +61,7 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 	@SuppressWarnings("unchecked")
 	@Override
 	default Snapshot<T> getAttributes(Serializable value, T... targets) {
-		return getAttributes(targets).filter(DefaultDependencies.valueFilter(value));
+		return getAttributes(targets).filter(new IndexFilter(Filters.HAS_VALUE, value));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -80,7 +81,7 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 	@SuppressWarnings("unchecked")
 	@Override
 	default Snapshot<T> getAttributes(T... targets) {
-		return getAttributes(getRoot().getMetaAttribute()).filter(componentsFilter(addThisToTargets(targets)));
+		return getAttributes(getRoot().getMetaAttribute()).filter(new IndexFilter(Filters.COMPOSITE_HAS_COMPONENTS, (Object[]) addThisToTargets(targets)));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -91,37 +92,47 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 	@SuppressWarnings("unchecked")
 	@Override
 	default Snapshot<T> getAttributes(int pos) {
-		return () -> getAttributes().stream().filter(attribute -> attribute.getComponent(pos) != null
-				&& ((T) this).isSpecializationOf(attribute.getComponent(pos)));
+		return new Snapshot<T>() {
+
+			@Override
+			public Stream<T> rootStream() {
+				return getAttributes().stream().filter(attribute -> attribute.getComponent(pos) != null && ((T) DefaultCompositesInheritance.this).isSpecializationOf(attribute.getComponent(pos)));
+			}
+		};
 	}
 
 	@SuppressWarnings("unchecked")
 	default ObservableList<T> getObservableAttributes(int pos) {
-		return getObservableAttributes().filtered(attribute -> attribute.getComponent(pos) != null
-				&& ((T) this).isSpecializationOf(attribute.getComponent(pos)));
+		return getObservableAttributes().filtered(attribute -> attribute.getComponent(pos) != null && ((T) this).isSpecializationOf(attribute.getComponent(pos)));
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	default Snapshot<T> getAttributes(T attribute) {
 		T nonHeritableProperty = getKey(NonHeritableProperty.class, ApiStatics.NO_POSITION);
-		if (nonHeritableProperty == null || attribute.inheritsFrom(nonHeritableProperty)
-				|| attribute.isInheritanceEnabled())
-			return () -> new InheritanceComputer<>((T) DefaultCompositesInheritance.this, attribute,
-					ApiStatics.STRUCTURAL).inheritanceStream();
-		return () -> this.getComposites().stream()
-				.filter(holder -> holder.isSpecializationOf(attribute) && holder.getLevel() == ApiStatics.STRUCTURAL);
+		if (nonHeritableProperty == null || attribute.inheritsFrom(nonHeritableProperty) || attribute.isInheritanceEnabled())
+			return new Snapshot<T>() {
+
+				@Override
+				public Stream<T> rootStream() {
+					return new InheritanceComputer<>((T) DefaultCompositesInheritance.this, attribute, ApiStatics.STRUCTURAL).inheritanceStream();
+				}
+			};
+		return new Snapshot<T>() {
+
+			@Override
+			public Stream<T> rootStream() {
+				return DefaultCompositesInheritance.this.getComposites().stream().filter(holder -> holder.isSpecializationOf(attribute) && holder.getLevel() == ApiStatics.STRUCTURAL);
+			}
+		};
 	}
 
 	@SuppressWarnings("unchecked")
 	default ObservableList<T> getObservableAttributes(T attribute) {
 		T nonHeritableProperty = getKey(NonHeritableProperty.class, ApiStatics.NO_POSITION);
-		if (nonHeritableProperty == null || attribute.inheritsFrom(nonHeritableProperty)
-				|| attribute.isInheritanceEnabled())
-			return BindingsTools.createMinimalUnitaryChangesBinding(new ObservableInheritanceComputer<>(
-					(T) DefaultCompositesInheritance.this, attribute, ApiStatics.STRUCTURAL));
-		return getObservableComposites()
-				.filtered(holder -> holder.isSpecializationOf(attribute) && holder.getLevel() == ApiStatics.STRUCTURAL);
+		if (nonHeritableProperty == null || attribute.inheritsFrom(nonHeritableProperty) || attribute.isInheritanceEnabled())
+			return BindingsTools.createMinimalUnitaryChangesBinding(new ObservableInheritanceComputer<>((T) DefaultCompositesInheritance.this, attribute, ApiStatics.STRUCTURAL));
+		return getObservableComposites().filtered(holder -> holder.isSpecializationOf(attribute) && holder.getLevel() == ApiStatics.STRUCTURAL);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -132,8 +143,7 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 
 	@SuppressWarnings("unchecked")
 	default ObservableValue<T> getObservableHolder(T attribute, Serializable value, T... targets) {
-		return BindingsTools
-				.transmitSuccessiveInvalidations(Bindings.valueAt(getObservableHolders(attribute, value, targets), 0));
+		return BindingsTools.transmitSuccessiveInvalidations(Bindings.valueAt(getObservableHolders(attribute, value, targets), 0));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -144,27 +154,24 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 
 	@SuppressWarnings("unchecked")
 	default ObservableValue<T> getObservableHolder(T attribute, T... targets) {
-		return BindingsTools
-				.transmitSuccessiveInvalidations(Bindings.valueAt(getObservableHolders(attribute, targets), 0));
+		return BindingsTools.transmitSuccessiveInvalidations(Bindings.valueAt(getObservableHolders(attribute, targets), 0));
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	default Snapshot<T> getHolders(T attribute, Serializable value, T... targets) {
-		return getHolders(attribute).filter(DefaultDependencies.valueFilter(value))
-				.filter(componentsFilter(addThisToTargets(targets)));
+		return getHolders(attribute, targets).filter(new IndexFilter(Filters.HAS_VALUE, value));
 	}
 
 	@SuppressWarnings("unchecked")
 	default ObservableList<T> getObservableHolders(T attribute, Serializable value, T... targets) {
-		return getObservableHolders(attribute).filtered(DefaultDependencies.valueFilter(value))
-				.filtered(componentsFilter(addThisToTargets(targets)));
+		return getObservableHolders(attribute).filtered(DefaultDependencies.valueFilter(value)).filtered(componentsFilter(addThisToTargets(targets)));
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	default Snapshot<T> getHolders(T attribute, T... targets) {
-		return getHolders(attribute).filter(componentsFilter(addThisToTargets(targets)));
+		return getHolders(attribute).filter(new IndexFilter(Filters.COMPOSITE_HAS_COMPONENTS, (Object[]) addThisToTargets(targets)));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -175,37 +182,47 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 	@SuppressWarnings("unchecked")
 	@Override
 	default Snapshot<T> getHolders(T attribute, int pos) {
-		return () -> getHolders(attribute).stream().filter(
-				holder -> holder.getComponent(pos) != null && ((T) this).isSpecializationOf(holder.getComponent(pos)));
+		return new Snapshot<T>() {
+
+			@Override
+			public Stream<T> rootStream() {
+				return getHolders(attribute).stream().filter(holder -> holder.getComponent(pos) != null && ((T) DefaultCompositesInheritance.this).isSpecializationOf(holder.getComponent(pos)));
+			}
+		};
 	}
 
 	@SuppressWarnings("unchecked")
 	default ObservableList<T> getObservableHolders(T attribute, int pos) {
-		return getObservableHolders(attribute).filtered(
-				holder -> holder.getComponent(pos) != null && ((T) this).isSpecializationOf(holder.getComponent(pos)));
+		return getObservableHolders(attribute).filtered(holder -> holder.getComponent(pos) != null && ((T) this).isSpecializationOf(holder.getComponent(pos)));
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	default Snapshot<T> getHolders(T attribute) {
 		T nonHeritableProperty = getKey(NonHeritableProperty.class, ApiStatics.NO_POSITION);
-		if (nonHeritableProperty == null || attribute.inheritsFrom(nonHeritableProperty)
-				|| attribute.isInheritanceEnabled())
-			return () -> new InheritanceComputer<>((T) DefaultCompositesInheritance.this, attribute,
-					ApiStatics.CONCRETE).inheritanceStream();
-		return () -> this.getComposites().stream()
-				.filter(holder -> holder.isSpecializationOf(attribute) && holder.getLevel() == ApiStatics.CONCRETE);
+		if (nonHeritableProperty == null || attribute.inheritsFrom(nonHeritableProperty) || attribute.isInheritanceEnabled())
+			return new Snapshot<T>() {
+
+				@Override
+				public Stream<T> rootStream() {
+					return new InheritanceComputer<>((T) DefaultCompositesInheritance.this, attribute, ApiStatics.CONCRETE).inheritanceStream();
+				}
+			};
+		return new Snapshot<T>() {
+
+			@Override
+			public Stream<T> rootStream() {
+				return DefaultCompositesInheritance.this.getComposites().stream().filter(holder -> holder.isSpecializationOf(attribute) && holder.getLevel() == ApiStatics.CONCRETE);
+			}
+		};
 	}
 
 	@SuppressWarnings("unchecked")
 	default ObservableList<T> getObservableHolders(T attribute) {
 		T nonHeritableProperty = getKey(NonHeritableProperty.class, ApiStatics.NO_POSITION);
-		if (nonHeritableProperty == null || attribute.inheritsFrom(nonHeritableProperty)
-				|| attribute.isInheritanceEnabled())
-			return BindingsTools.createMinimalUnitaryChangesBinding(new ObservableInheritanceComputer<>(
-					(T) DefaultCompositesInheritance.this, attribute, ApiStatics.CONCRETE));
-		return getObservableComposites()
-				.filtered(holder -> holder.isSpecializationOf(attribute) && holder.getLevel() == ApiStatics.CONCRETE);
+		if (nonHeritableProperty == null || attribute.inheritsFrom(nonHeritableProperty) || attribute.isInheritanceEnabled())
+			return BindingsTools.createMinimalUnitaryChangesBinding(new ObservableInheritanceComputer<>((T) DefaultCompositesInheritance.this, attribute, ApiStatics.CONCRETE));
+		return getObservableComposites().filtered(holder -> holder.isSpecializationOf(attribute) && holder.getLevel() == ApiStatics.CONCRETE);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -216,8 +233,7 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 
 	@SuppressWarnings("unchecked")
 	default ObservableValue<T> getObservableRelation(Serializable value, T... targets) {
-		return BindingsTools
-				.transmitSuccessiveInvalidations(Bindings.valueAt(getObservableRelations(value, targets), 0));
+		return BindingsTools.transmitSuccessiveInvalidations(Bindings.valueAt(getObservableRelations(value, targets), 0));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -234,7 +250,7 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 	@SuppressWarnings("unchecked")
 	@Override
 	default Snapshot<T> getRelations(Serializable value, T... targets) {
-		return getRelations(targets).filter(DefaultDependencies.valueFilter(value));
+		return getRelations(targets).filter(new IndexFilter(Filters.HAS_VALUE, value));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -245,26 +261,29 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 	@SuppressWarnings("unchecked")
 	@Override
 	default Snapshot<T> getRelations(T... targets) {
-		return getRelations(getRoot().getMetaRelation()).filter(componentsFilter(addThisToTargets(targets)));
+		return getRelations(getRoot().getMetaRelation()).filter(new IndexFilter(Filters.COMPOSITE_HAS_COMPONENTS, (Object[]) addThisToTargets(targets)));
 	}
 
 	@SuppressWarnings("unchecked")
 	default ObservableList<T> getObservableRelations(T... targets) {
-		return getObservableRelations(getRoot().getMetaRelation())
-				.filtered(componentsFilter(addThisToTargets(targets)));
+		return getObservableRelations(getRoot().getMetaRelation()).filtered(componentsFilter(addThisToTargets(targets)));
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	default Snapshot<T> getRelations(int pos) {
-		return () -> getRelations().stream().filter(relation -> relation.getComponent(pos) != null
-				&& ((T) this).isSpecializationOf(relation.getComponent(pos)));
+		return new Snapshot<T>() {
+
+			@Override
+			public Stream<T> rootStream() {
+				return getRelations().stream().filter(relation -> relation.getComponent(pos) != null && ((T) DefaultCompositesInheritance.this).isSpecializationOf(relation.getComponent(pos)));
+			}
+		};
 	}
 
 	@SuppressWarnings("unchecked")
 	default ObservableList<T> getObservableRelations(int pos) {
-		return getObservableRelations().filtered(relation -> relation.getComponent(pos) != null
-				&& ((T) this).isSpecializationOf(relation.getComponent(pos)));
+		return getObservableRelations().filtered(relation -> relation.getComponent(pos) != null && ((T) this).isSpecializationOf(relation.getComponent(pos)));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -286,8 +305,7 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 
 	@SuppressWarnings("unchecked")
 	default ObservableValue<T> getObservableLink(T relation, Serializable value, T... targets) {
-		return BindingsTools
-				.transmitSuccessiveInvalidations(Bindings.valueAt(getObservableLinks(relation, value, targets), 0));
+		return BindingsTools.transmitSuccessiveInvalidations(Bindings.valueAt(getObservableLinks(relation, value, targets), 0));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -298,27 +316,24 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 
 	@SuppressWarnings("unchecked")
 	default ObservableValue<T> getObservableLink(T relation, T... targets) {
-		return BindingsTools
-				.transmitSuccessiveInvalidations(Bindings.valueAt(getObservableLinks(relation, targets), 0));
+		return BindingsTools.transmitSuccessiveInvalidations(Bindings.valueAt(getObservableLinks(relation, targets), 0));
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	default Snapshot<T> getLinks(T relation, Serializable value, T... targets) {
-		return getLinks(relation).filter(DefaultDependencies.valueFilter(value))
-				.filter(componentsFilter(addThisToTargets(targets)));
+		return getLinks(relation, targets).filter(new IndexFilter(Filters.HAS_VALUE, value));
 	}
 
 	@SuppressWarnings("unchecked")
 	default ObservableList<T> getObservableLinks(T relation, Serializable value, T... targets) {
-		return getObservableLinks(relation).filtered(DefaultDependencies.valueFilter(value))
-				.filtered(componentsFilter(addThisToTargets(targets)));
+		return getObservableLinks(relation).filtered(DefaultDependencies.valueFilter(value)).filtered(componentsFilter(addThisToTargets(targets)));
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	default Snapshot<T> getLinks(T relation, T... targets) {
-		return getLinks(relation).filter(componentsFilter(addThisToTargets(targets)));
+		return getLinks(relation).filter(new IndexFilter(Filters.COMPOSITE_HAS_COMPONENTS, (Object[]) addThisToTargets(targets)));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -329,14 +344,18 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 	@SuppressWarnings("unchecked")
 	@Override
 	default Snapshot<T> getLinks(T relation, int pos) {
-		return () -> getLinks(relation).stream().filter(
-				link -> link.getComponent(pos) != null && ((T) this).isSpecializationOf(link.getComponent(pos)));
+		return new Snapshot<T>() {
+
+			@Override
+			public Stream<T> rootStream() {
+				return getLinks(relation).stream().filter(link -> link.getComponent(pos) != null && ((T) DefaultCompositesInheritance.this).isSpecializationOf(link.getComponent(pos)));
+			}
+		};
 	}
 
 	@SuppressWarnings("unchecked")
 	default ObservableList<T> getObservableLinks(T relation, int pos) {
-		return getObservableLinks(relation).filtered(
-				link -> link.getComponent(pos) != null && ((T) this).isSpecializationOf(link.getComponent(pos)));
+		return getObservableLinks(relation).filtered(link -> link.getComponent(pos) != null && ((T) this).isSpecializationOf(link.getComponent(pos)));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -383,7 +402,13 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 	@SuppressWarnings("unchecked")
 	@Override
 	default Snapshot<Serializable> getValues(T attribute, Serializable value, T... targets) {
-		return () -> getLinks(attribute, value, targets).stream().map(x -> x.getValue());
+		return new Snapshot<Serializable>() {
+
+			@Override
+			public Stream<Serializable> rootStream() {
+				return getLinks(attribute, value, targets).stream().map(x -> x.getValue());
+			}
+		};
 	}
 
 	@SuppressWarnings("unchecked")
@@ -396,8 +421,7 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 
 			@Override
 			protected ObservableList<Serializable> computeValue() {
-				return FXCollections.unmodifiableObservableList(FXCollections
-						.observableList(links.stream().map(x -> x.getValue()).collect(Collectors.toList())));
+				return FXCollections.unmodifiableObservableList(FXCollections.observableList(links.stream().map(x -> x.getValue()).collect(Collectors.toList())));
 			}
 		});
 	}
@@ -405,7 +429,13 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 	@SuppressWarnings("unchecked")
 	@Override
 	default Snapshot<Serializable> getValues(T attribute, T... targets) {
-		return () -> getLinks(attribute, targets).stream().map(x -> x.getValue());
+		return new Snapshot<Serializable>() {
+
+			@Override
+			public Stream<Serializable> rootStream() {
+				return getLinks(attribute, targets).stream().map(x -> x.getValue());
+			}
+		};
 	}
 
 	@SuppressWarnings("unchecked")
@@ -418,15 +448,20 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 
 			@Override
 			protected ObservableList<Serializable> computeValue() {
-				return FXCollections.unmodifiableObservableList(FXCollections
-						.observableList(links.stream().map(x -> x.getValue()).collect(Collectors.toList())));
+				return FXCollections.unmodifiableObservableList(FXCollections.observableList(links.stream().map(x -> x.getValue()).collect(Collectors.toList())));
 			}
 		});
 	}
 
 	@Override
 	default Snapshot<Serializable> getValues(T attribute, int pos) {
-		return () -> getHolders(attribute, pos).stream().map(x -> x.getValue());
+		return new Snapshot<Serializable>() {
+
+			@Override
+			public Stream<Serializable> rootStream() {
+				return getHolders(attribute, pos).stream().map(x -> x.getValue());
+			}
+		};
 	}
 
 	default ObservableList<Serializable> getObservableValues(T attribute, int pos) {
@@ -438,8 +473,7 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 
 			@Override
 			protected ObservableList<Serializable> computeValue() {
-				return FXCollections.unmodifiableObservableList(FXCollections
-						.observableList(holders.stream().map(x -> x.getValue()).collect(Collectors.toList())));
+				return FXCollections.unmodifiableObservableList(FXCollections.observableList(holders.stream().map(x -> x.getValue()).collect(Collectors.toList())));
 
 			}
 		});
@@ -450,10 +484,7 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 		return attribute -> {
 			List<T> attributeComps = new ArrayList<>(attribute.getComponents());
 			for (T componentReach : componentsReached) {
-				T matchedComponent = attributeComps.stream()
-						.filter(attributeComp -> componentsReached[0].isSpecializationOf(attributeComp) ? true
-								: componentReach.equals(attributeComp))
-						.findFirst().orElse(null);
+				T matchedComponent = attributeComps.stream().filter(attributeComp -> componentsReached[0].isSpecializationOf(attributeComp) ? true : componentReach.equals(attributeComp)).findFirst().orElse(null);
 				if (matchedComponent != null)
 					attributeComps.remove(matchedComponent);
 				else

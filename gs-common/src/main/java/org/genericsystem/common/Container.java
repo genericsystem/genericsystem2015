@@ -11,7 +11,7 @@ import org.genericsystem.api.core.IteratorSnapshot;
  * @author Nicolas Feybesse
  *
  */
-public class Container implements IteratorSnapshot<Generic> {
+public class Container extends IteratorSnapshot<Generic> {
 	final Map<Generic, Generic> container = new LinkedHashMap<>();// TODO is pseudoConcurrrentCollection needed ?
 
 	public Container(Stream<Generic> stream) {
