@@ -183,6 +183,8 @@ abstract class AbstractTsDependencies {
 		private ExtendedHashMap children = new ExtendedHashMap();
 
 		private class ExtendedHashMap extends ConcurrentHashMap<IndexFilter, IndexNode> {
+			private static final long serialVersionUID = 1873640660361944392L;
+
 			public IndexNode get(Object key, long ts) {
 				return super.computeIfAbsent((IndexFilter) key, k -> new IndexNode(new IndexImpl(k, ts, index), ts, IndexNode.this));
 			};

@@ -27,7 +27,7 @@ import javafx.beans.value.WeakChangeListener;
  *
  * @param <T>
  */
-public class PseudoConcurrentCollection<T extends IGeneric<?>> implements IteratorSnapshot<T> {
+public class PseudoConcurrentCollection<T extends IGeneric<?>> extends IteratorSnapshot<T> {
 	private static interface Index<T> {
 		public boolean add(T generic);
 
@@ -186,19 +186,17 @@ public class PseudoConcurrentCollection<T extends IGeneric<?>> implements Iterat
 		return indexesTree.getIndex(new ArrayList<>()).iterator();
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public Stream<T> stream() {
+	public Stream<T> rootStream() {
 		return indexesTree.getIndex(new ArrayList<>()).stream();
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public Snapshot<T> filter(List<IndexFilter> filters) {
 		return new Snapshot<T>() {
 
 			@Override
-			public Stream<T> stream() {
+			public Stream<T> rootStream() {
 				return indexesTree.getIndex(filters).stream();
 			}
 		};
