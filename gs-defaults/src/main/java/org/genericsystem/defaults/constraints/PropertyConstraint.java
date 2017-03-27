@@ -2,6 +2,8 @@ package org.genericsystem.defaults.constraints;
 
 import java.io.Serializable;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.annotations.Components;
 import org.genericsystem.api.core.annotations.Meta;
@@ -33,7 +35,13 @@ public class PropertyConstraint<T extends DefaultGeneric<T>> implements Checkabl
 	@Override
 	public void check(T modified, T attribute, Serializable value) throws ConstraintViolationException {
 		T base = modified.getBaseComponent();
-		Snapshot<T> snapshot = () -> base.getHolders(attribute).stream().filter(x -> modified.getComponents().equals(x.getComponents()) && modified.getMeta().equals(x.getMeta()));
+		Snapshot<T> snapshot = new Snapshot<T>() {
+
+			@Override
+			public Stream<T> rootStream() {
+				return base.getHolders(attribute).stream().filter(x -> modified.getComponents().equals(x.getComponents()) && modified.getMeta().equals(x.getMeta()));
+			}
+		};
 		if (snapshot.size() > 1)
 			throw new PropertyConstraintViolationException("For attribute : " + attribute + " these holders violates property constraint : \n" + snapshot.stream().map(x -> x.info() + "\n").collect(Collectors.toList()));
 	}

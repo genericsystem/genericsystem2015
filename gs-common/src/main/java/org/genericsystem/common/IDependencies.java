@@ -3,7 +3,6 @@ package org.genericsystem.common;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import org.genericsystem.api.core.Filters;
 import org.genericsystem.api.core.Snapshot;
 
 /**
@@ -11,20 +10,18 @@ import org.genericsystem.api.core.Snapshot;
  *
  * @param <T>
  */
-public interface IDependencies<T> extends Snapshot<T> {
+public abstract class IDependencies<T> extends Snapshot<T> {
 
 	@Override
-	Stream<T> stream();
-
-	Snapshot<Generic> filter(Filters filter);
+	public abstract Stream<T> rootStream();
 
 	@Override
-	public default T get(Object generic) {
+	public T get(Object generic) {
 		Optional<T> findFirst = stream().filter(generic::equals).findFirst();
 		return findFirst.isPresent() ? findFirst.get() : null;
 	}
 
-	void add(T add);
+	public abstract void add(T add);
 
-	public boolean remove(T remove);
+	public abstract boolean remove(T remove);
 }

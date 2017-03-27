@@ -13,18 +13,18 @@ import java.util.stream.StreamSupport;
  * @param <T>
  *            the implementation of IVertex used for all nodes.
  */
-public interface IteratorSnapshot<T> extends Snapshot<T> {
+public abstract class IteratorSnapshot<T> extends Snapshot<T> {
 
 	@Override
 	public abstract Iterator<T> iterator();
 
 	@Override
-	public default Stream<T> stream() {
+	public Stream<T> rootStream() {
 		return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator(), 0), false);
 	}
 
 	@Override
-	default int size() {
+	public int size() {
 		Iterator<T> iterator = iterator();
 		int size = 0;
 		while (iterator.hasNext()) {
@@ -35,30 +35,30 @@ public interface IteratorSnapshot<T> extends Snapshot<T> {
 	}
 
 	@Override
-	default boolean isEmpty() {
+	public boolean isEmpty() {
 		return !iterator().hasNext();
 	}
 
 	@Override
-	default boolean contains(Object o) {
+	public boolean contains(Object o) {
 		return o.equals(get(o)); // override necessary
 	}
 
 	@Override
-	default boolean containsAll(Collection<?> c) {
+	public boolean containsAll(Collection<?> c) {
 		return c.stream().allMatch(this::contains);
 	}
 
 	@Override
-	T get(Object o);
+	public abstract T get(Object o);
 
 	@Override
-	default String info() {
+	public String info() {
 		return stream().collect(Collectors.toList()).toString();
 	}
 
 	@Override
-	default T first() {
+	public T first() {
 		Iterator<T> iterator = iterator();
 		return iterator.hasNext() ? iterator.next() : null;
 	}
