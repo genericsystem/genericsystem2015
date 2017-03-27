@@ -8,8 +8,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.genericsystem.api.core.Filters;
-import org.genericsystem.api.core.Filters.IndexFilter;
+import org.genericsystem.api.core.FiltersBuilder;
+import org.genericsystem.api.core.IndexFilter;
 import org.genericsystem.defaults.DefaultGeneric;
 
 /**
@@ -81,11 +81,11 @@ public class InheritanceComputer<T extends DefaultGeneric<T>> extends HashSet<T>
 		}
 
 		protected Stream<T> compositesByMeta(T holder) {
-			return localBase.getDependencies().filter(Arrays.asList(new IndexFilter(Filters.COMPOSITES, localBase), new IndexFilter(Filters.HAS_META, holder))).stream();
+			return localBase.getDependencies().filter(Arrays.asList(new IndexFilter(FiltersBuilder.COMPOSITES, localBase), new IndexFilter(FiltersBuilder.HAS_META, holder))).stream();
 		}
 
 		protected Stream<T> compositesBySuper(T holder) {
-			return localBase.getDependencies().filter(Arrays.asList(new IndexFilter(Filters.COMPOSITES, localBase), new IndexFilter(Filters.HAS_SUPER, holder))).stream();
+			return localBase.getDependencies().filter(Arrays.asList(new IndexFilter(FiltersBuilder.COMPOSITES, localBase), new IndexFilter(FiltersBuilder.HAS_SUPER, holder))).stream();
 		}
 
 	}

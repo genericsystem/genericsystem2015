@@ -3,7 +3,7 @@ package org.genericsystem.common;
 import java.util.List;
 import java.util.stream.Stream;
 
-import org.genericsystem.api.core.Filters.IndexFilter;
+import org.genericsystem.api.core.IndexFilter;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
@@ -80,7 +80,7 @@ public class Differential implements IDifferential<Generic> {
 			}
 
 			@Override
-			public Stream<Generic> rootStream() {
+			public Stream<Generic> unfilteredStream() {
 				return Stream.concat(adds.contains(generic) ? Stream.empty() : subDifferential.getDependencies(generic).stream().filter(x -> !removes.contains(x)), adds.stream().filter(x -> generic.isDirectAncestorOf(x)));
 			}
 
@@ -89,7 +89,7 @@ public class Differential implements IDifferential<Generic> {
 				return new Snapshot<Generic>() {
 
 					@Override
-					public Stream<Generic> rootStream() {
+					public Stream<Generic> unfilteredStream() {
 						return Stream.concat(adds.contains(generic) ? Stream.empty() : subDifferential.getDependencies(generic).filter(filters).stream().filter(x -> !removes.contains(x)),
 								adds.filter(filters).stream().filter(x -> generic.isDirectAncestorOf(x)));
 					}

@@ -13,7 +13,7 @@ import org.genericsystem.api.core.Snapshot;
 public abstract class IDependencies<T> extends Snapshot<T> {
 
 	@Override
-	public abstract Stream<T> rootStream();
+	public abstract Stream<T> unfilteredStream();
 
 	@Override
 	public T get(Object generic) {

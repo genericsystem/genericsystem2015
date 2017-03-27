@@ -8,8 +8,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.genericsystem.api.core.Filters.IndexFilter;
-
 /**
  * Represents a <code>Set</code> of results <em>aware</em> of its context.
  * <p>
@@ -55,8 +53,8 @@ public class Snapshot<T> implements Iterable<T> {
 			current = current.parent;
 		}
 		if (!filters.isEmpty())
-			return current.filter(filters).rootStream();
-		return rootStream();
+			return current.filter(filters).unfilteredStream();
+		return unfilteredStream();
 	}
 
 	/**
@@ -64,8 +62,8 @@ public class Snapshot<T> implements Iterable<T> {
 	 *
 	 * @return a <code>Stream</code> of this <code>Snapshot</code>.
 	 */
-	public Stream<T> rootStream() {
-		throw new UnsupportedOperationException("The rootStream() method must be overridden by extending classes.");
+	public Stream<T> unfilteredStream() {
+		throw new UnsupportedOperationException("The unfiltered Stream() method must be overridden by extending classes.");
 	}
 
 	/**
@@ -156,7 +154,7 @@ public class Snapshot<T> implements Iterable<T> {
 		return new Snapshot<T>() {
 
 			@Override
-			public Stream<T> rootStream() {
+			public Stream<T> unfilteredStream() {
 				return Snapshot.this.stream().filter(predicate);
 			}
 
@@ -177,7 +175,7 @@ public class Snapshot<T> implements Iterable<T> {
 		return new Snapshot<T>() {
 
 			@Override
-			public Stream<T> rootStream() {
+			public Stream<T> unfilteredStream() {
 				return Snapshot.this.stream().filter(g -> filters.stream().allMatch(filter -> filter.test((IGeneric<?>) g)));
 			}
 

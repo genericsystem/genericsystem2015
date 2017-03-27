@@ -19,7 +19,7 @@ public abstract class IteratorSnapshot<T> extends Snapshot<T> {
 	public abstract Iterator<T> iterator();
 
 	@Override
-	public Stream<T> rootStream() {
+	public Stream<T> unfilteredStream() {
 		return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator(), 0), false);
 	}
 

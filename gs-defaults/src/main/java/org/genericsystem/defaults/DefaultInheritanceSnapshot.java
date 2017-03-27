@@ -17,7 +17,7 @@ public abstract class DefaultInheritanceSnapshot<T extends DefaultGeneric<T>> ex
 		return new DefaultInheritanceSnapshot<T>() {
 
 			@Override
-			public Stream<T> rootStream() {
+			public Stream<T> unfilteredStream() {
 				return DefaultInheritanceSnapshot.this.stream().filter(predicate);
 			}
 
