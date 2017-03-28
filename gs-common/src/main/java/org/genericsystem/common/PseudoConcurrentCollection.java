@@ -27,7 +27,7 @@ import javafx.beans.value.WeakChangeListener;
  *
  * @param <T>
  */
-public class PseudoConcurrentCollection<T extends IGeneric<?>> extends IteratorSnapshot<T> {
+public class PseudoConcurrentCollection<T extends IGeneric<?>> implements IteratorSnapshot<T> {
 	private static interface Index<T> {
 		public boolean add(T generic);
 

@@ -181,7 +181,7 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 
 	@Override
 	default Snapshot<T> getHolders(T attribute, int pos) {
-		return new Snapshot<T>(getHolders(attribute), new IndexFilter(FiltersBuilder.HAS_COMPONENT_AT_POS, this, pos));
+		return getHolders(attribute).filter(new IndexFilter(FiltersBuilder.HAS_COMPONENT_AT_POS, this, pos));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -201,7 +201,7 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 					return new InheritanceComputer<>((T) DefaultCompositesInheritance.this, attribute, ApiStatics.CONCRETE).inheritanceStream();
 				}
 			};
-		return new Snapshot<T>(DefaultCompositesInheritance.this.getComposites(), new IndexFilter(FiltersBuilder.IS_SPECIALIZATION_OF, attribute)).filter(new IndexFilter(FiltersBuilder.HAS_LEVEL, ApiStatics.CONCRETE));
+		return DefaultCompositesInheritance.this.getComposites().filter(new IndexFilter(FiltersBuilder.IS_SPECIALIZATION_OF, attribute)).filter(new IndexFilter(FiltersBuilder.HAS_LEVEL, ApiStatics.CONCRETE));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -259,7 +259,7 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 	@SuppressWarnings("unchecked")
 	@Override
 	default Snapshot<T> getRelations(int pos) {
-		return new Snapshot<T>(getRelations(), new IndexFilter(FiltersBuilder.HAS_COMPONENT_AT_POS, this, pos));
+		return getRelations().filter(new IndexFilter(FiltersBuilder.HAS_COMPONENT_AT_POS, this, pos));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -324,7 +324,7 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 
 	@Override
 	default Snapshot<T> getLinks(T relation, int pos) {
-		return new Snapshot<T>(getLinks(relation), new IndexFilter(FiltersBuilder.HAS_COMPONENT_AT_POS, this, pos));
+		return getLinks(relation).filter(new IndexFilter(FiltersBuilder.HAS_COMPONENT_AT_POS, this, pos));
 	}
 
 	@SuppressWarnings("unchecked")

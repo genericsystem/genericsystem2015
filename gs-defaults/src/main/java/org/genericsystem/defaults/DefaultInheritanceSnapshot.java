@@ -10,10 +10,10 @@ import org.genericsystem.api.core.Snapshot;
  *
  * @param <T>
  */
-public abstract class DefaultInheritanceSnapshot<T extends DefaultGeneric<T>> extends Snapshot<T> {
+public interface DefaultInheritanceSnapshot<T extends DefaultGeneric<T>> extends Snapshot<T> {
 
 	@Override
-	public DefaultInheritanceSnapshot<T> filter(Predicate<T> predicate) {
+	default DefaultInheritanceSnapshot<T> filter(Predicate<T> predicate) {
 		return new DefaultInheritanceSnapshot<T>() {
 
 			@Override
@@ -29,7 +29,7 @@ public abstract class DefaultInheritanceSnapshot<T extends DefaultGeneric<T>> ex
 		};
 	}
 
-	public DefaultInheritanceSnapshot<T> filterDefaultsFromMeta(T attibute, int pos) {
+	default DefaultInheritanceSnapshot<T> filterDefaultsFromMeta(T attibute, int pos) {
 		return filter(t -> t.getComponent(pos).inheritsFrom(attibute.getComponent(pos)));
 	}
 }
