@@ -179,16 +179,9 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 		return getObservableHolders(attribute).filtered(componentsFilter(addThisToTargets(targets)));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	default Snapshot<T> getHolders(T attribute, int pos) {
-		return new Snapshot<T>() {
-
-			@Override
-			public Stream<T> unfilteredStream() {
-				return getHolders(attribute).stream().filter(holder -> holder.getComponent(pos) != null && ((T) DefaultCompositesInheritance.this).isSpecializationOf(holder.getComponent(pos)));
-			}
-		};
+		return new Snapshot<T>(getHolders(attribute), new IndexFilter(FiltersBuilder.HAS_COMPONENT_AT_POS, this, pos));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -208,13 +201,7 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 					return new InheritanceComputer<>((T) DefaultCompositesInheritance.this, attribute, ApiStatics.CONCRETE).inheritanceStream();
 				}
 			};
-		return new Snapshot<T>() {
-
-			@Override
-			public Stream<T> unfilteredStream() {
-				return DefaultCompositesInheritance.this.getComposites().stream().filter(holder -> holder.isSpecializationOf(attribute) && holder.getLevel() == ApiStatics.CONCRETE);
-			}
-		};
+		return new Snapshot<T>(DefaultCompositesInheritance.this.getComposites(), new IndexFilter(FiltersBuilder.IS_SPECIALIZATION_OF, attribute)).filter(new IndexFilter(FiltersBuilder.HAS_LEVEL, ApiStatics.CONCRETE));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -272,13 +259,7 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 	@SuppressWarnings("unchecked")
 	@Override
 	default Snapshot<T> getRelations(int pos) {
-		return new Snapshot<T>() {
-
-			@Override
-			public Stream<T> unfilteredStream() {
-				return getRelations().stream().filter(relation -> relation.getComponent(pos) != null && ((T) DefaultCompositesInheritance.this).isSpecializationOf(relation.getComponent(pos)));
-			}
-		};
+		return new Snapshot<T>(getRelations(), new IndexFilter(FiltersBuilder.HAS_COMPONENT_AT_POS, this, pos));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -341,16 +322,9 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 		return getObservableLinks(relation).filtered(componentsFilter(addThisToTargets(targets)));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	default Snapshot<T> getLinks(T relation, int pos) {
-		return new Snapshot<T>() {
-
-			@Override
-			public Stream<T> unfilteredStream() {
-				return getLinks(relation).stream().filter(link -> link.getComponent(pos) != null && ((T) DefaultCompositesInheritance.this).isSpecializationOf(link.getComponent(pos)));
-			}
-		};
+		return new Snapshot<T>(getLinks(relation), new IndexFilter(FiltersBuilder.HAS_COMPONENT_AT_POS, this, pos));
 	}
 
 	@SuppressWarnings("unchecked")

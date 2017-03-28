@@ -48,7 +48,7 @@ public interface DefaultContext<T extends DefaultGeneric<T>> extends IContext<T>
 	}
 
 	default Snapshot<T> getInstances(T vertex) {
-		return getDependencies(vertex).filter(Arrays.asList(new IndexFilter(FiltersBuilder.INSTANCES, vertex)));
+		return getDependencies(vertex).filter(new IndexFilter(FiltersBuilder.INSTANCES, vertex));
 	}
 
 	default ObservableList<T> getObservableInstances(T vertex) {
@@ -56,7 +56,7 @@ public interface DefaultContext<T extends DefaultGeneric<T>> extends IContext<T>
 	}
 
 	default Snapshot<T> getInheritings(T vertex) {
-		return getDependencies(vertex).filter(Arrays.asList(new IndexFilter(FiltersBuilder.INHERITINGS, vertex)));
+		return getDependencies(vertex).filter(new IndexFilter(FiltersBuilder.INHERITINGS, vertex));
 	}
 
 	default ObservableList<T> getObservableInheritings(T vertex) {
@@ -64,7 +64,7 @@ public interface DefaultContext<T extends DefaultGeneric<T>> extends IContext<T>
 	}
 
 	default Snapshot<T> getComposites(T vertex) {
-		return getDependencies(vertex).filter(Arrays.asList(new IndexFilter(FiltersBuilder.COMPOSITES, vertex)));
+		return getDependencies(vertex).filter(new IndexFilter(FiltersBuilder.COMPOSITES, vertex));
 	}
 
 	default ObservableList<T> getObservableComposites(T vertex) {
