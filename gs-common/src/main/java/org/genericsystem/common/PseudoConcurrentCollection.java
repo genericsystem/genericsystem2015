@@ -11,9 +11,9 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import org.genericsystem.api.core.Filters;
-import org.genericsystem.api.core.Filters.IndexFilter;
+import org.genericsystem.api.core.FiltersBuilder;
 import org.genericsystem.api.core.IGeneric;
+import org.genericsystem.api.core.IndexFilter;
 import org.genericsystem.api.core.IteratorSnapshot;
 import org.genericsystem.api.core.Snapshot;
 
@@ -27,7 +27,7 @@ import javafx.beans.value.WeakChangeListener;
  *
  * @param <T>
  */
-public class PseudoConcurrentCollection<T extends IGeneric<?>> extends IteratorSnapshot<T> {
+public class PseudoConcurrentCollection<T extends IGeneric<?>> implements IteratorSnapshot<T> {
 	private static interface Index<T> {
 		public boolean add(T generic);
 
@@ -36,13 +36,11 @@ public class PseudoConcurrentCollection<T extends IGeneric<?>> extends IteratorS
 		public Iterator<T> iterator();
 
 		public Stream<T> stream();
-
-		public IndexFilter getFilter();
 	}
 
 	final Map<T, T> map = new HashMap<>();
 
-	private final IndexNode indexesTree = new IndexNode(new IndexImpl(new IndexFilter(Filters.NO_FILTER), null), null);
+	private final IndexNode indexesTree = new IndexNode(new IndexImpl(new IndexFilter(FiltersBuilder.NO_FILTER), null), null);
 
 	private class IndexNode {
 		private Index<T> index;
@@ -64,10 +62,6 @@ public class PseudoConcurrentCollection<T extends IGeneric<?>> extends IteratorS
 			if (filters.isEmpty())
 				return index;
 			return children.get(filters.get(0)).getIndex(filters.subList(1, filters.size()));
-		}
-
-		public void updateIndex(IndexFilter key) {
-			index = new IndexImpl(key, parent.index);
 		}
 
 		public void add(T generic) {
@@ -122,11 +116,6 @@ public class PseudoConcurrentCollection<T extends IGeneric<?>> extends IteratorS
 					return true;
 				}
 			return false;
-		}
-
-		@Override
-		public IndexFilter getFilter() {
-			return filter;
 		}
 
 		@Override
@@ -187,7 +176,7 @@ public class PseudoConcurrentCollection<T extends IGeneric<?>> extends IteratorS
 	}
 
 	@Override
-	public Stream<T> rootStream() {
+	public Stream<T> unfilteredStream() {
 		return indexesTree.getIndex(new ArrayList<>()).stream();
 	}
 
@@ -196,7 +185,7 @@ public class PseudoConcurrentCollection<T extends IGeneric<?>> extends IteratorS
 		return new Snapshot<T>() {
 
 			@Override
-			public Stream<T> rootStream() {
+			public Stream<T> unfilteredStream() {
 				return indexesTree.getIndex(filters).stream();
 			}
 		};

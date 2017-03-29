@@ -10,9 +10,9 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.genericsystem.api.core.ApiStatics;
-import org.genericsystem.api.core.Filters;
-import org.genericsystem.api.core.Filters.IndexFilter;
+import org.genericsystem.api.core.FiltersBuilder;
 import org.genericsystem.api.core.IContext;
+import org.genericsystem.api.core.IndexFilter;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ReferentialIntegrityConstraintViolationException;
 import org.genericsystem.api.core.exceptions.RollbackException;
@@ -48,7 +48,7 @@ public interface DefaultContext<T extends DefaultGeneric<T>> extends IContext<T>
 	}
 
 	default Snapshot<T> getInstances(T vertex) {
-		return getDependencies(vertex).filter(Arrays.asList(new IndexFilter(Filters.INSTANCES, vertex)));
+		return getDependencies(vertex).filter(new IndexFilter(FiltersBuilder.INSTANCES, vertex));
 	}
 
 	default ObservableList<T> getObservableInstances(T vertex) {
@@ -56,7 +56,7 @@ public interface DefaultContext<T extends DefaultGeneric<T>> extends IContext<T>
 	}
 
 	default Snapshot<T> getInheritings(T vertex) {
-		return getDependencies(vertex).filter(Arrays.asList(new IndexFilter(Filters.INHERITINGS, vertex)));
+		return getDependencies(vertex).filter(new IndexFilter(FiltersBuilder.INHERITINGS, vertex));
 	}
 
 	default ObservableList<T> getObservableInheritings(T vertex) {
@@ -64,7 +64,7 @@ public interface DefaultContext<T extends DefaultGeneric<T>> extends IContext<T>
 	}
 
 	default Snapshot<T> getComposites(T vertex) {
-		return getDependencies(vertex).filter(Arrays.asList(new IndexFilter(Filters.COMPOSITES, vertex)));
+		return getDependencies(vertex).filter(new IndexFilter(FiltersBuilder.COMPOSITES, vertex));
 	}
 
 	default ObservableList<T> getObservableComposites(T vertex) {

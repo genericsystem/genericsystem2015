@@ -8,8 +8,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.genericsystem.api.core.Filters.IndexFilter;
-
 /**
  * Represents a <code>Set</code> of results <em>aware</em> of its context.
  * <p>
@@ -21,24 +19,38 @@ import org.genericsystem.api.core.Filters.IndexFilter;
  * @param <T>
  *            the type of element contained by the <code>Snapshot</code>.
  */
-public class Snapshot<T> implements Iterable<T> {
+@FunctionalInterface
+public interface Snapshot<T> extends Iterable<T> {
 
-	private final Snapshot<T> parent;
-	private final IndexFilter filter;
-
-	public Snapshot() {
-		parent = null;
-		filter = null;
+	default Snapshot<T> getParent() {
+		return null;
 	}
 
-	public Snapshot(Snapshot<T> parent, IndexFilter filter) {
-		assert parent != null && filter != null;
-		this.parent = parent;
-		this.filter = filter;
+	default IndexFilter getFilter() {
+		return null;
+	}
+
+	default Snapshot<T> createChild(Snapshot<T> parent, IndexFilter filter) {
+		return new Snapshot<T>() {
+			@Override
+			public Snapshot<T> getParent() {
+				return parent;
+			}
+
+			@Override
+			public IndexFilter getFilter() {
+				return filter;
+			}
+
+			@Override
+			public Stream<T> unfilteredStream() {
+				throw new UnsupportedOperationException("unfilteredStream() should be called only on unfiltered snapshots.");
+			}
+		};
 	}
 
 	@Override
-	public Iterator<T> iterator() {
+	default Iterator<T> iterator() {
 		return stream().iterator();
 	}
 
@@ -47,16 +59,16 @@ public class Snapshot<T> implements Iterable<T> {
 	 *
 	 * @return a <code>Stream</code> of this <code>Snapshot</code>.
 	 */
-	public final Stream<T> stream() {
+	default Stream<T> stream() {
 		List<IndexFilter> filters = new LinkedList<>();
 		Snapshot<T> current = this;
-		while (current.parent != null) {
-			filters.add(0, current.filter);
-			current = current.parent;
+		while (current.getParent() != null) {
+			filters.add(0, current.getFilter());
+			current = current.getParent();
 		}
 		if (!filters.isEmpty())
-			return current.filter(filters).rootStream();
-		return rootStream();
+			return current.filter(filters).unfilteredStream();
+		return unfilteredStream();
 	}
 
 	/**
@@ -64,16 +76,14 @@ public class Snapshot<T> implements Iterable<T> {
 	 *
 	 * @return a <code>Stream</code> of this <code>Snapshot</code>.
 	 */
-	public Stream<T> rootStream() {
-		throw new UnsupportedOperationException("The rootStream() method must be overridden by extending classes.");
-	}
+	public Stream<T> unfilteredStream();
 
 	/**
 	 * Returns the number of elements in this snapshot.
 	 *
 	 * @return the number of elements in this snapshot.
 	 */
-	public int size() {
+	default int size() {
 		return (int) stream().count();
 	}
 
@@ -82,7 +92,7 @@ public class Snapshot<T> implements Iterable<T> {
 	 *
 	 * @return <code>true</code> if this snapshot contains no elements.
 	 */
-	public boolean isEmpty() {
+	default boolean isEmpty() {
 		return stream().count() == 0;
 	}
 
@@ -93,7 +103,7 @@ public class Snapshot<T> implements Iterable<T> {
 	 *            element whose presence in this snapshot is to be tested.
 	 * @return <code>true</code> if this snapshot contains the specified element.
 	 */
-	public boolean contains(Object o) {
+	default boolean contains(Object o) {
 		return o.equals(get(o));
 	}
 
@@ -104,7 +114,7 @@ public class Snapshot<T> implements Iterable<T> {
 	 *            collection to be checked for containment in this snapshot.
 	 * @return <code>true</code> if this snapshot contains all of the elements in the specified snapshot.
 	 */
-	public boolean containsAll(Collection<?> c) {
+	default boolean containsAll(Collection<?> c) {
 		return c.stream().allMatch(this::contains);
 	}
 
@@ -115,7 +125,7 @@ public class Snapshot<T> implements Iterable<T> {
 	 *            object to be tested for equality.
 	 * @return the first element in this snapshot equals to the specified object or <code>null</code> if no element in this snapshot is equal to the specified object.
 	 */
-	public T get(Object o) {
+	default T get(Object o) {
 		return stream().filter(o::equals).findFirst().orElse(null);
 	}
 
@@ -124,7 +134,7 @@ public class Snapshot<T> implements Iterable<T> {
 	 *
 	 * @return a <code>String</code> representation of all vertices contained in this snapshot.
 	 */
-	public String info() {
+	default String info() {
 		return stream().collect(Collectors.toList()).toString();
 	}
 
@@ -134,13 +144,13 @@ public class Snapshot<T> implements Iterable<T> {
 	 * @return the first element of this snapshot or <code>null</code> if this snapshot is empty.
 	 */
 
-	public T first() {
+	default T first() {
 
 		return (iterator().hasNext() ? iterator().next() : null);
 
 	}
 
-	public T getByIndex(int index) {
+	default T getByIndex(int index) {
 		Iterator<T> iterator = iterator();
 		int i = 0;
 		while (iterator.hasNext()) {
@@ -152,11 +162,11 @@ public class Snapshot<T> implements Iterable<T> {
 		return null;
 	}
 
-	public Snapshot<T> filter(Predicate<T> predicate) {
+	default Snapshot<T> filter(Predicate<T> predicate) {
 		return new Snapshot<T>() {
 
 			@Override
-			public Stream<T> rootStream() {
+			public Stream<T> unfilteredStream() {
 				return Snapshot.this.stream().filter(predicate);
 			}
 
@@ -168,16 +178,15 @@ public class Snapshot<T> implements Iterable<T> {
 		};
 	}
 
-	public Snapshot<T> filter(IndexFilter filter) {
-		return new Snapshot<T>(this, filter);
+	default Snapshot<T> filter(IndexFilter filter) {
+		return createChild(this, filter);
 	}
 
-	public Snapshot<T> filter(List<IndexFilter> filters) {
-		assert filter == null;
+	default Snapshot<T> filter(List<IndexFilter> filters) {
 		return new Snapshot<T>() {
 
 			@Override
-			public Stream<T> rootStream() {
+			public Stream<T> unfilteredStream() {
 				return Snapshot.this.stream().filter(g -> filters.stream().allMatch(filter -> filter.test((IGeneric<?>) g)));
 			}
 
@@ -189,7 +198,7 @@ public class Snapshot<T> implements Iterable<T> {
 		};
 	}
 
-	public List<T> toList() {
+	default List<T> toList() {
 		return stream().collect(Collectors.toList());
 	}
 }

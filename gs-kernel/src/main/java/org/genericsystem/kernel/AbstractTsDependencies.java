@@ -7,8 +7,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import org.genericsystem.api.core.Filters;
-import org.genericsystem.api.core.Filters.IndexFilter;
+import org.genericsystem.api.core.FiltersBuilder;
+import org.genericsystem.api.core.IndexFilter;
 import org.genericsystem.common.AbstractIterator;
 import org.genericsystem.common.Generic;
 import org.genericsystem.kernel.AbstractServer.RootServerHandler;
@@ -217,7 +217,7 @@ abstract class AbstractTsDependencies {
 		}
 	}
 
-	private final IndexNode indexesTree = new IndexNode(new IndexImpl(new IndexFilter(Filters.NO_FILTER), 0, null), 0, null);
+	private final IndexNode indexesTree = new IndexNode(new IndexImpl(new IndexFilter(FiltersBuilder.NO_FILTER), 0, null), 0, null);
 
 	public void add(Generic generic) {
 		indexesTree.add(generic);

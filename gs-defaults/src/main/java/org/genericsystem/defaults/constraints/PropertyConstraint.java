@@ -38,7 +38,7 @@ public class PropertyConstraint<T extends DefaultGeneric<T>> implements Checkabl
 		Snapshot<T> snapshot = new Snapshot<T>() {
 
 			@Override
-			public Stream<T> rootStream() {
+			public Stream<T> unfilteredStream() {
 				return base.getHolders(attribute).stream().filter(x -> modified.getComponents().equals(x.getComponents()) && modified.getMeta().equals(x.getMeta()));
 			}
 		};
