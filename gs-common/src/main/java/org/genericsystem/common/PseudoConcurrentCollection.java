@@ -14,7 +14,6 @@ import java.util.stream.StreamSupport;
 import org.genericsystem.api.core.FiltersBuilder;
 import org.genericsystem.api.core.IGeneric;
 import org.genericsystem.api.core.IndexFilter;
-import org.genericsystem.api.core.IteratorSnapshot;
 import org.genericsystem.api.core.Snapshot;
 
 import javafx.beans.Observable;
@@ -27,7 +26,7 @@ import javafx.beans.value.WeakChangeListener;
  *
  * @param <T>
  */
-public class PseudoConcurrentCollection<T extends IGeneric<?>> implements IteratorSnapshot<T> {
+public class PseudoConcurrentCollection<T extends IGeneric<?>> implements Snapshot<T> {
 	private static interface Index<T> {
 		public boolean add(T generic);
 
