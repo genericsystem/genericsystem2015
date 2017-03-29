@@ -124,11 +124,12 @@ public abstract class Root implements DefaultRoot<Generic>, ProxyObject, Generic
 			return metaAnnotation == null ? getTClass() : metaAnnotation.value();
 
 		DirectClass directClass = clazz.getAnnotation(DirectClass.class);
-		if (directClass != null){
-			if (metaAnnotation == null||metaAnnotation.value().isAssignableFrom(clazz))
+		if (directClass != null) {
+			if (metaAnnotation == null || metaAnnotation.value().isAssignableFrom(clazz))
 				return clazz;
 			else
-				getCurrentCache().discardWithException(new IllegalStateException(clazz + " must extend " + metaAnnotation.value()));}
+				getCurrentCache().discardWithException(new IllegalStateException(clazz + " must extend " + metaAnnotation.value()));
+		}
 		if (metaAnnotation == null)
 			return getTClass().isAssignableFrom(clazz) ? clazz : getTClass();
 
