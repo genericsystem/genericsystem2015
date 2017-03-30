@@ -9,6 +9,7 @@ import java.util.stream.StreamSupport;
 
 import org.genericsystem.api.core.FiltersBuilder;
 import org.genericsystem.api.core.IndexFilter;
+import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.AbstractIterator;
 import org.genericsystem.common.Generic;
 import org.genericsystem.kernel.AbstractServer.RootServerHandler;
@@ -165,9 +166,14 @@ abstract class AbstractTsDependencies {
 		return null;
 	}
 
-	public Stream<Generic> stream(long ts, List<IndexFilter> filters) {
-		return indexesTree.getIndex(filters, ts).stream(ts);
+	public Snapshot<Generic> filter(List<IndexFilter> filters, long ts) {
+		return new Snapshot<Generic>() {
 
+			@Override
+			public Stream<Generic> unfilteredStream() {
+				return indexesTree.getIndex(filters, ts).stream(ts);
+			}
+		};
 	}
 
 	public Stream<Generic> stream(long ts) {
