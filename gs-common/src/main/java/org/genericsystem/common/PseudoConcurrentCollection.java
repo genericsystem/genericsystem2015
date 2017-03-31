@@ -14,7 +14,6 @@ import java.util.stream.StreamSupport;
 import org.genericsystem.api.core.FiltersBuilder;
 import org.genericsystem.api.core.IGeneric;
 import org.genericsystem.api.core.IndexFilter;
-import org.genericsystem.api.core.IteratorSnapshot;
 import org.genericsystem.api.core.Snapshot;
 
 import javafx.beans.Observable;
@@ -27,7 +26,7 @@ import javafx.beans.value.WeakChangeListener;
  *
  * @param <T>
  */
-public class PseudoConcurrentCollection<T extends IGeneric<?>> implements IteratorSnapshot<T> {
+public class PseudoConcurrentCollection<T extends IGeneric<?>> implements Snapshot<T> {
 	private static interface Index<T> {
 		public boolean add(T generic);
 
@@ -40,22 +39,22 @@ public class PseudoConcurrentCollection<T extends IGeneric<?>> implements Iterat
 
 	final Map<T, T> map = new HashMap<>();
 
-	private final IndexNode indexesTree = new IndexNode(new IndexImpl(new IndexFilter(FiltersBuilder.NO_FILTER), null), null);
+	private final IndexNode indexesTree = new IndexNode(new IndexImpl(new IndexFilter(FiltersBuilder.NO_FILTER), null));
 
 	private class IndexNode {
 		private Index<T> index;
-		private final IndexNode parent;
 
 		private ConcurrentHashMap<IndexFilter, IndexNode> children = new ConcurrentHashMap<IndexFilter, IndexNode>() {
+			private static final long serialVersionUID = -1745909616130661281L;
+
 			@Override
 			public IndexNode get(Object key) {
-				return super.computeIfAbsent((IndexFilter) key, k -> new IndexNode(new IndexImpl(k, index), IndexNode.this));
+				return super.computeIfAbsent((IndexFilter) key, k -> new IndexNode(new IndexImpl(k, index)));
 			};
 		};
 
-		IndexNode(Index<T> index, IndexNode parent) {
+		IndexNode(Index<T> index) {
 			this.index = index;
-			this.parent = parent;
 		}
 
 		Index<T> getIndex(List<IndexFilter> filters) {
@@ -145,7 +144,6 @@ public class PseudoConcurrentCollection<T extends IGeneric<?>> implements Iterat
 
 			@Override
 			public void remove() {
-				T content = next.content;
 				if (next == null)
 					throw new IllegalStateException();
 				map.remove(next.content);

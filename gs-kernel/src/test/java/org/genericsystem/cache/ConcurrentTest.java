@@ -1,5 +1,7 @@
 package org.genericsystem.cache;
 
+import java.util.Iterator;
+
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.common.AbstractCache;
@@ -138,6 +140,62 @@ public class ConcurrentTest extends AbstractTest {
 			// ignore
 		}
 
+	}
+
+	public void testIterators() {
+		Engine engine = new Engine();
+
+		AbstractCache cache1 = engine.newCache().start();
+		final Generic car = engine.addInstance("Car");
+		Iterator<Generic> it = car.getInstances().iterator();
+		car.addInstance("myBmw");
+		car.addInstance("myMercedes");
+		cache1.flush();
+
+		AbstractCache cache2 = engine.newCache().start();
+
+		it = car.getInstances().iterator();
+		it.next();
+		it.next();
+		assert !it.hasNext();
+		cache1.start();
+		car.addInstance("myAudi");
+		try {
+			cache1.tryFlush();
+			assert false;
+		} catch (ConcurrencyControlException ignore) {
+
+		}
+	}
+
+	public void testIterators2() {
+		Engine engine = new Engine();
+
+		AbstractCache cache1 = engine.newCache().start();
+		final Generic car = engine.addInstance("Car");
+		cache1.flush(); // So that car is not in the adds anymore.
+		Iterator<Generic> it = car.getInstances().iterator();
+		car.addInstance("myBmw");
+		car.addInstance("myMercedes");
+		it.next();
+		it.next();
+		assert !it.hasNext();
+		cache1.flush();
+
+		AbstractCache cache2 = engine.newCache().start();
+
+		it = car.getInstances().iterator();
+		it.next();
+		it.next();
+		cache1.start();
+		car.addInstance("myAudi");
+		try {
+			cache1.tryFlush();
+		} catch (ConcurrencyControlException e) {
+			assert false;
+		}
+		cache2.start();
+		assert it.hasNext();
 	}
 	//
 	// // TODO: move to CachTest
