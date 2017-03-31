@@ -30,25 +30,6 @@ public interface Snapshot<T> extends Iterable<T> {
 		return null;
 	}
 
-	default Snapshot<T> createChild(Snapshot<T> parent, IndexFilter filter) {
-		return new Snapshot<T>() {
-			@Override
-			public Snapshot<T> getParent() {
-				return parent;
-			}
-
-			@Override
-			public IndexFilter getFilter() {
-				return filter;
-			}
-
-			@Override
-			public Stream<T> unfilteredStream() {
-				throw new UnsupportedOperationException("unfilteredStream() should be called only on unfiltered snapshots.");
-			}
-		};
-	}
-
 	@Override
 	default Iterator<T> iterator() {
 		return stream().iterator();
@@ -145,9 +126,7 @@ public interface Snapshot<T> extends Iterable<T> {
 	 */
 
 	default T first() {
-
 		return (iterator().hasNext() ? iterator().next() : null);
-
 	}
 
 	default T getByIndex(int index) {
@@ -179,7 +158,22 @@ public interface Snapshot<T> extends Iterable<T> {
 	}
 
 	default Snapshot<T> filter(IndexFilter filter) {
-		return createChild(this, filter);
+		return new Snapshot<T>() {
+			@Override
+			public Snapshot<T> getParent() {
+				return Snapshot.this;
+			}
+
+			@Override
+			public IndexFilter getFilter() {
+				return filter;
+			}
+
+			@Override
+			public Stream<T> unfilteredStream() {
+				throw new UnsupportedOperationException("unfilteredStream() should be called only on unfiltered snapshots.");
+			}
+		};
 	}
 
 	default Snapshot<T> filter(List<IndexFilter> filters) {
