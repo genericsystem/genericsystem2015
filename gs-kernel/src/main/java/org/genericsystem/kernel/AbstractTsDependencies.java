@@ -1,5 +1,6 @@
 package org.genericsystem.kernel;
 
+import java.lang.ref.SoftReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Spliterators;
@@ -12,6 +13,7 @@ import org.genericsystem.api.core.IndexFilter;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.AbstractIterator;
 import org.genericsystem.common.Generic;
+import org.genericsystem.common.SoftValueHashMap;
 import org.genericsystem.kernel.AbstractServer.RootServerHandler;
 
 /**
@@ -184,27 +186,25 @@ abstract class AbstractTsDependencies {
 	private class IndexNode {
 		private long ts;
 		private Index index;
-		private final IndexNode parent;
+		private final SoftReference<IndexNode> parent;
 
-		private ExtendedHashMap children = new ExtendedHashMap();
+		private SoftValueTsHashMap children = new SoftValueTsHashMap();
 
-		private class ExtendedHashMap extends ConcurrentHashMap<IndexFilter, IndexNode> {
-			private static final long serialVersionUID = 1873640660361944392L;
-
-			public IndexNode get(Object key, long ts) {
-				return super.computeIfAbsent((IndexFilter) key, k -> new IndexNode(new IndexImpl(k, ts, index), ts, IndexNode.this));
-			};
+		private class SoftValueTsHashMap extends SoftValueHashMap<IndexFilter, IndexNode> {
+			public synchronized IndexNode get(Object key, long ts) {
+				return computeIfAbsent((IndexFilter) key, k -> new IndexNode(new IndexImpl(k, ts, index), ts, IndexNode.this));
+			}
 		}
 
 		IndexNode(Index index, long ts, IndexNode parent) {
 			this.index = index;
 			this.ts = ts;
-			this.parent = parent;
+			this.parent = new SoftReference<>(parent);
 		}
 
 		Index getIndex(List<IndexFilter> filters, long ts) {
 			if (ts < this.ts)
-				index = new IndexImpl(index.getFilter(), ts, parent.index);
+				index = new IndexImpl(index.getFilter(), ts, parent.get().index);
 			if (filters.isEmpty())
 				return index;
 			return children.get(filters.get(0), ts).getIndex(filters.subList(1, filters.size()), ts);

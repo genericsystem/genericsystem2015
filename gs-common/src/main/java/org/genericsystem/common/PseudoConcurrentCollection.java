@@ -6,7 +6,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Spliterators;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -44,13 +43,18 @@ public class PseudoConcurrentCollection<T extends IGeneric<?>> implements Snapsh
 	private class IndexNode {
 		private Index<T> index;
 
-		private ConcurrentHashMap<IndexFilter, IndexNode> children = new ConcurrentHashMap<IndexFilter, IndexNode>() {
-			private static final long serialVersionUID = -1745909616130661281L;
+		private SoftValueHashMap<IndexFilter, IndexNode> children = new SoftValueHashMap<IndexFilter, IndexNode>() {
 
 			@Override
-			public IndexNode get(Object key) {
-				return super.computeIfAbsent((IndexFilter) key, k -> new IndexNode(new IndexImpl(k, index)));
-			};
+			public synchronized IndexNode get(Object key) {
+				IndexNode result = super.get(key);
+				if (result == null) {
+					IndexNode newValue = new IndexNode(new IndexImpl((IndexFilter) key, index));
+					put(key, newValue);
+					return newValue;
+				}
+				return result;
+			}
 		};
 
 		IndexNode(Index<T> index) {
