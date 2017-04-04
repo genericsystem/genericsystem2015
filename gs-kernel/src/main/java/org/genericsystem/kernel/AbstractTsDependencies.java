@@ -182,7 +182,6 @@ abstract class AbstractTsDependencies {
 		return indexesTree.getIndex(new ArrayList<>(), ts).stream(ts);
 	}
 
-	// TODO: Extend PseudoConcurrentCollection.IndexNode.
 	private class IndexNode {
 		private long ts;
 		private Index index;
