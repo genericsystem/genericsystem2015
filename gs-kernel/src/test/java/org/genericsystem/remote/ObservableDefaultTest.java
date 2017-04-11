@@ -29,10 +29,10 @@ public class ObservableDefaultTest extends AbstractTest {
 		ClientEngine engine = new ClientEngine();
 
 		Generic vehicle = engine.addInstance("vehicle");
-		ObservableList<Generic> vehicleObservableAttributes = vehicle.getObservableAttributes();
+		ObservableList<Generic> vehicleObservableAttributes = vehicle.getAttributes().toObservableList();
 
 		Generic car = engine.addInstance(vehicle, "car");
-		ObservableList<Generic> carObservableAttributes = car.getObservableAttributes();
+		ObservableList<Generic> carObservableAttributes = car.getAttributes().toObservableList();
 
 		Generic power = vehicle.addAttribute("power");
 		Thread.sleep(100);
@@ -53,7 +53,7 @@ public class ObservableDefaultTest extends AbstractTest {
 		Generic power = vehicle.addAttribute("power");
 		Generic car = engine.addInstance(vehicle, "car");
 
-		ObservableList<Generic> carObservableAttributes = car.getObservableAttributes();
+		ObservableList<Generic> carObservableAttributes = car.getAttributes().toObservableList();
 
 		Thread.sleep(100);
 
@@ -87,7 +87,7 @@ public class ObservableDefaultTest extends AbstractTest {
 		myCar.addHolder(carColorMat, "myCarRedMat", redMat);
 
 		Generic vehiclePower = vehicle.addAttribute("power");
-		ObservableList<Generic> myVehicleObservableHolders = myVehicle.getObservableHolders(vehiclePower);
+		ObservableList<Generic> myVehicleObservableHolders = myVehicle.getHolders(vehiclePower).toObservableList();
 		myVehicleObservableHolders.contains(null);// force compute
 		Generic myVehicle125 = myVehicle.addHolder(vehiclePower, "125");
 
@@ -110,13 +110,13 @@ public class ObservableDefaultTest extends AbstractTest {
 		Generic power = root.addInstance("Power", vehicle);
 		Generic car = root.addInstance(Arrays.asList(vehicle), "Car");
 
-		ObservableList<Generic> vehicleObservableHolders = vehicle.getObservableHolders(power);
+		ObservableList<Generic> vehicleObservableHolders = vehicle.getHolders(power).toObservableList();
 		vehicleObservableHolders.size();
-		ObservableList<Generic> powerObservableInstances = power.getObservableInstances();
+		ObservableList<Generic> powerObservableInstances = power.getInstances().toObservableList();
 		powerObservableInstances.size();
 		// ObservableValue<Generic> powerObservableInstance = power.getObservableInstance();
 		// powerObservableInstance.getValue();
-		ObservableList<Generic> carObservableHolders = car.getObservableHolders(power);
+		ObservableList<Generic> carObservableHolders = car.getHolders(power).toObservableList();
 		carObservableHolders.size();
 
 		Thread.sleep(100);
@@ -138,7 +138,7 @@ public class ObservableDefaultTest extends AbstractTest {
 	public void test_IteratorAndRemoveTest1() throws InterruptedException, ExecutionException, TimeoutException {
 		Generic root = new ClientEngine();
 		Generic car = root.addInstance("Car");
-		ObservableList<Generic> myCars = car.getObservableInstances();
+		ObservableList<Generic> myCars = car.getInstances().toObservableList();
 
 		myCars.size();
 
@@ -155,7 +155,7 @@ public class ObservableDefaultTest extends AbstractTest {
 			iterator.next();
 			cpt++;
 		}
-		assert cpt == 3;
+		assert cpt == 3 : cpt;
 	}
 
 	public void test_getInstanceTest13() throws InterruptedException, ExecutionException, TimeoutException {
@@ -163,7 +163,7 @@ public class ObservableDefaultTest extends AbstractTest {
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic vehiclePower = vehicle.addAttribute("power");
 
-		ObservableList<Generic> vehiclePowerObservableInstances = vehiclePower.getObservableInstances(116);
+		ObservableList<Generic> vehiclePowerObservableInstances = vehiclePower.getInstances(116).toObservableList();
 		vehiclePowerObservableInstances.size();
 
 		Generic car = root.addInstance(vehicle, "Car");
@@ -184,7 +184,7 @@ public class ObservableDefaultTest extends AbstractTest {
 		Generic vehicleColor = vehicle.addRelation("vehicleColor", color);
 		Generic car = root.addInstance(vehicle, "Car");
 
-		ObservableList<Generic> vehicleColorObservableInstances = vehicleColor.getObservableInstances("");
+		ObservableList<Generic> vehicleColorObservableInstances = vehicleColor.getInstances("").toObservableList();
 		vehicleColorObservableInstances.size();
 
 		Generic red = color.addInstance("red");
@@ -204,7 +204,7 @@ public class ObservableDefaultTest extends AbstractTest {
 		ClientEngine root = new ClientEngine();
 		Generic tree = root.addInstance("Tree");
 
-		ObservableList<Generic> children2ObservableInstances = tree.getObservableInstances("children2");
+		ObservableList<Generic> children2ObservableInstances = tree.getInstances("children2").toObservableList();
 		children2ObservableInstances.size();
 
 		Generic father = tree.addInstance("father");
@@ -228,12 +228,12 @@ public class ObservableDefaultTest extends AbstractTest {
 
 		Generic myBmw = car.addInstance("myBmw");
 		Generic myAudi = car.addInstance("myAudi");
-		ObservableList<Generic> myBmwObservableInstances = vehicleColor.getObservableInstances("", myBmw);
+		ObservableList<Generic> myBmwObservableInstances = vehicleColor.getInstances("", myBmw).toObservableList();
 		myBmwObservableInstances.size();
 
 		Generic red = color.addInstance("red");
 		Generic blue = color.addInstance("blue");
-		ObservableList<Generic> myBmwRedObservableInstances = vehicleColor.getObservableInstances("", myBmw, red);
+		ObservableList<Generic> myBmwRedObservableInstances = vehicleColor.getInstances("", myBmw, red).toObservableList();
 		myBmwObservableInstances.size();
 
 		vehicleColor.addInstance("", myBmw, red);
@@ -258,9 +258,9 @@ public class ObservableDefaultTest extends AbstractTest {
 		Generic myBmw = car.addInstance("myBmw");
 		Generic myAudi = car.addInstance("myAudi");
 
-		ObservableList<Generic> blueObservableInstances = vehicleColor.getObservableInstances(blue);
+		ObservableList<Generic> blueObservableInstances = vehicleColor.getInstances(blue).toObservableList();
 		blueObservableInstances.size();
-		ObservableList<Generic> myBmwObservableInstances = vehicleColor.getObservableInstances(myBmw);
+		ObservableList<Generic> myBmwObservableInstances = vehicleColor.getInstances(myBmw).toObservableList();
 		myBmwObservableInstances.size();
 
 		vehicleColor.addInstance("", myBmw, red);
@@ -277,12 +277,12 @@ public class ObservableDefaultTest extends AbstractTest {
 		ClientEngine root = new ClientEngine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic myBmw = vehicle.addInstance("myBmw");
-		ObservableList<Generic> myBmwObservableSubInstancesByVehicle = vehicle.getObservableSubInstances("myBmw");
+		ObservableList<Generic> myBmwObservableSubInstancesByVehicle = vehicle.getSubInstances("myBmw").toObservableList();
 		myBmwObservableSubInstancesByVehicle.size();
 
 		vehicle.addInstance("myAudi");
 		Generic car = root.addInstance(vehicle, "Car");
-		ObservableList<Generic> myBmwObservableSubInstancesByCar = car.getObservableSubInstances("myBmw");
+		ObservableList<Generic> myBmwObservableSubInstancesByCar = car.getSubInstances("myBmw").toObservableList();
 		myBmwObservableSubInstancesByCar.size();
 
 		Generic myBmwCar = car.addInstance("myBmw");
@@ -301,7 +301,7 @@ public class ObservableDefaultTest extends AbstractTest {
 		ClientEngine root = new ClientEngine();
 
 		Generic tree = root.addInstance("Tree");
-		ObservableList<Generic> treeObservableSubInstances = tree.getObservableSubInstances("children2");
+		ObservableList<Generic> treeObservableSubInstances = tree.getSubInstances("children2").toObservableList();
 		treeObservableSubInstances.size();
 
 		Generic father = tree.addInstance("father");
@@ -324,39 +324,39 @@ public class ObservableDefaultTest extends AbstractTest {
 
 	public void test_BindingServiceTest3() throws InterruptedException, ExecutionException, TimeoutException {
 		Generic engine = new ClientEngine();
-		ObservableList<Generic> engineSubInheritings = engine.getObservableSubInheritings();
+		ObservableList<Generic> engineSubInheritings = engine.getSubInheritings().toObservableList();
 		engineSubInheritings.size();
 
 		Generic animal = engine.addInstance("Animal");// Alone type
-		ObservableList<Generic> animalSubInheritings = animal.getObservableSubInheritings();
+		ObservableList<Generic> animalSubInheritings = animal.getSubInheritings().toObservableList();
 		animalSubInheritings.size();
 
 		Generic machine = engine.addInstance("Machine");
-		ObservableList<Generic> machineSubInheritings = machine.getObservableSubInheritings();
+		ObservableList<Generic> machineSubInheritings = machine.getSubInheritings().toObservableList();
 		machineSubInheritings.size();
 
 		Generic vehicle = engine.addInstance(machine, "Vehicle");
-		ObservableList<Generic> vehicleSubInheritings = vehicle.getObservableSubInheritings();
+		ObservableList<Generic> vehicleSubInheritings = vehicle.getSubInheritings().toObservableList();
 		vehicleSubInheritings.size();
 
 		Generic robot = engine.addInstance(machine, "Robot");
-		ObservableList<Generic> robotSubInheritings = robot.getObservableSubInheritings();
+		ObservableList<Generic> robotSubInheritings = robot.getSubInheritings().toObservableList();
 		robotSubInheritings.size();
 
 		Generic car = engine.addInstance(vehicle, "Car");
-		ObservableList<Generic> carSubInheritings = car.getObservableSubInheritings();
+		ObservableList<Generic> carSubInheritings = car.getSubInheritings().toObservableList();
 		carSubInheritings.size();
 
 		Generic bike = engine.addInstance(vehicle, "Bike");
-		ObservableList<Generic> bikeSubInheritings = bike.getObservableSubInheritings();
+		ObservableList<Generic> bikeSubInheritings = bike.getSubInheritings().toObservableList();
 		bikeSubInheritings.size();
 
 		Generic transformer = engine.addInstance(Arrays.asList(robot, car), "Transformer");
-		ObservableList<Generic> transformerSubInheritings = transformer.getObservableSubInheritings();
+		ObservableList<Generic> transformerSubInheritings = transformer.getSubInheritings().toObservableList();
 		transformerSubInheritings.size();
 
 		Generic plasticTransformer = engine.addInstance(transformer, "PlasticTransformer");
-		ObservableList<Generic> plasticTransformerSubInheritings = plasticTransformer.getObservableSubInheritings();
+		ObservableList<Generic> plasticTransformerSubInheritings = plasticTransformer.getSubInheritings().toObservableList();
 		plasticTransformerSubInheritings.size();
 
 		Thread.sleep(700);
@@ -399,12 +399,12 @@ public class ObservableDefaultTest extends AbstractTest {
 	public void test_getInstanceTest24() throws InterruptedException {
 		ClientEngine root = new ClientEngine();
 
-		ObservableList<Generic> rootSubInstancesPower = root.getRoot().getMetaAttribute().getObservableSubInstances(Collections.emptyList(), "power");
+		ObservableList<Generic> rootSubInstancesPower = root.getRoot().getMetaAttribute().getSubInstances(Collections.emptyList(), "power").toObservableList();
 
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic vehiclePower = vehicle.addAttribute("power");
 
-		ObservableList<Generic> rootSubInstancesPowerOverrideVehiclePower = root.getRoot().getMetaAttribute().getObservableSubInstances(vehiclePower, "power");
+		ObservableList<Generic> rootSubInstancesPowerOverrideVehiclePower = root.getRoot().getMetaAttribute().getSubInstances(vehiclePower, "power").toObservableList();
 
 		Generic car = root.addInstance(vehicle, "Car");
 		Generic trunck = root.addInstance(vehicle, "Trunck");

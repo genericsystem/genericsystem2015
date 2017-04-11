@@ -43,7 +43,7 @@ public class ObservableInheritanceComputer<T extends DefaultGeneric<T>> extends 
 				return new Inheritings(superVertex) {
 					@Override
 					protected Stream<T> compositesByMeta(T holder) {
-						ObservableList<T> filtered = localBase.getObservableComposites().filtered(x -> !x.equals(holder) && x.getMeta().equals(holder));
+						ObservableList<T> filtered = localBase.getComposites().toObservableList().filtered(x -> !x.equals(holder) && x.getMeta().equals(holder));
 						newInvalidators.add(filtered);
 						bind(filtered);
 						return super.compositesByMeta(holder);
@@ -51,7 +51,7 @@ public class ObservableInheritanceComputer<T extends DefaultGeneric<T>> extends 
 
 					@Override
 					protected Stream<T> compositesBySuper(T holder) {
-						ObservableList<T> filtered = localBase.getObservableComposites().filtered(x -> x.getSupers().contains(holder));
+						ObservableList<T> filtered = localBase.getComposites().toObservableList().filtered(x -> x.getSupers().contains(holder));
 						newInvalidators.add(filtered);
 						bind(filtered);
 						return super.compositesBySuper(holder);

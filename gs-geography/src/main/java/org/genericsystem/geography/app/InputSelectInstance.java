@@ -72,8 +72,7 @@ public class InputSelectInstance extends HtmlDiv {
 	public static class GENERIC_TEXT implements TextBinding {
 		@Override
 		public ObservableValue<String> apply(Context context, Tag tag) {
-			return new ReadOnlyStringWrapper(((InputSelectInstance) tag.getParent().getParent().getParent())
-					.displayInstance(context.getGeneric()));
+			return new ReadOnlyStringWrapper(((InputSelectInstance) tag.getParent().getParent().getParent()).displayInstance(context.getGeneric()));
 		}
 	}
 
@@ -103,9 +102,7 @@ public class InputSelectInstance extends HtmlDiv {
 	public static class AutocompleteAction implements ContextAction {
 		@Override
 		public void accept(Context context, Tag tag) {
-			tag.getParent().getParent().getParent().find(SearchInput.class).getDomNodeAttributes(context.getParent())
-					.put("value", ((InputSelectInstance) tag.getParent().getParent().getParent())
-							.displayInstance(context.getGeneric()));
+			tag.getParent().getParent().getParent().find(SearchInput.class).getDomNodeAttributes(context.getParent()).put("value", ((InputSelectInstance) tag.getParent().getParent().getParent()).displayInstance(context.getGeneric()));
 			tag.getContextProperty("txt", context).setValue("");
 			tag.getContextProperty("selected", context).setValue(context.getGeneric());
 
@@ -113,10 +110,7 @@ public class InputSelectInstance extends HtmlDiv {
 	}
 
 	public SortedList<Generic> filterInstances(Context c, Property<String> t) {
-		return c.getGeneric().getObservableSubInstances()
-				.filtered(res -> (t.getValue() != null && t.getValue().length() > 1)
-						? ((String) res.getValue()).toLowerCase().startsWith(t.getValue().toLowerCase()) : false)
-				.sorted();
+		return c.getGeneric().getSubInstances().toObservableList().filtered(res -> (t.getValue() != null && t.getValue().length() > 1) ? ((String) res.getValue()).toLowerCase().startsWith(t.getValue().toLowerCase()) : false).sorted();
 	}
 
 	public static class TEXT_FILTERED implements ObservableListExtractorFromContext {

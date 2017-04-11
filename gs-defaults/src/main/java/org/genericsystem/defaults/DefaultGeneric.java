@@ -15,19 +15,12 @@ import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
 import org.genericsystem.api.core.exceptions.AmbiguousSelectionException;
 import org.genericsystem.api.core.exceptions.MetaRuleConstraintViolationException;
 
-import javafx.collections.ObservableList;
-
 /**
  * @author Nicolas Feybesse
  *
  * @param <T>
  */
 public interface DefaultGeneric<T extends DefaultGeneric<T>> extends DefaultAncestors<T>, DefaultDependencies<T>, DefaultDisplay<T>, DefaultSystemProperties<T>, DefaultCompositesInheritance<T>, DefaultWritable<T>, Comparable<T> {
-
-	@Override
-	default ObservableList<T> getObservableComposites() {
-		return DefaultDependencies.super.getObservableComposites();
-	}
 
 	@Override
 	default DefaultCache<T> getCurrentCache() {
