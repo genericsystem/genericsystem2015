@@ -90,13 +90,7 @@ public class Transaction extends CheckedContext implements IDifferential<Generic
 
 			@Override
 			public Snapshot<Generic> filter(List<IndexFilter> filters) {
-				return new Snapshot<Generic>() {
-
-					@Override
-					public Stream<Generic> unfilteredStream() {
-						return ((RootServerHandler) ancestor.getProxyHandler()).getDependencies().stream(getTs(), filters);
-					}
-				};
+				return ((RootServerHandler) ancestor.getProxyHandler()).getDependencies().filter(filters, getTs());
 			}
 
 			@Override

@@ -33,18 +33,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>javax.json</groupId>
-			<artifactId>javax.json-api</artifactId>
-			<version>${json-api.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.glassfish</groupId>
-			<artifactId>javax.json</artifactId>
-			<version>${json.version}</version>
-		</dependency>
-
-
-		<dependency>
 			<groupId>org.javassist</groupId>
 			<artifactId>javassist</artifactId>
 			<version>${javassist.version}</version>
@@ -55,24 +43,6 @@
 			<artifactId>vertx-core</artifactId>
 			<version>${vertx.version}</version>
 		</dependency>
-
-		<dependency>
-			<groupId>io.vertx</groupId>
-			<artifactId>vertx-unit</artifactId>
-			<version>${vertx.version}</version>
-		</dependency>
-		
-		<dependency>
-			<groupId>io.vertx</groupId>
-			<artifactId>vertx-sync</artifactId>
-			<version>${vertx.version}</version>
-		</dependency>
-
-		<!-- <dependency> <groupId>io.vertx</groupId> <artifactId>vertx-hazelcast</artifactId> 
-			<version>${vertx.version}</version> </dependency> <dependency> <groupId>com.hazelcast</groupId> 
-			<artifactId>hazelcast</artifactId> <version>3.4</version> <exclusions> <exclusion> 
-			<groupId>net.sourceforge.findbugs</groupId> <artifactId>annotations</artifactId> 
-			</exclusion> </exclusions> </dependency> -->
 
 	</dependencies>
 	<properties>

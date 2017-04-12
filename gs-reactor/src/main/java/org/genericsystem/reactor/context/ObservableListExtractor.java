@@ -49,9 +49,7 @@ public interface ObservableListExtractor extends Function<Generic[], ObservableL
 
 	public static final ObservableListExtractor HOLDERS = generics -> {
 		// System.out.println("HOLDERS : " + Arrays.toString(generics) + " " + generics[1].getObservableHolders(generics[0]));
-
 		ObservableList<Generic> holders = generics[1].getObservableHolders(generics[0]);
-		// holders.addListener((ListChangeListener) c -> System.out.println(c));
 		return holders;
 	};
 
