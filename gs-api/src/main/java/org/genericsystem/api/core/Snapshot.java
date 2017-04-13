@@ -2,10 +2,14 @@ package org.genericsystem.api.core;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 /**
  * Represents a <code>Set</code> of results <em>aware</em> of its context.
@@ -21,6 +25,14 @@ import java.util.stream.Stream;
 @FunctionalInterface
 public interface Snapshot<T> extends Iterable<T> {
 
+	default Snapshot<T> getParent() {
+		return null;
+	}
+
+	default IndexFilter getFilter() {
+		return null;
+	}
+
 	@Override
 	default Iterator<T> iterator() {
 		return stream().iterator();
@@ -31,7 +43,24 @@ public interface Snapshot<T> extends Iterable<T> {
 	 *
 	 * @return a <code>Stream</code> of this <code>Snapshot</code>.
 	 */
-	abstract Stream<T> stream();
+	default Stream<T> stream() {
+		List<IndexFilter> filters = new LinkedList<>();
+		Snapshot<T> current = this;
+		while (current.getParent() != null) {
+			filters.add(0, current.getFilter());
+			current = current.getParent();
+		}
+		if (!filters.isEmpty())
+			return current.filter(filters).unfilteredStream();
+		return unfilteredStream();
+	}
+
+	/**
+	 * Returns a <code>Stream</code> of this <code>Snapshot</code>. Used only if this <code>Snapshot</code> is not filtered.
+	 *
+	 * @return a <code>Stream</code> of this <code>Snapshot</code>.
+	 */
+	public Stream<T> unfilteredStream();
 
 	/**
 	 * Returns the number of elements in this snapshot.
@@ -100,9 +129,7 @@ public interface Snapshot<T> extends Iterable<T> {
 	 */
 
 	default T first() {
-
 		return (iterator().hasNext() ? iterator().next() : null);
-
 	}
 
 	default T getByIndex(int index) {
@@ -121,7 +148,7 @@ public interface Snapshot<T> extends Iterable<T> {
 		return new Snapshot<T>() {
 
 			@Override
-			public Stream<T> stream() {
+			public Stream<T> unfilteredStream() {
 				return Snapshot.this.stream().filter(predicate);
 			}
 
@@ -133,23 +160,48 @@ public interface Snapshot<T> extends Iterable<T> {
 		};
 	}
 
-	default <U extends IGeneric<U>> Snapshot<T> filter(Filters filter, U generic) {
+	default Snapshot<T> filter(IndexFilter filter) {
+		return new Snapshot<T>() {
+			@Override
+			public Snapshot<T> getParent() {
+				return Snapshot.this;
+			}
+
+			@Override
+			public IndexFilter getFilter() {
+				return filter;
+			}
+
+			@Override
+			public Stream<T> unfilteredStream() {
+				throw new UnsupportedOperationException("unfilteredStream() should be called only on unfiltered snapshots.");
+			}
+		};
+	}
+
+	default Snapshot<T> filter(List<IndexFilter> filters) {
 		return new Snapshot<T>() {
 
 			@Override
-			public Stream<T> stream() {
-				return Snapshot.this.stream().filter(g -> filter.getFilter(generic).test((U) g));
+			public Stream<T> unfilteredStream() {
+				return Snapshot.this.stream().filter(g -> filters.stream().allMatch(filter -> filter.test((IGeneric<?>) g)));
 			}
 
 			@Override
 			public T get(Object o) {
 				T result = Snapshot.this.get(o);
-				return result != null && filter.getFilter(generic).test((U) result) ? result : null;
+				return result != null && filters.stream().allMatch(filter -> filter.test((IGeneric<?>) result)) ? result : null;
 			}
 		};
 	}
 
 	default List<T> toList() {
 		return stream().collect(Collectors.toList());
+	}
+
+	default ObservableList<T> toObservableList() {
+		if (getParent() != null)
+			return getParent().toObservableList().filtered(g -> getFilter().test((IGeneric<?>) g));
+		return FXCollections.observableArrayList(toList());
 	}
 }

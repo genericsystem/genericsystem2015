@@ -15,19 +15,12 @@ import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
 import org.genericsystem.api.core.exceptions.AmbiguousSelectionException;
 import org.genericsystem.api.core.exceptions.MetaRuleConstraintViolationException;
 
-import javafx.collections.ObservableList;
-
 /**
  * @author Nicolas Feybesse
  *
  * @param <T>
  */
 public interface DefaultGeneric<T extends DefaultGeneric<T>> extends DefaultAncestors<T>, DefaultDependencies<T>, DefaultDisplay<T>, DefaultSystemProperties<T>, DefaultCompositesInheritance<T>, DefaultWritable<T>, Comparable<T> {
-
-	@Override
-	default ObservableList<T> getObservableComposites() {
-		return DefaultDependencies.super.getObservableComposites();
-	}
 
 	@Override
 	default DefaultCache<T> getCurrentCache() {
@@ -267,7 +260,7 @@ public interface DefaultGeneric<T extends DefaultGeneric<T>> extends DefaultAnce
 			if (!getMeta().isReferentialIntegrityEnabled(i) && getMeta().isSingularConstraintEnabled(i))
 				return equiv2(componentsList.get(i), (T) components.get(i));
 		for (int i = 0; i < componentsList.size(); i++)
-			if (!equiv(componentsList.get(i), components.get(i)))
+			if (componentsList.get(i) != components.get(i))
 				return false;
 		if (!getMeta().isPropertyConstraintEnabled())
 			return Objects.equals(getValue(), value);

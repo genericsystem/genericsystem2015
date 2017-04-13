@@ -125,7 +125,7 @@ public class ExtendedRootTag extends RootTagImpl {
 		return new RootHtmlDomNode(rootModelContext, this, rootId, send) {
 			private final ObservableList<GTagAnnotationContent> annotationContentInstances;
 			{
-				annotationContentInstances = (ObservableList) engine.find(TagAnnotationContentAttribute.class).getObservableSubInstances();
+				annotationContentInstances = (ObservableList) engine.find(TagAnnotationContentAttribute.class).getSubInstances().toObservableList();
 				annotationContentInstances.addListener(new WeakListChangeListener<>(listener));
 			}
 		};

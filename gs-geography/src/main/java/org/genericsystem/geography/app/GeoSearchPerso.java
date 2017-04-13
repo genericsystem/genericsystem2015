@@ -52,10 +52,7 @@ public class GeoSearchPerso extends RootTagImpl {
 	public static class Input2 extends InputSelectInstance {
 		@Override
 		public SortedList<Generic> filterInstances(Context c, Property<String> t) {
-			return c.getGeneric().getObservableSubInstances()
-					.filtered(res -> (t.getValue() != null && t.getValue().length() > 1)
-							? ((String) res.getValue()).toLowerCase().contains(t.getValue().toLowerCase()) : false)
-					.sorted();
+			return c.getGeneric().getSubInstances().toObservableList().filtered(res -> (t.getValue() != null && t.getValue().length() > 1) ? ((String) res.getValue()).toLowerCase().contains(t.getValue().toLowerCase()) : false).sorted();
 		}
 	}
 

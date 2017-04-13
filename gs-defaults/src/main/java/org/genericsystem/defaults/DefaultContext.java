@@ -10,15 +10,14 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.genericsystem.api.core.ApiStatics;
-import org.genericsystem.api.core.Filters;
+import org.genericsystem.api.core.FiltersBuilder;
 import org.genericsystem.api.core.IContext;
+import org.genericsystem.api.core.IndexFilter;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ReferentialIntegrityConstraintViolationException;
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.api.core.exceptions.UnreachableOverridesException;
 import org.genericsystem.defaults.tools.SupersComputer;
-
-import javafx.collections.ObservableList;
 
 /**
  * @author Nicolas Feybesse
@@ -47,27 +46,15 @@ public interface DefaultContext<T extends DefaultGeneric<T>> extends IContext<T>
 	}
 
 	default Snapshot<T> getInstances(T vertex) {
-		return getDependencies(vertex).filter(Filters.INSTANCES, vertex);
-	}
-
-	default ObservableList<T> getObservableInstances(T vertex) {
-		return getObservableDependencies(vertex).filtered(x -> vertex.equals(x.getMeta()));
+		return getDependencies(vertex).filter(new IndexFilter(FiltersBuilder.INSTANCES, vertex));
 	}
 
 	default Snapshot<T> getInheritings(T vertex) {
-		return getDependencies(vertex).filter(Filters.INHERITINGS, vertex);
-	}
-
-	default ObservableList<T> getObservableInheritings(T vertex) {
-		return getObservableDependencies(vertex).filtered(x -> x.getSupers().contains(vertex));
+		return getDependencies(vertex).filter(new IndexFilter(FiltersBuilder.INHERITINGS, vertex));
 	}
 
 	default Snapshot<T> getComposites(T vertex) {
-		return getDependencies(vertex).filter(Filters.COMPOSITES, vertex);
-	}
-
-	default ObservableList<T> getObservableComposites(T vertex) {
-		return getObservableDependencies(vertex).filtered(x -> x.getComponents().contains(vertex));
+		return getDependencies(vertex).filter(new IndexFilter(FiltersBuilder.COMPOSITES, vertex));
 	}
 
 	default void discardWithException(Throwable exception) throws RollbackException {
@@ -81,7 +68,7 @@ public interface DefaultContext<T extends DefaultGeneric<T>> extends IContext<T>
 			OrderedDependencies visit(T node) {
 				if (!contains(node)) {
 					add(node);
-					getDependencies(node).forEach(this::visit);
+					getDependencies(node).stream().forEach(this::visit);
 				}
 				return this;
 			}
@@ -100,12 +87,15 @@ public interface DefaultContext<T extends DefaultGeneric<T>> extends IContext<T>
 						super.addAll(computeDependencies(node));
 					else {
 						alreadyVisited.add(node);
-						getDependencies(node).forEach(this::visit);
+						getDependencies(node).stream().forEach(this::visit);
 					}
 				return this;
 			}
 		}
-		return new PotentialDependenciesComputer().visit(meta);
+		if (components.isEmpty())
+			return meta.isMeta() ? new PotentialDependenciesComputer().visit(meta) : new TreeSet<>();
+		else
+			return new PotentialDependenciesComputer().visit(components.get(0));
 	}
 
 	default NavigableSet<T> computeRemoveDependencies(T node) {
@@ -147,8 +137,6 @@ public interface DefaultContext<T extends DefaultGeneric<T>> extends IContext<T>
 	}
 
 	Snapshot<T> getDependencies(T vertex);
-
-	ObservableList<T> getObservableDependencies(T generic);
 
 	default T getMeta(int dim) {
 		T adjustedMeta = getRoot().adjustMeta(rootComponents(dim));

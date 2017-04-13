@@ -1,5 +1,6 @@
 package org.genericsystem.defaults.tools;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -7,6 +8,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.genericsystem.api.core.FiltersBuilder;
+import org.genericsystem.api.core.IndexFilter;
 import org.genericsystem.defaults.DefaultGeneric;
 
 /**
@@ -78,11 +81,11 @@ public class InheritanceComputer<T extends DefaultGeneric<T>> extends HashSet<T>
 		}
 
 		protected Stream<T> compositesByMeta(T holder) {
-			return localBase.getComposites().stream().filter(x -> !x.equals(holder) && x.getMeta().equals(holder));
+			return localBase.getDependencies().filter(Arrays.asList(new IndexFilter(FiltersBuilder.COMPOSITES, localBase), new IndexFilter(FiltersBuilder.HAS_META, holder))).stream();
 		}
 
 		protected Stream<T> compositesBySuper(T holder) {
-			return localBase.getComposites().stream().filter(x -> x.getSupers().contains(holder));
+			return localBase.getDependencies().filter(Arrays.asList(new IndexFilter(FiltersBuilder.COMPOSITES, localBase), new IndexFilter(FiltersBuilder.HAS_SUPER, holder))).stream();
 		}
 
 	}

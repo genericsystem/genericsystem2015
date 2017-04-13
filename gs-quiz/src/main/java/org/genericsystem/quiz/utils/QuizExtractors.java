@@ -25,14 +25,14 @@ public class QuizExtractors {
 		// TODO Rendre la méthode générique -> lui faire trouver les enfants d'un generic ssi il y a un unique enfant
 		@Override
 		public ObservableList<Generic> apply(Generic[] generics) {
-			return generics[0].getObservableHolders(generics[0].getRoot().find(Answer.class));
+			return generics[0].getHolders(generics[0].getRoot().find(Answer.class)).toObservableList();
 		}
 	}
 
 	public static class QUESTIONS_EXTRACTOR implements ObservableListExtractor {
 		@Override
 		public ObservableList<Generic> apply(Generic[] generics) {
-			return generics[0].getObservableHolders(generics[0].getRoot().find(Question.class));
+			return generics[0].getHolders(generics[0].getRoot().find(Question.class)).toObservableList();
 		}
 	}
 
@@ -40,7 +40,7 @@ public class QuizExtractors {
 
 		@Override
 		public ObservableList<Generic> apply(Generic[] generics) {
-			return generics[0].getObservableHolders(generics[0].getRoot().find(Description.class));
+			return generics[0].getHolders(generics[0].getRoot().find(Description.class)).toObservableList();
 		}
 
 	}
@@ -96,7 +96,7 @@ public class QuizExtractors {
 
 				@Override
 				protected ObservableList<Generic> computeValue() {
-					return context.getGeneric().getObservableSubInstances().sorted(byQuiz.thenComparing(byScoreUser)).filtered(scoreUser -> {
+					return context.getGeneric().getSubInstances().toObservableList().sorted(byQuiz.thenComparing(byScoreUser)).filtered(scoreUser -> {
 
 						boolean isQuiz = true;
 						boolean isUser = true;

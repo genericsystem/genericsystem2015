@@ -943,6 +943,8 @@ public interface IGeneric<T extends IGeneric<T>> extends ISignature<T> {
 	 */
 	Snapshot<T> getComposites();
 
+	boolean isDirectAncestorOf(T vertex);
+
 	/**
 	 * Indicates whether this vertex is ancestor of the specified dependency.
 	 * <p>

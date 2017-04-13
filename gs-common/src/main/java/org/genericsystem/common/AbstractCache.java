@@ -3,9 +3,7 @@ package org.genericsystem.common;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -23,14 +21,11 @@ import org.genericsystem.defaults.tools.BindingsTools;
 
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
-import javafx.beans.binding.ListBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableIntegerValue;
 import javafx.beans.value.ObservableLongValue;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 
 /**
  * @author Nicolas Feybesse
@@ -75,7 +70,6 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 	private ObservableIntegerValue cacheLevel;
 	private ObservableLongValue ts;
 	private final ContextEventListener<Generic> listener;
-	private Map<Generic, ObservableList<Generic>> dependenciesAsOservableListCacheMap = new HashMap<>();
 
 	@Override
 	public long shiftTs() throws RollbackException {
@@ -101,8 +95,7 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 		this.restructurator = buildRestructurator();
 		this.listener = listener;
 		transactionProperty = new SimpleObjectProperty<>(buildTransaction());
-		cacheLevel = Bindings.createIntegerBinding(() -> differentialProperty.get().getCacheLevel(),
-				differentialProperty);
+		cacheLevel = Bindings.createIntegerBinding(() -> differentialProperty.get().getCacheLevel(), differentialProperty);
 		ts = Bindings.createLongBinding(() -> transactionProperty.get().getTs(), transactionProperty);
 		initialize();
 	}
@@ -134,86 +127,19 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 
 	@Override
 	public Snapshot<Generic> getDependencies(Generic generic) {
-		return getDifferential().getDependencies(generic);
+		return getDifferential().getDependencies(generic, this);
 	}
 
 	protected Restructurator buildRestructurator() {
 		return new Restructurator(this);
 	}
 
-	// private Observable getObservable(Generic generic) {
-	// return TransitiveObservable.create(differentialProperty, () -> new Observable[] {
-	// differentialProperty.get().getObservable(generic) });
-	// }
-
 	public Observable getObservable(Generic generic) {
-		return BindingsTools.createTransitive(differentialProperty,
-				diff -> new Observable[] { diff.getObservable(generic) });
-	}
-
-	// @Override
-	// public ObservableList<Generic> getObservableDependencies(Generic generic) {
-	// ObservableList<Generic> result = dependenciesAsOservableListCacheMap.get(generic);
-	// if (result == null) {
-	// result = new ListBinding<Generic>() {
-	// private Observable o = getObservable(generic);
-	// {
-	// bind(o);
-	// }
-	//
-	// @Override
-	// protected ObservableList<Generic> computeValue() {
-	// return FXCollections.observableList(AbstractCache.this.getDependencies(generic).toList());
-	// }
-	// };
-	// dependenciesAsOservableListCacheMap.put(generic, result);
-	// }
-	// return result;
-	// }
-
-	// private Observable getObservable(Generic generic) {
-	// return TransitiveObservable.create(differentialProperty, () -> new Observable[] {
-	// differentialProperty.get().getObservable(generic) });
-	// }
-
-	@Override
-	public ObservableList<Generic> getObservableDependencies(Generic generic) {
-		ObservableList<Generic> result = dependenciesAsOservableListCacheMap.get(generic);
-		if (result == null) {
-			result = BindingsTools.createMinimalUnitaryChangesBinding(
-					BindingsTools.transmitSuccessiveInvalidations(new ListBinding<Generic>() {
-						private final Observable invalidator = getObservable(generic);
-						{
-							bind(invalidator);
-							invalidate();
-						}
-
-						@Override
-						protected ObservableList<Generic> computeValue() {
-							return FXCollections.observableList(AbstractCache.this.getDependencies(generic).toList());
-						}
-					}));
-
-			// new AbstractMinimalChangesObservableList<Generic>() {
-			// private final Observable invalidator = getObservable(generic);
-			// {
-			// bind(invalidator);
-			// invalidate();
-			// }
-			//
-			// @Override
-			// protected List<Generic> computeValue() {
-			// return AbstractCache.this.getDependencies(generic).toList();
-			// }
-			// };
-			dependenciesAsOservableListCacheMap.put(generic, result);
-		}
-		return result;
+		return BindingsTools.createTransitive(differentialProperty, diff -> new Observable[] { diff.getObservable(generic) });
 	}
 
 	protected void initialize() {
-		differentialProperty.set(buildDifferential(
-				getDifferential() == null ? buildTransactionDifferential() : getDifferential().getSubDifferential()));
+		differentialProperty.set(buildDifferential(getDifferential() == null ? buildTransactionDifferential() : getDifferential().getSubDifferential()));
 	}
 
 	protected Differential buildDifferential(IDifferential<Generic> subCache) {
@@ -311,8 +237,7 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 			listener.triggersMutationEvent(oldDependency, newDependency);
 	}
 
-	Generic buildAndPlug(Class<?> clazz, Generic meta, List<Generic> supers, Serializable value,
-			List<Generic> components) {
+	public Generic buildAndPlug(Class<?> clazz, Generic meta, List<Generic> supers, Serializable value, List<Generic> components) {
 		return plug(getRoot().build(null, clazz, meta, supers, value, components));
 	}
 
