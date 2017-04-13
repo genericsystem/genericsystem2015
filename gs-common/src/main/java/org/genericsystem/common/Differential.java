@@ -13,8 +13,11 @@ import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.defaults.tools.BindingsTools;
 
 import javafx.beans.Observable;
+import javafx.beans.binding.ListBinding;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 /**
  * @author Nicolas Feybesse
@@ -72,18 +75,23 @@ public class Differential implements IDifferential<Generic> {
 
 	@Override
 	public Snapshot<Generic> getDependencies(Generic generic) {
+		return getDependencies(generic, null);
+	}
+
+	@Override
+	public Snapshot<Generic> getDependencies(Generic generic, AbstractCache cache) {
 		return new Snapshot<Generic>() {
 			@Override
 			public Generic get(Object o) {
 				Generic result = adds.get(o);
 				if (result != null)
 					return generic.isDirectAncestorOf(result) ? result : null;
-				return !removes.contains(o) ? subDifferential.getDependencies(generic).get(o) : null;
+				return !removes.contains(o) ? subDifferential.getDependencies(generic, cache).get(o) : null;
 			}
 
 			@Override
 			public Stream<Generic> unfilteredStream() {
-				return Stream.concat(adds.contains(generic) ? Stream.empty() : subDifferential.getDependencies(generic).filter(new IndexFilter(FiltersBuilder.NOT_CONTAINED_IN_PARAM, new ArrayList<>(removes.toList()))).stream(),
+				return Stream.concat(adds.contains(generic) ? Stream.empty() : subDifferential.getDependencies(generic, cache).filter(new IndexFilter(FiltersBuilder.NOT_CONTAINED_IN_PARAM, new ArrayList<>(removes.toList()))).stream(),
 						adds.filter(new IndexFilter(FiltersBuilder.IS_DIRECT_DEPENDENCY_OF, generic)).stream());
 			}
 
@@ -95,9 +103,25 @@ public class Differential implements IDifferential<Generic> {
 					public Stream<Generic> unfilteredStream() {
 						List<IndexFilter> filters_ = new ArrayList<>(filters);
 						filters_.add(new IndexFilter(FiltersBuilder.NOT_CONTAINED_IN_PARAM, new ArrayList<>(removes.toList())));
-						return Stream.concat(adds.contains(generic) ? Stream.empty() : subDifferential.getDependencies(generic).filter(filters_).stream(), adds.filter(filters).stream().filter(x -> generic.isDirectAncestorOf(x)));
+						return Stream.concat(adds.contains(generic) ? Stream.empty() : subDifferential.getDependencies(generic, cache).filter(filters_).stream(), adds.filter(filters).stream().filter(x -> generic.isDirectAncestorOf(x)));
 					}
 				};
+			}
+
+			@Override
+			public ObservableList<Generic> toObservableList() {
+				return BindingsTools.createMinimalUnitaryChangesBinding(BindingsTools.transmitSuccessiveInvalidations(new ListBinding<Generic>() {
+					private final Observable invalidator = cache != null ? cache.getObservable(generic) : getObservable(generic);
+					{
+						bind(invalidator);
+						invalidate();
+					}
+
+					@Override
+					protected ObservableList<Generic> computeValue() {
+						return FXCollections.observableList(cache != null ? cache.getDependencies(generic).toList() : Differential.this.getDependencies(generic).toList());
+					}
+				}));
 			}
 		};
 	}

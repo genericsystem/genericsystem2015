@@ -5,6 +5,7 @@ import org.genericsystem.geography.app.GeoSearchPerso.Input1;
 import org.genericsystem.geography.app.GeoSearchPerso.Input2;
 import org.genericsystem.geography.app.GeoSearchPerso.Test1;
 import org.genericsystem.geography.app.GeoSearchPerso.Test2;
+import org.genericsystem.geography.components.InputSelectInstance;
 import org.genericsystem.geography.model.AdministrativeTerritory;
 import org.genericsystem.geography.model.Building;
 import org.genericsystem.geography.model.City;
@@ -51,10 +52,7 @@ public class GeoSearchPerso extends RootTagImpl {
 	public static class Input2 extends InputSelectInstance {
 		@Override
 		public SortedList<Generic> filterInstances(Context c, Property<String> t) {
-			return c.getGeneric().getObservableSubInstances()
-					.filtered(res -> (t.getValue() != null && t.getValue().length() > 1)
-							? ((String) res.getValue()).toLowerCase().contains(t.getValue().toLowerCase()) : false)
-					.sorted();
+			return c.getGeneric().getSubInstances().toObservableList().filtered(res -> (t.getValue() != null && t.getValue().length() > 1) ? ((String) res.getValue()).toLowerCase().contains(t.getValue().toLowerCase()) : false).sorted();
 		}
 	}
 

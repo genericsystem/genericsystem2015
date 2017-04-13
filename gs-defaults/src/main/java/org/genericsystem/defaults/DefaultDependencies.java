@@ -76,19 +76,9 @@ public interface DefaultDependencies<T extends DefaultGeneric<T>> extends IGener
 	}
 
 	@SuppressWarnings("unchecked")
-	default ObservableList<T> getObservableInstances(Serializable value, T... components) {
-		return getObservableInstances(components).filtered(valueFilter(value));
-	}
-
-	@SuppressWarnings("unchecked")
 	@Override
 	default Snapshot<T> getInstances() {
 		return getCurrentCache().getInstances((T) this);
-	}
-
-	@SuppressWarnings("unchecked")
-	default ObservableList<T> getObservableInstances() {
-		return getCurrentCache().getObservableInstances((T) this);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -97,20 +87,10 @@ public interface DefaultDependencies<T extends DefaultGeneric<T>> extends IGener
 		return getInstances().filter(new IndexFilter(FiltersBuilder.HAS_COMPONENTS, (Object[]) components));
 	}
 
-	@SuppressWarnings("unchecked")
-	default ObservableList<T> getObservableInstances(T... components) {
-		return getObservableInstances().filtered(componentsFilter(components));
-	}
-
 	@Override
 	@SuppressWarnings("unchecked")
 	default Snapshot<T> getInstances(T override, Serializable value, T... components) {
 		return getInstances(Collections.singletonList(override), value, components);
-	}
-
-	@SuppressWarnings("unchecked")
-	default ObservableList<T> getObservableInstances(T override, Serializable value, T... components) {
-		return getObservableInstances(Collections.singletonList(override), value, components);
 	}
 
 	@Override
@@ -118,12 +98,6 @@ public interface DefaultDependencies<T extends DefaultGeneric<T>> extends IGener
 	default Snapshot<T> getInstances(List<T> overrides, Serializable value, T... components) {
 		List<T> supers = getCurrentCache().computeAndCheckOverridesAreReached((T) this, overrides, value, Arrays.asList(components));
 		return getInstances(value, components).filter(new IndexFilter(FiltersBuilder.HAS_SUPERS, supers.toArray()));
-	}
-
-	@SuppressWarnings("unchecked")
-	default ObservableList<T> getObservableInstances(List<T> overrides, Serializable value, T... components) {
-		List<T> supers = getCurrentCache().computeAndCheckOverridesAreReached((T) this, overrides, value, Arrays.asList(components));
-		return getObservableInstances(value, components).filtered(overridesFilter(supers));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -135,12 +109,7 @@ public interface DefaultDependencies<T extends DefaultGeneric<T>> extends IGener
 	@SuppressWarnings("unchecked")
 	@Override
 	default Snapshot<T> getSubInstances(Serializable value, T... components) {
-		return getSubInstances(components).filter(valueFilter(value));
-	}
-
-	@SuppressWarnings("unchecked")
-	default ObservableList<T> getObservableSubInstances(Serializable value, T... components) {
-		return getObservableSubInstances(components).filtered(valueFilter(value));
+		return getSubInstances(components).filter(new IndexFilter(FiltersBuilder.HAS_VALUE, value));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -152,18 +121,12 @@ public interface DefaultDependencies<T extends DefaultGeneric<T>> extends IGener
 			public Stream<T> unfilteredStream() {
 				return Stream.concat(Stream.of((T) DefaultDependencies.this), getInheritings().stream().flatMap(inheriting -> inheriting.getSubInheritings().stream())).distinct();
 			}
+
+			@Override
+			public ObservableList<T> toObservableList() {
+				return BindingsTools.createMinimalUnitaryChangesBinding(getInheritings().toObservableList(), () -> getSubInheritings().toList(), g -> g.getSubInheritings().toObservableList());
+			}
 		};
-	}
-
-	default ObservableList<T> getObservableSubInheritings() {
-		return BindingsTools.createMinimalUnitaryChangesBinding(getObservableInheritings(), () -> getSubInheritings().toList(), g -> g.getObservableSubInheritings());
-
-		// return new TransitiveObservableList<T>(getObservableInheritings(), g -> g.getObservableSubInheritings()) {
-		// @Override
-		// protected List<T> computeValue() {
-		// return getSubInheritings().toList();
-		// }
-		// };
 	}
 
 	@Override
@@ -174,18 +137,12 @@ public interface DefaultDependencies<T extends DefaultGeneric<T>> extends IGener
 			public Stream<T> unfilteredStream() {
 				return getSubInheritings().stream().flatMap(inheriting -> inheriting.getInstances().stream());
 			}
+
+			@Override
+			public ObservableList<T> toObservableList() {
+				return BindingsTools.createMinimalUnitaryChangesBinding(getSubInheritings().toObservableList(), () -> getSubInstances().toList(), g -> g.getInstances().toObservableList());
+			}
 		};
-	}
-
-	default ObservableList<T> getObservableSubInstances() {
-		return BindingsTools.createMinimalUnitaryChangesBinding(getObservableSubInheritings(), () -> getSubInstances().toList(), g -> g.getObservableInstances());
-
-		// return new TransitiveObservableList<T>(getObservableSubInheritings(), g -> g.getObservableInstances()) {
-		// @Override
-		// protected List<T> computeValue() {
-		// return getSubInstances().toList();
-		// }
-		// };
 	}
 
 	@SuppressWarnings("unchecked")
@@ -201,11 +158,6 @@ public interface DefaultDependencies<T extends DefaultGeneric<T>> extends IGener
 	}
 
 	@SuppressWarnings("unchecked")
-	default ObservableList<T> getObservableSubInstances(T... components) {
-		return getObservableSubInstances().filtered(componentsFilter(components));
-	}
-
-	@SuppressWarnings("unchecked")
 	@Override
 	default T getSubInstance(T override, Serializable value, T... components) {
 		return getNonAmbiguousResult(getSubInstances(override, value, components).stream());
@@ -215,11 +167,6 @@ public interface DefaultDependencies<T extends DefaultGeneric<T>> extends IGener
 	@Override
 	default Snapshot<T> getSubInstances(T override, Serializable value, T... components) {
 		return getSubInstances(Collections.singletonList(override), value, components);
-	}
-
-	@SuppressWarnings("unchecked")
-	default ObservableList<T> getObservableSubInstances(T override, Serializable value, T... components) {
-		return getObservableSubInstances(Collections.singletonList(override), value, components);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -233,12 +180,6 @@ public interface DefaultDependencies<T extends DefaultGeneric<T>> extends IGener
 	default Snapshot<T> getSubInstances(List<T> overrides, Serializable value, T... components) {
 		List<T> supers = getCurrentCache().computeAndCheckOverridesAreReached((T) this, overrides, value, Arrays.asList(components));
 		return getSubInstances(value, components).filter(new IndexFilter(FiltersBuilder.HAS_SUPERS, supers.toArray()));
-	}
-
-	@SuppressWarnings("unchecked")
-	default ObservableList<T> getObservableSubInstances(List<T> overrides, Serializable value, T... components) {
-		List<T> supers = getCurrentCache().computeAndCheckOverridesAreReached((T) this, overrides, value, Arrays.asList(components));
-		return getObservableSubInstances(value, components).filtered(overridesFilter(supers));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -260,30 +201,15 @@ public interface DefaultDependencies<T extends DefaultGeneric<T>> extends IGener
 	}
 
 	@SuppressWarnings("unchecked")
-	default ObservableList<T> getObservableInheritings(Serializable value, T... components) {
-		return getObservableInheritings(components).filtered(valueFilter(value));
-	}
-
-	@SuppressWarnings("unchecked")
 	@Override
 	default Snapshot<T> getInheritings() {
 		return getCurrentCache().getInheritings((T) this);
 	}
 
 	@SuppressWarnings("unchecked")
-	default ObservableList<T> getObservableInheritings() {
-		return getCurrentCache().getObservableInheritings((T) this);
-	}
-
-	@SuppressWarnings("unchecked")
 	@Override
 	default Snapshot<T> getInheritings(T... components) {
 		return getInheritings().filter(new IndexFilter(FiltersBuilder.HAS_COMPONENTS, (Object[]) components));
-	}
-
-	@SuppressWarnings("unchecked")
-	default ObservableList<T> getObservableInheritings(T... components) {
-		return getObservableInheritings().filtered(componentsFilter(components));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -299,11 +225,6 @@ public interface DefaultDependencies<T extends DefaultGeneric<T>> extends IGener
 	}
 
 	@SuppressWarnings("unchecked")
-	default ObservableList<T> getObservableSubInheritings(Serializable value, T... components) {
-		return getObservableSubInheritings(components).filtered(valueFilter(value));
-	}
-
-	@SuppressWarnings("unchecked")
 	@Override
 	default T getSubInheriting(T... components) {
 		return getNonAmbiguousResult(getSubInheritings(components).stream());
@@ -313,11 +234,6 @@ public interface DefaultDependencies<T extends DefaultGeneric<T>> extends IGener
 	@Override
 	default Snapshot<T> getSubInheritings(T... components) {
 		return getSubInheritings().filter(new IndexFilter(FiltersBuilder.HAS_COMPONENTS, (Object[]) components));
-	}
-
-	@SuppressWarnings("unchecked")
-	default ObservableList<T> getObservableSubInheritings(T... components) {
-		return getObservableSubInheritings().filtered(componentsFilter(components));
 	}
 
 	@Override
@@ -330,19 +246,10 @@ public interface DefaultDependencies<T extends DefaultGeneric<T>> extends IGener
 		return getComposites().filter(new IndexFilter(FiltersBuilder.HAS_VALUE, value));
 	}
 
-	default ObservableList<T> getObservableComposites(Serializable value) {
-		return getObservableComposites().filtered(valueFilter(value));
-	}
-
 	@SuppressWarnings("unchecked")
 	@Override
 	default Snapshot<T> getComposites() {
 		return getCurrentCache().getComposites((T) this);
-	}
-
-	@SuppressWarnings("unchecked")
-	default ObservableList<T> getObservableComposites() {
-		return getCurrentCache().getObservableComposites((T) this);
 	}
 
 	static <T extends DefaultGeneric<T>> Predicate<T> valueFilter(Serializable value) {

@@ -19,8 +19,6 @@ import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.api.core.exceptions.UnreachableOverridesException;
 import org.genericsystem.defaults.tools.SupersComputer;
 
-import javafx.collections.ObservableList;
-
 /**
  * @author Nicolas Feybesse
  *
@@ -51,24 +49,12 @@ public interface DefaultContext<T extends DefaultGeneric<T>> extends IContext<T>
 		return getDependencies(vertex).filter(new IndexFilter(FiltersBuilder.INSTANCES, vertex));
 	}
 
-	default ObservableList<T> getObservableInstances(T vertex) {
-		return getObservableDependencies(vertex).filtered(x -> vertex.equals(x.getMeta()));
-	}
-
 	default Snapshot<T> getInheritings(T vertex) {
 		return getDependencies(vertex).filter(new IndexFilter(FiltersBuilder.INHERITINGS, vertex));
 	}
 
-	default ObservableList<T> getObservableInheritings(T vertex) {
-		return getObservableDependencies(vertex).filtered(x -> x.getSupers().contains(vertex));
-	}
-
 	default Snapshot<T> getComposites(T vertex) {
 		return getDependencies(vertex).filter(new IndexFilter(FiltersBuilder.COMPOSITES, vertex));
-	}
-
-	default ObservableList<T> getObservableComposites(T vertex) {
-		return getObservableDependencies(vertex).filtered(x -> x.getComponents().contains(vertex));
 	}
 
 	default void discardWithException(Throwable exception) throws RollbackException {
@@ -151,8 +137,6 @@ public interface DefaultContext<T extends DefaultGeneric<T>> extends IContext<T>
 	}
 
 	Snapshot<T> getDependencies(T vertex);
-
-	ObservableList<T> getObservableDependencies(T generic);
 
 	default T getMeta(int dim) {
 		T adjustedMeta = getRoot().adjustMeta(rootComponents(dim));

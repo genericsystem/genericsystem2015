@@ -26,7 +26,7 @@ public class SoftValueHashMap<K, V> extends AbstractMap<K, V> implements Map<K, 
 		}
 
 		@SuppressWarnings({ "unchecked", "rawtypes" })
-		private static SoftValueRef<?, ?> create(Object key, Object val, ReferenceQueue<?> q) {
+		private static <T, U> SoftValueRef<T, U> create(T key, U val, ReferenceQueue<U> q) {
 			if (val == null)
 				return null;
 			else
@@ -85,11 +85,10 @@ public class SoftValueHashMap<K, V> extends AbstractMap<K, V> implements Map<K, 
 		return ref == null ? null : ref.get();
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public synchronized V put(Object key, Object value) {
+	public synchronized V put(K key, V value) {
 		processQueue();
-		SoftValueRef<K, V> ref = map.put((K) key, (SoftValueRef<K, V>) SoftValueRef.create(key, value, queue));
+		SoftValueRef<K, V> ref = map.put(key, SoftValueRef.create(key, value, queue));
 		return ref == null ? null : ref.get();
 	}
 

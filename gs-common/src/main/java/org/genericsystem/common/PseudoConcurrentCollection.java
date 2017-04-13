@@ -50,7 +50,7 @@ public class PseudoConcurrentCollection<T extends IGeneric<?>> implements Snapsh
 				IndexNode result = super.get(key);
 				if (result == null) {
 					IndexNode newValue = new IndexNode(new IndexImpl((IndexFilter) key, index));
-					put(key, newValue);
+					put((IndexFilter) key, newValue);
 					return newValue;
 				}
 				return result;
