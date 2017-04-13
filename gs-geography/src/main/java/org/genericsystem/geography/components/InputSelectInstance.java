@@ -1,9 +1,9 @@
-package org.genericsystem.geography.app;
+package org.genericsystem.geography.components;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.geography.app.InputSelectInstance.ResultUl;
-import org.genericsystem.geography.app.InputSelectInstance.SearchInput;
-import org.genericsystem.geography.app.InputSelectInstance.SimpleBr;
+import org.genericsystem.geography.components.InputSelectInstance.ResultUl;
+import org.genericsystem.geography.components.InputSelectInstance.SearchInput;
+import org.genericsystem.geography.components.InputSelectInstance.SimpleBr;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.BindAction;
@@ -48,7 +48,6 @@ public class InputSelectInstance extends HtmlDiv {
 	@Style(name = "position", value = "absolute")
 	@Style(name = "z-index", value = "200")
 	@Style(name = "padding-left", value = "0")
-
 	public static class ResultUl extends HtmlUl {
 	}
 

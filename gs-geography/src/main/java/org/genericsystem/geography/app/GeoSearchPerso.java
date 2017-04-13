@@ -5,6 +5,7 @@ import org.genericsystem.geography.app.GeoSearchPerso.Input1;
 import org.genericsystem.geography.app.GeoSearchPerso.Input2;
 import org.genericsystem.geography.app.GeoSearchPerso.Test1;
 import org.genericsystem.geography.app.GeoSearchPerso.Test2;
+import org.genericsystem.geography.components.InputSelectInstance;
 import org.genericsystem.geography.model.AdministrativeTerritory;
 import org.genericsystem.geography.model.Building;
 import org.genericsystem.geography.model.City;

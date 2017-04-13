@@ -13,8 +13,6 @@ import org.genericsystem.geography.model.AdministrativeTerritory.Adm3;
 @Dependencies({ Adm1.class, Adm2.class, Adm3.class })
 public class AdministrativeTerritory implements Generic {
 
-	// Inheritance
-
 	// 1st level
 	@SystemGeneric
 	@Supers(AdministrativeTerritory.class)

@@ -125,7 +125,7 @@ public class GeoStore extends RootTagImpl {
 
 			readFile("src/main/resources/adm3.csv", engine, engine.find(Adm3.class), 4);
 
-			readFile("src/main/resources/populated.csv", engine, engine.find(City.class), 5);
+			readFile("src/main/resources/populated_fr.csv", engine, engine.find(City.class), 5);
 
 			// Generic castle = engine.find(Castle.class);
 			// System.out.println(castle);
