@@ -28,7 +28,9 @@ import javafx.stage.WindowEvent;
 
 public class ClassifierDemo extends Application {
 
-	private final static String sourceDirectoryPath = "png";
+	private final static String pngDirectoryPath = "png";
+	private final static String adjustedDirectoryPath = "adjusted";
+
 	private final double displayWidth = 200d;
 
 	static {
@@ -44,17 +46,21 @@ public class ClassifierDemo extends Application {
 
 		GridPane gridPane = new GridPane();
 
-		List<File> images = Arrays.stream(new File(sourceDirectoryPath).listFiles()).filter(img -> img.getName().endsWith(".png")).collect(Collectors.toList());
+		List<File> pngImgs = Arrays.stream(new File(pngDirectoryPath).listFiles()).filter(img -> img.getName().endsWith(".png")).collect(Collectors.toList());
+		List<File> adjustedImages = Arrays.stream(new File(adjustedDirectoryPath).listFiles()).filter(img -> img.getName().endsWith(".png")).collect(Collectors.toList());
 
 		int row = 0;
 
-		for (File img1 : images) {
+		for (File img1 : pngImgs) {
 			int column = 0;
-			File img2 = images.get(0);
-			Mat mat1 = Imgcodecs.imread(img1.getPath());
-			gridPane.add(getImageViewFromMat(mat1), column++, row);
-			Integer result = Classifier.compareFeature(img1.getPath(), img2.getPath());
-			gridPane.add(new Label(result.toString()), column++, row);
+			for (File img2 : adjustedImages) {
+				Mat mat1 = Imgcodecs.imread(img1.getPath());
+				gridPane.add(getImageViewFromMat(mat1), column++, row);
+				Mat mat2 = Imgcodecs.imread(img2.getPath());
+				gridPane.add(getImageViewFromMat(mat2), column++, row);
+				Integer result = Classifier.compareFeature(img1.getPath(), img2.getPath());
+				gridPane.add(new Label(result.toString()), column++, row);
+			}
 			row++;
 		}
 		Scene scene = new Scene(new Group());
