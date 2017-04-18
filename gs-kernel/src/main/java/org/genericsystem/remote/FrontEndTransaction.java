@@ -4,10 +4,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import javafx.beans.Observable;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.ObservableList;
-
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
@@ -17,6 +13,9 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.common.IDifferential;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.remote.ClientEngine.ClientEngineHandler;
+
+import javafx.beans.Observable;
+import javafx.beans.property.SimpleObjectProperty;
 
 /**
  * @author Nicolas Feybesse
@@ -100,10 +99,5 @@ public class FrontEndTransaction extends CheckedContext implements IDifferential
 	@Override
 	public Observable getObservable(Generic generic) {
 		return new SimpleObjectProperty<Snapshot<Generic>>();
-	}
-
-	@Override
-	public ObservableList<Generic> getObservableDependencies(Generic generic) {
-		throw new UnsupportedOperationException();
 	}
 }

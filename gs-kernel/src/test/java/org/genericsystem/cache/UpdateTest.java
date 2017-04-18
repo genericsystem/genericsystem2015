@@ -1,13 +1,13 @@
 package org.genericsystem.cache;
 
-import javafx.collections.ObservableList;
-
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.exceptions.MetaRuleConstraintViolationException;
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.ObservableInheritanceComputer;
 import org.genericsystem.kernel.Engine;
 import org.testng.annotations.Test;
+
+import javafx.collections.ObservableList;
 
 @Test
 public class UpdateTest extends AbstractTest {
@@ -149,7 +149,7 @@ public class UpdateTest extends AbstractTest {
 		assert greenCars.isEmpty();
 		System.gc();
 		// Generic audiGreen = audiRed.updateComponent(green, ApiStatics.TARGET_POSITION);
-		Generic audiGreen = green.setHolder(carColor, "audiRed", audi);
+		Generic audiGreen = green.setHolder(carColor, "audiGreen", audi);
 		assert greenCars.contains(audiGreen);
 		engine.getCurrentCache().flush();
 	}

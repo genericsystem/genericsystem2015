@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import org.genericsystem.api.core.Filters.IndexFilter;
+import org.genericsystem.api.core.IndexFilter;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
@@ -18,7 +18,6 @@ import org.genericsystem.kernel.AbstractServer.RootServerHandler;
 
 import javafx.beans.Observable;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.ObservableList;
 
 /**
  * @author Nicolas Feybesse
@@ -84,19 +83,13 @@ public class Transaction extends CheckedContext implements IDifferential<Generic
 		return new IDependencies<Generic>() {
 
 			@Override
-			public Stream<Generic> rootStream() {
+			public Stream<Generic> unfilteredStream() {
 				return ((RootServerHandler) ancestor.getProxyHandler()).getDependencies().stream(getTs());
 			}
 
 			@Override
 			public Snapshot<Generic> filter(List<IndexFilter> filters) {
-				return new Snapshot<Generic>() {
-
-					@Override
-					public Stream<Generic> rootStream() {
-						return ((RootServerHandler) ancestor.getProxyHandler()).getDependencies().stream(getTs(), filters);
-					}
-				};
+				return ((RootServerHandler) ancestor.getProxyHandler()).getDependencies().filter(filters, getTs());
 			}
 
 			@Override
@@ -182,11 +175,6 @@ public class Transaction extends CheckedContext implements IDifferential<Generic
 	@Override
 	public Observable getObservable(Generic generic) {
 		return new SimpleObjectProperty<Snapshot<Generic>>();
-	}
-
-	@Override
-	public ObservableList<Generic> getObservableDependencies(Generic generic) {
-		throw new UnsupportedOperationException();
 	}
 
 	// @Override

@@ -2,6 +2,7 @@ package org.genericsystem.cache;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
 import org.genericsystem.api.core.exceptions.MetaRuleConstraintViolationException;
 import org.genericsystem.common.Generic;
 import org.genericsystem.kernel.Engine;

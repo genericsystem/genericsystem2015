@@ -1,9 +1,9 @@
-package org.genericsystem.geography.app;
+package org.genericsystem.geography.components;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.geography.app.InputSelectInstance.ResultUl;
-import org.genericsystem.geography.app.InputSelectInstance.SearchInput;
-import org.genericsystem.geography.app.InputSelectInstance.SimpleBr;
+import org.genericsystem.geography.components.InputSelectInstance.ResultUl;
+import org.genericsystem.geography.components.InputSelectInstance.SearchInput;
+import org.genericsystem.geography.components.InputSelectInstance.SimpleBr;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.BindAction;
@@ -48,7 +48,6 @@ public class InputSelectInstance extends HtmlDiv {
 	@Style(name = "position", value = "absolute")
 	@Style(name = "z-index", value = "200")
 	@Style(name = "padding-left", value = "0")
-
 	public static class ResultUl extends HtmlUl {
 	}
 
@@ -72,8 +71,7 @@ public class InputSelectInstance extends HtmlDiv {
 	public static class GENERIC_TEXT implements TextBinding {
 		@Override
 		public ObservableValue<String> apply(Context context, Tag tag) {
-			return new ReadOnlyStringWrapper(((InputSelectInstance) tag.getParent().getParent().getParent())
-					.displayInstance(context.getGeneric()));
+			return new ReadOnlyStringWrapper(((InputSelectInstance) tag.getParent().getParent().getParent()).displayInstance(context.getGeneric()));
 		}
 	}
 
@@ -81,18 +79,30 @@ public class InputSelectInstance extends HtmlDiv {
 		return StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(g);
 	}
 
+	@BindText(DEFAULT_TEXT.class)
 	public static class SearchInput extends HtmlInputText {
 
 		@Override
 		public void init() {
 			addPrefixBinding(context -> {
-				this.getDomNodeAttributes(context).addListener((MapChangeListener<String, String>) change -> {
+				getDomNodeAttributes(context).addListener((MapChangeListener<String, String>) change -> {
 					if ("value".equals(change.getKey())) {
 						if (change.wasAdded())
 							getContextProperty("txt", context).setValue(change.getValueAdded());
 					}
 				});
 			});
+		}
+	}
+
+	public static class DEFAULT_TEXT implements TextBinding {
+		@Override
+		public ObservableValue<String> apply(Context context, Tag tag) {
+			String str = "";
+			if (tag.getContextProperty("selected", context).getValue() != null)
+				str = ((InputSelectInstance) tag.getParent())
+						.displayInstance((Generic) tag.getContextProperty("selected", context).getValue());
+			return new ReadOnlyStringWrapper(str);
 		}
 	}
 
@@ -103,20 +113,14 @@ public class InputSelectInstance extends HtmlDiv {
 	public static class AutocompleteAction implements ContextAction {
 		@Override
 		public void accept(Context context, Tag tag) {
-			tag.getParent().getParent().getParent().find(SearchInput.class).getDomNodeAttributes(context.getParent())
-					.put("value", ((InputSelectInstance) tag.getParent().getParent().getParent())
-							.displayInstance(context.getGeneric()));
+			tag.getParent().getParent().getParent().find(SearchInput.class).getDomNodeAttributes(context.getParent()).put("value", ((InputSelectInstance) tag.getParent().getParent().getParent()).displayInstance(context.getGeneric()));
 			tag.getContextProperty("txt", context).setValue("");
 			tag.getContextProperty("selected", context).setValue(context.getGeneric());
-
 		}
 	}
 
 	public SortedList<Generic> filterInstances(Context c, Property<String> t) {
-		return c.getGeneric().getObservableSubInstances()
-				.filtered(res -> (t.getValue() != null && t.getValue().length() > 1)
-						? ((String) res.getValue()).toLowerCase().startsWith(t.getValue().toLowerCase()) : false)
-				.sorted();
+		return c.getGeneric().getSubInstances().toObservableList().filtered(res -> (t.getValue() != null && t.getValue().length() > 1) ? ((String) res.getValue()).toLowerCase().startsWith(t.getValue().toLowerCase()) : false).sorted();
 	}
 
 	public static class TEXT_FILTERED implements ObservableListExtractorFromContext {
