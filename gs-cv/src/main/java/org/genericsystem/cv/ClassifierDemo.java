@@ -53,9 +53,9 @@ public class ClassifierDemo extends Application {
 
 		for (File img1 : pngImgs) {
 			int column = 0;
+			Mat mat1 = Imgcodecs.imread(img1.getPath());
+			gridPane.add(getImageViewFromMat(mat1), column++, row);
 			for (File img2 : adjustedImages) {
-				Mat mat1 = Imgcodecs.imread(img1.getPath());
-				gridPane.add(getImageViewFromMat(mat1), column++, row);
 				Mat mat2 = Imgcodecs.imread(img2.getPath());
 				gridPane.add(getImageViewFromMat(mat2), column++, row);
 				Integer result = Classifier.compareFeature(img1.getPath(), img2.getPath());
