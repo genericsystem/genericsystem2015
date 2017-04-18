@@ -23,19 +23,19 @@ public class Classifier {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 	}
 
-	public static void main(String[] args) {
-		doWork(sourceDirectoryPath);
-	}
-
-	public static void doWork(String sourceDirectoryPath) {
-		List<File> images = Arrays.stream(new File(sourceDirectoryPath).listFiles()).filter(img -> img.getName().endsWith(".png")).collect(Collectors.toList());
-		for (File img1 : images) {
-			for (File img2 : images) {
-				compareFeature(img1.getPath(), img2.getPath());
-			}
-		}
-
-	};
+//	public static void main(String[] args) {
+//		doWork(sourceDirectoryPath);
+//	}
+//
+//	public static void doWork(String sourceDirectoryPath) {
+//		List<File> images = Arrays.stream(new File(sourceDirectoryPath).listFiles()).filter(img -> img.getName().endsWith(".png")).collect(Collectors.toList());
+//		for (File img1 : images) {
+//			for (File img2 : images) {
+//				compareFeature(img1.getPath(), img2.getPath());
+//			}
+//		}
+//
+//	};
 
 	public static int compareFeature(String filename1, String filename2) {
 		int retVal = 0;
@@ -95,7 +95,7 @@ public class Classifier {
 
 			// Extract good images (distances are under 10)
 			for (int i = 0; i < descriptors1.rows(); i++) {
-				if (match[i].distance <= 10) {
+				if (match[i].distance <= 30) {
 					retVal++;
 				}
 			}
