@@ -1,10 +1,5 @@
 package org.genericsystem.cv;
 
-import java.io.File;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.opencv.core.Core;
 import org.opencv.core.DMatch;
 import org.opencv.core.Mat;
@@ -23,29 +18,30 @@ public class Classifier {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 	}
 
-//	public static void main(String[] args) {
-//		doWork(sourceDirectoryPath);
-//	}
-//
-//	public static void doWork(String sourceDirectoryPath) {
-//		List<File> images = Arrays.stream(new File(sourceDirectoryPath).listFiles()).filter(img -> img.getName().endsWith(".png")).collect(Collectors.toList());
-//		for (File img1 : images) {
-//			for (File img2 : images) {
-//				compareFeature(img1.getPath(), img2.getPath());
-//			}
-//		}
-//
-//	};
+	// public static void main(String[] args) {
+	// doWork(sourceDirectoryPath);
+	// }
+	//
+	// public static void doWork(String sourceDirectoryPath) {
+	// List<File> images = Arrays.stream(new File(sourceDirectoryPath).listFiles()).filter(img -> img.getName().endsWith(".png")).collect(Collectors.toList());
+	// for (File img1 : images) {
+	// for (File img2 : images) {
+	// compareFeature(img1.getPath(), img2.getPath());
+	// }
+	// }
+	//
+	// };
 
 	public static int compareFeature(String filename1, String filename2) {
-		int retVal = 0;
-		long startTime = System.currentTimeMillis();
-
-		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-
-		// Load images to compare
 		Mat img1 = Imgcodecs.imread(filename1, Imgcodecs.CV_LOAD_IMAGE_COLOR);
 		Mat img2 = Imgcodecs.imread(filename2, Imgcodecs.CV_LOAD_IMAGE_COLOR);
+		return compareFeature(img1, img2);
+	}
+
+	public static int compareFeature(Mat img1, Mat img2) {
+
+		int retVal = 0;
+		long startTime = System.currentTimeMillis();
 
 		// Declare key point of images
 		MatOfKeyPoint keypoints1 = new MatOfKeyPoint();
@@ -95,7 +91,7 @@ public class Classifier {
 
 			// Extract good images (distances are under 10)
 			for (int i = 0; i < descriptors1.rows(); i++) {
-				if (match[i].distance <= 30) {
+				if (match[i].distance <= 20) {
 					retVal++;
 				}
 			}
