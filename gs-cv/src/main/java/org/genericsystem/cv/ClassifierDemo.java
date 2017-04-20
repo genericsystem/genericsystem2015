@@ -58,8 +58,11 @@ public class ClassifierDemo extends Application {
 			for (File img2 : adjustedImages) {
 				Mat mat2 = Imgcodecs.imread(img2.getPath());
 				gridPane.add(getImageViewFromMat(mat2), column++, row);
-				Integer result = Classifier.compareFeature(img1.getPath(), img2.getPath());
-				gridPane.add(new Label(result.toString()), column++, row);
+				Mat result = Classifier.compareFeature(img1.getPath(), img2.getPath());
+				if (result != null)
+					gridPane.add(getImageViewFromMat(result), column++, row);
+				else
+					gridPane.add(new Label("Not matching"), column++, row);
 			}
 			row++;
 		}
