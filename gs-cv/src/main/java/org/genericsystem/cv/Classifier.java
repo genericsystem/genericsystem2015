@@ -1,18 +1,30 @@
 package org.genericsystem.cv;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.opencv.calib3d.Calib3d;
 import org.opencv.core.Core;
 import org.opencv.core.DMatch;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfDMatch;
+import org.opencv.core.MatOfInt;
 import org.opencv.core.MatOfKeyPoint;
+import org.opencv.core.MatOfPoint2f;
+import org.opencv.core.Point;
+import org.opencv.core.Size;
 import org.opencv.features2d.DescriptorExtractor;
 import org.opencv.features2d.DescriptorMatcher;
 import org.opencv.features2d.FeatureDetector;
+import org.opencv.features2d.Features2d;
 import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
 
 public class Classifier {
 
-	private final static String sourceDirectoryPath = "png";
+	private final static String alignedDirectoryPath = "aligned";
+	private final static int MATCHING_THRESHOLD = 150;
 
 	static {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
@@ -32,15 +44,19 @@ public class Classifier {
 	//
 	// };
 
-	public static int compareFeature(String filename1, String filename2) {
+	public static Mat compareFeature(String filename1, String filename2) {
 		Mat img1 = Imgcodecs.imread(filename1, Imgcodecs.CV_LOAD_IMAGE_COLOR);
 		Mat img2 = Imgcodecs.imread(filename2, Imgcodecs.CV_LOAD_IMAGE_COLOR);
-		return compareFeature(img1, img2);
+		Mat result = compareFeature(img1, img2);
+		if (result != null) {
+			String dir = alignedDirectoryPath + "-" + filename2.replaceFirst(".*/", "");
+			new File(dir).mkdirs();
+			Imgcodecs.imwrite(dir + "/" + filename1.replaceFirst(".*/", ""), result, new MatOfInt(Imgcodecs.CV_IMWRITE_PNG_COMPRESSION));
+		}
+		return result;
 	}
 
-	public static int compareFeature(Mat img1, Mat img2) {
-
-		int retVal = 0;
+	public static Mat compareFeature(Mat img1, Mat img2) {
 		long startTime = System.currentTimeMillis();
 
 		// Declare key point of images
@@ -50,8 +66,8 @@ public class Classifier {
 		Mat descriptors2 = new Mat();
 
 		// Definition of ORB key point detector and descriptor extractors
-		FeatureDetector detector = FeatureDetector.create(FeatureDetector.ORB);
-		DescriptorExtractor extractor = DescriptorExtractor.create(DescriptorExtractor.ORB);
+		FeatureDetector detector = FeatureDetector.create(FeatureDetector.BRISK);
+		DescriptorExtractor extractor = DescriptorExtractor.create(DescriptorExtractor.OPPONENT_ORB);
 
 		// Detect key points
 		detector.detect(img1, keypoints1);
@@ -61,18 +77,16 @@ public class Classifier {
 		extractor.compute(img1, keypoints1, descriptors1);
 		extractor.compute(img2, keypoints2, descriptors2);
 
-		// Definition of descriptor matcher
-		DescriptorMatcher matcher = DescriptorMatcher.create(DescriptorMatcher.BRUTEFORCE_HAMMING);
-
-		// Match points of two images
-		MatOfDMatch matches = new MatOfDMatch();
 		System.out.println("Type of Image1= " + descriptors1.type() + ", Type of Image2= " + descriptors2.type());
 		System.out.println("Cols of Image1= " + descriptors1.cols() + ", Cols of Image2= " + descriptors2.cols());
 
-		// Avoid to assertion failed
-		// Assertion failed (type == src2.type() && src1.cols == src2.cols && (type == CV_32F || type == CV_8U)
-
+		Mat transformedImage = null;
 		if (descriptors2.cols() == descriptors1.cols()) {
+			// Definition of descriptor matcher
+			DescriptorMatcher matcher = DescriptorMatcher.create(DescriptorMatcher.BRUTEFORCE_HAMMING);
+
+			// Match points of two images
+			MatOfDMatch matches = new MatOfDMatch();
 			matcher.match(descriptors1, descriptors2, matches);
 
 			// Check matches of key points
@@ -90,18 +104,33 @@ public class Classifier {
 			System.out.println("max_dist=" + max_dist + ", min_dist=" + min_dist);
 
 			// Extract good images (distances are under 10)
+			List<DMatch> goodMatches = new ArrayList<>();
 			for (int i = 0; i < descriptors1.rows(); i++) {
-				if (match[i].distance <= 20) {
-					retVal++;
+				if (match[i].distance <= 30) {
+					goodMatches.add(match[i]);
 				}
 			}
-			System.out.println("matching count=" + retVal);
+			if (goodMatches.size() > MATCHING_THRESHOLD) {
+				Mat imgMatches = new Mat();
+				Features2d.drawMatches(img1, keypoints1, img2, keypoints2, new MatOfDMatch(goodMatches.stream().toArray(DMatch[]::new)), imgMatches);
+				List<Point> objectPoints = new ArrayList<>();
+				List<Point> scenePoints = new ArrayList<>();
+				for (DMatch goodMatch : goodMatches) {
+					objectPoints.add(keypoints1.toList().get(goodMatch.queryIdx).pt);
+					scenePoints.add(keypoints2.toList().get(goodMatch.trainIdx).pt);
+				}
+
+				Mat homography = Calib3d.findHomography(new MatOfPoint2f(objectPoints.stream().toArray(Point[]::new)), new MatOfPoint2f(scenePoints.stream().toArray(Point[]::new)), Calib3d.RANSAC, 10);
+				transformedImage = new Mat();
+				Imgproc.warpPerspective(img1, transformedImage, homography, new Size(img2.cols(), img2.rows()));
+			}
+			System.out.println("matching count=" + goodMatches.size());
 		}
 
 		long estimatedTime = System.currentTimeMillis() - startTime;
 		System.out.println("estimatedTime=" + estimatedTime + "ms");
 
-		return retVal;
+		return transformedImage;
 	}
 
 }
