@@ -68,33 +68,32 @@ public class MotionDetector {
 		while (read(frame)) {
 			Mat currentAdjustedFrame = adjust(frame);
 			updateM2AndMean(m2, average, currentAdjustedFrame, n);
-			System.out.println("Type m2 : " + m2.type());
 			Mat variance = new Mat();
 			Core.multiply(m2, new Scalar(1 / n), variance);
 			Core.convertScaleAbs(variance, variance);
-			Imgproc.threshold(m2, m2, 0, 255, Imgproc.THRESH_TOZERO);
-			n++;
-			prevAdjustedFrame = currentAdjustedFrame;
-			Mat not = new Mat();
-			Core.bitwise_not(m2, not);
 
-			detection_contours(frame, not);
+			Mat bwVariance = new Mat();
+			Imgproc.dilate(variance, bwVariance, Imgproc.getStructuringElement(Imgproc.MORPH_CROSS, new Size(3, 3)));
+			Imgproc.threshold(bwVariance, bwVariance, 200, 250, Imgproc.THRESH_TOZERO);
+			// Imgproc.adaptiveThreshold(bwVariance, bwVariance, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 9, 7);
+			detection_contours(frame, bwVariance);
 			ImageIcon image = new ImageIcon(mat2bufferedImage(frame));
 
 			vidpanel.setIcon(image);
 			vidpanel.repaint();
+			n++;
+			prevAdjustedFrame = currentAdjustedFrame;
 		}
 	}
 
 	private static void updateM2AndMean(Mat m2, Mat mean, Mat newFrame, double n) {
-		Mat mask = new Mat();
+		Mat mask = Mat.ones(m2.size(), CvType.CV_8U);
 		Mat delta = new Mat(m2.size(), CvType.CV_32S);
 		Core.subtract(newFrame, mean, delta, mask, CvType.CV_32S);
 		Core.addWeighted(mean, 1, delta, 1 / n, 0, mean, mean.type());
 		Mat delta2 = new Mat(m2.size(), CvType.CV_32S);
 		Core.subtract(newFrame, mean, delta2, mask, CvType.CV_32S);
 		Mat product = delta.mul(delta2);
-		System.out.println("Type product : " + product.type() + ", delta : " + delta.type() + ", delta2 : " + delta2.type() + ", mean : " + mean.type());
 		Core.add(m2, product, m2);
 	}
 
