@@ -33,7 +33,7 @@ public class MotionDetector {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 	}
 
-	private final static String adjustedDirectoryPath = "adjusted";
+	private final static String adjustedDirectoryPath = "aligned-image-3.png";
 
 	private static VideoCapture camera = new VideoCapture(0);
 	private static List<Mat> adjustedImages = Arrays.stream(new File(adjustedDirectoryPath).listFiles()).filter(img -> img.getName().endsWith(".png")).map(img -> Imgcodecs.imread(img.getPath())).peek(img -> Imgproc.resize(img, img, new Size(400d, 300d)))
@@ -64,23 +64,37 @@ public class MotionDetector {
 		Mat prevAdjustedFrame = adjust(frame);
 		Mat average = prevAdjustedFrame;
 		double n = 2;
-		Mat diffAverage = new Mat(prevAdjustedFrame.size(), prevAdjustedFrame.type(), new Scalar(0, 0, 0));
+		Mat m2 = new Mat(prevAdjustedFrame.size(), CvType.CV_32S, new Scalar(0, 0, 0));
 		while (read(frame)) {
 			Mat currentAdjustedFrame = adjust(frame);
-			Core.addWeighted(average, (n - 1) / n, currentAdjustedFrame, 2d / n, 0, average);
-			Mat diffFrame = computeDiffFrame(currentAdjustedFrame, average);
+			updateM2AndMean(m2, average, currentAdjustedFrame, n);
+			Mat variance = new Mat();
+			Core.multiply(m2, new Scalar(1 / n), variance);
+			Core.convertScaleAbs(variance, variance);
 
-			Core.addWeighted(diffAverage, (n - 1) / n, diffFrame, 3d / n, -(n - 3) / (2 * n), diffAverage);
-			Imgproc.threshold(diffAverage, diffAverage, 0, 255, Imgproc.THRESH_TOZERO);
-			n++;
-			// Imgproc.adaptiveThreshold(diffAverage, diffAverage, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 9, 7);
-			prevAdjustedFrame = currentAdjustedFrame;
-			detection_contours(frame, diffAverage);
+			Mat bwVariance = new Mat();
+			Imgproc.dilate(variance, bwVariance, Imgproc.getStructuringElement(Imgproc.MORPH_CROSS, new Size(3, 3)));
+			Imgproc.threshold(bwVariance, bwVariance, 200, 250, Imgproc.THRESH_TOZERO);
+			// Imgproc.adaptiveThreshold(bwVariance, bwVariance, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 9, 7);
+			detection_contours(frame, bwVariance);
 			ImageIcon image = new ImageIcon(mat2bufferedImage(frame));
 
 			vidpanel.setIcon(image);
 			vidpanel.repaint();
+			n++;
+			prevAdjustedFrame = currentAdjustedFrame;
 		}
+	}
+
+	private static void updateM2AndMean(Mat m2, Mat mean, Mat newFrame, double n) {
+		Mat mask = Mat.ones(m2.size(), CvType.CV_8U);
+		Mat delta = new Mat(m2.size(), CvType.CV_32S);
+		Core.subtract(newFrame, mean, delta, mask, CvType.CV_32S);
+		Core.addWeighted(mean, 1, delta, 1 / n, 0, mean, mean.type());
+		Mat delta2 = new Mat(m2.size(), CvType.CV_32S);
+		Core.subtract(newFrame, mean, delta2, mask, CvType.CV_32S);
+		Mat product = delta.mul(delta2);
+		Core.add(m2, product, m2);
 	}
 
 	private static Mat gradient(Mat src_gray) {

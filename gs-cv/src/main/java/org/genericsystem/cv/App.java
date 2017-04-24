@@ -190,7 +190,7 @@ public class App extends Application {
 			targets.remove(0);
 			targets.add(first);
 		}
-		Imgproc.warpPerspective(src, target, Imgproc.getPerspectiveTransform(contour2f, Converters.vector_Point2f_to_Mat(targets)), new Size(width, height));
+		Imgproc.warpPerspective(src, target, Imgproc.getPerspectiveTransform(contour2f, Converters.vector_Point2f_to_Mat(targets)), new Size(width, height), Imgproc.INTER_CUBIC);
 		return target;
 	}
 
