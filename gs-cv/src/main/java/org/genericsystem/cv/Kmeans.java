@@ -28,7 +28,7 @@ public class Kmeans {
 	private static VideoCapture camera = new VideoCapture(0);
 
 	private final static int MAX_ITER = 5;
-	private final static int CLUSTERS = 15;
+	private final static int CLUSTERS = 8;
 
 	public static void main(String[] args) {
 		JFrame jframe = new JFrame("Kmeans");
@@ -51,6 +51,10 @@ public class Kmeans {
 			vidpanel.repaint();
 		}
 
+	}
+
+	public static Mat colorMapKMeans(Mat img, int cluster) {
+		return colorMapKMeans(img, cluster, MAX_ITER);
 	}
 
 	public static Mat colorMapKMeans(Mat img, int K, int maxIterations) {

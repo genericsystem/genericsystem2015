@@ -211,7 +211,7 @@ public class App extends Application {
 	// return target;
 	// }
 
-	private File createFileFromMat(Mat mat, String fileName, String directoryPath) {
+	static File createFileFromMat(Mat mat, String fileName, String directoryPath) {
 		File destinationDirectory = new File(directoryPath);
 		if (!destinationDirectory.exists())
 			destinationDirectory.mkdir();

@@ -36,14 +36,14 @@ public class MotionDetector {
 	private final static String adjustedDirectoryPath = "aligned-image-3.png";
 
 	private static VideoCapture camera = new VideoCapture(0);
-	private static List<Mat> adjustedImages = Arrays.stream(new File(adjustedDirectoryPath).listFiles()).filter(img -> img.getName().endsWith(".png")).map(img -> Imgcodecs.imread(img.getPath())).peek(img -> Imgproc.resize(img, img, new Size(400d, 300d)))
-			.collect(Collectors.toList());
+	private static List<Mat> adjustedImages = Arrays.stream(new File(adjustedDirectoryPath).listFiles()).filter(img -> img.getName().endsWith(".png")).map(img -> Imgcodecs.imread(img.getPath())).collect(Collectors.toList());
 	private static int i;
 
 	static boolean read(Mat frame) {
 		// return camera.read(frame);
 		System.out.println(i + " " + i % adjustedImages.size());
 		adjustedImages.get(i % adjustedImages.size()).copyTo(frame);
+		// System.out.println("ZZZZZZZZZZZZZZ" + adjustedImages.get(i % adjustedImages.size()) + "========== " + frame);
 		i++;
 
 		return true;
@@ -61,29 +61,41 @@ public class MotionDetector {
 		read(frame);
 		jframe.setSize(frame.width(), frame.height());
 		jframe.setVisible(true);
-		Mat prevAdjustedFrame = adjust(frame);
-		Mat average = prevAdjustedFrame;
+		// Mat prevAdjustedFrame = adjust(frame);
+		Mat average = adjust(frame);
 		double n = 2;
-		Mat m2 = new Mat(prevAdjustedFrame.size(), CvType.CV_32S, new Scalar(0, 0, 0));
+		Mat m2 = new Mat(average.size(), CvType.CV_32S, new Scalar(0, 0, 0));
 		while (read(frame)) {
 			Mat currentAdjustedFrame = adjust(frame);
 			updateM2AndMean(m2, average, currentAdjustedFrame, n);
 			Mat variance = new Mat();
 			Core.multiply(m2, new Scalar(1 / n), variance);
 			Core.convertScaleAbs(variance, variance);
-
 			Mat bwVariance = new Mat();
-			Imgproc.dilate(variance, bwVariance, Imgproc.getStructuringElement(Imgproc.MORPH_CROSS, new Size(3, 3)));
-			Imgproc.threshold(bwVariance, bwVariance, 200, 250, Imgproc.THRESH_TOZERO);
-			// Imgproc.adaptiveThreshold(bwVariance, bwVariance, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 9, 7);
-			detection_contours(frame, bwVariance);
+			// Imgproc.threshold(variance, bwVariance, 100, 255, Imgproc.THRESH_TOZERO);
+			Imgproc.dilate(variance, bwVariance, Imgproc.getStructuringElement(Imgproc.MORPH_CROSS, new Size(5, 1)));
+			Imgproc.GaussianBlur(bwVariance, bwVariance, new Size(3, 1), 0);
+			detection_contours(frame, bwVariance, n);
 			ImageIcon image = new ImageIcon(mat2bufferedImage(frame));
-
 			vidpanel.setIcon(image);
 			vidpanel.repaint();
 			n++;
-			prevAdjustedFrame = currentAdjustedFrame;
 		}
+	}
+
+	public static Mat adjust(Mat frame) {
+		Mat mask = new Mat();
+		Core.inRange(frame, new Scalar(0, 0, 0), new Scalar(90, 255, 255), mask);
+		// Core.add(frame, new Scalar(0, 40, 0), frame);
+		Mat masked = new Mat();
+		frame.copyTo(masked, mask);
+		Mat grey = new Mat();
+		Imgproc.cvtColor(masked, grey, Imgproc.COLOR_BGR2GRAY);
+		// Imgproc.adaptiveThreshold(grey, grey, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 3, 0);
+		// Imgproc.threshold(grey, grey, 160, 255, Imgproc.THRESH_TOZERO);
+		// Imgproc.GaussianBlur(grey, grey, new Size(3, 3), 0);
+		// Imgproc.dilate(grey, grey, Imgproc.getStructuringElement(Imgproc.MORPH_CROSS, new Size(3, 3)));
+		return grey;
 	}
 
 	private static void updateM2AndMean(Mat m2, Mat mean, Mat newFrame, double n) {
@@ -97,44 +109,11 @@ public class MotionDetector {
 		Core.add(m2, product, m2);
 	}
 
-	private static Mat gradient(Mat src_gray) {
-		Mat grad_x = new Mat();
-		Mat grad_y = new Mat();
-		Mat abs_grad_x = new Mat();
-		Mat abs_grad_y = new Mat();
-
-		int scale = 1;
-		int delta = 0;
-		int ddepth = CvType.CV_32FC1;
-
-		// Calculate the x and y gradients using Sobel operator
-		Imgproc.Sobel(src_gray, grad_x, ddepth, 1, 0, 3, scale, delta, Core.BORDER_DEFAULT);
-		Core.convertScaleAbs(grad_x, abs_grad_x);
-
-		Imgproc.Sobel(src_gray, grad_y, ddepth, 0, 1, 3, scale, delta, Core.BORDER_DEFAULT);
-		Core.convertScaleAbs(grad_y, abs_grad_y);
-
-		// Combine the two gradients
-		Mat grad = new Mat();
-		Core.addWeighted(abs_grad_x, 0.5, abs_grad_y, 0.5, 0, grad);
-
-		return grad;
-
-	}
-
-	public static Mat computeDiffFrame(Mat currentAdjustedFrame, Mat prevAdjustedFrame) {
-		Mat result = new Mat();
-		Core.absdiff(currentAdjustedFrame, prevAdjustedFrame, result);
-		// Imgproc.dilate(result, result, Imgproc.getStructuringElement(Imgproc.MORPH_CROSS, new Size(3, 3)));
-		Imgproc.adaptiveThreshold(result, result, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 9, 7);
-		return result;
-	}
-
-	public static void detection_contours(Mat frame, Mat diffFrame) {
+	public static void detection_contours(Mat frame, Mat diffFrame, double n) {
 		List<MatOfPoint> contours = new ArrayList<>();
 		Imgproc.findContours(diffFrame, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 
-		double maxArea = 100;
+		double maxArea = 70;
 
 		// contours = contours.stream().filter(c -> Imgproc.contourArea(c) >= maxArea).collect(Collectors.toList());
 		// contours.sort((a, b) -> Double.compare(Imgproc.contourArea(b), Imgproc.contourArea(a)));
@@ -154,20 +133,27 @@ public class MotionDetector {
 				// Imgproc.minAreaRect(contour2F).points(result);
 				// Imgproc.drawContours(frame, Arrays.asList(new MatOfPoint(result)), 0, new Scalar(255, 0, 0), 2);
 				Rect rect = Imgproc.boundingRect(contour);
-				Imgproc.rectangle(frame, rect.br(), rect.tl(), new Scalar(0, 0, 255), 2);
-				Imgproc.drawContours(frame, contours, i, new Scalar(0, 255, 0));
+
+				if (n > 50 && rect.x > 2 && rect.y > 2) {
+					Mat ocrZone = new Mat(frame, new Rect(rect.x - 2, rect.y - 2, rect.width + 4, rect.height + 4));
+					// Imgproc.GaussianBlur(ocrZone, ocrZone, new Size(3, 3), 0);
+					// Mat mask = new Mat();
+					// Mat hsv = new Mat();
+
+					// Imgproc.cvtColor(ocrZone, hsv, Imgproc.COLOR_BGR2HSV);
+					// Core.inRange(hsv, new Scalar(0, 0, 0), new Scalar(255, 255, 100), mask);
+					// Core.add(frame, new Scalar(0, 40, 0), frame);
+					// Mat masked = new Mat();
+					// ocrZone.copyTo(masked,mask);
+
+					String ocrText = Ocr.doWork(App.createFileFromMat(ocrZone, rect.toString() + n + ".png", "ocr"));
+					System.out.println(rect.toString() + n + " ====> " + ocrText);
+				}
+				Imgproc.drawContours(frame, contours, i, new Scalar(0, 255, 0), 2);
+				Imgproc.rectangle(frame, rect.br(), rect.tl(), new Scalar(0, 0, 255), 1);
 
 			}
 		}
-	}
-
-	public static Mat adjust(Mat frame) {
-		Mat result = frame.clone();
-		Imgproc.cvtColor(frame, result, Imgproc.COLOR_BGR2GRAY);
-		// frame = gradient(frame);
-		Imgproc.GaussianBlur(result, result, new Size(3, 3), 0);
-		// Imgproc.Canny(result, result, 150d, 150d * 2, 3, true);
-		return result;
 	}
 
 	public static BufferedImage mat2bufferedImage(Mat image) {
@@ -178,6 +164,14 @@ public class MotionDetector {
 		} catch (IOException e) {
 			throw new IllegalStateException(e);
 		}
+	}
+
+	public static Mat computeDiffFrame(Mat currentAdjustedFrame, Mat prevAdjustedFrame) {
+		Mat result = new Mat();
+		Core.absdiff(currentAdjustedFrame, prevAdjustedFrame, result);
+		// Imgproc.dilate(result, result, Imgproc.getStructuringElement(Imgproc.MORPH_CROSS, new Size(3, 3)));
+		Imgproc.adaptiveThreshold(result, result, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 9, 7);
+		return result;
 	}
 
 }

@@ -27,6 +27,7 @@ public class Ocr {
 		instance.setDatapath("/usr/share/tesseract-ocr/4.00/");
 		instance.setLanguage("fra");
 		instance.setHocr(false);
+		instance.setPageSegMode(8);
 		// instance.setOcrEngineMode(2);
 		instance.setTessVariable("tessedit_char_whitelist", "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM0123456789.-,;:?!=_<'()");
 		instance.setTessVariable("tessedit_char_blacklist", "{}");

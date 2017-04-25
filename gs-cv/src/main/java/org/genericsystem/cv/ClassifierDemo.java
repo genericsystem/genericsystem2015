@@ -47,7 +47,8 @@ public class ClassifierDemo extends Application {
 		GridPane gridPane = new GridPane();
 
 		List<File> pngImgs = Arrays.stream(new File(pngDirectoryPath).listFiles()).filter(img -> img.getName().endsWith(".png")).collect(Collectors.toList());
-		List<File> adjustedImages = Arrays.stream(new File(adjustedDirectoryPath).listFiles()).filter(img -> img.getName().endsWith(".png")).collect(Collectors.toList());
+		List<File> adjustedImages = Arrays.asList(new File("adjusted/image-3.png"));
+		// Arrays.stream(new File(adjustedDirectoryPath).listFiles()).filter(img -> img.getName().endsWith(".png")).collect(Collectors.toList());
 
 		int row = 0;
 
