@@ -1,5 +1,8 @@
 package org.genericsystem.cv;
 
+import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -11,9 +14,12 @@ import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
 
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfByte;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Size;
+import org.opencv.imgcodecs.Imgcodecs;
 
 import net.sourceforge.tess4j.Tesseract;
 import net.sourceforge.tess4j.TesseractException;
@@ -27,15 +33,40 @@ public class Ocr {
 		instance.setDatapath("/usr/share/tesseract-ocr/4.00/");
 		instance.setLanguage("fra");
 		instance.setHocr(false);
-		instance.setPageSegMode(8);
-		// instance.setOcrEngineMode(2);
-		instance.setTessVariable("tessedit_char_whitelist", "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM0123456789.-,;:?!=_<'()");
-		instance.setTessVariable("tessedit_char_blacklist", "{}");
+		instance.setPageSegMode(13);
+		instance.setOcrEngineMode(1);
+		instance.setTessVariable("tessedit_char_whitelist", "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM0123456789.-,<'");
+		instance.setTessVariable("tessedit_char_blacklist", "?{}_");
 	}
 
 	public static String doWork(File imageFile) {
 		try {
 			return instance.doOCR(imageFile);
+		} catch (TesseractException e) {
+			throw new RuntimeException(e);
+		}
+
+	}
+
+	public static String doWork(Mat mat) {
+		return doWork(mat2bufferedImage(mat));
+	}
+
+	public static String doWork(Mat mat, Rect rect) {
+		return doWork(mat2bufferedImage(mat), new Rectangle(rect.x, rect.y, rect.width, rect.height));
+	}
+
+	public static String doWork(BufferedImage image) {
+		try {
+			return instance.doOCR(image);
+		} catch (TesseractException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public static String doWork(BufferedImage image, Rectangle rectangle) {
+		try {
+			return instance.doOCR(image, rectangle);
 		} catch (TesseractException e) {
 			throw new RuntimeException(e);
 		}
@@ -68,5 +99,23 @@ public class Ocr {
 		return result;
 
 	}
+
+	public static BufferedImage mat2bufferedImage(Mat image) {
+		MatOfByte bytemat = new MatOfByte();
+		Imgcodecs.imencode(".png", image, bytemat);
+		try {
+			return ImageIO.read(new ByteArrayInputStream(bytemat.toArray()));
+		} catch (IOException e) {
+			throw new IllegalStateException(e);
+		}
+	}
+	// public static BufferedImage mat2BufferedImage(Mat in) {
+	// BufferedImage image = new BufferedImage(in.width(), in.height(), BufferedImage.TYPE_3BYTE_BGR);
+	// WritableRaster raster = image.getRaster();
+	// DataBufferByte dataBuffer = (DataBufferByte) raster.getDataBuffer();
+	// byte[] data = dataBuffer.getData();
+	// in.get(0, 0, data);
+	// return image;
+	// }
 
 }

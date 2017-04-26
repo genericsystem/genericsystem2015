@@ -47,7 +47,7 @@ public class Classifier {
 	public static Mat compareFeature(String filename1, String filename2) {
 		Mat img1 = Imgcodecs.imread(filename1, Imgcodecs.CV_LOAD_IMAGE_COLOR);
 		Mat img2 = Imgcodecs.imread(filename2, Imgcodecs.CV_LOAD_IMAGE_COLOR);
-		Mat result = compareFeature(img1, img2);
+		Mat result = compareFeature(img1, img2, MATCHING_THRESHOLD);
 		if (result != null) {
 			String dir = alignedDirectoryPath + "-" + filename2.replaceFirst(".*/", "");
 			new File(dir).mkdirs();
@@ -56,7 +56,7 @@ public class Classifier {
 		return result;
 	}
 
-	public static Mat compareFeature(Mat img1, Mat img2) {
+	public static Mat compareFeature(Mat img1, Mat img2, int matching_threshold) {
 		long startTime = System.currentTimeMillis();
 
 		// Declare key point of images
@@ -110,7 +110,7 @@ public class Classifier {
 					goodMatches.add(match[i]);
 				}
 			}
-			if (goodMatches.size() > MATCHING_THRESHOLD) {
+			if (goodMatches.size() > matching_threshold) {
 				Mat imgMatches = new Mat();
 				Features2d.drawMatches(img1, keypoints1, img2, keypoints2, new MatOfDMatch(goodMatches.stream().toArray(DMatch[]::new)), imgMatches);
 				List<Point> objectPoints = new ArrayList<>();

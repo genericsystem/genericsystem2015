@@ -31,6 +31,7 @@ public class CamCropper {
 	}
 
 	private static Mat ref = Imgcodecs.imread(refPath);
+	private static boolean alreadyMatched = false;
 
 	public static void main(String[] args) {
 
@@ -49,8 +50,15 @@ public class CamCropper {
 		while (read(frame)) {
 			Mat currentAdjustedFrame = adjust(frame);
 			if (currentAdjustedFrame != null) {
+				if (!alreadyMatched) {
+					ref = currentAdjustedFrame;
+					average = currentAdjustedFrame;
+				} else
+					ref = average;
+
+				alreadyMatched = true;
 				Core.addWeighted(average, (n - 1) / n, currentAdjustedFrame, 1d / n, 0, average);
-				if (n < 5d)
+				if (n < 10d)
 					n++;
 			}
 			ImageIcon image = new ImageIcon(mat2bufferedImage(average));
@@ -62,7 +70,7 @@ public class CamCropper {
 	public static Mat adjust(Mat frame) {
 		Mat resized = new Mat();
 		Imgproc.resize(frame, resized, new Size(frame.width() * 2, frame.height() * 2));
-		return Classifier.compareFeature(resized, ref);
+		return Classifier.compareFeature(resized, ref, 50);
 	}
 
 	public static BufferedImage mat2bufferedImage(Mat image) {
