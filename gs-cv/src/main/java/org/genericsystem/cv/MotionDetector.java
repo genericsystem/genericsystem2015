@@ -73,8 +73,8 @@ public class MotionDetector {
 			Core.convertScaleAbs(variance, variance);
 			Mat bwVariance = new Mat();
 			// Imgproc.threshold(variance, bwVariance, 100, 255, Imgproc.THRESH_TOZERO);
-			Imgproc.dilate(variance, bwVariance, Imgproc.getStructuringElement(Imgproc.MORPH_CROSS, new Size(5, 1)));
-			Imgproc.GaussianBlur(bwVariance, bwVariance, new Size(3, 1), 0);
+			Imgproc.dilate(variance, bwVariance, Imgproc.getStructuringElement(Imgproc.MORPH_CROSS, new Size(11, 3)));
+			Imgproc.GaussianBlur(bwVariance, bwVariance, new Size(11, 3), 0);
 			detection_contours(frame, bwVariance, n);
 			ImageIcon image = new ImageIcon(mat2bufferedImage(frame));
 			vidpanel.setIcon(image);
@@ -85,7 +85,7 @@ public class MotionDetector {
 
 	public static Mat adjust(Mat frame) {
 		Mat mask = new Mat();
-		Core.inRange(frame, new Scalar(0, 0, 0), new Scalar(90, 255, 255), mask);
+		Core.inRange(frame, new Scalar(0, 0, 0), new Scalar(80, 255, 255), mask);
 		// Core.add(frame, new Scalar(0, 40, 0), frame);
 		Mat masked = new Mat();
 		frame.copyTo(masked, mask);
@@ -113,7 +113,7 @@ public class MotionDetector {
 		List<MatOfPoint> contours = new ArrayList<>();
 		Imgproc.findContours(diffFrame, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 
-		double maxArea = 70;
+		double maxArea = 500;
 
 		// contours = contours.stream().filter(c -> Imgproc.contourArea(c) >= maxArea).collect(Collectors.toList());
 		// contours.sort((a, b) -> Double.compare(Imgproc.contourArea(b), Imgproc.contourArea(a)));
@@ -134,8 +134,8 @@ public class MotionDetector {
 				// Imgproc.drawContours(frame, Arrays.asList(new MatOfPoint(result)), 0, new Scalar(255, 0, 0), 2);
 				Rect rect = Imgproc.boundingRect(contour);
 
-				if (n > 50 && rect.x > 2 && rect.y > 2) {
-					Mat ocrZone = new Mat(frame, new Rect(rect.x - 2, rect.y - 2, rect.width + 4, rect.height + 4));
+				if (n > 300) {
+					Mat ocrZone = new Mat(frame, new Rect(rect.x, rect.y, rect.width, rect.height));
 					// Imgproc.GaussianBlur(ocrZone, ocrZone, new Size(3, 3), 0);
 					// Mat mask = new Mat();
 					// Mat hsv = new Mat();
