@@ -7,6 +7,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javafx.scene.control.Label;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
+
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -17,10 +21,6 @@ import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
-import javafx.scene.control.Label;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.VBox;
-
 public class ClassImgFieldsDetector extends AbstractApp {
 	static {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
@@ -28,15 +28,36 @@ public class ClassImgFieldsDetector extends AbstractApp {
 
 	private final static String adjustedDirectoryPath = "aligned-image-3.png";
 
-	private Mat prepareOcr(Mat mat) {
-		Mat tmp = new Mat();
-		Imgproc.cvtColor(mat, tmp, Imgproc.COLOR_BGR2GRAY);
-		Mat tmp2 = new Mat();
-		Imgproc.adaptiveThreshold(tmp2, tmp2, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY, 11, 2);
-		Imgproc.threshold(tmp, tmp2, 0, 255, Imgproc.THRESH_BINARY + Imgproc.THRESH_OTSU);
+	public static void main(String[] args) {
+		launch(args);
+	}
+
+	private Mat equalizeHisto(Mat mat) {
 		Mat result = new Mat();
-		Imgproc.cvtColor(tmp2, result, Imgproc.COLOR_GRAY2BGR);
-		return mat;
+		Imgproc.cvtColor(mat, result, Imgproc.COLOR_BGR2YCrCb);
+		List<Mat> channels = new ArrayList<Mat>();
+		Core.split(result, channels);
+		Imgproc.equalizeHist(channels.get(0), channels.get(0));
+		// Imgproc.equalizeHist(channels.get(1), channels.get(1));
+		// Imgproc.equalizeHist(channels.get(2), channels.get(2));
+		Core.merge(channels, result);
+		Imgproc.cvtColor(result, result, Imgproc.COLOR_YCrCb2BGR);
+		return result;
+	}
+
+	private Mat prepareOcr(Mat mat) {
+		// Mat tmp = new Mat();
+		// Imgproc.blur(mat, tmp, new Size(3, 3));
+		// Mat tmp = equalizeHisto(mat);
+		Mat tmp = Kmeans.colorMapKMeans(mat, 6);
+		// Mat tmp = new Mat();
+		// Imgproc.blur(tmp, tmp, new Size(3, 3));
+		// Imgproc.cvtColor(mat, tmp, Imgproc.COLOR_BGR2GRAY);
+		// / Imgproc.adaptiveThreshold(tmp, tmp, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY, 11, 2);
+		// Imgproc.threshold(tmp, tmp, 0, 255, Imgproc.THRESH_BINARY + Imgproc.THRESH_OTSU);
+		// Mat result = new Mat();
+		// Imgproc.cvtColor(tmp, tmp, Imgproc.COLOR_GRAY2BGR);
+		return tmp;
 	}
 
 	@Override
@@ -44,10 +65,10 @@ public class ClassImgFieldsDetector extends AbstractApp {
 		int columnIndex = 0;
 		int rowIndex = 0;
 		List<Mat> classMats = getClassMats();
-		Mat hilightedVariance = getHighlightedVariance(classMats);
-		mainGrid.add(buildImageViewFromMat(hilightedVariance), columnIndex, rowIndex++);
+		Mat highlightedVariance = getHighlightedVariance(classMats);
+		mainGrid.add(buildImageViewFromMat(highlightedVariance), columnIndex, rowIndex++);
 
-		List<Rect> zones = getRectZones(hilightedVariance);
+		List<Rect> zones = getRectZones(highlightedVariance);
 		List<Mat> bluredMats = classMats.stream().map(mat -> prepareOcr(mat)).collect(Collectors.toList());
 		for (Mat mat : bluredMats) {
 			List<String> ocrs = new ArrayList<>();
@@ -92,10 +113,6 @@ public class ClassImgFieldsDetector extends AbstractApp {
 		Imgproc.dilate(variance, superVariance, Imgproc.getStructuringElement(Imgproc.MORPH_CROSS, new Size(11, 3)));
 		Imgproc.GaussianBlur(superVariance, superVariance, new Size(11, 3), 0);
 		return superVariance;
-	}
-
-	public static void main(String[] args) {
-		launch(args);
 	}
 
 	private static void computeImage(Mat average, Mat nVariance, Mat adjusted, int n) {

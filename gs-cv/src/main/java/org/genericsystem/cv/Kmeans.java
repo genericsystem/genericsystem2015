@@ -27,7 +27,7 @@ public class Kmeans {
 	}
 	private static VideoCapture camera = new VideoCapture(0);
 
-	private final static int MAX_ITER = 5;
+	private final static int MAX_ITER = 10;
 	private final static int CLUSTERS = 8;
 
 	public static void main(String[] args) {
@@ -73,8 +73,10 @@ public class Kmeans {
 			Mat row = imgMapped.row(i);
 			centroids.row(idx.get(i)).copyTo(row);
 		}
-
-		return imgMapped.reshape(3, img.rows());
+		Mat result = new Mat();
+		Mat mat32 = imgMapped.reshape(3, img.rows());
+		mat32.convertTo(result, CvType.CV_8U);
+		return result;
 	}
 
 	public static BufferedImage mat2bufferedImage(Mat image) {
