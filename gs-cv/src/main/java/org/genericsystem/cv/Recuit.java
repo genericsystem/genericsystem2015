@@ -1,28 +1,29 @@
 package org.genericsystem.cv;
 
+import java.util.Arrays;
 import java.util.function.Function;
 
 public class Recuit {
 
-	public static void main(String[] args) {
-		System.out.println(phi(-2.048));
-	}
-
-	static double phi(double x) {
-		double s = x, t = 0, b = x, q = x * x;
-		int i = 1;
-
-		while (s != t)
-			s = (t = s) + (b *= q / (i += 2));
-		return 0.5 + s * Math.exp(-0.5 * q - 0.91893853320467274178d);
-	}
-
 	// public static void main(String[] args) {
-	// Function<Double, Double> function0 = x -> (2 + 1.5 * Math.cos((x - 3) * Math.PI)) + 0.3 * Math.pow(1 - x + 3, 2);
-	// Function<Double, Double> function1 = x -> (2 + 1.5 * Math.cos((x) * Math.PI)) + 0.3 * Math.pow(1 - x, 2);
-	// Function<Double, Double> function2 = x -> (2 + 1.5 * Math.cos((x - 5) * Math.PI)) + 0.3 * Math.pow(1 - x + 5, 2);
-	// System.out.println(Arrays.toString(round(min(distance(function0, function1, function2), new Double[] { 10., 10., 10. }, T -> T * 0.99, 1000))));
+	// System.out.println(phi(-2.048));
 	// }
+
+	// static double phi(double x) {
+	// double s = x, t = 0, b = x, q = x * x;
+	// int i = 1;
+	//
+	// while (s != t)
+	// s = (t = s) + (b *= q / (i += 2));
+	// return 0.5 + s * Math.exp(-0.5 * q - 0.91893853320467274178d);
+	// }
+
+	public static void main(String[] args) {
+		Function<Double, Double> function0 = x -> (2 + 1.5 * Math.cos((x - 3) * Math.PI)) + 0.3 * Math.pow(1 - x + 3, 2);
+		Function<Double, Double> function1 = x -> (2 + 1.5 * Math.cos((x) * Math.PI)) + 0.3 * Math.pow(1 - x, 2);
+		Function<Double, Double> function2 = x -> (2 + 1.5 * Math.cos((x - 5) * Math.PI)) + 0.3 * Math.pow(1 - x + 5, 2);
+		System.out.println(Arrays.toString(round(min(distance(function0, function1, function2), new Double[] { 10., 10., 10. }, T -> T * 0.99, 1000))));
+	}
 
 	private static Function<Double[], Double> distance(Function<Double, Double>... functions) {
 		return x -> {
