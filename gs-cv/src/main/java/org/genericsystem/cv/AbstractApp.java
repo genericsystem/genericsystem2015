@@ -2,6 +2,14 @@ package org.genericsystem.cv;
 
 import java.io.ByteArrayInputStream;
 
+import org.opencv.core.Core;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfByte;
+import org.opencv.core.Size;
+import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
+
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
@@ -13,14 +21,6 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-
-import org.opencv.core.Core;
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfByte;
-import org.opencv.core.Size;
-import org.opencv.imgcodecs.Imgcodecs;
-import org.opencv.imgproc.Imgproc;
 
 public abstract class AbstractApp extends Application {
 	static {
@@ -58,7 +58,7 @@ public abstract class AbstractApp extends Application {
 	protected ImageView buildImageViewFromMat(Mat src) {
 		Mat conv = new Mat();
 		src.convertTo(conv, CvType.CV_8UC1);
-		System.out.println(conv);
+		// System.out.println(conv);
 		Mat target = new Mat();
 		Imgproc.resize(conv, target, new Size(displayWidth, Math.floor((displayWidth / conv.width()) * conv.height())));
 		MatOfByte buffer = new MatOfByte();
