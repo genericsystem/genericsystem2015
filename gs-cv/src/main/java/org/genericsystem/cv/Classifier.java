@@ -9,7 +9,6 @@ import org.opencv.core.Core;
 import org.opencv.core.DMatch;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfDMatch;
-import org.opencv.core.MatOfInt;
 import org.opencv.core.MatOfKeyPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
@@ -30,20 +29,6 @@ public class Classifier {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 	}
 
-	// public static void main(String[] args) {
-	// doWork(sourceDirectoryPath);
-	// }
-	//
-	// public static void doWork(String sourceDirectoryPath) {
-	// List<File> images = Arrays.stream(new File(sourceDirectoryPath).listFiles()).filter(img -> img.getName().endsWith(".png")).collect(Collectors.toList());
-	// for (File img1 : images) {
-	// for (File img2 : images) {
-	// compareFeature(img1.getPath(), img2.getPath());
-	// }
-	// }
-	//
-	// };
-
 	public static Mat compareFeature(String filename1, String filename2) {
 		Mat img1 = Imgcodecs.imread(filename1, Imgcodecs.CV_LOAD_IMAGE_COLOR);
 		Mat img2 = Imgcodecs.imread(filename2, Imgcodecs.CV_LOAD_IMAGE_COLOR);
@@ -51,7 +36,7 @@ public class Classifier {
 		if (result != null) {
 			String dir = alignedDirectoryPath + "-" + filename2.replaceFirst(".*/", "");
 			new File(dir).mkdirs();
-			Imgcodecs.imwrite(dir + "/" + filename1.replaceFirst(".*/", ""), result, new MatOfInt(Imgcodecs.CV_IMWRITE_PNG_COMPRESSION));
+			Imgcodecs.imwrite(dir + "/" + filename1.replaceFirst(".*/", ""), result);
 		}
 		return result;
 	}

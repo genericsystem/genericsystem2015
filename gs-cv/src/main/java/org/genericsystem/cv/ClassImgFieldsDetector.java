@@ -38,13 +38,19 @@ public class ClassImgFieldsDetector extends AbstractApp {
 		int columnIndex = 0;
 		int rowIndex = 0;
 
-		ImgClass imgClass = ImgClass.fromDirectory(classImgRepertory, false);
+		ImgClass imgClass = ImgClass.fromDirectory(classImgRepertory);
 		mainGrid.add(buildImageViewFromMat(imgClass.getAverage()), columnIndex, rowIndex++);
 
-		mainGrid.add(buildImageViewFromMat(imgClass.getVariance()), columnIndex, rowIndex++);
-		mainGrid.add(buildImageViewFromMat(highlightVariance(imgClass.getVariance())), columnIndex, rowIndex++);
+		mainGrid.add(buildImageViewFromMat(highlight(imgClass.getVariance(), 10)), columnIndex, rowIndex++);
+		mainGrid.add(buildImageViewFromMat(highlight(imgClass.computeBluredVariance(new Size(15, 15)), 10)), columnIndex, rowIndex++);
 
-		List<Rect> zones = getRectZones(highlightVariance(imgClass.getVariance()));
+		mainGrid.add(buildImageViewFromMat(imgClass.computeRangedMean(new Scalar(0, 0, 0), new Scalar(220, 180, 230), true, true)), columnIndex, rowIndex++);
+
+		mainGrid.add(buildImageViewFromMat(imgClass.computeRangedVariance(new Scalar(0, 0, 0), new Scalar(255, 255, 60), true)), columnIndex, rowIndex++);
+		mainGrid.add(buildImageViewFromMat(highlight(imgClass.computeRangedVariance(new Scalar(0, 0, 0), new Scalar(255, 255, 60), true), 40)), columnIndex, rowIndex++);
+
+		List<Rect> zones = getRectZones(highlight(imgClass.computeRangedVariance(new Scalar(0, 0, 0), new Scalar(255, 255, 80), true), 30));
+		// List<Rect> zones = getRectZones(highlight(imgClass.computeRangedMean(new Scalar(220, 0, 0), new Scalar(240, 180, 230), true, true), 1));
 		List<Mat> bluredMats = getClassMats(adjustedDirectoryPath2);
 		for (Mat mat : bluredMats) {
 			List<String> ocrs = new ArrayList<>();
@@ -59,36 +65,11 @@ public class ClassImgFieldsDetector extends AbstractApp {
 			VBox vbox = new VBox();
 			ocrs.forEach(ocr -> vbox.getChildren().add(new Label(ocr)));
 			mainGrid.add(vbox, columnIndex + 1, rowIndex++);
-			// break;
+			break;
 		}
 		columnIndex++;
 		columnIndex++;
 		rowIndex = 0;
-
-		ImgClass imgClass2 = ImgClass.fromDirectory(classImgRepertory, true);
-		mainGrid.add(buildImageViewFromMat(imgClass2.getAverage()), columnIndex, rowIndex++);
-
-		mainGrid.add(buildImageViewFromMat(imgClass2.getVariance()), columnIndex, rowIndex++);
-		mainGrid.add(buildImageViewFromMat(highlightVariance(imgClass2.getVariance())), columnIndex, rowIndex++);
-
-		zones = getRectZones(highlightVariance(imgClass2.getVariance()));
-		bluredMats = getClassMats(adjustedDirectoryPath2);
-		for (Mat mat : bluredMats) {
-			List<String> ocrs = new ArrayList<>();
-			for (Rect rect : zones) {
-				String s = Ocr.doWork(new Mat(mat, rect).clone());
-				ocrs.add(s = s.replace("\n", "").trim());
-				System.out.println(s);
-				Imgproc.rectangle(mat, rect.tl(), rect.br(), new Scalar(0, 255, 0), 3);
-				// Imgproc.putText(mat, s, new Point(rect.tl().x, rect.br().y), Core.FONT_HERSHEY_PLAIN, 1.8, new Scalar(0, 0, 255), 2);
-			}
-			mainGrid.add(buildImageViewFromMat(mat), columnIndex, rowIndex);
-			VBox vbox = new VBox();
-			ocrs.forEach(ocr -> vbox.getChildren().add(new Label(ocr)));
-			mainGrid.add(vbox, columnIndex + 1, rowIndex++);
-			// break;
-		}
-		columnIndex++;
 	}
 
 	private List<Mat> getClassMats(String repository) {
@@ -111,9 +92,10 @@ public class ClassImgFieldsDetector extends AbstractApp {
 
 	}
 
-	private Mat highlightVariance(Mat variance) {
+	private Mat highlight(Mat variance, double highlight) {
 		Mat superVariance = new Mat();
-		Imgproc.GaussianBlur(variance, superVariance, new Size(17, 3), 0);
+		Imgproc.cvtColor(variance, superVariance, Imgproc.COLOR_BGR2GRAY);
+		Core.multiply(superVariance, new Scalar(highlight), superVariance);
 		Imgproc.dilate(superVariance, superVariance, Imgproc.getStructuringElement(Imgproc.MORPH_CROSS, new Size(17, 3)));
 		Imgproc.GaussianBlur(superVariance, superVariance, new Size(17, 3), 0);
 		return superVariance;
