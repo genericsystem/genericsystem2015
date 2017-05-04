@@ -70,7 +70,7 @@ public class CamCropper {
 	public static Mat adjust(Mat frame) {
 		Mat resized = new Mat();
 		Imgproc.resize(frame, resized, new Size(frame.width() * 2, frame.height() * 2));
-		return Classifier.compareFeature(resized, ref, 50);
+		return Classifier.compareFeature(resized, ref, 10);
 	}
 
 	public static BufferedImage mat2bufferedImage(Mat image) {

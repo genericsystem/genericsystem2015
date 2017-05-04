@@ -4,7 +4,9 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -43,7 +45,8 @@ public class Kmeans {
 		jframe.setVisible(true);
 		for (;;) {
 			camera.read(img);
-			Mat clusters = colorMapKMeans(img, CLUSTERS, MAX_ITER);
+			Mat clusters = colorMapKMeans(img, CLUSTERS);
+			// Mat clusters = cluster(img, CLUSTERS).get(1);
 
 			ImageIcon image = new ImageIcon(mat2bufferedImage(clusters));
 
@@ -53,18 +56,14 @@ public class Kmeans {
 
 	}
 
-	public static Mat colorMapKMeans(Mat img, int cluster) {
-		return colorMapKMeans(img, cluster, MAX_ITER);
-	}
-
-	public static Mat colorMapKMeans(Mat img, int K, int maxIterations) {
+	public static Mat colorMapKMeans(Mat img, int K) {
 
 		Mat m = img.reshape(1, img.rows() * img.cols());
 		m.convertTo(m, CvType.CV_32F);
 
 		Mat bestLabels = new Mat(m.rows(), 1, CvType.CV_8U);
 		Mat centroids = new Mat(K, 1, CvType.CV_32F);
-		Core.kmeans(m, K, bestLabels, new TermCriteria(TermCriteria.COUNT | TermCriteria.EPS, maxIterations, 1E-5), 1, Core.KMEANS_RANDOM_CENTERS, centroids);
+		Core.kmeans(m, K, bestLabels, new TermCriteria(TermCriteria.COUNT | TermCriteria.EPS, MAX_ITER, 1E-5), 1, Core.KMEANS_PP_CENTERS, centroids);
 		List<Integer> idx = new ArrayList<>(m.rows());
 		Converters.Mat_to_vector_int(bestLabels, idx);
 
@@ -77,6 +76,40 @@ public class Kmeans {
 		Mat mat32 = imgMapped.reshape(3, img.rows());
 		mat32.convertTo(result, CvType.CV_8U);
 		return result;
+	}
+
+	public static List<Mat> cluster(Mat cutout, int k) {
+		Mat samples = cutout.reshape(1, cutout.cols() * cutout.rows());
+		Mat samples32f = new Mat();
+		samples.convertTo(samples32f, CvType.CV_32F);
+		Mat labels = new Mat();
+		Mat centers = new Mat();
+		Core.kmeans(samples32f, k, labels, new TermCriteria(TermCriteria.COUNT | TermCriteria.EPS, MAX_ITER, 1E-5), 1, Core.KMEANS_PP_CENTERS, centers);
+		return showClusters(cutout, labels, centers);
+	}
+
+	private static List<Mat> showClusters(Mat cutout, Mat labels, Mat centers) {
+		centers.convertTo(centers, CvType.CV_8UC1, 255.0);
+		centers.reshape(3);
+		List<Mat> clusters = new ArrayList<>();
+		for (int i = 0; i < centers.rows(); i++) {
+			clusters.add(Mat.zeros(cutout.size(), cutout.type()));
+		}
+		Map<Integer, Integer> counts = new HashMap<>();
+		for (int i = 0; i < centers.rows(); i++)
+			counts.put(i, 0);
+		int rows = 0;
+		for (int y = 0; y < cutout.rows(); y++) {
+			for (int x = 0; x < cutout.cols(); x++) {
+				int label = (int) labels.get(rows, 0)[0];
+				int r = (int) centers.get(label, 2)[0];
+				int g = (int) centers.get(label, 1)[0];
+				int b = (int) centers.get(label, 0)[0];
+				clusters.get(label).put(y, x, b, g, r);
+				rows++;
+			}
+		}
+		return clusters;
 	}
 
 	public static BufferedImage mat2bufferedImage(Mat image) {

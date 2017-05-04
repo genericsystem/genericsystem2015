@@ -43,10 +43,20 @@ public class ClassImgFieldsDetector extends AbstractApp {
 		mainGrid.add(buildImageViewFromMat(imgClass.getVariance()), columnIndex, rowIndex++);
 		mainGrid.add(buildImageViewFromMat(imgClass.computeBluredVariance(new Size(15, 15))), columnIndex, rowIndex++);
 
-		mainGrid.add(buildImageViewFromMat(imgClass.computeRangedMean(new Scalar(0, 0, 0), new Scalar(220, 180, 230), true, true)), columnIndex, rowIndex++);
+		// mainGrid.add(buildImageViewFromMat(imgClass.computeRangedMean(new Scalar(0, 0, 0), new Scalar(220, 180, 230), true, true)), columnIndex, rowIndex++);
+		// mainGrid.add(buildImageViewFromMat(imgClass.computeRangedVariance(new Scalar(0, 0, 0), new Scalar(255, 255, 60), true)), columnIndex, rowIndex++);
+		// mainGrid.add(buildImageViewFromMat(highlight(imgClass.computeRangedVariance(new Scalar(0, 0, 0), new Scalar(255, 255, 60), true), 40)), columnIndex, rowIndex++);
 
-		mainGrid.add(buildImageViewFromMat(imgClass.computeRangedVariance(new Scalar(0, 0, 0), new Scalar(255, 255, 60), true)), columnIndex, rowIndex++);
-		mainGrid.add(buildImageViewFromMat(highlight(imgClass.computeRangedVariance(new Scalar(0, 0, 0), new Scalar(255, 255, 60), true), 40)), columnIndex, rowIndex++);
+		mainGrid.add(buildImageViewFromMat(Kmeans.colorMapKMeans(imgClass.getAverage(), 4)), columnIndex, rowIndex++);
+		mainGrid.add(buildImageViewFromMat(Kmeans.colorMapKMeans(imgClass.getVariance(), 4)), columnIndex, rowIndex++);
+
+		List<Mat> clusters = Kmeans.cluster(imgClass.getAverage(), 4);
+		mainGrid.add(buildImageViewFromMat(clusters.get(0)), columnIndex, rowIndex++);
+		mainGrid.add(buildImageViewFromMat(clusters.get(1)), columnIndex, rowIndex++);
+		mainGrid.add(buildImageViewFromMat(clusters.get(2)), columnIndex, rowIndex++);
+		mainGrid.add(buildImageViewFromMat(clusters.get(3)), columnIndex, rowIndex++);
+		// mainGrid.add(buildImageViewFromMat(clusters.get(4)), columnIndex, rowIndex++);
+		// mainGrid.add(buildImageViewFromMat(clusters.get(5)), columnIndex, rowIndex++);
 
 		List<Rect> zones = getRectZones(highlight(imgClass.computeRangedVariance(new Scalar(0, 0, 0), new Scalar(255, 255, 80), true), 30));
 		// List<Rect> zones = getRectZones(highlight(imgClass.computeRangedMean(new Scalar(220, 0, 0), new Scalar(240, 180, 230), true, true), 1));
