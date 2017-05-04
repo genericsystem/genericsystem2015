@@ -40,9 +40,8 @@ public class ClassImgFieldsDetector extends AbstractApp {
 
 		ImgClass imgClass = ImgClass.fromDirectory(classImgRepertory);
 		mainGrid.add(buildImageViewFromMat(imgClass.getAverage()), columnIndex, rowIndex++);
-
-		mainGrid.add(buildImageViewFromMat(highlight(imgClass.getVariance(), 10)), columnIndex, rowIndex++);
-		mainGrid.add(buildImageViewFromMat(highlight(imgClass.computeBluredVariance(new Size(15, 15)), 10)), columnIndex, rowIndex++);
+		mainGrid.add(buildImageViewFromMat(imgClass.getVariance()), columnIndex, rowIndex++);
+		mainGrid.add(buildImageViewFromMat(imgClass.computeBluredVariance(new Size(15, 15))), columnIndex, rowIndex++);
 
 		mainGrid.add(buildImageViewFromMat(imgClass.computeRangedMean(new Scalar(0, 0, 0), new Scalar(220, 180, 230), true, true)), columnIndex, rowIndex++);
 

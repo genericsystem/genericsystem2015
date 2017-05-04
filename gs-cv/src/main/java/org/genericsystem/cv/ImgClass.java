@@ -9,6 +9,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.opencv.core.Core;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.Rect;
@@ -31,8 +32,9 @@ public class ImgClass {
 	public ImgClass(String bgrDirectory) {
 		this.directory = bgrDirectory;
 		getClassMats(directory).forEach(bgrImages::add);
-		average = computeMean(Function.identity());
-		variance = computeVariance(average, Function.identity());
+		List<Mat> meanAndVariance = computeMeanAndVariance(Function.identity());
+		average = meanAndVariance.get(0);
+		variance = meanAndVariance.get(1);
 	}
 
 	public Mat computeMean(Function<Mat, Mat> filter) {
@@ -40,10 +42,6 @@ public class ImgClass {
 		for (int count = 1; count < bgrImages.size(); count++)
 			Core.addWeighted(mean, 1d - 1d / Integer.valueOf(count).doubleValue(), filter.apply(bgrImages.get(count)), 1d / Integer.valueOf(count).doubleValue(), 0, mean);
 		return mean;
-	}
-
-	public Mat computeVariance(Function<Mat, Mat> filter) {
-		return computeVariance(computeMean(filter), filter);
 	}
 
 	public Mat computeBluredMean(Size blurSize) {
@@ -55,11 +53,11 @@ public class ImgClass {
 	}
 
 	public Mat computeBluredVariance(Size blurSize) {
-		return computeVariance(mat -> {
+		return computeMeanAndVariance(mat -> {
 			Mat result = new Mat();
 			Imgproc.GaussianBlur(mat, result, blurSize, 0);
 			return result;
-		});
+		}).get(1);
 	}
 
 	public Mat computeVariance(Mat mean, Function<Mat, Mat> filter) {
@@ -72,6 +70,34 @@ public class ImgClass {
 			Core.addWeighted(variance, 1d - 1d / Integer.valueOf(count).doubleValue(), diff, 1d / Integer.valueOf(count).doubleValue(), 0, variance);
 		}
 		return variance;
+	}
+
+	public List<Mat> computeMeanAndVariance(Function<Mat, Mat> filter) {
+		int type = CvType.CV_32SC3;
+		Mat img0 = filter.apply(bgrImages.get(0));
+		Mat mean = new Mat(img0.size(), type, new Scalar(0, 0, 0));
+		Mat m2 = new Mat(img0.size(), type, new Scalar(0, 0, 0));
+		Mat mask = Mat.ones(img0.size(), CvType.CV_8U);
+		int count = 1;
+		for (; count <= bgrImages.size(); count++) {
+			Mat img = new Mat();
+			filter.apply(bgrImages.get(count - 1)).convertTo(img, type);;
+			Mat delta = new Mat(img.size(), type);
+			Core.subtract(img, mean, delta, mask, type);
+			Core.addWeighted(mean, 1, delta, 1d / count, 0, mean, type);
+			Mat delta2 = new Mat(m2.size(), type);
+			Core.subtract(img, mean, delta2, mask, type);
+			Mat product = delta.mul(delta2);
+			Core.add(m2, product, m2);
+		}
+		Mat variance = new Mat(m2.size(), type);
+		Core.multiply(m2, new Scalar(1d / count, 1d / count, 1d / count), variance);
+		variance.convertTo(variance, CvType.CV_8UC3);
+		mean.convertTo(mean, CvType.CV_8UC3);
+		List<Mat> result = new ArrayList<>();
+		result.add(mean);
+		result.add(variance);
+		return result;
 	}
 
 	public Mat computeRangedMean(Scalar bgr1, Scalar bgr2, boolean hsv, boolean reverse) {
@@ -95,7 +121,7 @@ public class ImgClass {
 	}
 
 	public Mat computeRangedVariance(Scalar bgr1, Scalar bgr2, boolean hsv) {
-		return computeVariance(mat -> {
+		return computeMeanAndVariance(mat -> {
 			Mat ranged = new Mat();
 			if (hsv)
 				Imgproc.cvtColor(mat, ranged, Imgproc.COLOR_BGR2HSV);
@@ -108,7 +134,7 @@ public class ImgClass {
 			if (hsv)
 				Imgproc.cvtColor(result, result, Imgproc.COLOR_HSV2BGR);
 			return result;
-		});
+		}).get(1);
 	}
 
 	private List<Mat> getClassMats(String repository) {
