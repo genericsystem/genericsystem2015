@@ -15,7 +15,6 @@ import org.opencv.core.Mat;
 import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
-import org.opencv.video.BackgroundSubtractorKNN;
 import org.opencv.video.BackgroundSubtractorMOG2;
 import org.opencv.video.Video;
 import org.opencv.videoio.VideoCapture;
@@ -47,20 +46,24 @@ public class BackGroundSubstractor {
 		jframe.setSize(img.width(), img.height());
 		jframe.setVisible(true);
 		BackgroundSubtractorMOG2 mog2 = Video.createBackgroundSubtractorMOG2();
-		BackgroundSubtractorKNN knn = Video.createBackgroundSubtractorKNN();
-
-		for (int i = 0; i < 500; i++) {
+		// BackgroundSubtractorKNN knn = Video.createBackgroundSubtractorKNN();
+		Mat average = null;
+		for (int i = 1; i < 500; i++) {
 
 			srcs.get(i % srcs.size()).copyTo(img);
 			// camera.read(img);
 
-			Mat gray = new Mat();
-			Imgproc.cvtColor(img, gray, Imgproc.COLOR_BGR2GRAY);
+			// Mat gray = new Mat();
+			// Imgproc.cvtColor(img, gray, Imgproc.COLOR_BGR2GRAY);
 			Mat fgMask = new Mat();
-			knn.apply(gray, fgMask);
+			mog2.apply(img, fgMask);
 			Mat fg = new Mat();
 			img.copyTo(fg, fgMask);
-			ImageIcon image = new ImageIcon(Tools.mat2bufferedImage(fg));
+			if (average == null)
+				average = fg;
+			else
+				Core.addWeighted(average, 1 - 1d / 30, fg, 1d / 30, 0, average);
+			ImageIcon image = new ImageIcon(Tools.mat2bufferedImage(average));
 
 			vidpanel.setIcon(image);
 			vidpanel.repaint();

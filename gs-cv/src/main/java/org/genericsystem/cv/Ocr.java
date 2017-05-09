@@ -14,15 +14,15 @@ import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
 
+import net.sourceforge.tess4j.Tesseract;
+import net.sourceforge.tess4j.TesseractException;
+
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
-
-import net.sourceforge.tess4j.Tesseract;
-import net.sourceforge.tess4j.TesseractException;
 
 public class Ocr {
 
@@ -33,8 +33,10 @@ public class Ocr {
 		instance.setDatapath("/usr/share/tesseract-ocr/4.00/");
 		instance.setLanguage("fra");
 		instance.setHocr(false);
-		instance.setPageSegMode(13);
+		instance.setPageSegMode(6);
 		instance.setOcrEngineMode(1);
+		// instance.setTessVariable("preserve_interword_spaces", "1");
+		// instance.setTessVariable("textord_space_size_is_variable", "1");
 		instance.setTessVariable("tessedit_char_whitelist", "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM0123456789.-,<'");
 		instance.setTessVariable("tessedit_char_blacklist", "?{}_");
 	}
@@ -67,6 +69,16 @@ public class Ocr {
 	public static String doWork(BufferedImage image, Rectangle rectangle) {
 		try {
 			return instance.doOCR(image, rectangle);
+		} catch (TesseractException e) {
+			throw new RuntimeException(e);
+		}
+
+	}
+
+	public static List<Rect> findBox(Mat mat) {
+
+		try {
+			return instance.getSegmentedRegions(Tools.mat2bufferedImage(mat), 2).stream().map(rectangle -> new Rect(new Point(rectangle.getX(), rectangle.getY()), new Size(rectangle.getWidth(), rectangle.getHeight()))).collect(Collectors.toList());
 		} catch (TesseractException e) {
 			throw new RuntimeException(e);
 		}

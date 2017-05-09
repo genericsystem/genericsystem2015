@@ -1,12 +1,9 @@
 package org.genericsystem.cv;
 
-import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
@@ -15,7 +12,6 @@ import org.opencv.core.MatOfPoint;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
-import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
 public class ImgClass {
@@ -31,7 +27,7 @@ public class ImgClass {
 
 	public ImgClass(String bgrDirectory) {
 		this.directory = bgrDirectory;
-		getClassMats(directory).forEach(bgrImages::add);
+		Tools.getClassMats(directory).forEach(bgrImages::add);
 		List<Mat> meanAndVariance = computeMeanAndVariance(Function.identity());
 		average = meanAndVariance.get(0);
 		variance = meanAndVariance.get(1);
@@ -81,7 +77,8 @@ public class ImgClass {
 		int count = 1;
 		for (; count <= bgrImages.size(); count++) {
 			Mat img = new Mat();
-			filter.apply(bgrImages.get(count - 1)).convertTo(img, type);;
+			filter.apply(bgrImages.get(count - 1)).convertTo(img, type);
+			;
 			Mat delta = new Mat(img.size(), type);
 			Core.subtract(img, mean, delta, mask, type);
 			Core.addWeighted(mean, 1, delta, 1d / count, 0, mean, type);
@@ -135,10 +132,6 @@ public class ImgClass {
 				Imgproc.cvtColor(result, result, Imgproc.COLOR_HSV2BGR);
 			return result;
 		}).get(1);
-	}
-
-	private List<Mat> getClassMats(String repository) {
-		return Arrays.stream(new File(repository).listFiles()).filter(img -> img.getName().endsWith(".png")).peek(img -> System.out.println("load : " + img.getPath())).map(img -> Imgcodecs.imread(img.getPath())).collect(Collectors.toList());
 	}
 
 	public static List<Rect> getRectZones(Mat highlightVariance) {
