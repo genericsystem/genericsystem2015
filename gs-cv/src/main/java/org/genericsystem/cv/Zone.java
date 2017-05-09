@@ -53,8 +53,8 @@ public class Zone {
 		Imgproc.rectangle(mat, rect.tl(), rect.br(), color, thickness);
 	}
 
-	public void write(Mat mat, String text, double d, Scalar color, int thickness) {
-		Imgproc.putText(mat, text, new Point(rect.tl().x, rect.br().y), Core.FONT_HERSHEY_PLAIN, 1.8, color, thickness);
+	public void write(Mat mat, String text, double fontScale, Scalar color, int thickness) {
+		Imgproc.putText(mat, text, new Point(rect.tl().x, rect.br().y), Core.FONT_HERSHEY_PLAIN, fontScale, color, thickness);
 	}
 
 }
