@@ -13,6 +13,9 @@ import io.vertx.spi.cluster.hazelcast.HazelcastClusterManager;
 
 public class VerticleDeployer extends AbstractVerticle {
 
+	public static final String PDF_WATCHER_ADDRESS = "app.pdfchanges";
+	public static final String PNG_WATCHER_ADDRESS = "app.pngchanges";
+
 	public static void deployVerticle(Verticle verticle) {
 		ClusterManager mgr = new HazelcastClusterManager();
 
@@ -31,8 +34,9 @@ public class VerticleDeployer extends AbstractVerticle {
 	@Override
 	public void start(Future<Void> startFuture) throws Exception {
 		DeploymentOptions options = new DeploymentOptions().setWorker(true);
-		vertx.deployVerticle(new PdfWatcherVerticle(Paths.get("..", "gs-cv", "pdf")), options);
+		vertx.deployVerticle(new DirectoryWatcherVerticle(Paths.get("..", "gs-cv", "pdf"), PDF_WATCHER_ADDRESS), options);
 		vertx.deployVerticle(new PdfsConverterVerticle(), options);
+		vertx.deployVerticle(new PngWatcherVerticle(Paths.get("..", "gs-cv", "pdf"), PNG_WATCHER_ADDRESS), options);
 		startFuture.complete();
 	}
 }

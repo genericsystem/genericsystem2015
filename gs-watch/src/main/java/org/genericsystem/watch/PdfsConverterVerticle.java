@@ -22,7 +22,7 @@ public class PdfsConverterVerticle extends AbstractVerticle {
 
 	@Override
 	public void start() throws Exception {
-		MessageConsumer<String> consumer = vertx.eventBus().consumer(PdfWatcherVerticle.ADDRESS);
+		MessageConsumer<String> consumer = vertx.eventBus().consumer(VerticleDeployer.PDF_WATCHER_ADDRESS);
 		consumer.handler(message -> vertx.executeBlocking(future -> {
 			JsonObject json = new JsonObject(message.body());
 			String kind = json.getString("kind");
