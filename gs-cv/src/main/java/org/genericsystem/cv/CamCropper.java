@@ -22,7 +22,7 @@ public class CamCropper {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 	}
 
-	private final static String refPath = "adjusted/image-3.png";
+	private final static String refPath = "ajusted/image-3.png";
 
 	private static VideoCapture camera = new VideoCapture(0);
 

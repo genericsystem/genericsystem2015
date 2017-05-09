@@ -1,25 +1,18 @@
 package org.genericsystem.cv;
 
-import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import org.opencv.core.Core;
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfPoint;
-import org.opencv.core.Rect;
-import org.opencv.core.Scalar;
-import org.opencv.core.Size;
-import org.opencv.imgcodecs.Imgcodecs;
-import org.opencv.imgproc.Imgproc;
 
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
+
+import org.opencv.core.Core;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.core.Scalar;
+import org.opencv.core.Size;
+import org.opencv.imgproc.Imgproc;
 
 public class ClassImgFieldsDetector extends AbstractApp {
 	static {
@@ -27,7 +20,8 @@ public class ClassImgFieldsDetector extends AbstractApp {
 	}
 
 	private final static String classImgRepertory = "aligned-image-3.png";
-	private final static String adjustedDirectoryPath2 = "aligned-image-3.png/mask/image-3";
+
+	// private final static String adjustedDirectoryPath2 = "aligned-image-3.png/mask/image-3";
 
 	public static void main(String[] args) {
 		launch(args);
@@ -58,31 +52,33 @@ public class ClassImgFieldsDetector extends AbstractApp {
 		// mainGrid.add(buildImageViewFromMat(clusters.get(4)), columnIndex, rowIndex++);
 		// mainGrid.add(buildImageViewFromMat(clusters.get(5)), columnIndex, rowIndex++);
 
-		List<Rect> zones = getRectZones(highlight(imgClass.computeRangedVariance(new Scalar(0, 0, 0), new Scalar(255, 255, 80), true), 30));
-		// List<Rect> zones = getRectZones(highlight(imgClass.computeRangedMean(new Scalar(220, 0, 0), new Scalar(240, 180, 230), true, true), 1));
-		List<Mat> bluredMats = getClassMats(adjustedDirectoryPath2);
-		for (Mat mat : bluredMats) {
-			List<String> ocrs = new ArrayList<>();
-			for (Rect rect : zones) {
-				String s = Ocr.doWork(new Mat(mat, rect).clone());
-				ocrs.add(s = s.replace("\n", "").trim());
-				System.out.println(s);
-				Imgproc.rectangle(mat, rect.tl(), rect.br(), new Scalar(0, 255, 0), 3);
-				// Imgproc.putText(mat, s, new Point(rect.tl().x, rect.br().y), Core.FONT_HERSHEY_PLAIN, 1.8, new Scalar(0, 0, 255), 2);
-			}
-			mainGrid.add(buildImageViewFromMat(mat), columnIndex, rowIndex);
-			VBox vbox = new VBox();
-			ocrs.forEach(ocr -> vbox.getChildren().add(new Label(ocr)));
-			mainGrid.add(vbox, columnIndex + 1, rowIndex++);
-			break;
-		}
-		columnIndex++;
-		columnIndex++;
-		rowIndex = 0;
-	}
+		// Mat img = Imgcodecs.imread("aligned-image-3.png/image-3.png");
+		// Mat canny = new Mat();
+		// Imgproc.cvtColor(img, img, Imgproc.COLOR_BGR2GRAY);
+		// Imgproc.Canny(img, canny, canyThreshold1, canyThreshold2);
+		// mainGrid.add(buildImageViewFromMat(canny), columnIndex, rowIndex++);
 
-	private List<Mat> getClassMats(String repository) {
-		return Arrays.stream(new File(repository).listFiles()).filter(img -> img.getName().endsWith(".png")).map(img -> Imgcodecs.imread(img.getPath())).collect(Collectors.toList());
+		Mat imageToZone = highlight(imgClass.computeRangedVariance(new Scalar(0, 0, 0), new Scalar(255, 255, 85), true), 30);
+		// highlight(imgClass.computeRangedMean(new Scalar(220, 0, 0), new Scalar(240, 180, 230), true, true), 1)
+		List<Zone> zones = ImgZoner.getZones(imageToZone);
+		List<Mat> sameMats = Tools.getClassMats("aligned-image-3.png/mask/image-3", "aligned-image-3.png/foreground/image-3");
+		sameMats.addAll(Tools.getImages("aligned-image-3.png", "image-3.png"));
+		List<String> bestOcrs = new ArrayList<String>();
+		double dx = 5;
+		double dy = 5;
+		for (Zone zone : zones) {
+			Zone adjusted = zone.adjustRect(dx, dy, sameMats.get(0).width(), sameMats.get(0).height());
+			String scoredText = adjusted.computeUnsupervisedScoredText(sameMats);
+			bestOcrs.add(scoredText);
+			System.out.println(scoredText);
+		}
+
+		for (Mat mat : sameMats) {
+			mainGrid.add(buildImageViewFromMat(mat), columnIndex, rowIndex++);
+		}
+		VBox vbox = new VBox();
+		bestOcrs.forEach(ocr -> vbox.getChildren().add(new Label(ocr)));
+		mainGrid.add(vbox, columnIndex, rowIndex++);
 	}
 
 	private Mat getVariance(List<Mat> mats) {
@@ -131,22 +127,22 @@ public class ClassImgFieldsDetector extends AbstractApp {
 		return grey;
 	}
 
-	public static List<Rect> getRectZones(Mat highlightVariance) {
-		// To improve
-		List<Rect> result = new ArrayList<>();
-		List<MatOfPoint> contours = new ArrayList<>();
-		Imgproc.findContours(highlightVariance, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
-		double minArea = 500;
-		Collections.sort(contours, (c1, c2) -> Double.compare(Imgproc.contourArea(c2), Imgproc.contourArea(c1)));
-		for (int i = 0; i < contours.size(); i++) {
-			MatOfPoint contour = contours.get(i);
-			double contourarea = Imgproc.contourArea(contour);
-			if (contourarea > minArea)
-				result.add(Imgproc.boundingRect(contour));
-
-		}
-		return result;
-	}
+	// public static List<Rect> getRectZones(Mat highlightVariance) {
+	// // To improve
+	// List<Rect> result = new ArrayList<>();
+	// List<MatOfPoint> contours = new ArrayList<>();
+	// Imgproc.findContours(highlightVariance, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+	// double minArea = 500;
+	// Collections.sort(contours, (c1, c2) -> Double.compare(Imgproc.contourArea(c2), Imgproc.contourArea(c1)));
+	// for (int i = 0; i < contours.size(); i++) {
+	// MatOfPoint contour = contours.get(i);
+	// double contourarea = Imgproc.contourArea(contour);
+	// if (contourarea > minArea)
+	// result.add(Imgproc.boundingRect(contour));
+	//
+	// }
+	// return result;
+	// }
 
 	// private Mat equalizeHisto(Mat mat) {
 	// Mat result = new Mat();

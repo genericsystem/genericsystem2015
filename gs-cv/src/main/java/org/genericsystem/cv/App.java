@@ -12,6 +12,19 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import javafx.application.Application;
+import javafx.event.EventHandler;
+import javafx.scene.Group;
+import javafx.scene.Scene;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextArea;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
+
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -26,32 +39,18 @@ import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
 
-import javafx.application.Application;
-import javafx.event.EventHandler;
-import javafx.scene.Group;
-import javafx.scene.Scene;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TextArea;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
-
 public class App extends Application {
 
 	private final String sourceDirectoryPath = "pdf";
 	private final String targetDirectoryPath = "png";
 	private final String adjustedDirectoryPath = "ajusted";
-	private final String templatedDirectoryPath = "templated";
 	private final double displayWidth = 200d;
 	private final double canyThreshold1 = 12;
+	private final double canyThreshold2 = 90;
 	private final double ratio = 2;
 	private final boolean landscape = true;
 	private final double[] zone = new double[] { 3.4d / 10.6d, 8d / 10.6d, 1.4d / 7.4d, 2d / 7.4d };
 	// private final double resizeFactor = 4d / 3;
-	private final double canyThreshold2 = 90;
 
 	static {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
@@ -63,15 +62,13 @@ public class App extends Application {
 
 	@Override
 	public void start(Stage stage) throws Exception {
+
 		// SourceFilesConverter.doWork(sourceDirectoryPath, targetDirectoryPath);
-		List<File> srcFiles = Arrays.asList(new File(targetDirectoryPath).listFiles());
 		GridPane gridPane = new GridPane();
 
 		int row = 0;
-		for (File srcFile : srcFiles) {
+		for (Mat img : Tools.getClassMats(targetDirectoryPath)) {
 			int column = 0;
-
-			Mat srcMat = read(srcFile);
 
 			// Mat hsv = new Mat();
 			// Imgproc.cvtColor(srcMat, hsv, Imgproc.COLOR_BGR2HSV);
@@ -80,9 +77,9 @@ public class App extends Application {
 			// Mat result = new Mat();
 			// Core.bitwise_and(hsv, hsv, result, mask);
 			// Imgproc.cvtColor(result, srcMat, Imgproc.COLOR_HSV2BGR);
-			gridPane.add(getImageViewFromMat(srcMat), column++, row);
+			gridPane.add(getImageViewFromMat(img), column++, row);
 
-			Mat grayed = gray(srcMat);
+			Mat grayed = gray(img);
 			gridPane.add(getImageViewFromMat(grayed), column++, row);
 
 			Mat canny = canny(grayed, canyThreshold1);
@@ -97,15 +94,14 @@ public class App extends Application {
 			Mat contoured = drawContour(colorize(blured), contour);
 			gridPane.add(getImageViewFromMat(contoured), column++, row);
 
-			Mat adjusted = transform(srcMat, contour);
+			Mat adjusted = transform(img, contour);
 			gridPane.add(getImageViewFromMat(adjusted), column++, row);
 
-			File fileToOcr = createFileFromMat(adjusted, srcFile.getName(), adjustedDirectoryPath);
-			String hocrString = Ocr.doWork(fileToOcr);
+			String hocrString = Ocr.doWork(adjusted);
 			gridPane.add(new TextArea(hocrString), column++, row);
 
 			Mat boxed = adjusted.clone();
-			for (Rect rect : Ocr.findBox(fileToOcr))
+			for (Rect rect : Ocr.findBox(adjusted))
 				Imgproc.rectangle(boxed, rect.tl(), rect.br(), new Scalar(0, 255, 0), 5);
 			gridPane.add(getImageViewFromMat(boxed), column++, row);
 
@@ -146,7 +142,7 @@ public class App extends Application {
 			Mat ocrZone = new Mat(adjusted, rect);
 			gridPane.add(getImageViewFromMat(ocrZone), column++, row);
 
-			String zoneOcr = Ocr.doWork(createFileFromMat(ocrZone, srcFile.getName(), templatedDirectoryPath));
+			String zoneOcr = Ocr.doWork(ocrZone);
 			gridPane.add(new TextArea(zoneOcr), column++, row);
 
 			row++;

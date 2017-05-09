@@ -85,6 +85,9 @@ public class Kmeans {
 		Mat labels = new Mat();
 		Mat centers = new Mat();
 		Core.kmeans(samples32f, k, labels, new TermCriteria(TermCriteria.COUNT | TermCriteria.EPS, MAX_ITER, 1E-5), 1, Core.KMEANS_PP_CENTERS, centers);
+
+		// Objdetect.groupRectangles(rectList, weights, groupThreshold);
+
 		return showClusters(cutout, labels, centers);
 	}
 
