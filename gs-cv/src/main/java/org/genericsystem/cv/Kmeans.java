@@ -81,7 +81,7 @@ public class Kmeans {
 	public static List<Mat> cluster(Mat cutout, int k) {
 		Mat samples = cutout.reshape(1, cutout.cols() * cutout.rows());
 		Mat samples32f = new Mat();
-		samples.convertTo(samples32f, CvType.CV_32F);
+		samples.convertTo(samples32f, CvType.CV_32F, 1.0 / 255.0);
 		Mat labels = new Mat();
 		Mat centers = new Mat();
 		Core.kmeans(samples32f, k, labels, new TermCriteria(TermCriteria.COUNT | TermCriteria.EPS, MAX_ITER, 1E-5), 1, Core.KMEANS_PP_CENTERS, centers);
@@ -92,7 +92,7 @@ public class Kmeans {
 	}
 
 	private static List<Mat> showClusters(Mat cutout, Mat labels, Mat centers) {
-		centers.convertTo(centers, CvType.CV_8UC1, 255.0);
+		centers.convertTo(centers, CvType.CV_8UC1, 255);
 		centers.reshape(3);
 		List<Mat> clusters = new ArrayList<>();
 		for (int i = 0; i < centers.rows(); i++) {

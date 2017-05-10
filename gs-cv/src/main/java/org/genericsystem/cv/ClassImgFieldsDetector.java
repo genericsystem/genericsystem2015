@@ -2,14 +2,14 @@ package org.genericsystem.cv;
 
 import java.util.List;
 
+import javafx.scene.layout.GridPane;
+
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
-
-import javafx.scene.layout.GridPane;
 
 public class ClassImgFieldsDetector extends AbstractApp {
 	static {
@@ -32,12 +32,13 @@ public class ClassImgFieldsDetector extends AbstractApp {
 		ImgClass imgClass = ImgClass.fromDirectory(classImgRepertory);
 		double dx = 5;
 		double dy = 5;
-		Mat imageToZone = imgClass.computeRangedMean(new Scalar(0, 0, 0), new Scalar(255, 255, 82), true, false);
-		ImgZoner.drawAdjustedZones(imageToZone, dx, dy, new Scalar(0, 255, 0), 3);
+		Mat imageToZone = highlight(imgClass.computeRangedMean(new Scalar(0, 0, 0), new Scalar(255, 255, 90), true, false), new Scalar(20, 20, 20));
+		// ImgZoner.drawZones(imageToZone, 1, new Scalar(255, 255, 255), -1);
+		// ImgZoner.drawAdjustedZones(imageToZone, dx, dy, new Scalar(0, 255, 0), 3);
 		mainGrid.add(buildImageViewFromMat(imageToZone), columnIndex, rowIndex++);
 
 		Mat imageToZone2 = imgClass.computeRangedVariance(new Scalar(0, 0, 0), new Scalar(255, 255, 82), true);
-		ImgZoner.drawAdjustedZones(imageToZone2, dx, dy, new Scalar(0, 255, 0), 3);
+		// ImgZoner.drawZones(imageToZone2, 1, new Scalar(255, 255, 255), -1);
 		mainGrid.add(buildImageViewFromMat(imageToZone2), columnIndex, rowIndex++);
 
 		// mainGrid.add(buildImageViewFromMat(imgClass.getAverage()), columnIndex, rowIndex++);
@@ -50,9 +51,9 @@ public class ClassImgFieldsDetector extends AbstractApp {
 		Mat result = new Mat(bluredVariance.size(), bluredVariance.type(), new Scalar(0, 0, 0));
 		bluredVariance.copyTo(result, mask);
 		Imgproc.cvtColor(result, result, Imgproc.COLOR_HSV2BGR);
-		Imgproc.dilate(result, result, Imgproc.getStructuringElement(Imgproc.MORPH_CROSS, new Size(17, 3)));
-		Imgproc.GaussianBlur(result, result, new Size(17, 3), 0);
-		ImgZoner.drawAdjustedZones(result, dx, dy, new Scalar(0, 255, 0), 3);
+		// Imgproc.dilate(result, result, Imgproc.getStructuringElement(Imgproc.MORPH_CROSS, new Size(17, 3)));
+		// Imgproc.GaussianBlur(result, result, new Size(17, 3), 0);
+		ImgZoner.drawAdjustedZones(result, 500, dx, dy, new Scalar(0, 255, 0), 3);
 		mainGrid.add(buildImageViewFromMat(result), columnIndex, rowIndex++);
 
 		Mat bluredVariance2 = imgClass.computeBluredVariance(new Size(31, 31));
@@ -62,9 +63,9 @@ public class ClassImgFieldsDetector extends AbstractApp {
 		Mat result2 = new Mat(bluredVariance2.size(), bluredVariance2.type(), new Scalar(0, 0, 0));
 		bluredVariance2.copyTo(result2, mask2);
 		Imgproc.cvtColor(result2, result2, Imgproc.COLOR_HSV2BGR);
-		Imgproc.dilate(result2, result2, Imgproc.getStructuringElement(Imgproc.MORPH_CROSS, new Size(17, 3)));
-		Imgproc.GaussianBlur(result2, result2, new Size(17, 3), 0);
-		ImgZoner.drawAdjustedZones(result2, dx, dy, new Scalar(0, 255, 0), 3);
+		// Imgproc.dilate(result2, result2, Imgproc.getStructuringElement(Imgproc.MORPH_CROSS, new Size(17, 3)));
+		// Imgproc.GaussianBlur(result2, result2, new Size(17, 3), 0);
+		ImgZoner.drawAdjustedZones(result2, 500, dx, dy, new Scalar(0, 255, 0), 3);
 		mainGrid.add(buildImageViewFromMat(result2), columnIndex, rowIndex++);
 
 		// mainGrid.add(buildImageViewFromMat(imgClass.computeBluredVariance(new Size(31, 31))), columnIndex, rowIndex++);
@@ -139,8 +140,8 @@ public class ClassImgFieldsDetector extends AbstractApp {
 	private Mat highlight(Mat variance, Scalar scalar) {
 		Mat superVariance = new Mat();
 		Core.multiply(variance, scalar, superVariance);
-		Imgproc.dilate(superVariance, superVariance, Imgproc.getStructuringElement(Imgproc.MORPH_CROSS, new Size(17, 3)));
-		Imgproc.GaussianBlur(superVariance, superVariance, new Size(17, 3), 0);
+		// Imgproc.dilate(superVariance, superVariance, Imgproc.getStructuringElement(Imgproc.MORPH_CROSS, new Size(17, 3)));
+		// Imgproc.GaussianBlur(superVariance, superVariance, new Size(17, 3), 0);
 		return superVariance;
 	}
 
