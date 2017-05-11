@@ -23,7 +23,7 @@ import org.opencv.features2d.Features2d;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
 
-public class MserDetector {
+public class TextDetectors {
 
 	static {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
@@ -42,17 +42,19 @@ public class MserDetector {
 		JLabel vidpanel = new JLabel();
 		jframe.setContentPane(vidpanel);
 		Mat frame = new Mat();
-		Mat grey = new Mat();
+		Mat gray = new Mat();
 		read(frame);
 		jframe.setSize(frame.width(), frame.height());
 		jframe.setVisible(true);
 		for (;;) {
 			read(frame);
-			Imgproc.cvtColor(frame, grey, Imgproc.COLOR_BGR2GRAY);
-			// anotherMserDetector(frame, grey);
-			mserDetectText(frame, grey);
-			lpdDetectText(frame, grey);
-			morphGradientDetectText(frame, grey);
+			Imgproc.cvtColor(frame, gray, Imgproc.COLOR_BGR2GRAY);
+			Img grayImage = new Img(gray);
+			anotherMserDetector(frame, grayImage);
+			mserDetectText(frame, grayImage);
+			lpdDetectText(frame, gray);
+			morphGradientDetectText(frame, gray);
+			anotherDetector(frame, grayImage);
 			ImageIcon image = new ImageIcon(Tools.mat2bufferedImage(frame));
 			vidpanel.setIcon(image);
 			vidpanel.repaint();
@@ -60,51 +62,46 @@ public class MserDetector {
 
 	}
 
-	public static void mserDetectText(Mat frame, Mat gray) {
+	public static void mserDetectText(Mat frame, Img grayImage) {
+		Scalar zeos = new Scalar(0, 0, 0);
 		MatOfKeyPoint keypoint = new MatOfKeyPoint();
-		List<KeyPoint> listpoint;
-		KeyPoint kpoint;
-		Mat mask = Mat.zeros(gray.size(), CvType.CV_8UC1);
-		int rectanx1;
-		int rectany1;
-		int rectanx2;
-		int rectany2;
-		int imgsize = gray.height() * gray.width();
-		Scalar white = new Scalar(255);
-
-		List<MatOfPoint> contours = new ArrayList<>();
-		Mat kernel = new Mat(1, 50, CvType.CV_8UC1, Scalar.all(255));
-		Mat morbyte = new Mat();
-		Mat hierarchy = new Mat();
+		Mat mask = Mat.zeros(grayImage.size(), CvType.CV_8UC1);
 
 		FeatureDetector detector = FeatureDetector.create(FeatureDetector.MSER);
-		detector.detect(gray, keypoint);
-		listpoint = keypoint.toList();
+		detector.detect(grayImage.getSrc(), keypoint);
+		List<KeyPoint> listpoint = keypoint.toList();
 
 		for (int ind = 0; ind < listpoint.size(); ind++) {
-			kpoint = listpoint.get(ind);
-			rectanx1 = (int) (kpoint.pt.x - 0.5 * kpoint.size);
-			rectany1 = (int) (kpoint.pt.y - 0.5 * kpoint.size);
-			rectanx2 = (int) (kpoint.size);
-			rectany2 = (int) (kpoint.size);
+			KeyPoint kpoint = listpoint.get(ind);
+			int rectanx1 = (int) (kpoint.pt.x - 0.5 * kpoint.size);
+			int rectany1 = (int) (kpoint.pt.y - 0.5 * kpoint.size);
+			int rectanx2 = (int) (kpoint.size);
+			int rectany2 = (int) (kpoint.size);
 			if (rectanx1 <= 0)
 				rectanx1 = 1;
 			if (rectany1 <= 0)
 				rectany1 = 1;
-			if ((rectanx1 + rectanx2) > gray.width())
-				rectanx2 = gray.width() - rectanx1;
-			if ((rectany1 + rectany2) > gray.height())
-				rectany2 = gray.height() - rectany1;
+			if ((rectanx1 + rectanx2) > grayImage.width())
+				rectanx2 = grayImage.width() - rectanx1;
+			if ((rectany1 + rectany2) > grayImage.height())
+				rectany2 = grayImage.height() - rectany1;
 			Rect rectant = new Rect(rectanx1, rectany1, rectanx2, rectany2);
 			Mat roi = new Mat(mask, rectant);
-			roi.setTo(white);
+			roi.setTo(new Scalar(255));
 		}
 
-		Imgproc.morphologyEx(mask, morbyte, Imgproc.MORPH_DILATE, kernel);
+		int imgsize = grayImage.height() * grayImage.width();
+		Mat morbyte = new Mat();
+		Mat hierarchy = new Mat();
+		List<MatOfPoint> contours = new ArrayList<>();
+		Imgproc.morphologyEx(mask, morbyte, Imgproc.MORPH_DILATE, new Mat(1, 50, CvType.CV_8UC1, new Scalar(255)));
 		Imgproc.findContours(morbyte, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 		for (int i = 0; i < contours.size(); i++) {
 			Rect rect = Imgproc.boundingRect(contours.get(i));
-			if (rect.area() <= 0.5 * imgsize && rect.area() >= 100 && rect.width / rect.height > 2)
+			if (rect.area() > 0.5 * imgsize || rect.area() < 100 || rect.width / rect.height < 2) {
+				Mat roi = new Mat(morbyte, rect);
+				roi.setTo(zeos);
+			} else
 				Imgproc.rectangle(frame, rect.br(), rect.tl(), new Scalar(0, 255, 0));
 		}
 	}
@@ -178,58 +175,30 @@ public class MserDetector {
 
 	}
 
-	public void anotherDetector(Mat src, Mat dst) {
-		if (dst != src) {
-			src.copyTo(dst);
-		}
-		Mat img_gray, img_sobel, img_threshold, element;
-
-		img_gray = new Mat();
-		Imgproc.cvtColor(src, img_gray, Imgproc.COLOR_RGB2GRAY);
-
-		img_sobel = new Mat();
-		Imgproc.Sobel(img_gray, img_sobel, CvType.CV_8U, 1, 0, 3, 1, 0, Core.BORDER_DEFAULT);
-
-		img_threshold = new Mat();
-		Imgproc.threshold(img_sobel, img_threshold, 0, 255, Imgproc.THRESH_OTSU + Imgproc.THRESH_BINARY);
-
-		element = new Mat();
-		element = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(17, 3));
-		Imgproc.morphologyEx(img_threshold, img_threshold, Imgproc.MORPH_CLOSE, element);
-		// Does the trick
-		List<MatOfPoint> contours = new ArrayList<>();
-		Mat hierarchy = new Mat();
-		Imgproc.findContours(img_threshold, contours, hierarchy, 0, 1);
-		List<MatOfPoint> contours_poly = new ArrayList<>(contours.size());
-		contours_poly.addAll(contours);
-
+	public static void anotherDetector(Mat src, Img gray) {
+		Img sobel = gray.sobel(CvType.CV_8U, 1, 0, 3, 1, 0, Core.BORDER_DEFAULT);
+		Img threshold = sobel.thresHold(0, 255, Imgproc.THRESH_OTSU + Imgproc.THRESH_BINARY);
+		threshold = threshold.morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, new Size(17, 3)));
+		List<MatOfPoint> contours = threshold.findContours(new Img[1], Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_NONE);
 		MatOfPoint2f mMOP2f1, mMOP2f2;
 		mMOP2f1 = new MatOfPoint2f();
 		mMOP2f2 = new MatOfPoint2f();
-
 		for (int i = 0; i < contours.size(); i++)
-
 			if (contours.get(i).toList().size() > 100) {
 				contours.get(i).convertTo(mMOP2f1, CvType.CV_32FC2);
 				Imgproc.approxPolyDP(mMOP2f1, mMOP2f2, 3, true);
-				mMOP2f2.convertTo(contours_poly.get(i), CvType.CV_32S);
-				Rect appRect = Imgproc.boundingRect(contours_poly.get(i));
-				if (appRect.width > appRect.height) {
-					Imgproc.rectangle(dst, new Point(appRect.x, appRect.y), new Point(appRect.x + appRect.width, appRect.y + appRect.height), new Scalar(255, 0, 0));
-				}
+				mMOP2f2.convertTo(contours.get(i), CvType.CV_32S);
+				Rect appRect = Imgproc.boundingRect(contours.get(i));
+				if (appRect.width > appRect.height)
+					Imgproc.rectangle(src, new Point(appRect.x, appRect.y), new Point(appRect.x + appRect.width, appRect.y + appRect.height), new Scalar(255, 255, 0));
 			}
-
 	}
 
-	public static void anotherMserDetector(Mat frame, Mat gray) {
+	public static void anotherMserDetector(Mat frame, Img gray) {
 		FeatureDetector fd = FeatureDetector.create(FeatureDetector.MSER);
 		MatOfKeyPoint mokp = new MatOfKeyPoint();
-		Mat edges = new Mat();
-		// for mask
-		Imgproc.Canny(gray, edges, 400, 450);
-		fd.detect(gray, mokp, edges);
-		// for drawing keypoints
-
+		Img edges = gray.canny(50, 200);
+		fd.detect(gray.getSrc(), mokp, edges.getSrc());
 		Features2d.drawKeypoints(frame, mokp, frame);
 	}
 }
