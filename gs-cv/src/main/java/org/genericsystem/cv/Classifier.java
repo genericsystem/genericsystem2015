@@ -23,7 +23,7 @@ import org.opencv.imgproc.Imgproc;
 public class Classifier {
 
 	private final static String alignedDirectoryPath = "aligned";
-	private final static int MATCHING_THRESHOLD = 150;
+	public final static int MATCHING_THRESHOLD = 150;
 
 	static {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);

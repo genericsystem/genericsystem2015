@@ -17,6 +17,7 @@ public class DirectoryWatcherVerticle extends AbstractVerticle {
 	private final String address;
 	private WatchService watcher;
 
+	// Creates a verticle that publishes an event to the given address when a new file is created in the given folder.
 	public DirectoryWatcherVerticle(Path folder, String address) {
 		this.folder = folder;
 		this.address = address;
@@ -26,7 +27,7 @@ public class DirectoryWatcherVerticle extends AbstractVerticle {
 	public void start() throws Exception {
 		try {
 			watcher = folder.getFileSystem().newWatchService();
-			folder.register(watcher, StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_DELETE);
+			folder.register(watcher, StandardWatchEventKinds.ENTRY_CREATE);
 
 			vertx.setPeriodic(1000, new Handler<Long>() {
 				@Override

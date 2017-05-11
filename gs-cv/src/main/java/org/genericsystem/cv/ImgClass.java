@@ -80,4 +80,7 @@ public class ImgClass {
 		return variance;
 	}
 
+	public String getDirectory() {
+		return directory;
+	}
 }
