@@ -3,8 +3,13 @@ package org.genericsystem.cv;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.ImageIcon;
+
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
+import org.opencv.core.Point;
+import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
@@ -31,16 +36,24 @@ public class Img {
 		return new Img(result);
 	}
 
-	public Img morphologyEx(int morphClose, StructuringElement structuringElement) {
+	public Img morphologyEx(int morphOp, StructuringElement structuringElement) {
 		Mat result = new Mat();
-		Imgproc.morphologyEx(src, result, morphClose, structuringElement.getSrc());
+		Imgproc.morphologyEx(src, result, morphOp, structuringElement.getSrc());
 		return new Img(result);
 	}
 
 	public List<MatOfPoint> findContours(Img[] hierarchy, int mode, int method) {
 		Mat mat = new Mat();
-		List<MatOfPoint> result = new ArrayList<MatOfPoint>();
+		List<MatOfPoint> result = new ArrayList<>();
 		Imgproc.findContours(src, result, mat, mode, method);
+		hierarchy[0] = new Img(mat);
+		return result;
+	}
+
+	public List<MatOfPoint> findContours(Img[] hierarchy, int mode, int method, Point point) {
+		Mat mat = new Mat();
+		List<MatOfPoint> result = new ArrayList<>();
+		Imgproc.findContours(src, result, mat, mode, method, point);
 		hierarchy[0] = new Img(mat);
 		return result;
 	}
@@ -61,6 +74,24 @@ public class Img {
 
 	public int width() {
 		return src.width();
+	}
+
+	public double[] get(int row, int col) {
+		return src.get(row, col);
+	}
+
+	public Img cvtColor(int code) {
+		Mat result = new Mat();
+		Imgproc.cvtColor(src, result, code);
+		return new Img(result);
+	}
+
+	public ImageIcon getImageIcon() {
+		return new ImageIcon(Tools.mat2bufferedImage(src));
+	}
+
+	public void rectangle(Rect rect, Scalar color, int thickNess) {
+		Imgproc.rectangle(src, rect.br(), rect.tl(), color, thickNess);
 	}
 
 }
