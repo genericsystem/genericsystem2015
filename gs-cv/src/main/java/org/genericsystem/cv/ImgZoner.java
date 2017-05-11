@@ -21,16 +21,16 @@ public class ImgZoner {
 		return getZones(imgSrc, minArea).stream().map(zone -> zone.adjustRect(dx, dy, imgSrc.width(), imgSrc.height())).collect(Collectors.toList());
 	}
 
-	private ImgZoner(Mat imgSrc, double minArea) {
-		Mat gray = new Mat();
-		Imgproc.cvtColor(imgSrc, gray, Imgproc.COLOR_BGR2GRAY);
+	private ImgZoner(Mat gray, double minArea) {
+		// Mat gray = new Mat();
+		// Imgproc.cvtColor(imgSrc, gray, Imgproc.COLOR_BGR2GRAY);
 		List<MatOfPoint> contours = new ArrayList<>();
 		Imgproc.findContours(gray, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 		// double minArea = 1;
 		Collections.sort(contours, (c1, c2) -> Double.compare(Imgproc.contourArea(c2), Imgproc.contourArea(c1)));
-		for (int i = 0; i < contours.size(); i++) {
-			Imgproc.drawContours(imgSrc, contours, i, new Scalar(0, 0, 255), -1);
-		}
+		// for (int i = 0; i < contours.size(); i++) {
+		// Imgproc.drawContours(imgSrc, contours, i, new Scalar(0, 0, 255), -1);
+		// }
 
 		for (int i = 0; i < contours.size(); i++) {
 			MatOfPoint contour = contours.get(i);
@@ -51,6 +51,10 @@ public class ImgZoner {
 
 	public static void drawZones(Mat imageToZone, double minArea, Scalar scalar, int thickness) {
 		getZones(imageToZone, minArea).forEach(adjusted -> adjusted.draw(imageToZone, scalar, thickness));
+	}
+
+	public static void drawZones(Mat imageToZone, Mat imageToDraw, double minArea, Scalar scalar, int thickness) {
+		getZones(imageToZone, minArea).forEach(adjusted -> adjusted.draw(imageToDraw, scalar, thickness));
 	}
 
 }

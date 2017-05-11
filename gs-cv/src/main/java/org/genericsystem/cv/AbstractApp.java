@@ -2,6 +2,14 @@ package org.genericsystem.cv;
 
 import java.io.ByteArrayInputStream;
 
+import org.opencv.core.Core;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfByte;
+import org.opencv.core.Size;
+import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
+
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
@@ -14,20 +22,12 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
-import org.opencv.core.Core;
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfByte;
-import org.opencv.core.Size;
-import org.opencv.imgcodecs.Imgcodecs;
-import org.opencv.imgproc.Imgproc;
-
 public abstract class AbstractApp extends Application {
 	static {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 	}
 
-	private final double displayWidth = 400d;
+	public final static double displayWidth = 400d;
 
 	@Override
 	public void start(Stage stage) throws Exception {

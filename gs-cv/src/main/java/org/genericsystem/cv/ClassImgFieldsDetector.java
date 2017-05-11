@@ -2,14 +2,14 @@ package org.genericsystem.cv;
 
 import java.util.List;
 
-import javafx.scene.layout.GridPane;
-
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
+
+import javafx.scene.layout.GridPane;
 
 public class ClassImgFieldsDetector extends AbstractApp {
 	static {
@@ -29,44 +29,66 @@ public class ClassImgFieldsDetector extends AbstractApp {
 		int columnIndex = 0;
 		int rowIndex = 0;
 
-		ImgClass imgClass = ImgClass.fromDirectory(classImgRepertory);
-		double dx = 5;
-		double dy = 5;
-		Mat imageToZone = highlight(imgClass.computeRangedMean(new Scalar(0, 0, 0), new Scalar(255, 255, 90), true, false), new Scalar(20, 20, 20));
-		// ImgZoner.drawZones(imageToZone, 1, new Scalar(255, 255, 255), -1);
-		// ImgZoner.drawAdjustedZones(imageToZone, dx, dy, new Scalar(0, 255, 0), 3);
-		mainGrid.add(buildImageViewFromMat(imageToZone), columnIndex, rowIndex++);
+		ImgClass imgClass2 = ImgClass.fromDirectory(null, classImgRepertory);
+		Img model = imgClass2.getMean();
+		mainGrid.add(imgClass2.getMean().getImageView(), columnIndex, rowIndex++);
+		mainGrid.add(imgClass2.getVariance().getImageView(), columnIndex, rowIndex++);
 
-		Mat imageToZone2 = imgClass.computeRangedVariance(new Scalar(0, 0, 0), new Scalar(255, 255, 82), true);
-		// ImgZoner.drawZones(imageToZone2, 1, new Scalar(255, 255, 255), -1);
-		mainGrid.add(buildImageViewFromMat(imageToZone2), columnIndex, rowIndex++);
+		imgClass2.addMapper(img -> img.range(new Scalar(0, 0, 0), new Scalar(255, 255, 80), true));
+		mainGrid.add(imgClass2.getVariance().getImageView(), columnIndex, rowIndex++);
+		imgClass2.addMapper(img -> img.morphologyEx(Imgproc.MORPH_DILATE, new StructuringElement(Imgproc.MORPH_RECT, new Size(17, 5))));
+		// imgClass2.addMapper(img -> img.gaussianBlur(new Size(15, 15)));
+		// mainGrid.add(imgClass2.getMean().getImageView(), columnIndex, rowIndex++);
+		// img = img.morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, new Size(3, 3)));
+		mainGrid.add(imgClass2.getVariance().getImageView(), columnIndex, rowIndex++);
+		ImgZoner.drawZones(imgClass2.getVariance().cvtColor(Imgproc.COLOR_BGR2GRAY).getSrc(), model.getSrc(), 400, new Scalar(0, 255, 0), 3);
+		mainGrid.add(model.getImageView(), columnIndex, rowIndex++);
 
-		// mainGrid.add(buildImageViewFromMat(imgClass.getAverage()), columnIndex, rowIndex++);
-		// mainGrid.add(buildImageViewFromMat(imgClass.getVariance()), columnIndex, rowIndex++);
-
-		Mat bluredVariance = imgClass.computeBluredVariance(new Size(15, 15));
-		Imgproc.cvtColor(bluredVariance, bluredVariance, Imgproc.COLOR_BGR2HSV);
-		Mat mask = new Mat();
-		Core.inRange(bluredVariance, new Scalar(0, 0, 0), new Scalar(255, 1, 255), mask);
-		Mat result = new Mat(bluredVariance.size(), bluredVariance.type(), new Scalar(0, 0, 0));
-		bluredVariance.copyTo(result, mask);
-		Imgproc.cvtColor(result, result, Imgproc.COLOR_HSV2BGR);
-		// Imgproc.dilate(result, result, Imgproc.getStructuringElement(Imgproc.MORPH_CROSS, new Size(17, 3)));
-		// Imgproc.GaussianBlur(result, result, new Size(17, 3), 0);
-		ImgZoner.drawAdjustedZones(result, 500, dx, dy, new Scalar(0, 255, 0), 3);
-		mainGrid.add(buildImageViewFromMat(result), columnIndex, rowIndex++);
-
-		Mat bluredVariance2 = imgClass.computeBluredVariance(new Size(31, 31));
-		Imgproc.cvtColor(bluredVariance2, bluredVariance2, Imgproc.COLOR_BGR2HSV);
-		Mat mask2 = new Mat();
-		Core.inRange(bluredVariance2, new Scalar(0, 0, 0), new Scalar(255, 1, 255), mask2);
-		Mat result2 = new Mat(bluredVariance2.size(), bluredVariance2.type(), new Scalar(0, 0, 0));
-		bluredVariance2.copyTo(result2, mask2);
-		Imgproc.cvtColor(result2, result2, Imgproc.COLOR_HSV2BGR);
-		// Imgproc.dilate(result2, result2, Imgproc.getStructuringElement(Imgproc.MORPH_CROSS, new Size(17, 3)));
-		// Imgproc.GaussianBlur(result2, result2, new Size(17, 3), 0);
-		ImgZoner.drawAdjustedZones(result2, 500, dx, dy, new Scalar(0, 255, 0), 3);
-		mainGrid.add(buildImageViewFromMat(result2), columnIndex, rowIndex++);
+		// // ImgClass imgClass = ImgClass.fromDirectory(classImgRepertory);
+		// double dx = 5;
+		// double dy = 5;
+		// Mat imageToZone = highlight(imgClass.computeRangedMean(new Scalar(0, 0, 0), new Scalar(255, 255, 90), true, false), new Scalar(20, 20, 20));
+		// // ImgZoner.drawZones(imageToZone, 1, new Scalar(255, 255, 255), -1);
+		// // ImgZoner.drawAdjustedZones(imageToZone, dx, dy, new Scalar(0, 255, 0), 3);
+		// mainGrid.add(buildImageViewFromMat(imageToZone), columnIndex, rowIndex++);
+		//
+		// Img im = new Img(imgClass.computeRangedVariance(new Scalar(0, 0, 0), new Scalar(255, 255, 90), true));
+		// mainGrid.add(buildImageViewFromMat(im.getSrc()), columnIndex, rowIndex++);
+		// im = im.cvtColor(Imgproc.COLOR_BGR2GRAY);
+		// im = im.thresHold(5, 255.0, Imgproc.THRESH_OTSU + Imgproc.THRESH_BINARY);
+		// im = im.morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, new Size(17, 5)));
+		//
+		// // TextDetectors.lpdDetectText(im);
+		// // ImgZoner.drawZones(im.getSrc(), 300, new Scalar(255), -1);
+		// // mainGrid.add(buildImageViewFromMat(imageToZone2), columnIndex, rowIndex++);
+		// mainGrid.add(buildImageViewFromMat(im.getSrc()), columnIndex, rowIndex++);
+		//
+		// // mainGrid.add(buildImageViewFromMat(imgClass.getAverage()), columnIndex, rowIndex++);
+		// // mainGrid.add(buildImageViewFromMat(imgClass.getVariance()), columnIndex, rowIndex++);
+		//
+		// Mat bluredVariance = imgClass.computeBluredVariance(new Size(15, 15));
+		// Imgproc.cvtColor(bluredVariance, bluredVariance, Imgproc.COLOR_BGR2HSV);
+		// Mat mask = new Mat();
+		// Core.inRange(bluredVariance, new Scalar(0, 0, 0), new Scalar(255, 1, 255), mask);
+		// Mat result = new Mat(bluredVariance.size(), bluredVariance.type(), new Scalar(0, 0, 0));
+		// bluredVariance.copyTo(result, mask);
+		// Imgproc.cvtColor(result, result, Imgproc.COLOR_HSV2BGR);
+		// // Imgproc.dilate(result, result, Imgproc.getStructuringElement(Imgproc.MORPH_CROSS, new Size(17, 3)));
+		// // Imgproc.GaussianBlur(result, result, new Size(17, 3), 0);
+		// // ImgZoner.drawAdjustedZones(result, 500, dx, dy, new Scalar(0, 255, 0), 3);
+		// mainGrid.add(buildImageViewFromMat(result), columnIndex, rowIndex++);
+		//
+		// Mat bluredVariance2 = imgClass.computeBluredVariance(new Size(31, 31));
+		// Imgproc.cvtColor(bluredVariance2, bluredVariance2, Imgproc.COLOR_BGR2HSV);
+		// Mat mask2 = new Mat();
+		// Core.inRange(bluredVariance2, new Scalar(0, 0, 0), new Scalar(255, 1, 255), mask2);
+		// Mat result2 = new Mat(bluredVariance2.size(), bluredVariance2.type(), new Scalar(0, 0, 0));
+		// bluredVariance2.copyTo(result2, mask2);
+		// Imgproc.cvtColor(result2, result2, Imgproc.COLOR_HSV2BGR);
+		// // Imgproc.dilate(result2, result2, Imgproc.getStructuringElement(Imgproc.MORPH_CROSS, new Size(17, 3)));
+		// // Imgproc.GaussianBlur(result2, result2, new Size(17, 3), 0);
+		// // ImgZoner.drawAdjustedZones(result2, 500, dx, dy, new Scalar(0, 255, 0), 3);
+		// mainGrid.add(buildImageViewFromMat(result2), columnIndex, rowIndex++);
 
 		// mainGrid.add(buildImageViewFromMat(imgClass.computeBluredVariance(new Size(31, 31))), columnIndex, rowIndex++);
 		//

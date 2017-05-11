@@ -33,6 +33,10 @@ public class Tools {
 		return Arrays.stream(new File(repository).listFiles()).filter(img -> img.getName().endsWith(".png")).map(img -> Imgcodecs.imread(img.getPath()));
 	}
 
+	public static Stream<Img> classImgsStream(String repository) {
+		return Arrays.stream(new File(repository).listFiles()).filter(img -> img.getName().endsWith(".png")).map(img -> new Img(Imgcodecs.imread(img.getPath())));
+	}
+
 	public static BufferedImage mat2bufferedImage(Mat image) {
 		MatOfByte bytemat = new MatOfByte();
 		Imgcodecs.imencode(".png", image, bytemat);
