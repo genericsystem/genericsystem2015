@@ -49,12 +49,12 @@ public class Zone {
 		return new Zone(new Rect(tl, br));
 	}
 
-	public void draw(Mat mat, Scalar color, int thickness) {
-		Imgproc.rectangle(mat, rect.tl(), rect.br(), color, thickness);
+	public void draw(Img img, Scalar color, int thickness) {
+		Imgproc.rectangle(img.getSrc(), rect.tl(), rect.br(), color, thickness);
 	}
 
-	public void write(Mat mat, String text, double fontScale, Scalar color, int thickness) {
-		Imgproc.putText(mat, text, new Point(rect.tl().x, rect.br().y), Core.FONT_HERSHEY_PLAIN, fontScale, color, thickness);
+	public void write(Img img, String text, double fontScale, Scalar color, int thickness) {
+		Imgproc.putText(img.getSrc(), text, new Point(rect.tl().x, rect.br().y), Core.FONT_HERSHEY_PLAIN, fontScale, color, thickness);
 	}
 
 }

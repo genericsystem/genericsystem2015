@@ -34,16 +34,18 @@ public class ClassImgFieldsDetector extends AbstractApp {
 		mainGrid.add(imgClass2.getMean().getImageView(), columnIndex, rowIndex++);
 		mainGrid.add(imgClass2.getVariance().getImageView(), columnIndex, rowIndex++);
 
-		imgClass2.addMapper(img -> img.range(new Scalar(0, 0, 0), new Scalar(255, 255, 80), true));
+		// imgClass2.addMapper(img -> img.range(new Scalar(0, 0, 0), new Scalar(255, 255, 5), true));
+		imgClass2.addMapper(img -> img.range(new Scalar(0, 0, 0), new Scalar(80, 255, 255), false));
+		imgClass2.addMapper(img -> img.thresHold(50, 255, Imgproc.THRESH_BINARY));
 		mainGrid.add(imgClass2.getVariance().getImageView(), columnIndex, rowIndex++);
+		imgClass2.addMapper(img -> img.morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, new Size(17, 5))));
 		imgClass2.addMapper(img -> img.morphologyEx(Imgproc.MORPH_DILATE, new StructuringElement(Imgproc.MORPH_RECT, new Size(17, 5))));
 		// imgClass2.addMapper(img -> img.gaussianBlur(new Size(15, 15)));
 		// mainGrid.add(imgClass2.getMean().getImageView(), columnIndex, rowIndex++);
 		// img = img.morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, new Size(3, 3)));
 		mainGrid.add(imgClass2.getVariance().getImageView(), columnIndex, rowIndex++);
-		ImgZoner.drawZones(imgClass2.getVariance().cvtColor(Imgproc.COLOR_BGR2GRAY).getSrc(), model.getSrc(), 400, new Scalar(0, 255, 0), 3);
+		ImgZoner.drawZones(imgClass2.getVariance().cvtColor(Imgproc.COLOR_BGR2GRAY), model, 400, new Scalar(0, 255, 0), 3);
 		mainGrid.add(model.getImageView(), columnIndex, rowIndex++);
-
 		// // ImgClass imgClass = ImgClass.fromDirectory(classImgRepertory);
 		// double dx = 5;
 		// double dy = 5;

@@ -23,14 +23,14 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
 public class Img {
-	private final Mat src;
+	private final Mat src = new Mat();
 
 	public Mat getSrc() {
 		return src;
 	}
 
 	public Img(Mat src) {
-		this.src = src.clone();
+		src.copyTo(this.src);
 	}
 
 	public Img sobel(int ddepth, int dx, int dy, int ksize, double scale, double delta, int borderType) {
@@ -143,5 +143,4 @@ public class Img {
 		Imgproc.GaussianBlur(src, result, size, 0);
 		return new Img(result);
 	}
-
 }

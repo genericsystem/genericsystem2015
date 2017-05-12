@@ -51,6 +51,8 @@ public abstract class AbstractApp extends Application {
 		});
 		stage.setScene(scene);
 		stage.show();
+		System.gc();
+		System.runFinalization();
 	}
 
 	protected abstract void fillGrid(GridPane mainGrid);
@@ -58,7 +60,6 @@ public abstract class AbstractApp extends Application {
 	protected ImageView buildImageViewFromMat(Mat src) {
 		Mat conv = new Mat();
 		src.convertTo(conv, CvType.CV_8UC1);
-		// System.out.println(conv);
 		Mat target = new Mat();
 		Imgproc.resize(conv, target, new Size(displayWidth, Math.floor((displayWidth / conv.width()) * conv.height())));
 		MatOfByte buffer = new MatOfByte();

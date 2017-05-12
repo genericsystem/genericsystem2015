@@ -1,6 +1,8 @@
 package org.genericsystem.cv;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -15,10 +17,20 @@ public class ImgClass {
 	private Img mean;
 	private Img variance;
 	private final String directory;
-	private Function<Img, Img> mapper = Function.identity();
+	private final List<Function<Img, Img>> mappers = new ArrayList<>();
 
 	public static ImgClass fromDirectory(Img classModel, String bgrDirectory) {
 		return new ImgClass(classModel, bgrDirectory);
+	}
+
+	private Img applyMappers(Img img) {
+		for (Function<Img, Img> mapper : mappers) {
+			img = mapper.apply(img);
+			System.gc();
+			System.runFinalization();
+
+		}
+		return img;
 	}
 
 	public ImgClass(Img classModel, String bgrDirectory) {
@@ -33,7 +45,7 @@ public class ImgClass {
 	}
 
 	private void computeMeanVariance() {
-		Img img0 = mapper.apply(classImgsStream().iterator().next());
+		Img img0 = applyMappers(classImgsStream().iterator().next());
 		boolean gray = img0.channels() == 1;
 		int type = gray ? CvType.CV_32S : CvType.CV_32SC3;
 
@@ -44,7 +56,7 @@ public class ImgClass {
 		Iterator<Img> it = classImgsStream().iterator();
 		while (it.hasNext()) {
 			Mat img = new Mat();
-			mapper.apply(it.next()).getSrc().convertTo(img, type);
+			applyMappers(it.next()).getSrc().convertTo(img, type);
 			Mat delta = new Mat(img.size(), type);
 			Core.subtract(img, mean, delta, mask, type);
 			Core.addWeighted(mean, 1, delta, 1d / count, 0, mean, type);
@@ -64,7 +76,7 @@ public class ImgClass {
 	}
 
 	public void addMapper(Function<Img, Img> after) {
-		this.mapper = this.mapper.andThen(after);
+		mappers.add(after);
 		computeMeanVariance();
 	}
 
