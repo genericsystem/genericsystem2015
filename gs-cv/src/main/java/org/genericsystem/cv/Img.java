@@ -120,11 +120,11 @@ public class Img {
 		return src.channels();
 	}
 
-	public Img range(Scalar scalar, Scalar scalar2, boolean hsv) {
+	public Img range(Scalar scalar, Scalar scalar2, Scalar others, boolean hsv) {
 		Img ranged = this;
 		if (hsv)
 			ranged = ranged.cvtColor(Imgproc.COLOR_BGR2HSV);
-		Mat result = new Mat(ranged.size(), ranged.type(), new Scalar(0, 0, 0));
+		Mat result = new Mat(ranged.size(), ranged.type(), others);
 		Mat mask = new Mat();
 		Core.inRange(ranged.getSrc(), scalar, scalar2, mask);
 		ranged.getSrc().copyTo(result, mask);
@@ -141,6 +141,12 @@ public class Img {
 	public Img gaussianBlur(Size size) {
 		Mat result = new Mat();
 		Imgproc.GaussianBlur(src, result, size, 0);
+		return new Img(result);
+	}
+
+	public Img multiply(Scalar scalar) {
+		Mat result = new Mat();
+		Core.multiply(src, scalar, result);
 		return new Img(result);
 	}
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.opencv.core.MatOfPoint;
+import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
@@ -25,8 +26,11 @@ public class ImgZoner {
 		for (int i = 0; i < contours.size(); i++) {
 			MatOfPoint contour = contours.get(i);
 			double contourarea = Imgproc.contourArea(contour);
-			if (contourarea > minArea)
-				zones.add(new Zone(Imgproc.boundingRect(contour)));
+			if (contourarea > minArea) {
+				Rect rect = Imgproc.boundingRect(contour);
+				if (rect.area() < minArea * 2 || rect.width >= rect.height)
+					zones.add(new Zone(rect));
+			}
 
 		}
 	}
@@ -35,8 +39,12 @@ public class ImgZoner {
 		return zones;
 	}
 
-	public static void drawAdjustedZones(Img img, double minArea, double dx, double dy, Scalar scalar, int thickness) {
-		getAdjustedZones(img, minArea, dx, dy).forEach(adjusted -> adjusted.draw(img, scalar, thickness));
+	public static void drawAdjustedZones(Img imageToZone, Img imageToDraw, double minArea, double dx, double dy, Scalar scalar, int thickness) {
+		getAdjustedZones(imageToZone, minArea, dx, dy).forEach(adjusted -> adjusted.draw(imageToDraw, scalar, thickness));
+	}
+
+	public static void drawAdjustedZones(Img imageToZone, double minArea, double dx, double dy, Scalar scalar, int thickness) {
+		getAdjustedZones(imageToZone, minArea, dx, dy).forEach(adjusted -> adjusted.draw(imageToZone, scalar, thickness));
 	}
 
 	public static void drawZones(Img imageToZone, double minArea, Scalar scalar, int thickness) {
