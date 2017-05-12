@@ -29,23 +29,45 @@ public class ClassImgFieldsDetector extends AbstractApp {
 		int columnIndex = 0;
 		int rowIndex = 0;
 
-		ImgClass imgClass2 = ImgClass.fromDirectory(null, classImgRepertory);
-		Img model = imgClass2.getMean();
-		mainGrid.add(imgClass2.getMean().getImageView(), columnIndex, rowIndex++);
-		mainGrid.add(imgClass2.getVariance().getImageView(), columnIndex, rowIndex++);
+		ImgClass imgClass = ImgClass.fromDirectory(null, classImgRepertory);
+		Img model = imgClass.getMean();
+		Img model2 = new Img(model.getSrc());
+		mainGrid.add(imgClass.getMean().getImageView(), columnIndex, rowIndex++);
+		mainGrid.add(imgClass.getVariance().getImageView(), columnIndex, rowIndex++);
 
-		// imgClass2.addMapper(img -> img.range(new Scalar(0, 0, 0), new Scalar(255, 255, 5), true));
-		imgClass2.addMapper(img -> img.range(new Scalar(0, 0, 0), new Scalar(80, 255, 255), false));
-		imgClass2.addMapper(img -> img.thresHold(50, 255, Imgproc.THRESH_BINARY));
-		mainGrid.add(imgClass2.getVariance().getImageView(), columnIndex, rowIndex++);
-		imgClass2.addMapper(img -> img.morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, new Size(17, 5))));
-		imgClass2.addMapper(img -> img.morphologyEx(Imgproc.MORPH_DILATE, new StructuringElement(Imgproc.MORPH_RECT, new Size(17, 5))));
-		// imgClass2.addMapper(img -> img.gaussianBlur(new Size(15, 15)));
-		// mainGrid.add(imgClass2.getMean().getImageView(), columnIndex, rowIndex++);
-		// img = img.morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, new Size(3, 3)));
-		mainGrid.add(imgClass2.getVariance().getImageView(), columnIndex, rowIndex++);
-		ImgZoner.drawZones(imgClass2.getVariance().cvtColor(Imgproc.COLOR_BGR2GRAY), model, 400, new Scalar(0, 255, 0), 3);
+		imgClass.addMapper(img -> img.range(new Scalar(0, 0, 0), new Scalar(80, 255, 255), new Scalar(0, 0, 0), false));
+		imgClass.addMapper(img -> img.range(new Scalar(0, 0, 0), new Scalar(255, 255, 85), new Scalar(0, 0, 0), true));
+
+		Img mean = imgClass.getMean().cvtColor(Imgproc.COLOR_BGR2GRAY).thresHold(1, 255, Imgproc.THRESH_BINARY);
+		Img variance = imgClass.getVariance().cvtColor(Imgproc.COLOR_BGR2GRAY).thresHold(1, 255, Imgproc.THRESH_BINARY);
+
+		mainGrid.add(mean.getImageView(), columnIndex, rowIndex++);
+		mainGrid.add(variance.getImageView(), columnIndex, rowIndex++);
+
+		mean = mean.morphologyEx(Imgproc.MORPH_DILATE, new StructuringElement(Imgproc.MORPH_RECT, new Size(7, 3)));
+		variance = variance.morphologyEx(Imgproc.MORPH_DILATE, new StructuringElement(Imgproc.MORPH_RECT, new Size(7, 3)));
+
+		mean = mean.morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, new Size(25, 11)));
+		variance = variance.morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, new Size(25, 11)));
+
+		mainGrid.add(mean.getImageView(), columnIndex, rowIndex++);
+		mainGrid.add(variance.getImageView(), columnIndex, rowIndex++);
+
+		ImgZoner.drawZones(mean, model, 400, new Scalar(0, 255, 0), 3);
 		mainGrid.add(model.getImageView(), columnIndex, rowIndex++);
+
+		ImgZoner.drawZones(variance, model2, 400, new Scalar(0, 255, 0), 3);
+		mainGrid.add(model2.getImageView(), columnIndex, rowIndex++);
+
+		// imgClass.addMapper(img -> img.thresHold(5, 255.0, Imgproc.THRESH_OTSU + Imgproc.THRESH_BINARY));
+		// mainGrid.add(imgClass.getMean().getImageView(), columnIndex, rowIndex++);
+		// mainGrid.add(imgClass.getVariance().getImageView(), columnIndex, rowIndex++);
+		//
+		// imgClass.addMapper(img -> img.morphologyEx(Imgproc.MORPH_DILATE, new StructuringElement(Imgproc.MORPH_RECT, new Size(25, 5))));
+		// mainGrid.add(imgClass.getVariance().getImageView(), columnIndex, rowIndex++);
+		//
+
+		// imgClass.addMapper(img -> img.thresHold(5, 255.0, Imgproc.THRESH_OTSU + Imgproc.THRESH_BINARY));
 		// // ImgClass imgClass = ImgClass.fromDirectory(classImgRepertory);
 		// double dx = 5;
 		// double dy = 5;
@@ -54,6 +76,14 @@ public class ClassImgFieldsDetector extends AbstractApp {
 		// // ImgZoner.drawAdjustedZones(imageToZone, dx, dy, new Scalar(0, 255, 0), 3);
 		// mainGrid.add(buildImageViewFromMat(imageToZone), columnIndex, rowIndex++);
 		//
+		// imgClass2.addMapper(img -> img.cvtColor(Imgproc.COLOR_BGR2GRAY).thresHold(0, 255, Imgproc.THRESH_BINARY).cvtColor(Imgproc.COLOR_GRAY2BGR));
+		// imgClass2.addMapper(img -> img.range(new Scalar(0, 0, 0), new Scalar(255, 255, 5), true));
+		// imgClass.addMapper(img -> img.morphologyEx(Imgproc.MORPH_DILATE, new StructuringElement(Imgproc.MORPH_RECT, new Size(17, 5))));
+		// imgClass2.addMapper(img -> img.gaussianBlur(new Size(15, 15)));
+		// mainGrid.add(imgClass2.getMean().getImageView(), columnIndex, rowIndex++);
+		// img = img.morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, new Size(3, 3)));
+
+		// imgClass.addMapper(img -> img.gaussianBlur(new Size(3, 3)));
 		// Img im = new Img(imgClass.computeRangedVariance(new Scalar(0, 0, 0), new Scalar(255, 255, 90), true));
 		// mainGrid.add(buildImageViewFromMat(im.getSrc()), columnIndex, rowIndex++);
 		// im = im.cvtColor(Imgproc.COLOR_BGR2GRAY);
