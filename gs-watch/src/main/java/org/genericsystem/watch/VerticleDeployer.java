@@ -36,7 +36,8 @@ public class VerticleDeployer extends AbstractVerticle {
 		DeploymentOptions options = new DeploymentOptions().setWorker(true);
 		vertx.deployVerticle(new DirectoryWatcherVerticle(Paths.get("..", "gs-cv", "pdf"), PDF_WATCHER_ADDRESS), options);
 		vertx.deployVerticle(new PdfsConverterVerticle(), options);
-		vertx.deployVerticle(new PngWatcherVerticle(Paths.get("..", "gs-cv", "pdf"), PNG_WATCHER_ADDRESS), options);
+		vertx.deployVerticle(new PngWatcherVerticle(Paths.get("..", "gs-cv", "png"), PNG_WATCHER_ADDRESS), options);
+		vertx.deployVerticle(new ClassifierVerticle(), options);
 		startFuture.complete();
 	}
 }

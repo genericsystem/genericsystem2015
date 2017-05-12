@@ -17,7 +17,6 @@ public class PdfToPngConverter {
 
 	public static void main(String[] args) {
 		convertPdfToPng(pdfDirectoryPath, pngDirectoryPath);
-
 	}
 
 	static void convertPdfToPng(String sourceDirectoryName, String destinationDirectoryName) {
@@ -29,7 +28,7 @@ public class PdfToPngConverter {
 				convertPdfToImages(image, destinationDirectory);
 	}
 
-	private static void convertPdfToImages(File pdfFile, File destinationDirectory) {
+	public static void convertPdfToImages(File pdfFile, File destinationDirectory) {
 		try {
 			PDDocument document = PDDocument.load(new FileInputStream(pdfFile));
 			PDFRenderer pdfRenderer = new PDFRenderer(document);
@@ -38,14 +37,11 @@ public class PdfToPngConverter {
 			int pageCounter = 0;
 			for (PDPage page : document.getPages()) {
 				BufferedImage bim = pdfRenderer.renderImageWithDPI(pageCounter, 300, ImageType.RGB);
-				ImageIOUtil.writeImage(bim, destinationDirectory + "/" + fileName + "-" + (pageCounter++) + ".png", 300);
+				ImageIOUtil.writeImage(bim, destinationDirectory + "/" + fileName + "-" + pageCounter++ + ".png", 300);
 			}
 			document.close();
 			System.out.println("Converted Images are saved at -> " + destinationDirectory.getAbsolutePath());
-
-		} catch (
-
-		Exception e) {
+		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
