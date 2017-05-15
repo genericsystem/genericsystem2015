@@ -10,6 +10,8 @@ import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
+import org.opencv.imgproc.Imgproc;
 
 public class ImgClass {
 
@@ -94,5 +96,13 @@ public class ImgClass {
 
 	public String getDirectory() {
 		return directory;
+	}
+
+	public Zones getClosedMeanZones(double minarea, double dx, double dy, Size morphClose) {
+		return Zones.get(mean.morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, morphClose)), minarea, dx, dy);
+	}
+
+	public Zones getClosedVarianceZones(double minarea, double dx, double dy, Size morphClose) {
+		return Zones.get(variance.morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, morphClose)), minarea, dx, dy);
 	}
 }

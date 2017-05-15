@@ -57,4 +57,8 @@ public class Zone {
 		Imgproc.putText(img.getSrc(), text, new Point(rect.tl().x, rect.br().y), Core.FONT_HERSHEY_PLAIN, fontScale, color, thickness);
 	}
 
+	public String ocr(Img img) {
+		return Ocr.doWork(img.getSrc(), getRect());
+	}
+
 }

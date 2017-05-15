@@ -33,12 +33,12 @@ public class Ocr {
 		instance.setDatapath("/usr/share/tesseract-ocr/4.00/");
 		instance.setLanguage("fra");
 		instance.setHocr(false);
-		instance.setPageSegMode(6);
+		instance.setPageSegMode(10);
 		instance.setOcrEngineMode(1);
 		// instance.setTessVariable("preserve_interword_spaces", "1");
 		// instance.setTessVariable("textord_space_size_is_variable", "1");
 		instance.setTessVariable("tessedit_char_whitelist", "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM0123456789.-,<'");
-		instance.setTessVariable("tessedit_char_blacklist", "?{}_");
+		instance.setTessVariable("tessedit_char_blacklist", "?{}_[]()À");
 	}
 
 	public static String doWork(File imageFile) {

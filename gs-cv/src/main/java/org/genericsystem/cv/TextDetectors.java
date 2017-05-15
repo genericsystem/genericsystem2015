@@ -63,27 +63,25 @@ public class TextDetectors {
 	public static void mserDetectText(Img frame) {
 		Img gray = frame.cvtColor(Imgproc.COLOR_BGR2GRAY);
 		MatOfKeyPoint keypoint = new MatOfKeyPoint();
-		Mat mask = Mat.zeros(gray.size(), CvType.CV_8UC1);
-
 		FeatureDetector detector = FeatureDetector.create(FeatureDetector.MSER);
 		detector.detect(gray.getSrc(), keypoint);
 		List<KeyPoint> listpoint = keypoint.toList();
-
+		Mat mask = Mat.zeros(gray.size(), CvType.CV_8UC1);
 		for (int ind = 0; ind < listpoint.size(); ind++) {
 			KeyPoint kpoint = listpoint.get(ind);
 			int rectanx1 = (int) (kpoint.pt.x - 0.5 * kpoint.size);
 			int rectany1 = (int) (kpoint.pt.y - 0.5 * kpoint.size);
-			int rectanx2 = (int) (kpoint.size);
-			int rectany2 = (int) (kpoint.size);
+			int width = (int) (kpoint.size);
+			int height = (int) (kpoint.size);
 			if (rectanx1 <= 0)
 				rectanx1 = 1;
 			if (rectany1 <= 0)
 				rectany1 = 1;
-			if ((rectanx1 + rectanx2) > gray.width())
-				rectanx2 = gray.width() - rectanx1;
-			if ((rectany1 + rectany2) > gray.height())
-				rectany2 = gray.height() - rectany1;
-			Rect rectant = new Rect(rectanx1, rectany1, rectanx2, rectany2);
+			if ((rectanx1 + width) > gray.width())
+				width = gray.width() - rectanx1;
+			if ((rectany1 + height) > gray.height())
+				height = gray.height() - rectany1;
+			Rect rectant = new Rect(rectanx1, rectany1, width, height);
 			Mat roi = new Mat(mask, rectant);
 			roi.setTo(new Scalar(255));
 		}
@@ -109,12 +107,12 @@ public class TextDetectors {
 		Img sobel = gray.sobel(CvType.CV_8UC1, 1, 0, 3, 1, 0, Core.BORDER_DEFAULT);
 		Img threshold = sobel.thresHold(0, 255, Imgproc.THRESH_OTSU + Imgproc.THRESH_BINARY);
 		Img connected = threshold.morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, new Size(17, 3)));
-		List<MatOfPoint> contours = connected.findContours(new Img[1], Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_NONE);
+		List<MatOfPoint> contours = connected.findContours(new Img[1], Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 		for (int i = 0; i < contours.size(); i++) {
-			if (Imgproc.contourArea(contours.get(i)) > 100) {
+			if (Imgproc.contourArea(contours.get(i)) > 400) {
 				Rect rect = Imgproc.boundingRect(contours.get(i));
 				if (rect.width > rect.height)
-					frame.rectangle(rect, red, 1);
+					frame.rectangle(rect, red, 2);
 			}
 		}
 	}
@@ -147,7 +145,7 @@ public class TextDetectors {
 			 * these two conditions alone are not very robust. better to use something like the number of significant peaks in a horizontal projection as a third condition
 			 */
 			) {
-				frame.rectangle(rect, blue, 1);
+				frame.rectangle(rect, blue, 2);
 			}
 		}
 

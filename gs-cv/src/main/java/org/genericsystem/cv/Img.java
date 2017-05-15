@@ -6,25 +6,28 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import javafx.scene.Node;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+
 import javax.swing.ImageIcon;
 
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
+import org.opencv.core.KeyPoint;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
+import org.opencv.core.MatOfKeyPoint;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
+import org.opencv.features2d.FeatureDetector;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
-
-import javafx.scene.Node;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 
 public class Img {
 	private final Mat src = new Mat();
@@ -35,6 +38,10 @@ public class Img {
 
 	public Img(Mat src) {
 		src.copyTo(this.src);
+	}
+
+	public Img(Img model, Zone zone) {
+		this(new Mat(model.getSrc(), zone.getRect()));
 	}
 
 	public Img sobel(int ddepth, int dx, int dy, int ksize, double scale, double delta, int borderType) {
@@ -245,11 +252,11 @@ public class Img {
 		return src.channels();
 	}
 
-	public Img range(Scalar scalar, Scalar scalar2, Scalar others, boolean hsv) {
+	public Img range(Scalar scalar, Scalar scalar2, boolean hsv) {
 		Img ranged = this;
 		if (hsv)
 			ranged = ranged.cvtColor(Imgproc.COLOR_BGR2HSV);
-		Mat result = new Mat(ranged.size(), ranged.type(), others);
+		Mat result = new Mat(ranged.size(), ranged.type(), new Scalar(0, 0, 0));
 		Mat mask = new Mat();
 		Core.inRange(ranged.getSrc(), scalar, scalar2, mask);
 		ranged.getSrc().copyTo(result, mask);
@@ -274,4 +281,85 @@ public class Img {
 		Core.multiply(src, scalar, result);
 		return new Img(result);
 	}
+
+	public Img sobel() {
+		Img gray = cvtColor(Imgproc.COLOR_BGR2GRAY);
+		Img sobel = gray.sobel(CvType.CV_8UC1, 1, 0, 3, 1, 0, Core.BORDER_DEFAULT);
+		Img threshold = sobel.thresHold(0, 255, Imgproc.THRESH_OTSU + Imgproc.THRESH_BINARY);
+		return threshold.morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, new Size(17, 3)));
+	}
+
+	public Img grad() {
+		Img gray = cvtColor(Imgproc.COLOR_BGR2GRAY);
+		Img grad = gray.morphologyEx(Imgproc.MORPH_GRADIENT, new StructuringElement(Imgproc.MORPH_ELLIPSE, new Size(3, 3)));
+		Img threshold = grad.thresHold(0.0, 255.0, Imgproc.THRESH_OTSU + Imgproc.THRESH_BINARY);
+		return threshold.morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, new Size(17, 3)));
+	}
+
+	public Img mser() {
+		Img gray = cvtColor(Imgproc.COLOR_BGR2GRAY);
+		MatOfKeyPoint keypoint = new MatOfKeyPoint();
+		FeatureDetector detector = FeatureDetector.create(FeatureDetector.MSER);
+		detector.detect(gray.getSrc(), keypoint);
+		List<KeyPoint> listpoint = keypoint.toList();
+		Mat result = Mat.zeros(gray.size(), CvType.CV_8UC1);
+		for (int ind = 0; ind < listpoint.size(); ind++) {
+			KeyPoint kpoint = listpoint.get(ind);
+			int rectanx1 = (int) (kpoint.pt.x - 0.5 * kpoint.size);
+			int rectany1 = (int) (kpoint.pt.y - 0.5 * kpoint.size);
+			int width = (int) (kpoint.size);
+			int height = (int) (kpoint.size);
+			if (rectanx1 <= 0)
+				rectanx1 = 1;
+			if (rectany1 <= 0)
+				rectany1 = 1;
+			if ((rectanx1 + width) > gray.width())
+				width = gray.width() - rectanx1;
+			if ((rectany1 + height) > gray.height())
+				height = gray.height() - rectany1;
+			Rect rectant = new Rect(rectanx1, rectany1, width, height);
+			Mat roi = new Mat(result, rectant);
+			roi.setTo(new Scalar(255));
+		}
+		return new Img(result).morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, new Size(17, 3)));
+	}
+
+	public Img otsu() {
+		return cvtColor(Imgproc.COLOR_BGR2GRAY).thresHold(0, 255, Imgproc.THRESH_BINARY + Imgproc.THRESH_OTSU);
+	}
+
+	public Img otsuInv() {
+		return cvtColor(Imgproc.COLOR_BGR2GRAY).thresHold(0, 255, Imgproc.THRESH_BINARY_INV + Imgproc.THRESH_OTSU);
+	}
+
+	public Img dilateBlacks(int valueThreshold, int saturatioThreshold, int blueThreshold, Size dilatation) {
+		return range(new Scalar(0, 0, 0), new Scalar(255, saturatioThreshold, valueThreshold), true).range(new Scalar(0, 0, 0), new Scalar(blueThreshold, 255, 255), false).gray()
+				.morphologyEx(Imgproc.MORPH_DILATE, new StructuringElement(Imgproc.MORPH_RECT, dilatation));
+	}
+
+	public Img equalizeHisto(Mat mat) {
+		Mat result = new Mat();
+		Imgproc.cvtColor(mat, result, Imgproc.COLOR_BGR2YCrCb);
+		List<Mat> channels = new ArrayList<Mat>();
+		Core.split(result, channels);
+		Imgproc.equalizeHist(channels.get(0), channels.get(0));
+		Imgproc.equalizeHist(channels.get(1), channels.get(1));
+		Imgproc.equalizeHist(channels.get(2), channels.get(2));
+		Core.merge(channels, result);
+		Imgproc.cvtColor(result, result, Imgproc.COLOR_YCrCb2BGR);
+		return new Img(result);
+	}
+
+	public Img resize(Size size) {
+		Mat result = new Mat();
+		Imgproc.resize(src, result, size);
+		return new Img(result);
+	}
+
+	public Img resize(double coeff) {
+		Mat result = new Mat();
+		Imgproc.resize(src, result, new Size(src.width() * coeff, src.height() * coeff));
+		return new Img(result);
+	}
+
 }
