@@ -51,7 +51,7 @@ public class ClassImgFieldsDetector extends AbstractApp {
 
 		Img img2 = new Img(Tools.classImgsStream(classImgRepertory).iterator().next(), zones.get().get(0));
 		for (Zone z : subZones.get()) {
-			Img letter = new Img(img2, z);
+			Img letter = new Img(img2, z).resize(0.9);
 			System.out.println(Ocr.doWork(letter.getSrc()));
 			mainGrid.add(letter.getImageView(), columnIndex + 1, rowIndex++);
 		}
