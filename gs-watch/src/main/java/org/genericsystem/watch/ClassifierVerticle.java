@@ -47,6 +47,8 @@ public class ClassifierVerticle extends FileCreateEventsHandlerVerticle {
 						matchingClassDir = path;
 						alignedImage = alignedImage_;
 					}
+					System.gc();
+					System.runFinalization();
 				}
 			} catch (IOException e) {
 				throw new IllegalStateException(e);
