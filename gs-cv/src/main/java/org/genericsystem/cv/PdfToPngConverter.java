@@ -3,6 +3,9 @@ package org.genericsystem.cv;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.nio.channels.FileLock;
+import java.nio.file.Path;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -37,7 +40,10 @@ public class PdfToPngConverter {
 			int pageCounter = 0;
 			for (PDPage page : document.getPages()) {
 				BufferedImage bim = pdfRenderer.renderImageWithDPI(pageCounter, 300, ImageType.RGB);
-				ImageIOUtil.writeImage(bim, destinationDirectory + "/" + fileName + "-" + pageCounter++ + ".png", 300);
+				Path newFile = destinationDirectory.toPath().resolve(fileName + "-" + pageCounter++ + ".png");
+				try (FileLock lock = new FileOutputStream(newFile.toFile()).getChannel().lock()) {
+					ImageIOUtil.writeImage(bim, newFile.toString(), 300);
+				}
 			}
 			document.close();
 			System.out.println("Converted Images are saved at -> " + destinationDirectory.getAbsolutePath());

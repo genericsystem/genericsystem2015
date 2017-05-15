@@ -90,12 +90,6 @@ public class Img {
 		return new Img(result);
 	}
 
-	public Img dilate(Mat kernel, Point anchor, int iterations) {
-		Mat result = new Mat();
-		Imgproc.dilate(src, result, kernel, anchor, iterations);
-		return new Img(result);
-	}
-
 	public Img canny(double threshold1, double threshold2) {
 		Mat result = new Mat();
 		Imgproc.Canny(src, result, threshold1, threshold2);
@@ -140,8 +134,8 @@ public class Img {
 
 	public Img cropAndDeskew() {
 		Img blurred = medianBlur(9);
-		Img gray = blurred.gray(); // new Img(new Mat(blurred.size(), CvType.CV_8U));// = blurred.gray();
-		Img gray_;// = new Img(gray.src);
+		Img gray = blurred.gray();
+		Img gray_;
 
 		List<MatOfPoint> contours = new ArrayList<>();
 
@@ -150,7 +144,7 @@ public class Img {
 		MatOfPoint2f maxContour = null;
 
 		gray_ = gray.canny(10, 20, 3, true);
-		gray_ = gray_.dilate(new Mat(), new Point(-1, -1), 1);
+		gray_ = gray_.dilate(Imgproc.getStructuringElement(Imgproc.MORPH_CROSS, new Size(12, 12)));
 
 		contours = gray_.findContours(new Img[1], Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
 
