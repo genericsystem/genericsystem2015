@@ -16,7 +16,10 @@ import org.opencv.imgcodecs.Imgcodecs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ClassifierVerticle extends FileCreateEventsHandlerVerticle {
+import io.vertx.core.AbstractVerticle;
+import io.vertx.core.eventbus.MessageConsumer;
+
+public class ClassifierVerticle extends AbstractVerticle {
 
 	private static Logger log = LoggerFactory.getLogger(ClassifierVerticle.class);
 
@@ -24,58 +27,62 @@ public class ClassifierVerticle extends FileCreateEventsHandlerVerticle {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 	}
 
-	public ClassifierVerticle() {
-		super(VerticleDeployer.PNG_WATCHER_ADDRESS);
-	}
-
 	public static void main(String[] args) {
 		VerticleDeployer.deployVerticle(new ClassifierVerticle());
 	}
 
 	@Override
-	public void handle(Path newFile) {
-		Mat img = Imgcodecs.imread(newFile.toString());
-		Path matchingClassDir = null;
-		Mat alignedImage = null;
-		Path classesDirectory = Paths.get("..", "gs-cv", "classes");
-		classesDirectory.toFile().mkdirs();
-		// Only one access to classesDirectory at a time to avoid duplicate classes.
-		synchronized (ClassifierVerticle.class) {
-			try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(classesDirectory, Files::isDirectory)) {
-				for (Path path : directoryStream) {
-					ImgClass imgClass = new ImgClass(null, path.toString());
-					Mat alignedImage_ = Classifier.compareFeature(img, imgClass.getMean().getSrc(), Classifier.MATCHING_THRESHOLD);
-					if (alignedImage_ != null) {
-						if (matchingClassDir != null)
-							log.warn("Two matching classes found for file " + newFile + " : " + matchingClassDir + " and " + path);
-						matchingClassDir = path;
-						alignedImage = alignedImage_;
+	public void start() {
+		MessageConsumer<String> consumer = vertx.eventBus().consumer(VerticleDeployer.PNG_WATCHER_ADDRESS);
+		consumer.handler(message -> vertx.executeBlocking(future -> {
+			Path newFile = Paths.get(".", message.body().split(File.separator));
+			Mat img = Imgcodecs.imread(newFile.toString());
+			Path matchingClassDir = null;
+			Mat alignedImage = null;
+			Path classesDirectory = Paths.get("..", "gs-cv", "classes");
+			classesDirectory.toFile().mkdirs();
+			// Only one access to classesDirectory at a time to avoid duplicate classes.
+			synchronized (ClassifierVerticle.class) {
+				try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(classesDirectory, Files::isDirectory)) {
+					for (Path path : directoryStream) {
+						ImgClass imgClass = new ImgClass(null, path.toString());
+						Mat alignedImage_ = Classifier.compareFeature(img, imgClass.getMean().getSrc(), Classifier.MATCHING_THRESHOLD);
+						if (alignedImage_ != null) {
+							if (matchingClassDir != null)
+								log.warn("Two matching classes found for file " + newFile + " : " + matchingClassDir + " and " + path);
+							matchingClassDir = path;
+							alignedImage = alignedImage_;
+						}
+						System.gc();
+						System.runFinalization();
 					}
-					System.gc();
-					System.runFinalization();
+				} catch (IOException e) {
+					log.error("IOException:", e);
 				}
-			} catch (IOException e) {
-				log.error("IOException:", e);
-			}
-			if (matchingClassDir == null) {
-				matchingClassDir = classesDirectory.resolve(System.nanoTime() + "");
-				matchingClassDir.toFile().mkdirs();
+				if (matchingClassDir == null) {
+					matchingClassDir = classesDirectory.resolve(System.nanoTime() + "");
+					matchingClassDir.toFile().mkdirs();
+					try {
+						alignedImage = new Img(img).cropAndDeskew().getSrc();
+					} catch (Exception e) {
+						matchingClassDir.toFile().delete();
+						log.warn("Error while deskewing new image " + newFile.toString() + " to create new class, new class not created.", e);
+						// TODO: Store the image somewhere else.
+					}
+				}
+				String[] fileNameParts = newFile.getFileName().toString().split("\\.(?=[^\\.]+$)");
+				File savedFile;
 				try {
-					alignedImage = new Img(img).cropAndDeskew().getSrc();
-				} catch (Exception e) {
-					matchingClassDir.toFile().delete();
-					log.warn("Error while deskewing new image " + newFile.toString() + " to create new class, new class not created.", e);
-					// TODO: Store the image somewhere else.
+					savedFile = File.createTempFile(fileNameParts[0] + "-", "." + fileNameParts[1], matchingClassDir.toFile());
+					Imgcodecs.imwrite(savedFile.toString(), alignedImage);
+				} catch (IOException e) {
+					log.warn("IOException: ", e);
 				}
 			}
-			String[] fileNameParts = newFile.getFileName().toString().split("\\.(?=[^\\.]+$)");
-			File savedFile;
-			try {
-				savedFile = File.createTempFile(fileNameParts[0] + "-", "." + fileNameParts[1], matchingClassDir.toFile());
-				Imgcodecs.imwrite(savedFile.toString(), alignedImage);
-			} catch (IOException e) {
-				log.warn("IOException: ", e);
-			}
-		}
+			future.complete();
+		}, res -> {
+			if (res.failed())
+				throw new IllegalStateException(res.cause());
+		}));
 	}
 }

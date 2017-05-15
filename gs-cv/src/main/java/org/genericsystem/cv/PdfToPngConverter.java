@@ -3,9 +3,9 @@ package org.genericsystem.cv;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.nio.channels.FileLock;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -31,8 +31,9 @@ public class PdfToPngConverter {
 				convertPdfToImages(image, destinationDirectory);
 	}
 
-	public static void convertPdfToImages(File pdfFile, File destinationDirectory) {
+	public static List<Path> convertPdfToImages(File pdfFile, File destinationDirectory) {
 		try {
+			List<Path> results = new ArrayList<>();
 			PDDocument document = PDDocument.load(new FileInputStream(pdfFile));
 			PDFRenderer pdfRenderer = new PDFRenderer(document);
 			String fileName = pdfFile.getName().replace(".pdf", "");
@@ -41,12 +42,12 @@ public class PdfToPngConverter {
 			for (PDPage page : document.getPages()) {
 				BufferedImage bim = pdfRenderer.renderImageWithDPI(pageCounter, 300, ImageType.RGB);
 				Path newFile = destinationDirectory.toPath().resolve(fileName + "-" + pageCounter++ + ".png");
-				try (FileLock lock = new FileOutputStream(newFile.toFile()).getChannel().lock()) {
-					ImageIOUtil.writeImage(bim, newFile.toString(), 300);
-				}
+				ImageIOUtil.writeImage(bim, newFile.toString(), 300);
+				results.add(newFile);
 			}
 			document.close();
 			System.out.println("Converted Images are saved at -> " + destinationDirectory.getAbsolutePath());
+			return results;
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

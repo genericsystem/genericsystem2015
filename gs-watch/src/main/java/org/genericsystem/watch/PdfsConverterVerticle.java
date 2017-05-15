@@ -2,6 +2,7 @@ package org.genericsystem.watch;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.List;
 
 import org.genericsystem.cv.PdfToPngConverter;
 
@@ -17,6 +18,8 @@ public class PdfsConverterVerticle extends FileCreateEventsHandlerVerticle {
 
 	@Override
 	public void handle(Path newFile) {
-		PdfToPngConverter.convertPdfToImages(newFile.toFile(), new File("../gs-cv/png"));
+		List<Path> createdPngs = PdfToPngConverter.convertPdfToImages(newFile.toFile(), new File("../gs-cv/png"));
+		for (Path path : createdPngs)
+			vertx.eventBus().publish(VerticleDeployer.PNG_WATCHER_ADDRESS, path.toString());
 	}
 }
