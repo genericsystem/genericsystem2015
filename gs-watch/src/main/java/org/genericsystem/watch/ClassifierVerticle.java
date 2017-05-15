@@ -13,8 +13,12 @@ import org.genericsystem.cv.ImgClass;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.imgcodecs.Imgcodecs;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ClassifierVerticle extends FileCreateEventsHandlerVerticle {
+
+	private static Logger log = LoggerFactory.getLogger(ClassifierVerticle.class);
 
 	static {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
@@ -43,7 +47,7 @@ public class ClassifierVerticle extends FileCreateEventsHandlerVerticle {
 					Mat alignedImage_ = Classifier.compareFeature(img, imgClass.getMean().getSrc(), Classifier.MATCHING_THRESHOLD);
 					if (alignedImage_ != null) {
 						if (matchingClassDir != null)
-							throw new IllegalStateException("Two matching classes found");
+							log.warn("Two matching classes found for file " + newFile + " : " + matchingClassDir + " and " + path);
 						matchingClassDir = path;
 						alignedImage = alignedImage_;
 					}
@@ -51,7 +55,7 @@ public class ClassifierVerticle extends FileCreateEventsHandlerVerticle {
 					System.runFinalization();
 				}
 			} catch (IOException e) {
-				throw new IllegalStateException(e);
+				log.error("IOException:", e);
 			}
 			if (matchingClassDir == null) {
 				matchingClassDir = classesDirectory.resolve(System.nanoTime() + "");
@@ -60,7 +64,7 @@ public class ClassifierVerticle extends FileCreateEventsHandlerVerticle {
 					alignedImage = new Img(img).cropAndDeskew().getSrc();
 				} catch (Exception e) {
 					matchingClassDir.toFile().delete();
-					throw new IllegalStateException("Error while deskewing new image " + newFile.toString() + " to create new class, new class not created.", e);
+					log.warn("Error while deskewing new image " + newFile.toString() + " to create new class, new class not created.", e);
 					// TODO: Store the image somewhere else.
 				}
 			}
@@ -68,10 +72,10 @@ public class ClassifierVerticle extends FileCreateEventsHandlerVerticle {
 			File savedFile;
 			try {
 				savedFile = File.createTempFile(fileNameParts[0] + "-", "." + fileNameParts[1], matchingClassDir.toFile());
+				Imgcodecs.imwrite(savedFile.toString(), alignedImage);
 			} catch (IOException e) {
-				throw new IllegalStateException(e);
+				log.warn("IOException: ", e);
 			}
-			Imgcodecs.imwrite(savedFile.toString(), alignedImage);
 		}
 	}
 }
