@@ -2,7 +2,7 @@ package org.genericsystem.watch;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardWatchEventKinds;
@@ -30,14 +30,8 @@ public abstract class FileCreateEventsHandlerVerticle extends AbstractVerticle {
 			if (StandardWatchEventKinds.ENTRY_CREATE.name().equals(kind)) {
 				Path watchedDir = Paths.get(".", json.getString("folder").split("/"));
 				Path newFile = watchedDir.resolve(json.getString("filename"));
-				FileChannel channel = null;
-				try {
-					RandomAccessFile raf = new RandomAccessFile(newFile.toFile(), "rw");
-					channel = raf.getChannel();
-					channel.lock();
+				try (FileLock lock = new RandomAccessFile(newFile.toFile(), "rw").getChannel().lock()) {
 					handle(newFile);
-					channel.close();
-					raf.close();
 				} catch (IOException e) {
 					throw new IllegalStateException(e);
 				}

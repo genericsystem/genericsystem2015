@@ -2,8 +2,6 @@ package org.genericsystem.watch;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.nio.channels.FileChannel;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,8 +15,6 @@ import org.opencv.core.Mat;
 import org.opencv.imgcodecs.Imgcodecs;
 
 public class ClassifierVerticle extends FileCreateEventsHandlerVerticle {
-
-	private static final String LOCK_FILE_NAME = ".lock";
 
 	static {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
@@ -34,14 +30,13 @@ public class ClassifierVerticle extends FileCreateEventsHandlerVerticle {
 
 	@Override
 	public void handle(Path newFile) {
-		Mat img = Imgcodecs.imread(newFile.toString(), Imgcodecs.CV_LOAD_IMAGE_COLOR);
+		Mat img = Imgcodecs.imread(newFile.toString());
 		Path matchingClassDir = null;
 		Mat alignedImage = null;
 		Path classesDirectory = Paths.get("..", "gs-cv", "classes");
 		classesDirectory.toFile().mkdirs();
-		try (RandomAccessFile raf = new RandomAccessFile(classesDirectory.resolve(LOCK_FILE_NAME).toString(), "rw"); FileChannel channel = raf.getChannel()) {
-			channel.lock();
-
+		// Only one access to classesDirectory at a time to avoid duplicate classes.
+		synchronized (ClassifierVerticle.class) {
 			try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(classesDirectory, Files::isDirectory)) {
 				for (Path path : directoryStream) {
 					ImgClass imgClass = new ImgClass(null, path.toString());
@@ -52,6 +47,8 @@ public class ClassifierVerticle extends FileCreateEventsHandlerVerticle {
 						matchingClassDir = path;
 						alignedImage = alignedImage_;
 					}
+					System.gc();
+					System.runFinalization();
 				}
 			} catch (IOException e) {
 				throw new IllegalStateException(e);
@@ -62,7 +59,9 @@ public class ClassifierVerticle extends FileCreateEventsHandlerVerticle {
 				try {
 					alignedImage = new Img(img).cropAndDeskew().getSrc();
 				} catch (Exception e) {
-					throw new IllegalStateException(e);
+					matchingClassDir.toFile().delete();
+					throw new IllegalStateException("Error while deskewing new image " + newFile.toString() + " to create new class, new class not created.", e);
+					// TODO: Store the image somewhere else.
 				}
 			}
 			String[] fileNameParts = newFile.getFileName().toString().split("\\.(?=[^\\.]+$)");
@@ -73,8 +72,6 @@ public class ClassifierVerticle extends FileCreateEventsHandlerVerticle {
 				throw new IllegalStateException(e);
 			}
 			Imgcodecs.imwrite(savedFile.toString(), alignedImage);
-		} catch (IOException e) {
-			throw new IllegalStateException(e);
 		}
 	}
 }
