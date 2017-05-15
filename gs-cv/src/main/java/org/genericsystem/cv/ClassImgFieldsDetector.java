@@ -50,7 +50,7 @@ public class ClassImgFieldsDetector extends AbstractApp {
 				System.out.println("file : " + file.getName());
 				Img img = new Img(Imgcodecs.imread(file.getPath()));
 				try {
-					List<Mat> sameMats = Tools.getClassMats("aligned-" + file.getName() + "/mask/" + file.getName().replaceAll(".png", ""));
+					List<Mat> sameMats = Tools.getClassMats(classImgRepertory + "/mask/" + file.getName().replace(".png", ""));
 					for (Zone zone : zones.get()) {
 						zone.draw(img, new Scalar(0, 255, 0), -1);
 						UnsupervisedZoneScorer scorer = zone.newUnsupervisedScorer(sameMats);
