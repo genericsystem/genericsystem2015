@@ -22,25 +22,8 @@ public class Zone {
 		return rect;
 	}
 
-	public double computeUnsupervisedScore(String repositoryPath) {
-		return computeUnsupervisedScore(Tools.getClassMats(repositoryPath));
-	}
-
-	public double computeUnsupervisedScore(List<Mat> imgs) {
-		return new UnsupervisedZoneScorer(this, imgs).getBestScore();
-	}
-
-	public String computeUnsupervisedScoredText(List<Mat> imgs) {
-		UnsupervisedZoneScorer scorer = new UnsupervisedZoneScorer(this, imgs);
-		return scorer.getBestScore() + " : " + scorer.getBestText();
-	}
-
-	public double computeSupervisedScore(String repositoryPath) {
-		return computeUnsupervisedScore(Tools.getClassMats(repositoryPath));
-	}
-
-	public double computeSupervisedScore(List<Mat> imgs) {
-		return 0;// TODO
+	public UnsupervisedZoneScorer newUnsupervisedScorer(List<Mat> imgs) {
+		return new UnsupervisedZoneScorer(this, imgs);
 	}
 
 	public Zone adjustRect(double dx, double dy, int maxWidht, int maxHeight) {
