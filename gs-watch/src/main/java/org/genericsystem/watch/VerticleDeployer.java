@@ -34,10 +34,9 @@ public class VerticleDeployer extends AbstractVerticle {
 
 	@Override
 	public void start(Future<Void> startFuture) throws Exception {
-		DeploymentOptions options = new DeploymentOptions().setWorker(true);
-		vertx.deployVerticle(new DirectoryWatcherVerticle(Paths.get("..", "gs-cv", "pdf"), PDF_WATCHER_ADDRESS), options);
-		vertx.deployVerticle(new PdfsConverterVerticle(), options);
-		vertx.deployVerticle(new ClassifierVerticle(), options);
+		vertx.deployVerticle(new DirectoryWatcherVerticle(Paths.get("..", "gs-cv", "pdf"), PDF_WATCHER_ADDRESS));
+		vertx.deployVerticle(new PdfsConverterVerticle());
+		vertx.deployVerticle(new ClassifierVerticle());
 		vertx.deployVerticle(new RunScriptVerticle());
 		startFuture.complete();
 	}
