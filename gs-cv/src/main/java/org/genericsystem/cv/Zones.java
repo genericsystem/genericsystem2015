@@ -36,8 +36,8 @@ public class Zones {
 			double contourarea = Imgproc.contourArea(contour);
 			if (contourarea > minArea) {
 				Rect rect = Imgproc.boundingRect(contour);
-				// if (rect.area() < minArea * 2 || rect.width >= rect.height)
-				zones.add(new Zone(rect));
+				if (rect.area() < minArea * 2 || rect.width >= rect.height)
+					zones.add(new Zone(rect));
 			}
 		}
 	}

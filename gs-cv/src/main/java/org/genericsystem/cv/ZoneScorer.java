@@ -32,7 +32,7 @@ public class ZoneScorer {
 			super(zone);
 			for (Mat img : imgs) {
 				String s = Ocr.doWork(new Mat(img, getZone().getRect()).clone());
-				s = s.replace("\n", "").trim();
+				s = s.replace("\n", "").replace(" ", "").trim();
 				scores.put(s);
 			}
 		}

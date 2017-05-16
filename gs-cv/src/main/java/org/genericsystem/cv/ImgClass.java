@@ -98,11 +98,11 @@ public class ImgClass {
 		return directory;
 	}
 
-	public Zones getClosedMeanZones(double minarea, double dx, double dy, Size morphClose) {
-		return Zones.get(mean.morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, morphClose)), minarea, dx, dy);
+	public Img getClosedMeanZones(Size morphClose) {
+		return mean.morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, morphClose));
 	}
 
-	public Zones getClosedVarianceZones(double minarea, double dx, double dy, Size morphClose) {
-		return Zones.get(variance.morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, morphClose)), minarea, dx, dy);
+	public Img getClosedVarianceZones(Size morphClose) {
+		return variance.morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, morphClose));
 	}
 }

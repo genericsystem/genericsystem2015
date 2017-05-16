@@ -14,15 +14,15 @@ import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
 
-import net.sourceforge.tess4j.Tesseract;
-import net.sourceforge.tess4j.TesseractException;
-
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
+
+import net.sourceforge.tess4j.Tesseract;
+import net.sourceforge.tess4j.TesseractException;
 
 public class Ocr {
 
@@ -35,8 +35,8 @@ public class Ocr {
 		instance.setHocr(false);
 		instance.setPageSegMode(10);
 		instance.setOcrEngineMode(1);
-		// instance.setTessVariable("preserve_interword_spaces", "1");
-		// instance.setTessVariable("textord_space_size_is_variable", "1");
+		instance.setTessVariable("preserve_interword_spaces", "0");
+		instance.setTessVariable("textord_space_size_is_variable", "1");
 		instance.setTessVariable("tessedit_char_whitelist", "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM0123456789.-,<'");
 		instance.setTessVariable("tessedit_char_blacklist", "?{}_[]()À");
 	}
