@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.MessageConsumer;
+import io.vertx.core.json.JsonObject;
 
 public class ClassifierVerticle extends AbstractVerticle {
 
@@ -75,6 +76,8 @@ public class ClassifierVerticle extends AbstractVerticle {
 				try {
 					savedFile = File.createTempFile(fileNameParts[0] + "-", "." + fileNameParts[1], matchingClassDir.toFile());
 					Imgcodecs.imwrite(savedFile.toString(), alignedImage);
+					JsonObject watchMsg = new JsonObject().put("filename", savedFile.toString());
+					vertx.eventBus().publish(VerticleDeployer.IMAGE_ADDED_TO_CLASS_ADDRESS, watchMsg.encodePrettily());
 				} catch (IOException e) {
 					log.warn("IOException: ", e);
 				}

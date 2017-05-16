@@ -5,14 +5,12 @@ E_BADARGS=65
 if [ ! -n "$1" ]
 then
     echo "Usage: `basename $0` directory_name"
+    echo "       or `basename $0` file_name"
     exit $E_BADARGS
 fi
 
-dirname=$1
-cd $dirname
-
-for image in *.png
-do
+convert_image() {
+    image="$1"
     imagename=${image%.*}
     for method in abutaleb bernsen brink djvu niblack otsu sauvola shading-subtraction tsai white-rohrer
     do
@@ -30,6 +28,20 @@ do
         rm $djvufile
         rm $tifffile
     done
-done
+}
+
+if [ -d "$1" ]; then
+    cd "$1"
+    for image in *.png
+    do
+        convert_image "$image"
+    done
+elif [ -f "$1" ]; then
+    cd `dirname "$1"`
+    convert_image `basename "$1"`
+else
+    echo "Given argument is not a valid file or directory name: $1."
+    exit $E_BADARGS
+fi
 
 exit 0
