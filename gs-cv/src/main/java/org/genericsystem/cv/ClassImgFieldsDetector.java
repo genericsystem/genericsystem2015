@@ -19,8 +19,6 @@ public class ClassImgFieldsDetector extends AbstractApp {
 
 	private final static String classImgRepertory = "aligned-image-3.png";
 
-	// private final static String adjustedDirectoryPath2 = "aligned-image-3.png/mask/image-3";
-
 	public static void main(String[] args) {
 		launch(args);
 	}
@@ -37,7 +35,7 @@ public class ClassImgFieldsDetector extends AbstractApp {
 		mainGrid.add(imgClass.getMean().getImageView(), columnIndex, rowIndex++);
 		mainGrid.add(imgClass.getVariance().getImageView(), columnIndex, rowIndex++);
 
-		imgClass.addMapper(img -> img.dilateBlacks(86, 255, 76, new Size(15, 3)));
+		imgClass.addMapper(img -> img.eraseCorners(0.1).dilateBlacks(86, 255, 76, new Size(15, 3)));
 		mainGrid.add(imgClass.getMean().getImageView(), columnIndex, rowIndex++);
 		mainGrid.add(imgClass.getVariance().getImageView(), columnIndex, rowIndex++);
 
@@ -54,7 +52,7 @@ public class ClassImgFieldsDetector extends AbstractApp {
 					for (Zone zone : zones.get()) {
 						zone.draw(img, new Scalar(0, 255, 0), -1);
 						UnsupervisedZoneScorer scorer = zone.newUnsupervisedScorer(sameMats);
-						zone.write(img, scorer.getBestText() + " " + Math.floor((scorer.getBestScore() * 10000)) / 100 + "%", 2, new Scalar(0, 0, 255), 2);
+						zone.write(img, scorer.getBestText() + " " + Math.floor((scorer.getBestScore() * 10000)) / 100 + "%", 2.5, new Scalar(0, 0, 255), 2);
 					}
 					mainGrid.add(img.getImageView(), columnIndex, rowIndex++);
 				} catch (Exception ignore) {

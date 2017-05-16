@@ -6,10 +6,6 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-import javafx.scene.Node;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-
 import javax.swing.ImageIcon;
 
 import org.opencv.core.Core;
@@ -28,6 +24,10 @@ import org.opencv.features2d.FeatureDetector;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
+
+import javafx.scene.Node;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 
 public class Img {
 	private final Mat src = new Mat();
@@ -327,14 +327,14 @@ public class Img {
 	}
 
 	public Img dilateBlacks(int valueThreshold, int saturatioThreshold, int blueThreshold, Size dilatation) {
-		return range(new Scalar(0, 0, 0), new Scalar(255, saturatioThreshold, valueThreshold), true).range(new Scalar(0, 0, 0), new Scalar(blueThreshold, 255, 255), false).gray()
-				.morphologyEx(Imgproc.MORPH_DILATE, new StructuringElement(Imgproc.MORPH_RECT, dilatation));
+		return range(new Scalar(0, 0, 0), new Scalar(255, saturatioThreshold, valueThreshold), true).range(new Scalar(0, 0, 0), new Scalar(blueThreshold, 255, 255), false).gray().morphologyEx(Imgproc.MORPH_DILATE,
+				new StructuringElement(Imgproc.MORPH_RECT, dilatation));
 	}
 
 	public Img equalizeHisto(Mat mat) {
 		Mat result = new Mat();
 		Imgproc.cvtColor(mat, result, Imgproc.COLOR_BGR2YCrCb);
-		List<Mat> channels = new ArrayList<Mat>();
+		List<Mat> channels = new ArrayList<>();
 		Core.split(result, channels);
 		Imgproc.equalizeHist(channels.get(0), channels.get(0));
 		Imgproc.equalizeHist(channels.get(1), channels.get(1));
@@ -355,7 +355,7 @@ public class Img {
 		Imgproc.resize(src, result, new Size(src.width() * coeff, src.height() * coeff));
 		return new Img(result);
 	}
-	
+
 	public Img bilateralFilter() {
 		Mat result = new Mat();
 		Imgproc.bilateralFilter(src, result, 30, 80, 80);
@@ -368,5 +368,39 @@ public class Img {
 		return new Img(result);
 	}
 
+	public Img absDiff(Img img) {
+		Mat result = new Mat();
+		Core.absdiff(src, img.getSrc(), result);
+		return new Img(result);
+	}
+
+	public Img hsvChannel(int channel) {
+		Mat result = new Mat();
+		Imgproc.cvtColor(src, result, Imgproc.COLOR_BGR2HSV);
+		List<Mat> channels = new ArrayList<>();
+		Core.split(result, channels);
+		return new Img(channels.get(channel));
+	}
+
+	public Img bgrChannel(int channel) {
+		List<Mat> channels = new ArrayList<>();
+		Core.split(src, channels);
+		return new Img(channels.get(channel));
+	}
+
+	public Img eraseCorners(double proportion) {
+		Img result = new Img(src);
+		int width = Double.valueOf(src.width() * proportion).intValue();
+		int height = Double.valueOf(src.height() * proportion).intValue();
+		Mat roi = new Mat(result.getSrc(), new Rect(0, 0, width, height));
+		roi.setTo(new Scalar(255, 255, 255));
+		roi = new Mat(result.getSrc(), new Rect(0, src.height() - height, width, height));
+		roi.setTo(new Scalar(255, 255, 255));
+		roi = new Mat(result.getSrc(), new Rect(src.width() - width, src.height() - height, width, height));
+		roi.setTo(new Scalar(255, 255, 255));
+		roi = new Mat(result.getSrc(), new Rect(src.width() - width, 0, width, height));
+		roi.setTo(new Scalar(255, 255, 255));
+		return result;
+	}
 
 }
