@@ -15,6 +15,9 @@ import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
 import org.opencv.imgcodecs.Imgcodecs;
 
+import javafx.embed.swing.SwingFXUtils;
+import javafx.scene.image.Image;
+
 public class Tools {
 
 	public static List<Mat> getImages(String repository, String... imagePaths) {
@@ -46,4 +49,9 @@ public class Tools {
 			throw new IllegalStateException(e);
 		}
 	}
+	
+	public static Image mat2jfxImage(Mat frame){
+		return SwingFXUtils.toFXImage(Tools.mat2bufferedImage(frame), null);
+	}
+	
 }
