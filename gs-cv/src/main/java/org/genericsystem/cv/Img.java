@@ -1,6 +1,10 @@
 package org.genericsystem.cv;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -31,12 +35,17 @@ import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.photo.Photo;
 import org.opencv.utils.Converters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javafx.scene.Node;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
 public class Img {
+
+	private static Logger log = LoggerFactory.getLogger(Img.class);
+
 	private final Mat src = new Mat();
 
 	public Mat getSrc() {
@@ -226,11 +235,32 @@ public class Img {
 		Mat target = new Mat();
 		List<Point> targets = new LinkedList<>(Arrays.asList(new Point(0, 0), new Point(0, height), new Point(width, height), new Point(width, 0)));
 		Imgproc.warpPerspective(src, target, Imgproc.getPerspectiveTransform(Converters.vector_Point2f_to_Mat(list), Converters.vector_Point2f_to_Mat(targets)), new Size(width, height), Imgproc.INTER_CUBIC);
-		return new Img(target);
+
+		Img result = new Img(target);
+		int orientation = result.getOrientation();
+		if (orientation != 0)
+			result = result.rotate(orientation);
+		return result;
 	}
 
 	private double distance(Point p1, Point p2) {
 		return Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
+	}
+
+	// angle is 90, 180 or 270 degrees.
+	public Img rotate(int angle) {
+		Mat result = new Mat();
+		if (angle == 90) {
+			Core.transpose(src, result);
+			Core.flip(result, result, 0);
+		}
+		if (angle == 180)
+			Core.flip(src, result, -1);
+		if (angle == 270) {
+			Core.transpose(src, result);
+			Core.flip(result, result, 1);
+		}
+		return new Img(result);
 	}
 
 	// List of points corresponding to the ordered vertices of a convex polygon.
@@ -240,6 +270,22 @@ public class Img {
 		Point p3 = points.get(2);
 		// The points are in clockwise order iff the determinant of the vectors p1p2 and p2p3 is positive. (/!\ clockwise basis)
 		return (p2.x - p1.x) * (p3.y - p2.y) - (p2.y - p1.y) * (p3.x - p2.x) >= 0;
+	}
+
+	public int getOrientation() {
+		try {
+			File tmpFile = File.createTempFile("orientation", ".png");
+			tmpFile.deleteOnExit();
+			Imgcodecs.imwrite(tmpFile.toString(), src);
+			Process process = Runtime.getRuntime().exec(new String[] { "../gs-cv/orientation.sh", tmpFile.toString() });
+			process.waitFor();
+			BufferedReader stdInput = new BufferedReader(new InputStreamReader(process.getInputStream()));
+			return Integer.valueOf(stdInput.readLine());
+		} catch (IOException | InterruptedException e) {
+			log.warn("Impossible to detect file orientation, returning 0.");
+			e.printStackTrace();
+			return 0;
+		}
 	}
 
 	public Size size() {
