@@ -513,11 +513,11 @@ public class Img {
 		List<Integer> methods = Arrays.asList(Imgproc.HISTCMP_CORREL, Imgproc.HISTCMP_CHISQR, Imgproc.HISTCMP_INTERSECT, Imgproc.HISTCMP_BHATTACHARYYA, Imgproc.HISTCMP_CHISQR_ALT, Imgproc.HISTCMP_KL_DIV);
 		Map<Integer, Integer> mins = new HashMap<>();
 		for (Integer method : methods) {
-			double min = results.get(0).get(method);
+			double max = results.get(0).get(method);
 			int index = 0;
 			for (int i = 0; i < results.size(); i++) {
-				if (min > results.get(i).get(method)) {
-					min = results.get(i).get(method);
+				if (max < results.get(i).get(method)) {
+					max = results.get(i).get(method);
 					index = i;
 				}
 			}
@@ -526,6 +526,7 @@ public class Img {
 		TreeMap<Integer, Integer> reverse = mins.entrySet().stream().collect(Collectors.toMap(entry -> entry.getValue(), entry -> entry.getKey(), (u, v) -> {
 			return u;
 		}, TreeMap::new));
+		System.out.println("Number of algos : " + reverse.lastEntry().getKey());
 		return reverse.lastEntry().getValue();
 
 	}
