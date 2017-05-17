@@ -49,12 +49,14 @@ public class TextDetectors {
 		for (;;) {
 			camera.read(frame);
 			Img frameImg = new Img(frame);
-			anotherMserDetector(frameImg);
-			mserDetectText(frameImg);
-			lpdDetectText(frameImg);
-			morphGradientDetectText(frameImg);
-			anotherDetector(frameImg);
-			vidpanel.setIcon(frameImg.getImageIcon());
+			Img result = new Img(frameImg.getSrc());
+
+			Zones.get(frameImg.sobel(), 400).draw(result, new Scalar(0, 255, 0), 1);
+			// Zones.get(frameImg.classic(), 400).draw(result, new Scalar(255, 255, 0), 2);
+			Zones.get(frameImg.grad(), 400).draw(result, new Scalar(0, 0, 255), 1);
+			Zones.get(frameImg.mser(), 400).draw(result, new Scalar(255, 0, 0), 1);
+
+			vidpanel.setIcon(result.getImageIcon());
 			vidpanel.repaint();
 		}
 

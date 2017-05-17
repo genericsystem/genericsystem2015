@@ -3,8 +3,12 @@ package org.genericsystem.cv;
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import javax.swing.ImageIcon;
 
@@ -13,6 +17,8 @@ import org.opencv.core.CvType;
 import org.opencv.core.KeyPoint;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
+import org.opencv.core.MatOfFloat;
+import org.opencv.core.MatOfInt;
 import org.opencv.core.MatOfKeyPoint;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
@@ -23,6 +29,7 @@ import org.opencv.core.Size;
 import org.opencv.features2d.FeatureDetector;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.photo.Photo;
 import org.opencv.utils.Converters;
 
 import javafx.scene.Node;
@@ -230,15 +237,19 @@ public class Img {
 	}
 
 	public Node getImageView() {
+		return getImageView(AbstractApp.displayWidth);
+	}
+
+	public Node getImageView(double width) {
 		Mat conv = new Mat();
 		src.convertTo(conv, CvType.CV_8UC1);
 		Mat target = new Mat();
-		Imgproc.resize(conv, target, new Size(AbstractApp.displayWidth, Math.floor((AbstractApp.displayWidth / conv.width()) * conv.height())));
+		Imgproc.resize(conv, target, new Size(width, Math.floor((width / conv.width()) * conv.height())));
 		MatOfByte buffer = new MatOfByte();
 		Imgcodecs.imencode(".png", target, buffer);
 		ImageView imageView = new ImageView(new Image(new ByteArrayInputStream(buffer.toArray())));
 		imageView.setPreserveRatio(true);
-		imageView.setFitWidth(AbstractApp.displayWidth);
+		imageView.setFitWidth(width);
 		return imageView;
 	}
 
@@ -276,6 +287,12 @@ public class Img {
 		return new Img(result);
 	}
 
+	// public Img classic() {
+	// Img gray = cvtColor(Imgproc.COLOR_BGR2GRAY);
+	// Img threshold = gray.thresHold(0, 255, Imgproc.THRESH_OTSU + Imgproc.THRESH_BINARY);
+	// return threshold.morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, new Size(17, 3)));
+	// }
+
 	public Img sobel() {
 		Img gray = cvtColor(Imgproc.COLOR_BGR2GRAY);
 		Img sobel = gray.sobel(CvType.CV_8UC1, 1, 0, 3, 1, 0, Core.BORDER_DEFAULT);
@@ -286,7 +303,7 @@ public class Img {
 	public Img grad() {
 		Img gray = cvtColor(Imgproc.COLOR_BGR2GRAY);
 		Img grad = gray.morphologyEx(Imgproc.MORPH_GRADIENT, new StructuringElement(Imgproc.MORPH_ELLIPSE, new Size(3, 3)));
-		Img threshold = grad.thresHold(0.0, 255.0, Imgproc.THRESH_OTSU + Imgproc.THRESH_BINARY);
+		Img threshold = grad.thresHold(0.0, 255.0, Imgproc.THRESH_OTSU + Imgproc.THRESH_BINARY).morphologyEx(Imgproc.MORPH_ERODE, new StructuringElement(Imgproc.MORPH_RECT, new Size(3, 3)));
 		return threshold.morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, new Size(17, 3)));
 	}
 
@@ -299,10 +316,10 @@ public class Img {
 		Mat result = Mat.zeros(gray.size(), CvType.CV_8UC1);
 		for (int ind = 0; ind < listpoint.size(); ind++) {
 			KeyPoint kpoint = listpoint.get(ind);
-			int rectanx1 = (int) (kpoint.pt.x - 0.5 * kpoint.size);
-			int rectany1 = (int) (kpoint.pt.y - 0.5 * kpoint.size);
-			int width = (int) (kpoint.size);
-			int height = (int) (kpoint.size);
+			int rectanx1 = (int) (kpoint.pt.x - 0.5 * 20/* kpoint.size */);
+			int rectany1 = (int) (kpoint.pt.y - 0.5 * 20 /* kpoint.size */);
+			int width = (20/* kpoint.size */);
+			int height = (20/* kpoint.size */);
 			if (rectanx1 <= 0)
 				rectanx1 = 1;
 			if (rectany1 <= 0)
@@ -331,9 +348,9 @@ public class Img {
 				new StructuringElement(Imgproc.MORPH_RECT, dilatation));
 	}
 
-	public Img equalizeHisto(Mat mat) {
+	public Img equalizeHisto() {
 		Mat result = new Mat();
-		Imgproc.cvtColor(mat, result, Imgproc.COLOR_BGR2YCrCb);
+		Imgproc.cvtColor(src, result, Imgproc.COLOR_BGR2YCrCb);
 		List<Mat> channels = new ArrayList<>();
 		Core.split(result, channels);
 		Imgproc.equalizeHist(channels.get(0), channels.get(0));
@@ -401,6 +418,151 @@ public class Img {
 		roi = new Mat(result.getSrc(), new Rect(src.width() - width, 0, width, height));
 		roi.setTo(new Scalar(255, 255, 255));
 		return result;
+	}
+
+	public Img fastNlMeansDenoising() {
+		Mat result = new Mat();
+		Photo.fastNlMeansDenoising(src, result);
+		return new Img(result);
+	}
+
+	public Img bernsen(int ksize, int contrast_limit) {
+		Img gray = gray();
+		Mat ret = Mat.zeros(gray.size(), gray.type());
+		for (int i = 0; i < gray.cols(); i++) {
+			for (int j = 0; j < gray.rows(); j++) {
+				double mn = 999, mx = 0;
+				int ti = 0, tj = 0;
+				int tlx = i - ksize / 2;
+				int tly = j - ksize / 2;
+				int brx = i + ksize / 2;
+				int bry = j + ksize / 2;
+				if (tlx < 0)
+					tlx = 0;
+				if (tly < 0)
+					tly = 0;
+				if (brx >= gray.cols())
+					brx = gray.cols() - 1;
+				if (bry >= gray.rows())
+					bry = gray.rows() - 1;
+
+				for (int ik = -ksize / 2; ik <= ksize / 2; ik++) {
+					for (int jk = -ksize / 2; jk <= ksize / 2; jk++) {
+						ti = i + ik;
+						tj = j + jk;
+						if (ti > 0 && ti < gray.cols() && tj > 0 && tj < gray.rows()) {
+							double pix = gray.get(tj, ti)[0];
+							if (pix < mn)
+								mn = pix;
+							if (pix > mx)
+								mx = pix;
+						}
+					}
+				}
+				double median = 0.5 * (mn + mx);
+				if (median < contrast_limit) {
+					ret.put(j, i, 0);
+				} else {
+					double pix = gray.get(j, i)[0];
+					ret.put(j, i, pix > median ? 255 : 0);
+				}
+			}
+		}
+		return new Img(ret);
+	}
+
+	private int rows() {
+		return src.rows();
+	}
+
+	private int cols() {
+		return src.cols();
+	}
+
+	// private List<Rect> getRects() {
+	// List<Rect> boundRects = new ArrayList<>();
+	// List<Mat> channels = new ArrayList<>();
+	//
+	// Text.computeNMChannels(src, channels);
+	//
+	// System.out.println("Extracting Class Specific Extremal Regions from " + channels.size() + " channels ...");
+	//
+	// ERFilter erc1 = Text.createERFilterNM1(getClass().getResource("trained_classifierNM1.xml").getPath(), 16, 0.00015f, 0.13f, 0.2f, true, 0.1f);
+	// ERFilter erc2 = Text.createERFilterNM2(getClass().getResource("trained_classifierNM2.xml").getPath(), 0.5f);
+	//
+	// for (Mat channel : channels) {
+	// List<MatOfPoint> regions = new ArrayList<>();
+	// Text.detectRegions(channel, erc1, erc2, regions); // **Java fails here with Exception Type: EXC_BAD_ACCESS (SIGABRT)**
+	// MatOfRect mor = new MatOfRect();
+	// Text.erGrouping(src, channel, regions, mor);
+	//
+	// for (Rect r : mor.toArray()) {
+	// boundRects.add(r);
+	// }
+	// }
+	//
+	// return boundRects;
+	// }
+
+	public int findBestHisto(List<Img> imgs) {
+
+		List<Map<Integer, Double>> results = new ArrayList<>();
+		for (Img img : imgs)
+			results.add(compareHistogramm(img));
+
+		List<Integer> methods = Arrays.asList(Imgproc.HISTCMP_CORREL, Imgproc.HISTCMP_CHISQR, Imgproc.HISTCMP_INTERSECT, Imgproc.HISTCMP_BHATTACHARYYA, Imgproc.HISTCMP_CHISQR_ALT, Imgproc.HISTCMP_KL_DIV);
+		Map<Integer, Integer> mins = new HashMap<>();
+		for (Integer method : methods) {
+			double min = results.get(0).get(method);
+			int index = 0;
+			for (int i = 0; i < results.size(); i++) {
+				if (min > results.get(i).get(method)) {
+					min = results.get(i).get(method);
+					index = i;
+				}
+			}
+			mins.put(index, mins.get(index) != null ? mins.get(index) + 1 : 1);
+		}
+		TreeMap<Integer, Integer> reverse = mins.entrySet().stream().collect(Collectors.toMap(entry -> entry.getValue(), entry -> entry.getKey(), (u, v) -> {
+			return u;
+		}, TreeMap::new));
+		return reverse.lastEntry().getValue();
+
+	}
+
+	public Map<Integer, Double> compareHistogramm(Img img) {
+		Mat rgb = cvtColor(Imgproc.COLOR_BGR2RGB).getSrc();
+		Mat rgb2 = img.cvtColor(Imgproc.COLOR_BGR2RGB).getSrc();
+		MatOfInt channels = new MatOfInt(0, 1, 2);
+		MatOfInt histSize = new MatOfInt(8, 8, 8);
+		MatOfFloat ranges = new MatOfFloat(0, 256, 0, 256, 0, 256);
+
+		List<Mat> histos = new ArrayList<>();
+		for (Mat im : Arrays.asList(rgb, rgb2)) {
+			Mat hist = new Mat();
+			Imgproc.calcHist(Arrays.asList(im), channels, Mat.ones(im.size(), CvType.CV_8UC1), hist, histSize, ranges);
+			histos.add(hist);
+		}
+
+		Map<Integer, Double> results = new HashMap<>();
+
+		List<Integer> methods = Arrays.asList(Imgproc.HISTCMP_CORREL, Imgproc.HISTCMP_CHISQR, Imgproc.HISTCMP_INTERSECT, Imgproc.HISTCMP_BHATTACHARYYA, Imgproc.HISTCMP_CHISQR_ALT, Imgproc.HISTCMP_KL_DIV);
+		for (int method : methods) {
+			double result = Imgproc.compareHist(histos.get(0), histos.get(1), method);
+			switch (method) {
+			case Imgproc.HISTCMP_CORREL:
+				result = -result;
+				break;
+			case Imgproc.HISTCMP_INTERSECT:
+				result = -result;
+				break;
+			}
+			results.put(method, result);
+			// System.out.println("for Algo " + method + " comparison : " + result + "\n");
+		}
+
+		return results;
+
 	}
 
 }
