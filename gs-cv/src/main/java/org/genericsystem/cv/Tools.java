@@ -15,6 +15,9 @@ import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
 import org.opencv.imgcodecs.Imgcodecs;
 
+import javafx.embed.swing.SwingFXUtils;
+import javafx.scene.image.Image;
+
 public class Tools {
 
 	public static List<Mat> getImages(String repository, String... imagePaths) {
@@ -37,6 +40,10 @@ public class Tools {
 		return Arrays.stream(new File(repository).listFiles()).filter(img -> img.getName().endsWith(".png")).map(img -> new Img(Imgcodecs.imread(img.getPath())));
 	}
 
+	public static Stream<Img> classImgsStream(String repository, String... imagePaths) {
+		return Arrays.stream(new File(repository).listFiles()).filter(img -> img.getName().endsWith(".png") && Arrays.asList(imagePaths).contains(img.getName())).map(img -> new Img(Imgcodecs.imread(img.getPath())));
+	}
+
 	public static BufferedImage mat2bufferedImage(Mat image) {
 		MatOfByte bytemat = new MatOfByte();
 		Imgcodecs.imencode(".png", image, bytemat);
@@ -46,4 +53,9 @@ public class Tools {
 			throw new IllegalStateException(e);
 		}
 	}
+	
+	public static Image mat2jfxImage(Mat frame){
+		return SwingFXUtils.toFXImage(Tools.mat2bufferedImage(frame), null);
+	}
+	
 }
