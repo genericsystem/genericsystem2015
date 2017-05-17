@@ -185,25 +185,61 @@ public class Img {
 	}
 
 	public Img transform(MatOfPoint2f contour2f) {
+		List<Point> list = new ArrayList<>(Arrays.asList(contour2f.toArray()));
+
+		// Put the points in counterclockwise order.
+		if (isClockwise(list)) {
+			Point second = list.remove(3);
+			Point fourth = list.remove(1);
+			list.add(1, second);
+			list.add(fourth);
+		}
+
+		// Look for the top left corner of the rectangle.
+		// The line used as the top of the rectangle makes an angle of 45° max with an horizontal line.
+		int yMinIndex = 0; // Point with min y, and min x if there are two such points.
+		int xMinIndex = 0; // Point with min x, and min y if there are two such points.
+		for (int i = 0; i < list.size(); i++) {
+			double xCurr = list.get(i).x;
+			double xMin = list.get(xMinIndex).x;
+			double yCurr = list.get(i).y;
+			double yMin = list.get(yMinIndex).y;
+			if (xCurr < xMin || xCurr == xMin && yCurr < list.get(xMinIndex).y)
+				xMinIndex = i;
+			if (yCurr < yMin || yCurr == yMin && xCurr < list.get(yMinIndex).x)
+				yMinIndex = i;
+		}
+		int tlIndex = yMinIndex;
+		if (yMinIndex != xMinIndex) {
+			double slope = (list.get(xMinIndex).y - list.get(yMinIndex).y) / (list.get(yMinIndex).x - list.get(xMinIndex).x);
+			if (slope < 1)
+				tlIndex = xMinIndex;
+		}
+
+		// Put the top left corner first.
+		for (int i = 0; i < tlIndex; i++)
+			list.add(list.remove(0));
+
+		// Transform the image.
+		double height = distance(list.get(0), list.get(1));
+		double width = distance(list.get(1), list.get(2));
 		Mat target = new Mat();
-		List<Point> list = Arrays.asList(contour2f.toArray());
-		double width = Math.max(Math.sqrt(Math.pow(list.get(0).x - list.get(1).x, 2) + Math.pow(list.get(0).y - list.get(1).y, 2)), Math.sqrt(Math.pow(list.get(2).x - list.get(3).x, 2) + Math.pow(list.get(2).y - list.get(3).y, 2)));
-		double height = Math.max(Math.sqrt(Math.pow(list.get(1).x - list.get(2).x, 2) + Math.pow(list.get(1).y - list.get(2).y, 2)), Math.sqrt(Math.pow(list.get(3).x - list.get(0).x, 2) + Math.pow(list.get(3).y - list.get(0).y, 2)));
-		boolean toReverse = width < height;
-		if (toReverse) {
-			System.out.println("inversion width height");
-			double tmp = width;
-			width = height;
-			height = tmp;
-		}
-		List<Point> targets = new LinkedList<>(Arrays.asList(new Point(width, 0), new Point(0, 0), new Point(0, height), new Point(width, height)));
-		if (toReverse) {
-			Point first = targets.get(0);
-			targets.remove(0);
-			targets.add(first);
-		}
-		Imgproc.warpPerspective(src, target, Imgproc.getPerspectiveTransform(contour2f, Converters.vector_Point2f_to_Mat(targets)), new Size(width, height), Imgproc.INTER_CUBIC);
+		List<Point> targets = new LinkedList<>(Arrays.asList(new Point(0, 0), new Point(0, height), new Point(width, height), new Point(width, 0)));
+		Imgproc.warpPerspective(src, target, Imgproc.getPerspectiveTransform(Converters.vector_Point2f_to_Mat(list), Converters.vector_Point2f_to_Mat(targets)), new Size(width, height), Imgproc.INTER_CUBIC);
 		return new Img(target);
+	}
+
+	private double distance(Point p1, Point p2) {
+		return Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
+	}
+
+	// List of points corresponding to the ordered vertices of a convex polygon.
+	private boolean isClockwise(List<Point> points) {
+		Point p1 = points.get(0);
+		Point p2 = points.get(1);
+		Point p3 = points.get(2);
+		// The points are in clockwise order iff the determinant of the vectors p1p2 and p2p3 is positive. (/!\ clockwise basis)
+		return (p2.x - p1.x) * (p3.y - p2.y) - (p2.y - p1.y) * (p3.x - p2.x) >= 0;
 	}
 
 	public Size size() {
