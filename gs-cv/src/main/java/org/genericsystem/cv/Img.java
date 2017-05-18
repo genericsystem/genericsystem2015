@@ -14,6 +14,10 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+import javafx.scene.Node;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+
 import javax.swing.ImageIcon;
 
 import org.opencv.core.Core;
@@ -37,10 +41,6 @@ import org.opencv.photo.Photo;
 import org.opencv.utils.Converters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javafx.scene.Node;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 
 public class Img {
 
@@ -426,8 +426,8 @@ public class Img {
 	}
 
 	public Img dilateBlacks(int valueThreshold, int saturatioThreshold, int blueThreshold, Size dilatation) {
-		return range(new Scalar(0, 0, 0), new Scalar(255, saturatioThreshold, valueThreshold), true).range(new Scalar(0, 0, 0), new Scalar(blueThreshold, 255, 255), false).gray().morphologyEx(Imgproc.MORPH_DILATE,
-				new StructuringElement(Imgproc.MORPH_RECT, dilatation));
+		return range(new Scalar(0, 0, 0), new Scalar(255, saturatioThreshold, valueThreshold), true).range(new Scalar(0, 0, 0), new Scalar(blueThreshold, 255, 255), false).gray()
+				.morphologyEx(Imgproc.MORPH_DILATE, new StructuringElement(Imgproc.MORPH_RECT, dilatation));
 	}
 
 	public Img equalizeHisto() {
@@ -595,12 +595,13 @@ public class Img {
 		List<Integer> methods = Arrays.asList(Imgproc.HISTCMP_CORREL, Imgproc.HISTCMP_CHISQR, Imgproc.HISTCMP_INTERSECT, Imgproc.HISTCMP_BHATTACHARYYA, Imgproc.HISTCMP_CHISQR_ALT, Imgproc.HISTCMP_KL_DIV);
 		Map<Integer, Integer> mins = new HashMap<>();
 		for (Integer method : methods) {
-			double max = results.get(0).get(method);
+			double min = results.get(0).get(method);
 			int index = 0;
 			for (int i = 0; i < results.size(); i++) {
-				if (max < results.get(i).get(method)) {
-					max = results.get(i).get(method);
+				if (min > results.get(i).get(method)) {
+					min = results.get(i).get(method);
 					index = i;
+					System.out.println("method=" + method + " index=" + index);
 				}
 			}
 			mins.put(index, mins.get(index) != null ? mins.get(index) + 1 : 1);
@@ -623,7 +624,14 @@ public class Img {
 		List<Mat> histos = new ArrayList<>();
 		for (Mat im : Arrays.asList(rgb, rgb2)) {
 			Mat hist = new Mat();
+
+			// Imgproc.equalizeHist(channels.get(0), channels.get(0));
+			// Imgproc.equalizeHist(channels.get(1), channels.get(1));
+			// Imgproc.equalizeHist(channels.get(2), channels.get(2));
+
 			Imgproc.calcHist(Arrays.asList(im), channels, Mat.ones(im.size(), CvType.CV_8UC1), hist, histSize, ranges);
+			// Core.normalize(hist, hist, 0, 1, Core.NORM_MINMAX, -1, new Mat());
+			Core.normalize(hist, hist);
 			histos.add(hist);
 		}
 
@@ -643,9 +651,8 @@ public class Img {
 			results.put(method, result);
 			// System.out.println("for Algo " + method + " comparison : " + result + "\n");
 		}
-
+		System.out.println("results : " + results);
 		return results;
 
 	}
-
 }
