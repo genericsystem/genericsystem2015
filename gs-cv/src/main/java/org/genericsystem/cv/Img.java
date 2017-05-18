@@ -1,10 +1,18 @@
 package org.genericsystem.cv;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import javax.swing.ImageIcon;
 
@@ -13,6 +21,8 @@ import org.opencv.core.CvType;
 import org.opencv.core.KeyPoint;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
+import org.opencv.core.MatOfFloat;
+import org.opencv.core.MatOfInt;
 import org.opencv.core.MatOfKeyPoint;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
@@ -23,13 +33,19 @@ import org.opencv.core.Size;
 import org.opencv.features2d.FeatureDetector;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.photo.Photo;
 import org.opencv.utils.Converters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javafx.scene.Node;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
 public class Img {
+
+	private static Logger log = LoggerFactory.getLogger(Img.class);
+
 	private final Mat src = new Mat();
 
 	public Mat getSrc() {
@@ -178,25 +194,98 @@ public class Img {
 	}
 
 	public Img transform(MatOfPoint2f contour2f) {
+		List<Point> list = new ArrayList<>(Arrays.asList(contour2f.toArray()));
+
+		// Put the points in counterclockwise order.
+		if (isClockwise(list)) {
+			Point second = list.remove(3);
+			Point fourth = list.remove(1);
+			list.add(1, second);
+			list.add(fourth);
+		}
+
+		// Look for the top left corner of the rectangle.
+		// The line used as the top of the rectangle makes an angle of 45° max with an horizontal line.
+		int yMinIndex = 0; // Point with min y, and min x if there are two such points.
+		int xMinIndex = 0; // Point with min x, and min y if there are two such points.
+		for (int i = 0; i < list.size(); i++) {
+			double xCurr = list.get(i).x;
+			double xMin = list.get(xMinIndex).x;
+			double yCurr = list.get(i).y;
+			double yMin = list.get(yMinIndex).y;
+			if (xCurr < xMin || xCurr == xMin && yCurr < list.get(xMinIndex).y)
+				xMinIndex = i;
+			if (yCurr < yMin || yCurr == yMin && xCurr < list.get(yMinIndex).x)
+				yMinIndex = i;
+		}
+		int tlIndex = yMinIndex;
+		if (yMinIndex != xMinIndex) {
+			double slope = (list.get(xMinIndex).y - list.get(yMinIndex).y) / (list.get(yMinIndex).x - list.get(xMinIndex).x);
+			if (slope < 1)
+				tlIndex = xMinIndex;
+		}
+
+		// Put the top left corner first.
+		for (int i = 0; i < tlIndex; i++)
+			list.add(list.remove(0));
+
+		// Transform the image.
+		double height = distance(list.get(0), list.get(1));
+		double width = distance(list.get(1), list.get(2));
 		Mat target = new Mat();
-		List<Point> list = Arrays.asList(contour2f.toArray());
-		double width = Math.max(Math.sqrt(Math.pow(list.get(0).x - list.get(1).x, 2) + Math.pow(list.get(0).y - list.get(1).y, 2)), Math.sqrt(Math.pow(list.get(2).x - list.get(3).x, 2) + Math.pow(list.get(2).y - list.get(3).y, 2)));
-		double height = Math.max(Math.sqrt(Math.pow(list.get(1).x - list.get(2).x, 2) + Math.pow(list.get(1).y - list.get(2).y, 2)), Math.sqrt(Math.pow(list.get(3).x - list.get(0).x, 2) + Math.pow(list.get(3).y - list.get(0).y, 2)));
-		boolean toReverse = width < height;
-		if (toReverse) {
-			System.out.println("inversion width height");
-			double tmp = width;
-			width = height;
-			height = tmp;
+		List<Point> targets = new LinkedList<>(Arrays.asList(new Point(0, 0), new Point(0, height), new Point(width, height), new Point(width, 0)));
+		Imgproc.warpPerspective(src, target, Imgproc.getPerspectiveTransform(Converters.vector_Point2f_to_Mat(list), Converters.vector_Point2f_to_Mat(targets)), new Size(width, height), Imgproc.INTER_CUBIC);
+
+		Img result = new Img(target);
+		int orientation = result.getOrientation();
+		if (orientation != 0)
+			result = result.rotate(orientation);
+		return result;
+	}
+
+	private double distance(Point p1, Point p2) {
+		return Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
+	}
+
+	// angle is 90, 180 or 270 degrees.
+	public Img rotate(int angle) {
+		Mat result = new Mat();
+		if (angle == 90) {
+			Core.transpose(src, result);
+			Core.flip(result, result, 0);
 		}
-		List<Point> targets = new LinkedList<>(Arrays.asList(new Point(width, 0), new Point(0, 0), new Point(0, height), new Point(width, height)));
-		if (toReverse) {
-			Point first = targets.get(0);
-			targets.remove(0);
-			targets.add(first);
+		if (angle == 180)
+			Core.flip(src, result, -1);
+		if (angle == 270) {
+			Core.transpose(src, result);
+			Core.flip(result, result, 1);
 		}
-		Imgproc.warpPerspective(src, target, Imgproc.getPerspectiveTransform(contour2f, Converters.vector_Point2f_to_Mat(targets)), new Size(width, height), Imgproc.INTER_CUBIC);
-		return new Img(target);
+		return new Img(result);
+	}
+
+	// List of points corresponding to the ordered vertices of a convex polygon.
+	private boolean isClockwise(List<Point> points) {
+		Point p1 = points.get(0);
+		Point p2 = points.get(1);
+		Point p3 = points.get(2);
+		// The points are in clockwise order iff the determinant of the vectors p1p2 and p2p3 is positive. (/!\ clockwise basis)
+		return (p2.x - p1.x) * (p3.y - p2.y) - (p2.y - p1.y) * (p3.x - p2.x) >= 0;
+	}
+
+	public int getOrientation() {
+		try {
+			File tmpFile = File.createTempFile("orientation", ".png");
+			tmpFile.deleteOnExit();
+			Imgcodecs.imwrite(tmpFile.toString(), src);
+			Process process = Runtime.getRuntime().exec(new String[] { "../gs-cv/orientation.sh", tmpFile.toString() });
+			process.waitFor();
+			BufferedReader stdInput = new BufferedReader(new InputStreamReader(process.getInputStream()));
+			return Integer.valueOf(stdInput.readLine());
+		} catch (IOException | InterruptedException e) {
+			log.warn("Impossible to detect file orientation, returning 0.");
+			e.printStackTrace();
+			return 0;
+		}
 	}
 
 	public Size size() {
@@ -229,16 +318,20 @@ public class Img {
 		Imgproc.rectangle(src, rect.br(), rect.tl(), color, thickNess);
 	}
 
-	public Node getImageView() {
+	public ImageView getImageView() {
+		return getImageView(AbstractApp.displayWidth);
+	}
+
+	public Node getImageView(double width) {
 		Mat conv = new Mat();
 		src.convertTo(conv, CvType.CV_8UC1);
 		Mat target = new Mat();
-		Imgproc.resize(conv, target, new Size(AbstractApp.displayWidth, Math.floor((AbstractApp.displayWidth / conv.width()) * conv.height())));
+		Imgproc.resize(conv, target, new Size(width, Math.floor((width / conv.width()) * conv.height())));
 		MatOfByte buffer = new MatOfByte();
 		Imgcodecs.imencode(".png", target, buffer);
 		ImageView imageView = new ImageView(new Image(new ByteArrayInputStream(buffer.toArray())));
 		imageView.setPreserveRatio(true);
-		imageView.setFitWidth(AbstractApp.displayWidth);
+		imageView.setFitWidth(width);
 		return imageView;
 	}
 
@@ -276,6 +369,12 @@ public class Img {
 		return new Img(result);
 	}
 
+	// public Img classic() {
+	// Img gray = cvtColor(Imgproc.COLOR_BGR2GRAY);
+	// Img threshold = gray.thresHold(0, 255, Imgproc.THRESH_OTSU + Imgproc.THRESH_BINARY);
+	// return threshold.morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, new Size(17, 3)));
+	// }
+
 	public Img sobel() {
 		Img gray = cvtColor(Imgproc.COLOR_BGR2GRAY);
 		Img sobel = gray.sobel(CvType.CV_8UC1, 1, 0, 3, 1, 0, Core.BORDER_DEFAULT);
@@ -286,7 +385,7 @@ public class Img {
 	public Img grad() {
 		Img gray = cvtColor(Imgproc.COLOR_BGR2GRAY);
 		Img grad = gray.morphologyEx(Imgproc.MORPH_GRADIENT, new StructuringElement(Imgproc.MORPH_ELLIPSE, new Size(3, 3)));
-		Img threshold = grad.thresHold(0.0, 255.0, Imgproc.THRESH_OTSU + Imgproc.THRESH_BINARY);
+		Img threshold = grad.thresHold(0.0, 255.0, Imgproc.THRESH_OTSU + Imgproc.THRESH_BINARY).morphologyEx(Imgproc.MORPH_ERODE, new StructuringElement(Imgproc.MORPH_RECT, new Size(3, 3)));
 		return threshold.morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, new Size(17, 3)));
 	}
 
@@ -326,14 +425,14 @@ public class Img {
 		return cvtColor(Imgproc.COLOR_BGR2GRAY).thresHold(0, 255, Imgproc.THRESH_BINARY_INV + Imgproc.THRESH_OTSU);
 	}
 
-	public Img dilateBlacks(int valueThreshold, int saturatioThreshold, int blueThreshold, Size dilatation) {
+	public Img dilateBlacks(double valueThreshold, double saturatioThreshold, double blueThreshold, Size dilatation) {
 		return range(new Scalar(0, 0, 0), new Scalar(255, saturatioThreshold, valueThreshold), true).range(new Scalar(0, 0, 0), new Scalar(blueThreshold, 255, 255), false).gray().morphologyEx(Imgproc.MORPH_DILATE,
 				new StructuringElement(Imgproc.MORPH_RECT, dilatation));
 	}
 
-	public Img equalizeHisto(Mat mat) {
+	public Img equalizeHisto() {
 		Mat result = new Mat();
-		Imgproc.cvtColor(mat, result, Imgproc.COLOR_BGR2YCrCb);
+		Imgproc.cvtColor(src, result, Imgproc.COLOR_BGR2YCrCb);
 		List<Mat> channels = new ArrayList<>();
 		Core.split(result, channels);
 		Imgproc.equalizeHist(channels.get(0), channels.get(0));
@@ -403,4 +502,149 @@ public class Img {
 		return result;
 	}
 
+	public Img fastNlMeansDenoising() {
+		Mat result = new Mat();
+		Photo.fastNlMeansDenoising(src, result);
+		return new Img(result);
+	}
+
+	public Img bernsen(int ksize, int contrast_limit) {
+		Img gray = gray();
+		Mat ret = Mat.zeros(gray.size(), gray.type());
+		for (int i = 0; i < gray.cols(); i++) {
+			for (int j = 0; j < gray.rows(); j++) {
+				double mn = 999, mx = 0;
+				int ti = 0, tj = 0;
+				int tlx = i - ksize / 2;
+				int tly = j - ksize / 2;
+				int brx = i + ksize / 2;
+				int bry = j + ksize / 2;
+				if (tlx < 0)
+					tlx = 0;
+				if (tly < 0)
+					tly = 0;
+				if (brx >= gray.cols())
+					brx = gray.cols() - 1;
+				if (bry >= gray.rows())
+					bry = gray.rows() - 1;
+
+				for (int ik = -ksize / 2; ik <= ksize / 2; ik++) {
+					for (int jk = -ksize / 2; jk <= ksize / 2; jk++) {
+						ti = i + ik;
+						tj = j + jk;
+						if (ti > 0 && ti < gray.cols() && tj > 0 && tj < gray.rows()) {
+							double pix = gray.get(tj, ti)[0];
+							if (pix < mn)
+								mn = pix;
+							if (pix > mx)
+								mx = pix;
+						}
+					}
+				}
+				double median = 0.5 * (mn + mx);
+				if (median < contrast_limit) {
+					ret.put(j, i, 0);
+				} else {
+					double pix = gray.get(j, i)[0];
+					ret.put(j, i, pix > median ? 255 : 0);
+				}
+			}
+		}
+		return new Img(ret);
+	}
+
+	private int rows() {
+		return src.rows();
+	}
+
+	private int cols() {
+		return src.cols();
+	}
+
+	// private List<Rect> getRects() {
+	// List<Rect> boundRects = new ArrayList<>();
+	// List<Mat> channels = new ArrayList<>();
+	//
+	// Text.computeNMChannels(src, channels);
+	//
+	// System.out.println("Extracting Class Specific Extremal Regions from " + channels.size() + " channels ...");
+	//
+	// ERFilter erc1 = Text.createERFilterNM1(getClass().getResource("trained_classifierNM1.xml").getPath(), 16, 0.00015f, 0.13f, 0.2f, true, 0.1f);
+	// ERFilter erc2 = Text.createERFilterNM2(getClass().getResource("trained_classifierNM2.xml").getPath(), 0.5f);
+	//
+	// for (Mat channel : channels) {
+	// List<MatOfPoint> regions = new ArrayList<>();
+	// Text.detectRegions(channel, erc1, erc2, regions); // **Java fails here with Exception Type: EXC_BAD_ACCESS (SIGABRT)**
+	// MatOfRect mor = new MatOfRect();
+	// Text.erGrouping(src, channel, regions, mor);
+	//
+	// for (Rect r : mor.toArray()) {
+	// boundRects.add(r);
+	// }
+	// }
+	//
+	// return boundRects;
+	// }
+
+	public int findBestHisto(List<Img> imgs) {
+
+		List<Map<Integer, Double>> results = new ArrayList<>();
+		for (Img img : imgs)
+			results.add(compareHistogramm(computeHistogramm(), img));
+
+		List<Integer> methods = Arrays.asList(Imgproc.HISTCMP_CORREL, Imgproc.HISTCMP_CHISQR, Imgproc.HISTCMP_INTERSECT, Imgproc.HISTCMP_BHATTACHARYYA, Imgproc.HISTCMP_CHISQR_ALT, Imgproc.HISTCMP_KL_DIV);
+		Map<Integer, Integer> mins = new HashMap<>();
+		for (Integer method : methods) {
+			double min = results.get(0).get(method);
+			int index = 0;
+			for (int i = 0; i < results.size(); i++) {
+				if (min > results.get(i).get(method)) {
+					min = results.get(i).get(method);
+					index = i;
+					System.out.println("method=" + method + " index=" + index);
+				}
+			}
+			mins.put(index, mins.get(index) != null ? mins.get(index) + 1 : 1);
+		}
+		TreeMap<Integer, Integer> reverse = mins.entrySet().stream().collect(Collectors.toMap(entry -> entry.getValue(), entry -> entry.getKey(), (u, v) -> {
+			return u;
+		}, TreeMap::new));
+		System.out.println("Number of algos : " + reverse.lastEntry().getKey());
+		return reverse.lastEntry().getValue();
+
+	}
+
+	public Mat computeHistogramm() {
+		MatOfInt channels = new MatOfInt(0, 1, 2);
+		MatOfInt histSize = new MatOfInt(8, 8, 8);
+		MatOfFloat ranges = new MatOfFloat(0, 256, 0, 256, 0, 256);
+		Mat rgb = cvtColor(Imgproc.COLOR_BGR2RGB).getSrc();
+		Mat hist = new Mat();
+		Imgproc.calcHist(Arrays.asList(rgb), channels, Mat.ones(rgb.size(), CvType.CV_8UC1), hist, histSize, ranges);
+		// Core.normalize(hist, hist, 0, 1, Core.NORM_MINMAX, -1, new Mat());
+		Core.normalize(hist, hist);
+		return hist;
+	}
+
+	public Map<Integer, Double> compareHistogramm(Mat histo, Img img) {
+		Map<Integer, Double> results = new HashMap<>();
+		List<Integer> methods = Arrays.asList(Imgproc.HISTCMP_CORREL, Imgproc.HISTCMP_CHISQR, Imgproc.HISTCMP_INTERSECT, Imgproc.HISTCMP_BHATTACHARYYA, Imgproc.HISTCMP_CHISQR_ALT, Imgproc.HISTCMP_KL_DIV);
+		for (int method : methods) {
+			double result = Imgproc.compareHist(histo, img.computeHistogramm(), method);
+			switch (method) {
+			case Imgproc.HISTCMP_CORREL:
+				result = -result;
+				break;
+			case Imgproc.HISTCMP_INTERSECT:
+				result = -result;
+				break;
+			}
+			results.put(method, result);
+			System.gc();
+			// System.out.println("for Algo " + method + " comparison : " + result + "\n");
+		}
+		System.out.println("results : " + results);
+		return results;
+
+	}
 }

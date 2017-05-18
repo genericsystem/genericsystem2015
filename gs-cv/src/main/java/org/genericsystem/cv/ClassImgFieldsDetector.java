@@ -1,11 +1,8 @@
 package org.genericsystem.cv;
 
 import java.io.File;
-import java.util.List;
 
-import org.genericsystem.cv.ZoneScorer.UnsupervisedZoneScorer;
 import org.opencv.core.Core;
-import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
@@ -17,7 +14,7 @@ public class ClassImgFieldsDetector extends AbstractApp {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 	}
 
-	private final static String classImgRepertory = "aligned-image-3.png";
+	private final static String imgClassDirectory = "aligned-image-3.png";
 
 	public static void main(String[] args) {
 		launch(args);
@@ -28,10 +25,9 @@ public class ClassImgFieldsDetector extends AbstractApp {
 		int columnIndex = 0;
 		int rowIndex = 0;
 
-		ImgClass imgClass = ImgClass.fromDirectory(null, classImgRepertory);
+		ImgClass imgClass = ImgClass.fromDirectory(null, imgClassDirectory);
 		Img model = imgClass.getMean();
 
-		imgClass.addMapper(img -> img);
 		mainGrid.add(imgClass.getMean().getImageView(), columnIndex, rowIndex++);
 		mainGrid.add(imgClass.getVariance().getImageView(), columnIndex, rowIndex++);
 
@@ -39,37 +35,35 @@ public class ClassImgFieldsDetector extends AbstractApp {
 		mainGrid.add(imgClass.getMean().getImageView(), columnIndex, rowIndex++);
 		mainGrid.add(imgClass.getVariance().getImageView(), columnIndex, rowIndex++);
 
+		Img img1 = Tools.firstImg(imgClassDirectory);
+		Zones.get(img1.sobel(), 300).draw(img1, new Scalar(0, 255, 0), 3);
+		mainGrid.add(img1.getImageView(), columnIndex, rowIndex++);
+
+		Img img2 = Tools.firstImg(imgClassDirectory);
+		Zones.get(img2.mser(), 300).draw(img2, new Scalar(255, 0, 0), 3);
+		mainGrid.add(img2.getImageView(), columnIndex, rowIndex++);
+
+		Img img3 = Tools.firstImg(imgClassDirectory);
+		Zones.get(img3.grad(), 300).draw(img3, new Scalar(0, 0, 255), 3);
+		mainGrid.add(img3.getImageView(), columnIndex, rowIndex++);
+
 		Zones zones = Zones.get(imgClass.getClosedVarianceZones(new Size(9, 10)), 300, 6, 6);
 		zones.draw(model, new Scalar(0, 255, 0), 3);
 		mainGrid.add(model.getImageView(), columnIndex, rowIndex++);
-
-		for (File file : new File(classImgRepertory).listFiles())
+		int i = 0;
+		for (File file : new File(imgClassDirectory).listFiles())
 			if (file.getName().endsWith(".png")) {
+				if (i++ > 2)
+					continue;
 				System.out.println("file : " + file.getName());
 				Img img = new Img(Imgcodecs.imread(file.getPath()));
-				try {
-					List<Mat> sameMats = Tools.getClassMats(classImgRepertory + "/mask/" + file.getName().replace(".png", ""));
-					for (Zone zone : zones.get()) {
-						zone.draw(img, new Scalar(0, 255, 0), -1);
-						UnsupervisedZoneScorer scorer = zone.newUnsupervisedScorer(sameMats);
-						zone.write(img, scorer.getBestText() + " " + Math.floor((scorer.getBestScore() * 10000)) / 100 + "%", 2.5, new Scalar(0, 0, 255), 2);
-					}
-					mainGrid.add(img.getImageView(), columnIndex, rowIndex++);
-				} catch (Exception ignore) {
-
+				for (Zone zone : zones.get()) {
+					zone.draw(img, new Scalar(0, 255, 0), -1);
+					ZoneScorer scorer = zone.newUnsupervisedScorer(Tools.classImgsStream(imgClassDirectory + "/mask/" + file.getName().replace(".png", "")));
+					zone.write(img, scorer.getBestText() + " " + Math.floor((scorer.getBestScore() * 10000)) / 100 + "%", 2.5, new Scalar(0, 0, 255), 2);
 				}
+				mainGrid.add(img.getImageView(), columnIndex, rowIndex++);
 			}
-
 	}
-	// Img img = Tools.classImgsStream(classImgRepertory).iterator().next();
-	// ImgZoner.drawZones(img.sobel(), img, 300, new Scalar(0, 255, 0), 3);
-	// mainGrid.add(img.getImageView(), columnIndex, rowIndex++);
-	//
-	// Img img2 = Tools.classImgsStream(classImgRepertory).iterator().next();
-	// ImgZoner.drawZones(img2.mser(), img2, 300, new Scalar(0, 255, 0), 3);
-	// mainGrid.add(img2.getImageView(), columnIndex, rowIndex++);
-	//
-	// Img img3 = Tools.classImgsStream(classImgRepertory).iterator().next();
-	// ImgZoner.drawZones(img3.grad(), img3, 300, new Scalar(0, 255, 0), 3);
-	// mainGrid.add(img3.getImageView(), columnIndex, rowIndex++);
+
 }
