@@ -24,8 +24,7 @@ public class PdfToPngConverter {
 
 	static void convertPdfToPng(String sourceDirectoryName, String destinationDirectoryName) {
 		File destinationDirectory = new File(destinationDirectoryName);
-		if (!destinationDirectory.exists())
-			destinationDirectory.mkdir();
+		destinationDirectory.mkdirs();
 		for (File image : new File(sourceDirectoryName).listFiles())
 			if (image.getName().endsWith(".pdf"))
 				convertPdfToImages(image, destinationDirectory);
@@ -33,6 +32,7 @@ public class PdfToPngConverter {
 
 	public static List<Path> convertPdfToImages(File pdfFile, File destinationDirectory) {
 		try {
+			destinationDirectory.mkdirs();
 			List<Path> results = new ArrayList<>();
 			PDDocument document = PDDocument.load(new FileInputStream(pdfFile));
 			PDFRenderer pdfRenderer = new PDFRenderer(document);
