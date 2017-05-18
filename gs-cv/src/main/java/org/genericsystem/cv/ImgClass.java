@@ -19,14 +19,14 @@ import org.opencv.imgproc.Imgproc;
 public class ImgClass {
 
 	private final static String TEMPLATE_NAME = "template.png";
-	private final Img classModel;
+	private Img classModel;
 	private Img mean;
 	private Img variance;
 	private final String directory;
 	private final List<Function<Img, Img>> mappers = new ArrayList<>();
 
-	public static ImgClass fromDirectory(Img classModel, String bgrDirectory) {
-		return new ImgClass(classModel, bgrDirectory);
+	public static ImgClass fromDirectory(String bgrDirectory) {
+		return new ImgClass(bgrDirectory);
 	}
 
 	private Img applyMappers(Img img) {
@@ -39,12 +39,10 @@ public class ImgClass {
 		return img;
 	}
 
-	public ImgClass(Img classModel, String bgrDirectory) {
+	public ImgClass(String bgrDirectory) {
 		Path template = Paths.get(bgrDirectory).resolve(TEMPLATE_NAME);
 		if (classModel == null && template.toFile().exists())
 			this.classModel = new Img(Imgcodecs.imread(template.toString()));
-		else
-			this.classModel = classModel;
 		this.directory = bgrDirectory;
 		computeMeanVariance();
 	}

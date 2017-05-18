@@ -86,7 +86,7 @@ public class Classifier {
 		List<CompareFeatureResult> results = new ArrayList<>();
 		try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(classesDirectory, Files::isDirectory)) {
 			for (Path path : directoryStream) {
-				ImgClass imgClass = new ImgClass(null, path.toString());
+				ImgClass imgClass = new ImgClass(path.toString());
 				CompareFeatureResult classResult = Classifier.compareFeature(img, imgClass, matching_threshold, featureDetector, descriptorExtractor);
 				if (classResult != null)
 					results.add(classResult);
