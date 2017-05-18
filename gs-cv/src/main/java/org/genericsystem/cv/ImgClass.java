@@ -1,5 +1,7 @@
 package org.genericsystem.cv;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -11,10 +13,12 @@ import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
+import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
 public class ImgClass {
 
+	private final static String TEMPLATE_NAME = "template.png";
 	private final Img classModel;
 	private Img mean;
 	private Img variance;
@@ -36,10 +40,13 @@ public class ImgClass {
 	}
 
 	public ImgClass(Img classModel, String bgrDirectory) {
-		this.classModel = classModel;
+		Path template = Paths.get(bgrDirectory).resolve(TEMPLATE_NAME);
+		if (classModel == null && template.toFile().exists())
+			this.classModel = new Img(Imgcodecs.imread(template.toString()));
+		else
+			this.classModel = classModel;
 		this.directory = bgrDirectory;
 		computeMeanVariance();
-
 	}
 
 	public Stream<Img> classImgsStream() {
