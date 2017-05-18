@@ -1,10 +1,8 @@
 package org.genericsystem.cv;
 
-import java.util.List;
+import java.util.stream.Stream;
 
-import org.genericsystem.cv.ZoneScorer.UnsupervisedZoneScorer;
 import org.opencv.core.Core;
-import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
@@ -22,8 +20,8 @@ public class Zone {
 		return rect;
 	}
 
-	public UnsupervisedZoneScorer newUnsupervisedScorer(List<Mat> imgs) {
-		return new UnsupervisedZoneScorer(this, imgs);
+	public ZoneScorer newUnsupervisedScorer(Stream<Img> imgs) {
+		return new ZoneScorer(this, imgs);
 	}
 
 	public Zone adjustRect(double dx, double dy, int maxWidht, int maxHeight) {

@@ -1,16 +1,13 @@
 package org.genericsystem.cv;
 
 import java.io.File;
-import java.util.List;
 
-import javafx.scene.layout.GridPane;
-
-import org.genericsystem.cv.ZoneScorer.UnsupervisedZoneScorer;
 import org.opencv.core.Core;
-import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
+
+import javafx.scene.layout.GridPane;
 
 public class ClassImgFieldsDetector extends AbstractApp {
 	static {
@@ -31,7 +28,6 @@ public class ClassImgFieldsDetector extends AbstractApp {
 		ImgClass imgClass = ImgClass.fromDirectory(null, imgClassDirectory);
 		Img model = imgClass.getMean();
 
-		imgClass.addMapper(img -> img);
 		mainGrid.add(imgClass.getMean().getImageView(), columnIndex, rowIndex++);
 		mainGrid.add(imgClass.getVariance().getImageView(), columnIndex, rowIndex++);
 
@@ -59,17 +55,13 @@ public class ClassImgFieldsDetector extends AbstractApp {
 			if (file.getName().endsWith(".png")) {
 				System.out.println("file : " + file.getName());
 				Img img = new Img(Imgcodecs.imread(file.getPath()));
-				try {
-					List<Mat> sameMats = Tools.getClassMats(imgClassDirectory + "/mask/" + file.getName().replace(".png", ""));
-					for (Zone zone : zones.get()) {
-						zone.draw(img, new Scalar(0, 255, 0), -1);
-						UnsupervisedZoneScorer scorer = zone.newUnsupervisedScorer(sameMats);
-						zone.write(img, scorer.getBestText() + " " + Math.floor((scorer.getBestScore() * 10000)) / 100 + "%", 2.5, new Scalar(0, 0, 255), 2);
-					}
-					mainGrid.add(img.getImageView(), columnIndex, rowIndex++);
-				} catch (Exception ignore) {
-
+				for (Zone zone : zones.get()) {
+					zone.draw(img, new Scalar(0, 255, 0), -1);
+					ZoneScorer scorer = zone.newUnsupervisedScorer(Tools.classImgsStream(imgClassDirectory + "/mask/" + file.getName().replace(".png", "")));
+					zone.write(img, scorer.getBestText() + " " + Math.floor((scorer.getBestScore() * 10000)) / 100 + "%", 2.5, new Scalar(0, 0, 255), 2);
 				}
+				mainGrid.add(img.getImageView(), columnIndex, rowIndex++);
 			}
 	}
+
 }

@@ -9,29 +9,33 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javafx.embed.swing.SwingFXUtils;
-import javafx.scene.image.Image;
-
 import javax.imageio.ImageIO;
 
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
 import org.opencv.imgcodecs.Imgcodecs;
 
+import javafx.embed.swing.SwingFXUtils;
+import javafx.scene.image.Image;
+
 public class Tools {
 
+	@Deprecated
 	public static List<Mat> getImages(String repository, String... imagePaths) {
 		return Arrays.stream(new File(repository).listFiles()).filter(img -> img.getName().endsWith(".png") && Arrays.asList(imagePaths).contains(img.getName())).map(img -> Imgcodecs.imread(img.getPath())).collect(Collectors.toList());
 	}
 
+	@Deprecated
 	public static List<Mat> getClassMats(String... repositories) {
 		return Arrays.stream(repositories).flatMap(Tools::classMatsStream).collect(Collectors.toList());
 	}
 
+	@Deprecated
 	public static List<Mat> getClassMats(String repository) {
 		return classMatsStream(repository).collect(Collectors.toList());
 	}
 
+	@Deprecated
 	private static Stream<Mat> classMatsStream(String repository) {
 		return Arrays.stream(new File(repository).listFiles()).filter(img -> img.getName().endsWith(".png")).map(img -> Imgcodecs.imread(img.getPath()));
 	}

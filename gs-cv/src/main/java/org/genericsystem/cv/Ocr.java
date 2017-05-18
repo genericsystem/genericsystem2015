@@ -14,15 +14,18 @@ import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
 
-import net.sourceforge.tess4j.Tesseract;
-import net.sourceforge.tess4j.TesseractException;
-
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
+import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
+import org.opencv.core.RotatedRect;
 import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
+
+import net.sourceforge.tess4j.Tesseract;
+import net.sourceforge.tess4j.TesseractException;
 
 public class Ocr {
 
@@ -33,7 +36,7 @@ public class Ocr {
 		instance.setDatapath("/usr/share/tesseract-ocr/4.00/");
 		instance.setLanguage("fra");
 		instance.setHocr(false);
-		instance.setPageSegMode(10);
+		instance.setPageSegMode(8);
 		instance.setOcrEngineMode(1);
 		instance.setTessVariable("preserve_interword_spaces", "0");
 		instance.setTessVariable("textord_space_size_is_variable", "1");
@@ -56,6 +59,16 @@ public class Ocr {
 
 	public static String doWork(Mat mat, Rect rect) {
 		return doWork(mat2bufferedImage(mat), new Rectangle(rect.x, rect.y, rect.width, rect.height));
+	}
+
+	public static String doWork(Mat mat, RotatedRect rect) {
+		// Not tested !!!
+		Point[] points = new Point[4];
+		rect.points(points);
+		Mat result = new Mat();
+		MatOfPoint2f targets = new MatOfPoint2f(new Point(rect.size.width, 0), new Point(0, 0), new Point(0, rect.size.height), new Point(rect.size.width, rect.size.height));
+		Imgproc.warpAffine(mat, result, Imgproc.getAffineTransform(new MatOfPoint2f(points), targets), rect.size);
+		return doWork(mat2bufferedImage(result));
 	}
 
 	public static String doWork(BufferedImage image) {

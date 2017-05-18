@@ -2,12 +2,11 @@ package org.genericsystem.cv;
 
 import java.util.stream.Stream;
 
-public class ZoneScorer {
-
+public class RotatedZoneScorer {
 	private final Scores scores = new Scores();
-	private final Zone zone;
+	private final RotatedZone zone;
 
-	public ZoneScorer(Zone zone, Stream<Img> imgs) {
+	public RotatedZoneScorer(RotatedZone zone, Stream<Img> imgs) {
 		this.zone = zone;
 		imgs.forEach(img -> {
 			String s = zone.ocr(img);
@@ -16,7 +15,7 @@ public class ZoneScorer {
 		});
 	}
 
-	public Zone getZone() {
+	public RotatedZone getZone() {
 		return zone;
 	}
 
