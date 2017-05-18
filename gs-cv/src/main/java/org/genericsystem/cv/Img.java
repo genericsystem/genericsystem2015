@@ -14,10 +14,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import javafx.scene.Node;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-
 import javax.swing.ImageIcon;
 
 import org.opencv.core.Core;
@@ -41,6 +37,10 @@ import org.opencv.photo.Photo;
 import org.opencv.utils.Converters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javafx.scene.Node;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 
 public class Img {
 
@@ -426,8 +426,8 @@ public class Img {
 	}
 
 	public Img dilateBlacks(int valueThreshold, int saturatioThreshold, int blueThreshold, Size dilatation) {
-		return range(new Scalar(0, 0, 0), new Scalar(255, saturatioThreshold, valueThreshold), true).range(new Scalar(0, 0, 0), new Scalar(blueThreshold, 255, 255), false).gray()
-				.morphologyEx(Imgproc.MORPH_DILATE, new StructuringElement(Imgproc.MORPH_RECT, dilatation));
+		return range(new Scalar(0, 0, 0), new Scalar(255, saturatioThreshold, valueThreshold), true).range(new Scalar(0, 0, 0), new Scalar(blueThreshold, 255, 255), false).gray().morphologyEx(Imgproc.MORPH_DILATE,
+				new StructuringElement(Imgproc.MORPH_RECT, dilatation));
 	}
 
 	public Img equalizeHisto() {
@@ -590,7 +590,7 @@ public class Img {
 
 		List<Map<Integer, Double>> results = new ArrayList<>();
 		for (Img img : imgs)
-			results.add(compareHistogramm(img));
+			results.add(compareHistogramm(computeHistogramm(), img));
 
 		List<Integer> methods = Arrays.asList(Imgproc.HISTCMP_CORREL, Imgproc.HISTCMP_CHISQR, Imgproc.HISTCMP_INTERSECT, Imgproc.HISTCMP_BHATTACHARYYA, Imgproc.HISTCMP_CHISQR_ALT, Imgproc.HISTCMP_KL_DIV);
 		Map<Integer, Integer> mins = new HashMap<>();
@@ -614,32 +614,23 @@ public class Img {
 
 	}
 
-	public Map<Integer, Double> compareHistogramm(Img img) {
-		Mat rgb = cvtColor(Imgproc.COLOR_BGR2RGB).getSrc();
-		Mat rgb2 = img.cvtColor(Imgproc.COLOR_BGR2RGB).getSrc();
+	public Mat computeHistogramm() {
 		MatOfInt channels = new MatOfInt(0, 1, 2);
 		MatOfInt histSize = new MatOfInt(8, 8, 8);
 		MatOfFloat ranges = new MatOfFloat(0, 256, 0, 256, 0, 256);
+		Mat rgb = cvtColor(Imgproc.COLOR_BGR2RGB).getSrc();
+		Mat hist = new Mat();
+		Imgproc.calcHist(Arrays.asList(rgb), channels, Mat.ones(rgb.size(), CvType.CV_8UC1), hist, histSize, ranges);
+		// Core.normalize(hist, hist, 0, 1, Core.NORM_MINMAX, -1, new Mat());
+		Core.normalize(hist, hist);
+		return hist;
+	}
 
-		List<Mat> histos = new ArrayList<>();
-		for (Mat im : Arrays.asList(rgb, rgb2)) {
-			Mat hist = new Mat();
-
-			// Imgproc.equalizeHist(channels.get(0), channels.get(0));
-			// Imgproc.equalizeHist(channels.get(1), channels.get(1));
-			// Imgproc.equalizeHist(channels.get(2), channels.get(2));
-
-			Imgproc.calcHist(Arrays.asList(im), channels, Mat.ones(im.size(), CvType.CV_8UC1), hist, histSize, ranges);
-			// Core.normalize(hist, hist, 0, 1, Core.NORM_MINMAX, -1, new Mat());
-			Core.normalize(hist, hist);
-			histos.add(hist);
-		}
-
+	public Map<Integer, Double> compareHistogramm(Mat histo, Img img) {
 		Map<Integer, Double> results = new HashMap<>();
-
 		List<Integer> methods = Arrays.asList(Imgproc.HISTCMP_CORREL, Imgproc.HISTCMP_CHISQR, Imgproc.HISTCMP_INTERSECT, Imgproc.HISTCMP_BHATTACHARYYA, Imgproc.HISTCMP_CHISQR_ALT, Imgproc.HISTCMP_KL_DIV);
 		for (int method : methods) {
-			double result = Imgproc.compareHist(histos.get(0), histos.get(1), method);
+			double result = Imgproc.compareHist(histo, img.computeHistogramm(), method);
 			switch (method) {
 			case Imgproc.HISTCMP_CORREL:
 				result = -result;
@@ -649,6 +640,7 @@ public class Img {
 				break;
 			}
 			results.put(method, result);
+			System.gc();
 			// System.out.println("for Algo " + method + " comparison : " + result + "\n");
 		}
 		System.out.println("results : " + results);
