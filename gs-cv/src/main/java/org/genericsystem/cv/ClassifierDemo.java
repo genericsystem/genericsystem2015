@@ -12,6 +12,8 @@ import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
 import org.opencv.core.Size;
+import org.opencv.features2d.DescriptorExtractor;
+import org.opencv.features2d.FeatureDetector;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
@@ -19,8 +21,8 @@ import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.control.Separator;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
@@ -49,38 +51,40 @@ public class ClassifierDemo extends Application {
 		GridPane gridPane = new GridPane();
 
 		List<File> pngImgs = Arrays.stream(new File(pngDirectoryPath).listFiles()).filter(img -> img.getName().endsWith(".png")).collect(Collectors.toList());
-		List<File> adjustedImages = Arrays.asList(new File("ajusted/image-3.png"));
-		// Arrays.stream(new File(adjustedDirectoryPath).listFiles()).filter(img -> img.getName().endsWith(".png")).collect(Collectors.toList());
+		List<File> adjustedImages = Arrays.stream(new File(adjustedDirectoryPath).listFiles()).filter(img -> img.getName().endsWith(".png")).collect(Collectors.toList());
 
 		int row = 0;
 
-		List<List<File>> classifiedFiles = partition(pngImgs, (file1, file2) -> Classifier.compareFeature(file1.getPath(), file2.getPath()) != null);
-		for (List<File> typeList : classifiedFiles) {
-			gridPane.add(new Separator(), 0, row);
-			row++;
-			int column = 0;
-			for (File img : typeList) {
-				Mat mat = Imgcodecs.imread(img.getPath());
-				gridPane.add(getImageViewFromMat(mat), column++, row);
-			}
-			row++;
-		}
-
-		// for (File img1 : pngImgs) {
+		// List<List<File>> classifiedFiles = partition(pngImgs, (file1, file2) -> Classifier.compareFeature(file1.getPath(), file2.getPath()) != null);
+		// for (List<File> typeList : classifiedFiles) {
+		// gridPane.add(new Separator(), 0, row);
+		// row++;
 		// int column = 0;
-		// Mat mat1 = Imgcodecs.imread(img1.getPath());
-		// gridPane.add(getImageViewFromMat(mat1), column++, row);
-		// for (File img2 : adjustedImages) {
-		// Mat mat2 = Imgcodecs.imread(img2.getPath());
-		// gridPane.add(getImageViewFromMat(mat2), column++, row);
-		// Mat result = Classifier.compareFeature(img1.getPath(), img2.getPath());
-		// if (result != null)
-		// gridPane.add(getImageViewFromMat(result), column++, row);
-		// else
-		// gridPane.add(new Label("Not matching"), column++, row);
+		// for (File img : typeList) {
+		// Mat mat = Imgcodecs.imread(img.getPath());
+		// gridPane.add(getImageViewFromMat(mat), column++, row);
 		// }
 		// row++;
 		// }
+
+		for (File img1 : pngImgs) {
+			System.out.println("================== image : " + img1.getName());
+			int column = 0;
+			Mat mat1 = Imgcodecs.imread(img1.getPath());
+			gridPane.add(getImageViewFromMat(mat1), column++, row);
+			for (File img2 : adjustedImages) {
+				Mat mat2 = Imgcodecs.imread(img2.getPath());
+				gridPane.add(getImageViewFromMat(mat2), column++, row);
+				Mat result = Classifier.compareFeature(img1.getPath(), img2.getPath(), 50, FeatureDetector.GFTT, DescriptorExtractor.OPPONENT_ORB);
+				if (result != null)
+					gridPane.add(getImageViewFromMat(result), column++, row);
+				else
+					gridPane.add(new Label("Not matching"), column++, row);
+			}
+			row++;
+			System.gc();
+			System.runFinalization();
+		}
 		Scene scene = new Scene(new Group());
 		stage.setTitle("Generic System Computer Vision");
 		ScrollPane scrollPane = new ScrollPane(gridPane);

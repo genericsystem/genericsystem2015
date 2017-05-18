@@ -25,7 +25,7 @@ public class ClassImgFieldsDetector extends AbstractApp {
 		int columnIndex = 0;
 		int rowIndex = 0;
 
-		ImgClass imgClass = ImgClass.fromDirectory(null, imgClassDirectory);
+		ImgClass imgClass = ImgClass.fromDirectory(imgClassDirectory);
 		Img model = imgClass.getMean();
 
 		mainGrid.add(imgClass.getMean().getImageView(), columnIndex, rowIndex++);
