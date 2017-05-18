@@ -1,6 +1,5 @@
 package org.genericsystem.cv;
 
-import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -34,6 +33,7 @@ public class Ocr {
 	static {
 		instance = new Tesseract();
 		instance.setDatapath("/usr/share/tesseract-ocr/4.00/");
+		// instance.setDatapath("/usr/share/tesseract-ocr/");
 		instance.setLanguage("fra");
 		instance.setHocr(false);
 		instance.setPageSegMode(3);
@@ -58,7 +58,7 @@ public class Ocr {
 	}
 
 	public static String doWork(Mat mat, Rect rect) {
-		return doWork(mat2bufferedImage(mat), new Rectangle(rect.x, rect.y, rect.width, rect.height));
+		return doWork(mat2bufferedImage(new Mat(mat, rect).clone()));
 	}
 
 	public static String doWork(Mat mat, RotatedRect rect) {
@@ -79,14 +79,14 @@ public class Ocr {
 		}
 	}
 
-	public static String doWork(BufferedImage image, Rectangle rectangle) {
-		try {
-			return instance.doOCR(image, rectangle);
-		} catch (TesseractException e) {
-			throw new RuntimeException(e);
-		}
-
-	}
+	// public static String doWork(BufferedImage image, Rectangle rectangle) {
+	// try {
+	// return instance.doOCR(image, rectangle);
+	// } catch (TesseractException e) {
+	// throw new RuntimeException(e);
+	// }
+	//
+	// }
 
 	public static List<Rect> findBox(Mat mat) {
 
