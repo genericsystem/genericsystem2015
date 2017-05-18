@@ -9,14 +9,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javafx.embed.swing.SwingFXUtils;
+import javafx.scene.image.Image;
+
 import javax.imageio.ImageIO;
 
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
 import org.opencv.imgcodecs.Imgcodecs;
-
-import javafx.embed.swing.SwingFXUtils;
-import javafx.scene.image.Image;
 
 public class Tools {
 
@@ -40,6 +40,10 @@ public class Tools {
 		return Arrays.stream(new File(repository).listFiles()).filter(img -> img.getName().endsWith(".png")).map(img -> new Img(Imgcodecs.imread(img.getPath())));
 	}
 
+	public static Img firstImg(String repository) {
+		return classImgsStream(repository).findFirst().get();
+	}
+
 	public static Stream<Img> classImgsStream(String repository, String... imagePaths) {
 		return Arrays.stream(new File(repository).listFiles()).filter(img -> img.getName().endsWith(".png") && Arrays.asList(imagePaths).contains(img.getName())).map(img -> new Img(Imgcodecs.imread(img.getPath())));
 	}
@@ -53,9 +57,9 @@ public class Tools {
 			throw new IllegalStateException(e);
 		}
 	}
-	
-	public static Image mat2jfxImage(Mat frame){
+
+	public static Image mat2jfxImage(Mat frame) {
 		return SwingFXUtils.toFXImage(Tools.mat2bufferedImage(frame), null);
 	}
-	
+
 }

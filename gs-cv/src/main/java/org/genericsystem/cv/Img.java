@@ -398,10 +398,10 @@ public class Img {
 		Mat result = Mat.zeros(gray.size(), CvType.CV_8UC1);
 		for (int ind = 0; ind < listpoint.size(); ind++) {
 			KeyPoint kpoint = listpoint.get(ind);
-			int rectanx1 = (int) (kpoint.pt.x - 0.5 * 20/* kpoint.size */);
-			int rectany1 = (int) (kpoint.pt.y - 0.5 * 20 /* kpoint.size */);
-			int width = (20/* kpoint.size */);
-			int height = (20/* kpoint.size */);
+			int rectanx1 = (int) (kpoint.pt.x - 0.5 * kpoint.size);
+			int rectany1 = (int) (kpoint.pt.y - 0.5 * kpoint.size);
+			int width = (int) (kpoint.size);
+			int height = (int) (kpoint.size);
 			if (rectanx1 <= 0)
 				rectanx1 = 1;
 			if (rectany1 <= 0)
