@@ -50,9 +50,11 @@ public class ClassImgFieldsDetector extends AbstractApp {
 		Zones zones = Zones.get(imgClass.getClosedVarianceZones(new Size(9, 10)), 300, 6, 6);
 		zones.draw(model, new Scalar(0, 255, 0), 3);
 		mainGrid.add(model.getImageView(), columnIndex, rowIndex++);
-
+		int i = 0;
 		for (File file : new File(imgClassDirectory).listFiles())
 			if (file.getName().endsWith(".png")) {
+				if (i++ > 2)
+					continue;
 				System.out.println("file : " + file.getName());
 				Img img = new Img(Imgcodecs.imread(file.getPath()));
 				for (Zone zone : zones.get()) {
