@@ -2,23 +2,21 @@ package org.genericsystem.watch;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.genericsystem.cv.Classifier;
+import org.genericsystem.cv.Classifier.CompareFeatureResult;
 import org.genericsystem.cv.Img;
-import org.genericsystem.cv.ImgClass;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.imgcodecs.Imgcodecs;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 
 public class ClassifierVerticle extends AbstractVerticle {
 
@@ -38,29 +36,19 @@ public class ClassifierVerticle extends AbstractVerticle {
 		consumer.handler(message -> vertx.executeBlocking(future -> {
 			Path newFile = Paths.get(".", message.body().split(File.separator));
 			Mat img = Imgcodecs.imread(newFile.toString());
-			Path matchingClassDir = null;
-			Mat alignedImage = null;
+			// Only one access to classesDirectory at a time to avoid duplicate classes.
 			Path classesDirectory = Paths.get("..", "gs-cv", "classes");
 			classesDirectory.toFile().mkdirs();
-			// Only one access to classesDirectory at a time to avoid duplicate classes.
 			synchronized (ClassifierVerticle.class) {
-				try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(classesDirectory, Files::isDirectory)) {
-					for (Path path : directoryStream) {
-						ImgClass imgClass = new ImgClass(null, path.toString());
-						Mat alignedImage_ = Classifier.compareFeature(img, imgClass.getMean().getSrc(), Classifier.MATCHING_THRESHOLD);
-						if (alignedImage_ != null) {
-							if (matchingClassDir != null)
-								log.warn("Two matching classes found for file " + newFile + " : " + matchingClassDir + " and " + path);
-							matchingClassDir = path;
-							alignedImage = alignedImage_;
-						}
-						System.gc();
-						System.runFinalization();
-					}
-				} catch (IOException e) {
-					log.error("IOException:", e);
-				}
-				if (matchingClassDir == null) {
+				CompareFeatureResult bestClass = Classifier.selectBestClass(classesDirectory, img);
+				System.gc();
+				System.runFinalization();
+				Path matchingClassDir;
+				Mat alignedImage = null;
+				if (bestClass != null) {
+					matchingClassDir = Paths.get("..", ("gs-cv/" + bestClass.getImgClass().getDirectory()).split(File.separator));
+					alignedImage = bestClass.getImg();
+				} else {
 					matchingClassDir = classesDirectory.resolve(System.nanoTime() + "");
 					matchingClassDir.toFile().mkdirs();
 					try {
@@ -68,6 +56,7 @@ public class ClassifierVerticle extends AbstractVerticle {
 					} catch (Exception e) {
 						matchingClassDir.toFile().delete();
 						log.warn("Error while deskewing new image " + newFile.toString() + " to create new class, new class not created.", e);
+						future.fail("Impossible to create new class.");
 						// TODO: Store the image somewhere else.
 					}
 				}

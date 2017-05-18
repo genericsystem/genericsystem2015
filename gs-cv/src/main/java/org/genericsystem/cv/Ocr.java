@@ -1,6 +1,5 @@
 package org.genericsystem.cv;
 
-import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -24,6 +23,8 @@ import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
+import net.sourceforge.tess4j.ITessAPI.TessOcrEngineMode;
+import net.sourceforge.tess4j.ITessAPI.TessPageSegMode;
 import net.sourceforge.tess4j.Tesseract;
 import net.sourceforge.tess4j.TesseractException;
 
@@ -33,13 +34,11 @@ public class Ocr {
 
 	static {
 		instance = new Tesseract();
-		instance.setDatapath("/usr/share/tesseract-ocr/tessdata");
+		instance.setDatapath("/usr/share/tesseract-ocr/4.00/");
 		instance.setLanguage("fra");
 		instance.setHocr(false);
-		instance.setPageSegMode(3);
-
-		instance.setOcrEngineMode(0);
-
+		instance.setPageSegMode(TessPageSegMode.PSM_AUTO);
+		instance.setOcrEngineMode(TessOcrEngineMode.OEM_CUBE_ONLY);
 		// instance.setTessVariable("preserve_interword_spaces", "0");
 		// instance.setTessVariable("textord_space_size_is_variable", "1");
 		instance.setTessVariable("tessedit_char_whitelist", "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM0123456789.-,<'");
@@ -60,7 +59,7 @@ public class Ocr {
 	}
 
 	public static String doWork(Mat mat, Rect rect) {
-		return doWork(mat2bufferedImage(mat), new Rectangle(rect.x, rect.y, rect.width, rect.height));
+		return doWork(mat2bufferedImage(new Mat(mat, rect).clone()));
 	}
 
 	public static String doWork(Mat mat, RotatedRect rect) {
@@ -81,14 +80,14 @@ public class Ocr {
 		}
 	}
 
-	public static String doWork(BufferedImage image, Rectangle rectangle) {
-		try {
-			return instance.doOCR(image, rectangle);
-		} catch (TesseractException e) {
-			throw new RuntimeException(e);
-		}
-
-	}
+	// public static String doWork(BufferedImage image, Rectangle rectangle) {
+	// try {
+	// return instance.doOCR(image, rectangle);
+	// } catch (TesseractException e) {
+	// throw new RuntimeException(e);
+	// }
+	//
+	// }
 
 	public static List<Rect> findBox(Mat mat) {
 
