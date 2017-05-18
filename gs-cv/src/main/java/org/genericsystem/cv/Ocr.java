@@ -23,6 +23,8 @@ import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
+import net.sourceforge.tess4j.ITessAPI.TessOcrEngineMode;
+import net.sourceforge.tess4j.ITessAPI.TessPageSegMode;
 import net.sourceforge.tess4j.Tesseract;
 import net.sourceforge.tess4j.TesseractException;
 
@@ -33,12 +35,10 @@ public class Ocr {
 	static {
 		instance = new Tesseract();
 		instance.setDatapath("/usr/share/tesseract-ocr/4.00/");
-		instance.setDatapath("/usr/share/tesseract-ocr/tessdata");
 		instance.setLanguage("fra");
 		instance.setHocr(false);
-		instance.setPageSegMode(3);
-		instance.setOcrEngineMode(1);
-
+		instance.setPageSegMode(TessPageSegMode.PSM_AUTO);
+		instance.setOcrEngineMode(TessOcrEngineMode.OEM_CUBE_ONLY);
 		// instance.setTessVariable("preserve_interword_spaces", "0");
 		// instance.setTessVariable("textord_space_size_is_variable", "1");
 		instance.setTessVariable("tessedit_char_whitelist", "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM0123456789.-,<'");
