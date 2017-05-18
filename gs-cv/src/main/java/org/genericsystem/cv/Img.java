@@ -322,7 +322,7 @@ public class Img {
 		return getImageView(AbstractApp.displayWidth);
 	}
 
-	public Node getImageView(double width) {
+	public ImageView getImageView(double width) {
 		Mat conv = new Mat();
 		src.convertTo(conv, CvType.CV_8UC1);
 		Mat target = new Mat();

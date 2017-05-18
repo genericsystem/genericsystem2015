@@ -37,7 +37,9 @@ public class Ocr {
 		instance.setLanguage("fra");
 		instance.setHocr(false);
 		instance.setPageSegMode(3);
+
 		instance.setOcrEngineMode(0);
+
 		// instance.setTessVariable("preserve_interword_spaces", "0");
 		// instance.setTessVariable("textord_space_size_is_variable", "1");
 		instance.setTessVariable("tessedit_char_whitelist", "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM0123456789.-,<'");
