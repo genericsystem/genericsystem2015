@@ -318,11 +318,11 @@ public class Img {
 		Imgproc.rectangle(src, rect.br(), rect.tl(), color, thickNess);
 	}
 
-	public Node getImageView() {
+	public ImageView getImageView() {
 		return getImageView(AbstractApp.displayWidth);
 	}
 
-	public Node getImageView(double width) {
+	public ImageView getImageView(double width) {
 		Mat conv = new Mat();
 		src.convertTo(conv, CvType.CV_8UC1);
 		Mat target = new Mat();
@@ -425,7 +425,7 @@ public class Img {
 		return cvtColor(Imgproc.COLOR_BGR2GRAY).thresHold(0, 255, Imgproc.THRESH_BINARY_INV + Imgproc.THRESH_OTSU);
 	}
 
-	public Img dilateBlacks(int valueThreshold, int saturatioThreshold, int blueThreshold, Size dilatation) {
+	public Img dilateBlacks(double valueThreshold, double saturatioThreshold, double blueThreshold, Size dilatation) {
 		return range(new Scalar(0, 0, 0), new Scalar(255, saturatioThreshold, valueThreshold), true).range(new Scalar(0, 0, 0), new Scalar(blueThreshold, 255, 255), false).gray().morphologyEx(Imgproc.MORPH_DILATE,
 				new StructuringElement(Imgproc.MORPH_RECT, dilatation));
 	}

@@ -21,6 +21,7 @@ public class DirectoryWatcherVerticle extends AbstractVerticle {
 	public DirectoryWatcherVerticle(Path folder, String address) {
 		this.folder = folder;
 		this.address = address;
+		folder.toFile().mkdirs();
 	}
 
 	@Override
