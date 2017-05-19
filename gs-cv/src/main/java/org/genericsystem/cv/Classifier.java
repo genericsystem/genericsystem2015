@@ -1,10 +1,13 @@
 package org.genericsystem.cv;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -29,11 +32,17 @@ import org.opencv.imgproc.Imgproc;
 
 public class Classifier {
 
-	private final static String alignedDirectoryPath = "aligned";
 	public final static int MATCHING_THRESHOLD = 150;
+	private static final String pngDirectoryPath = "png";
+	private static final String classesDirectoryPath = "classes";
 
 	static {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+	}
+
+	public static void main(String[] args) {
+		Path classesDirectory = Paths.get(classesDirectoryPath);
+		Arrays.stream(new File(pngDirectoryPath).listFiles()).filter(img -> img.getName().endsWith(".png")).forEach(imgFile -> classify(classesDirectory, imgFile.toPath()));
 	}
 
 	public static Mat compareFeature(String filename1, String filename2, int matching_threshold, int featureDetector, int descriptorExtractor) {
@@ -46,6 +55,43 @@ public class Classifier {
 		// Imgcodecs.imwrite(dir + "/" + filename1.replaceFirst(".*/", ""), result);
 		// }
 		return result != null ? result.getImg() : null;
+	}
+
+	// Stores the given image in the best class found in the given classesDirectory, creates a new class if necessary.
+	// Returns the path to the stored image (the file name can have been changed to avoid duplicate names).
+	public static File classify(Path classesDirectory, Path imgFile) {
+		Mat img = Imgcodecs.imread(imgFile.toString());
+		CompareFeatureResult bestClass = Classifier.selectBestClass(classesDirectory, img);
+		System.gc();
+		System.runFinalization();
+		Path matchingClassDir;
+		Mat alignedImage = null;
+		if (bestClass != null) {
+			matchingClassDir = Paths.get("..", ("gs-cv/" + bestClass.getImgClass().getDirectory()).split(File.separator));
+			alignedImage = bestClass.getImg();
+		} else {
+			matchingClassDir = classesDirectory.resolve(System.nanoTime() + "");
+			matchingClassDir.toFile().mkdirs();
+			try {
+				alignedImage = new Img(img).cropAndDeskew().getSrc();
+			} catch (Exception e) {
+				matchingClassDir.toFile().delete();
+				System.out.println("Error while deskewing new image " + imgFile.toString() + " to create new class, new class not created.");
+				e.printStackTrace();
+				return null;
+				// TODO: Store the image somewhere else.
+			}
+		}
+		String[] fileNameParts = imgFile.getFileName().toString().split("\\.(?=[^\\.]+$)");
+		File savedFile;
+		try {
+			savedFile = File.createTempFile(fileNameParts[0] + "-", "." + fileNameParts[1], matchingClassDir.toFile());
+			Imgcodecs.imwrite(savedFile.toString(), alignedImage);
+			return savedFile;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	public static CompareFeatureResult selectBestClass(Path classesDirectory, Mat img) {
