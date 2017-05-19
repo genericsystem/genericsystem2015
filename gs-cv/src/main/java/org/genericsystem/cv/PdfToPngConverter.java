@@ -46,7 +46,6 @@ public class PdfToPngConverter {
 				results.add(newFile);
 			}
 			document.close();
-			System.out.println("Converted Images are saved at -> " + destinationDirectory.getAbsolutePath());
 			return results;
 		} catch (Exception e) {
 			throw new RuntimeException(e);

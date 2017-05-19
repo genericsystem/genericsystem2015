@@ -224,7 +224,7 @@ public class Classifier {
 				Mat transformedImage = new Mat();
 				Imgproc.warpPerspective(img1, transformedImage, homography, new Size(img2.cols(), img2.rows()));
 				result = new CompareFeatureResult(transformedImage, goodMatches.size());
-				System.out.println("----------------- match found, featureDetector: " + featureDetector + ", extractor: " + descriptorExtractor + ", threshold: " + matchingThreshold + ", goodMatches: " + goodMatches.size());
+				System.out.println("----------------- possible match found, featureDetector: " + featureDetector + ", extractor: " + descriptorExtractor + ", threshold: " + matchingThreshold + ", goodMatches: " + goodMatches.size());
 			} else
 				System.out.println("----------------- not a match, featureDetector: " + featureDetector + ", extractor: " + descriptorExtractor + ", threshold: " + matchingThreshold + ", goodMatches: " + goodMatches.size());
 		}
