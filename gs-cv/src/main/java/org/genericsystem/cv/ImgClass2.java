@@ -37,10 +37,7 @@ public class ImgClass2 {
 	}
 
 	private Img applyPreprocessor(Img img) {
-		if (preprocessor.getValue() != null) {
-			img = preprocessor.getValue().apply(img);
-		}
-		return img;
+		return preprocessor.getValue() != null ? preprocessor.getValue().apply(img) : img;
 	}
 
 	public ImgClass2(Img classModel, String bgrDirectory) {
@@ -48,13 +45,10 @@ public class ImgClass2 {
 		this.directory = bgrDirectory;
 		computeMeanVariance();
 		preprocessor.addListener((o, ov, nv) -> {
-
 			new Thread(new Runnable() {
 				@Override
 				public void run() {
-
 					computeMeanVariance();
-
 				}
 			}).start();
 
