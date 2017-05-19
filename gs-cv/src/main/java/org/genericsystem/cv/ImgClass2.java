@@ -38,13 +38,10 @@ public class ImgClass2 {
 		this.directory = bgrDirectory;
 		computeMeanVariance();
 		preprocessor.addListener((o, ov, nv) -> {
-
 			new Thread(new Runnable() {
 				@Override
 				public void run() {
-
 					computeMeanVariance();
-
 				}
 			}).start();
 
@@ -109,12 +106,10 @@ public class ImgClass2 {
 	}
 
 	public Img getClosedMean(Size morphClose) {
-		return observableMean.getValue().morphologyEx(Imgproc.MORPH_CLOSE,
-				new StructuringElement(Imgproc.MORPH_RECT, morphClose));
+		return observableMean.getValue().morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, morphClose));
 	}
 
 	public Img getClosedVariance(Size morphClose) {
-		return observableVariance.getValue().morphologyEx(Imgproc.MORPH_CLOSE,
-				new StructuringElement(Imgproc.MORPH_RECT, morphClose));
+		return observableVariance.getValue().morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, morphClose));
 	}
 }
