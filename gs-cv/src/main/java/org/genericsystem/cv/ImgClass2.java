@@ -1,5 +1,7 @@
 package org.genericsystem.cv;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -11,6 +13,11 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 
@@ -21,6 +28,8 @@ public class ImgClass2 {
 	private SimpleObjectProperty<Img> observableVariance = new SimpleObjectProperty<>();
 	private final String directory;
 	private final SimpleObjectProperty<Function<Img, Img>> preprocessor = new SimpleObjectProperty<>();
+	private Zones zones;
+	private ObjectMapper mapper = new ObjectMapper();
 
 	public static ImgClass2 fromDirectory(Img classModel, String bgrDirectory) {
 		return new ImgClass2(classModel, bgrDirectory);
@@ -98,10 +107,36 @@ public class ImgClass2 {
 	}
 
 	public Img getClosedMean(Size morphClose) {
-		return observableMean.getValue().morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, morphClose));
+		return observableMean.getValue().morphologyEx(Imgproc.MORPH_CLOSE,
+				new StructuringElement(Imgproc.MORPH_RECT, morphClose));
 	}
 
 	public Img getClosedVariance(Size morphClose) {
-		return observableVariance.getValue().morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, morphClose));
+		return observableVariance.getValue().morphologyEx(Imgproc.MORPH_CLOSE,
+				new StructuringElement(Imgproc.MORPH_RECT, morphClose));
 	}
+
+	public void loadZones() throws JsonParseException, JsonMappingException, IOException {
+		zones = mapper.readValue(new File(directory + "/zones/zones.json"), Zones.class);
+	}
+
+	public Zones buildZones(Img img) {
+		Zones zones = Zones.get(
+				img.morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, new Size(9, 10))), 300,
+				6, 6);
+		this.zones = zones;
+		return zones;
+	}
+
+	public void saveZones() {
+		File save = new File(directory + "/zones/zones.json");
+		save.getParentFile().mkdirs();
+		mapper.enable(SerializationFeature.INDENT_OUTPUT);
+		try {
+			mapper.writeValue(save, zones);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 }

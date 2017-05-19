@@ -57,8 +57,7 @@ public class DirectoryWatcherVerticle extends AbstractVerticle {
 
 				Path filename = ev.context();
 				JsonObject watchMsg = new JsonObject();
-				watchMsg.put("filename", filename.toString());
-				watchMsg.put("folder", folder.toString());
+				watchMsg.put("filename", folder.resolve(filename).toString());
 				watchMsg.put("kind", kind.name());
 
 				vertx.eventBus().publish(address, watchMsg.encodePrettily());

@@ -3,13 +3,13 @@ package org.genericsystem.cv;
 import org.opencv.core.Core;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
-import org.opencv.imgproc.Imgproc;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.image.ImageView;
@@ -43,7 +43,8 @@ public class ClassImgFieldsDetector2 extends AbstractApp {
 		mainGrid.add(new AwareImageView(observableVariance), 1, 1);
 
 		mainGrid.add(new ClassImgsBoard(imgClass), 0, 2);
-		mainGrid.add(new AwareZonageImageView(model, observableVariance), 1, 2);
+		mainGrid.add(new AwareZonageImageView(imgClass, model, observableVariance), 1, 2);
+
 	}
 
 	public static class AwareImageView extends ImageView {
@@ -64,9 +65,9 @@ public class ClassImgFieldsDetector2 extends AbstractApp {
 
 	public static class AwareZonageImageView extends ImageView {
 
-		public AwareZonageImageView(Img mean, ObservableValue<Img> observableImg) {
+		public AwareZonageImageView(ImgClass2 imgClass, Img mean, ObservableValue<Img> observableImg) {
 			observableImg.addListener((o, ov, nv) -> {
-				Zones zones = Zones.get(nv.morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, new Size(9, 10))), 300, 6, 6);
+				Zones zones = imgClass.buildZones(nv);
 				Img zonedMean = new Img(mean.getSrc());
 				zones.draw(zonedMean, new Scalar(0, 255, 0), 3);
 				Platform.runLater(new Runnable() {
@@ -91,7 +92,8 @@ public class ClassImgFieldsDetector2 extends AbstractApp {
 			slider.setMin(min);
 			slider.setMax(max);
 			slider.setValue(value);
-			label.textProperty().bind(Bindings.createStringBinding(() -> name + " : " + slider.valueProperty().doubleValue(), slider.valueProperty()));
+			label.textProperty().bind(Bindings.createStringBinding(
+					() -> name + " : " + slider.valueProperty().doubleValue(), slider.valueProperty()));
 			getChildren().add(label);
 			getChildren().add(slider);
 		}
@@ -118,7 +120,11 @@ public class ClassImgFieldsDetector2 extends AbstractApp {
 			LabelledSpinner valueSpinner = new LabelledSpinner("value", 0, 255, 86);
 			LabelledSpinner blueSpinner = new LabelledSpinner("blue", 0, 255, 76);
 			LabelledSpinner saturationSpinner = new LabelledSpinner("saturation", 0, 255, 255);
-			Runnable action = () -> imgClass.setPreprocessor(img -> img.eraseCorners(0.1).dilateBlacks(valueSpinner.getValue(), blueSpinner.getValue(), saturationSpinner.getValue(), new Size(15, 3)));
+			Button saveButton = new Button("Save");
+			saveButton.setOnAction((e) -> imgClass.saveZones());
+			Runnable action = () -> imgClass
+					.setPreprocessor(img -> img.eraseCorners(0.1).dilateBlacks(valueSpinner.getValue(),
+							blueSpinner.getValue(), saturationSpinner.getValue(), new Size(15, 3)));
 			valueSpinner.setListener(action);
 			blueSpinner.setListener(action);
 			saturationSpinner.setListener(action);
@@ -126,6 +132,7 @@ public class ClassImgFieldsDetector2 extends AbstractApp {
 			getChildren().add(valueSpinner);
 			getChildren().add(blueSpinner);
 			getChildren().add(saturationSpinner);
+			getChildren().add(saveButton);
 		}
 	}
 

@@ -28,8 +28,7 @@ public abstract class FileCreateEventsHandlerVerticle extends AbstractVerticle {
 			JsonObject json = new JsonObject(message.body());
 			String kind = json.getString("kind");
 			if (StandardWatchEventKinds.ENTRY_CREATE.name().equals(kind)) {
-				Path watchedDir = Paths.get(".", json.getString("folder").split("/"));
-				Path newFile = watchedDir.resolve(json.getString("filename"));
+				Path newFile = Paths.get(json.getString("filename"));
 				try (FileLock lock = new RandomAccessFile(newFile.toFile(), "rw").getChannel().lock()) {
 					handle(newFile);
 				} catch (IOException e) {

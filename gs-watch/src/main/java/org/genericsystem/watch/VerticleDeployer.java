@@ -1,7 +1,5 @@
 package org.genericsystem.watch;
 
-import java.nio.file.Paths;
-
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
@@ -34,7 +32,7 @@ public class VerticleDeployer extends AbstractVerticle {
 
 	@Override
 	public void start(Future<Void> startFuture) throws Exception {
-		vertx.deployVerticle(new DirectoryWatcherVerticle(Paths.get("..", "gs-cv", "pdf"), PDF_WATCHER_ADDRESS));
+		vertx.deployVerticle(new MailWatcherVerticle());
 		vertx.deployVerticle(new PdfsConverterVerticle());
 		vertx.deployVerticle(new ClassifierVerticle());
 		vertx.deployVerticle(new RunScriptVerticle());

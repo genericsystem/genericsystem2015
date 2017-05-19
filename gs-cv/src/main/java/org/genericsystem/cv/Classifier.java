@@ -59,7 +59,7 @@ public class Classifier {
 
 	// Stores the given image in the best class found in the given classesDirectory, creates a new class if necessary.
 	// Returns the path to the stored image (the file name can have been changed to avoid duplicate names).
-	public static File classify(Path classesDirectory, Path imgFile) {
+	public static Path classify(Path classesDirectory, Path imgFile) {
 		Mat img = Imgcodecs.imread(imgFile.toString());
 		CompareFeatureResult bestClass = Classifier.selectBestClass(classesDirectory, img);
 		System.gc();
@@ -67,7 +67,7 @@ public class Classifier {
 		Path matchingClassDir;
 		Mat alignedImage = null;
 		if (bestClass != null) {
-			matchingClassDir = Paths.get("..", ("gs-cv/" + bestClass.getImgClass().getDirectory()).split(File.separator));
+			matchingClassDir = Paths.get(".").resolveSibling(bestClass.getImgClass().getDirectory());
 			alignedImage = bestClass.getImg();
 		} else {
 			matchingClassDir = classesDirectory.resolve(System.nanoTime() + "");
@@ -82,10 +82,14 @@ public class Classifier {
 				// TODO: Store the image somewhere else.
 			}
 		}
-		String[] fileNameParts = imgFile.getFileName().toString().split("\\.(?=[^\\.]+$)");
-		File savedFile;
+		Path savedFile = matchingClassDir.resolve(imgFile.getFileName());
 		try {
-			savedFile = File.createTempFile(fileNameParts[0] + "-", "." + fileNameParts[1], matchingClassDir.toFile());
+			synchronized (Classifier.class) {
+				if (savedFile.toFile().exists()) {
+					String[] fileNameParts = imgFile.getFileName().toString().split("\\.(?=[^\\.]+$)");
+					savedFile = File.createTempFile(fileNameParts[0] + "-", "." + fileNameParts[1], matchingClassDir.toFile()).toPath();
+				}
+			}
 			Imgcodecs.imwrite(savedFile.toString(), alignedImage);
 			return savedFile;
 		} catch (IOException e) {
@@ -220,7 +224,7 @@ public class Classifier {
 				Mat transformedImage = new Mat();
 				Imgproc.warpPerspective(img1, transformedImage, homography, new Size(img2.cols(), img2.rows()));
 				result = new CompareFeatureResult(transformedImage, goodMatches.size());
-				System.out.println("----------------- match found, featureDetector: " + featureDetector + ", extractor: " + descriptorExtractor + ", threshold: " + matchingThreshold + ", goodMatches: " + goodMatches.size());
+				System.out.println("----------------- possible match found, featureDetector: " + featureDetector + ", extractor: " + descriptorExtractor + ", threshold: " + matchingThreshold + ", goodMatches: " + goodMatches.size());
 			} else
 				System.out.println("----------------- not a match, featureDetector: " + featureDetector + ", extractor: " + descriptorExtractor + ", threshold: " + matchingThreshold + ", goodMatches: " + goodMatches.size());
 		}

@@ -1,6 +1,5 @@
 package org.genericsystem.watch;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -9,7 +8,6 @@ import org.opencv.core.Core;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.MessageConsumer;
-import io.vertx.core.json.JsonObject;
 
 public class ClassifierVerticle extends AbstractVerticle {
 
@@ -25,17 +23,17 @@ public class ClassifierVerticle extends AbstractVerticle {
 	public void start() {
 		MessageConsumer<String> consumer = vertx.eventBus().consumer(VerticleDeployer.PNG_WATCHER_ADDRESS);
 		consumer.handler(message -> vertx.executeBlocking(future -> {
-			Path newFile = Paths.get(".", message.body().split(File.separator));
+			Path newFile = Paths.get(message.body());
+			System.out.println(">>> New file to classify: " + newFile);
 			// Only one access to classesDirectory at a time to avoid duplicate classes.
 			Path classesDirectory = Paths.get("..", "gs-cv", "classes");
 			classesDirectory.toFile().mkdirs();
-			File savedFile;
+			Path savedFile;
 			synchronized (ClassifierVerticle.class) {
 				savedFile = Classifier.classify(classesDirectory, newFile);
 			}
 			if (savedFile != null) {
-				JsonObject watchMsg = new JsonObject().put("filename", savedFile.toString());
-				vertx.eventBus().publish(VerticleDeployer.IMAGE_ADDED_TO_CLASS_ADDRESS, watchMsg.encodePrettily());
+				vertx.eventBus().publish(VerticleDeployer.IMAGE_ADDED_TO_CLASS_ADDRESS, savedFile.toString());
 				future.complete();
 			} else
 				future.fail("Impossible to classify image " + newFile);
