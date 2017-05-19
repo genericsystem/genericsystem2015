@@ -1,12 +1,12 @@
 package org.genericsystem.cv;
 
-import java.util.function.Function;
-
 import org.opencv.core.Core;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
+import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
@@ -21,16 +21,16 @@ public class ClassImgFieldsDetector2 extends AbstractApp {
 
 	private final static String classImgRepertory = "aligned-image-3.png";
 
-	private Slider valueSlider = new Slider();
-	private Slider blueSlider = new Slider();
-	private Slider saturationSlider = new Slider();
-
 	public static void main(String[] args) {
 		launch(args);
 	}
 
 	@Override
 	protected void fillGrid(GridPane mainGrid) {
+
+		Slider valueSlider = new Slider();
+		Slider blueSlider = new Slider();
+		Slider saturationSlider = new Slider();
 
 		valueSlider.setMin(0);
 		valueSlider.setMax(255);
@@ -57,53 +57,47 @@ public class ClassImgFieldsDetector2 extends AbstractApp {
 		mainGrid.add(new AwareImageView(observableMean), 1, 0);
 		mainGrid.add(new AwareImageView(observableVariance), 1, 1);
 
-		mainGrid.add(new AwareZonageImageView(model, observableVariance), 0, 2);
+		mainGrid.add(new AwareZonageImageView(model, observableVariance), 1, 2);
 
 		GridPane sliders = new GridPane();
-		sliders.setPadding(new Insets(0, 40, 0, 40));
-		Label valueLabel = new Label("Value");
-		Slider valueSlider = new Slider();
-
-		valueSlider.valueProperty()
-				.addListener((ov, old_val, new_val) -> imgClass.setPreprocessor(new Function<Img, Img>() {
-					@Override
-					public Img apply(Img img) {
-						return img.eraseCorners(0.1).dilateBlacks(valueSlider.getValue(), blueSlider.getValue(),
-								saturationSlider.getValue(), new Size(15, 3));
-					}
-				}));
-
-		blueSlider.valueProperty()
-				.addListener((ov, old_val, new_val) -> imgClass.setPreprocessor(new Function<Img, Img>() {
-					@Override
-					public Img apply(Img img) {
-						return img.eraseCorners(0.1).dilateBlacks(valueSlider.getValue(), blueSlider.getValue(),
-								saturationSlider.getValue(), new Size(15, 3));
-					}
-				}));
-
-		saturationSlider.valueProperty()
-				.addListener((ov, old_val, new_val) -> imgClass.setPreprocessor(new Function<Img, Img>() {
-					@Override
-					public Img apply(Img img) {
-						return img.eraseCorners(0.1).dilateBlacks(valueSlider.getValue(), blueSlider.getValue(),
-								saturationSlider.getValue(), new Size(15, 3));
-					}
-				}));
+		sliders.setPadding(new Insets(40, 40, 40, 40));
+		Label valueLabel = new Label("Value : " + valueSlider.getValue());
 
 		sliders.add(valueLabel, 0, 0);
 		sliders.add(valueSlider, 0, 1);
-		Label blueLabel = new Label("Blue");
+		Label blueLabel = new Label("Blue : " + blueSlider.getValue());
 		blueLabel.setPadding(new Insets(20, 0, 0, 0));
 
 		sliders.add(blueLabel, 0, 2);
 		sliders.add(blueSlider, 0, 3);
-		Label saturationLabel = new Label("Saturation");
+		Label saturationLabel = new Label("Saturation : " + saturationSlider.getValue());
 		saturationLabel.setPadding(new Insets(20, 0, 0, 0));
 
 		sliders.add(saturationLabel, 0, 4);
 		sliders.add(saturationSlider, 0, 5);
-		mainGrid.add(sliders, 1, 2);
+		mainGrid.add(sliders, 0, 2);
+
+		ChangeListener<Number> valueSliderListener = (o, ov, nv) -> {
+			imgClass.setPreprocessor((img) -> img.eraseCorners(0.1).dilateBlacks(valueSlider.getValue(),
+					blueSlider.getValue(), saturationSlider.getValue(), new Size(15, 3)));
+			valueLabel.setText("Value : " + nv.intValue());
+		};
+
+		ChangeListener<Number> blueSliderListener = (o, ov, nv) -> {
+			imgClass.setPreprocessor((img) -> img.eraseCorners(0.1).dilateBlacks(valueSlider.getValue(),
+					blueSlider.getValue(), saturationSlider.getValue(), new Size(15, 3)));
+			blueLabel.setText("Blue : " + nv.intValue());
+		};
+
+		ChangeListener<Number> saturationSliderListener = (o, ov, nv) -> {
+			imgClass.setPreprocessor((img) -> img.eraseCorners(0.1).dilateBlacks(valueSlider.getValue(),
+					blueSlider.getValue(), saturationSlider.getValue(), new Size(15, 3)));
+			saturationLabel.setText("Saturation : " + nv.intValue());
+		};
+
+		valueSlider.valueProperty().addListener(valueSliderListener);
+		blueSlider.valueProperty().addListener(blueSliderListener);
+		saturationSlider.valueProperty().addListener(saturationSliderListener);
 
 		// for (File file : new File(classImgRepertory).listFiles())
 		// if (file.getName().endsWith(".png")) {
@@ -145,8 +139,13 @@ public class ClassImgFieldsDetector2 extends AbstractApp {
 	public static class AwareImageView extends ImageView {
 
 		public AwareImageView(ObservableValue<Img> observableImg) {
-			observableImg.addListener((o, nv, ov) -> {
-				setImage(observableImg.getValue().getImageView().getImage());
+			observableImg.addListener((o, ov, nv) -> {
+				Platform.runLater(new Runnable() {
+					@Override
+					public void run() {
+						setImage(observableImg.getValue().getImageView().getImage());
+					}
+				});
 			});
 			setImage(observableImg.getValue().getImageView().getImage());
 		}
@@ -159,12 +158,17 @@ public class ClassImgFieldsDetector2 extends AbstractApp {
 
 		public AwareZonageImageView(Img mean, ObservableValue<Img> observableImg) {
 			this.mean = new Img(mean.getSrc());
-			observableImg.addListener((o, nv, ov) -> {
+			observableImg.addListener((o, ov, nv) -> {
 				Zones zones = Zones.get(nv.morphologyEx(Imgproc.MORPH_CLOSE,
 						new StructuringElement(Imgproc.MORPH_RECT, new Size(9, 10))), 300, 6, 6);
 				Img zonedMean = new Img(mean.getSrc());
 				zones.draw(zonedMean, new Scalar(0, 255, 0), 3);
-				setImage(zonedMean.getImageView().getImage());
+				Platform.runLater(new Runnable() {
+					@Override
+					public void run() {
+						setImage(zonedMean.getImageView().getImage());
+					}
+				});
 			});
 			setImage(mean.getImageView().getImage());
 		}

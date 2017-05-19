@@ -39,8 +39,18 @@ public class ImgClass2 {
 		this.classModel = classModel;
 		this.directory = bgrDirectory;
 		computeMeanVariance();
-		preprocessor.addListener((o, nw, old) -> {
-			computeMeanVariance();
+		preprocessor.addListener((o, ov, nv) -> {
+
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+
+					computeMeanVariance();
+
+				}
+			}).start();
+
+			// computeMeanVariance();
 		});
 	}
 
@@ -48,7 +58,7 @@ public class ImgClass2 {
 		return Tools.classImgsStream(directory);
 	}
 
-	private void computeMeanVariance() {
+	private synchronized void computeMeanVariance() {
 		Img img0 = applyPreprocessor(classImgsStream().iterator().next());
 		boolean gray = img0.channels() == 1;
 		int type = gray ? CvType.CV_32S : CvType.CV_32SC3;
