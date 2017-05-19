@@ -10,12 +10,8 @@ import org.opencv.core.Core;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 
 public class ClassifierVerticle extends AbstractVerticle {
-
-	private static Logger log = LoggerFactory.getLogger(ClassifierVerticle.class);
 
 	static {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
