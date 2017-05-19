@@ -1,6 +1,5 @@
 package org.genericsystem.watch;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -29,7 +28,7 @@ public class ClassifierVerticle extends AbstractVerticle {
 			// Only one access to classesDirectory at a time to avoid duplicate classes.
 			Path classesDirectory = Paths.get("..", "gs-cv", "classes");
 			classesDirectory.toFile().mkdirs();
-			File savedFile;
+			Path savedFile;
 			synchronized (ClassifierVerticle.class) {
 				savedFile = Classifier.classify(classesDirectory, newFile);
 			}
