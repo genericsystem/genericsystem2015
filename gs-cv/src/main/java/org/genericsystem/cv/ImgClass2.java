@@ -30,19 +30,14 @@ public class ImgClass2 {
 		return preprocessor.getValue() != null ? preprocessor.getValue().apply(img) : img;
 	}
 
+	private LongTaskOverrider taskManager = new LongTaskOverrider();
+
 	public ImgClass2(Img classModel, String bgrDirectory) {
 		this.classModel = classModel;
 		this.directory = bgrDirectory;
 		computeMeanVariance();
 		preprocessor.addListener((o, ov, nv) -> {
-			new Thread(new Runnable() {
-				@Override
-				public void run() {
-					computeMeanVariance();
-				}
-			}).start();
-
-			// computeMeanVariance();
+			taskManager.schedule(() -> computeMeanVariance());
 		});
 	}
 

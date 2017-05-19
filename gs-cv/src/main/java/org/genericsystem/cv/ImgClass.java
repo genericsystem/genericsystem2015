@@ -35,7 +35,6 @@ public class ImgClass {
 			img = mapper.apply(img);
 			System.gc();
 			System.runFinalization();
-
 		}
 		return img;
 	}
