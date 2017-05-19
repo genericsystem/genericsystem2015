@@ -78,38 +78,26 @@ public class ClassImgFieldsDetector2 extends AbstractApp {
 
 		mainGrid.add(sliders, 0, 2);
 
-		valueSlider.valueChangingProperty().addListener(new ChangeListener<Boolean>() {
-			@Override
-			public void changed(ObservableValue<? extends Boolean> o, Boolean wasChanging, Boolean changing) {
-				if (!changing) {
-					imgClass.setPreprocessor((img) -> img.eraseCorners(0.1).dilateBlacks(valueSlider.getValue(),
-							blueSlider.getValue(), saturationSlider.getValue(), new Size(15, 3)));
-					valueLabel.setText("Value : " + ((Number) valueSlider.getValue()).intValue());
-				}
-			}
-		});
+		ChangeListener<Boolean> sliderListener = (o, wasChanging, changing) -> {
+			if (!changing)
+				imgClass.setPreprocessor((img) -> img.eraseCorners(0.1).dilateBlacks(valueSlider.getValue(),
+						blueSlider.getValue(), saturationSlider.getValue(), new Size(15, 3)));
+		};
 
-		saturationSlider.valueChangingProperty().addListener(new ChangeListener<Boolean>() {
-			@Override
-			public void changed(ObservableValue<? extends Boolean> o, Boolean wasChanging, Boolean changing) {
-				if (!changing) {
-					imgClass.setPreprocessor((img) -> img.eraseCorners(0.1).dilateBlacks(valueSlider.getValue(),
-							blueSlider.getValue(), saturationSlider.getValue(), new Size(15, 3)));
-					saturationLabel.setText("Saturation : " + ((Number) saturationSlider.getValue()).intValue());
-				}
-			}
-		});
+		valueSlider.valueChangingProperty().addListener(sliderListener);
 
-		blueSlider.valueChangingProperty().addListener(new ChangeListener<Boolean>() {
-			@Override
-			public void changed(ObservableValue<? extends Boolean> o, Boolean wasChanging, Boolean changing) {
-				if (!changing) {
-					imgClass.setPreprocessor((img) -> img.eraseCorners(0.1).dilateBlacks(valueSlider.getValue(),
-							blueSlider.getValue(), saturationSlider.getValue(), new Size(15, 3)));
-					blueLabel.setText("Blue : " + ((Number) blueSlider.getValue()).intValue());
-				}
-			}
-		});
+		valueSlider.valueProperty().addListener(
+				(o, ov, nv) -> valueLabel.setText("Value : " + ((Number) valueSlider.getValue()).intValue()));
+
+		saturationSlider.valueChangingProperty().addListener(sliderListener);
+
+		saturationSlider.valueProperty().addListener((o, ov, nv) -> saturationLabel
+				.setText("Saturation : " + ((Number) saturationSlider.getValue()).intValue()));
+
+		blueSlider.valueChangingProperty().addListener(sliderListener);
+
+		blueSlider.valueProperty()
+				.addListener((o, ov, nv) -> blueLabel.setText("Blue : " + ((Number) blueSlider.getValue()).intValue()));
 
 		// for (File file : new File(classImgRepertory).listFiles())
 		// if (file.getName().endsWith(".png")) {
