@@ -21,7 +21,8 @@ public class Zones {
 	}
 
 	private Zones adjust(double dx, double dy, int width, int height) {
-		return new Zones(zones.stream().map(zone -> zone.adjustRect(dx, dy, width, height)).collect(Collectors.toList()));
+		return new Zones(
+				zones.stream().map(zone -> zone.adjustRect(dx, dy, width, height)).collect(Collectors.toList()));
 	}
 
 	public Zones(List<Zone> zonesList) {
@@ -49,4 +50,9 @@ public class Zones {
 	public void draw(Img img, Scalar scalar, int thickness) {
 		zones.forEach(adjusted -> adjusted.draw(img, scalar, thickness));
 	}
+
+	public List<Zone> getZones() {
+		return zones;
+	}
+
 }
