@@ -1,5 +1,6 @@
 package org.genericsystem.cv;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -18,7 +19,7 @@ import org.opencv.imgproc.Imgproc;
 
 public class ImgClass {
 
-	private final static String TEMPLATE_NAME = "template.png";
+	private final static String TEMPLATE_NAME = "template/template.png";
 	private Img classModel;
 	private Img mean;
 	private Img variance;
@@ -40,7 +41,12 @@ public class ImgClass {
 	}
 
 	public ImgClass(String bgrDirectory) {
-		Path template = Paths.get(bgrDirectory).resolve(TEMPLATE_NAME);
+		// TODO: Remove renaming code.
+		File oldTemplate = Paths.get(bgrDirectory).resolve("template.png").toFile();
+		Path template = Paths.get(bgrDirectory, TEMPLATE_NAME.split(File.separator));
+		template.getParent().toFile().mkdirs();
+		if (oldTemplate.exists())
+			oldTemplate.renameTo(template.toFile());
 		if (classModel == null && template.toFile().exists())
 			this.classModel = new Img(Imgcodecs.imread(template.toString()));
 		this.directory = bgrDirectory;
@@ -52,34 +58,38 @@ public class ImgClass {
 	}
 
 	private void computeMeanVariance() {
-		Img img0 = applyMappers(classImgsStream().iterator().next());
-		boolean gray = img0.channels() == 1;
-		int type = gray ? CvType.CV_32S : CvType.CV_32SC3;
+		Iterator<Img> it_ = classImgsStream().iterator();
+		if (it_.hasNext()) {
+			Img img0 = applyMappers(it_.next());
+			boolean gray = img0.channels() == 1;
+			int type = gray ? CvType.CV_32S : CvType.CV_32SC3;
 
-		Mat mean = new Mat(img0.size(), type, Scalar.all(0));
-		Mat m2 = new Mat(img0.size(), type, Scalar.all(0));
-		Mat mask = Mat.ones(img0.size(), CvType.CV_8U);
-		int count = 1;
-		Iterator<Img> it = classImgsStream().iterator();
-		while (it.hasNext()) {
-			Mat img = new Mat();
-			applyMappers(it.next()).getSrc().convertTo(img, type);
-			Mat delta = new Mat(img.size(), type);
-			Core.subtract(img, mean, delta, mask, type);
-			Core.addWeighted(mean, 1, delta, 1d / count, 0, mean, type);
-			Mat delta2 = new Mat(m2.size(), type);
-			Core.subtract(img, mean, delta2, mask, type);
-			Mat product = delta.mul(delta2);
-			Core.add(m2, product, m2);
-			count++;
+			Mat mean = new Mat(img0.size(), type, Scalar.all(0));
+			Mat m2 = new Mat(img0.size(), type, Scalar.all(0));
+			Mat mask = Mat.ones(img0.size(), CvType.CV_8U);
+			int count = 1;
+
+			Iterator<Img> it = classImgsStream().iterator();
+			while (it.hasNext()) {
+				Mat img = new Mat();
+				applyMappers(it.next()).getSrc().convertTo(img, type);
+				Mat delta = new Mat(img.size(), type);
+				Core.subtract(img, mean, delta, mask, type);
+				Core.addWeighted(mean, 1, delta, 1d / count, 0, mean, type);
+				Mat delta2 = new Mat(m2.size(), type);
+				Core.subtract(img, mean, delta2, mask, type);
+				Mat product = delta.mul(delta2);
+				Core.add(m2, product, m2);
+				count++;
+			}
+			Mat variance = new Mat(m2.size(), type);
+			Core.multiply(m2, new Scalar(1d / count, 1d / count, 1d / count), variance);
+			variance.convertTo(variance, CvType.CV_8U);
+			mean.convertTo(mean, CvType.CV_8U);
+
+			this.mean = new Img(mean);
+			this.variance = new Img(variance);
 		}
-		Mat variance = new Mat(m2.size(), type);
-		Core.multiply(m2, new Scalar(1d / count, 1d / count, 1d / count), variance);
-		variance.convertTo(variance, CvType.CV_8U);
-		mean.convertTo(mean, CvType.CV_8U);
-
-		this.mean = new Img(mean);
-		this.variance = new Img(variance);
 	}
 
 	public void addMapper(Function<Img, Img> after) {
