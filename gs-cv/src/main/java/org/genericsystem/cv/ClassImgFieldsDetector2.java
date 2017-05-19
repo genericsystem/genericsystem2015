@@ -19,7 +19,7 @@ public class ClassImgFieldsDetector2 extends AbstractApp {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 	}
 
-	private final static String classImgRepertory = "aligned-image-3.png";
+	private final static String classImgRepertory = "classes/passport-fr";
 
 	public static void main(String[] args) {
 		launch(args);
@@ -37,10 +37,10 @@ public class ClassImgFieldsDetector2 extends AbstractApp {
 		valueSlider.setValue(86);
 		blueSlider.setMin(0);
 		blueSlider.setMax(255);
-		blueSlider.setValue(255);
+		blueSlider.setValue(76);
 		saturationSlider.setMin(0);
 		saturationSlider.setMax(255);
-		saturationSlider.setValue(76);
+		saturationSlider.setValue(255);
 
 		ImgClass2 imgClass = ImgClass2.fromDirectory(null, classImgRepertory);
 
@@ -61,43 +61,55 @@ public class ClassImgFieldsDetector2 extends AbstractApp {
 
 		GridPane sliders = new GridPane();
 		sliders.setPadding(new Insets(40, 40, 40, 40));
-		Label valueLabel = new Label("Value : " + valueSlider.getValue());
 
+		Label valueLabel = new Label("Value : " + valueSlider.getValue());
 		sliders.add(valueLabel, 0, 0);
 		sliders.add(valueSlider, 0, 1);
-		Label blueLabel = new Label("Blue : " + blueSlider.getValue());
-		blueLabel.setPadding(new Insets(20, 0, 0, 0));
 
-		sliders.add(blueLabel, 0, 2);
-		sliders.add(blueSlider, 0, 3);
 		Label saturationLabel = new Label("Saturation : " + saturationSlider.getValue());
 		saturationLabel.setPadding(new Insets(20, 0, 0, 0));
+		sliders.add(saturationLabel, 0, 2);
+		sliders.add(saturationSlider, 0, 3);
 
-		sliders.add(saturationLabel, 0, 4);
-		sliders.add(saturationSlider, 0, 5);
+		Label blueLabel = new Label("Blue : " + blueSlider.getValue());
+		blueLabel.setPadding(new Insets(20, 0, 0, 0));
+		sliders.add(blueLabel, 0, 4);
+		sliders.add(blueSlider, 0, 5);
+
 		mainGrid.add(sliders, 0, 2);
 
-		ChangeListener<Number> valueSliderListener = (o, ov, nv) -> {
-			imgClass.setPreprocessor((img) -> img.eraseCorners(0.1).dilateBlacks(valueSlider.getValue(),
-					blueSlider.getValue(), saturationSlider.getValue(), new Size(15, 3)));
-			valueLabel.setText("Value : " + nv.intValue());
-		};
+		valueSlider.valueChangingProperty().addListener(new ChangeListener<Boolean>() {
+			@Override
+			public void changed(ObservableValue<? extends Boolean> o, Boolean wasChanging, Boolean changing) {
+				if (!changing) {
+					imgClass.setPreprocessor((img) -> img.eraseCorners(0.1).dilateBlacks(valueSlider.getValue(),
+							blueSlider.getValue(), saturationSlider.getValue(), new Size(15, 3)));
+					valueLabel.setText("Value : " + ((Number) valueSlider.getValue()).intValue());
+				}
+			}
+		});
 
-		ChangeListener<Number> blueSliderListener = (o, ov, nv) -> {
-			imgClass.setPreprocessor((img) -> img.eraseCorners(0.1).dilateBlacks(valueSlider.getValue(),
-					blueSlider.getValue(), saturationSlider.getValue(), new Size(15, 3)));
-			blueLabel.setText("Blue : " + nv.intValue());
-		};
+		saturationSlider.valueChangingProperty().addListener(new ChangeListener<Boolean>() {
+			@Override
+			public void changed(ObservableValue<? extends Boolean> o, Boolean wasChanging, Boolean changing) {
+				if (!changing) {
+					imgClass.setPreprocessor((img) -> img.eraseCorners(0.1).dilateBlacks(valueSlider.getValue(),
+							blueSlider.getValue(), saturationSlider.getValue(), new Size(15, 3)));
+					saturationLabel.setText("Saturation : " + ((Number) saturationSlider.getValue()).intValue());
+				}
+			}
+		});
 
-		ChangeListener<Number> saturationSliderListener = (o, ov, nv) -> {
-			imgClass.setPreprocessor((img) -> img.eraseCorners(0.1).dilateBlacks(valueSlider.getValue(),
-					blueSlider.getValue(), saturationSlider.getValue(), new Size(15, 3)));
-			saturationLabel.setText("Saturation : " + nv.intValue());
-		};
-
-		valueSlider.valueProperty().addListener(valueSliderListener);
-		blueSlider.valueProperty().addListener(blueSliderListener);
-		saturationSlider.valueProperty().addListener(saturationSliderListener);
+		blueSlider.valueChangingProperty().addListener(new ChangeListener<Boolean>() {
+			@Override
+			public void changed(ObservableValue<? extends Boolean> o, Boolean wasChanging, Boolean changing) {
+				if (!changing) {
+					imgClass.setPreprocessor((img) -> img.eraseCorners(0.1).dilateBlacks(valueSlider.getValue(),
+							blueSlider.getValue(), saturationSlider.getValue(), new Size(15, 3)));
+					blueLabel.setText("Blue : " + ((Number) blueSlider.getValue()).intValue());
+				}
+			}
+		});
 
 		// for (File file : new File(classImgRepertory).listFiles())
 		// if (file.getName().endsWith(".png")) {

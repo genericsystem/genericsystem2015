@@ -29,8 +29,6 @@ public class ImgClass2 {
 	private Img applyPreprocessor(Img img) {
 		if (preprocessor.getValue() != null) {
 			img = preprocessor.getValue().apply(img);
-			System.gc();
-			System.runFinalization();
 		}
 		return img;
 	}
@@ -86,6 +84,8 @@ public class ImgClass2 {
 		mean.convertTo(mean, CvType.CV_8U);
 		this.observableMean.setValue(new Img(mean));
 		this.observableVariance.setValue(new Img(variance));
+		System.gc();
+		System.runFinalization();
 	}
 
 	public void setPreprocessor(Function<Img, Img> after) {
