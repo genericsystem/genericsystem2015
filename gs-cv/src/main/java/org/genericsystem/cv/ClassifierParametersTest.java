@@ -30,7 +30,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
-public class ClassifierDemo extends Application {
+public class ClassifierParametersTest extends Application {
 
 	private final static String pngDirectoryPath = "png";
 	private final static String adjustedDirectoryPath = "adjusted";
