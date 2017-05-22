@@ -6,9 +6,6 @@ import java.util.Iterator;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ObservableValue;
-
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -21,6 +18,9 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableValue;
+
 public class ImgClass2 {
 
 	private final Img classModel;
@@ -29,7 +29,7 @@ public class ImgClass2 {
 	private final String directory;
 	private final SimpleObjectProperty<Function<Img, Img>> preprocessor = new SimpleObjectProperty<>();
 	private Zones zones;
-	private ObjectMapper mapper;
+	private final ObjectMapper mapper = new ObjectMapper();
 
 	public static ImgClass2 fromDirectory(Img classModel, String bgrDirectory) {
 		return new ImgClass2(classModel, bgrDirectory);
