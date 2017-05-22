@@ -20,14 +20,18 @@ public class RunScriptVerticle extends AbstractVerticle {
 	public void start() throws Exception {
 		MessageConsumer<String> consumer = vertx.eventBus().consumer(VerticleDeployer.IMAGE_ADDED_TO_CLASS_ADDRESS);
 		consumer.handler(message -> vertx.executeBlocking(future -> {
-			System.out.println(">>>> New classified image: " + message.body());
+			String imagePath = message.body();
+			System.out.println(">>>> New classified image: " + imagePath);
 			try {
-				Process process = Runtime.getRuntime().exec(new String[] { shellScript, message.body() });
+				Process process = Runtime.getRuntime().exec(new String[] { shellScript, imagePath });
 				int exitValue = process.waitFor();
-				if (exitValue != 0)
-					log.warn("Shell script execution failed, exit value: " + exitValue);
+				if (exitValue == 0)
+					vertx.eventBus().publish(VerticleDeployer.IMAGE_TO_OCR, imagePath);
+				else
+					log.warn("Shell script execution failed on " + imagePath + " , exit value: " + exitValue + ".");
 			} catch (IOException | InterruptedException e) {
-				log.warn("Exception while executing shell script on file " + message.body(), e);
+				log.warn("Exception while executing shell script on file " + imagePath, e);
+				future.fail("Shell script execution failed on " + imagePath + ".");
 			}
 			future.complete();
 		}, res -> {
