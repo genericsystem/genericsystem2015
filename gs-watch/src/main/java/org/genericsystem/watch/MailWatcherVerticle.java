@@ -1,5 +1,7 @@
 package org.genericsystem.watch;
 
+import io.vertx.core.AbstractVerticle;
+
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -23,16 +25,14 @@ import org.apache.commons.mail.util.MimeMessageParser;
 
 import com.sun.mail.imap.IMAPFolder;
 
-import io.vertx.core.AbstractVerticle;
-
 public class MailWatcherVerticle extends AbstractVerticle {
 
 	// TODO: Store config in a config file.
 	private static final String protocol = "imaps";
-	private static final String host = null;
+	private static final String host = "imap.gmail.com";
 	private static final String file = "INBOX";
-	private static final String username = null;
-	private static final String password = null;
+	private static final String username = "watchtestmwf";
+	private static final String password = "WatchTestMWF4";
 	private static final String pdfDir = "../gs-cv/pdf";
 
 	public static void main(String[] args) {
@@ -107,6 +107,8 @@ public class MailWatcherVerticle extends AbstractVerticle {
 						}
 						Files.copy(attachment.getInputStream(), newFile);
 					}
+					System.gc();
+					System.runFinalization();
 					vertx.eventBus().publish(VerticleDeployer.PDF_WATCHER_ADDRESS, newFile.toString());
 				}
 			}
