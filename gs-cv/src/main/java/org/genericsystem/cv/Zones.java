@@ -1,5 +1,7 @@
 package org.genericsystem.cv;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -9,8 +11,12 @@ import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+
 public class Zones {
 	private final List<Zone> zones;
+	private static final ObjectMapper mapper = new ObjectMapper();
 
 	public static Zones get(Img img, double minArea) {
 		return new Zones(img, minArea);
@@ -54,5 +60,20 @@ public class Zones {
 	public List<Zone> getZones() {
 		return zones;
 	}
+
+	public void save(File file) {
+		file.getParentFile().mkdirs();
+		mapper.enable(SerializationFeature.INDENT_OUTPUT);
+		try {
+			mapper.writeValue(file, zones);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	// public void load(File file) throws JsonParseException,
+	// JsonMappingException, IOException {
+	// zones = mapper.readValue(file, Zones.class);
+	// }
 
 }
