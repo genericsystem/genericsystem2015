@@ -2,19 +2,19 @@ package org.genericsystem.cv;
 
 import java.io.File;
 
+import javafx.scene.layout.GridPane;
+
 import org.opencv.core.Core;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
-
-import javafx.scene.layout.GridPane;
 
 public class ClassImgFieldsDetector extends AbstractApp {
 	static {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 	}
 
-	private final static String imgClassDirectory = "aligned-image-3.png";
+	private final static String imgClassDirectory = "classes/id-fr-front";
 
 	public static void main(String[] args) {
 		launch(args);

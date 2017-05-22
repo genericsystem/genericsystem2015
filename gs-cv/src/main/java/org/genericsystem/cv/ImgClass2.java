@@ -6,6 +6,9 @@ import java.util.Iterator;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableValue;
+
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -13,10 +16,7 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
@@ -29,7 +29,6 @@ public class ImgClass2 {
 	private final String directory;
 	private final SimpleObjectProperty<Function<Img, Img>> preprocessor = new SimpleObjectProperty<>();
 	private Zones zones;
-	private ObjectMapper mapper = new ObjectMapper();
 
 	public static ImgClass2 fromDirectory(Img classModel, String bgrDirectory) {
 		return new ImgClass2(classModel, bgrDirectory);
@@ -39,19 +38,14 @@ public class ImgClass2 {
 		return preprocessor.getValue() != null ? preprocessor.getValue().apply(img) : img;
 	}
 
+	private LongTaskOverrider taskManager = new LongTaskOverrider();
+
 	public ImgClass2(Img classModel, String bgrDirectory) {
 		this.classModel = classModel;
 		this.directory = bgrDirectory;
 		computeMeanVariance();
 		preprocessor.addListener((o, ov, nv) -> {
-			new Thread(new Runnable() {
-				@Override
-				public void run() {
-					computeMeanVariance();
-				}
-			}).start();
-
-			// computeMeanVariance();
+			taskManager.schedule(() -> computeMeanVariance());
 		});
 	}
 
@@ -112,13 +106,11 @@ public class ImgClass2 {
 	}
 
 	public Img getClosedMean(Size morphClose) {
-		return observableMean.getValue().morphologyEx(Imgproc.MORPH_CLOSE,
-				new StructuringElement(Imgproc.MORPH_RECT, morphClose));
+		return observableMean.getValue().morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, morphClose));
 	}
 
 	public Img getClosedVariance(Size morphClose) {
-		return observableVariance.getValue().morphologyEx(Imgproc.MORPH_CLOSE,
-				new StructuringElement(Imgproc.MORPH_RECT, morphClose));
+		return observableVariance.getValue().morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, morphClose));
 	}
 
 	public void loadZones() throws JsonParseException, JsonMappingException, IOException {
@@ -126,9 +118,7 @@ public class ImgClass2 {
 	}
 
 	public Zones buildZones(Img img) {
-		Zones zones = Zones.get(
-				img.morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, new Size(9, 10))), 300,
-				6, 6);
+		Zones zones = Zones.get(img.morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, new Size(9, 10))), 300, 6, 6);
 		this.zones = zones;
 		return zones;
 	}
