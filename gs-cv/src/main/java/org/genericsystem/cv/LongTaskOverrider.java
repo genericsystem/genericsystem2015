@@ -15,6 +15,13 @@ public class LongTaskOverrider {
 		}
 	}
 
+	private synchronized void terminate() {
+		isRunning = waiting;
+		waiting = null;
+		if (isRunning != null)
+			run(isRunning);
+	}
+
 	private void run(Runnable toRun) {
 		new Thread() {
 			@Override
@@ -23,12 +30,5 @@ public class LongTaskOverrider {
 				terminate();
 			};
 		}.start();
-	}
-
-	private synchronized void terminate() {
-		isRunning = waiting;
-		waiting = null;
-		if (isRunning != null)
-			run(isRunning);
 	}
 }
