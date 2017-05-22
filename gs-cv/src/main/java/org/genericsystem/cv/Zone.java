@@ -10,9 +10,11 @@ import org.opencv.imgproc.Imgproc;
 
 public class Zone {
 
+	private final int num;
 	private final Rect rect;
 
-	public Zone(Rect rect) {
+	public Zone(int num, Rect rect) {
+		this.num = num;
 		this.rect = rect;
 	}
 
@@ -26,20 +28,27 @@ public class Zone {
 
 	public Zone adjustRect(double dx, double dy, int maxWidht, int maxHeight) {
 		Point tl = new Point(rect.tl().x > dx ? rect.tl().x - dx : 0d, rect.tl().y > dy ? rect.tl().y - dy : 0d);
-		Point br = new Point((rect.br().x + dx > maxWidht) ? maxWidht : rect.br().x + dx, (rect.br().y + dy > maxHeight) ? maxHeight : rect.br().y + dy);
-		return new Zone(new Rect(tl, br));
+		Point br = new Point((rect.br().x + dx > maxWidht) ? maxWidht : rect.br().x + dx,
+				(rect.br().y + dy > maxHeight) ? maxHeight : rect.br().y + dy);
+		return new Zone(num, new Rect(tl, br));
 	}
 
 	public void draw(Img img, Scalar color, int thickness) {
+		write(img, String.valueOf(num), 3, new Scalar(0, 0, 255), thickness);
 		Imgproc.rectangle(img.getSrc(), rect.tl(), rect.br(), color, thickness);
 	}
 
 	public void write(Img img, String text, double fontScale, Scalar color, int thickness) {
-		Imgproc.putText(img.getSrc(), text, new Point(rect.tl().x, rect.br().y), Core.FONT_HERSHEY_PLAIN, fontScale, color, thickness);
+		Imgproc.putText(img.getSrc(), text, new Point(rect.tl().x, rect.br().y), Core.FONT_HERSHEY_PLAIN, fontScale,
+				color, thickness);
 	}
 
 	public String ocr(Img img) {
 		return Ocr.doWork(img.getSrc(), getRect());
+	}
+
+	public int getNum() {
+		return num;
 	}
 
 }

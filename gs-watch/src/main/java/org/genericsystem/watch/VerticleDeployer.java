@@ -14,6 +14,7 @@ public class VerticleDeployer extends AbstractVerticle {
 	public static final String PDF_WATCHER_ADDRESS = "app.pdfchanges";
 	public static final String PNG_WATCHER_ADDRESS = "app.pngchanges";
 	public static final String IMAGE_ADDED_TO_CLASS_ADDRESS = "app.class.newimage";
+	public static final String IMAGE_TO_OCR = "app.ocr.newimage";
 
 	public static void deployVerticle(Verticle verticle) {
 		ClusterManager mgr = new HazelcastClusterManager();
@@ -36,6 +37,7 @@ public class VerticleDeployer extends AbstractVerticle {
 		vertx.deployVerticle(new PdfsConverterVerticle());
 		vertx.deployVerticle(new ClassifierVerticle());
 		vertx.deployVerticle(new RunScriptVerticle());
+		vertx.deployVerticle(new OcrVerticle());
 		startFuture.complete();
 	}
 }

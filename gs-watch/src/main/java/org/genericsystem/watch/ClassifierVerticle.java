@@ -33,6 +33,8 @@ public class ClassifierVerticle extends AbstractVerticle {
 				savedFile = Classifier.classify(classesDirectory, newFile);
 			}
 			if (savedFile != null) {
+				System.gc();
+				System.runFinalization();
 				vertx.eventBus().publish(VerticleDeployer.IMAGE_ADDED_TO_CLASS_ADDRESS, savedFile.toString());
 				future.complete();
 			} else
