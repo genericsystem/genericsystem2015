@@ -29,8 +29,7 @@ public class Zones {
 	}
 
 	private Zones adjust(double dx, double dy, int width, int height) {
-		return new Zones(
-				zones.stream().map(zone -> zone.adjustRect(dx, dy, width, height)).collect(Collectors.toList()));
+		return new Zones(zones.stream().map(zone -> zone.adjustRect(dx, dy, width, height)).collect(Collectors.toList()));
 	}
 
 	public Zones(List<Zone> zonesList) {
@@ -46,7 +45,7 @@ public class Zones {
 			if (contourarea > minArea) {
 				Rect rect = Imgproc.boundingRect(contour);
 				if (rect.width >= rect.height)
-					zones.add(new Zone(rect));
+					zones.add(new Zone(i, rect));
 			}
 		}
 	}

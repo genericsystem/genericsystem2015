@@ -58,10 +58,6 @@ public class ClassImgsBoard extends VBox {
 			zonesRef.setValue((ObservableValue<Img>) group.getSelectedToggle().getUserData());
 		});
 
-		imgToDisplay.setValue(model);
-
-		AwareImageView zonesImageView = new AwareImageView(imgToDisplay);
-
 		ob = createTransitive(zonesRef, ov -> ov.getValue());
 		ob.addListener((o, ov, nv) -> {
 			zones = Zones.get(
@@ -74,9 +70,10 @@ public class ClassImgsBoard extends VBox {
 		zones = Zones.get(zonesRef.getValue().getValue()
 				.morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, new Size(9, 10))).gray(),
 				300.0, 6.0, 6.0);
-		Img zonedMean = new Img(model.getSrc());
-		zones.draw(zonedMean, new Scalar(0, 255, 0), 3);
-		imgToDisplay.setValue(zonedMean);
+		zones.draw(model, new Scalar(0, 255, 0), 3);
+		imgToDisplay.setValue(model);
+
+		AwareImageView zonesImageView = new AwareImageView(imgToDisplay);
 
 		HBox zoneBase = new HBox();
 		zoneBase.getChildren().add(average);
