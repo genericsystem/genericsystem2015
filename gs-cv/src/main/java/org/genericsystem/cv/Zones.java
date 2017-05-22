@@ -29,7 +29,8 @@ public class Zones {
 	}
 
 	private Zones adjust(double dx, double dy, int width, int height) {
-		return new Zones(zones.stream().map(zone -> zone.adjustRect(dx, dy, width, height)).collect(Collectors.toList()));
+		return new Zones(
+				zones.stream().map(zone -> zone.adjustRect(dx, dy, width, height)).collect(Collectors.toList()));
 	}
 
 	public Zones(List<Zone> zonesList) {
@@ -39,13 +40,16 @@ public class Zones {
 	public Zones(Img gray, double minArea) {
 		this.zones = new ArrayList<>();
 		List<MatOfPoint> contours = gray.findContours(new Img[1], Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+		int num = 0;
 		for (int i = 0; i < contours.size(); i++) {
 			MatOfPoint contour = contours.get(i);
 			double contourarea = Imgproc.contourArea(contour);
 			if (contourarea > minArea) {
 				Rect rect = Imgproc.boundingRect(contour);
-				if (rect.width >= rect.height)
-					zones.add(new Zone(i, rect));
+				if (rect.width >= rect.height) {
+					zones.add(new Zone(num, rect));
+					num++;
+				}
 			}
 		}
 	}
