@@ -41,6 +41,7 @@ public class Ocr {
 		instance.setOcrEngineMode(TessOcrEngineMode.OEM_CUBE_ONLY);
 		// instance.setTessVariable("preserve_interword_spaces", "0");
 		// instance.setTessVariable("textord_space_size_is_variable", "1");
+		instance.setTessVariable("debug_file", "/dev/null");
 		instance.setTessVariable("tessedit_char_whitelist", "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM0123456789.-,<'");
 		instance.setTessVariable("tessedit_char_blacklist", "?{}_[]()À");
 	}
