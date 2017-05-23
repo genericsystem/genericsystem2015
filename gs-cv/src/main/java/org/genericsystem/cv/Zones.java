@@ -17,7 +17,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
 public class Zones {
-	private List<Zone> zones;
+	private final List<Zone> zones;
 	private static final ObjectMapper mapper = new ObjectMapper();
 
 	public static Zones get(Img img, double minArea) {
@@ -30,6 +30,10 @@ public class Zones {
 
 	private Zones adjust(double dx, double dy, int width, int height) {
 		return new Zones(zones.stream().map(zone -> zone.adjustRect(dx, dy, width, height)).collect(Collectors.toList()));
+	}
+
+	public Zones() {
+		zones = new ArrayList<>();
 	}
 
 	public Zones(List<Zone> zonesList) {
@@ -81,7 +85,7 @@ public class Zones {
 
 	}
 
-	public Zones load(File file) throws JsonParseException, JsonMappingException, IOException {
+	public static Zones load(File file) throws JsonParseException, JsonMappingException, IOException {
 		return mapper.readValue(file, Zones.class);
 	}
 
