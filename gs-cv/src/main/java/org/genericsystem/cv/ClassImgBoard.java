@@ -50,8 +50,10 @@ public class ClassImgBoard extends VBox {
 		zonedImg = Bindings.createObjectBinding(() -> {
 			Img zonedMean = new Img(model.getSrc());
 			if (imgToZone.getValue() != null) {
-				zones = Zones.get(imgToZone.getValue().morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, new Size(9, 10))), 300.0, 6.0, 6.0);
+				zones = Zones.get(imgToZone.getValue().morphologyEx(Imgproc.MORPH_CLOSE,
+						new StructuringElement(Imgproc.MORPH_RECT, new Size(9, 10))), 300.0, 6.0, 6.0);
 				zones.draw(zonedMean, new Scalar(0, 255, 0), 3);
+				zones.writeNum(zonedMean, new Scalar(0, 0, 255), 3);
 				return zonedMean;
 			}
 			return zonedMean;
@@ -65,14 +67,24 @@ public class ClassImgBoard extends VBox {
 		zoneBase.getChildren().add(varianceRadio);
 		zoneBase.setSpacing(15);
 		vBox.getChildren().add(zoneBase);
-		List<LabelledSpinner> spinners = Arrays.asList(new LabelledSpinner("min hue", 0, 255, 0), new LabelledSpinner("min saturation", 0, 255, 0), new LabelledSpinner("min value", 0, 255, 0), new LabelledSpinner("max hue", 0, 255, 255),
-				new LabelledSpinner("max saturation", 0, 255, 255), new LabelledSpinner("max value", 0, 255, 86), new LabelledSpinner("min blue", 0, 255, 0), new LabelledSpinner("min green", 0, 255, 0), new LabelledSpinner("min red", 0, 255, 0),
-				new LabelledSpinner("max blue", 0, 255, 76), new LabelledSpinner("max green", 0, 255, 255), new LabelledSpinner("max red", 0, 255, 255), new LabelledSpinner("horizontal dilatation", 1, 60, 17),
+		List<LabelledSpinner> spinners = Arrays.asList(new LabelledSpinner("min hue", 0, 255, 0),
+				new LabelledSpinner("min saturation", 0, 255, 0), new LabelledSpinner("min value", 0, 255, 0),
+				new LabelledSpinner("max hue", 0, 255, 255), new LabelledSpinner("max saturation", 0, 255, 255),
+				new LabelledSpinner("max value", 0, 255, 86), new LabelledSpinner("min blue", 0, 255, 0),
+				new LabelledSpinner("min green", 0, 255, 0), new LabelledSpinner("min red", 0, 255, 0),
+				new LabelledSpinner("max blue", 0, 255, 76), new LabelledSpinner("max green", 0, 255, 255),
+				new LabelledSpinner("max red", 0, 255, 255), new LabelledSpinner("horizontal dilatation", 1, 60, 17),
 				new LabelledSpinner("vertical dilatation", 1, 30, 3));
-		action = () -> imgClass.setPreprocessor(
-				img -> img.eraseCorners(0.1).range(new Scalar(spinners.get(0).getValue(), spinners.get(1).getValue(), spinners.get(2).getValue()), new Scalar(spinners.get(3).getValue(), spinners.get(4).getValue(), spinners.get(5).getValue()), true)
-						.range(new Scalar(spinners.get(6).getValue(), spinners.get(7).getValue(), spinners.get(8).getValue()), new Scalar(spinners.get(9).getValue(), spinners.get(10).getValue(), spinners.get(11).getValue()), false)
-						.morphologyEx(Imgproc.MORPH_DILATE, new StructuringElement(Imgproc.MORPH_RECT, new Size(spinners.get(12).getValue(), spinners.get(13).getValue()))));
+		action = () -> imgClass.setPreprocessor(img -> img.eraseCorners(0.1)
+				.range(new Scalar(spinners.get(0).getValue(), spinners.get(1).getValue(), spinners.get(2).getValue()),
+						new Scalar(spinners.get(3).getValue(), spinners.get(4).getValue(), spinners.get(5).getValue()),
+						true)
+				.range(new Scalar(spinners.get(6).getValue(), spinners.get(7).getValue(), spinners.get(8).getValue()),
+						new Scalar(spinners.get(9).getValue(), spinners.get(10).getValue(),
+								spinners.get(11).getValue()),
+						false)
+				.morphologyEx(Imgproc.MORPH_DILATE, new StructuringElement(Imgproc.MORPH_RECT,
+						new Size(spinners.get(12).getValue(), spinners.get(13).getValue()))));
 		spinners.forEach(spinner -> spinner.setListener(action));
 		spinners.forEach(vBox.getChildren()::add);
 		AwareImageView zonesImageView = new AwareImageView(zonedImg);
@@ -92,7 +104,8 @@ public class ClassImgBoard extends VBox {
 			slider.setMin(min);
 			slider.setMax(max);
 			slider.setValue(value);
-			label.textProperty().bind(Bindings.createStringBinding(() -> name + " : " + slider.valueProperty().intValue(), slider.valueProperty()));
+			label.textProperty().bind(Bindings.createStringBinding(
+					() -> name + " : " + slider.valueProperty().intValue(), slider.valueProperty()));
 			getChildren().add(label);
 			getChildren().add(slider);
 		}
