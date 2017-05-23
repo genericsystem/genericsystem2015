@@ -40,16 +40,13 @@ public class Zones {
 	public Zones(Img gray, double minArea) {
 		this.zones = new ArrayList<>();
 		List<MatOfPoint> contours = gray.findContours(new Img[1], Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
-		int num = 0;
 		for (int i = 0; i < contours.size(); i++) {
 			MatOfPoint contour = contours.get(i);
 			double contourarea = Imgproc.contourArea(contour);
 			if (contourarea > minArea) {
 				Rect rect = Imgproc.boundingRect(contour);
-				if (rect.width >= rect.height) {
-					zones.add(new Zone(num, rect));
-					num++;
-				}
+				if (rect.width >= rect.height)
+					zones.add(new Zone(rect));
 			}
 		}
 	}
