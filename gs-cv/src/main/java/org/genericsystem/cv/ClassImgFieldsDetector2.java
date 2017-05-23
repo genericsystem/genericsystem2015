@@ -28,7 +28,7 @@ public class ClassImgFieldsDetector2 extends AbstractApp {
 		mainGrid.add(new AwareImageView(observableMean), 0, 0);
 		mainGrid.add(new AwareImageView(observableVariance), 1, 0);
 
-		mainGrid.add(new ClassImgsBoard2(imgClass, model), 0, 1, 2, 1);
+		mainGrid.add(new ClassImgBoard(imgClass, model), 0, 1, 2, 1);
 
 	}
 

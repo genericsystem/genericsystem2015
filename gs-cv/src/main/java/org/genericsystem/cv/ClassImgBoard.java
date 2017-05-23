@@ -1,9 +1,9 @@
 package org.genericsystem.cv;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
-import org.genericsystem.cv.ClassImgsBoard.LabelledSpinner;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
@@ -11,22 +11,26 @@ import org.opencv.imgproc.Imgproc;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
+import javafx.scene.control.Slider;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
-public class ClassImgsBoard2 extends VBox {
+public class ClassImgBoard extends VBox {
 
-	private ToggleGroup group = new ToggleGroup();
-	private ObservableValue<Img> average;
-	private ObservableValue<Img> variance;
+	private final ToggleGroup group = new ToggleGroup();
+	private final ObservableValue<Img> average;
+	private final ObservableValue<Img> variance;
 
-	private ObservableValue<Img> imgToZone;
-	private ObservableValue<Img> zonedImg;
-	private Runnable action;
+	private final ObservableValue<Img> imgToZone;
+	private final ObservableValue<Img> zonedImg;
+	private final Runnable action;
+	private Zones zones;
 
-	public ClassImgsBoard2(ImgClass2 imgClass, Img model) {
+	public ClassImgBoard(ImgClass2 imgClass, Img model) {
 		average = imgClass.getObservableMean();
 		variance = imgClass.getObservableVariance();
 
@@ -46,7 +50,7 @@ public class ClassImgsBoard2 extends VBox {
 		zonedImg = Bindings.createObjectBinding(() -> {
 			Img zonedMean = new Img(model.getSrc());
 			if (imgToZone.getValue() != null) {
-				Zones zones = Zones.get(imgToZone.getValue().morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, new Size(9, 10))), 300.0, 6.0, 6.0);
+				zones = Zones.get(imgToZone.getValue().morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, new Size(9, 10))), 300.0, 6.0, 6.0);
 				zones.draw(zonedMean, new Scalar(0, 255, 0), 3);
 				return zonedMean;
 			}
@@ -74,7 +78,33 @@ public class ClassImgsBoard2 extends VBox {
 		AwareImageView zonesImageView = new AwareImageView(zonedImg);
 		getChildren().add(zonesImageView);
 		getChildren().add(vBox);
+		Button saveButton = new Button("Save");
+		saveButton.setOnAction((e) -> zones.save(new File(imgClass.getDirectory() + "/zones/zones.json")));
+		vBox.getChildren().add(saveButton);
 		action.run();
+	}
+
+	public static class LabelledSpinner extends VBox {
+		private final Label label = new Label();
+		private final Slider slider = new Slider();
+
+		public LabelledSpinner(String name, double min, double max, double value) {
+			slider.setMin(min);
+			slider.setMax(max);
+			slider.setValue(value);
+			label.textProperty().bind(Bindings.createStringBinding(() -> name + " : " + slider.valueProperty().intValue(), slider.valueProperty()));
+			getChildren().add(label);
+			getChildren().add(slider);
+		}
+
+		public double getValue() {
+			return slider.getValue();
+		}
+
+		public void setListener(Runnable action) {
+			slider.setOnMouseReleased((e) -> action.run());
+			slider.setOnKeyReleased((e) -> action.run());
+		}
 	}
 
 }
