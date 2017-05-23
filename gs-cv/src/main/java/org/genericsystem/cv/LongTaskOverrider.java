@@ -11,7 +11,7 @@ public class LongTaskOverrider {
 			System.out.println("Overrides waiting task");
 		} else {
 			isRunning = task;
-			run(isRunning = task);
+			run(isRunning);
 		}
 	}
 

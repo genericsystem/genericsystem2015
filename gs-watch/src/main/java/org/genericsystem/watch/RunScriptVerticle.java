@@ -1,6 +1,6 @@
 package org.genericsystem.watch;
 
-import java.io.IOException;
+import org.genericsystem.cv.DidjvuScript;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.MessageConsumer;
@@ -10,7 +10,6 @@ import io.vertx.core.logging.LoggerFactory;
 public class RunScriptVerticle extends AbstractVerticle {
 
 	private static Logger log = LoggerFactory.getLogger(ClassifierVerticle.class);
-	private static final String shellScript = "../gs-cv/didjvu.sh";
 
 	public static void main(String[] args) {
 		VerticleDeployer.deployVerticle(new RunScriptVerticle());
@@ -22,18 +21,14 @@ public class RunScriptVerticle extends AbstractVerticle {
 		consumer.handler(message -> vertx.executeBlocking(future -> {
 			String imagePath = message.body();
 			System.out.println(">>>> New classified image: " + imagePath);
-			try {
-				Process process = Runtime.getRuntime().exec(new String[] { shellScript, imagePath });
-				int exitValue = process.waitFor();
-				if (exitValue == 0)
-					vertx.eventBus().publish(VerticleDeployer.IMAGE_TO_OCR, imagePath);
-				else
-					log.warn("Shell script execution failed on " + imagePath + " , exit value: " + exitValue + ".");
-			} catch (IOException | InterruptedException e) {
-				log.warn("Exception while executing shell script on file " + imagePath, e);
+			int exitValue = DidjvuScript.runDidjvuScript(imagePath);
+			if (exitValue == 0) {
+				vertx.eventBus().publish(VerticleDeployer.IMAGE_TO_OCR, imagePath);
+				future.complete();
+			} else {
+				log.warn("Shell script execution failed on " + imagePath + " , exit value: " + exitValue + ".");
 				future.fail("Shell script execution failed on " + imagePath + ".");
 			}
-			future.complete();
 		}, res -> {
 			if (res.failed())
 				throw new IllegalStateException(res.cause());

@@ -29,10 +29,10 @@ public class MailWatcherVerticle extends AbstractVerticle {
 
 	// TODO: Store config in a config file.
 	private static final String protocol = "imaps";
-	private static final String host = null;
+	private static final String host = "imap.gmail.com";
 	private static final String file = "INBOX";
-	private static final String username = null;
-	private static final String password = null;
+	private static final String username = "watchtestmwf";
+	private static final String password = "WatchTestMWF4";
 	private static final String pdfDir = "../gs-cv/pdf";
 
 	public static void main(String[] args) {
@@ -56,7 +56,7 @@ public class MailWatcherVerticle extends AbstractVerticle {
 			store = session.getStore(url);
 			store.connect();
 			IMAPFolder inbox = (IMAPFolder) store.getFolder(url);
-			inbox.open(Folder.READ_ONLY); // Folder.READ_WRITE to mark the emails as read.
+			inbox.open(Folder.READ_WRITE); // Folder.READ_WRITE to mark the emails as read.
 
 			int start = 1;
 			int end = inbox.getMessageCount();
