@@ -40,6 +40,7 @@ public class PdfToPngConverter {
 
 			int pageCounter = 0;
 			for (PDPage page : document.getPages()) {
+				System.out.println("Extracting an image from file " + pdfFile);
 				BufferedImage bim = pdfRenderer.renderImageWithDPI(pageCounter, 300, ImageType.RGB);
 				Path newFile = destinationDirectory.toPath().resolve(fileName + "-" + pageCounter++ + ".png");
 				ImageIOUtil.writeImage(bim, newFile.toString(), 300);
