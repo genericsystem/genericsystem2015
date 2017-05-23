@@ -21,11 +21,11 @@ public class Zones {
 	private static final ObjectMapper mapper = new ObjectMapper();
 
 	public static Zones get(Img img, double minArea) {
-		return new Zones(img.gray(), minArea);
+		return new Zones(img.channels() == 1 ? img : img.gray(), minArea);
 	}
 
 	public static Zones get(Img img, double minArea, double dx, double dy) {
-		return new Zones(img.gray(), minArea).adjust(dx, dy, img.width(), img.height());
+		return new Zones(img.channels() == 1 ? img : img.gray(), minArea).adjust(dx, dy, img.width(), img.height());
 	}
 
 	private Zones adjust(double dx, double dy, int width, int height) {
