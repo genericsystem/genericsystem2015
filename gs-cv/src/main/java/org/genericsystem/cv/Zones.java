@@ -21,16 +21,15 @@ public class Zones {
 	private static final ObjectMapper mapper = new ObjectMapper();
 
 	public static Zones get(Img img, double minArea) {
-		return new Zones(img, minArea);
+		return new Zones(img.channels() == 1 ? img : img.gray(), minArea);
 	}
 
 	public static Zones get(Img img, double minArea, double dx, double dy) {
-		return new Zones(img, minArea).adjust(dx, dy, img.width(), img.height());
+		return new Zones(img.channels() == 1 ? img : img.gray(), minArea).adjust(dx, dy, img.width(), img.height());
 	}
 
 	private Zones adjust(double dx, double dy, int width, int height) {
-		return new Zones(
-				zones.stream().map(zone -> zone.adjustRect(dx, dy, width, height)).collect(Collectors.toList()));
+		return new Zones(zones.stream().map(zone -> zone.adjustRect(dx, dy, width, height)).collect(Collectors.toList()));
 	}
 
 	public Zones(List<Zone> zonesList) {
