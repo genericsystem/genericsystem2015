@@ -12,6 +12,8 @@ public class AwareImageView extends ImageView {
 				@Override
 				public void run() {
 					setImage(observableImg.getValue().getImageView().getImage());
+					System.gc();
+					System.runFinalization();
 				}
 			});
 		});
