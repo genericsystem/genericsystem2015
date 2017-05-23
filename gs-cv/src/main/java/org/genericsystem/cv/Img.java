@@ -38,7 +38,6 @@ import org.opencv.utils.Converters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javafx.scene.Node;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
@@ -601,7 +600,7 @@ public class Img {
 				if (min > results.get(i).get(method)) {
 					min = results.get(i).get(method);
 					index = i;
-					System.out.println("method=" + method + " index=" + index);
+					// System.out.println("method=" + method + " index=" + index);
 				}
 			}
 			mins.put(index, mins.get(index) != null ? mins.get(index) + 1 : 1);
@@ -609,7 +608,7 @@ public class Img {
 		TreeMap<Integer, Integer> reverse = mins.entrySet().stream().collect(Collectors.toMap(entry -> entry.getValue(), entry -> entry.getKey(), (u, v) -> {
 			return u;
 		}, TreeMap::new));
-		System.out.println("Number of algos : " + reverse.lastEntry().getKey());
+		// System.out.println("Number of algos : " + reverse.lastEntry().getKey());
 		return reverse.lastEntry().getValue();
 
 	}
@@ -643,7 +642,7 @@ public class Img {
 			System.gc();
 			// System.out.println("for Algo " + method + " comparison : " + result + "\n");
 		}
-		System.out.println("results : " + results);
+		// System.out.println("results : " + results);
 		return results;
 
 	}

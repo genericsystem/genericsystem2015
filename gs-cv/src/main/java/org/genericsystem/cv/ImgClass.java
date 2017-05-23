@@ -88,6 +88,8 @@ public class ImgClass {
 
 			this.mean = new Img(mean);
 			this.variance = new Img(variance);
+			System.gc();
+			System.runFinalization();
 		}
 	}
 

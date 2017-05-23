@@ -16,7 +16,6 @@ import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
@@ -142,14 +141,11 @@ public class ClassImgsBoard extends VBox {
 		private final Label label = new Label();
 		private final Slider slider = new Slider();
 
-		private ChangeListener<Boolean> sliderListener;
-
 		public LabelledSpinner(String name, double min, double max, double value) {
 			slider.setMin(min);
 			slider.setMax(max);
 			slider.setValue(value);
-			label.textProperty().bind(Bindings.createStringBinding(
-					() -> name + " : " + slider.valueProperty().intValue(), slider.valueProperty()));
+			label.textProperty().bind(Bindings.createStringBinding(() -> name + " : " + slider.valueProperty().intValue(), slider.valueProperty()));
 			getChildren().add(label);
 			getChildren().add(slider);
 		}
@@ -159,13 +155,8 @@ public class ClassImgsBoard extends VBox {
 		}
 
 		public void setListener(Runnable action) {
-			sliderListener = (o, wasChanging, changing) -> {
-				if (!changing)
-					action.run();
-			};
-			slider.valueChangingProperty().addListener(sliderListener);
+			slider.setOnMouseReleased((e) -> action.run());
+			slider.setOnKeyReleased((e) -> action.run());
 		}
-
 	}
-
 }
