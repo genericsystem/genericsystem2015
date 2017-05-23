@@ -2,12 +2,12 @@ package org.genericsystem.cv;
 
 import java.io.File;
 
-import javafx.scene.layout.GridPane;
-
 import org.opencv.core.Core;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
+
+import javafx.scene.layout.GridPane;
 
 public class ClassImgFieldsDetector extends AbstractApp {
 	static {
@@ -31,7 +31,7 @@ public class ClassImgFieldsDetector extends AbstractApp {
 		mainGrid.add(imgClass.getMean().getImageView(), columnIndex, rowIndex++);
 		mainGrid.add(imgClass.getVariance().getImageView(), columnIndex, rowIndex++);
 
-		imgClass.addMapper(img -> img.eraseCorners(0.1).dilateBlacks(86, 255, 76, new Size(15, 3)));
+		imgClass.addMapper(img -> img.eraseCorners(0.1).dilateBlacks(86, 255, 76, new Size(20, 3)));
 		mainGrid.add(imgClass.getMean().getImageView(), columnIndex, rowIndex++);
 		mainGrid.add(imgClass.getVariance().getImageView(), columnIndex, rowIndex++);
 
