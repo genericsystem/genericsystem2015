@@ -38,7 +38,6 @@ public class ClassImgsBoard extends VBox {
 	public ClassImgsBoard(ImgClass2 imgClass, Img model) {
 
 		VBox vBox = new VBox();
-
 		setPadding(new Insets(40, 40, 40, 40));
 
 		ToggleGroup group = new ToggleGroup();
@@ -57,7 +56,6 @@ public class ClassImgsBoard extends VBox {
 		group.selectedToggleProperty().addListener((o, ov, nv) -> {
 			zonesRef.setValue((ObservableValue<Img>) group.getSelectedToggle().getUserData());
 		});
-
 		ob = createTransitive(zonesRef, ov -> ov.getValue());
 		ob.addListener((o, ov, nv) -> {
 			zones = Zones.get(
@@ -65,6 +63,7 @@ public class ClassImgsBoard extends VBox {
 					300.0, 6.0, 6.0);
 			Img zonedMean = new Img(model.getSrc());
 			zones.draw(zonedMean, new Scalar(0, 255, 0), 3);
+			zones.writeNum(zonedMean, new Scalar(0, 0, 255), 3);
 			Platform.runLater(() -> imgToDisplay.setValue(zonedMean));
 		});
 		zones = Zones.get(zonesRef.getValue().getValue()
