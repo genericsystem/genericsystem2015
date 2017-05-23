@@ -56,7 +56,7 @@ public class MailWatcherVerticle extends AbstractVerticle {
 			store = session.getStore(url);
 			store.connect();
 			IMAPFolder inbox = (IMAPFolder) store.getFolder(url);
-			inbox.open(Folder.READ_ONLY); // Folder.READ_WRITE to mark the emails as read.
+			inbox.open(Folder.READ_WRITE); // Folder.READ_WRITE to mark the emails as read.
 
 			int start = 1;
 			int end = inbox.getMessageCount();
