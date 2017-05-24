@@ -1,15 +1,8 @@
 package org.genericsystem.watch;
 
-import java.io.IOException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.genericsystem.cv.ImgClass;
-import org.genericsystem.cv.Tools;
-import org.genericsystem.cv.Zone;
-import org.genericsystem.cv.ZoneScorer;
-import org.genericsystem.cv.Zones;
-import org.opencv.core.Size;
+import org.genericsystem.cv.Ocr;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.MessageConsumer;
@@ -30,30 +23,7 @@ public class OcrVerticle extends AbstractVerticle {
 		consumer.handler(message -> vertx.executeBlocking(future -> {
 			String imagePath = message.body();
 			System.out.println(">>>>> New image to OCR: " + imagePath);
-			Path imgClassDirectory = Paths.get(imagePath).getParent();
-
-			Path zonesFile = imgClassDirectory.resolve("zones/zones.json");
-			Zones zones = null;
-			if (zonesFile.toFile().exists()) {
-				System.out.println("Precomputed zones found, file: " + zonesFile);
-				try {
-					zones = Zones.load(zonesFile.toFile());
-				} catch (IOException ignore) {
-					System.out.println("Error while loading zones: " + zonesFile);
-					ignore.printStackTrace();
-				}
-			}
-			if (zones == null) {
-				ImgClass imgClass = ImgClass.fromDirectory(imgClassDirectory.toString());
-				imgClass.addMapper(img -> img.eraseCorners(0.1).dilateBlacks(86, 255, 76, new Size(15, 3)));
-				zones = Zones.get(imgClass.getClosedVarianceZones(new Size(9, 10)), 300, 6, 6);
-			}
-			for (Zone zone : zones.get()) {
-				ZoneScorer scorer = zone.newUnsupervisedScorer(Tools.classImgsStream(imgClassDirectory + "/mask/" + Paths.get(imagePath).getFileName().toString().replace(".png", "")));
-				System.out.println("Image " + imagePath + ", found text: " + scorer.getBestText() + " " + Math.floor((scorer.getBestScore() * 10000)) / 100 + "%");
-			}
-			System.gc();
-			System.runFinalization();
+			Ocr.ocrClassifiedImage(Paths.get(imagePath));
 			future.complete();
 		}, res -> {
 			if (res.failed())
