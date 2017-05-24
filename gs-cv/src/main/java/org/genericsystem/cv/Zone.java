@@ -10,8 +10,11 @@ import org.opencv.imgproc.Imgproc;
 
 public class Zone {
 
-	private final Rect rect;
+	private Rect rect;
 	private int num;
+
+	public Zone() {
+	}
 
 	public Zone(int num, Rect rect) {
 		this.num = num;
