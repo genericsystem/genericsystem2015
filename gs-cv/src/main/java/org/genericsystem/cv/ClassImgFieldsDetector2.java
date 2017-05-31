@@ -1,9 +1,8 @@
 package org.genericsystem.cv;
 
-import org.opencv.core.Core;
-
-import javafx.beans.value.ObservableValue;
 import javafx.scene.layout.GridPane;
+
+import org.opencv.core.Core;
 
 public class ClassImgFieldsDetector2 extends AbstractApp {
 	static {
@@ -18,18 +17,10 @@ public class ClassImgFieldsDetector2 extends AbstractApp {
 
 	@Override
 	protected void fillGrid(GridPane mainGrid) {
-
 		ImgClass2 imgClass = ImgClass2.fromDirectory(null, classImgRepertory);
-
-		ObservableValue<Img> observableMean = imgClass.getObservableMean();
-		Img model = observableMean.getValue();
-		ObservableValue<Img> observableVariance = imgClass.getObservableVariance();
-
-		mainGrid.add(new AwareImageView(observableMean), 0, 0);
-		mainGrid.add(new AwareImageView(observableVariance), 1, 0);
-
-		mainGrid.add(new ClassImgBoard(imgClass, model), 0, 1, 2, 1);
-
+		mainGrid.add(new AwareImageView(imgClass.getObservableMean()), 0, 0);
+		mainGrid.add(new AwareImageView(imgClass.getObservableVariance()), 1, 0);
+		mainGrid.add(new ClassImgBoard(imgClass), 0, 1, 2, 1);
 	}
 
 }
