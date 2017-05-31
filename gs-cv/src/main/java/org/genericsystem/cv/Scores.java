@@ -41,4 +41,22 @@ public class Scores {
 		}
 		return bestText;
 	}
+
+	public String getBestText2() {
+		String bestText = "";
+		int shorterDistance = Integer.MAX_VALUE;
+		for (Entry<String, Integer> entry : ocrs.entrySet()) {
+			if (!entry.getKey().equals("")) {
+				int d = 0;
+				for (Entry<String, Integer> entry2 : ocrs.entrySet()) {
+					d += Levenshtein.distance(entry.getKey(), entry2.getKey());
+				}
+				if (d < shorterDistance) {
+					bestText = entry.getKey();
+					shorterDistance = d;
+				}
+			}
+		}
+		return bestText;
+	}
 }

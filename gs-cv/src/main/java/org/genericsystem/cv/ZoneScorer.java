@@ -12,6 +12,7 @@ public class ZoneScorer {
 		imgs.forEach(img -> {
 			String s = zone.ocr(img);
 			s = s.replace("\n", "").replace(" ", "").trim();
+			System.out.println("------ " + s);
 			scores.put(s);
 		});
 	}
@@ -26,6 +27,10 @@ public class ZoneScorer {
 
 	public String getBestText() {
 		return scores.getBestText();
+	}
+
+	public String getBestText2() {
+		return scores.getBestText2();
 	}
 
 }

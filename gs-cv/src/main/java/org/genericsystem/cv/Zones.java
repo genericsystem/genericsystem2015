@@ -11,8 +11,6 @@ import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
@@ -29,7 +27,8 @@ public class Zones {
 	}
 
 	private Zones adjust(double dx, double dy, int width, int height) {
-		return new Zones(zones.stream().map(zone -> zone.adjustRect(dx, dy, width, height)).collect(Collectors.toList()));
+		return new Zones(
+				zones.stream().map(zone -> zone.adjustRect(dx, dy, width, height)).collect(Collectors.toList()));
 	}
 
 	public Zones() {
@@ -85,8 +84,21 @@ public class Zones {
 
 	}
 
-	public static Zones load(File file) throws JsonParseException, JsonMappingException, IOException {
-		return mapper.readValue(file, Zones.class);
+	public void save(String imgClassDirectory) {
+		this.save(new File(imgClassDirectory + "/zones/zones.json"));
+	}
+
+	public static Zones load(File file) {
+		try {
+			return mapper.readValue(file, Zones.class);
+		} catch (IOException e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		}
+	}
+
+	public static Zones load(String imgClassDirectory) {
+		return load(new File(imgClassDirectory + "/zones/zones.json"));
 	}
 
 }
