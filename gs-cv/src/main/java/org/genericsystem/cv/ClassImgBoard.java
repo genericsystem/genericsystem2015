@@ -4,10 +4,6 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
-import org.opencv.core.Scalar;
-import org.opencv.core.Size;
-import org.opencv.imgproc.Imgproc;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
@@ -19,8 +15,12 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
-public class ClassImgBoard extends VBox {
+import org.opencv.core.Scalar;
+import org.opencv.core.Size;
+import org.opencv.imgproc.Imgproc;
 
+public class ClassImgBoard extends VBox {
+	private final Img model;
 	private final ToggleGroup group = new ToggleGroup();
 	private final ObservableValue<Img> average;
 	private final ObservableValue<Img> variance;
@@ -30,8 +30,9 @@ public class ClassImgBoard extends VBox {
 	private final Runnable action;
 	private Zones zones;
 
-	public ClassImgBoard(ImgClass2 imgClass, Img model) {
+	public ClassImgBoard(ImgClass2 imgClass) {
 		average = imgClass.getObservableMean();
+		model = average.getValue();
 		variance = imgClass.getObservableVariance();
 
 		RadioButton averageRadio = new RadioButton("Average");
@@ -68,12 +69,12 @@ public class ClassImgBoard extends VBox {
 		vBox.getChildren().add(zoneBase);
 		List<LabelledSpinner> spinners = Arrays.asList(new LabelledSpinner("min hue", 0, 255, 0), new LabelledSpinner("min saturation", 0, 255, 0), new LabelledSpinner("min value", 0, 255, 0), new LabelledSpinner("max hue", 0, 255, 255),
 				new LabelledSpinner("max saturation", 0, 255, 255), new LabelledSpinner("max value", 0, 255, 86), new LabelledSpinner("min blue", 0, 255, 0), new LabelledSpinner("min green", 0, 255, 0), new LabelledSpinner("min red", 0, 255, 0),
-				new LabelledSpinner("max blue", 0, 255, 76), new LabelledSpinner("max green", 0, 255, 255), new LabelledSpinner("max red", 0, 255, 255), new LabelledSpinner("horizontal dilatation", 1, 60, 20),
-				new LabelledSpinner("vertical dilatation", 1, 30, 3));
-		action = () -> imgClass.setPreprocessor(
-				img -> img.eraseCorners(0.1).range(new Scalar(spinners.get(0).getValue(), spinners.get(1).getValue(), spinners.get(2).getValue()), new Scalar(spinners.get(3).getValue(), spinners.get(4).getValue(), spinners.get(5).getValue()), true)
-						.range(new Scalar(spinners.get(6).getValue(), spinners.get(7).getValue(), spinners.get(8).getValue()), new Scalar(spinners.get(9).getValue(), spinners.get(10).getValue(), spinners.get(11).getValue()), false)
-						.morphologyEx(Imgproc.MORPH_DILATE, new StructuringElement(Imgproc.MORPH_RECT, new Size(spinners.get(12).getValue(), spinners.get(13).getValue()))));
+				new LabelledSpinner("max blue", 0, 255, 76), new LabelledSpinner("max green", 0, 255, 255), new LabelledSpinner("max red", 0, 255, 255), new LabelledSpinner("horizontal dilatation", 1, 60, 20), new LabelledSpinner("vertical dilatation", 1,
+						30, 3));
+		action = () -> imgClass.setPreprocessor(img -> img.eraseCorners(0.1)
+				.range(new Scalar(spinners.get(0).getValue(), spinners.get(1).getValue(), spinners.get(2).getValue()), new Scalar(spinners.get(3).getValue(), spinners.get(4).getValue(), spinners.get(5).getValue()), true)
+				.range(new Scalar(spinners.get(6).getValue(), spinners.get(7).getValue(), spinners.get(8).getValue()), new Scalar(spinners.get(9).getValue(), spinners.get(10).getValue(), spinners.get(11).getValue()), false)
+				.morphologyEx(Imgproc.MORPH_DILATE, new StructuringElement(Imgproc.MORPH_RECT, new Size(spinners.get(12).getValue(), spinners.get(13).getValue()))));
 		spinners.forEach(spinner -> spinner.setListener(action));
 		spinners.forEach(vBox.getChildren()::add);
 		AwareImageView zonesImageView = new AwareImageView(zonedImg);

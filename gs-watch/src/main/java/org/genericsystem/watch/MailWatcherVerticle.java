@@ -1,5 +1,7 @@
 package org.genericsystem.watch;
 
+import io.vertx.core.AbstractVerticle;
+
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -22,8 +24,6 @@ import javax.mail.search.FlagTerm;
 import org.apache.commons.mail.util.MimeMessageParser;
 
 import com.sun.mail.imap.IMAPFolder;
-
-import io.vertx.core.AbstractVerticle;
 
 public class MailWatcherVerticle extends AbstractVerticle {
 
