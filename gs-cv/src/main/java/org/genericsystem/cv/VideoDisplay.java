@@ -1,5 +1,6 @@
 package org.genericsystem.cv;
 
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -23,8 +24,8 @@ public class VideoDisplay extends AbstractApp {
 
 	private final static String refPath = "classes/id-fr-front/image4-0.png";
 	private static Img ref = new Img(Imgcodecs.imread(refPath));
-	private VideoCapture capture = new VideoCapture(0);
-	private ScheduledExecutorService timer;
+	private final VideoCapture capture = new VideoCapture(0);
+	private ScheduledExecutorService timer = Executors.newSingleThreadScheduledExecutor();
 
 	@Override
 	protected void fillGrid(GridPane mainGrid) {
@@ -33,8 +34,6 @@ public class VideoDisplay extends AbstractApp {
 		ImageView src = new ImageView(Tools.mat2jfxImage(frame));
 		mainGrid.add(src, 0, 0);
 		mainGrid.add(ref.getImageView(), 0, 1);
-		ImageView result = new ImageView();
-		mainGrid.add(result, 0, 1);
 		timer.scheduleAtFixedRate(() -> {
 			capture.read(frame);
 			src.setImage(Tools.mat2jfxImage(frame));
