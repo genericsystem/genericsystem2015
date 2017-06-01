@@ -74,12 +74,7 @@ public class Ocr {
 		Zones zones = null;
 		if (zonesFile.toFile().exists()) {
 			System.out.println("Precomputed zones found, file: " + zonesFile);
-			try {
-				zones = Zones.load(zonesFile.toFile());
-			} catch (IOException ignore) {
-				System.out.println("Error while loading zones: " + zonesFile);
-				ignore.printStackTrace();
-			}
+			zones = Zones.load(zonesFile.toFile());
 		}
 		if (zones == null) {
 			ImgClass imgClass = ImgClass.fromDirectory(imgClassDirectory.toString());
