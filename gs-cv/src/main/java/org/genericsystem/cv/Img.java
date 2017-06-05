@@ -661,10 +661,4 @@ public class Img {
 		return result;
 	}
 
-
-	public Img scale(double d) {
-		Mat result = new Mat();
-		Imgproc.resize(src, result, new Size(src.width() * d, src.height() * d));
-		return new Img(result);
-	}
 }
