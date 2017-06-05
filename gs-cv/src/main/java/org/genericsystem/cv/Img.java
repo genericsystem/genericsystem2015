@@ -14,6 +14,9 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+
 import javax.swing.ImageIcon;
 
 import org.opencv.core.Core;
@@ -37,9 +40,6 @@ import org.opencv.photo.Photo;
 import org.opencv.utils.Converters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 
 public class Img {
 
@@ -425,8 +425,8 @@ public class Img {
 	}
 
 	public Img dilateBlacks(double valueThreshold, double saturatioThreshold, double blueThreshold, Size dilatation) {
-		return range(new Scalar(0, 0, 0), new Scalar(255, saturatioThreshold, valueThreshold), true).range(new Scalar(0, 0, 0), new Scalar(blueThreshold, 255, 255), false).gray().morphologyEx(Imgproc.MORPH_DILATE,
-				new StructuringElement(Imgproc.MORPH_RECT, dilatation));
+		return range(new Scalar(0, 0, 0), new Scalar(255, saturatioThreshold, valueThreshold), true).range(new Scalar(0, 0, 0), new Scalar(blueThreshold, 255, 255), false).gray()
+				.morphologyEx(Imgproc.MORPH_DILATE, new StructuringElement(Imgproc.MORPH_RECT, dilatation));
 	}
 
 	public Img equalizeHisto() {
@@ -646,4 +646,19 @@ public class Img {
 		return results;
 
 	}
+
+	public Mat projectVerticaly() {
+		Mat result = new Mat();
+		Img img = otsu();
+		Core.reduce(img.getSrc(), result, 1, Core.REDUCE_SUM, CvType.CV_32S);
+		return result;
+	}
+
+	public Mat projectHorizontaly() {
+		Mat result = new Mat();
+		Img img = otsu();
+		Core.reduce(img.getSrc(), result, 0, Core.REDUCE_SUM, CvType.CV_32S);
+		return result;
+	}
+
 }
