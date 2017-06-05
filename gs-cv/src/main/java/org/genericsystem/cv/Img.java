@@ -646,4 +646,25 @@ public class Img {
 		return results;
 
 	}
+
+	public Mat projectVerticaly() {
+		Mat result = new Mat();
+		Img img = otsu();
+		Core.reduce(img.getSrc(), result, 1, Core.REDUCE_SUM, CvType.CV_32S);
+		return result;
+	}
+
+	public Mat projectHorizontaly() {
+		Mat result = new Mat();
+		Img img = otsu();
+		Core.reduce(img.getSrc(), result, 0, Core.REDUCE_SUM, CvType.CV_32S);
+		return result;
+	}
+
+
+	public Img scale(double d) {
+		Mat result = new Mat();
+		Imgproc.resize(src, result, new Size(src.width() * d, src.height() * d));
+		return new Img(result);
+	}
 }
