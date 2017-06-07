@@ -3,6 +3,7 @@ package org.genericsystem.cv;
 import java.util.stream.Stream;
 
 import org.opencv.core.Core;
+import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
@@ -31,8 +32,7 @@ public class Zone {
 
 	public Zone adjustRect(double dx, double dy, int maxWidht, int maxHeight) {
 		Point tl = new Point(rect.tl().x > dx ? rect.tl().x - dx : 0d, rect.tl().y > dy ? rect.tl().y - dy : 0d);
-		Point br = new Point((rect.br().x + dx > maxWidht) ? maxWidht : rect.br().x + dx,
-				(rect.br().y + dy > maxHeight) ? maxHeight : rect.br().y + dy);
+		Point br = new Point((rect.br().x + dx > maxWidht) ? maxWidht : rect.br().x + dx, (rect.br().y + dy > maxHeight) ? maxHeight : rect.br().y + dy);
 		return new Zone(num, new Rect(tl, br));
 	}
 
@@ -41,8 +41,7 @@ public class Zone {
 	}
 
 	public void write(Img img, String text, double fontScale, Scalar color, int thickness) {
-		Imgproc.putText(img.getSrc(), text, new Point(rect.tl().x, rect.br().y), Core.FONT_HERSHEY_PLAIN, fontScale,
-				color, thickness);
+		Imgproc.putText(img.getSrc(), text, new Point(rect.tl().x, rect.br().y), Core.FONT_HERSHEY_PLAIN, fontScale, color, thickness);
 	}
 
 	public String ocr(Img img) {
@@ -51,6 +50,10 @@ public class Zone {
 
 	public int getNum() {
 		return num;
+	}
+
+	public Img getRoi(Img img) {
+		return new Img(new Mat(img.getSrc(), getRect()));
 	}
 
 }

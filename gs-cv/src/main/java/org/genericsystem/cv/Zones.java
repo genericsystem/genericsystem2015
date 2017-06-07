@@ -22,13 +22,16 @@ public class Zones {
 		return new Zones(img.channels() == 1 ? img : img.gray(), minArea);
 	}
 
+	public static Zones get(Img img, double minArea, int RETR) {
+		return new Zones(img.channels() == 1 ? img : img.gray(), minArea, RETR);
+	}
+
 	public static Zones get(Img img, double minArea, double dx, double dy) {
 		return new Zones(img.channels() == 1 ? img : img.gray(), minArea).adjust(dx, dy, img.width(), img.height());
 	}
 
 	private Zones adjust(double dx, double dy, int width, int height) {
-		return new Zones(
-				zones.stream().map(zone -> zone.adjustRect(dx, dy, width, height)).collect(Collectors.toList()));
+		return new Zones(zones.stream().map(zone -> zone.adjustRect(dx, dy, width, height)).collect(Collectors.toList()));
 	}
 
 	public Zones() {
@@ -40,8 +43,12 @@ public class Zones {
 	}
 
 	public Zones(Img gray, double minArea) {
+		this(gray, minArea, Imgproc.RETR_EXTERNAL);
+	}
+
+	public Zones(Img gray, double minArea, int RETR) {
 		this.zones = new ArrayList<>();
-		List<MatOfPoint> contours = gray.findContours(new Img[1], Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+		List<MatOfPoint> contours = gray.findContours(new Img[1], RETR, Imgproc.CHAIN_APPROX_SIMPLE);
 		int num = 0;
 		for (int i = 0; i < contours.size(); i++) {
 			MatOfPoint contour = contours.get(i);

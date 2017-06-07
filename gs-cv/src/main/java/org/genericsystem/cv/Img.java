@@ -51,6 +51,10 @@ public class Img {
 		return src;
 	}
 
+	public Img(String path) {
+		this(Imgcodecs.imread(path));
+	}
+
 	public Img(Mat src) {
 		src.copyTo(this.src);
 	}
@@ -552,11 +556,11 @@ public class Img {
 		return new Img(ret);
 	}
 
-	private int rows() {
+	public int rows() {
 		return src.rows();
 	}
 
-	private int cols() {
+	public int cols() {
 		return src.cols();
 	}
 
@@ -647,18 +651,54 @@ public class Img {
 
 	}
 
-	public Mat projectVerticaly() {
+	public Img projectVerticaly() {
 		Mat result = new Mat();
-		Img img = otsu();
-		Core.reduce(img.getSrc(), result, 1, Core.REDUCE_SUM, CvType.CV_32S);
-		return result;
+		Core.reduce(getSrc(), result, 1, Core.REDUCE_SUM, CvType.CV_32S);
+		return new Img(result);
 	}
 
-	public Mat projectHorizontaly() {
+	public Img projectHorizontaly() {
 		Mat result = new Mat();
-		Img img = otsu();
-		Core.reduce(img.getSrc(), result, 0, Core.REDUCE_SUM, CvType.CV_32S);
-		return result;
+		Core.reduce(getSrc(), result, 0, Core.REDUCE_SUM, CvType.CV_32S);
+		return new Img(result);
+	}
+
+	public Img toVerticalHistogram(int cols) {
+		Mat result = new Mat(new Size(cols, rows()), CvType.CV_8UC1);
+		for (int row = 0; row < rows(); row++) {
+			double x = get(row, 0)[0] / 255;
+			if (x < Integer.valueOf(cols).doubleValue() / 100)
+				x = 0;
+			else
+				x = cols;
+			Imgproc.line(result, new Point(0, row), new Point(x, row), new Scalar(255));
+		}
+		return new Img(result);
+	}
+
+	public Img toHorizontalHistogram(int rows) {
+		Mat result = new Mat(new Size(cols(), rows), CvType.CV_8UC1);
+		for (int col = 0; col < cols(); col++) {
+			double y = get(0, col)[0] / 255;
+			if (y < Integer.valueOf(rows).doubleValue() / 100)
+				y = 0;
+			else
+				y = rows;
+			Imgproc.line(result, new Point(col, 0), new Point(col, y), new Scalar(255));
+		}
+		return new Img(result);
+	}
+
+	public Img add(Img img) {
+		Mat result = new Mat();
+		Core.add(getSrc(), img.getSrc(), result);
+		return new Img(result);
+	}
+
+	public Img bitwise(Img img) {
+		Mat result = new Mat();
+		Core.bitwise_and(getSrc(), img.getSrc(), result);
+		return new Img(result);
 	}
 
 }
