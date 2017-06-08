@@ -704,4 +704,16 @@ public class Img {
 		return new Img(result);
 	}
 
+	public void recursivSplit(boolean vertical) {
+		Zones zones = Zones.split(this, 0, 0, vertical);
+		assert zones.size() != 0;
+		if (zones.size() == 1)
+			return;
+		for (Zone zone : zones) {
+			Img subRoi = zone.getRoi(this);
+			subRoi.recursivSplit(!vertical);
+		}
+		zones.draw(this, new Scalar(0, 255, 0), 3);
+	}
+
 }
