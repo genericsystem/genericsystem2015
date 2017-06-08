@@ -14,6 +14,9 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+
 import javax.swing.ImageIcon;
 
 import org.opencv.core.Core;
@@ -38,14 +41,11 @@ import org.opencv.utils.Converters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-
 public class Img {
 
 	private static Logger log = LoggerFactory.getLogger(Img.class);
 
-	private final Mat src = new Mat();
+	private final Mat src;
 
 	public Mat getSrc() {
 		return src;
@@ -56,11 +56,12 @@ public class Img {
 	}
 
 	public Img(Mat src) {
+		this.src = new Mat();
 		src.copyTo(this.src);
 	}
 
 	public Img(Img model, Zone zone) {
-		this(new Mat(model.getSrc(), zone.getRect()));
+		this.src = new Mat(model.getSrc(), zone.getRect());
 	}
 
 	public Img sobel(int ddepth, int dx, int dy, int ksize, double scale, double delta, int borderType) {
@@ -429,8 +430,8 @@ public class Img {
 	}
 
 	public Img dilateBlacks(double valueThreshold, double saturatioThreshold, double blueThreshold, Size dilatation) {
-		return range(new Scalar(0, 0, 0), new Scalar(255, saturatioThreshold, valueThreshold), true).range(new Scalar(0, 0, 0), new Scalar(blueThreshold, 255, 255), false).gray().morphologyEx(Imgproc.MORPH_DILATE,
-				new StructuringElement(Imgproc.MORPH_RECT, dilatation));
+		return range(new Scalar(0, 0, 0), new Scalar(255, saturatioThreshold, valueThreshold), true).range(new Scalar(0, 0, 0), new Scalar(blueThreshold, 255, 255), false).gray()
+				.morphologyEx(Imgproc.MORPH_DILATE, new StructuringElement(Imgproc.MORPH_RECT, dilatation));
 	}
 
 	public Img equalizeHisto() {
@@ -651,40 +652,42 @@ public class Img {
 
 	}
 
-	public Img projectVerticaly() {
+	public Img projectVertically() {
 		Mat result = new Mat();
 		Core.reduce(getSrc(), result, 1, Core.REDUCE_SUM, CvType.CV_32S);
 		return new Img(result);
 	}
 
-	public Img projectHorizontaly() {
+	public Img projectHorizontally() {
 		Mat result = new Mat();
 		Core.reduce(getSrc(), result, 0, Core.REDUCE_SUM, CvType.CV_32S);
 		return new Img(result);
 	}
 
 	public Img toVerticalHistogram(int cols) {
-		Mat result = new Mat(new Size(cols, rows()), CvType.CV_8UC1);
+		Mat result = new Mat(new Size(cols, rows()), CvType.CV_8UC1, new Scalar(0));
 		for (int row = 0; row < rows(); row++) {
 			double x = get(row, 0)[0] / 255;
 			if (x < Integer.valueOf(cols).doubleValue() / 100)
 				x = 0;
 			else
 				x = cols;
-			Imgproc.line(result, new Point(0, row), new Point(x, row), new Scalar(255));
+			if (x != 0)
+				Imgproc.line(result, new Point(0, row), new Point(x, row), new Scalar(255));
 		}
 		return new Img(result);
 	}
 
 	public Img toHorizontalHistogram(int rows) {
-		Mat result = new Mat(new Size(cols(), rows), CvType.CV_8UC1);
+		Mat result = new Mat(new Size(cols(), rows), CvType.CV_8UC1, new Scalar(0));
 		for (int col = 0; col < cols(); col++) {
 			double y = get(0, col)[0] / 255;
 			if (y < Integer.valueOf(rows).doubleValue() / 100)
 				y = 0;
 			else
 				y = rows;
-			Imgproc.line(result, new Point(col, 0), new Point(col, y), new Scalar(255));
+			if (y != 0)
+				Imgproc.line(result, new Point(col, 0), new Point(col, y), new Scalar(255));
 		}
 		return new Img(result);
 	}

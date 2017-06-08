@@ -53,7 +53,15 @@ public class Zone {
 	}
 
 	public Img getRoi(Img img) {
+		return new Img(img, this);
+	}
+
+	public Img getImg(Img img) {
 		return new Img(new Mat(img.getSrc(), getRect()));
+	}
+
+	public void draw(Mat roi, Scalar color, int thickness) {
+		Imgproc.rectangle(roi, rect.tl(), rect.br(), color, thickness);
 	}
 
 }

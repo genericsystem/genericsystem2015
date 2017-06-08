@@ -4,6 +4,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
+
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -14,9 +17,6 @@ import org.opencv.imgproc.Imgproc;
 import org.opencv.text.ERFilter;
 import org.opencv.text.Text;
 import org.opencv.videoio.VideoCapture;
-
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
 
 public class TextDetector extends AbstractApp {
 
@@ -51,7 +51,7 @@ public class TextDetector extends AbstractApp {
 		ERFilter er_filter1 = Text.createERFilterNM1("resources/trained_classifierNM1.xml", 16, 0.00015f, 0.13f, 0.2f, true, 0.1f);
 		ERFilter er_filter2 = Text.createERFilterNM2("resources/trained_classifierNM2.xml", 0.5f);
 		MatOfRect groups_rects = new MatOfRect();
-		Text.detectRegions(src, er_filter1, er_filter2, groups_rects, Text.ERGROUPING_ORIENTATION_HORIZ, "resources/trained_classifier_erGrouping.xml", 0.5f);
+		// Text.detectRegions(src, er_filter1, er_filter2, groups_rects, Text.ERGROUPING_ORIENTATION_HORIZ, "resources/trained_classifier_erGrouping.xml", 0.5f);
 		for (Rect rect : groups_rects.toArray())
 			Imgproc.rectangle(src, rect.tl(), rect.br(), src.type() == CvType.CV_8UC3 ? new Scalar(0, 255, 0) : new Scalar(255), 1, Imgproc.LINE_8, 0);
 	}
