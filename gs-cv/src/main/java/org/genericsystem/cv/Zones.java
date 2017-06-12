@@ -32,24 +32,24 @@ public class Zones implements Iterable<Zone> {
 		return new Zones(img.channels() == 1 ? img : img.gray(), minArea).adjust(dx, dy, img.width(), img.height());
 	}
 
-	public static Zones splitVertically(Img img) {
-		return get(img.otsuInv().projectVertically().toVerticalHistogram(img.cols()).morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, new Size(1, 30))), 10);
+	public static Zones splitVertically(Img img, double morph, double minarea) {
+		return get(img.otsuInv().projectVertically().toVerticalHistogram(img.cols()).morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, new Size(1, morph))), minarea);
 	}
 
-	public static Zones splitHorizontally(Img img) {
-		return get(img.otsuInv().projectHorizontally().toHorizontalHistogram(img.rows()).morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, new Size(30, 1))), 10);
+	public static Zones splitHorizontally(Img img, double morph, double minarea) {
+		return get(img.otsuInv().projectHorizontally().toHorizontalHistogram(img.rows()).morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, new Size(morph, 1))), minarea);
 	}
 
-	public static Zones split(Img img, double dx, double dy, boolean vertical) {
-		return vertical ? splitVertically(img, dx, dy) : splitHorizontally(img, dx, dy);
+	public static Zones split(Img img, double morph, double minarea, double dx, double dy, boolean vertical) {
+		return vertical ? splitVertically(img, morph, minarea, dx, dy) : splitHorizontally(img, morph, minarea, dx, dy);
 	}
 
-	public static Zones splitVertically(Img img, double dx, double dy) {
-		return get(img.otsuInv().projectVertically().toVerticalHistogram(img.cols()).morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, new Size(1, 30))), 10, dx, dy);
+	public static Zones splitVertically(Img img, double morph, double minarea, double dx, double dy) {
+		return get(img.otsuInv().projectVertically().toVerticalHistogram(img.cols()).morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, new Size(1, morph))), minarea, dx, dy);
 	}
 
-	public static Zones splitHorizontally(Img img, double dx, double dy) {
-		return get(img.otsuInv().projectHorizontally().toHorizontalHistogram(img.rows()).morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, new Size(30, 1))), 10, dx, dy);
+	public static Zones splitHorizontally(Img img, double morph, double minarea, double dx, double dy) {
+		return get(img.otsuInv().projectHorizontally().toHorizontalHistogram(img.rows()).morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, new Size(morph, 1))), minarea, dx, dy);
 	}
 
 	private Zones adjust(double dx, double dy, int width, int height) {

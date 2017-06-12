@@ -1,11 +1,11 @@
 package org.genericsystem.cv;
 
-import javafx.scene.layout.GridPane;
-
 import org.opencv.core.Core;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
+
+import javafx.scene.layout.GridPane;
 
 public class LayoutAnalyser extends AbstractApp {
 	static {
@@ -35,7 +35,7 @@ public class LayoutAnalyser extends AbstractApp {
 		zones.draw(result3, new Scalar(255), 5);
 		mainGrid.add(result3.getImageView(), columnIndex, rowIndex++);
 
-		img.recursivSplit(true);
+		img.recursivSplit(30, true);
 		mainGrid.add(img.getImageView(), columnIndex, rowIndex++);
 
 	}
