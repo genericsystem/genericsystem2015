@@ -3,8 +3,7 @@ package org.genericsystem.cv;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
-import org.genericsystem.cv.SetRealValues.Image;
-import org.genericsystem.cv.SetRealValues.TextDiv;
+import org.genericsystem.cv.SetRealValues.DocumentDiv;
 import org.genericsystem.cv.SetRealValues.Validate;
 import org.genericsystem.cv.model.Doc;
 import org.genericsystem.cv.model.DocClass;
@@ -13,7 +12,6 @@ import org.genericsystem.cv.model.ZoneText;
 import org.genericsystem.cv.model.ZoneText.ZoneTextInstance;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.annotations.Attribute;
 import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
@@ -36,17 +34,28 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
 @DependsOnModel({ Doc.class, DocClass.class, ZoneGeneric.class, ZoneText.class })
-@Children({ Image.class, TextDiv.class, Validate.class })
+@Children({ DocumentDiv.class, Validate.class })
 public class SetRealValues extends RootTagImpl {
 
-	private static final String imageName = "image2-0-5666029511635993302.png";
+	private static final String docClass = "id-fr-front";
 
 	public static void main(String[] mainArgs) {
 		ApplicationServer.startSimpleGenericApp(mainArgs, SetRealValues.class, "/gs-cv-model");
 	}
 
-	@Attribute(name = "src", value = imageName)
+	@ForEach(DOC_CLASS_SELECTOR.class)
+	@Children({ Image.class, TextDiv.class })
+	public static class DocumentDiv extends HtmlDiv {
+
+	}
+
 	public static class Image extends HtmlImg {
+
+		@Override
+		public void init() {
+			bindAttribute("src", "imgadr",
+					context -> new SimpleStringProperty((String) context.getGeneric().getValue()));
+		}
 
 	}
 
@@ -74,14 +83,22 @@ public class SetRealValues extends RootTagImpl {
 	public static class SELECTOR implements ObservableListExtractor {
 		@Override
 		public ObservableList<Generic> apply(Generic[] generics) {
-			Root root = generics[0].getRoot();
-			Generic currentDoc = root.find(Doc.class).getInstance(imageName);
-			System.out.println("Current document : " + currentDoc);
-			ZoneText zoneText = root.find(ZoneText.class);
-			Snapshot<Generic> zoneTextInstances = currentDoc.getHolders(zoneText)
+			Generic currentDoc = generics[0];
+			System.out.println("Document : " + currentDoc);
+			Snapshot<Generic> zoneTextInstances = currentDoc.getHolders(currentDoc.getRoot().find(ZoneText.class))
 					.filter(zt -> "reality".equals(((ZoneTextInstance) zt).getImgFilter().getValue()));
-			System.out.println("Nb zones : " + zoneTextInstances.size());
 			return zoneTextInstances.toObservableList();
+		}
+	}
+
+	public static class DOC_CLASS_SELECTOR implements ObservableListExtractor {
+		@Override
+		public ObservableList<Generic> apply(Generic[] generics) {
+			Root root = generics[0].getRoot();
+			Generic currentDocClass = root.find(DocClass.class).getInstance(docClass);
+			System.out.println("Current doc class : " + currentDocClass);
+			Snapshot<Generic> docInstances = currentDocClass.getHolders(root.find(Doc.class));
+			return docInstances.toObservableList();
 		}
 	}
 
@@ -94,7 +111,7 @@ public class SetRealValues extends RootTagImpl {
 	public static class SAVE implements ContextAction {
 		@Override
 		public void accept(Context context, Tag tag) {
-			System.out.println("Saving text for document " + imageName);
+			System.out.println("Saving text for class " + docClass);
 			context.getGeneric().getRoot().getCurrentCache().flush();
 		}
 	}

@@ -66,7 +66,7 @@ public class InitModel extends RootTagImpl {
 				imgFilter.addImgFilter(f);
 			}
 			engine.getCurrentCache().flush();
-			for (File file : new File(imgClassDirectory).listFiles((dir, name) -> name.endsWith(".png"))) {
+			for (File file : new File(imgClassDirectory + "/ref/").listFiles((dir, name) -> name.endsWith(".png"))) {
 				System.out.println(file.getName());
 				// draw and save the document with zones
 				Img originalImg = new Img(Imgcodecs.imread(file.getPath()));
@@ -83,7 +83,7 @@ public class InitModel extends RootTagImpl {
 						// reality is initialized with the original picture and
 						// will be manually corrected then
 						if ("original".equals(filter) || "reality".equals(filter))
-							filteredImage = new Img(Imgcodecs.imread(imgClassDirectory + "/" + file.getName()));
+							filteredImage = new Img(Imgcodecs.imread(imgClassDirectory + "/ref/" + file.getName()));
 						else
 							filteredImage = new Img(Imgcodecs.imread(imgClassDirectory + "/mask/" + filter + "/"
 									+ file.getName().replace(".png", "") + "-" + filter + ".png"));
