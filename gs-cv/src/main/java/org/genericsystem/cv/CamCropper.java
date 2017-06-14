@@ -1,86 +1,63 @@
 package org.genericsystem.cv;
 
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
-import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-
+import org.genericsystem.cv.Classifier.CompareFeatureResult;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfByte;
-import org.opencv.core.Size;
+import org.opencv.features2d.DescriptorExtractor;
+import org.opencv.features2d.FeatureDetector;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
 
-public class CamCropper {
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
+
+public class CamCropper extends AbstractApp {
 	static {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 	}
 
-	private final static String refPath = "ajusted/image-3.png";
+	// private final static String refPath = "classes/id-fr-front/image4-0.png";
+	private final static String refPath = "classes/id-fr-front/template/template.png";
 
-	private static VideoCapture camera = new VideoCapture(0);
+	private static Img ref = new Img(Imgcodecs.imread(refPath)).gray();
 
-	static boolean read(Mat frame) {
-		return camera.read(frame);
-	}
+	private final VideoCapture camera = new VideoCapture(0);
+	private ScheduledExecutorService timer = Executors.newSingleThreadScheduledExecutor();
 
-	private static Mat ref = Imgcodecs.imread(refPath);
 	private static boolean alreadyMatched = false;
 
 	public static void main(String[] args) {
+		launch(args);
+	}
 
-		JFrame jframe = new JFrame("CamCropper");
-		jframe.setResizable(false);
-		jframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		JLabel vidpanel = new JLabel();
-		jframe.setContentPane(vidpanel);
-
+	@Override
+	protected void fillGrid(GridPane mainGrid) {
 		Mat frame = new Mat();
-		read(frame);
-		jframe.setSize(ref.width(), ref.height());
-		jframe.setVisible(true);
-		Mat average = ref.clone();
-		double n = 2;
-		while (read(frame)) {
-			Mat currentAdjustedFrame = adjust(frame);
-			if (currentAdjustedFrame != null) {
-				if (!alreadyMatched) {
-					ref = currentAdjustedFrame;
-					average = currentAdjustedFrame;
-				} else
-					ref = average;
+		camera.read(frame);
+		ImageView src = new ImageView(Tools.mat2jfxImage(frame));
+		mainGrid.add(src, 0, 0);
+		mainGrid.add(ref.getImageView(), 0, 1);
+		ImageView result = ref.getImageView();
+		mainGrid.add(result, 0, 1);
+		Mat[] average = new Mat[] { ref.getSrc().clone() };
+		int n = 3;
+		timer.scheduleAtFixedRate(() -> {
+			camera.read(frame);
+			Mat gray = new Mat();
 
-				alreadyMatched = true;
-				Core.addWeighted(average, (n - 1) / n, currentAdjustedFrame, 1d / n, 0, average);
-				if (n < 10d)
-					n++;
-			}
-			ImageIcon image = new ImageIcon(mat2bufferedImage(average));
-			vidpanel.setIcon(image);
-			vidpanel.repaint();
-		}
-	}
+			Imgproc.cvtColor(frame, gray, Imgproc.COLOR_BGR2GRAY);
+			src.setImage(Tools.mat2jfxImage(frame));
+			CompareFeatureResult adjusted = Classifier.compareFeature(frame, ref.getSrc(), 15, FeatureDetector.ORB, DescriptorExtractor.OPPONENT_ORB);
+			if (adjusted != null)
+				Core.addWeighted(average[0], (Double.valueOf(n) - 1d) / n, adjusted.getImg(), 1d / n, 0, average[0]);
+			result.setImage(Tools.mat2jfxImage(average[0]));
 
-	public static Mat adjust(Mat frame) {
-		Mat resized = new Mat();
-		Imgproc.resize(frame, resized, new Size(frame.width() * 2, frame.height() * 2));
-		return Classifier.compareFeature(resized, ref, 10);
-	}
-
-	public static BufferedImage mat2bufferedImage(Mat image) {
-		MatOfByte bytemat = new MatOfByte();
-		Imgcodecs.imencode(".jpg", image, bytemat);
-		try {
-			return ImageIO.read(new ByteArrayInputStream(bytemat.toArray()));
-		} catch (IOException e) {
-			throw new IllegalStateException(e);
-		}
+		}, 0L, 33L, TimeUnit.MILLISECONDS);
 	}
 
 }
