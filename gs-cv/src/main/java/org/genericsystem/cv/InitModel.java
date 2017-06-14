@@ -30,7 +30,7 @@ public class InitModel extends RootTagImpl {
 
 	public static void main(String[] mainArgs) {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-		ApplicationServer.startSimpleGenericApp(mainArgs, InitModel.class, "/gs-cv-model");
+		ApplicationServer.startSimpleGenericApp(mainArgs, InitModel.class, "/gs-cv_model");
 	}
 
 	public static class InitScript implements Script {
@@ -80,8 +80,8 @@ public class InitModel extends RootTagImpl {
 					ZoneInstance zoneInstance = docClassInstance.getZone(z.getNum());
 					for (String filter : imgFilters) {
 						Img filteredImage;
-						// reality is initialized with the original picture and
-						// will be manually corrected then
+						// reality is initialized with the original picture
+						// and will be manually corrected then
 						if ("original".equals(filter) || "reality".equals(filter))
 							filteredImage = new Img(Imgcodecs.imread(imgClassDirectory + "/ref/" + file.getName()));
 						else
