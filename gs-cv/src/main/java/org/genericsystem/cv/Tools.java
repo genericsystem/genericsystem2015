@@ -22,7 +22,9 @@ public class Tools {
 
 	@Deprecated
 	public static List<Mat> getImages(String repository, String... imagePaths) {
-		return Arrays.stream(new File(repository).listFiles()).filter(img -> img.getName().endsWith(".png") && Arrays.asList(imagePaths).contains(img.getName())).map(img -> Imgcodecs.imread(img.getPath())).collect(Collectors.toList());
+		return Arrays.stream(new File(repository).listFiles())
+				.filter(img -> img.getName().endsWith(".png") && Arrays.asList(imagePaths).contains(img.getName()))
+				.map(img -> Imgcodecs.imread(img.getPath())).collect(Collectors.toList());
 	}
 
 	@Deprecated
@@ -37,11 +39,13 @@ public class Tools {
 
 	@Deprecated
 	private static Stream<Mat> classMatsStream(String repository) {
-		return Arrays.stream(new File(repository).listFiles()).filter(img -> img.getName().endsWith(".png")).map(img -> Imgcodecs.imread(img.getPath()));
+		return Arrays.stream(new File(repository).listFiles()).filter(img -> img.getName().endsWith(".png"))
+				.map(img -> Imgcodecs.imread(img.getPath()));
 	}
 
 	public static Stream<Img> classImgsStream(String repository) {
-		return Arrays.stream(new File(repository).listFiles()).filter(img -> img.getName().endsWith(".png")).map(img -> new Img(Imgcodecs.imread(img.getPath())));
+		return Arrays.stream(new File(repository).listFiles()).filter(img -> img.getName().endsWith(".png"))
+				.map(img -> new Img(Imgcodecs.imread(img.getPath())));
 	}
 
 	public static Img firstImg(String repository) {
@@ -49,7 +53,9 @@ public class Tools {
 	}
 
 	public static Stream<Img> classImgsStream(String repository, String... imagePaths) {
-		return Arrays.stream(new File(repository).listFiles()).filter(img -> img.getName().endsWith(".png") && Arrays.asList(imagePaths).contains(img.getName())).map(img -> new Img(Imgcodecs.imread(img.getPath())));
+		return Arrays.stream(new File(repository).listFiles())
+				.filter(img -> img.getName().endsWith(".png") && Arrays.asList(imagePaths).contains(img.getName()))
+				.map(img -> new Img(Imgcodecs.imread(img.getPath())));
 	}
 
 	public static BufferedImage mat2bufferedImage(Mat image) {

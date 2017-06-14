@@ -45,18 +45,23 @@ public class Img {
 
 	private static Logger log = LoggerFactory.getLogger(Img.class);
 
-	private final Mat src = new Mat();
+	private final Mat src;
 
 	public Mat getSrc() {
 		return src;
 	}
 
+	public Img(String path) {
+		this(Imgcodecs.imread(path));
+	}
+
 	public Img(Mat src) {
+		this.src = new Mat();
 		src.copyTo(this.src);
 	}
 
 	public Img(Img model, Zone zone) {
-		this(new Mat(model.getSrc(), zone.getRect()));
+		this.src = new Mat(model.getSrc(), zone.getRect());
 	}
 
 	public Img sobel(int ddepth, int dx, int dy, int ksize, double scale, double delta, int borderType) {
@@ -552,11 +557,11 @@ public class Img {
 		return new Img(ret);
 	}
 
-	private int rows() {
+	public int rows() {
 		return src.rows();
 	}
 
-	private int cols() {
+	public int cols() {
 		return src.cols();
 	}
 
@@ -646,4 +651,84 @@ public class Img {
 		return results;
 
 	}
+
+	public Img projectVertically() {
+		Mat result = new Mat();
+		Core.reduce(getSrc(), result, 1, Core.REDUCE_SUM, CvType.CV_32S);
+		return new Img(result);
+	}
+
+	public Img projectHorizontally() {
+		Mat result = new Mat();
+		Core.reduce(getSrc(), result, 0, Core.REDUCE_SUM, CvType.CV_32S);
+		return new Img(result);
+	}
+
+	public Img toVerticalHistogram(int cols) {
+		Mat result = new Mat(new Size(cols, rows()), CvType.CV_8UC1, new Scalar(0));
+		for (int row = 0; row < rows(); row++) {
+			double x = get(row, 0)[0] / 255;
+			if (x < Integer.valueOf(cols).doubleValue() / 100 || x > 99 * Integer.valueOf(cols).doubleValue() / 100)
+				x = 0;
+			else
+				x = cols;
+			if (x != 0)
+				Imgproc.line(result, new Point(0, row), new Point(x, row), new Scalar(255));
+		}
+		return new Img(result);
+	}
+
+	public Img toHorizontalHistogram(int rows) {
+		Mat result = new Mat(new Size(cols(), rows), CvType.CV_8UC1, new Scalar(0));
+		for (int col = 0; col < cols(); col++) {
+			double y = get(0, col)[0] / 255;
+			if (y < Integer.valueOf(rows).doubleValue() / 100 || y > 99 * Integer.valueOf(rows).doubleValue() / 100)
+				y = 0;
+			else
+				y = rows;
+			if (y != 0)
+				Imgproc.line(result, new Point(col, 0), new Point(col, y), new Scalar(255));
+		}
+		return new Img(result);
+	}
+
+	public Img add(Img img) {
+		Mat result = new Mat();
+		Core.add(getSrc(), img.getSrc(), result);
+		return new Img(result);
+	}
+
+	public Img bitwise(Img img) {
+		Mat result = new Mat();
+		Core.bitwise_and(getSrc(), img.getSrc(), result);
+		return new Img(result);
+	}
+
+	public void recursivSplit(double morph, boolean vertical) {
+		Zones zones = Zones.split(this, morph, 0, 0, 0, vertical);
+		assert zones.size() != 0;
+		if (zones.size() == 1) {
+			// if (morph > 2)
+			// recursivSplit(morph / 1.8, !vertical);
+			return;
+		}
+		for (Zone zone : zones) {
+			Img subRoi = zone.getRoi(this);
+			subRoi.recursivSplit(morph, !vertical);
+		}
+		zones.draw(this, new Scalar(0, 255, 0), 2);
+	}
+
+	public Img houghLinesP(double rho, double theta, int threshold) {
+		Mat result = new Mat();
+		Imgproc.HoughLinesP(src, result, rho, theta, threshold);
+		return new Img(result);
+	}
+
+	public Img houghLinesP(int rho, double theta, int threshold, double mineLineLenght, double maxLineGap) {
+		Mat result = new Mat();
+		Imgproc.HoughLinesP(src, result, rho, theta, threshold, mineLineLenght, maxLineGap);
+		return new Img(result);
+	}
+
 }

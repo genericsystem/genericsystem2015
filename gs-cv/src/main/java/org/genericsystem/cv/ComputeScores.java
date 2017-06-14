@@ -37,7 +37,7 @@ public class ComputeScores extends RootTagImpl {
 		@Override
 		public void run(Root engine) {
 
-			String docType = "passport-fr";
+			String docType = "id-fr-front";
 
 			Generic currentDocClass = engine.find(DocClass.class).getInstance(docType);
 			System.out.println("Current doc class : " + currentDocClass);

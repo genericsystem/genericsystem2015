@@ -70,7 +70,7 @@ public class ClassImgFieldsDetector extends AbstractApp {
 				// continue;
 				// System.out.println("File : " + file.getName());
 				Img img = new Img(Imgcodecs.imread(file.getPath()));
-				for (Zone zone : zones.get()) {
+				for (Zone zone : zones.getZones()) {
 					System.out.println("Zone n°" + zone.getNum());
 					zone.draw(img, new Scalar(0, 255, 0), -1);
 					ZoneScorer scorer = zone.newUnsupervisedScorer(Stream.concat(
