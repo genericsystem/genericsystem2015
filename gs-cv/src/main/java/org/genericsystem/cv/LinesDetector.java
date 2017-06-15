@@ -4,6 +4,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
+
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfDouble;
@@ -12,9 +15,6 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
-
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
 
 public class LinesDetector extends AbstractApp {
 
@@ -38,7 +38,7 @@ public class LinesDetector extends AbstractApp {
 		mainGrid.add(canny, 0, 0);
 		ImageView src = new ImageView(Tools.mat2jfxImage(frame));
 		mainGrid.add(src, 0, 1);
-		double sigma = 0.33;
+		double sigma = 0.66;
 		timer.scheduleAtFixedRate(() -> {
 			capture.read(frame);
 			Img gray = new Img(frame).gray();
@@ -61,10 +61,10 @@ public class LinesDetector extends AbstractApp {
 			}
 			angle /= lines.rows(); // mean angle, in radians.
 
-			canny.setImage(Tools.mat2jfxImage(edges.getSrc()));
-			src.setImage(Tools.mat2jfxImage(frame));
-			System.out.println("Average angle: " + Math.round(angle / Math.PI * 180));
-		}, 0, 33, TimeUnit.MILLISECONDS);
+				canny.setImage(Tools.mat2jfxImage(edges.getSrc()));
+				src.setImage(Tools.mat2jfxImage(frame));
+				System.out.println("Angle: " + (double) Math.round(angle * 100 / Math.PI * 180) / 100 + "°");
+			}, 0, 33, TimeUnit.MILLISECONDS);
 
 	}
 
