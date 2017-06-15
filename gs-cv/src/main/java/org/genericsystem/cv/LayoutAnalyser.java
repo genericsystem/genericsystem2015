@@ -27,8 +27,8 @@ public class LayoutAnalyser extends AbstractApp {
 		mainGrid.add(img.getImageView(), columnIndex, rowIndex++);
 		mainGrid.add(img.otsuInv().getImageView(), columnIndex, rowIndex++);
 
-		Img hImg = img.otsuInv().morphologyEx(type, new StructuringElement(Imgproc.MORPH_RECT, hSize));
-		Img vImg = img.otsuInv().morphologyEx(type, new StructuringElement(Imgproc.MORPH_RECT, vSize));
+		Img hImg = img.otsuInv().morphologyEx(type, Imgproc.MORPH_RECT, hSize);
+		Img vImg = img.otsuInv().morphologyEx(type, Imgproc.MORPH_RECT, vSize);
 
 		Zones zones = Zones.get(hImg.add(vImg), 10, Imgproc.RETR_TREE);
 		Img result3 = hImg.bitwise(vImg);

@@ -37,7 +37,7 @@ public class BackGroundSubstractor {
 		JLabel vidpanel = new JLabel();
 		jframe.setContentPane(vidpanel);
 
-		List<Mat> srcs = getClassMats2();
+		// List<Mat> srcs = getClassMats2();
 		Mat img = new Mat();
 		// srcs.get(0).copyTo(img);
 		camera.read(img);
