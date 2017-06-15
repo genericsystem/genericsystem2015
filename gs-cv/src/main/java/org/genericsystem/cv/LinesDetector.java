@@ -41,25 +41,28 @@ public class LinesDetector extends AbstractApp {
 		double sigma = 0.66;
 		timer.scheduleAtFixedRate(() -> {
 			capture.read(frame);
+
+			Img grad = new Img(frame).morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_RECT, new Size(2, 2)).otsu();
+
 			Img gray = new Img(frame).gray();
-			Img blured = gray.gaussianBlur(new Size(3, 3));
+			// Img blured = gray.gaussianBlur(new Size(3, 3));
 
-			MatOfDouble mu = new MatOfDouble();
-			Core.meanStdDev(blured.getSrc(), mu, new MatOfDouble());
-			double median = mu.get(0, 0)[0];
-			double lower = Math.max(0, (1.0 - sigma) * median);
-			double upper = Math.min(255, (1.0 + sigma) * median);
-			Img edges = blured.canny(lower, upper);
+				MatOfDouble mu = new MatOfDouble();
+				Core.meanStdDev(gray.getSrc(), mu, new MatOfDouble());
+				double median = mu.get(0, 0)[0];
+				double lower = Math.max(0, (1.0 - sigma) * median);
+				double upper = Math.min(255, (1.0 + sigma) * median);
+				Img edges = gray.canny(lower, upper);
+				Imgproc.dilate(edges.getSrc(), edges.getSrc(), new Mat());
 
-			Img lines = edges.houghLinesP(1, Math.PI / 180, 50, 140, 10);
-			double angle = 0.;
-			for (int i = 0; i < lines.rows(); i++) {
-				double[] val = lines.get(i, 0);
-				Imgproc.line(frame, new Point(val[0], val[1]), new Point(val[2], val[3]), new Scalar(0, 0, 255), 2);
-
-				angle += Math.atan2(val[3] - val[1], val[2] - val[0]);
-			}
-			angle /= lines.rows(); // mean angle, in radians.
+				Img lines = edges.houghLinesP(1, Math.PI / 180, 50, 100, 10);
+				double angle = 0.;
+				for (int i = 0; i < lines.rows(); i++) {
+					double[] val = lines.get(i, 0);
+					Imgproc.line(frame, new Point(val[0], val[1]), new Point(val[2], val[3]), new Scalar(0, 0, 255), 1);
+					angle += Math.atan2(val[3] - val[1], val[2] - val[0]);
+				}
+				angle /= lines.rows(); // mean angle, in radians.
 
 				canny.setImage(Tools.mat2jfxImage(edges.getSrc()));
 				src.setImage(Tools.mat2jfxImage(frame));

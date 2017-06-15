@@ -40,4 +40,11 @@ public class VideoDisplay extends AbstractApp {
 		}, 0, 33, TimeUnit.MILLISECONDS);
 	}
 
+	@Override
+	public void stop() throws Exception {
+		timer.shutdown();
+		capture.release();
+		super.stop();
+	}
+
 }

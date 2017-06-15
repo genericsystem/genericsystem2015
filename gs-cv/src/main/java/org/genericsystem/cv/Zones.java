@@ -33,11 +33,11 @@ public class Zones implements Iterable<Zone> {
 	}
 
 	public static Zones splitVertically(Img img, double morph, double minarea) {
-		return get(img.otsuInv().projectVertically().toVerticalHistogram(img.cols()).morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, new Size(1, morph))), minarea);
+		return get(img.otsuInv().projectVertically().toVerticalHistogram(img.cols()).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(1, morph)), minarea);
 	}
 
 	public static Zones splitHorizontally(Img img, double morph, double minarea) {
-		return get(img.otsuInv().projectHorizontally().toHorizontalHistogram(img.rows()).morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, new Size(morph, 1))), minarea);
+		return get(img.otsuInv().projectHorizontally().toHorizontalHistogram(img.rows()).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(morph, 1)), minarea);
 	}
 
 	public static Zones split(Img img, double morph, double minarea, double dx, double dy, boolean vertical) {
@@ -45,11 +45,11 @@ public class Zones implements Iterable<Zone> {
 	}
 
 	public static Zones splitVertically(Img img, double morph, double minarea, double dx, double dy) {
-		return get(img.otsuInv().projectVertically().toVerticalHistogram(img.cols()).morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, new Size(1, morph))), minarea, dx, dy);
+		return get(img.otsuInv().projectVertically().toVerticalHistogram(img.cols()).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(1, morph)), minarea, dx, dy);
 	}
 
 	public static Zones splitHorizontally(Img img, double morph, double minarea, double dx, double dy) {
-		return get(img.otsuInv().projectHorizontally().toHorizontalHistogram(img.rows()).morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, new Size(morph, 1))), minarea, dx, dy);
+		return get(img.otsuInv().projectHorizontally().toHorizontalHistogram(img.rows()).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(morph, 1)), minarea, dx, dy);
 	}
 
 	private Zones adjust(double dx, double dy, int width, int height) {

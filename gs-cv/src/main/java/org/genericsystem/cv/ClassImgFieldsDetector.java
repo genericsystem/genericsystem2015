@@ -84,3 +84,4 @@ public class ClassImgFieldsDetector extends AbstractApp {
 			}
 	}
 }
+

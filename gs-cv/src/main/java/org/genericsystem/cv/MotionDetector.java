@@ -44,7 +44,7 @@ public class MotionDetector {
 		jframe.setVisible(true);
 		Mat prevAdjustedFrame = adjust(frame);
 		Mat average = prevAdjustedFrame;
-		double n = 5;
+		double n = 20;
 		while (camera.read(frame)) {
 			Mat currentAdjustedFrame = adjust(frame);
 			Core.addWeighted(average, (n - 1) / n, currentAdjustedFrame, 10d / n, 0, average);

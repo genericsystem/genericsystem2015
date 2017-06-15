@@ -1,15 +1,15 @@
 package org.genericsystem.cv;
 
-import javafx.scene.layout.GridPane;
-
 import org.opencv.core.Core;
+
+import javafx.scene.layout.GridPane;
 
 public class ClassImgFieldsDetector2 extends AbstractApp {
 	static {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 	}
 
-	private final static String classImgRepertory = "classes/id-fr-front";
+	private final static String classImgRepertory = "classes/passport-fr";
 
 	public static void main(String[] args) {
 		launch(args);

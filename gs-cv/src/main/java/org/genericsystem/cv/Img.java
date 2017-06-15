@@ -82,9 +82,9 @@ public class Img {
 		return new Img(result);
 	}
 
-	public Img morphologyEx(int morphOp, StructuringElement structuringElement) {
+	public Img morphologyEx(int morphOp, int morph, Size size) {
 		Mat result = new Mat();
-		Imgproc.morphologyEx(src, result, morphOp, structuringElement.getSrc());
+		Imgproc.morphologyEx(src, result, morphOp, Imgproc.getStructuringElement(morph, size));
 		return new Img(result);
 	}
 
@@ -383,14 +383,14 @@ public class Img {
 		Img gray = cvtColor(Imgproc.COLOR_BGR2GRAY);
 		Img sobel = gray.sobel(CvType.CV_8UC1, 1, 0, 3, 1, 0, Core.BORDER_DEFAULT);
 		Img threshold = sobel.thresHold(0, 255, Imgproc.THRESH_OTSU + Imgproc.THRESH_BINARY);
-		return threshold.morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, new Size(17, 3)));
+		return threshold.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(17, 3));
 	}
 
 	public Img grad() {
 		Img gray = cvtColor(Imgproc.COLOR_BGR2GRAY);
-		Img grad = gray.morphologyEx(Imgproc.MORPH_GRADIENT, new StructuringElement(Imgproc.MORPH_ELLIPSE, new Size(3, 3)));
-		Img threshold = grad.thresHold(0.0, 255.0, Imgproc.THRESH_OTSU + Imgproc.THRESH_BINARY).morphologyEx(Imgproc.MORPH_ERODE, new StructuringElement(Imgproc.MORPH_RECT, new Size(3, 3)));
-		return threshold.morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, new Size(17, 3)));
+		Img grad = gray.morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(3, 3));
+		Img threshold = grad.thresHold(0.0, 255.0, Imgproc.THRESH_OTSU + Imgproc.THRESH_BINARY).morphologyEx(Imgproc.MORPH_ERODE, Imgproc.MORPH_RECT, new Size(3, 3));
+		return threshold.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(17, 3));
 	}
 
 	public Img mser() {
@@ -418,7 +418,7 @@ public class Img {
 			Mat roi = new Mat(result, rectant);
 			roi.setTo(new Scalar(255));
 		}
-		return new Img(result).morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, new Size(17, 3)));
+		return new Img(result).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(17, 3));
 	}
 
 	public Img otsu() {
@@ -430,8 +430,7 @@ public class Img {
 	}
 
 	public Img dilateBlacks(double valueThreshold, double saturatioThreshold, double blueThreshold, Size dilatation) {
-		return range(new Scalar(0, 0, 0), new Scalar(255, saturatioThreshold, valueThreshold), true).range(new Scalar(0, 0, 0), new Scalar(blueThreshold, 255, 255), false).gray().morphologyEx(Imgproc.MORPH_DILATE,
-				new StructuringElement(Imgproc.MORPH_RECT, dilatation));
+		return range(new Scalar(0, 0, 0), new Scalar(255, saturatioThreshold, valueThreshold), true).range(new Scalar(0, 0, 0), new Scalar(blueThreshold, 255, 255), false).gray().morphologyEx(Imgproc.MORPH_DILATE, Imgproc.MORPH_RECT, dilatation);
 	}
 
 	public Img equalizeHisto() {

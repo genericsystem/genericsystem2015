@@ -115,10 +115,10 @@ public class ImgClass {
 	}
 
 	public Img getClosedMeanZones(Size morphClose) {
-		return mean.morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, morphClose));
+		return mean.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, morphClose);
 	}
 
 	public Img getClosedVarianceZones(Size morphClose) {
-		return variance.morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, morphClose));
+		return variance.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, morphClose);
 	}
 }
