@@ -1,11 +1,13 @@
 package org.genericsystem.cv;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
@@ -41,71 +43,89 @@ public class MotionDetector2 extends AbstractApp {
 	protected void fillGrid(GridPane mainGrid) {
 		Mat frame = new Mat();
 		capture.read(frame);
-		Img average = adjust(frame);
 		ImageView src = new ImageView(Tools.mat2jfxImage(frame));
+		ImageView src2 = new ImageView(Tools.mat2jfxImage(frame));
+		ImageView src3 = new ImageView(Tools.mat2jfxImage(frame));
+		ImageView src4 = new ImageView(Tools.mat2jfxImage(frame));
 		mainGrid.add(src, 0, 0);
-		double n = 20;
+		mainGrid.add(src2, 1, 0);
+		mainGrid.add(src3, 0, 1);
+		mainGrid.add(src4, 1, 1);
 		timer.scheduleAtFixedRate(() -> {
-			capture.read(frame);
-			Img adjustedFrame = adjust(frame);
-			Core.addWeighted(average.getSrc(), (n - 1) / n, adjustedFrame.getSrc(), 1d / n, 0, average.getSrc());
-			Mat diffFrame = computeDiffFrame(adjustedFrame.getSrc(), average.getSrc());
-			detection_contours(frame, diffFrame);
-			// for (Rect rect : detection_contours(frame, diffFrame))
-			// Imgproc.rectangle(frame, rect.br(), rect.tl(), new Scalar(0, 0, 255), 1);
+			try {
+				capture.read(frame);
+				Img adaptativThreshold = new Img(frame).cvtColor(Imgproc.COLOR_BGR2GRAY).adaptiveThresHold(255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 17, 9);
+				Img dilated = adaptativThreshold.morphologyEx(Imgproc.MORPH_DILATE, Imgproc.MORPH_ELLIPSE, new Size(5, 5));
+				Img frameCopy = new Img(frame);
+				double angle = detection_contours(frame, dilated.getSrc());
+				Mat matrix = Imgproc.getRotationMatrix2D(new Point(frame.width() / 2, frame.height() / 2), angle, 1);
+				Mat rotated = new Mat();
+				Imgproc.warpAffine(frameCopy.getSrc(), rotated, matrix, new Size(frame.size().width, frame.size().height));
+				double crop = 0.15;
+				Img croppedImg = new Img(new Mat(rotated, new Rect(Double.valueOf(rotated.width() * crop).intValue(), Double.valueOf(rotated.height() * crop).intValue(), Double.valueOf(rotated.width() * (1 - 2 * crop)).intValue(),
+						Double.valueOf(rotated.height() * (1 - 2 * crop)).intValue())));
 
-			src.setImage(Tools.mat2jfxImage(frame));
-		}, 0, 100, TimeUnit.MILLISECONDS);
-	}
+				src.setImage(Tools.mat2jfxImage(dilated.getSrc()));
+				src2.setImage(Tools.mat2jfxImage(frame));
+				Img croppedAdaptativ = croppedImg.cvtColor(Imgproc.COLOR_BGR2GRAY).adaptiveThresHold(255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 17, 9);
+				Img croppedDilated = croppedAdaptativ.morphologyEx(Imgproc.MORPH_DILATE, Imgproc.MORPH_RECT, new Size(9, 3));
+				// detection_deskiew_contours(croppedImg.getSrc(), croppedDilated.getSrc());
+				croppedImg.recursivSplit(5, true);
+				src3.setImage(Tools.mat2jfxImage(croppedDilated.getSrc()));
+				src4.setImage(Tools.mat2jfxImage(croppedImg.getSrc()));
+			} catch (Exception e) {
+				e.printStackTrace();
 
-	public static Mat computeDiffFrame(Mat currentAdjustedFrame, Mat prevAdjustedFrame) {
-		Mat result = new Mat();
-		Core.absdiff(currentAdjustedFrame, prevAdjustedFrame, result);
-		Imgproc.adaptiveThreshold(currentAdjustedFrame, result, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 17, 5);
-		return result;
-	}
-
-	public List<Rect> detection_contours(Mat frame, Mat diffFrame) {
-		List<MatOfPoint> contours = new ArrayList<>();
-		Imgproc.findContours(diffFrame, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
-
-		double minArea = 100;
-		double maxArea = 2000;
-		List<Rect> rectangles = new ArrayList<>();
-		for (int i = 0; i < contours.size(); i++) {
-			MatOfPoint contour = contours.get(i);
-			double area = Imgproc.contourArea(contour);
-			if (area > minArea) {
-				// maxArea = contourarea;
-				MatOfPoint2f contour2F = new MatOfPoint2f(contour.toArray());
-				Point[] result = new Point[4];
-				RotatedRect rect = Imgproc.minAreaRect(contour2F);
-				rect.points(result);
-				// if (rect.size.height * rect.size.width < maxArea) {
-				Imgproc.drawContours(frame, Arrays.asList(new MatOfPoint(result)), 0, new Scalar(255, 0, 0), 2);
-				// if (rect.angle < -45.) {
-				// rect.angle += 90.0;
-				// double tmp = rect.size.width;
-				// rect.size.width = rect.size.height;
-				// rect.size.height = tmp;
-				// }
-				//
-				// Mat matrix = Imgproc.getRotationMatrix2D(rect.center, rect.angle, 1);
-				// Mat rotated = new Mat();
-				// Mat res = new Mat();
-				// Imgproc.warpAffine(frame, rotated, matrix, frame.size());
-				// Imgproc.getRectSubPix(rotated, rect.size, rect.center, res);
-				// System.out.println(ocr.run(res, 90, 1));
-				// // rectangles.add(Imgproc.boundingRect(contour));
-				// Imgproc.drawContours(frame, contours, i, new Scalar(0, 255, 0));
 			}
-		}
-		return rectangles;
-
+		}, 0, 33, TimeUnit.MILLISECONDS);
 	}
 
-	public Img adjust(Mat frame) {
-		return new Img(frame).cvtColor(Imgproc.COLOR_BGR2GRAY).gaussianBlur(new Size(5, 5));
+	public double detection_contours(Mat frame, Mat dilated) {
+		List<MatOfPoint> contours = new ArrayList<>();
+		Imgproc.findContours(dilated, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+		double minArea = 100;
+		double crop = 0.15;
+		Predicate<RotatedRect> filter = rect -> rect.center.x > Double.valueOf(frame.width() * crop).intValue() && rect.center.y > Double.valueOf(frame.height() * crop).intValue() && rect.center.x < Double.valueOf(frame.width() * (1 - crop)).intValue()
+				&& rect.center.y < Double.valueOf(frame.height() * (1 - crop)).intValue();
+		List<RotatedRect> rotatedRects = contours.stream().filter(contour -> Imgproc.contourArea(contour) > minArea).map(contour -> Imgproc.minAreaRect(new MatOfPoint2f(contour.toArray()))).filter(filter).collect(Collectors.toList());
+		double mean = 0;
+		for (RotatedRect rotatedRect : rotatedRects) {
+			if (rotatedRect.angle < -45.) {
+				rotatedRect.angle += 90.0;
+				double tmp = rotatedRect.size.width;
+				rotatedRect.size.width = rotatedRect.size.height;
+				rotatedRect.size.height = tmp;
+			}
+			mean += rotatedRect.angle;
+		}
+		final double average = mean / rotatedRects.size();
+
+		List<RotatedRect> goodRects = rotatedRects.stream().filter(rotatedRect -> Math.abs(rotatedRect.angle - average) < 5).collect(Collectors.toList());
+		double goodRectsMean = 0;
+		for (RotatedRect rotatedRect : goodRects) {
+			goodRectsMean += rotatedRect.angle;
+		}
+		final double goodAverage = goodRectsMean / goodRects.size();
+		goodRects.forEach(rotatedRect -> rotatedRect.angle = goodAverage);
+		System.out.println(average);
+		System.out.println(goodAverage);
+
+		goodRects.forEach(rotatedRect -> {
+			Point[] result = new Point[4];
+			rotatedRect.points(result);
+			List<MatOfPoint> mof = Collections.singletonList(new MatOfPoint(new MatOfPoint(result)));
+			Imgproc.drawContours(frame, mof, 0, new Scalar(0, 255, 0), 1);
+			// Imgproc.drawContours(dilated, mof, 0, new Scalar(255), 1);
+		});
+		return goodAverage;
+	}
+
+	public void detection_deskiew_contours(Mat frame, Mat dilated) {
+		List<MatOfPoint> contours = new ArrayList<>();
+		Imgproc.findContours(dilated, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+		double minArea = 100;
+		List<Rect> rects = contours.stream().filter(contour -> Imgproc.contourArea(contour) > minArea).map(contour -> Imgproc.boundingRect(contour)).collect(Collectors.toList());
+		rects.forEach(rect -> Imgproc.rectangle(frame, rect.tl(), rect.br(), new Scalar(0, 255, 0), 1));
 	}
 
 	@Override
