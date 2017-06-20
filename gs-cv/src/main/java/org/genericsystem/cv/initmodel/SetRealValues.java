@@ -1,10 +1,10 @@
-package org.genericsystem.cv;
+package org.genericsystem.cv.initmodel;
 
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
-import org.genericsystem.cv.SetRealValues.DocumentDiv;
-import org.genericsystem.cv.SetRealValues.Validate;
+import org.genericsystem.cv.initmodel.SetRealValues.DocumentDiv;
+import org.genericsystem.cv.initmodel.SetRealValues.Validate;
 import org.genericsystem.cv.model.Doc;
 import org.genericsystem.cv.model.DocClass;
 import org.genericsystem.cv.model.ZoneGeneric;
