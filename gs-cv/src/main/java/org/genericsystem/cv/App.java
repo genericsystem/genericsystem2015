@@ -12,19 +12,6 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import javafx.application.Application;
-import javafx.event.EventHandler;
-import javafx.scene.Group;
-import javafx.scene.Scene;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TextArea;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
-
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -38,6 +25,19 @@ import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
+
+import javafx.application.Application;
+import javafx.event.EventHandler;
+import javafx.scene.Group;
+import javafx.scene.Scene;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextArea;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 public class App extends Application {
 
@@ -66,8 +66,8 @@ public class App extends Application {
 		// SourceFilesConverter.doWork(sourceDirectoryPath, targetDirectoryPath);
 		GridPane gridPane = new GridPane();
 
-		int row = 0;
-		for (Mat img : Tools.getClassMats(targetDirectoryPath)) {
+		int row[] = new int[] { 0 };
+		Tools.classImgsStream(targetDirectoryPath).forEach(img -> {
 			int column = 0;
 
 			// Mat hsv = new Mat();
@@ -77,44 +77,39 @@ public class App extends Application {
 			// Mat result = new Mat();
 			// Core.bitwise_and(hsv, hsv, result, mask);
 			// Imgproc.cvtColor(result, srcMat, Imgproc.COLOR_HSV2BGR);
-			gridPane.add(getImageViewFromMat(img), column++, row);
+			gridPane.add(getImageViewFromMat(img.getSrc()), column++, row[0]);
 
-			Mat grayed = gray(img);
-			gridPane.add(getImageViewFromMat(grayed), column++, row);
+			Mat grayed = gray(img.getSrc());
+			gridPane.add(getImageViewFromMat(grayed), column++, row[0]);
 
 			Mat canny = canny(grayed, canyThreshold1);
-			gridPane.add(getImageViewFromMat(canny), column++, row);
+			gridPane.add(getImageViewFromMat(canny), column++, row[0]);
 
 			Mat blured = canny.clone();// gaussianBlur(canny);
 			Imgproc.dilate(blured, blured, Imgproc.getStructuringElement(Imgproc.MORPH_CROSS, new Size(5, 5)));
-			gridPane.add(getImageViewFromMat(blured), column++, row);
+			gridPane.add(getImageViewFromMat(blured), column++, row[0]);
 
 			MatOfPoint2f contour = getContour(blured);
 
 			Mat contoured = drawContour(colorize(blured), contour);
-			gridPane.add(getImageViewFromMat(contoured), column++, row);
+			gridPane.add(getImageViewFromMat(contoured), column++, row[0]);
 
-			Mat adjusted = transform(img, contour);
-			gridPane.add(getImageViewFromMat(adjusted), column++, row);
+			Mat adjusted = transform(img.getSrc(), contour);
+			gridPane.add(getImageViewFromMat(adjusted), column++, row[0]);
 
 			String hocrString = Ocr.doWork(adjusted);
-			gridPane.add(new TextArea(hocrString), column++, row);
-
-			Mat boxed = adjusted.clone();
-			for (Rect rect : Ocr.findBox(adjusted))
-				Imgproc.rectangle(boxed, rect.tl(), rect.br(), new Scalar(0, 255, 0), 5);
-			gridPane.add(getImageViewFromMat(boxed), column++, row);
+			gridPane.add(new TextArea(hocrString), column++, row[0]);
 
 			Mat adjustedGrayed = gray(adjusted);
 			// Imgproc.threshold(adjustedGrayed, adjustedGrayed, 220, 255, Imgproc.THRESH_TRUNC);
-			gridPane.add(getImageViewFromMat(adjustedGrayed), column++, row);
+			gridPane.add(getImageViewFromMat(adjustedGrayed), column++, row[0]);
 
 			Mat adjustedCanny = canny(adjustedGrayed, canyThreshold2);
 			Imgproc.dilate(adjustedCanny, adjustedCanny, Imgproc.getStructuringElement(Imgproc.MORPH_CROSS, new Size(12, 12)));
-			gridPane.add(getImageViewFromMat(adjustedCanny), column++, row);
+			gridPane.add(getImageViewFromMat(adjustedCanny), column++, row[0]);
 
 			Mat adjustedBlured = gaussianBlur(adjustedCanny);
-			gridPane.add(getImageViewFromMat(adjustedCanny), column++, row);
+			gridPane.add(getImageViewFromMat(adjustedCanny), column++, row[0]);
 
 			List<MatOfPoint> contours = new ArrayList<>();
 			Imgproc.findContours(adjustedBlured, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
@@ -129,7 +124,7 @@ public class App extends Application {
 						Imgproc.rectangle(coutoured, rect.tl(), rect.br(), new Scalar(0, 255, 0), 5);
 				}
 			}
-			gridPane.add(getImageViewFromMat(coutoured), column++, row);
+			gridPane.add(getImageViewFromMat(coutoured), column++, row[0]);
 
 			Point pt1 = new Point(zone[0] * adjusted.width(), zone[2] * adjusted.height());
 			Point pt2 = new Point(zone[1] * adjusted.width(), zone[3] * adjusted.height());
@@ -137,16 +132,16 @@ public class App extends Application {
 
 			Mat templated = adjusted.clone();
 			Imgproc.rectangle(templated, rect.br(), rect.tl(), new Scalar(0, 255, 0), 20);
-			gridPane.add(getImageViewFromMat(templated), column++, row);
+			gridPane.add(getImageViewFromMat(templated), column++, row[0]);
 
 			Mat ocrZone = new Mat(adjusted, rect);
-			gridPane.add(getImageViewFromMat(ocrZone), column++, row);
+			gridPane.add(getImageViewFromMat(ocrZone), column++, row[0]);
 
 			String zoneOcr = Ocr.doWork(ocrZone);
-			gridPane.add(new TextArea(zoneOcr), column++, row);
+			gridPane.add(new TextArea(zoneOcr), column++, row[0]);
 
-			row++;
-		}
+			row[0]++;
+		});
 
 		Scene scene = new Scene(new Group());
 		stage.setTitle("Generic System OCR");

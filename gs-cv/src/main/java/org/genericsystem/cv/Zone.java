@@ -10,7 +10,6 @@ import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
 public class Zone {
-
 	private Rect rect;
 	private int num;
 
@@ -45,7 +44,7 @@ public class Zone {
 	}
 
 	public String ocr(Img img) {
-		return Ocr.doWork(img.getSrc(), getRect());
+		return Ocr.doWork(new Mat(img.getSrc(), getRect()));
 	}
 
 	public int getNum() {
