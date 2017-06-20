@@ -12,19 +12,6 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import javafx.application.Application;
-import javafx.event.EventHandler;
-import javafx.scene.Group;
-import javafx.scene.Scene;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TextArea;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
-
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -38,6 +25,19 @@ import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
+
+import javafx.application.Application;
+import javafx.event.EventHandler;
+import javafx.scene.Group;
+import javafx.scene.Scene;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextArea;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 public class App extends Application {
 
@@ -99,11 +99,6 @@ public class App extends Application {
 
 			String hocrString = Ocr.doWork(adjusted);
 			gridPane.add(new TextArea(hocrString), column++, row);
-
-			Mat boxed = adjusted.clone();
-			for (Rect rect : Ocr.findBox(adjusted))
-				Imgproc.rectangle(boxed, rect.tl(), rect.br(), new Scalar(0, 255, 0), 5);
-			gridPane.add(getImageViewFromMat(boxed), column++, row);
 
 			Mat adjustedGrayed = gray(adjusted);
 			// Imgproc.threshold(adjustedGrayed, adjustedGrayed, 220, 255, Imgproc.THRESH_TRUNC);
