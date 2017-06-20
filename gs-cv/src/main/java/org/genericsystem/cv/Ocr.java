@@ -22,7 +22,7 @@ public class Ocr {
 		try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(Paths.get(".", "classes"), Files::isDirectory)) {
 			for (Path directoryPath : directoryStream) {
 				System.out.println("--- Images of class: " + directoryPath);
-				try (DirectoryStream<Path> imagesStream = Files.newDirectoryStream(directoryPath, Files::isRegularFile)) {
+				try (DirectoryStream<Path> imagesStream = Files.newDirectoryStream(directoryPath, path -> Files.isRegularFile(path) && path.toString().endsWith(".png"))) {
 					imagesStream.forEach(path -> {
 						System.out.println("------ Image: " + path);
 						ocrClassifiedImage(path);
