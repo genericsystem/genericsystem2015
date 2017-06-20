@@ -117,7 +117,6 @@ public class Zones implements Iterable<Zone> {
 		try {
 			return mapper.readValue(file, Zones.class);
 		} catch (IOException e) {
-			e.printStackTrace();
 			throw new RuntimeException(e);
 		}
 	}

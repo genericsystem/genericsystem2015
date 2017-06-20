@@ -3,12 +3,12 @@ package org.genericsystem.cv;
 import java.io.File;
 import java.util.stream.Stream;
 
-import javafx.scene.layout.GridPane;
-
 import org.opencv.core.Core;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
+
+import javafx.scene.layout.GridPane;
 
 public class ClassImgFieldsDetector extends AbstractApp {
 	static {
@@ -30,8 +30,6 @@ public class ClassImgFieldsDetector extends AbstractApp {
 		mainGrid.add(imgClass.getMean().getImageView(), columnIndex, rowIndex++);
 		mainGrid.add(imgClass.getVariance().getImageView(), columnIndex, rowIndex++);
 
-		// imgClass.addMapper(img -> img.eraseCorners(0.1).dilateBlacks(86, 255,
-		// 76, new Size(20, 3)));
 		// mainGrid.add(imgClass.getMean().getImageView(), columnIndex,
 		// rowIndex++);
 		// mainGrid.add(imgClass.getVariance().getImageView(), columnIndex,
@@ -54,6 +52,7 @@ public class ClassImgFieldsDetector extends AbstractApp {
 			zones = Zones.load(imgClassDirectory);
 		} catch (RuntimeException e) {
 			System.out.println("could not load accurate zones");
+			imgClass.addMapper(img -> img.eraseCorners(0.1).dilateBlacks(86, 255, 76, new Size(20, 3)));
 			zones = Zones.get(imgClass.getClosedVarianceZones(new Size(9, 10)), 300, 6, 6);
 		}
 		Img model = imgClass.getMean();
@@ -65,7 +64,6 @@ public class ClassImgFieldsDetector extends AbstractApp {
 				System.out.println("File : " + file.getName());
 				if (i++ > 3)
 					continue;
-				// System.out.println("File : " + file.getName());
 				Img img = new Img(Imgcodecs.imread(file.getPath()));
 				for (Zone zone : zones) {
 					System.out.println("Zone n°" + zone.getNum());
@@ -84,4 +82,3 @@ public class ClassImgFieldsDetector extends AbstractApp {
 			}
 	}
 }
-

@@ -430,7 +430,7 @@ public class Img {
 	}
 
 	public Img dilateBlacks(double valueThreshold, double saturatioThreshold, double blueThreshold, Size dilatation) {
-		return range(new Scalar(0, 0, 0), new Scalar(255, saturatioThreshold, valueThreshold), true).range(new Scalar(0, 0, 0), new Scalar(blueThreshold, 255, 255), false).gray().morphologyEx(Imgproc.MORPH_DILATE, Imgproc.MORPH_RECT, dilatation);
+		return range(new Scalar(0, 0, 0), new Scalar(255, saturatioThreshold, valueThreshold), true).range(new Scalar(0, 0, 0), new Scalar(blueThreshold, 255, 255), false).morphologyEx(Imgproc.MORPH_DILATE, Imgproc.MORPH_RECT, dilatation);
 	}
 
 	public Img equalizeHisto() {
