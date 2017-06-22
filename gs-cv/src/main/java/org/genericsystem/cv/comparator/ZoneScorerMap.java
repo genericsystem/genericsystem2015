@@ -22,8 +22,6 @@ public class ZoneScorerMap {
 
 	public ZoneScorerMap(Zone zone, Stream<Entry<Img, String>> stream, String filename) {
 		this.zone = zone;
-		// Map for logging : key = filtername, value = ocr'd text
-		Map<String, String> map = new HashMap<>();
 
 		try {
 			// Open a file to log the data (default: append = true)
@@ -35,14 +33,15 @@ public class ZoneScorerMap {
 			stream.forEach(entry -> {
 				String ocrText = zone.ocr(entry.getKey());
 				ocrText = ocrText.replace("\n", "").replaceAll("\t", "").trim();
-				map.put(entry.getValue(), ocrText);
 				scores.put(ocrText);
+				scores.put(entry.getValue(), ocrText);
 			});
 			// Call the garbage collector to free the resources
 			System.gc();
 			
 			// Log every OCR and filter names
-			log(writer, map);
+			log(writer, this.getResultsMap());
+			log(writer, "bestLevenshtein", this.getMinLevenshtein());
 			log(writer, "bestText", this.getBestText());
 			log(writer, "bestText2", this.getBestText2());
 			// Close the file
@@ -59,13 +58,13 @@ public class ZoneScorerMap {
 		}
 		writer.append("\n");
 	}
-
-	private void log(FileWriter writer, Map<String, String> map) throws IOException {
+	
+	private void log(FileWriter writer, Map<String, Integer> map) throws IOException {
 		StringBuffer line1 = new StringBuffer("Filtername").append(delimiter);
-		StringBuffer line2 = new StringBuffer("OCR").append(delimiter);
+		StringBuffer line2 = new StringBuffer("Levenshtein").append(delimiter);
 		map.entrySet().stream().forEach(entry -> {
 			line1.append(entry.getKey()).append(delimiter);
-			line2.append(entry.getValue()).append(delimiter);
+			line2.append(entry.getValue().toString()).append(delimiter);
 		});
 		writer.append(line1.toString()).append("\n");
 		writer.append(line2.toString()).append("\n");
@@ -77,6 +76,14 @@ public class ZoneScorerMap {
 
 	public double getBestScore() {
 		return scores.getBestScore();
+	}
+	
+	public Map<String, Integer> getResultsMap(){
+		return scores.getResultsMap();
+	}
+	
+	public String getMinLevenshtein(){
+		return scores.getMinLevenshtein().toString();
 	}
 
 	public String getBestText() {
