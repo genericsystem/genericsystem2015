@@ -4,14 +4,13 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Stream;
-
+import org.genericsystem.cv.Img;
 import org.genericsystem.cv.ImgClass;
-import org.genericsystem.cv.Tools;
 import org.genericsystem.cv.Zone;
 import org.genericsystem.cv.Zones;
 import org.opencv.core.Core;
 import org.opencv.core.Size;
+import org.opencv.imgcodecs.Imgcodecs;
 
 public class ClassImgFieldsDetectorComparator {
 	static {
@@ -37,26 +36,31 @@ public class ClassImgFieldsDetectorComparator {
 			zones = Zones.get(imgClass.getClosedVarianceZones(new Size(9, 10)), 300, 6, 6);
 		}
 
-		int i = 0;
-		
-		// TODO lazily load the files to avoid memory overload
-		for (File file : new File(imgClassDirectory).listFiles())
-			if (file.getName().endsWith(".png")) {
-				// Create the Map 
-//				Map<File, String> map = Arrays.asList(new File(imgClassDirectory).listFiles()).
-//						stream().filter(img -> img.getName().equals(file.getName()))
-						
-				
-				System.out.println("File : " + file.getName());
-				if (i++ > 0)
-					continue;
-				for (Zone zone : zones) {
-					System.out.println("Zone n°" + zone.getNum());
-					// TODO create a new Stream with a wrapper containing the file and the name of the filter 
-					ZoneScorer2 scorer = zone.newUnsupervisedScorer2(file, Stream.concat(
-							Tools.classImgsStream(imgClassDirectory, file.getName()),
-							Tools.classImgsStream(imgClassDirectory + "/mask/" + file.getName().replace(".png", ""))));
-				}
-			}
+		final Zones zones2 = zones;
+
+		Arrays.asList(new File(imgClassDirectory).listFiles()).stream().filter(img -> img.getName().endsWith(".png"))
+				.forEach(file -> {
+					System.out.println("File : " + file.getName());
+					// Create a Map containing both the img and the name of the
+					// filter
+					Map<Img, String> map = new HashMap<>();
+					map.put(new Img(Imgcodecs.imread(file.getPath())), "original");
+					Arrays.asList(
+							new File(imgClassDirectory + "/mask/" + file.getName().replace(".png", "")).listFiles())
+							.stream().filter(img -> img.getName().endsWith(".png")).forEach(img -> {
+								map.put(new Img(Imgcodecs.imread(img.getPath())),
+										img.getName().replace(file.getName().replace(".png", ""), "").substring(1)
+												.replace(".png", ""));
+							});
+
+					for (Zone zone : zones2) {
+						System.out.println("Zone n°" + zone.getNum());
+						ZoneScorerMap scorer = zone.newUnsupervisedScorerMap(file.getName(), map.entrySet().stream());
+					}
+				});
+
+		// Call the garbage collector to free the resources
+		System.gc();
+
 	}
 }
