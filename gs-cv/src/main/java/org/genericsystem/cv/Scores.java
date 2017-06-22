@@ -53,16 +53,18 @@ public class Scores {
 			if (!"".equals(key)) {
 				int d = 0;
 				for (String key2 : ocrs2) {
-					// System.out.println("key2 : " + key2 + " Levenshtein : " + Levenshtein.distance(key, key2));
+//					 System.out.println("key2 : " + key2 + " Levenshtein : " + Levenshtein.distance(key, key2));
 					d += Levenshtein.distance(key, key2);
 				}
-				// System.out.println("key : " + key + " somme distance : " + d);
+//				 System.out.println("key : " + key + " somme distance : " + d);
 				if (d < shorterDistance) {
 					bestText = key;
 					shorterDistance = d;
 				}
 			}
 		}
+//		System.out.println("best text: " + bestText);
+//		System.out.println("shorter distance: " + shorterDistance);
 		return bestText;
 	}
 }
