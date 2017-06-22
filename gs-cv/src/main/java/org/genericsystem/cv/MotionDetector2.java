@@ -19,7 +19,6 @@ import org.opencv.core.RotatedRect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
-import org.opencv.text.OCRTesseract;
 import org.opencv.videoio.VideoCapture;
 
 import javafx.scene.image.ImageView;
@@ -37,7 +36,6 @@ public class MotionDetector2 extends AbstractApp {
 
 	private final VideoCapture capture = new VideoCapture(0);
 	private final ScheduledExecutorService timer = Executors.newSingleThreadScheduledExecutor();
-	private final OCRTesseract ocr = OCRTesseract.create("/usr/share/tesseract-ocr/4.00/", "fra", "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM0123456789.-,<'", 1, 7);
 
 	@Override
 	protected void fillGrid(GridPane mainGrid) {
@@ -55,9 +53,9 @@ public class MotionDetector2 extends AbstractApp {
 			try {
 				capture.read(frame);
 				Img adaptativThreshold = new Img(frame).cvtColor(Imgproc.COLOR_BGR2GRAY).adaptiveThresHold(255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 17, 9);
-				Img dilated = adaptativThreshold.morphologyEx(Imgproc.MORPH_DILATE, Imgproc.MORPH_ELLIPSE, new Size(5, 5));
+				Img closed = adaptativThreshold.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(11, 7));
 				Img frameCopy = new Img(frame);
-				double angle = detection_contours(frame, dilated.getSrc());
+				double angle = detection_contours(frame, closed.getSrc());
 				Mat matrix = Imgproc.getRotationMatrix2D(new Point(frame.width() / 2, frame.height() / 2), angle, 1);
 				Mat rotated = new Mat();
 				Imgproc.warpAffine(frameCopy.getSrc(), rotated, matrix, new Size(frame.size().width, frame.size().height));
@@ -65,12 +63,12 @@ public class MotionDetector2 extends AbstractApp {
 				Img croppedImg = new Img(new Mat(rotated, new Rect(Double.valueOf(rotated.width() * crop).intValue(), Double.valueOf(rotated.height() * crop).intValue(), Double.valueOf(rotated.width() * (1 - 2 * crop)).intValue(),
 						Double.valueOf(rotated.height() * (1 - 2 * crop)).intValue())));
 
-				src.setImage(Tools.mat2jfxImage(dilated.getSrc()));
+				src.setImage(Tools.mat2jfxImage(closed.getSrc()));
 				src2.setImage(Tools.mat2jfxImage(frame));
 				Img croppedAdaptativ = croppedImg.cvtColor(Imgproc.COLOR_BGR2GRAY).adaptiveThresHold(255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 17, 9);
-				Img croppedDilated = croppedAdaptativ.morphologyEx(Imgproc.MORPH_DILATE, Imgproc.MORPH_RECT, new Size(9, 3));
-				// detection_deskiew_contours(croppedImg.getSrc(), croppedDilated.getSrc());
-				croppedImg.recursivSplit(5, true);
+				Img croppedDilated = croppedAdaptativ.morphologyEx(Imgproc.MORPH_DILATE, Imgproc.MORPH_RECT, new Size(15, 3));
+				detection_deskiew_contours(croppedImg.getSrc(), croppedDilated.getSrc());
+				// croppedImg.recursivSplit(5, true);
 				src3.setImage(Tools.mat2jfxImage(croppedDilated.getSrc()));
 				src4.setImage(Tools.mat2jfxImage(croppedImg.getSrc()));
 			} catch (Exception e) {
@@ -84,7 +82,7 @@ public class MotionDetector2 extends AbstractApp {
 		List<MatOfPoint> contours = new ArrayList<>();
 		Imgproc.findContours(dilated, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
 		double minArea = 100;
-		double crop = 0.15;
+		double crop = 0.10;
 		Predicate<RotatedRect> filter = rect -> rect.center.x > Double.valueOf(frame.width() * crop).intValue() && rect.center.y > Double.valueOf(frame.height() * crop).intValue() && rect.center.x < Double.valueOf(frame.width() * (1 - crop)).intValue()
 				&& rect.center.y < Double.valueOf(frame.height() * (1 - crop)).intValue();
 		List<RotatedRect> rotatedRects = contours.stream().filter(contour -> Imgproc.contourArea(contour) > minArea).map(contour -> Imgproc.minAreaRect(new MatOfPoint2f(contour.toArray()))).filter(filter).collect(Collectors.toList());
@@ -100,7 +98,7 @@ public class MotionDetector2 extends AbstractApp {
 		}
 		final double average = mean / rotatedRects.size();
 
-		List<RotatedRect> goodRects = rotatedRects.stream().filter(rotatedRect -> Math.abs(rotatedRect.angle - average) < 5).collect(Collectors.toList());
+		List<RotatedRect> goodRects = rotatedRects.stream().filter(rotatedRect -> Math.abs(rotatedRect.angle - average) < 10).collect(Collectors.toList());
 		double goodRectsMean = 0;
 		for (RotatedRect rotatedRect : goodRects) {
 			goodRectsMean += rotatedRect.angle;
