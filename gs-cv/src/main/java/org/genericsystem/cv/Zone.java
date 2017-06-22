@@ -1,7 +1,9 @@
 package org.genericsystem.cv;
 
+import java.util.Map.Entry;
 import java.util.stream.Stream;
 
+import org.genericsystem.cv.comparator.ZoneScorerMap;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
@@ -27,6 +29,10 @@ public class Zone {
 
 	public ZoneScorer newUnsupervisedScorer(Stream<Img> imgs) {
 		return new ZoneScorer(this, imgs);
+	}
+	
+	public ZoneScorerMap newUnsupervisedScorerMap(String fileName, Stream<Entry<Img, String>> stream) {
+		return new ZoneScorerMap(this, stream, fileName);
 	}
 
 	public Zone adjustRect(double dx, double dy, int maxWidht, int maxHeight) {

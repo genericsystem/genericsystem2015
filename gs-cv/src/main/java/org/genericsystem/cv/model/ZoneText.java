@@ -37,6 +37,7 @@ public class ZoneText implements Generic {
 	}
 
 	public ZoneTextInstance getZoneText(DocInstance doc, ZoneInstance zone, ImgFilterInstance imgFilter) {
+		// TODO remove the get(0) ? index out of bound exeption -> getInstance()
 		return (ZoneTextInstance) getInstances(doc, zone, imgFilter).toList().get(0);
 	}
 
