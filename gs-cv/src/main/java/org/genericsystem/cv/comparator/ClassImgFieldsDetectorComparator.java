@@ -38,7 +38,7 @@ public class ClassImgFieldsDetectorComparator {
 
 		final Zones zones2 = zones;
 
-		Arrays.asList(new File(imgClassDirectory).listFiles()).stream().filter(img -> img.getName().endsWith("0.png"))
+		Arrays.asList(new File(imgClassDirectory).listFiles()).stream().filter(img -> img.getName().endsWith(".png"))
 				.forEach(file -> {
 					System.out.println("File : " + file.getName());
 					// Create a Map containing both the img and the name of the
@@ -55,7 +55,7 @@ public class ClassImgFieldsDetectorComparator {
 
 					for (Zone zone : zones2) {
 						System.out.println("Zone n°" + zone.getNum());
-						ZoneScorerMap scorer = zone.newUnsupervisedScorerMap(file.getName(), map.entrySet().stream());
+						ZoneScorerMap2 scorer = zone.newUnsupervisedScorerMap(file.getName(), map.entrySet().stream());
 					}
 				});
 
