@@ -32,6 +32,7 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.features2d.FeatureDetector;
 import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.CLAHE;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.photo.Photo;
 import org.opencv.utils.Converters;
@@ -443,6 +444,23 @@ public class Img {
 		Imgproc.equalizeHist(channels.get(2), channels.get(2));
 		Core.merge(channels, result);
 		Imgproc.cvtColor(result, result, Imgproc.COLOR_YCrCb2BGR);
+		return new Img(result);
+	}
+	
+	// Equalize histograms using a Contrast Limited Adaptive Histogram Equalization algorithm
+	public Img equalizeHistoAdaptative() {
+		Mat result = new Mat();
+		Mat channelL = new Mat();
+		CLAHE clahe = Imgproc.createCLAHE(2.0, new Size(8, 8));
+		// Convert from BGR to Lab
+		Imgproc.cvtColor(src, result, Imgproc.COLOR_BGR2Lab);
+		// Extract the luminance (L) channel and apply filter
+		Core.extractChannel(result, channelL, 0);
+		clahe.apply(channelL, channelL);
+		// Insert back the luminance channel
+		Core.insertChannel(channelL, result, 0);
+		// Convert from Lab to BGR
+		Imgproc.cvtColor(result, result, Imgproc.COLOR_Lab2BGR);
 		return new Img(result);
 	}
 
