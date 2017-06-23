@@ -71,7 +71,7 @@ public class Img {
 		return new Img(result);
 	}
 
-	public Img adaptiveThresHold(double maxValue, int adaptiveMethod, int thresholdType, int blockSize, double C) {
+	public Img adaptativeThresHold(double maxValue, int adaptiveMethod, int thresholdType, int blockSize, double C) {
 		Mat result = new Mat();
 		Imgproc.adaptiveThreshold(src, result, maxValue, adaptiveMethod, thresholdType, blockSize, C);
 		return new Img(result);

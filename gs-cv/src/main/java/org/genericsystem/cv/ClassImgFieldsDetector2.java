@@ -9,7 +9,7 @@ public class ClassImgFieldsDetector2 extends AbstractApp {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 	}
 
-	private final static String classImgRepertory = "classes/passport-fr";
+	private final static String classImgRepertory = "classes/id-fr-front";
 
 	public static void main(String[] args) {
 		launch(args);
