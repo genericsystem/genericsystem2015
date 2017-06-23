@@ -43,40 +43,54 @@ public class SetRealValues extends RootTagImpl {
 		ApplicationServer.startSimpleGenericApp(mainArgs, SetRealValues.class, "/gs-cv_model");
 	}
 
+	/*
+	 * For each document saved in GS, create image + textdiv elements
+	 */
 	@ForEach(DOC_CLASS_SELECTOR.class)
 	@Children({ Image.class, TextDiv.class })
 	public static class DocumentDiv extends HtmlDiv {
 
 	}
 
+	// Map the image source to the filename stored in GS
 	public static class Image extends HtmlImg {
-
 		@Override
 		public void init() {
 			bindAttribute("src", "imgadr",
 					context -> new SimpleStringProperty((String) context.getGeneric().getValue()));
 		}
-
 	}
 
+	// Define the textdiv
 	@Children(ZoneLabelInput.class)
 	public static class TextDiv extends HtmlDiv {
 
 	}
 
+	/*
+	 * For each zone, create label + inputText
+	 */
 	@Children({ ZoneLabel.class, ZoneInput.class })
 	@ForEach(SELECTOR.class)
 	public static class ZoneLabelInput extends HtmlDiv {
 
 	}
 
+	// Define the zone label
 	@BindText(ZONE_LABEL.class)
 	public static class ZoneLabel extends HtmlLabel {
 
 	}
 
+	// Define the inputText
 	@BindText
 	public static class ZoneInput extends InputTextEditorWithConversion {
+
+	}
+	
+	@SetText("Validate")
+	@BindAction(value = SAVE.class)
+	public static class Validate extends HtmlButton {
 
 	}
 
@@ -100,12 +114,6 @@ public class SetRealValues extends RootTagImpl {
 			Snapshot<Generic> docInstances = currentDocClass.getHolders(root.find(Doc.class));
 			return docInstances.toObservableList();
 		}
-	}
-
-	@SetText("Validate")
-	@BindAction(value = SAVE.class)
-	public static class Validate extends HtmlButton {
-
 	}
 
 	public static class SAVE implements ContextAction {

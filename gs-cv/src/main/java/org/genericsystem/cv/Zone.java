@@ -33,7 +33,15 @@ public class Zone {
 	}
 	
 	public ZoneScorerMap2 newUnsupervisedScorerMap(String fileName, Stream<Entry<Img, String>> stream) {
-		return new ZoneScorerMap2(this, stream, fileName);
+		ZoneScorerMap2 scorer = new ZoneScorerMap2(this, stream, fileName);
+		scorer.setSupervised(false);
+		return scorer;
+	}
+	
+	public ZoneScorerMap2 newSupervisedScorerMap(String fileName, Stream<Entry<Img, String>> stream) {
+		ZoneScorerMap2 scorer = new ZoneScorerMap2(this, stream, fileName);
+		scorer.setSupervised(true);
+		return scorer;
 	}
 
 	public Zone adjustRect(double dx, double dy, int maxWidht, int maxHeight) {
