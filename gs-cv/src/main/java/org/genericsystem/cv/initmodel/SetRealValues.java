@@ -62,7 +62,7 @@ public class SetRealValues extends RootTagImpl {
 	}
 
 	// Define the textdiv
-	@Children(ZoneLabelInput.class)
+	@Children({ ZoneLabelInput.class, ZoneLabelInputBis.class })
 	public static class TextDiv extends HtmlDiv {
 
 	}
@@ -73,6 +73,15 @@ public class SetRealValues extends RootTagImpl {
 	@Children({ ZoneLabel.class, ZoneInput.class })
 	@ForEach(SELECTOR.class)
 	public static class ZoneLabelInput extends HtmlDiv {
+
+	}
+	
+	/*
+	 * For each zone, create label + inputText
+	 */
+	@Children({ ZoneLabel.class, ZoneInput.class })
+	@ForEach(SELECTOR_BIS.class)
+	public static class ZoneLabelInputBis extends HtmlDiv {
 
 	}
 
@@ -105,6 +114,17 @@ public class SetRealValues extends RootTagImpl {
 		}
 	}
 
+	public static class SELECTOR_BIS implements ObservableListExtractor {
+		@Override
+		public ObservableList<Generic> apply(Generic[] generics) {
+			Generic currentDoc = generics[0];
+			System.out.println("Document : " + currentDoc);
+			Snapshot<Generic> zoneTextInstances = currentDoc.getHolders(currentDoc.getRoot().find(ZoneText.class))
+					.filter(zt -> "original".equals(((ZoneTextInstance) zt).getImgFilter().getValue()));
+			return zoneTextInstances.toObservableList();
+		}
+	}
+
 	public static class DOC_CLASS_SELECTOR implements ObservableListExtractor {
 		@Override
 		public ObservableList<Generic> apply(Generic[] generics) {
@@ -130,5 +150,5 @@ public class SetRealValues extends RootTagImpl {
 			return new SimpleStringProperty("Zone " + ((ZoneTextInstance) context.getGenerics()[0]).getZone());
 		}
 	}
-
+	
 }
