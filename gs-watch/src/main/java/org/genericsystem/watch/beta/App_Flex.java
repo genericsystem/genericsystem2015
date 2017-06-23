@@ -21,9 +21,7 @@ public class App_Flex {
 		
 		VertxOptions vertxOptions = new VertxOptions().setClustered(true).setClusterManager(mgr);
 		vertxOptions.setEventBusOptions(new EventBusOptions()).setClustered(true);		
-		
-		vertxOptions.setClusterHost("192.168.1.11");
-		
+		vertxOptions.setClusterHost("192.168.1.11");		
 		vertxOptions.setMaxWorkerExecuteTime(Long.MAX_VALUE);
 		
 		
