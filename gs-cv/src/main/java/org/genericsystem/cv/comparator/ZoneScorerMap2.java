@@ -2,7 +2,6 @@ package org.genericsystem.cv.comparator;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Stream;
@@ -11,7 +10,7 @@ import org.genericsystem.cv.Img;
 import org.genericsystem.cv.Scores;
 import org.genericsystem.cv.Zone;
 
-public class ZoneScorerMap {
+public class ZoneScorerMap2 {
 
 	private FileWriter writer;
 	private static final String basePath = "classes/id-fr-front/csv/";
@@ -20,15 +19,13 @@ public class ZoneScorerMap {
 	private final Scores scores = new Scores();
 	private final Zone zone;
 
-	public ZoneScorerMap(Zone zone, Stream<Entry<Img, String>> stream, String filename) {
+	public ZoneScorerMap2(Zone zone, Stream<Entry<Img, String>> stream, String filename) {
 		this.zone = zone;
 
 		try {
 			// Open a file to log the data (default: append = true)
 			writer = new FileWriter(basePath + filename.replaceAll(".png", "") + ".csv", true);
-			// Log the zone number
-			log(writer, "Zone", Integer.toString(zone.getNum()));
-			
+
 			// Loop over each entry and get the OCR
 			stream.forEach(entry -> {
 				String ocrText = zone.ocr(entry.getKey());
@@ -38,12 +35,9 @@ public class ZoneScorerMap {
 			});
 			// Call the garbage collector to free the resources
 			System.gc();
-			
+
 			// Log every OCR and filter names
 			log(writer, this.getResultsMap());
-			log(writer, "bestLevenshtein", this.getMinLevenshtein());
-			log(writer, "bestText", this.getBestText());
-			log(writer, "bestText2", this.getBestText2());
 			// Close the file
 			writer.flush();
 			writer.close();
@@ -58,16 +52,16 @@ public class ZoneScorerMap {
 		}
 		writer.append("\n");
 	}
-	
+
 	private void log(FileWriter writer, Map<String, Integer> map) throws IOException {
-		StringBuffer line1 = new StringBuffer("Filtername").append(delimiter);
-		StringBuffer line2 = new StringBuffer("Levenshtein").append(delimiter);
 		map.entrySet().stream().forEach(entry -> {
-			line1.append(entry.getKey()).append(delimiter);
-			line2.append(entry.getValue().toString()).append(delimiter);
+			try {
+				writer.append(Integer.toString(zone.getNum())).append(delimiter).append(entry.getKey())
+						.append(delimiter).append(entry.getValue().toString()).append("\n");
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		});
-		writer.append(line1.toString()).append("\n");
-		writer.append(line2.toString()).append("\n");
 	}
 
 	public Zone getZone() {
@@ -77,12 +71,12 @@ public class ZoneScorerMap {
 	public double getBestScore() {
 		return scores.getBestScore();
 	}
-	
-	public Map<String, Integer> getResultsMap(){
+
+	public Map<String, Integer> getResultsMap() {
 		return scores.getResultsMap();
 	}
-	
-	public String getMinLevenshtein(){
+
+	public String getMinLevenshtein() {
 		return scores.getMinLevenshtein().toString();
 	}
 

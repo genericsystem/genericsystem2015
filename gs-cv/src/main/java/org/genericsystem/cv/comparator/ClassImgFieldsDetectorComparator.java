@@ -55,7 +55,7 @@ public class ClassImgFieldsDetectorComparator {
 
 					for (Zone zone : zones2) {
 						System.out.println("Zone n°" + zone.getNum());
-						ZoneScorerMap scorer = zone.newUnsupervisedScorerMap(file.getName(), map.entrySet().stream());
+						ZoneScorerMap2 scorer = zone.newUnsupervisedScorerMap(file.getName(), map.entrySet().stream());
 					}
 				});
 

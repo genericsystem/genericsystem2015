@@ -12,10 +12,39 @@ public class Scores {
 	private final Map<String, Integer> ocrs = new HashMap<>();
 	private final List<String> ocrs2 = new ArrayList<>();
 
+	private final Map<String, String> ocrResults = new HashMap<>();
+	private Integer minLevenshtein;
+
 	public void put(String s) {
 		Integer count = ocrs.get(s);
 		ocrs.put(s, 1 + (count != null ? count : 0));
 		ocrs2.add(s);
+	}
+
+	public void put(String filtername, String ocr) {
+		ocrResults.put(filtername, ocr);
+	}
+
+	public Map<String, Integer> getResultsMap() {
+		// Create a Map containing the filtername and the corresponding Levenshtein distance
+		Map<String, Integer> results = new HashMap<>();
+		int shorterDistance = Integer.MAX_VALUE;
+		for (Entry<String, String> entry : ocrResults.entrySet()) {
+			int dist = 0;
+			for (Entry<String, String> entry2 : ocrResults.entrySet()) {
+				dist += Levenshtein.distance(entry.getValue(), entry2.getValue());
+			}
+			results.put(entry.getKey(), dist);
+			if (dist < shorterDistance){
+				shorterDistance = dist;
+			}
+		}
+		minLevenshtein = shorterDistance;
+		return results;
+	}
+	
+	public Integer getMinLevenshtein() {
+		return minLevenshtein;
 	}
 
 	public double getBestScore() {
@@ -32,6 +61,7 @@ public class Scores {
 		return Integer.valueOf(bestScore).doubleValue() / allOcrs;
 	}
 
+	// Best text = most occurrence
 	public String getBestText() {
 		String bestText = "";
 		int bestScore = 0;
@@ -46,6 +76,7 @@ public class Scores {
 		return bestText;
 	}
 
+	// Best text = shorter Levenshtein distance
 	public String getBestText2() {
 		String bestText = "";
 		int shorterDistance = Integer.MAX_VALUE;
@@ -53,18 +84,20 @@ public class Scores {
 			if (!"".equals(key)) {
 				int d = 0;
 				for (String key2 : ocrs2) {
-//					 System.out.println("key2 : " + key2 + " Levenshtein : " + Levenshtein.distance(key, key2));
+					// System.out.println("key2 : " + key2 + " Levenshtein : " +
+					// Levenshtein.distance(key, key2));
 					d += Levenshtein.distance(key, key2);
 				}
-//				 System.out.println("key : " + key + " somme distance : " + d);
+				// System.out.println("key : " + key + " somme distance : " +
+				// d);
 				if (d < shorterDistance) {
 					bestText = key;
 					shorterDistance = d;
 				}
 			}
 		}
-//		System.out.println("best text: " + bestText);
-//		System.out.println("shorter distance: " + shorterDistance);
+		// System.out.println("best text: " + bestText);
+		// System.out.println("shorter distance: " + shorterDistance);
 		return bestText;
 	}
 }
