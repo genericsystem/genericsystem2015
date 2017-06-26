@@ -1,4 +1,4 @@
-package org.genericsystem.cv.initmodel;
+package org.genericsystem.cv.comparator;
 
 import java.io.File;
 import java.util.Arrays;
@@ -9,7 +9,7 @@ import org.genericsystem.common.Root;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.Zone;
 import org.genericsystem.cv.Zones;
-import org.genericsystem.cv.initmodel.InitModel.InitScript;
+import org.genericsystem.cv.comparator.InitModel.InitScript;
 import org.genericsystem.cv.model.Doc;
 import org.genericsystem.cv.model.Doc.DocInstance;
 import org.genericsystem.cv.model.DocClass;

@@ -1,4 +1,4 @@
-package org.genericsystem.cv;
+package org.genericsystem.cv.comparator;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -6,13 +6,13 @@ import java.util.List;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
-import org.genericsystem.cv.ComputeScores.ComputeScript;
+import org.genericsystem.cv.Levenshtein;
+import org.genericsystem.cv.comparator.ComputeScores.ComputeScript;
 import org.genericsystem.cv.model.Doc;
 import org.genericsystem.cv.model.Doc.DocInstance;
 import org.genericsystem.cv.model.DocClass;
 import org.genericsystem.cv.model.ImgFilter;
 import org.genericsystem.cv.model.ImgFilter.ImgFilterInstance;
-import org.genericsystem.cv.model.LevDistance;
 import org.genericsystem.cv.model.ZoneGeneric;
 import org.genericsystem.cv.model.ZoneGeneric.ZoneInstance;
 import org.genericsystem.cv.model.ZoneText;
@@ -24,7 +24,7 @@ import org.genericsystem.reactor.gscomponents.RootTagImpl;
 import org.opencv.core.Core;
 
 @RunScript(ComputeScript.class)
-@DependsOnModel({ Doc.class, ImgFilter.class, ZoneGeneric.class, ZoneText.class, LevDistance.class })
+@DependsOnModel({ Doc.class, ImgFilter.class, ZoneGeneric.class, ZoneText.class })
 public class ComputeScores extends RootTagImpl {
 
 	public static void main(String[] mainArgs) {

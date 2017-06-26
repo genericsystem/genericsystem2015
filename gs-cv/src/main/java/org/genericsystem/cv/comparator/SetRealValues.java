@@ -1,10 +1,9 @@
-package org.genericsystem.cv.initmodel;
+package org.genericsystem.cv.comparator;
 
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
-import org.genericsystem.cv.initmodel.SetRealValues.DocumentDiv;
-import org.genericsystem.cv.initmodel.SetRealValues.Validate;
+import org.genericsystem.cv.comparator.SetRealValues.DocumentDiv;
 import org.genericsystem.cv.model.Doc;
 import org.genericsystem.cv.model.DocClass;
 import org.genericsystem.cv.model.ZoneGeneric;
@@ -34,7 +33,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
 @DependsOnModel({ Doc.class, DocClass.class, ZoneGeneric.class, ZoneText.class })
-@Children({ DocumentDiv.class, Validate.class })
+@Children({ DocumentDiv.class })
 public class SetRealValues extends RootTagImpl {
 
 	private static final String docClass = "id-fr-front";
@@ -62,7 +61,7 @@ public class SetRealValues extends RootTagImpl {
 	}
 
 	// Define the textdiv
-	@Children({ ZoneLabelInput.class })
+	@Children({ ZoneLabelInput.class, Validate.class })
 	public static class TextDiv extends HtmlDiv {
 
 	}
@@ -87,7 +86,7 @@ public class SetRealValues extends RootTagImpl {
 	public static class ZoneInput extends InputTextEditorWithConversion {
 
 	}
-	
+
 	@SetText("Validate")
 	@BindAction(value = SAVE.class)
 	public static class Validate extends HtmlButton {
@@ -95,16 +94,19 @@ public class SetRealValues extends RootTagImpl {
 	}
 
 	public static class SELECTOR implements ObservableListExtractor {
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		@Override
 		public ObservableList<Generic> apply(Generic[] generics) {
 			Generic currentDoc = generics[0];
+			Root root = currentDoc.getRoot();
 			System.out.println("Document : " + currentDoc);
-			Snapshot<Generic> zoneTextInstances = currentDoc.getHolders(currentDoc.getRoot().find(ZoneText.class))
+			Snapshot<ZoneTextInstance> zoneTextInstances = (Snapshot) currentDoc
+					.getHolders(root.find(ZoneText.class))
 					.filter(zt -> "reality".equals(((ZoneTextInstance) zt).getImgFilter().getValue()));
-			return zoneTextInstances.toObservableList().sorted();
+			return (ObservableList) zoneTextInstances.toObservableList()
+					.sorted((g1, g2) -> Integer.compare(g1.getZoneNum(), g2.getZoneNum()));
 		}
 	}
-
 
 	public static class DOC_CLASS_SELECTOR implements ObservableListExtractor {
 		@Override
@@ -131,5 +133,5 @@ public class SetRealValues extends RootTagImpl {
 			return new SimpleStringProperty("Zone " + ((ZoneTextInstance) context.getGenerics()[0]).getZone());
 		}
 	}
-	
+
 }

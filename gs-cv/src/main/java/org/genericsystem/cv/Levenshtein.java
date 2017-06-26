@@ -3,8 +3,6 @@ package org.genericsystem.cv;
 public class Levenshtein {
 
 	public static int distance(String a, String b) {
-		System.out.println(">>> Levenshtein a : \"" + a + "\"");
-		System.out.println(">>> Levenshtein b : \"" + b + "\"");
 		a = a.toLowerCase();
 		b = b.toLowerCase();
 		// i == 0
@@ -21,7 +19,8 @@ public class Levenshtein {
 				costs[j] = cj;
 			}
 		}
-		System.out.println(">>> Levenshtein cost : " + costs[b.length()] + "\n");
+//		System.out.print(">>> Levenshtein a : \"" + a + "\"" + " | b : \"" + b + "\"");
+//		System.out.println(" | cost : " + costs[b.length()]);
 		return costs[b.length()];
 	}
 

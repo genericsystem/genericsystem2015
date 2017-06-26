@@ -21,23 +21,24 @@ public class ZoneScorerMap2 {
 	private final Zone zone;
 
 	public ZoneScorerMap2(Zone zone, Stream<Entry<Img, String>> stream, String filename, boolean supervised) {
+		this(zone, stream, filename, null, supervised);
+	}
+	
+	public ZoneScorerMap2(Zone zone, Stream<Entry<Img, String>> stream, String filename, String realText, boolean supervised) {
 		this.zone = zone;
 		this.supervised = supervised;
-		if (supervised){
-			computeScorer(stream, filename);
-		} else {
-			computeScorer(stream, filename);
-		}	
+		computeScorer(stream, filename, realText);
 	}
 
-	private void computeScorer(Stream<Entry<Img, String>> stream, String filename) {
+	private void computeScorer(Stream<Entry<Img, String>> stream, String filename, String realText) {
 		try {
 			// Open a file to log the data (default: append = true)
 			writer = new FileWriter(basePath + filename.replaceAll(".png", "") + ".csv", true);
 			
-			// Store the filename in the scores
+			// Store the parameters in the scores objet
 			scores.setFilename(filename);
 			scores.setZone(zone.getNum());
+			scores.setRealText(realText);
 			
 			// Loop over each entry and get the OCR
 			stream.forEach(entry -> {

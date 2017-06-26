@@ -27,9 +27,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 //TODO compute score / bestText on every add ?
 public class Scores {
-	
-	// TODO : remove ?
-	Engine engine;
 
 	private static final ObjectMapper mapper = new ObjectMapper();
 	private static final String basePath = "classes/id-fr-front";
@@ -41,6 +38,7 @@ public class Scores {
 	private String filename;
 	private int zone;
 	private Integer minLevenshtein;
+	private String realText;
 
 	public void put(String s) {
 		Integer count = ocrs.get(s);
@@ -81,44 +79,16 @@ public class Scores {
 
 	public Map<String, Integer> getSupervisedResultsMap() {
 		Map<String, Integer> results = new HashMap<>();
-
-		final List<ZoneRealValue> realValues;
-		File src = new File(basePath + "/reference-text/" + this.filename.replace(".png", ".json"));
-		// Open the file containing the real values for the document
-		try {
-			realValues = mapper.readValue(src, new TypeReference<List<ZoneRealValue>>() {
-			});
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-
-		// Get the real String value from the json file
-//		String realText = realValues.stream().filter(zone -> zone.getNum() == this.zone).findFirst()
-//				.map(x -> x.getText()).get();
 		
-		/*
-		 *  Get the real String value from GS (fitlername = "reality")
-		 */
-		Generic doc = engine.find(Doc.class);
-		DocClass docClass = engine.find(DocClass.class);
-		ZoneText zoneText = engine.find(ZoneText.class);
-		// Get the current class
-		DocClassInstance docClassInstance = docClass.getDocClass("id-fr-front");
-		// Get the document instance
-		DocInstance docInstance = (DocInstance) docClassInstance.getHolder(doc, this.filename);
-		// Get the real text
-		String realText = docInstance.getHolders(zoneText)
-				.filter(zt -> "reality".equals(((ZoneTextInstance)zt).getImgFilter().getValue()) &&
-						((ZoneTextInstance)zt).getZone().getValue().equals(this.zone)).getByIndex(0).toString();
-
 		/*
 		 * If the text value is readble, compare with each OCR text and store the Levenshtein distance.
 		 * For convenience, all spaces are removed
 		 */
-		if (realText != null && !realText.isEmpty() ) {
+		if (this.realText != null && !this.realText.isEmpty() ) {
+			System.out.println("Trained data found! Using supervised training");
 			for (Entry<String, String> entry : ocrResults.entrySet()) {
 				int dist = Levenshtein.distance(entry.getValue().replaceAll("[ .,]", "").trim(),
-						realText.replaceAll("[ .,]", "").trim());
+						this.realText.replaceAll("[ .,]", "").trim());
 				results.put(entry.getKey(), dist);
 			}
 		} else {
@@ -192,5 +162,13 @@ public class Scores {
 
 	public void setZone(int zone) {
 		this.zone = zone;
+	}
+
+	public String getRealText() {
+		return realText;
+	}
+
+	public void setRealText(String realText) {
+		this.realText = realText;
 	}
 }

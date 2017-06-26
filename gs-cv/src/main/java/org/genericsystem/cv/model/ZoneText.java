@@ -25,6 +25,10 @@ public class ZoneText implements Generic {
 		public ZoneInstance getZone() {
 			return (ZoneInstance) this.getComponent(1);
 		}
+		
+		public int getZoneNum() {
+			return (int) getZone().getValue();
+		}
 
 		public ImgFilterInstance getImgFilter() {
 			return (ImgFilterInstance) this.getComponent(2);

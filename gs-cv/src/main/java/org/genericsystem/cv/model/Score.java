@@ -15,7 +15,7 @@ import org.genericsystem.cv.model.ZoneGeneric.ZoneInstance;
  */
 @SystemGeneric
 @PropertyConstraint
-@Components({ Zone.class, ImgFilter.class })
+@Components({ ZoneGeneric.class, ImgFilter.class })
 public class Score implements Generic {
 
 	public static class ScoreInstance implements Generic {

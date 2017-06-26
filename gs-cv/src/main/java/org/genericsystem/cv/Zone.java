@@ -37,8 +37,8 @@ public class Zone {
 		return scorer;
 	}
 	
-	public ZoneScorerMap2 newSupervisedScorerMap(String fileName, Stream<Entry<Img, String>> stream) {
-		ZoneScorerMap2 scorer = new ZoneScorerMap2(this, stream, fileName, true);
+	public ZoneScorerMap2 newSupervisedScorerMap(String fileName, String realText, Stream<Entry<Img, String>> stream) {
+		ZoneScorerMap2 scorer = new ZoneScorerMap2(this, stream, fileName, realText, true);
 		return scorer;
 	}
 
