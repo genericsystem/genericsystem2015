@@ -9,13 +9,27 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+import org.genericsystem.api.core.Snapshot;
+import org.genericsystem.common.Generic;
 import org.genericsystem.cv.comparator.ZoneRealValue;
+import org.genericsystem.cv.model.Doc;
+import org.genericsystem.cv.model.DocClass;
+import org.genericsystem.cv.model.ImgFilter;
+import org.genericsystem.cv.model.ZoneGeneric;
+import org.genericsystem.cv.model.ZoneText;
+import org.genericsystem.cv.model.Doc.DocInstance;
+import org.genericsystem.cv.model.DocClass.DocClassInstance;
+import org.genericsystem.cv.model.ZoneText.ZoneTextInstance;
+import org.genericsystem.kernel.Engine;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 //TODO compute score / bestText on every add ?
 public class Scores {
+	
+	// TODO : remove ?
+	Engine engine;
 
 	private static final ObjectMapper mapper = new ObjectMapper();
 	private static final String basePath = "classes/id-fr-front";
@@ -69,7 +83,7 @@ public class Scores {
 		Map<String, Integer> results = new HashMap<>();
 
 		final List<ZoneRealValue> realValues;
-		File src = new File(basePath + "/reference-text" + filename.replace(".png", ".json"));
+		File src = new File(basePath + "/reference-text/" + this.filename.replace(".png", ".json"));
 		// Open the file containing the real values for the document
 		try {
 			realValues = mapper.readValue(src, new TypeReference<List<ZoneRealValue>>() {
@@ -79,14 +93,32 @@ public class Scores {
 		}
 
 		// Get the real String value from the json file
-		String realText = realValues.stream().filter(zone -> zone.getNum() == this.zone).findFirst()
-				.map(x -> x.getText()).get();
+//		String realText = realValues.stream().filter(zone -> zone.getNum() == this.zone).findFirst()
+//				.map(x -> x.getText()).get();
+		
+		/*
+		 *  Get the real String value from GS (fitlername = "reality")
+		 */
+		Generic doc = engine.find(Doc.class);
+		DocClass docClass = engine.find(DocClass.class);
+		ZoneText zoneText = engine.find(ZoneText.class);
+		// Get the current class
+		DocClassInstance docClassInstance = docClass.getDocClass("id-fr-front");
+		// Get the document instance
+		DocInstance docInstance = (DocInstance) docClassInstance.getHolder(doc, this.filename);
+		// Get the real text
+		String realText = docInstance.getHolders(zoneText)
+				.filter(zt -> "reality".equals(((ZoneTextInstance)zt).getImgFilter().getValue()) &&
+						((ZoneTextInstance)zt).getZone().getValue().equals(this.zone)).getByIndex(0).toString();
 
-		// If the text value is readble, compare with each OCR text and store
-		// the Levenshtein distance
-		if (realText != null && realText != "") {
+		/*
+		 * If the text value is readble, compare with each OCR text and store the Levenshtein distance.
+		 * For convenience, all spaces are removed
+		 */
+		if (realText != null && !realText.isEmpty() ) {
 			for (Entry<String, String> entry : ocrResults.entrySet()) {
-				int dist = Levenshtein.distance(entry.getValue(), realText);
+				int dist = Levenshtein.distance(entry.getValue().replaceAll("[ .,]", "").trim(),
+						realText.replaceAll("[ .,]", "").trim());
 				results.put(entry.getKey(), dist);
 			}
 		} else {

@@ -33,14 +33,12 @@ public class Zone {
 	}
 	
 	public ZoneScorerMap2 newUnsupervisedScorerMap(String fileName, Stream<Entry<Img, String>> stream) {
-		ZoneScorerMap2 scorer = new ZoneScorerMap2(this, stream, fileName);
-		scorer.setSupervised(false);
+		ZoneScorerMap2 scorer = new ZoneScorerMap2(this, stream, fileName, false);
 		return scorer;
 	}
 	
 	public ZoneScorerMap2 newSupervisedScorerMap(String fileName, Stream<Entry<Img, String>> stream) {
-		ZoneScorerMap2 scorer = new ZoneScorerMap2(this, stream, fileName);
-		scorer.setSupervised(true);
+		ZoneScorerMap2 scorer = new ZoneScorerMap2(this, stream, fileName, true);
 		return scorer;
 	}
 

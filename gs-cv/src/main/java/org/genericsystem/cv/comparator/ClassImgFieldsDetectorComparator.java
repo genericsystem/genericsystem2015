@@ -8,6 +8,12 @@ import org.genericsystem.cv.Img;
 import org.genericsystem.cv.ImgClass;
 import org.genericsystem.cv.Zone;
 import org.genericsystem.cv.Zones;
+import org.genericsystem.cv.model.Doc;
+import org.genericsystem.cv.model.DocClass;
+import org.genericsystem.cv.model.ImgFilter;
+import org.genericsystem.cv.model.ZoneGeneric;
+import org.genericsystem.cv.model.ZoneText;
+import org.genericsystem.kernel.Engine;
 import org.opencv.core.Core;
 import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
@@ -18,8 +24,14 @@ public class ClassImgFieldsDetectorComparator {
 	}
 
 	private final static String imgClassDirectory = "classes/id-fr-front";
+	
+	private static Engine engine;
 
 	public static void main(String[] args) {
+		// Start the engine
+		engine = new Engine(System.getenv("HOME") + "/genericsystem/gs-cv_model/", Doc.class, DocClass.class,
+				ZoneGeneric.class, ZoneText.class, ImgFilter.class);
+		engine.newCache().start();
 		compute();
 	}
 
@@ -38,7 +50,8 @@ public class ClassImgFieldsDetectorComparator {
 
 		final Zones zones2 = zones;
 
-		Arrays.asList(new File(imgClassDirectory).listFiles()).stream().filter(img -> img.getName().endsWith(".png"))
+		// Compute the scores for each image in the "/ref" sub-directory
+		Arrays.asList(new File(imgClassDirectory + "/ref/").listFiles()).stream().filter(img -> img.getName().endsWith(".png"))
 				.forEach(file -> {
 					System.out.println("File : " + file.getName());
 					// Create a Map containing both the img and the name of the

@@ -1,5 +1,11 @@
 package org.genericsystem.cv.comparator;
 
+/**
+ * Utility class to extract the real values for each zone from a json file.
+ * 
+ * @author Pierrik Lassalas
+ *
+ */
 public class ZoneRealValue {
 	private int num;
 	private String text;

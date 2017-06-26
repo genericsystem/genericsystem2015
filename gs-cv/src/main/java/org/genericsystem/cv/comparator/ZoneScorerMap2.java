@@ -20,16 +20,17 @@ public class ZoneScorerMap2 {
 	private final Scores scores = new Scores();
 	private final Zone zone;
 
-	public ZoneScorerMap2(Zone zone, Stream<Entry<Img, String>> stream, String filename) {
+	public ZoneScorerMap2(Zone zone, Stream<Entry<Img, String>> stream, String filename, boolean supervised) {
 		this.zone = zone;
-		if (isSupervised()){
-			computeScorer(stream, filename, true);
+		this.supervised = supervised;
+		if (supervised){
+			computeScorer(stream, filename);
 		} else {
-			computeScorer(stream, filename, false);
+			computeScorer(stream, filename);
 		}	
 	}
 
-	private void computeScorer(Stream<Entry<Img, String>> stream, String filename, boolean supervised) {
+	private void computeScorer(Stream<Entry<Img, String>> stream, String filename) {
 		try {
 			// Open a file to log the data (default: append = true)
 			writer = new FileWriter(basePath + filename.replaceAll(".png", "") + ".csv", true);
@@ -109,14 +110,6 @@ public class ZoneScorerMap2 {
 
 	public String getBestText2() {
 		return scores.getBestText2();
-	}
-
-	public boolean isSupervised() {
-		return supervised;
-	}
-
-	public void setSupervised(boolean supervised) {
-		this.supervised = supervised;
 	}
 
 }

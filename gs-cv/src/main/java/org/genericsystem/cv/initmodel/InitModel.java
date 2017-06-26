@@ -53,7 +53,7 @@ public class InitModel extends RootTagImpl {
 			Generic doc = engine.find(Doc.class);
 			ZoneText zoneText = engine.find(ZoneText.class);
 			ImgFilter imgFilter = engine.find(ImgFilter.class);
-			
+
 			// Save the current document class
 			DocClassInstance docClassInstance = docClass.addDocClass(docType);
 
@@ -64,14 +64,14 @@ public class InitModel extends RootTagImpl {
 
 			// Load the accurate zones
 			Zones zones = Zones.load(imgClassDirectory);
-			
+
 			// Save the zones
 			zones.getZones().forEach(z -> {
 				log.info("Adding zone n° {}", z.getNum());
 				docClassInstance.addZone(z.getNum(), z.getRect().x, z.getRect().y, z.getRect().width,
 						z.getRect().height);
 			});
-			
+
 			// Save the filternames
 			imgFilters.forEach(f -> {
 				log.info("Adding filter : {} ", f);
@@ -80,45 +80,55 @@ public class InitModel extends RootTagImpl {
 
 			// Persist the changes
 			engine.getCurrentCache().flush();
-			
+
 			// Process each file in the subfolder "/ref"
-			Arrays.asList(new File(imgClassDirectory + "/ref/").listFiles((dir, name) -> name.endsWith(".png"))).
-				stream().
-				forEach(file -> {
-					log.info("\nProcessing file: {}", file.getName());
-					// Draw the image's zones + numbers
-					Img originalImg = new Img(Imgcodecs.imread(file.getPath()));
-					zones.draw(originalImg, new Scalar(0, 255, 0), 3);
-					zones.writeNum(originalImg, new Scalar(0, 0, 255), 3);
-					// Copy the images to the resources folder
-					// TODO implement a filter mechanism to avoid creating duplicates in a public folder
-					Imgcodecs.imwrite(System.getProperty("user.dir") + "/src/main/resources/" + file.getName(),
-							originalImg.getSrc());
-					// Save the file
-//					DocInstance docInstance = (DocInstance) docClassInstance.setHolder(doc, file.getName());
-					DocInstance docInstance = docClassInstance.addDoc(docClassInstance, doc, file.getName());
-					
-					// Process each zone
-					zones.getZones().stream().forEach(z -> {
-						log.info("Zone n° {}", z.getNum());
-						// Save the zone
-						ZoneInstance zoneInstance = docClassInstance.getZone(z.getNum());
-						for (String filter : imgFilters) {
-							Img filteredImage;
-							// "reality" is initialized with the original picture
-							if ("original".equals(filter) || "reality".equals(filter))
-								filteredImage = new Img(Imgcodecs.imread(imgClassDirectory + "/ref/" + file.getName()));
-							else
-								filteredImage = new Img(Imgcodecs.imread(imgClassDirectory + "/mask/" + filter + "/"
-										+ file.getName().replace(".png", "") + "-" + filter + ".png"));
-							// Get the OCR text
-							String ocrText = z.ocr(filteredImage);
-							log.info("filter {} => {}", filter, ocrText.trim());
-							// Add the text to the corresponding zone
-							zoneText.addZoneText(ocrText, docInstance, zoneInstance, imgFilter.getImgFilter(filter));
-						}
+			Arrays.asList(new File(imgClassDirectory + "/ref/").listFiles((dir, name) -> name.endsWith(".png")))
+					.stream().forEach(file -> {
+						log.info("\nProcessing file: {}", file.getName());
+						// Draw the image's zones + numbers
+						Img originalImg = new Img(Imgcodecs.imread(file.getPath()));
+						zones.draw(originalImg, new Scalar(0, 255, 0), 3);
+						zones.writeNum(originalImg, new Scalar(0, 0, 255), 3);
+						// Copy the images to the resources folder
+						// TODO implement a filter mechanism to avoid creating
+						// duplicates in a public folder
+						Imgcodecs.imwrite(System.getProperty("user.dir") + "/src/main/resources/" + file.getName(),
+								originalImg.getSrc());
+						// Save the file
+						// DocInstance docInstance = (DocInstance)
+						// docClassInstance.setHolder(doc, file.getName());
+						DocInstance docInstance = docClassInstance.addDoc(docClassInstance, doc, file.getName());
+
+						// Process each zone
+						zones.getZones().stream().forEach(z -> {
+							log.info("Zone n° {}", z.getNum());
+							// Save the zone
+							ZoneInstance zoneInstance = docClassInstance.getZone(z.getNum());
+							for (String filter : imgFilters) {
+								Img filteredImage;
+								// "reality" is initialized with the original picture if the text has not been filled yet
+								if ("original".equals(filter) || "reality".equals(filter)) {
+									if ("reality".equals(filter) && null != zoneText.getZoneText(docInstance,
+											zoneInstance, imgFilter.getImgFilter(filter))) {
+										continue;
+									}
+									filteredImage = new Img(
+											Imgcodecs.imread(imgClassDirectory + "/ref/" + file.getName()));
+								} else {
+									filteredImage = new Img(Imgcodecs.imread(imgClassDirectory + "/mask/" + filter + "/"
+											+ file.getName().replace(".png", "") + "-" + filter + ".png"));
+								}
+								// Get the OCR text
+								String ocrText = z.ocr(filteredImage);
+								log.info("filter {} => {}", filter, ocrText.trim());
+								// Add the text to the corresponding zone
+								zoneText.addZoneText(ocrText, docInstance, zoneInstance,
+										imgFilter.getImgFilter(filter));
+							}
+						});
+						// Call the garbage collector to free the resources
+						System.gc();
 					});
-				});
 
 			engine.getCurrentCache().flush();
 		}
