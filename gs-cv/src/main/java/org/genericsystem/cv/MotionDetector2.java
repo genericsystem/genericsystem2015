@@ -52,13 +52,10 @@ public class MotionDetector2 extends AbstractApp {
 		timer.scheduleAtFixedRate(() -> {
 			try {
 				capture.read(frame);
-<<<<<<< HEAD
-				Img adaptativThreshold = new Img(frame).cvtColor(Imgproc.COLOR_BGR2GRAY).adaptiveThresHold(255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 17, 9);
-				Img closed = adaptativThreshold.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(11, 7));
-=======
+
 				Img adaptativThreshold = new Img(frame).cvtColor(Imgproc.COLOR_BGR2GRAY).adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 17, 9);
-				Img dilated = adaptativThreshold.morphologyEx(Imgproc.MORPH_DILATE, Imgproc.MORPH_ELLIPSE, new Size(5, 5));
->>>>>>> branch 'master' of https://nfeybesse@github.com/genericsystem/genericsystem2015.git
+				Img closed = adaptativThreshold.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(11, 7));
+
 				Img frameCopy = new Img(frame);
 				double angle = detection_contours(frame, closed.getSrc());
 				Mat matrix = Imgproc.getRotationMatrix2D(new Point(frame.width() / 2, frame.height() / 2), angle, 1);
@@ -70,17 +67,11 @@ public class MotionDetector2 extends AbstractApp {
 
 				src.setImage(Tools.mat2jfxImage(closed.getSrc()));
 				src2.setImage(Tools.mat2jfxImage(frame));
-<<<<<<< HEAD
-				Img croppedAdaptativ = croppedImg.cvtColor(Imgproc.COLOR_BGR2GRAY).adaptiveThresHold(255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 17, 9);
+
+				Img croppedAdaptativ = croppedImg.cvtColor(Imgproc.COLOR_BGR2GRAY).adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 17, 9);
 				Img croppedDilated = croppedAdaptativ.morphologyEx(Imgproc.MORPH_DILATE, Imgproc.MORPH_RECT, new Size(15, 3));
 				detection_deskiew_contours(croppedImg.getSrc(), croppedDilated.getSrc());
 				// croppedImg.recursivSplit(5, true);
-=======
-				Img croppedAdaptativ = croppedImg.cvtColor(Imgproc.COLOR_BGR2GRAY).adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 17, 9);
-				Img croppedDilated = croppedAdaptativ.morphologyEx(Imgproc.MORPH_DILATE, Imgproc.MORPH_RECT, new Size(9, 3));
-				// detection_deskiew_contours(croppedImg.getSrc(), croppedDilated.getSrc());
-				croppedImg.recursivSplit(5, true);
->>>>>>> branch 'master' of https://nfeybesse@github.com/genericsystem/genericsystem2015.git
 				src3.setImage(Tools.mat2jfxImage(croppedDilated.getSrc()));
 				src4.setImage(Tools.mat2jfxImage(croppedImg.getSrc()));
 			} catch (Exception e) {
