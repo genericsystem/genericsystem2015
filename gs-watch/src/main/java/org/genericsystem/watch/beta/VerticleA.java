@@ -16,14 +16,17 @@ public class VerticleA extends AbstractVerticle{
 	public void start() throws Exception {
 		
 		System.out.println("Verticle A");
+		
 		vertx.setPeriodic(10000, new Handler<Long>() {
 			
 			@Override
 			public void handle(Long event) {
 								
 				System.out.println("Verticle A publishing");
-				vertx.eventBus().publish(App_Flex.STEP1, "1000");
+				vertx.eventBus().publish(App_Flex.STEP1, "Message : "+System.currentTimeMillis());
 			}
 		});
+			
+		
 	}
 }
