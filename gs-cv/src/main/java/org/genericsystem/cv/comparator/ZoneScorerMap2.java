@@ -12,6 +12,7 @@ import org.genericsystem.cv.Zone;
 
 public class ZoneScorerMap2 {
 
+	private boolean supervised;
 	private FileWriter writer;
 	private static final String basePath = "classes/id-fr-front/csv/";
 	private static final String delimiter = "\t";
@@ -21,23 +22,41 @@ public class ZoneScorerMap2 {
 
 	public ZoneScorerMap2(Zone zone, Stream<Entry<Img, String>> stream, String filename) {
 		this.zone = zone;
+		if (isSupervised()){
+			computeScorer(stream, filename, true);
+		} else {
+			computeScorer(stream, filename, false);
+		}	
+	}
 
+	private void computeScorer(Stream<Entry<Img, String>> stream, String filename, boolean supervised) {
 		try {
 			// Open a file to log the data (default: append = true)
 			writer = new FileWriter(basePath + filename.replaceAll(".png", "") + ".csv", true);
-
+			
+			// Store the filename in the scores
+			scores.setFilename(filename);
+			scores.setZone(zone.getNum());
+			
 			// Loop over each entry and get the OCR
 			stream.forEach(entry -> {
 				String ocrText = zone.ocr(entry.getKey());
 				ocrText = ocrText.replace("\n", "").replaceAll("\t", "").trim();
+				// Store the OCR text
 				scores.put(ocrText);
+				// Store the OCR text corresponding to the filter
 				scores.put(entry.getValue(), ocrText);
 			});
 			// Call the garbage collector to free the resources
 			System.gc();
 
 			// Log every OCR and filter names
-			log(writer, this.getResultsMap());
+			if (supervised){
+				log(writer, this.getSupervisedResultsMap());
+			} else {
+				log(writer, this.getResultsMap());
+			}
+			
 			// Close the file
 			writer.flush();
 			writer.close();
@@ -75,6 +94,10 @@ public class ZoneScorerMap2 {
 	public Map<String, Integer> getResultsMap() {
 		return scores.getResultsMap();
 	}
+	
+	public Map<String, Integer> getSupervisedResultsMap() {
+		return scores.getSupervisedResultsMap();
+	}
 
 	public String getMinLevenshtein() {
 		return scores.getMinLevenshtein().toString();
@@ -86,6 +109,14 @@ public class ZoneScorerMap2 {
 
 	public String getBestText2() {
 		return scores.getBestText2();
+	}
+
+	public boolean isSupervised() {
+		return supervised;
+	}
+
+	public void setSupervised(boolean supervised) {
+		this.supervised = supervised;
 	}
 
 }

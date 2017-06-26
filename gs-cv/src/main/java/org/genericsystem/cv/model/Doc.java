@@ -22,6 +22,7 @@ public class Doc implements Generic {
 			return (DocClassInstance) this.getBaseComponent();
 		}
 
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public List<ZoneInstance> getZones() {
 			Snapshot<ZoneInstance> shot = (Snapshot) getBaseComponent().getHolders(getRoot().find(ZoneGeneric.class));
 			return shot.toList();

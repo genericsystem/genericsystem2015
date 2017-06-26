@@ -8,6 +8,11 @@ import org.genericsystem.cv.Zone;
 import org.genericsystem.cv.model.ImgFilter.ImgFilterInstance;
 import org.genericsystem.cv.model.ZoneGeneric.ZoneInstance;
 
+/**
+ * Ongoing work (not yet implemented)
+ * @author Pierrik Lassalas
+ *
+ */
 @SystemGeneric
 @PropertyConstraint
 @Components({ Zone.class, ImgFilter.class })

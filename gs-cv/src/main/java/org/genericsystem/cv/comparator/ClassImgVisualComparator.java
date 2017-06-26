@@ -17,6 +17,7 @@ import org.opencv.imgcodecs.Imgcodecs;
 
 import javafx.scene.layout.GridPane;
 
+// TODO not yet implemented!
 public class ClassImgVisualComparator extends AbstractApp {
 	static {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
