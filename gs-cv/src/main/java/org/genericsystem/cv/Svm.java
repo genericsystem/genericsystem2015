@@ -22,7 +22,6 @@ public class Svm {
 		Mat classes = new Mat();
 		Mat trainingData = new Mat();
 
-		Mat samples = new Mat();
 		Mat trainingImages = new Mat();
 		Mat trainingLabels = new Mat();
 
@@ -39,10 +38,10 @@ public class Svm {
 				Mat img = Imgcodecs.imread(file.getPath());
 				Imgproc.cvtColor(img, img, Imgproc.COLOR_BGR2GRAY);
 				Imgproc.resize(img, img, size);
-				img.reshape(1, 1);
+				img = img.reshape(1, 1);
 
 				trainingImages.push_back(img);
-				trainingLabels.push_back(Mat.ones(new Size(1, 1), CvType.CV_32FC1));
+				trainingLabels.push_back(Mat.ones(new Size(1, 1), CvType.CV_32S));
 			}
 		}
 
@@ -51,15 +50,14 @@ public class Svm {
 				Mat img = Imgcodecs.imread(file.getPath());
 				Imgproc.cvtColor(img, img, Imgproc.COLOR_BGR2GRAY);
 				Imgproc.resize(img, img, size);
-				img.reshape(1, 1);
+				img = img.reshape(1, 1);
 
 				trainingImages.push_back(img);
-				trainingLabels.push_back(Mat.zeros(new Size(1, 1), CvType.CV_32FC1));
+				trainingLabels.push_back(Mat.zeros(new Size(1, 1), CvType.CV_32S));
 			}
 		}
 
-		trainingImages.copyTo(trainingData);
-		trainingData.convertTo(trainingData, CvType.CV_32FC1);
+		trainingImages.convertTo(trainingData, CvType.CV_32FC1);
 		trainingLabels.copyTo(classes);
 
 		clasificador = SVM.create();
@@ -68,16 +66,16 @@ public class Svm {
 		clasificador.setKernel(SVM.LINEAR);
 		System.out.println(trainingData.rows());
 		System.out.println(classes.rows());
-		clasificador.train(trainingData, Ml.ROW_SAMPLE, classes);
+		clasificador.train(trainingData, Ml.ROW_SAMPLE, trainingLabels);
 
 		for (File file : new File(imgClassDirectory + "/samples/").listFiles()) {
 			if (file.getName().endsWith(".png")) {
 				Mat img = Imgcodecs.imread(file.getPath());
 				Imgproc.cvtColor(img, img, Imgproc.COLOR_BGR2GRAY);
 				Imgproc.resize(img, img, size);
-				img.reshape(1, 1);
-				samples.push_back(img);
-				System.out.println(file.getName() + " : " + clasificador.predict(samples));
+				img = img.reshape(1, 1);
+				img.convertTo(img, CvType.CV_32FC1);
+				System.out.println(file.getName() + " : " + clasificador.predict(img));
 			}
 		}
 	}
