@@ -43,40 +43,63 @@ public class SetRealValues extends RootTagImpl {
 		ApplicationServer.startSimpleGenericApp(mainArgs, SetRealValues.class, "/gs-cv_model");
 	}
 
+	/*
+	 * For each document saved in GS, create image + textdiv elements
+	 */
 	@ForEach(DOC_CLASS_SELECTOR.class)
 	@Children({ Image.class, TextDiv.class })
 	public static class DocumentDiv extends HtmlDiv {
 
 	}
 
+	// Map the image source to the filename stored in GS
 	public static class Image extends HtmlImg {
-
 		@Override
 		public void init() {
 			bindAttribute("src", "imgadr",
 					context -> new SimpleStringProperty((String) context.getGeneric().getValue()));
 		}
-
 	}
 
-	@Children(ZoneLabelInput.class)
+	// Define the textdiv
+	@Children({ ZoneLabelInput.class, ZoneLabelInputBis.class })
 	public static class TextDiv extends HtmlDiv {
 
 	}
 
+	/*
+	 * For each zone, create label + inputText
+	 */
 	@Children({ ZoneLabel.class, ZoneInput.class })
 	@ForEach(SELECTOR.class)
 	public static class ZoneLabelInput extends HtmlDiv {
 
 	}
+	
+	/*
+	 * For each zone, create label + inputText
+	 */
+	@Children({ ZoneLabel.class, ZoneInput.class })
+	@ForEach(SELECTOR_BIS.class)
+	public static class ZoneLabelInputBis extends HtmlDiv {
 
+	}
+
+	// Define the zone label
 	@BindText(ZONE_LABEL.class)
 	public static class ZoneLabel extends HtmlLabel {
 
 	}
 
+	// Define the inputText
 	@BindText
 	public static class ZoneInput extends InputTextEditorWithConversion {
+
+	}
+	
+	@SetText("Validate")
+	@BindAction(value = SAVE.class)
+	public static class Validate extends HtmlButton {
 
 	}
 
@@ -91,6 +114,17 @@ public class SetRealValues extends RootTagImpl {
 		}
 	}
 
+	public static class SELECTOR_BIS implements ObservableListExtractor {
+		@Override
+		public ObservableList<Generic> apply(Generic[] generics) {
+			Generic currentDoc = generics[0];
+			System.out.println("Document : " + currentDoc);
+			Snapshot<Generic> zoneTextInstances = currentDoc.getHolders(currentDoc.getRoot().find(ZoneText.class))
+					.filter(zt -> "original".equals(((ZoneTextInstance) zt).getImgFilter().getValue()));
+			return zoneTextInstances.toObservableList();
+		}
+	}
+
 	public static class DOC_CLASS_SELECTOR implements ObservableListExtractor {
 		@Override
 		public ObservableList<Generic> apply(Generic[] generics) {
@@ -100,12 +134,6 @@ public class SetRealValues extends RootTagImpl {
 			Snapshot<Generic> docInstances = currentDocClass.getHolders(root.find(Doc.class));
 			return docInstances.toObservableList();
 		}
-	}
-
-	@SetText("Validate")
-	@BindAction(value = SAVE.class)
-	public static class Validate extends HtmlButton {
-
 	}
 
 	public static class SAVE implements ContextAction {
@@ -122,5 +150,5 @@ public class SetRealValues extends RootTagImpl {
 			return new SimpleStringProperty("Zone " + ((ZoneTextInstance) context.getGenerics()[0]).getZone());
 		}
 	}
-
+	
 }

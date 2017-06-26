@@ -48,37 +48,45 @@ public class InitModel extends RootTagImpl {
 			String imgClassDirectory = "classes/" + docType;
 			log.info("imgClassDirectory = {} ", imgClassDirectory);
 
+			// Get the necessary classes from the engine
 			DocClass docClass = engine.find(DocClass.class);
-			DocClassInstance docClassInstance = docClass.addDocClass(docType);
-
 			Generic doc = engine.find(Doc.class);
-
 			ZoneText zoneText = engine.find(ZoneText.class);
 			ImgFilter imgFilter = engine.find(ImgFilter.class);
+			
+			// Save the current document class
+			DocClassInstance docClassInstance = docClass.addDocClass(docType);
 
+			// Get all the filternames
 			String[] imgF = { "reality", "original", "abutaleb", "bernsen", "brink", "djvu", "niblack", "otsu",
 					"sauvola", "shading-subtraction", "tsai", "white-rohrer" };
 			List<String> imgFilters = Arrays.asList(imgF);
 
+			// Load the accurate zones
 			Zones zones = Zones.load(imgClassDirectory);
-			for (Zone z : zones.getZones()) {
+			
+			// Save the zones
+			zones.getZones().forEach(z -> {
 				log.info("Adding zone n° {}", z.getNum());
 				docClassInstance.addZone(z.getNum(), z.getRect().x, z.getRect().y, z.getRect().width,
 						z.getRect().height);
-			}
-
-			for (String f : imgFilters) {
+			});
+			
+			// Save the filternames
+			imgFilters.forEach(f -> {
 				log.info("Adding filter : {} ", f);
 				imgFilter.addImgFilter(f);
-			}
+			});
 
+			// Persist the changes
 			engine.getCurrentCache().flush();
 			
+			// Process each file in the subfolder "/ref"
 			Arrays.asList(new File(imgClassDirectory + "/ref/").listFiles((dir, name) -> name.endsWith(".png"))).
 				stream().
 				forEach(file -> {
 					log.info("\nProcessing file: {}", file.getName());
-					// Draw the image with numbered zones
+					// Draw the image's zones + numbers
 					Img originalImg = new Img(Imgcodecs.imread(file.getPath()));
 					zones.draw(originalImg, new Scalar(0, 255, 0), 3);
 					zones.writeNum(originalImg, new Scalar(0, 0, 255), 3);
@@ -87,8 +95,10 @@ public class InitModel extends RootTagImpl {
 					Imgcodecs.imwrite(System.getProperty("user.dir") + "/src/main/resources/" + file.getName(),
 							originalImg.getSrc());
 					// Save the file
-					DocInstance docInstance = (DocInstance) docClassInstance.setHolder(doc, file.getName());
-
+//					DocInstance docInstance = (DocInstance) docClassInstance.setHolder(doc, file.getName());
+					DocInstance docInstance = docClassInstance.addDoc(docClassInstance, doc, file.getName());
+					
+					// Process each zone
 					zones.getZones().stream().forEach(z -> {
 						log.info("Zone n° {}", z.getNum());
 						// Save the zone
