@@ -37,7 +37,7 @@ import javafx.collections.ObservableList;
  * The SetRealValues class can be used to provide accurate values for the text
  * fields (zones).
  * 
- * These real values are stored in GS, and used by {@link ComputeScores} to
+ * These real values are stored in GS, and used by {@link ComputeTrainedScores} to
  * compute the scores for each zone/filter pairs.
  * 
  * @author middleware
