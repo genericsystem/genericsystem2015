@@ -89,7 +89,7 @@ public class ComputeAllLevDistances {
 
 						String text1 = (String) zoneText1.getValue();
 						String text2 = (String) zoneText2.getValue();
-						System.out.println(">>> text1 = " + text1.trim() + " | text2 = " + text2.trim());
+//						System.out.println(">>> text1 = " + text1.trim() + " | text2 = " + text2.trim());
 						dist = Levenshtein.distance(text1.trim(), text2.trim());
 						levDistance.addLevDistance(dist, zoneText1, zoneText2);
 						levDistance.addLevDistance(dist, zoneText2, zoneText1);
