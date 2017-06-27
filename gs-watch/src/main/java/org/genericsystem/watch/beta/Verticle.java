@@ -100,7 +100,6 @@ public class Verticle extends AbstractVerticle {
 		vertx.setPeriodic(3000, l -> {
 			System.out.println("Periodic messages check");
 			cache.safeConsum(nothing -> {
-
 				Snapshot<Generic> s = messageType.getInstances();
 				System.out.println(s.toList().toString());
 
