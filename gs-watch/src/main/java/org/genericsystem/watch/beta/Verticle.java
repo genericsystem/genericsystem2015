@@ -27,7 +27,7 @@ public class Verticle extends AbstractVerticle {
 	private final Cache cache = engine.newCache();
 	private final Generic messageType = engine.find(Message.class);
 	private final Generic taskType = engine.find(Task.class);
-	// private static final int ATTEMPTS = 5;
+	private static final int ATTEMPTS = 5;
 
 	public static void main(String[] args) {
 
