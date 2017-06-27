@@ -62,8 +62,6 @@ public class App extends Application {
 
 	@Override
 	public void start(Stage stage) throws Exception {
-
-		// SourceFilesConverter.doWork(sourceDirectoryPath, targetDirectoryPath);
 		GridPane gridPane = new GridPane();
 
 		int row[] = new int[] { 0 };
