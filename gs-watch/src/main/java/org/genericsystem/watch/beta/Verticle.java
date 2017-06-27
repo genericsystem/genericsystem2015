@@ -48,7 +48,6 @@ public class Verticle extends AbstractVerticle {
 				throw new IllegalStateException(res.cause());
 			}
 		});
-
 	}
 
 	@Override
