@@ -58,7 +58,7 @@ public class Verticle extends AbstractVerticle {
 		consumer.handler((event) -> {
 
 			JsonObject obj = new JsonObject(event.body());
-			// System.out.println(new JsonObject(event.body()));
+
 			cache.safeConsum(nothing -> {
 
 				String messageTask = new JsonObject().put("messagets", obj.getLong("ts")).put("state", "started")
