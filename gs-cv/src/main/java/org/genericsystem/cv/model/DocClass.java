@@ -32,7 +32,6 @@ public class DocClass implements Generic {
 
 		public ZoneInstance getZone(int num) {
 			return (ZoneInstance) getHolder(getRoot().find(ZoneGeneric.class), num);
-
 		}
 
 	}

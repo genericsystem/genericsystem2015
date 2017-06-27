@@ -2,6 +2,13 @@ package org.genericsystem.cv;
 
 public class Levenshtein {
 
+	/**
+	 * Computes the Levenshtein distance between two strings.
+	 * 
+	 * @param a - the first string
+	 * @param b - the second string
+	 * @return an {@code int} representing the cost 
+	 */
 	public static int distance(String a, String b) {
 		a = a.toLowerCase();
 		b = b.toLowerCase();

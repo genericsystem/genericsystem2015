@@ -9,7 +9,7 @@ import org.genericsystem.common.Root;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.Zone;
 import org.genericsystem.cv.Zones;
-import org.genericsystem.cv.comparator.InitModel.InitScript;
+import org.genericsystem.cv.comparator.GetDataInModel.InitScript;
 import org.genericsystem.cv.model.Doc;
 import org.genericsystem.cv.model.Doc.DocInstance;
 import org.genericsystem.cv.model.DocClass;
@@ -29,15 +29,22 @@ import org.opencv.imgcodecs.Imgcodecs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * The GetDataInModel class can analyze a batch of images and store the OCR text for
+ * each zone and each document in GS.
+ * 
+ * @author Pierrik Lassalas
+ *
+ */
 @RunScript(InitScript.class)
 @DependsOnModel({ Doc.class, ImgFilter.class, ZoneGeneric.class, ZoneText.class })
-public class InitModel extends RootTagImpl {
+public class GetDataInModel extends RootTagImpl {
 
-	private static Logger log = LoggerFactory.getLogger(InitModel.class);
+	private static Logger log = LoggerFactory.getLogger(GetDataInModel.class);
 
 	public static void main(String[] mainArgs) {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-		ApplicationServer.startSimpleGenericApp(mainArgs, InitModel.class, "/gs-cv_model");
+		ApplicationServer.startSimpleGenericApp(mainArgs, GetDataInModel.class, "/gs-cv_model");
 	}
 
 	public static class InitScript implements Script {
@@ -57,13 +64,13 @@ public class InitModel extends RootTagImpl {
 			// Save the current document class
 			DocClassInstance docClassInstance = docClass.addDocClass(docType);
 
-			// Get all the filternames
+			// Set all the filternames
 			String[] imgF = { "reality", "original", "abutaleb", "bernsen", "brink", "djvu", "niblack", "otsu",
 					"sauvola", "shading-subtraction", "tsai", "white-rohrer" };
 			List<String> imgFilters = Arrays.asList(imgF);
 
 			// Load the accurate zones
-			Zones zones = Zones.load(imgClassDirectory);
+			final Zones zones = Zones.load(imgClassDirectory);
 
 			// Save the zones
 			zones.getZones().forEach(z -> {
@@ -81,7 +88,8 @@ public class InitModel extends RootTagImpl {
 			// Persist the changes
 			engine.getCurrentCache().flush();
 
-			// Process each file in the subfolder "/ref"
+			// Process each file in the subfolder "/ref/"
+			// TODO : use a new cache after each iteration to avoid loosing too much data when an error occurs
 			Arrays.asList(new File(imgClassDirectory + "/ref/").listFiles((dir, name) -> name.endsWith(".png")))
 					.stream().forEach(file -> {
 						log.info("\nProcessing file: {}", file.getName());
@@ -94,11 +102,8 @@ public class InitModel extends RootTagImpl {
 						// duplicates in a public folder
 						Imgcodecs.imwrite(System.getProperty("user.dir") + "/src/main/resources/" + file.getName(),
 								originalImg.getSrc());
-						// Save the file
-						// DocInstance docInstance = (DocInstance)
-						// docClassInstance.setHolder(doc, file.getName());
+						// Save the current file (document)
 						DocInstance docInstance = docClassInstance.addDoc(docClassInstance, doc, file.getName());
-
 						// Process each zone
 						zones.getZones().stream().forEach(z -> {
 							log.info("Zone n° {}", z.getNum());
@@ -106,7 +111,8 @@ public class InitModel extends RootTagImpl {
 							ZoneInstance zoneInstance = docClassInstance.getZone(z.getNum());
 							for (String filter : imgFilters) {
 								Img filteredImage;
-								// "reality" is initialized with the original picture if the text has not been filled yet
+								// "reality" is initialized with the original
+								// picture if the text has not been filled yet
 								if ("original".equals(filter) || "reality".equals(filter)) {
 									if ("reality".equals(filter) && null != zoneText.getZoneText(docInstance,
 											zoneInstance, imgFilter.getImgFilter(filter))) {
@@ -125,11 +131,10 @@ public class InitModel extends RootTagImpl {
 								zoneText.addZoneText(ocrText, docInstance, zoneInstance,
 										imgFilter.getImgFilter(filter));
 							}
+							// Call the garbage collector to free the resources
+							System.gc();
 						});
-						// Call the garbage collector to free the resources
-						System.gc();
 					});
-
 			engine.getCurrentCache().flush();
 		}
 	}

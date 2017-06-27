@@ -4,7 +4,6 @@ import java.util.Map.Entry;
 import java.util.stream.Stream;
 
 import org.genericsystem.cv.comparator.ZoneScorerMap;
-import org.genericsystem.cv.comparator.ZoneScorerMap2;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
@@ -32,13 +31,13 @@ public class Zone {
 		return new ZoneScorer(this, imgs);
 	}
 	
-	public ZoneScorerMap2 newUnsupervisedScorerMap(String fileName, Stream<Entry<Img, String>> stream) {
-		ZoneScorerMap2 scorer = new ZoneScorerMap2(this, stream, fileName, false);
+	public ZoneScorerMap newUnsupervisedScorerMap(String fileName, Stream<Entry<Img, String>> stream) {
+		ZoneScorerMap scorer = new ZoneScorerMap(this, stream, fileName, false);
 		return scorer;
 	}
 	
-	public ZoneScorerMap2 newSupervisedScorerMap(String fileName, String realText, Stream<Entry<Img, String>> stream) {
-		ZoneScorerMap2 scorer = new ZoneScorerMap2(this, stream, fileName, realText, true);
+	public ZoneScorerMap newSupervisedScorerMap(String fileName, String realText, Stream<Entry<Img, String>> stream) {
+		ZoneScorerMap scorer = new ZoneScorerMap(this, stream, fileName, realText, true);
 		return scorer;
 	}
 

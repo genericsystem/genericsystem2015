@@ -2,7 +2,6 @@ package org.genericsystem.cv.comparator;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Stream;
@@ -13,6 +12,7 @@ import org.genericsystem.cv.Zone;
 
 public class ZoneScorerMap {
 
+	private boolean supervised;
 	private FileWriter writer;
 	private static final String basePath = "classes/id-fr-front/csv/";
 	private static final String delimiter = "\t";
@@ -20,30 +20,45 @@ public class ZoneScorerMap {
 	private final Scores scores = new Scores();
 	private final Zone zone;
 
-	public ZoneScorerMap(Zone zone, Stream<Entry<Img, String>> stream, String filename) {
+	public ZoneScorerMap(Zone zone, Stream<Entry<Img, String>> stream, String filename, boolean supervised) {
+		this(zone, stream, filename, null, supervised);
+	}
+	
+	public ZoneScorerMap(Zone zone, Stream<Entry<Img, String>> stream, String filename, String realText, boolean supervised) {
 		this.zone = zone;
+		this.supervised = supervised;
+		computeScorer(stream, filename, realText);
+	}
 
+	private void computeScorer(Stream<Entry<Img, String>> stream, String filename, String realText) {
 		try {
 			// Open a file to log the data (default: append = true)
 			writer = new FileWriter(basePath + filename.replaceAll(".png", "") + ".csv", true);
-			// Log the zone number
-			log(writer, "Zone", Integer.toString(zone.getNum()));
+			
+			// Store the parameters in the scores objet
+			scores.setFilename(filename);
+			scores.setZone(zone.getNum());
+			scores.setRealText(realText);
 			
 			// Loop over each entry and get the OCR
 			stream.forEach(entry -> {
 				String ocrText = zone.ocr(entry.getKey());
 				ocrText = ocrText.replace("\n", "").replaceAll("\t", "").trim();
+				// Store the OCR text
 				scores.put(ocrText);
+				// Store the OCR text corresponding to the filter
 				scores.put(entry.getValue(), ocrText);
 			});
 			// Call the garbage collector to free the resources
 			System.gc();
-			
+
 			// Log every OCR and filter names
-			log(writer, this.getResultsMap());
-			log(writer, "bestLevenshtein", this.getMinLevenshtein());
-			log(writer, "bestText", this.getBestText());
-			log(writer, "bestText2", this.getBestText2());
+			if (supervised){
+				log(writer, this.getSupervisedResultsMap());
+			} else {
+				log(writer, this.getResultsMap());
+			}
+			
 			// Close the file
 			writer.flush();
 			writer.close();
@@ -58,16 +73,16 @@ public class ZoneScorerMap {
 		}
 		writer.append("\n");
 	}
-	
+
 	private void log(FileWriter writer, Map<String, Integer> map) throws IOException {
-		StringBuffer line1 = new StringBuffer("Filtername").append(delimiter);
-		StringBuffer line2 = new StringBuffer("Levenshtein").append(delimiter);
 		map.entrySet().stream().forEach(entry -> {
-			line1.append(entry.getKey()).append(delimiter);
-			line2.append(entry.getValue().toString()).append(delimiter);
+			try {
+				writer.append(Integer.toString(zone.getNum())).append(delimiter).append(entry.getKey())
+						.append(delimiter).append(entry.getValue().toString()).append("\n");
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		});
-		writer.append(line1.toString()).append("\n");
-		writer.append(line2.toString()).append("\n");
 	}
 
 	public Zone getZone() {
@@ -77,12 +92,16 @@ public class ZoneScorerMap {
 	public double getBestScore() {
 		return scores.getBestScore();
 	}
-	
-	public Map<String, Integer> getResultsMap(){
+
+	public Map<String, Integer> getResultsMap() {
 		return scores.getResultsMap();
 	}
 	
-	public String getMinLevenshtein(){
+	public Map<String, Integer> getSupervisedResultsMap() {
+		return scores.getSupervisedResultsMap();
+	}
+
+	public String getMinLevenshtein() {
 		return scores.getMinLevenshtein().toString();
 	}
 

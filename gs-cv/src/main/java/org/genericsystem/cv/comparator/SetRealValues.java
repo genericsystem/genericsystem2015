@@ -6,6 +6,7 @@ import org.genericsystem.common.Root;
 import org.genericsystem.cv.comparator.SetRealValues.DocumentDiv;
 import org.genericsystem.cv.model.Doc;
 import org.genericsystem.cv.model.DocClass;
+import org.genericsystem.cv.model.Score;
 import org.genericsystem.cv.model.ZoneGeneric;
 import org.genericsystem.cv.model.ZoneText;
 import org.genericsystem.cv.model.ZoneText.ZoneTextInstance;
@@ -32,6 +33,16 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
+/**
+ * The SetRealValues class can be used to provide accurate values for the text
+ * fields (zones).
+ * 
+ * These real values are stored in GS, and used by {@link ComputeScores} to
+ * compute the scores for each zone/filter pairs.
+ * 
+ * @author middleware
+ *
+ */
 @DependsOnModel({ Doc.class, DocClass.class, ZoneGeneric.class, ZoneText.class })
 @Children({ DocumentDiv.class })
 public class SetRealValues extends RootTagImpl {
@@ -100,8 +111,7 @@ public class SetRealValues extends RootTagImpl {
 			Generic currentDoc = generics[0];
 			Root root = currentDoc.getRoot();
 			System.out.println("Document : " + currentDoc);
-			Snapshot<ZoneTextInstance> zoneTextInstances = (Snapshot) currentDoc
-					.getHolders(root.find(ZoneText.class))
+			Snapshot<ZoneTextInstance> zoneTextInstances = (Snapshot) currentDoc.getHolders(root.find(ZoneText.class))
 					.filter(zt -> "reality".equals(((ZoneTextInstance) zt).getImgFilter().getValue()));
 			return (ObservableList) zoneTextInstances.toObservableList()
 					.sorted((g1, g2) -> Integer.compare(g1.getZoneNum(), g2.getZoneNum()));

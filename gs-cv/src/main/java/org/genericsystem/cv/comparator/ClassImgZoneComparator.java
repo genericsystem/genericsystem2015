@@ -25,6 +25,17 @@ import org.opencv.core.Core;
 import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 
+/**
+ * Get the OCR text for all specified documents using pre-treated images.
+ * 
+ * A score gets computed based on trained data, and stored in csv files. It is
+ * recommended to use {@link GetDataInModel}, {@link SetRealValues} and
+ * {@link ComputeScores} instead.
+ * 
+ * @author Pierrik Lassalas
+ *
+ */
+@Deprecated
 public class ClassImgZoneComparator {
 	static {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
@@ -87,7 +98,7 @@ public class ClassImgZoneComparator {
 
 					for (Zone zone : zones2) {
 						System.out.println("Zone n°" + zone.getNum());
-						
+
 						// Get the document instance
 						DocInstance docInstance = (DocInstance) docClassInstance.getHolder(doc, file.getName());
 						ZoneInstance zoneInstance = docClassInstance.getZone(zone.getNum());
@@ -97,11 +108,11 @@ public class ClassImgZoneComparator {
 								zoneInstance, imgFilterInstance);
 						String realText = zoneTextInstance.getValue().toString();
 						System.out.println("> real text : " + realText);
-						
-						// ZoneScorerMap2 scorer =
+
+						// ZoneScorerMap scorer =
 						// zone.newUnsupervisedScorerMap(file.getName(),
 						// map.entrySet().stream());
-						ZoneScorerMap2 scorer = zone.newSupervisedScorerMap(file.getName(), realText,
+						ZoneScorerMap scorer = zone.newSupervisedScorerMap(file.getName(), realText,
 								imgFiltersMap.entrySet().stream());
 					}
 				});
