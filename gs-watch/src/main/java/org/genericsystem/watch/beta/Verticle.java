@@ -91,6 +91,7 @@ public class Verticle extends AbstractVerticle {
 					});
 
 				});
+
 			});
 
 		});
