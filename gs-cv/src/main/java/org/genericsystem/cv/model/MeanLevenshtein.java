@@ -9,7 +9,8 @@ import org.genericsystem.cv.model.Score.ScoreInstance;
 import org.genericsystem.cv.model.MeanLevenshtein.MeanLevenshteinInstance;
 
 /**
- * 
+ * This class stores the mean levenshtein distance for a given
+ * {@link ZoneGeneric} and {@link ImgFilter}
  * 
  * @author Pierrik Lassalas
  *

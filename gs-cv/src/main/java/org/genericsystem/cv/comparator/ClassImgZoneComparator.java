@@ -30,25 +30,24 @@ import org.opencv.imgcodecs.Imgcodecs;
  * 
  * A score gets computed based on trained data, and stored in csv files. It is
  * recommended to use {@link GetDataInModel}, {@link SetRealValues} and
- * {@link ComputeScores} instead.
+ * {@link ComputeTrainedScores} instead.
  * 
  * @author Pierrik Lassalas
  *
  */
 @Deprecated
 public class ClassImgZoneComparator {
+
+	private final static String imgClassDirectory = "classes/id-fr-front";
+	private final static Engine engine = new Engine(System.getenv("HOME") + "/genericsystem/gs-cv_model/", Doc.class,
+			DocClass.class, ZoneGeneric.class, ZoneText.class, ImgFilter.class);
+	
 	static {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 	}
 
-	private final static String imgClassDirectory = "classes/id-fr-front";
-
-	private static Engine engine;
-
 	public static void main(String[] args) {
 		// Start the engine
-		engine = new Engine(System.getenv("HOME") + "/genericsystem/gs-cv_model/", Doc.class, DocClass.class,
-				ZoneGeneric.class, ZoneText.class, ImgFilter.class);
 		engine.newCache().start();
 		compute();
 		engine.close();

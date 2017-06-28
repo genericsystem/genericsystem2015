@@ -57,7 +57,7 @@ public class Archiver {
 	private static final String PART_EXTENSION = ".part";
 	private static final String LOCK_FILE_NAME = ".lock";
 
-	private static final long SNAPSHOTS_PERIOD = 5000L;
+	private static final long SNAPSHOTS_PERIOD = 2000L;
 	private static final long SNAPSHOTS_INITIAL_DELAY = 1000L;
 
 	private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
