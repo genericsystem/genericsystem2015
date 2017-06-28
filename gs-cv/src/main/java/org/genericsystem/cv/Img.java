@@ -36,6 +36,7 @@ import org.opencv.imgproc.CLAHE;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.photo.Photo;
 import org.opencv.utils.Converters;
+import org.opencv.ximgproc.Ximgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -210,9 +211,12 @@ public class Img {
 		}
 
 		// Look for the top left corner of the rectangle.
-		// The line used as the top of the rectangle makes an angle of 45° max with an horizontal line.
-		int yMinIndex = 0; // Point with min y, and min x if there are two such points.
-		int xMinIndex = 0; // Point with min x, and min y if there are two such points.
+		// The line used as the top of the rectangle makes an angle of 45° max
+		// with an horizontal line.
+		int yMinIndex = 0; // Point with min y, and min x if there are two such
+							// points.
+		int xMinIndex = 0; // Point with min x, and min y if there are two such
+							// points.
 		for (int i = 0; i < list.size(); i++) {
 			double xCurr = list.get(i).x;
 			double xMin = list.get(xMinIndex).x;
@@ -225,7 +229,8 @@ public class Img {
 		}
 		int tlIndex = yMinIndex;
 		if (yMinIndex != xMinIndex) {
-			double slope = (list.get(xMinIndex).y - list.get(yMinIndex).y) / (list.get(yMinIndex).x - list.get(xMinIndex).x);
+			double slope = (list.get(xMinIndex).y - list.get(yMinIndex).y)
+					/ (list.get(yMinIndex).x - list.get(xMinIndex).x);
 			if (slope < 1)
 				tlIndex = xMinIndex;
 		}
@@ -238,8 +243,10 @@ public class Img {
 		double height = distance(list.get(0), list.get(1));
 		double width = distance(list.get(1), list.get(2));
 		Mat target = new Mat();
-		List<Point> targets = new LinkedList<>(Arrays.asList(new Point(0, 0), new Point(0, height), new Point(width, height), new Point(width, 0)));
-		Imgproc.warpPerspective(src, target, Imgproc.getPerspectiveTransform(Converters.vector_Point2f_to_Mat(list), Converters.vector_Point2f_to_Mat(targets)), new Size(width, height), Imgproc.INTER_CUBIC);
+		List<Point> targets = new LinkedList<>(
+				Arrays.asList(new Point(0, 0), new Point(0, height), new Point(width, height), new Point(width, 0)));
+		Imgproc.warpPerspective(src, target, Imgproc.getPerspectiveTransform(Converters.vector_Point2f_to_Mat(list),
+				Converters.vector_Point2f_to_Mat(targets)), new Size(width, height), Imgproc.INTER_CUBIC);
 
 		Img result = new Img(target);
 		int orientation = result.getOrientation();
@@ -273,7 +280,8 @@ public class Img {
 		Point p1 = points.get(0);
 		Point p2 = points.get(1);
 		Point p3 = points.get(2);
-		// The points are in clockwise order iff the determinant of the vectors p1p2 and p2p3 is positive. (/!\ clockwise basis)
+		// The points are in clockwise order iff the determinant of the vectors
+		// p1p2 and p2p3 is positive. (/!\ clockwise basis)
 		return (p2.x - p1.x) * (p3.y - p2.y) - (p2.y - p1.y) * (p3.x - p2.x) >= 0;
 	}
 
@@ -376,8 +384,10 @@ public class Img {
 
 	// public Img classic() {
 	// Img gray = cvtColor(Imgproc.COLOR_BGR2GRAY);
-	// Img threshold = gray.thresHold(0, 255, Imgproc.THRESH_OTSU + Imgproc.THRESH_BINARY);
-	// return threshold.morphologyEx(Imgproc.MORPH_CLOSE, new StructuringElement(Imgproc.MORPH_RECT, new Size(17, 3)));
+	// Img threshold = gray.thresHold(0, 255, Imgproc.THRESH_OTSU +
+	// Imgproc.THRESH_BINARY);
+	// return threshold.morphologyEx(Imgproc.MORPH_CLOSE, new
+	// StructuringElement(Imgproc.MORPH_RECT, new Size(17, 3)));
 	// }
 
 	public Img sobel() {
@@ -390,7 +400,8 @@ public class Img {
 	public Img grad() {
 		Img gray = cvtColor(Imgproc.COLOR_BGR2GRAY);
 		Img grad = gray.morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(3, 3));
-		Img threshold = grad.thresHold(0.0, 255.0, Imgproc.THRESH_OTSU + Imgproc.THRESH_BINARY).morphologyEx(Imgproc.MORPH_ERODE, Imgproc.MORPH_RECT, new Size(3, 3));
+		Img threshold = grad.thresHold(0.0, 255.0, Imgproc.THRESH_OTSU + Imgproc.THRESH_BINARY)
+				.morphologyEx(Imgproc.MORPH_ERODE, Imgproc.MORPH_RECT, new Size(3, 3));
 		return threshold.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(17, 3));
 	}
 
@@ -426,12 +437,20 @@ public class Img {
 		return cvtColor(Imgproc.COLOR_BGR2GRAY).thresHold(0, 255, Imgproc.THRESH_BINARY + Imgproc.THRESH_OTSU);
 	}
 
+	public Img otsuAfterGaussianBlur(Size blurSize) {
+		// Same as otsu filtering, but a Gaussian blur is applied first
+		return cvtColor(Imgproc.COLOR_BGR2GRAY).gaussianBlur(blurSize).thresHold(0, 255,
+				Imgproc.THRESH_BINARY + Imgproc.THRESH_OTSU);
+	}
+
 	public Img otsuInv() {
 		return cvtColor(Imgproc.COLOR_BGR2GRAY).thresHold(0, 255, Imgproc.THRESH_BINARY_INV + Imgproc.THRESH_OTSU);
 	}
 
 	public Img dilateBlacks(double valueThreshold, double saturatioThreshold, double blueThreshold, Size dilatation) {
-		return range(new Scalar(0, 0, 0), new Scalar(255, saturatioThreshold, valueThreshold), true).range(new Scalar(0, 0, 0), new Scalar(blueThreshold, 255, 255), false).morphologyEx(Imgproc.MORPH_DILATE, Imgproc.MORPH_RECT, dilatation);
+		return range(new Scalar(0, 0, 0), new Scalar(255, saturatioThreshold, valueThreshold), true)
+				.range(new Scalar(0, 0, 0), new Scalar(blueThreshold, 255, 255), false)
+				.morphologyEx(Imgproc.MORPH_DILATE, Imgproc.MORPH_RECT, dilatation);
 	}
 
 	public Img equalizeHisto() {
@@ -446,21 +465,65 @@ public class Img {
 		Imgproc.cvtColor(result, result, Imgproc.COLOR_YCrCb2BGR);
 		return new Img(result);
 	}
-	
-	// Equalize histograms using a Contrast Limited Adaptive Histogram Equalization algorithm
+
+	// Equalize histograms using a Contrast Limited Adaptive Histogram
+	// Equalization algorithm
 	public Img equalizeHistoAdaptative() {
 		Mat result = new Mat();
 		Mat channelL = new Mat();
 		CLAHE clahe = Imgproc.createCLAHE(2.0, new Size(8, 8));
-		// Convert from BGR to Lab
 		Imgproc.cvtColor(src, result, Imgproc.COLOR_BGR2Lab);
 		// Extract the luminance (L) channel and apply filter
 		Core.extractChannel(result, channelL, 0);
 		clahe.apply(channelL, channelL);
 		// Insert back the luminance channel
 		Core.insertChannel(channelL, result, 0);
-		// Convert from Lab to BGR
 		Imgproc.cvtColor(result, result, Imgproc.COLOR_Lab2BGR);
+		return new Img(result);
+	}
+
+	public Img adaptativeMeanThreshold() {
+		// TODO: adjust blocksize and C parameters
+		return cvtColor(Imgproc.COLOR_BGR2GRAY).adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_MEAN_C,
+				Imgproc.THRESH_BINARY, 11, 2);
+	}
+
+	public Img adaptativeGaussianThreshold() {
+		// TODO: adjust blocksize and C parameters
+		return cvtColor(Imgproc.COLOR_BGR2GRAY).adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C,
+				Imgproc.THRESH_BINARY, 11, 2);
+	}
+
+	public Img niblackThreshold(int blockSize, double k) {
+		// TODO: adjust blocksize and k parameters
+		// Guessed values : blockSize = 15, k between -0.75 and 0
+		Mat result = new Mat();
+		Ximgproc.niBlackThreshold(cvtColor(Imgproc.COLOR_BGR2GRAY).getSrc(), result, 255, Imgproc.THRESH_BINARY,
+				blockSize, k, Ximgproc.BINARIZATION_NIBLACK);
+		return new Img(result);
+	}
+
+	public Img sauvolaThreshold(int blockSize, double k) {
+		// TODO: adjust blocksize and k parameters
+		Mat result = new Mat();
+		Ximgproc.niBlackThreshold(cvtColor(Imgproc.COLOR_BGR2GRAY).getSrc(), result, 255, Imgproc.THRESH_BINARY,
+				blockSize, k, Ximgproc.BINARIZATION_SAUVOLA);
+		return new Img(result);
+	}
+
+	public Img nickThreshold(int blockSize, double k) {
+		// TODO: adjust blocksize and k parameters
+		// Guessed values : blockSize = 11, k = 2
+		Mat result = new Mat();
+		Ximgproc.niBlackThreshold(src, result, 255, Imgproc.THRESH_BINARY, blockSize, k, Ximgproc.BINARIZATION_NICK);
+		return new Img(result);
+	}
+
+	public Img wolfThreshold(int blockSize, double k) {
+		// TODO: adjust blocksize and k parameters
+		// Guessed values : blockSize = 11, k = 2
+		Mat result = new Mat();
+		Ximgproc.niBlackThreshold(src, result, 255, Imgproc.THRESH_BINARY, blockSize, k, Ximgproc.BINARIZATION_WOLF);
 		return new Img(result);
 	}
 
@@ -588,14 +651,20 @@ public class Img {
 	//
 	// Text.computeNMChannels(src, channels);
 	//
-	// System.out.println("Extracting Class Specific Extremal Regions from " + channels.size() + " channels ...");
+	// System.out.println("Extracting Class Specific Extremal Regions from " +
+	// channels.size() + " channels ...");
 	//
-	// ERFilter erc1 = Text.createERFilterNM1(getClass().getResource("trained_classifierNM1.xml").getPath(), 16, 0.00015f, 0.13f, 0.2f, true, 0.1f);
-	// ERFilter erc2 = Text.createERFilterNM2(getClass().getResource("trained_classifierNM2.xml").getPath(), 0.5f);
+	// ERFilter erc1 =
+	// Text.createERFilterNM1(getClass().getResource("trained_classifierNM1.xml").getPath(),
+	// 16, 0.00015f, 0.13f, 0.2f, true, 0.1f);
+	// ERFilter erc2 =
+	// Text.createERFilterNM2(getClass().getResource("trained_classifierNM2.xml").getPath(),
+	// 0.5f);
 	//
 	// for (Mat channel : channels) {
 	// List<MatOfPoint> regions = new ArrayList<>();
-	// Text.detectRegions(channel, erc1, erc2, regions); // **Java fails here with Exception Type: EXC_BAD_ACCESS (SIGABRT)**
+	// Text.detectRegions(channel, erc1, erc2, regions); // **Java fails here
+	// with Exception Type: EXC_BAD_ACCESS (SIGABRT)**
 	// MatOfRect mor = new MatOfRect();
 	// Text.erGrouping(src, channel, regions, mor);
 	//
@@ -613,7 +682,8 @@ public class Img {
 		for (Img img : imgs)
 			results.add(compareHistogramm(computeHistogramm(), img));
 
-		List<Integer> methods = Arrays.asList(Imgproc.HISTCMP_CORREL, Imgproc.HISTCMP_CHISQR, Imgproc.HISTCMP_INTERSECT, Imgproc.HISTCMP_BHATTACHARYYA, Imgproc.HISTCMP_CHISQR_ALT, Imgproc.HISTCMP_KL_DIV);
+		List<Integer> methods = Arrays.asList(Imgproc.HISTCMP_CORREL, Imgproc.HISTCMP_CHISQR, Imgproc.HISTCMP_INTERSECT,
+				Imgproc.HISTCMP_BHATTACHARYYA, Imgproc.HISTCMP_CHISQR_ALT, Imgproc.HISTCMP_KL_DIV);
 		Map<Integer, Integer> mins = new HashMap<>();
 		for (Integer method : methods) {
 			double min = results.get(0).get(method);
@@ -622,15 +692,18 @@ public class Img {
 				if (min > results.get(i).get(method)) {
 					min = results.get(i).get(method);
 					index = i;
-					// System.out.println("method=" + method + " index=" + index);
+					// System.out.println("method=" + method + " index=" +
+					// index);
 				}
 			}
 			mins.put(index, mins.get(index) != null ? mins.get(index) + 1 : 1);
 		}
-		TreeMap<Integer, Integer> reverse = mins.entrySet().stream().collect(Collectors.toMap(entry -> entry.getValue(), entry -> entry.getKey(), (u, v) -> {
-			return u;
-		}, TreeMap::new));
-		// System.out.println("Number of algos : " + reverse.lastEntry().getKey());
+		TreeMap<Integer, Integer> reverse = mins.entrySet().stream()
+				.collect(Collectors.toMap(entry -> entry.getValue(), entry -> entry.getKey(), (u, v) -> {
+					return u;
+				}, TreeMap::new));
+		// System.out.println("Number of algos : " +
+		// reverse.lastEntry().getKey());
 		return reverse.lastEntry().getValue();
 
 	}
@@ -649,7 +722,8 @@ public class Img {
 
 	public Map<Integer, Double> compareHistogramm(Mat histo, Img img) {
 		Map<Integer, Double> results = new HashMap<>();
-		List<Integer> methods = Arrays.asList(Imgproc.HISTCMP_CORREL, Imgproc.HISTCMP_CHISQR, Imgproc.HISTCMP_INTERSECT, Imgproc.HISTCMP_BHATTACHARYYA, Imgproc.HISTCMP_CHISQR_ALT, Imgproc.HISTCMP_KL_DIV);
+		List<Integer> methods = Arrays.asList(Imgproc.HISTCMP_CORREL, Imgproc.HISTCMP_CHISQR, Imgproc.HISTCMP_INTERSECT,
+				Imgproc.HISTCMP_BHATTACHARYYA, Imgproc.HISTCMP_CHISQR_ALT, Imgproc.HISTCMP_KL_DIV);
 		for (int method : methods) {
 			double result = Imgproc.compareHist(histo, img.computeHistogramm(), method);
 			switch (method) {
@@ -662,7 +736,8 @@ public class Img {
 			}
 			results.put(method, result);
 			System.gc();
-			// System.out.println("for Algo " + method + " comparison : " + result + "\n");
+			// System.out.println("for Algo " + method + " comparison : " +
+			// result + "\n");
 		}
 		// System.out.println("results : " + results);
 		return results;
