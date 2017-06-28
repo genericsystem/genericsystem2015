@@ -36,7 +36,7 @@ public class Verticle extends AbstractVerticle {
 
 		VertxOptions vertxOptions = new VertxOptions().setClustered(true).setClusterManager(mgr);
 		vertxOptions.setEventBusOptions(new EventBusOptions()).setClustered(true);
-		vertxOptions.setClusterHost("192.168.1.11");
+		vertxOptions.setClusterHost("0.0.0.0");
 		vertxOptions.setMaxWorkerExecuteTime(Long.MAX_VALUE);
 
 		Vertx.clusteredVertx(vertxOptions, res -> {
@@ -54,9 +54,14 @@ public class Verticle extends AbstractVerticle {
 	@Override
 	public void start() throws Exception {
 
+		trySend(new JsonObject().put("ts", System.currentTimeMillis()), false);
+		trySend(new JsonObject().put("ts", System.currentTimeMillis()), false);
+
 		MessageConsumer<String> consumer = vertx.eventBus().consumer(BUS_MSG);
 
 		consumer.handler((event) -> {
+
+			event.reply("received : " + event.body());
 
 			JsonObject obj = new JsonObject(event.body());
 
@@ -70,10 +75,13 @@ public class Verticle extends AbstractVerticle {
 				vertx.executeBlocking(future -> {
 
 					try {
+						System.out.println("executing task : " + messageTask.toString());
 						Thread.sleep(10000);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
+
+					future.complete();
 
 				}, res -> {
 					cache.safeConsum(nothing2 -> {
@@ -96,8 +104,6 @@ public class Verticle extends AbstractVerticle {
 			});
 
 		});
-
-		trySend(new JsonObject().put("ts", System.currentTimeMillis()), false);
 
 		vertx.setPeriodic(3000, l -> {
 			System.out.println("Periodic messages check");
@@ -130,6 +136,7 @@ public class Verticle extends AbstractVerticle {
 		vertx.eventBus().send(BUS_MSG, message, (event) -> {
 			if (event.failed()) {
 				System.out.println("failed to deliver message");
+				System.out.println(event.cause());
 				cache.safeConsum(nothing -> {
 					if (!persisted) {
 						System.out.println("Saving message that can't be sent : " + message);
@@ -140,6 +147,7 @@ public class Verticle extends AbstractVerticle {
 					}
 				});
 			} else {
+				System.out.println("Success sending message : " + message);
 				if (persisted) {
 					System.out.println("Remove message after resend");
 					messageType.getInstance(message).remove();
