@@ -54,7 +54,7 @@ public class MotionDetector2 extends AbstractApp {
 				capture.read(frame);
 
 				Img adaptativThreshold = new Img(frame).cvtColor(Imgproc.COLOR_BGR2GRAY).adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 17, 9);
-				Img closed = adaptativThreshold.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(11, 7));
+				Img closed = adaptativThreshold.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(5, 5));
 
 				Img frameCopy = new Img(frame);
 				double angle = detection_contours(frame, closed.getSrc());
@@ -69,7 +69,7 @@ public class MotionDetector2 extends AbstractApp {
 				src2.setImage(Tools.mat2jfxImage(frame));
 
 				Img croppedAdaptativ = croppedImg.cvtColor(Imgproc.COLOR_BGR2GRAY).adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 17, 9);
-				Img croppedDilated = croppedAdaptativ.morphologyEx(Imgproc.MORPH_DILATE, Imgproc.MORPH_RECT, new Size(15, 3));
+				Img croppedDilated = croppedAdaptativ.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(5, 1));
 				detection_deskiew_contours(croppedImg.getSrc(), croppedDilated.getSrc());
 				// croppedImg.recursivSplit(5, true);
 				src3.setImage(Tools.mat2jfxImage(croppedDilated.getSrc()));
