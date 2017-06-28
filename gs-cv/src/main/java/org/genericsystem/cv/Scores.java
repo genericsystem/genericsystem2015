@@ -1,42 +1,18 @@
 package org.genericsystem.cv;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
-
-import org.genericsystem.api.core.Snapshot;
-import org.genericsystem.common.Generic;
-import org.genericsystem.cv.comparator.ZoneRealValue;
-import org.genericsystem.cv.model.Doc;
-import org.genericsystem.cv.model.DocClass;
-import org.genericsystem.cv.model.ImgFilter;
-import org.genericsystem.cv.model.ZoneGeneric;
-import org.genericsystem.cv.model.ZoneText;
-import org.genericsystem.cv.model.Doc.DocInstance;
-import org.genericsystem.cv.model.DocClass.DocClassInstance;
-import org.genericsystem.cv.model.ZoneText.ZoneTextInstance;
-import org.genericsystem.kernel.Engine;
-
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 //TODO compute score / bestText on every add ?
 public class Scores {
-
-	private static final ObjectMapper mapper = new ObjectMapper();
-	private static final String basePath = "classes/id-fr-front";
 
 	private final Map<String, Integer> ocrs = new HashMap<>();
 	private final List<String> ocrs2 = new ArrayList<>();
 
 	private final Map<String, String> ocrResults = new HashMap<>();
-	private String filename;
-	private int zone;
 	private Integer minLevenshtein;
 	private String realText;
 
@@ -58,7 +34,7 @@ public class Scores {
 	 * is also set with the minimum distance found.
 	 * 
 	 * @return A Map containing the filtername as the key, and the corresponding
-	 *         Levenshtein distance as the value
+	 *         total Levenshtein distance as the value
 	 */
 	public Map<String, Integer> getResultsMap() {
 		Map<String, Integer> results = new HashMap<>();
@@ -77,14 +53,21 @@ public class Scores {
 		return results;
 	}
 
+	/**
+	 * Compute the supervised scores for a given OCR result.
+	 * 
+	 * The Map {@link #ocrResults}, which contains the filtername as a key and
+	 * the OCR text as the value, is analyzed. A new map is created, containing
+	 * the filtername as key and the Levenshtein distance as value.
+	 * 
+	 * @return A Map containing the filtername as the key, and the corresponding
+	 *         Levenshtein distance (compared to the real value) as the value
+	 */
 	public Map<String, Integer> getSupervisedResultsMap() {
 		Map<String, Integer> results = new HashMap<>();
-		
-		/*
-		 * If the text value is readble, compare with each OCR text and store the Levenshtein distance.
-		 * For convenience, all spaces are removed
-		 */
-		if (this.realText != null && !this.realText.isEmpty() ) {
+		// If the text value is readable, compare with each OCR text and store
+		// the Levenshtein distance. For convenience, all spaces are removed
+		if (this.realText != null && !this.realText.isEmpty()) {
 			System.out.println("Trained data found! Using supervised training");
 			for (Entry<String, String> entry : ocrResults.entrySet()) {
 				int dist = Levenshtein.distance(entry.getValue().replaceAll("[ .,]", "").trim(),
@@ -103,14 +86,12 @@ public class Scores {
 	}
 
 	public double getBestScore() {
-		String bestText = "";
 		int bestScore = 0;
 		int allOcrs = 0;
 		for (Entry<String, Integer> entry : ocrs.entrySet()) {
 			allOcrs += entry.getValue();
 			if (bestScore < entry.getValue()) {
 				bestScore = entry.getValue();
-				bestText = entry.getKey();
 			}
 		}
 		return Integer.valueOf(bestScore).doubleValue() / allOcrs;
@@ -120,9 +101,7 @@ public class Scores {
 	public String getBestText() {
 		String bestText = "";
 		int bestScore = 0;
-		int allOcrs = 0;
 		for (Entry<String, Integer> entry : ocrs.entrySet()) {
-			allOcrs += entry.getValue();
 			if (bestScore < entry.getValue()) {
 				bestScore = entry.getValue();
 				bestText = entry.getKey();
@@ -154,14 +133,6 @@ public class Scores {
 		// System.out.println("best text: " + bestText);
 		// System.out.println("shorter distance: " + shorterDistance);
 		return bestText;
-	}
-
-	public void setFilename(String filename) {
-		this.filename = filename;
-	}
-
-	public void setZone(int zone) {
-		this.zone = zone;
 	}
 
 	public String getRealText() {
