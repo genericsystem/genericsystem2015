@@ -36,8 +36,6 @@ public class ZoneScorerMap {
 			writer = new FileWriter(basePath + filename.replaceAll(".png", "") + ".csv", true);
 			
 			// Store the parameters in the scores objet
-			scores.setFilename(filename);
-			scores.setZone(zone.getNum());
 			scores.setRealText(realText);
 			
 			// Loop over each entry and get the OCR
@@ -58,7 +56,6 @@ public class ZoneScorerMap {
 			} else {
 				log(writer, this.getResultsMap());
 			}
-			
 			// Close the file
 			writer.flush();
 			writer.close();
@@ -67,6 +64,7 @@ public class ZoneScorerMap {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private void log(FileWriter writer, String... strings) throws IOException {
 		for (String s : strings) {
 			writer.append(s).append(delimiter);
