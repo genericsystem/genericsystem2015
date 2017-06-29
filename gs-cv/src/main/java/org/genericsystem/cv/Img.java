@@ -66,24 +66,6 @@ public class Img {
 		this.src = new Mat(model.getSrc(), zone.getRect());
 	}
 
-	public Img sobel(int ddepth, int dx, int dy, int ksize, double scale, double delta, int borderType) {
-		Mat result = new Mat();
-		Imgproc.Sobel(src, result, ddepth, dx, dy, ksize, scale, delta, borderType);
-		return new Img(result);
-	}
-
-	public Img adaptativeThresHold(double maxValue, int adaptiveMethod, int thresholdType, int blockSize, double C) {
-		Mat result = new Mat();
-		Imgproc.adaptiveThreshold(src, result, maxValue, adaptiveMethod, thresholdType, blockSize, C);
-		return new Img(result);
-	}
-
-	public Img thresHold(double thresh, double maxval, int type) {
-		Mat result = new Mat();
-		Imgproc.threshold(src, result, thresh, maxval, type);
-		return new Img(result);
-	}
-
 	public Img morphologyEx(int morphOp, int morph, Size size) {
 		Mat result = new Mat();
 		Imgproc.morphologyEx(src, result, morphOp, Imgproc.getStructuringElement(morph, size));
@@ -140,7 +122,7 @@ public class Img {
 		return new Img(result);
 	}
 
-	public Img gray() {
+	public Img bgr2Gray() {
 		Mat result = new Mat();
 		Imgproc.cvtColor(src, result, Imgproc.COLOR_BGR2GRAY);
 		return new Img(result);
@@ -156,7 +138,7 @@ public class Img {
 
 	public Img cropAndDeskew() {
 		Img blurred = medianBlur(9);
-		Img gray = blurred.gray();
+		Img gray = blurred.bgr2Gray();
 		Img gray_;
 
 		List<MatOfPoint> contours = new ArrayList<>();
@@ -381,32 +363,9 @@ public class Img {
 		Core.multiply(src, scalar, result);
 		return new Img(result);
 	}
-
-	// public Img classic() {
-	// Img gray = cvtColor(Imgproc.COLOR_BGR2GRAY);
-	// Img threshold = gray.thresHold(0, 255, Imgproc.THRESH_OTSU +
-	// Imgproc.THRESH_BINARY);
-	// return threshold.morphologyEx(Imgproc.MORPH_CLOSE, new
-	// StructuringElement(Imgproc.MORPH_RECT, new Size(17, 3)));
-	// }
-
-	public Img sobel() {
-		Img gray = cvtColor(Imgproc.COLOR_BGR2GRAY);
-		Img sobel = gray.sobel(CvType.CV_8UC1, 1, 0, 3, 1, 0, Core.BORDER_DEFAULT);
-		Img threshold = sobel.thresHold(0, 255, Imgproc.THRESH_OTSU + Imgproc.THRESH_BINARY);
-		return threshold.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(17, 3));
-	}
-
-	public Img grad() {
-		Img gray = cvtColor(Imgproc.COLOR_BGR2GRAY);
-		Img grad = gray.morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(3, 3));
-		Img threshold = grad.thresHold(0.0, 255.0, Imgproc.THRESH_OTSU + Imgproc.THRESH_BINARY)
-				.morphologyEx(Imgproc.MORPH_ERODE, Imgproc.MORPH_RECT, new Size(3, 3));
-		return threshold.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(17, 3));
-	}
-
+	
 	public Img mser() {
-		Img gray = cvtColor(Imgproc.COLOR_BGR2GRAY);
+		Img gray = bgr2Gray();
 		MatOfKeyPoint keypoint = new MatOfKeyPoint();
 		FeatureDetector detector = FeatureDetector.create(FeatureDetector.MSER);
 		detector.detect(gray.getSrc(), keypoint);
@@ -432,37 +391,57 @@ public class Img {
 		}
 		return new Img(result).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(17, 3));
 	}
-
-	public Img otsu() {
-		return cvtColor(Imgproc.COLOR_BGR2GRAY).thresHold(0, 255, Imgproc.THRESH_BINARY + Imgproc.THRESH_OTSU);
+	
+	public Img grad() {
+		Img gray = bgr2Gray();
+		Img grad = gray.morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(3, 3));
+		Img threshold = grad.thresHold(0.0, 255.0, Imgproc.THRESH_OTSU + Imgproc.THRESH_BINARY)
+				.morphologyEx(Imgproc.MORPH_ERODE, Imgproc.MORPH_RECT, new Size(3, 3));
+		return threshold.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(17, 3));
 	}
 
-	public Img otsuAfterGaussianBlur(Size blurSize) {
-		// Same as otsu filtering, but a Gaussian blur is applied first
-		return cvtColor(Imgproc.COLOR_BGR2GRAY).gaussianBlur(blurSize).thresHold(0, 255,
-				Imgproc.THRESH_BINARY + Imgproc.THRESH_OTSU);
+	// public Img classic() {
+	// Img gray = gray();
+	// Img threshold = gray.thresHold(0, 255, Imgproc.THRESH_OTSU +
+	// Imgproc.THRESH_BINARY);
+	// return threshold.morphologyEx(Imgproc.MORPH_CLOSE, new
+	// StructuringElement(Imgproc.MORPH_RECT, new Size(17, 3)));
+	// }
+	
+	public Img sobel() {
+		Img gray = bgr2Gray();
+		Img sobel = gray.sobel(CvType.CV_8UC1, 1, 0, 3, 1, 0, Core.BORDER_DEFAULT);
+		Img threshold = sobel.thresHold(0, 255, Imgproc.THRESH_BINARY + Imgproc.THRESH_OTSU);
+		return threshold.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(17, 3));
+	}
+	
+	public Img bernsen() {
+		return bernsen(31, 15);
+	}
+	
+	public Img otsu() {
+		return bgr2Gray().thresHold(0, 255, Imgproc.THRESH_BINARY + Imgproc.THRESH_OTSU);
+	}
+	
+	public Img otsuAfterGaussianBlur() {
+		return otsuAfterGaussianBlur(new Size(5,5));
 	}
 
 	public Img otsuInv() {
-		return cvtColor(Imgproc.COLOR_BGR2GRAY).thresHold(0, 255, Imgproc.THRESH_BINARY_INV + Imgproc.THRESH_OTSU);
+		return bgr2Gray().thresHold(0, 255, Imgproc.THRESH_BINARY_INV + Imgproc.THRESH_OTSU);
 	}
-
-	public Img dilateBlacks(double valueThreshold, double saturatioThreshold, double blueThreshold, Size dilatation) {
-		return range(new Scalar(0, 0, 0), new Scalar(255, saturatioThreshold, valueThreshold), true)
-				.range(new Scalar(0, 0, 0), new Scalar(blueThreshold, 255, 255), false)
-				.morphologyEx(Imgproc.MORPH_DILATE, Imgproc.MORPH_RECT, dilatation);
-	}
-
+	
 	public Img equalizeHisto() {
 		Mat result = new Mat();
-		Imgproc.cvtColor(src, result, Imgproc.COLOR_BGR2YCrCb);
-		List<Mat> channels = new ArrayList<>();
-		Core.split(result, channels);
-		Imgproc.equalizeHist(channels.get(0), channels.get(0));
-		Imgproc.equalizeHist(channels.get(1), channels.get(1));
-		Imgproc.equalizeHist(channels.get(2), channels.get(2));
-		Core.merge(channels, result);
-		Imgproc.cvtColor(result, result, Imgproc.COLOR_YCrCb2BGR);
+		Imgproc.equalizeHist(bgr2Gray().getSrc(), result);
+//		Imgproc.cvtColor(src, result, Imgproc.COLOR_BGR2YCrCb);
+//		List<Mat> channels = new ArrayList<>();
+//		Core.split(result, channels);
+//		Imgproc.equalizeHist(channels.get(0), channels.get(0));
+//		Imgproc.equalizeHist(channels.get(1), channels.get(1));
+//		Imgproc.equalizeHist(channels.get(2), channels.get(2));
+//		Core.merge(channels, result);
+//		Imgproc.cvtColor(result, result, Imgproc.COLOR_YCrCb2BGR);
 		return new Img(result);
 	}
 
@@ -476,46 +455,152 @@ public class Img {
 		// Extract the luminance (L) channel and apply filter
 		Core.extractChannel(result, channelL, 0);
 		clahe.apply(channelL, channelL);
-		// Insert back the luminance channel
 		Core.insertChannel(channelL, result, 0);
 		Imgproc.cvtColor(result, result, Imgproc.COLOR_Lab2BGR);
 		return new Img(result);
 	}
+	
+	public Img adaptativeMeanThreshold() {
+		return adaptativeMeanThreshold(11, 2);
+	}
+
+	public Img adaptativeGaussianThreshold() {
+		return adaptativeGaussianThreshold(11, 2);
+	}
+
+	public Img niblackThreshold() {
+		return niblackThreshold(11, 2);
+	}
+
+	public Img sauvolaThreshold() {
+		return sauvolaThreshold(11,  2);
+	}
+
+	public Img nickThreshold() {
+		return nickThreshold(11,  2);
+	}
+
+	public Img wolfThreshold() {
+		return wolfThreshold(11,  2);
+	}
+	
+	public Img otsuAfterGaussianBlur(Size blurSize) {
+		// Same as otsu filtering, but a Gaussian blur is applied first
+		return bgr2Gray().gaussianBlur(blurSize).thresHold(0, 255,
+				Imgproc.THRESH_BINARY + Imgproc.THRESH_OTSU);
+	}
+
+	public Img sobel(int ddepth, int dx, int dy, int ksize, double scale, double delta, int borderType) {
+		Mat result = new Mat();
+		Imgproc.Sobel(src, result, ddepth, dx, dy, ksize, scale, delta, borderType);
+		return new Img(result);
+	}
+
+	public Img adaptativeThresHold(double maxValue, int adaptiveMethod, int thresholdType, int blockSize, double C) {
+		Mat result = new Mat();
+		Imgproc.adaptiveThreshold(src, result, maxValue, adaptiveMethod, thresholdType, blockSize, C);
+		return new Img(result);
+	}
+
+	public Img thresHold(double thresh, double maxval, int type) {
+		Mat result = new Mat();
+		Imgproc.threshold(src, result, thresh, maxval, type);
+		return new Img(result);
+	}
+	
+	public Img bernsen(int ksize, int contrast_limit) {
+		Img gray = bgr2Gray();
+		Mat ret = Mat.zeros(gray.size(), gray.type());
+		for (int i = 0; i < gray.cols(); i++) {
+			for (int j = 0; j < gray.rows(); j++) {
+				double mn = 999, mx = 0;
+				int ti = 0, tj = 0;
+				int tlx = i - ksize / 2;
+				int tly = j - ksize / 2;
+				int brx = i + ksize / 2;
+				int bry = j + ksize / 2;
+				if (tlx < 0)
+					tlx = 0;
+				if (tly < 0)
+					tly = 0;
+				if (brx >= gray.cols())
+					brx = gray.cols() - 1;
+				if (bry >= gray.rows())
+					bry = gray.rows() - 1;
+
+				for (int ik = -ksize / 2; ik <= ksize / 2; ik++) {
+					for (int jk = -ksize / 2; jk <= ksize / 2; jk++) {
+						ti = i + ik;
+						tj = j + jk;
+						if (ti > 0 && ti < gray.cols() && tj > 0 && tj < gray.rows()) {
+							double pix = gray.get(tj, ti)[0];
+							if (pix < mn)
+								mn = pix;
+							if (pix > mx)
+								mx = pix;
+						}
+					}
+				}
+				double median = 0.5 * (mn + mx);
+				if (median < contrast_limit) {
+					ret.put(j, i, 0);
+				} else {
+					double pix = gray.get(j, i)[0];
+					ret.put(j, i, pix > median ? 255 : 0);
+				}
+			}
+		}
+		return new Img(ret);
+	}
+
+	public int rows() {
+		return src.rows();
+	}
+
+	public int cols() {
+		return src.cols();
+	}
+
+	public Img dilateBlacks(double valueThreshold, double saturatioThreshold, double blueThreshold, Size dilatation) {
+		return range(new Scalar(0, 0, 0), new Scalar(255, saturatioThreshold, valueThreshold), true)
+				.range(new Scalar(0, 0, 0), new Scalar(blueThreshold, 255, 255), false)
+				.morphologyEx(Imgproc.MORPH_DILATE, Imgproc.MORPH_RECT, dilatation);
+	}
 
 	public Img adaptativeMeanThreshold(int blockSize, double C) {
-		return cvtColor(Imgproc.COLOR_BGR2GRAY).adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_MEAN_C,
+		return bgr2Gray().adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_MEAN_C,
 				Imgproc.THRESH_BINARY, blockSize, C);
 	}
 
 	public Img adaptativeGaussianThreshold(int blockSize, double C) {
-		return cvtColor(Imgproc.COLOR_BGR2GRAY).adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C,
+		return bgr2Gray().adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C,
 				Imgproc.THRESH_BINARY, blockSize, C);
 	}
 
 	public Img niblackThreshold(int blockSize, double k) {
 		Mat result = new Mat();
-		Ximgproc.niBlackThreshold(cvtColor(Imgproc.COLOR_BGR2GRAY).getSrc(), result, 255, Imgproc.THRESH_BINARY,
+		Ximgproc.niBlackThreshold(bgr2Gray().getSrc(), result, 255, Imgproc.THRESH_BINARY,
 				blockSize, k, Ximgproc.BINARIZATION_NIBLACK);
 		return new Img(result);
 	}
 
 	public Img sauvolaThreshold(int blockSize, double k) {
 		Mat result = new Mat();
-		Ximgproc.niBlackThreshold(cvtColor(Imgproc.COLOR_BGR2GRAY).getSrc(), result, 255, Imgproc.THRESH_BINARY,
+		Ximgproc.niBlackThreshold(bgr2Gray().getSrc(), result, 255, Imgproc.THRESH_BINARY,
 				blockSize, k, Ximgproc.BINARIZATION_SAUVOLA);
 		return new Img(result);
 	}
 
 	public Img nickThreshold(int blockSize, double k) {
 		Mat result = new Mat();
-		Ximgproc.niBlackThreshold(cvtColor(Imgproc.COLOR_BGR2GRAY).getSrc(), result, 255, Imgproc.THRESH_BINARY,
+		Ximgproc.niBlackThreshold(bgr2Gray().getSrc(), result, 255, Imgproc.THRESH_BINARY,
 				blockSize, k, Ximgproc.BINARIZATION_NICK);
 		return new Img(result);
 	}
 
 	public Img wolfThreshold(int blockSize, double k) {
 		Mat result = new Mat();
-		Ximgproc.niBlackThreshold(cvtColor(Imgproc.COLOR_BGR2GRAY).getSrc(), result, 255, Imgproc.THRESH_BINARY,
+		Ximgproc.niBlackThreshold(bgr2Gray().getSrc(), result, 255, Imgproc.THRESH_BINARY,
 				blockSize, k, Ximgproc.BINARIZATION_WOLF);
 		return new Img(result);
 	}
@@ -583,59 +668,6 @@ public class Img {
 		Mat result = new Mat();
 		Photo.fastNlMeansDenoising(src, result);
 		return new Img(result);
-	}
-
-	public Img bernsen(int ksize, int contrast_limit) {
-		Img gray = gray();
-		Mat ret = Mat.zeros(gray.size(), gray.type());
-		for (int i = 0; i < gray.cols(); i++) {
-			for (int j = 0; j < gray.rows(); j++) {
-				double mn = 999, mx = 0;
-				int ti = 0, tj = 0;
-				int tlx = i - ksize / 2;
-				int tly = j - ksize / 2;
-				int brx = i + ksize / 2;
-				int bry = j + ksize / 2;
-				if (tlx < 0)
-					tlx = 0;
-				if (tly < 0)
-					tly = 0;
-				if (brx >= gray.cols())
-					brx = gray.cols() - 1;
-				if (bry >= gray.rows())
-					bry = gray.rows() - 1;
-
-				for (int ik = -ksize / 2; ik <= ksize / 2; ik++) {
-					for (int jk = -ksize / 2; jk <= ksize / 2; jk++) {
-						ti = i + ik;
-						tj = j + jk;
-						if (ti > 0 && ti < gray.cols() && tj > 0 && tj < gray.rows()) {
-							double pix = gray.get(tj, ti)[0];
-							if (pix < mn)
-								mn = pix;
-							if (pix > mx)
-								mx = pix;
-						}
-					}
-				}
-				double median = 0.5 * (mn + mx);
-				if (median < contrast_limit) {
-					ret.put(j, i, 0);
-				} else {
-					double pix = gray.get(j, i)[0];
-					ret.put(j, i, pix > median ? 255 : 0);
-				}
-			}
-		}
-		return new Img(ret);
-	}
-
-	public int rows() {
-		return src.rows();
-	}
-
-	public int cols() {
-		return src.cols();
 	}
 
 	// private List<Rect> getRects() {
