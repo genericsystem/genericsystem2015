@@ -1,6 +1,5 @@
 package org.genericsystem.watch.beta;
 
-import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
 import org.genericsystem.kernel.Cache;
 import org.genericsystem.kernel.Engine;
@@ -10,6 +9,7 @@ import org.genericsystem.watch.beta.Model.Task;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
+import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.EventBusOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.spi.cluster.ClusterManager;
@@ -26,6 +26,7 @@ public class DistributedVerticle extends AbstractVerticle {
 	private final Generic messageType = engine.find(Message.class);
 	private final Generic taskType = engine.find(Task.class);
 	private final RoundRobin roundrobin = new RoundRobin();
+	private static final DeliveryOptions TIMEOUT = new DeliveryOptions().setSendTimeout(2000);
 
 	private static final int ATTEMPTS = 5;
 
@@ -53,22 +54,38 @@ public class DistributedVerticle extends AbstractVerticle {
 	@Override
 	public void start() throws Exception {
 
+		cache.safeConsum(nothing -> {
+			for (Generic task1 : taskType.getInstances()) {
+				if ("started".equals(new JsonObject((String) task1.getValue()).getString("state"))) {
+					Generic message = messageType.addInstance(
+							new JsonObject().put("task", new JsonObject((String) task1.getValue()).getLong("task"))
+									.put("state", "TODO").encodePrettily());
+					task1.remove();
+				}
+			}
+
+			for (Generic message1 : taskType.getInstances()) {
+				if ("IN PROGRESS".equals(new JsonObject((String) message1.getValue()).getString("state"))) {
+					Generic message = messageType.addInstance(
+							new JsonObject().put("task", new JsonObject((String) message1.getValue()).getLong("task"))
+									.put("state", "TODO").encodePrettily());
+					message1.remove();
+				}
+			}
+			cache.flush();
+		});
+
 		// Periodic aknowledge of availability
 		vertx.setPeriodic(5000, h -> {
 			vertx.eventBus().publish(PUBLIC_ADDRESS, PRIVATE_ADDRESS);
 		});
 
-		// Periodic : Maintaining the list of recipients
-		vertx.setPeriodic(5000, m -> {
-			vertx.eventBus().consumer(PUBLIC_ADDRESS, message -> {
-				roundrobin.Register((String) message.body());
-				// System.out.println("List of available verticles : " +
-				// roundrobin.getPrivateAdresses());
-			});
+		vertx.eventBus().consumer(PUBLIC_ADDRESS, message -> {
+			roundrobin.Register((String) message.body());
 		});
 
 		// Periodic : Task creation
-		vertx.setPeriodic(10000, m -> {
+		vertx.setPeriodic(12123, m -> {
 			cache.safeConsum(n -> {
 				messageType.addInstance(
 						new JsonObject().put("task", System.currentTimeMillis()).put("state", "TODO").encodePrettily());
@@ -78,65 +95,103 @@ public class DistributedVerticle extends AbstractVerticle {
 
 		// Periodic : Messages send
 		vertx.setPeriodic(5000, l -> {
-			Generic gMessage = getNextMessage();
 
-			if (gMessage != null) {
+			cache.safeConsum(n -> {
+				System.out.println("========================================================================");
+				System.out.println(messageType.getInstances().toList().toString());
+				System.out.println("------------------------------------------------------------------------");
+				System.out.println(taskType.getInstances().toList().toString());
+				System.out.println("========================================================================");
+				for (Generic message : messageType.getInstances()) {
+					JsonObject json = new JsonObject((String) message.getValue());
+					if ("TODO".equals(json.getString("state"))) {
+						message.remove();
+						Generic inProgress = messageType.addInstance(new JsonObject().put("task", json.getLong("task"))
+								.put("state", "IN PROGRESS").encodePrettily());
+						cache.flush();
+						String workerAddress = roundrobin.getNextAddress();
+						if (workerAddress != null) {
+							vertx.eventBus().send(workerAddress, inProgress.getValue(), TIMEOUT, reply -> {
+								cache.safeConsum(nothing -> {
+									inProgress.remove();
+									if (reply.failed()) {
+										System.out.println(reply.cause());
+										roundrobin.remove(workerAddress);
+										messageType
+												.addInstance(new JsonObject()
+														.put("task",
+																new JsonObject((String) inProgress.getValue())
+																		.getLong("task"))
+														.put("state", "TODO").encodePrettily());
 
-				String workerAddress = roundrobin.getNextAddress();
-				if (!workerAddress.equals(null)) {
-					vertx.eventBus().send(workerAddress, gMessage.getValue(), reply -> {
-						cache.safeConsum(nothing -> {
-							if (reply.failed()) {
-								System.out.println(reply.cause());
-								roundrobin.remove(workerAddress);
-								gMessage.updateValue(new JsonObject()
-										.put("task", new JsonObject((String) gMessage.getValue()).getLong("task"))
-										.put("state", "TODO").encodePrettily());
+									} else {
+										if ("KO".equals(reply.result().body()))
+											messageType
+													.addInstance(
+															new JsonObject()
+																	.put("task",
+																			new JsonObject(
+																					(String) inProgress.getValue())
+																							.getLong("task"))
+																	.put("state", "TODO").encodePrettily());
 
-							} else {
+									}
+									cache.flush();
+								});
+							});
+						} else {
+							System.out.println("No worker Verticle available");
+						}
 
-								gMessage.remove();
-							}
-							cache.flush();
-						});
-					});
-				} else {
-					System.out.println("No worker Verticle available");
+					}
 				}
-
-			} else {
-				System.out.println("No new messages");
-			}
-		});
-
-		// Periodic : Messages handling
-		vertx.setPeriodic(5000, h -> {
-
-			vertx.eventBus().consumer(PRIVATE_ADDRESS, message -> {
-
-				System.out.println(PRIVATE_ADDRESS + " received " + message.body());
-				// traitement
-				message.reply("");
 			});
+
+		});
+
+		// Messages handling
+
+		vertx.eventBus().consumer(PRIVATE_ADDRESS, message -> {
+			// System.out.println("---------------------------------------------------------------");
+			// System.out.println("task received " + message.body());
+
+			cache.safeConsum(nothing -> {
+				for (Generic task : taskType.getInstances())
+					if ("started".equals(new JsonObject((String) task.getValue()).getString("state"))) {
+						message.reply("KO");
+						return;
+					}
+				long taskTs = new JsonObject((String) message.body()).getLong("task");
+				String messageTask = new JsonObject().put("task", taskTs).put("state", "started").encodePrettily();
+				taskType.addInstance(messageTask);
+				cache.flush();
+				vertx.executeBlocking(future -> {
+					try {
+						System.out.println("executing task : " + messageTask.toString());
+						Thread.sleep(10000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+
+					future.complete();
+				}, res -> {
+					cache.safeConsum(nothing2 -> {
+						taskType.getInstance(messageTask).remove();
+						if (res.succeeded())
+							taskType.addInstance(
+									new JsonObject().put("task", taskTs).put("state", "finished").encodePrettily());
+						else
+							taskType.addInstance(
+									new JsonObject().put("task", taskTs).put("state", "aborted").encodePrettily());
+						cache.flush();
+					});
+
+				});
+				message.reply("OK");
+			});
+
 		});
 
 	}
 
-	private Generic getNextMessage() {
-		return cache.safeSupply(() -> {
-			Snapshot<Generic> s = messageType.getInstances();
-			System.out.println(s.toList().toString());
-			for (Generic result : messageType.getInstances()) {
-				JsonObject json = new JsonObject((String) result.getValue());
-				if ("TODO".equals(json.getString("state"))) {
-					result = result.updateValue(new JsonObject().put("task", json.getLong("task"))
-							.put("state", "IN PROGRESS").encodePrettily());
-					cache.flush();
-					return result;
-				}
-			}
-			return null;
-		});
-
-	}
 }
