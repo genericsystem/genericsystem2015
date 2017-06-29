@@ -482,21 +482,17 @@ public class Img {
 		return new Img(result);
 	}
 
-	public Img adaptativeMeanThreshold() {
-		// TODO: adjust blocksize and C parameters
+	public Img adaptativeMeanThreshold(int blockSize, double C) {
 		return cvtColor(Imgproc.COLOR_BGR2GRAY).adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_MEAN_C,
-				Imgproc.THRESH_BINARY, 11, 2);
+				Imgproc.THRESH_BINARY, blockSize, C);
 	}
 
-	public Img adaptativeGaussianThreshold() {
-		// TODO: adjust blocksize and C parameters
+	public Img adaptativeGaussianThreshold(int blockSize, double C) {
 		return cvtColor(Imgproc.COLOR_BGR2GRAY).adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C,
-				Imgproc.THRESH_BINARY, 11, 2);
+				Imgproc.THRESH_BINARY, blockSize, C);
 	}
 
 	public Img niblackThreshold(int blockSize, double k) {
-		// TODO: adjust blocksize and k parameters
-		// Guessed values : blockSize = 15, k between -0.75 and 0
 		Mat result = new Mat();
 		Ximgproc.niBlackThreshold(cvtColor(Imgproc.COLOR_BGR2GRAY).getSrc(), result, 255, Imgproc.THRESH_BINARY,
 				blockSize, k, Ximgproc.BINARIZATION_NIBLACK);
@@ -504,7 +500,6 @@ public class Img {
 	}
 
 	public Img sauvolaThreshold(int blockSize, double k) {
-		// TODO: adjust blocksize and k parameters
 		Mat result = new Mat();
 		Ximgproc.niBlackThreshold(cvtColor(Imgproc.COLOR_BGR2GRAY).getSrc(), result, 255, Imgproc.THRESH_BINARY,
 				blockSize, k, Ximgproc.BINARIZATION_SAUVOLA);
@@ -512,18 +507,16 @@ public class Img {
 	}
 
 	public Img nickThreshold(int blockSize, double k) {
-		// TODO: adjust blocksize and k parameters
-		// Guessed values : blockSize = 11, k = 2
 		Mat result = new Mat();
-		Ximgproc.niBlackThreshold(src, result, 255, Imgproc.THRESH_BINARY, blockSize, k, Ximgproc.BINARIZATION_NICK);
+		Ximgproc.niBlackThreshold(cvtColor(Imgproc.COLOR_BGR2GRAY).getSrc(), result, 255, Imgproc.THRESH_BINARY,
+				blockSize, k, Ximgproc.BINARIZATION_NICK);
 		return new Img(result);
 	}
 
 	public Img wolfThreshold(int blockSize, double k) {
-		// TODO: adjust blocksize and k parameters
-		// Guessed values : blockSize = 11, k = 2
 		Mat result = new Mat();
-		Ximgproc.niBlackThreshold(src, result, 255, Imgproc.THRESH_BINARY, blockSize, k, Ximgproc.BINARIZATION_WOLF);
+		Ximgproc.niBlackThreshold(cvtColor(Imgproc.COLOR_BGR2GRAY).getSrc(), result, 255, Imgproc.THRESH_BINARY,
+				blockSize, k, Ximgproc.BINARIZATION_WOLF);
 		return new Img(result);
 	}
 
