@@ -17,13 +17,15 @@ import io.vertx.spi.cluster.hazelcast.HazelcastClusterManager;
 
 public class DistributedVerticle extends AbstractVerticle {
 
-	public static final String PUBLIC_ADDRESS = "publicAdress";
-	public final String PRIVATE_ADDRESS = "privateAdress" + hashCode();
+	public static final String PUBLIC_ADDRESS = "publicAddress";
+	public final String PRIVATE_ADDRESS = "privateAddress " + hashCode();
 
-	private final Engine engine = new Engine(System.getenv("HOME") + "/genericsystem/cloud/", Task.class, Message.class);
+	private final Engine engine = new Engine(System.getenv("HOME") + "/genericsystem/cloud/", Task.class,
+			Message.class);
 	private final Cache cache = engine.newCache();
 	private final Generic messageType = engine.find(Message.class);
 	private final Generic taskType = engine.find(Task.class);
+	private final RoundRobin roundrobin = new RoundRobin();
 
 	private static final int ATTEMPTS = 5;
 
@@ -33,7 +35,7 @@ public class DistributedVerticle extends AbstractVerticle {
 
 		VertxOptions vertxOptions = new VertxOptions().setClustered(true).setClusterManager(mgr);
 		vertxOptions.setEventBusOptions(new EventBusOptions()).setClustered(true);
-		vertxOptions.setClusterHost("192.168.1.16");
+		vertxOptions.setClusterHost("192.168.1.11");
 		vertxOptions.setMaxWorkerExecuteTime(Long.MAX_VALUE);
 
 		Vertx.clusteredVertx(vertxOptions, res -> {
@@ -50,56 +52,72 @@ public class DistributedVerticle extends AbstractVerticle {
 
 	@Override
 	public void start() throws Exception {
-		vertx.eventBus().consumer(PRIVATE_ADDRESS, jobAsk -> {
-			Generic gMessage = getNextMessage();
-			if (gMessage != null) {
-				jobAsk.reply(gMessage.getValue(), reply -> {
-					if (reply.failed())
-						throw new IllegalStateException(reply.cause());
-					System.out.println("Receive : " + reply.result().body());
-					cache.safeConsum(n -> {
-						if ("OK".equals(reply.result().body()))
-							gMessage.remove();
-						else
-							gMessage.updateValue(new JsonObject().put("task", new JsonObject((String) gMessage.getValue()).getLong("task")).put("state", "TODO").encodePrettily());
-						cache.flush();
-					});
 
-				});
-			} else {
-				jobAsk.reply("NOTHING");
-			}
-
-		});
-
-		vertx.eventBus().consumer(PUBLIC_ADDRESS, message -> {
-			vertx.eventBus().send((String) message.body(), "jobAsk", reply -> {
-				if (reply.failed())
-					throw new IllegalStateException(reply.cause());
-				System.out.println("Receive : " + reply.result().body());
-				if ("NOTHING".equals(reply.result().body()))
-					return;
-				reply.result().reply("KO");
-			});
-		});
-
-		vertx.setPeriodic(3000, l -> {
-			cache.safeConsum(n -> {
-				System.out.println("=====================================================");
-				Snapshot<Generic> messages = messageType.getInstances();
-				System.out.println(messages.toList().toString());
-				System.out.println("=====================================================");
-			});
-
+		// Periodic aknowledge of availability
+		vertx.setPeriodic(5000, h -> {
 			vertx.eventBus().publish(PUBLIC_ADDRESS, PRIVATE_ADDRESS);
 		});
 
-		vertx.setTimer(10000, l -> {
+		// Periodic : Maintaining the list of recipients
+		vertx.setPeriodic(5000, m -> {
+			vertx.eventBus().consumer(PUBLIC_ADDRESS, message -> {
+				roundrobin.Register((String) message.body());
+				// System.out.println("List of available verticles : " +
+				// roundrobin.getPrivateAdresses());
+			});
+		});
+
+		// Periodic : Task creation
+		vertx.setPeriodic(10000, m -> {
 			cache.safeConsum(n -> {
-				messageType.addInstance(new JsonObject().put("task", System.currentTimeMillis()).put("state", "TODO").encodePrettily());
+				messageType.addInstance(
+						new JsonObject().put("task", System.currentTimeMillis()).put("state", "TODO").encodePrettily());
 				cache.flush();
 			});
+		});
 
+		// Periodic : Messages send
+		vertx.setPeriodic(5000, l -> {
+			Generic gMessage = getNextMessage();
+
+			if (gMessage != null) {
+
+				String workerAddress = roundrobin.getNextAddress();
+				if (!workerAddress.equals(null)) {
+					vertx.eventBus().send(workerAddress, gMessage.getValue(), reply -> {
+						cache.safeConsum(nothing -> {
+							if (reply.failed()) {
+								System.out.println(reply.cause());
+								roundrobin.remove(workerAddress);
+								gMessage.updateValue(new JsonObject()
+										.put("task", new JsonObject((String) gMessage.getValue()).getLong("task"))
+										.put("state", "TODO").encodePrettily());
+
+							} else {
+
+								gMessage.remove();
+							}
+							cache.flush();
+						});
+					});
+				} else {
+					System.out.println("No worker Verticle available");
+				}
+
+			} else {
+				System.out.println("No new messages");
+			}
+		});
+
+		// Periodic : Messages handling
+		vertx.setPeriodic(5000, h -> {
+
+			vertx.eventBus().consumer(PRIVATE_ADDRESS, message -> {
+
+				System.out.println(PRIVATE_ADDRESS + " received " + message.body());
+				// traitement
+				message.reply("");
+			});
 		});
 
 	}
@@ -111,7 +129,8 @@ public class DistributedVerticle extends AbstractVerticle {
 			for (Generic result : messageType.getInstances()) {
 				JsonObject json = new JsonObject((String) result.getValue());
 				if ("TODO".equals(json.getString("state"))) {
-					result = result.updateValue(new JsonObject().put("task", json.getLong("task")).put("state", "IN PROGRESS").encodePrettily());
+					result = result.updateValue(new JsonObject().put("task", json.getLong("task"))
+							.put("state", "IN PROGRESS").encodePrettily());
 					cache.flush();
 					return result;
 				}
