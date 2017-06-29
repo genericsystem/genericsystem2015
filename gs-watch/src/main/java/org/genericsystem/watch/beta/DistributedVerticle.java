@@ -10,6 +10,7 @@ import org.genericsystem.watch.beta.Model.Task;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
+import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.EventBusOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.spi.cluster.ClusterManager;
@@ -25,6 +26,7 @@ public class DistributedVerticle extends AbstractVerticle {
 	private final Generic messageType = engine.find(Message.class);
 	private final Generic taskType = engine.find(Task.class);
 	private final RoundRobin roundrobin = new RoundRobin();
+	private static final DeliveryOptions TIMEOUT = new DeliveryOptions().setSendTimeout(2000);
 
 	private static final int ATTEMPTS = 5;
 
@@ -89,7 +91,7 @@ public class DistributedVerticle extends AbstractVerticle {
 
 				String workerAddress = roundrobin.getNextAddress();
 				if (!workerAddress.equals(null)) {
-					vertx.eventBus().send(workerAddress, gMessage.getValue(), reply -> {
+					vertx.eventBus().send(workerAddress, gMessage.getValue(), TIMEOUT, reply -> {
 						cache.safeConsum(nothing -> {
 							if (reply.failed()) {
 								System.out.println(reply.cause());
