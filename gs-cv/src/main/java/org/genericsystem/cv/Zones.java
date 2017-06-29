@@ -21,15 +21,15 @@ public class Zones implements Iterable<Zone> {
 	private static final ObjectMapper mapper = new ObjectMapper();
 
 	public static Zones get(Img img, double minArea) {
-		return new Zones(img.channels() == 1 ? img : img.gray(), minArea);
+		return new Zones(img.channels() == 1 ? img : img.bgr2Gray(), minArea);
 	}
 
 	public static Zones get(Img img, double minArea, int RETR) {
-		return new Zones(img.channels() == 1 ? img : img.gray(), minArea, RETR);
+		return new Zones(img.channels() == 1 ? img : img.bgr2Gray(), minArea, RETR);
 	}
 
 	public static Zones get(Img img, double minArea, double dx, double dy) {
-		return new Zones(img.channels() == 1 ? img : img.gray(), minArea).adjust(dx, dy, img.width(), img.height());
+		return new Zones(img.channels() == 1 ? img : img.bgr2Gray(), minArea).adjust(dx, dy, img.width(), img.height());
 	}
 
 	public static Zones splitVertically(Img img, double morph, double minarea) {

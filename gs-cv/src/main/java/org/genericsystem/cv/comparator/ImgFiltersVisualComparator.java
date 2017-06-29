@@ -1,6 +1,12 @@
 package org.genericsystem.cv.comparator;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.genericsystem.cv.AbstractApp;
@@ -11,9 +17,11 @@ import org.genericsystem.cv.Zone;
 import org.genericsystem.cv.ZoneScorer;
 import org.genericsystem.cv.Zones;
 import org.opencv.core.Core;
+import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
 
 import javafx.scene.layout.GridPane;
 
@@ -34,61 +42,92 @@ public class ImgFiltersVisualComparator extends AbstractApp {
 		int rowIndex = 0;
 
 		ImgClass imgClass = ImgClass.fromDirectory(imgClassDirectory);
-//		mainGrid.add(imgClass.getMean().getImageView(), columnIndex, rowIndex++);
-//		mainGrid.add(imgClass.getVariance().getImageView(), columnIndex, rowIndex++);
-//
-//		mainGrid.add(imgClass.getMean().getImageView(), columnIndex, rowIndex++);
-//		mainGrid.add(imgClass.getVariance().getImageView(), columnIndex, rowIndex++);
 
-//		Img img1 = Tools.firstImg(imgClassDirectory);
-//		mainGrid.add(img1.otsu().getImageView(), columnIndex, rowIndex++);
-//		
-//		Img img11 = Tools.firstImg(imgClassDirectory);
-//		mainGrid.add(img11.otsuAfterGaussianBlur(new Size(5, 5)).getImageView(), columnIndex, rowIndex++);
+		Img img = Tools.firstImg(imgClassDirectory);
 
-		Img img2 = Tools.firstImg(imgClassDirectory);
-		mainGrid.add(img2.niblackThreshold(15, 0).getImageView(), columnIndex, rowIndex++);
-		Img img3 = Tools.firstImg(imgClassDirectory);
-		mainGrid.add(img3.niblackThreshold(15, -1).getImageView(), columnIndex, rowIndex++);
-		Img img31 = Tools.firstImg(imgClassDirectory);
-		mainGrid.add(img31.niblackThreshold(15, -0.75).getImageView(), columnIndex, rowIndex++);
-		Img img32 = Tools.firstImg(imgClassDirectory);
-		mainGrid.add(img32.niblackThreshold(15, -0.5).getImageView(), columnIndex, rowIndex++);
-
-//		Zones zones;
-//		try {
-//			zones = Zones.load(imgClassDirectory);
-//		} catch (RuntimeException e) {
-//			System.out.println("could not load accurate zones");
-//			imgClass.addMapper(img -> img.eraseCorners(0.1).dilateBlacks(86, 255, 76, new Size(20, 3)));
-//			zones = Zones.get(imgClass.getClosedVarianceZones(new Size(9, 10)), 300, 6, 6);
-//		}
-//		Img model = imgClass.getMean();
-//		zones.draw(model, new Scalar(0, 255, 0), 3);
-//		mainGrid.add(model.getImageView(), columnIndex, rowIndex++);
-//		int i = 0;
-//		for (File file : new File(imgClassDirectory).listFiles())
-//			if (file.getName().endsWith(".png")) {
-//				System.out.println("File : " + file.getName());
-//				if (i++ > 3)
-//					continue;
-//				Img img = new Img(Imgcodecs.imread(file.getPath()));
-//				for (Zone zone : zones) {
-//					System.out.println("Zone n°" + zone.getNum());
-//					zone.draw(img, new Scalar(0, 255, 0), -1);
-//					ZoneScorer scorer = zone.newUnsupervisedScorer(Stream.concat(
-//							Tools.classImgsStream(imgClassDirectory, file.getName()),
-//							Tools.classImgsStream(imgClassDirectory + "/mask/" + file.getName().replace(".png", ""))));
-//					// // zone.write(img,
-//					// // scorer.getBestText() + " " +
-//					// // Math.floor((scorer.getBestScore() * 10000)) / 100 +
-//					// "%",
-//					// // 2.5,
-//					// // new Scalar(0, 0, 255), 2);
-//					zone.write(img, scorer.getBestText2(), 2.5, new Scalar(0, 0, 255), 2);
-//					System.out.println("Best text : " + scorer.getBestText2());
-//				}
-//				mainGrid.add(img.getImageView(), columnIndex, rowIndex++);
+//		List<Integer> blockSizes = Arrays.asList(new Integer[] { 3, 5, 7, 9, 11, 15, 17, 21, 27, 37 });
+//		List<Double> ks = Arrays.asList(new Double[] { -2.0, -1.0, -0.8, -0.6, -0.5, -0.4, -0.3, -0.2, -0.1, 0.0, 0.1,
+//				0.2, 0.3, 0.4, 0.5, 0.6, 0.8, 1.0, 2.0, 3.0 });
+//		for (Integer bs : blockSizes) {
+//			for (Double k : ks) {
+//				Img img2 = img.niblackThreshold(bs, k); // k: between -1.0 and
+//														// 0.0, bs > 5
+//				// Img img2 = img.sauvolaThreshold(bs, k); // k: between 0.1 and
+//				// 0.3, bs > 5
+//				// Img img2 = img.nickThreshold(bs, k); // k: between -0.3 and
+//				// -0.1, bs > 7
+//				// Img img2 = img.wolfThreshold(bs, k); // k: between 0.1 and
+//				// 0.6, bs > 5
+//				// Img img2 = img.adaptativeMeanThreshold(bs, k); // Img img2 =
+//				img.adaptativeGaussianThreshold(bs, k);
+//				String text = "bs=" + bs + ", k=" + k;
+//				Imgproc.putText(img2.getSrc(), text, new Point(550, 129), Core.FONT_HERSHEY_PLAIN, 3,
+//						new Scalar(0, 0, 255), 3);
+//				mainGrid.add(img2.getImageView(), columnIndex++, rowIndex);
 //			}
+//			rowIndex++;
+//			columnIndex = 0;
+//		}
+
+		final Map<String, Function<Img, Img>> imgFilters = new HashMap<>();
+		imgFilters.put("original", Img::bgr2Gray);
+		imgFilters.put("bernsen", i -> i.bernsen(15, 15));
+		imgFilters.put("equalizeHisto", Img::equalizeHisto);
+		imgFilters.put("equalizeHistoAdaptative", i -> i.equalizeHistoAdaptative(4.0, new Size(8, 8)));
+		imgFilters.put("wolf", i -> i.wolfThreshold(15, 0.3));
+		imgFilters.put("nick", i -> i.nickThreshold(21, -0.1));
+		imgFilters.put("otsu", Img::otsu);
+		imgFilters.put("otsuGaussian", i -> i.otsuAfterGaussianBlur(new Size(3, 3)));
+		imgFilters.put("niblack", i -> i.niblackThreshold(15, -0.6));
+		imgFilters.put("sauvola", i -> i.sauvolaThreshold(15, 0.2));
+		imgFilters.put("adaptativeMeanThreshold", Img::adaptativeMeanThreshold);
+		imgFilters.put("adaptativeGaussianThreshold", Img::adaptativeGaussianThreshold);
+
+		Map<String, Img> imgs = new HashMap<>();
+
+		for (Entry<String, Function<Img, Img>> entry : imgFilters.entrySet()) {
+			System.out.print("Processing filter : " + entry.getKey() + "...");
+			long start = System.currentTimeMillis();
+
+			Img img2 = null;
+			if ("original".equals(entry.getKey()) || "reality".equals(entry.getKey())) {
+				img2 = img.bgr2Gray();
+			} else {
+				img2 = entry.getValue().apply(img);
+			}
+			imgs.put(entry.getKey(), img2);
+
+			long stop = System.currentTimeMillis();
+			System.out.println(" (" + (stop - start) + " ms)");
+			// Imgproc.putText(img2.getSrc(), entry.getKey(), new Point(550,
+			// 129), Core.FONT_HERSHEY_PLAIN, 5, new Scalar(0, 0, 255), 3);
+			// mainGrid.add(img2.getImageView(), columnIndex, rowIndex++);
+		}
+
+		final Zones zones = Zones.load(imgClassDirectory);
+
+		Img model = img;
+		zones.draw(model, new Scalar(0, 255, 0), 3);
+		mainGrid.add(model.getImageView(), columnIndex, rowIndex++);
+
+		for (Entry<String, Img> entry : imgs.entrySet()) {
+			Img currentImg = entry.getValue();
+			for (Zone zone : zones) {
+				// System.out.println("Zone n°" + zone.getNum());
+				String ocr = zone.ocr(currentImg);
+				zone.draw(currentImg, new Scalar(255, 255, 255), -1);
+				zone.write(currentImg, ocr.trim(), 2, new Scalar(0, 0, 0), 3);
+
+				Imgproc.rectangle(currentImg.getSrc(), new Point(80, 40), new Point(600, 90), new Scalar(255, 255, 255),
+						-1);
+				Imgproc.putText(currentImg.getSrc(), entry.getKey(), new Point(90, 80), Core.FONT_HERSHEY_PLAIN, 2.5,
+						new Scalar(0, 0, 255), 3);
+			}
+			mainGrid.add(currentImg.getImageView(), columnIndex, rowIndex++);
+			if (rowIndex % 3 == 0){
+				rowIndex = 0;
+				columnIndex++;
+			}
+		}
 	}
 }
