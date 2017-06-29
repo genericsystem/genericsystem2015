@@ -17,13 +17,12 @@ public class RoundRobin {
 	}
 
 	public String getNextAddress() {
-		if (privateAdresses.size() > 0) {
-			if (privateAdresses.size() > 1)
-				index = (index + 1) % privateAdresses.size();
-			return privateAdresses.get(index);
-		} else {
+		if (privateAdresses.isEmpty())
 			return null;
-		}
+		if (privateAdresses.size() == 1)
+			return privateAdresses.get(0);
+		return privateAdresses.get(index++ % privateAdresses.size());
+
 	}
 
 	public void remove(String Adresse) {

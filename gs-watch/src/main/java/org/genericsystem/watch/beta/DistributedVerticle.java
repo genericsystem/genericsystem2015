@@ -61,18 +61,7 @@ public class DistributedVerticle extends AbstractVerticle {
 
 		vertx.eventBus().consumer(PUBLIC_ADDRESS, message -> {
 			roundrobin.Register((String) message.body());
-			// System.out.println("List of available verticles : " +
-			// roundrobin.getPrivateAdresses());
 		});
-
-		// // Periodic : Maintaining the list of recipients
-		// vertx.setPeriodic(5000, m -> {
-		// vertx.eventBus().consumer(PUBLIC_ADDRESS, message -> {
-		// roundrobin.Register((String) message.body());
-		// // System.out.println("List of available verticles : " +
-		// // roundrobin.getPrivateAdresses());
-		// });
-		// });
 
 		// Periodic : Task creation
 		vertx.setPeriodic(10000, m -> {
@@ -85,63 +74,54 @@ public class DistributedVerticle extends AbstractVerticle {
 		// Periodic : Messages send
 		vertx.setPeriodic(5000, l -> {
 
-			Generic gMessage = getNextMessage();
+			Snapshot<Generic> s = messageType.getInstances();
+			System.out.println("========================================================================");
+			System.out.println(s.toList().toString());
+			System.out.println("========================================================================");
+			cache.safeConsum(n -> {
+				for (Generic message : messageType.getInstances()) {
+					JsonObject json = new JsonObject((String) message.getValue());
+					if ("TODO".equals(json.getString("state"))) {
+						message.remove();
+						Generic inProgress = messageType.addInstance(new JsonObject().put("task", json.getLong("task")).put("state", "IN PROGRESS").encodePrettily());
+						cache.flush();
+						String workerAddress = roundrobin.getNextAddress();
+						if (workerAddress != null) {
+							vertx.eventBus().send(workerAddress, inProgress.getValue(), TIMEOUT, reply -> {
+								cache.safeConsum(nothing -> {
+									inProgress.remove();
+									if (reply.failed()) {
+										System.out.println(reply.cause());
+										roundrobin.remove(workerAddress);
+										messageType.addInstance(new JsonObject().put("task", new JsonObject((String) inProgress.getValue()).getLong("task")).put("state", "TODO").encodePrettily());
 
-			if (gMessage != null) {
+									} else {
+										if ("KO".equals(reply.result().body()))
+											messageType.addInstance(new JsonObject().put("task", new JsonObject((String) inProgress.getValue()).getLong("task")).put("state", "TODO").encodePrettily());
 
-				String workerAddress = roundrobin.getNextAddress();
-				if (!workerAddress.equals(null)) {
-					vertx.eventBus().send(workerAddress, gMessage.getValue(), TIMEOUT, reply -> {
-						cache.safeConsum(nothing -> {
-							if (reply.failed()) {
-								System.out.println(reply.cause());
-								roundrobin.remove(workerAddress);
-								gMessage.updateValue(new JsonObject().put("task", new JsonObject((String) gMessage.getValue()).getLong("task")).put("state", "TODO").encodePrettily());
+									}
+									cache.flush();
+								});
+							});
+						} else {
+							System.out.println("No worker Verticle available");
+						}
 
-							} else {
-								if ("OK".equals(reply.result().body()))
-									gMessage.remove();
-								else
-									gMessage.updateValue(new JsonObject().put("task", new JsonObject((String) gMessage.getValue()).getLong("task")).put("state", "TODO").encodePrettily());
-
-							}
-							cache.flush();
-						});
-					});
-				} else {
-					System.out.println("No worker Verticle available");
+					}
 				}
+			});
 
-			} else {
-				System.out.println("No new messages");
-			}
 		});
 
-		// Periodic : Messages handling
+		// Messages handling
 
 		vertx.eventBus().consumer(PRIVATE_ADDRESS, message -> {
-
-			System.out.println(PRIVATE_ADDRESS + " received " + message.body());
+			System.out.println("---------------------------------------------------------------");
+			System.out.println("task received " + message.body());
 			// traitement
 			message.reply("KO");
 		});
 
 	}
 
-	private Generic getNextMessage() {
-		return cache.safeSupply(() -> {
-			Snapshot<Generic> s = messageType.getInstances();
-			System.out.println(s.toList().toString());
-			for (Generic result : messageType.getInstances()) {
-				JsonObject json = new JsonObject((String) result.getValue());
-				if ("TODO".equals(json.getString("state"))) {
-					result = result.updateValue(new JsonObject().put("task", json.getLong("task")).put("state", "IN PROGRESS").encodePrettily());
-					cache.flush();
-					return result;
-				}
-			}
-			return null;
-		});
-
-	}
 }
