@@ -118,7 +118,13 @@ public class DistributedVerticle extends AbstractVerticle {
 		vertx.eventBus().consumer(PRIVATE_ADDRESS, message -> {
 			// System.out.println("---------------------------------------------------------------");
 			// System.out.println("task received " + message.body());
+
 			cache.safeConsum(nothing -> {
+				for (Generic task : taskType.getInstances())
+					if ("started".equals(new JsonObject((String) task.getValue()).getString("state"))) {
+						message.reply("KO");
+						return;
+					}
 				long taskTs = new JsonObject((String) message.body()).getLong("task");
 				String messageTask = new JsonObject().put("task", taskTs).put("state", "started").encodePrettily();
 				taskType.addInstance(messageTask);
@@ -143,9 +149,8 @@ public class DistributedVerticle extends AbstractVerticle {
 					});
 
 				});
-
+				message.reply("OK");
 			});
-			message.reply("OK");
 
 		});
 
