@@ -132,7 +132,6 @@ public class DistributedVerticle extends AbstractVerticle {
 					}
 
 					future.complete();
-
 				}, res -> {
 					cache.safeConsum(nothing2 -> {
 						taskType.getInstance(messageTask).remove();
