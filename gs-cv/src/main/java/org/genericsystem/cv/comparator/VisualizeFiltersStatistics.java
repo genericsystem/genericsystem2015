@@ -34,7 +34,7 @@ import org.genericsystem.reactor.gscomponents.RootTagImpl;
 public class VisualizeFiltersStatistics extends RootTagImpl {
 
 	public static void main(String[] mainArgs) {
-		ApplicationServer.startSimpleGenericApp(mainArgs, VisualizeFiltersStatistics.class, "/gs-cv_model");
+		ApplicationServer.startSimpleGenericApp(mainArgs, VisualizeFiltersStatistics.class, "/gs-cv_model2");
 	}
 
 }

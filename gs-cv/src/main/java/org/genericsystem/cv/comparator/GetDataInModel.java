@@ -70,7 +70,7 @@ public class GetDataInModel {
 		DocClassInstance docClassInstance = docClass.addDocClass(docType);
 
 		// Set all the filter names
-		Map<String,Function<Img,Img>> imgFilters = fillAlgoMap();
+		Map<String,Function<Img,Img>> imgFilters = fillAlgorithmMap();
 
 		// Load the accurate zones
 		final Zones zones = Zones.load(imgClassDirectory);
@@ -90,7 +90,7 @@ public class GetDataInModel {
 		// Persist the changes
 		engine.getCurrentCache().flush();
 
-		// Process each file in the subfolder "/ref2/"
+		// Process each file in folder imgDirectory
 		Arrays.asList(new File(imgDirectory).listFiles((dir, name) -> name.endsWith(".png"))).stream().forEach(file -> {
 			engine.getCurrentCache().mount();
 			log.info("\nProcessing file: {}", file.getName());
@@ -148,7 +148,7 @@ public class GetDataInModel {
 		engine.getCurrentCache().flush();
 	}
 
-	private static Map<String, Function<Img, Img>> fillAlgoMap(){
+	private static Map<String, Function<Img, Img>> fillAlgorithmMap(){
 		final Map<String,Function<Img,Img>> map = new HashMap<>();
 		map.put("original", Img::bgr2Gray);
 		map.put("reality", Img::bgr2Gray);
