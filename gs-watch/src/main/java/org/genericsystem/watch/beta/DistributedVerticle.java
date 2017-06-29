@@ -74,11 +74,11 @@ public class DistributedVerticle extends AbstractVerticle {
 		// Periodic : Messages send
 		vertx.setPeriodic(5000, l -> {
 
-			Snapshot<Generic> s = messageType.getInstances();
-			System.out.println("========================================================================");
-			System.out.println(s.toList().toString());
-			System.out.println("========================================================================");
 			cache.safeConsum(n -> {
+				Snapshot<Generic> s = messageType.getInstances();
+				System.out.println("========================================================================");
+				System.out.println(s.toList().toString());
+				System.out.println("========================================================================");
 				for (Generic message : messageType.getInstances()) {
 					JsonObject json = new JsonObject((String) message.getValue());
 					if ("TODO".equals(json.getString("state"))) {
