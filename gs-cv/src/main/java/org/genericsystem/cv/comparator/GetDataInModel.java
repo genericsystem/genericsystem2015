@@ -1,8 +1,12 @@
 package org.genericsystem.cv.comparator;
 
 import java.io.File;
+import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.cv.Img;
@@ -14,13 +18,16 @@ import org.genericsystem.cv.model.DocClass.DocClassInstance;
 import org.genericsystem.cv.model.ImgFilter;
 import org.genericsystem.cv.model.ZoneGeneric;
 import org.genericsystem.cv.model.ZoneGeneric.ZoneInstance;
-import org.genericsystem.kernel.Engine;
 import org.genericsystem.cv.model.ZoneText;
+import org.genericsystem.kernel.Engine;
 import org.opencv.core.Core;
 import org.opencv.core.Scalar;
 import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+
 
 /**
  * The GetDataInModel class can analyze a batch of images and store the OCR text
@@ -32,9 +39,10 @@ import org.slf4j.LoggerFactory;
 public class GetDataInModel {
 
 	private static Logger log = LoggerFactory.getLogger(GetDataInModel.class);
-	private final static Engine engine = new Engine(System.getenv("HOME") + "/genericsystem/gs-cv_model/", Doc.class,
-			ImgFilter.class, ZoneGeneric.class, ZoneText.class);
-	
+	private static final String gsPath = System.getenv("HOME") + "/genericsystem/gs-cv_model2/";
+	private final static Engine engine = new Engine(gsPath, Doc.class, ImgFilter.class, ZoneGeneric.class,
+			ZoneText.class);
+
 	static {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 	}
@@ -46,8 +54,10 @@ public class GetDataInModel {
 	}
 
 	public static void compute() {
-		String docType = "id-fr-front";
-		String imgClassDirectory = "classes/" + docType;
+		final String docType = "id-fr-front";
+		final String imgClassDirectory = "classes/" + docType;
+		final String imgDirectory = imgClassDirectory + "/ref2/";
+
 		log.info("imgClassDirectory = {} ", imgClassDirectory);
 
 		// Get the necessary classes from the engine
@@ -59,10 +69,8 @@ public class GetDataInModel {
 		// Save the current document class
 		DocClassInstance docClassInstance = docClass.addDocClass(docType);
 
-		// Set all the filternames
-		String[] imgF = { "reality", "original", "abutaleb", "bernsen", "brink", "djvu", "niblack", "otsu", "sauvola",
-				"shading-subtraction", "tsai", "white-rohrer" };
-		List<String> imgFilters = Arrays.asList(imgF);
+		// Set all the filter names
+		Map<String,Function<Img,Img>> imgFilters = fillAlgoMap();
 
 		// Load the accurate zones
 		final Zones zones = Zones.load(imgClassDirectory);
@@ -74,63 +82,79 @@ public class GetDataInModel {
 		});
 
 		// Save the filternames
-		imgFilters.forEach(f -> {
-			log.info("Adding filter : {} ", f);
-			imgFilter.addImgFilter(f);
+		imgFilters.entrySet().forEach(entry -> {
+			log.info("Adding algorithm : {} ", entry.getKey());
+			imgFilter.addImgFilter(entry.getKey());
 		});
 
 		// Persist the changes
 		engine.getCurrentCache().flush();
 
-		// Process each file in the subfolder "/ref/"
-		Arrays.asList(new File(imgClassDirectory + "/ref/").listFiles((dir, name) -> name.endsWith(".png"))).stream()
-				.forEach(file -> {
-					engine.getCurrentCache().mount();
-					log.info("\nProcessing file: {}", file.getName());
-					// Draw the image's zones + numbers
-					Img originalImg = new Img(Imgcodecs.imread(file.getPath()));
-					zones.draw(originalImg, new Scalar(0, 255, 0), 3);
-					zones.writeNum(originalImg, new Scalar(0, 0, 255), 3);
-					// Copy the images to the resources folder
-					// TODO implement a filter mechanism to avoid creating
-					// duplicates in a public folder
-					Imgcodecs.imwrite(System.getProperty("user.dir") + "/src/main/resources/" + file.getName(),
-							originalImg.getSrc());
-					// Save the current file (document)
-					DocInstance docInstance = docClassInstance.addDoc(docClassInstance, doc, file.getName());
-					// Process each zone
-					zones.getZones().stream().forEach(z -> {
-						log.info("Zone n° {}", z.getNum());
-						// Save the zone
-						ZoneInstance zoneInstance = docClassInstance.getZone(z.getNum());
-						for (String filter : imgFilters) {
-							Img filteredImage;
-							// "reality" is initialized with the original
-							// picture if the text has not been filled yet
-							if ("original".equals(filter) || "reality".equals(filter)) {
-								if ("reality".equals(filter) && null != zoneText.getZoneText(docInstance, zoneInstance,
-										imgFilter.getImgFilter(filter))) {
-									continue;
-								}
-								filteredImage = new Img(Imgcodecs.imread(imgClassDirectory + "/ref/" + file.getName()));
-							} else {
-								filteredImage = new Img(Imgcodecs.imread(imgClassDirectory + "/mask/" + filter + "/"
-										+ file.getName().replace(".png", "") + "-" + filter + ".png"));
-							}
-							// Get the OCR text
-							String ocrText = z.ocr(filteredImage);
-							log.info("filter {} => {}", filter, ocrText.trim());
-							// Add the text to the corresponding zone
-							zoneText.addZoneText(ocrText, docInstance, zoneInstance, imgFilter.getImgFilter(filter));
-						}
-						// Call the garbage collector to free the resources
-						System.gc();
-					});
-					System.out.println(">>> cache n°" + engine.getCurrentCache().getCacheLevel());
-					engine.getCurrentCache().flush();
-					engine.getCurrentCache().unmount();
+		// Process each file in the subfolder "/ref2/"
+		Arrays.asList(new File(imgDirectory).listFiles((dir, name) -> name.endsWith(".png"))).stream().forEach(file -> {
+			engine.getCurrentCache().mount();
+			log.info("\nProcessing file: {}", file.getName());
+			// Draw the image's zones + numbers
+			Img originalImg = new Img(Imgcodecs.imread(file.getPath()));
+			Img annotedImg = new Img(originalImg.getSrc());
+			zones.draw(annotedImg, new Scalar(0, 255, 0), 3);
+			zones.writeNum(annotedImg, new Scalar(0, 0, 255), 3);
+			// Copy the images to the resources folder
+			// TODO implement a filter mechanism to avoid creating
+			// duplicates in a public folder
+			Imgcodecs.imwrite(System.getProperty("user.dir") + "/src/main/resources/" + file.getName(),
+					annotedImg.getSrc());
+			// Save the current file (document)
+			DocInstance docInstance = docClassInstance.addDoc(docClassInstance, doc, file.getName());
+
+			// Create a map of treated Img
+			log.info("Converting image {}:", file.getName());
+			Map<String, Img> imgs = new HashMap<>();
+			imgFilters.entrySet().forEach(entry -> {
+				log.info("Applying algorithm {}...", entry.getKey());
+				Img img = null;
+				if ("original".equals(entry.getKey()) || "reality".equals(entry.getKey())) {
+					img = originalImg.bgr2Gray();
+					imgs.put(entry.getKey(), img);
+				} else {
+					img = entry.getValue().apply(originalImg);
+				}
+			});
+
+			// Process each zone
+			zones.getZones().stream().forEach(z -> {
+				log.info("Zone n° {}", z.getNum());
+				// Save the zone
+				ZoneInstance zoneInstance = docClassInstance.getZone(z.getNum());
+				imgs.entrySet().forEach(entry -> {
+					if ("reality".equals(entry.getKey()) && null != zoneText.getZoneText(docInstance, zoneInstance,
+							imgFilter.getImgFilter(entry.getKey()))) {
+						// Do not proceed to OCR if the real values are already stored in GS
+					} else {
+						// Get the OCR text
+						String ocrText = z.ocr(entry.getValue());
+						log.info("filter {} => {}", entry.getKey(), ocrText.trim());
+						// Add the text to the corresponding zone
+						zoneText.addZoneText(ocrText, docInstance, zoneInstance, imgFilter.getImgFilter(entry.getKey()));
+					}
 				});
+				// Call the garbage collector to free the resources used by
+				// OpenCV
+				System.gc();
+			});
+			engine.getCurrentCache().flush();
+			engine.getCurrentCache().unmount();
+		});
 		engine.getCurrentCache().flush();
 	}
 
+	private static Map<String, Function<Img, Img>> fillAlgoMap(){
+		final Map<String,Function<Img,Img>> map = new HashMap<>();
+		map.put("original", Img::bgr2Gray);
+		map.put("reality", Img::bgr2Gray);
+		map.put("bernsen", Img::bernsen);
+		map.put("equalizeHisto", Img::equalizeHisto);
+		map.put("equalizeHistoAdaptative", Img::equalizeHistoAdaptative);
+		return map;
+	}
 }

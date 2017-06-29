@@ -35,7 +35,8 @@ import org.genericsystem.cv.model.ZoneText.ZoneTextInstance;
 public class ComputeAllLevDistances {
 
 	private final static String docType = "id-fr-front";
-	private final static Engine engine = new Engine(System.getenv("HOME") + "/genericsystem/gs-cv_model/", Doc.class,
+	private static final String gsPath = System.getenv("HOME") + "/genericsystem/gs-cv_model/";
+	private final static Engine engine = new Engine(gsPath, Doc.class,
 			ImgFilter.class, ZoneGeneric.class, ZoneText.class, LevDistance.class);
 
 	static {

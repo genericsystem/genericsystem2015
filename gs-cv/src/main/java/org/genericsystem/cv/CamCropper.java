@@ -24,7 +24,7 @@ public class CamCropper extends AbstractApp {
 	// private final static String refPath = "classes/id-fr-front/image4-0.png";
 	private final static String refPath = "classes/id-fr-front/template/template.png";
 
-	private static Img ref = new Img(Imgcodecs.imread(refPath)).gray();
+	private static Img ref = new Img(Imgcodecs.imread(refPath)).bgr2Gray();
 
 	private final VideoCapture camera = new VideoCapture(0);
 	private ScheduledExecutorService timer = Executors.newSingleThreadScheduledExecutor();
