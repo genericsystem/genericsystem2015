@@ -1,6 +1,5 @@
 package org.genericsystem.watch.beta;
 
-import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
 import org.genericsystem.kernel.Cache;
 import org.genericsystem.kernel.Engine;
@@ -64,7 +63,7 @@ public class DistributedVerticle extends AbstractVerticle {
 		});
 
 		// Periodic : Task creation
-		vertx.setPeriodic(10000, m -> {
+		vertx.setPeriodic(12597, m -> {
 			cache.safeConsum(n -> {
 				messageType.addInstance(new JsonObject().put("task", System.currentTimeMillis()).put("state", "TODO").encodePrettily());
 				cache.flush();
@@ -75,9 +74,10 @@ public class DistributedVerticle extends AbstractVerticle {
 		vertx.setPeriodic(5000, l -> {
 
 			cache.safeConsum(n -> {
-				Snapshot<Generic> s = messageType.getInstances();
 				System.out.println("========================================================================");
-				System.out.println(s.toList().toString());
+				System.out.println(messageType.getInstances().toList().toString());
+				System.out.println("------------------------------------------------------------------------");
+				System.out.println(taskType.getInstances().toList().toString());
 				System.out.println("========================================================================");
 				for (Generic message : messageType.getInstances()) {
 					JsonObject json = new JsonObject((String) message.getValue());
@@ -116,10 +116,38 @@ public class DistributedVerticle extends AbstractVerticle {
 		// Messages handling
 
 		vertx.eventBus().consumer(PRIVATE_ADDRESS, message -> {
-			System.out.println("---------------------------------------------------------------");
-			System.out.println("task received " + message.body());
-			// traitement
-			message.reply("KO");
+			// System.out.println("---------------------------------------------------------------");
+			// System.out.println("task received " + message.body());
+			cache.safeConsum(nothing -> {
+				long taskTs = new JsonObject((String) message.body()).getLong("task");
+				String messageTask = new JsonObject().put("task", taskTs).put("state", "started").encodePrettily();
+				taskType.addInstance(messageTask);
+				cache.flush();
+				vertx.executeBlocking(future -> {
+					try {
+						System.out.println("executing task : " + messageTask.toString());
+						Thread.sleep(10000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+
+					future.complete();
+
+				}, res -> {
+					cache.safeConsum(nothing2 -> {
+						taskType.getInstance(messageTask).remove();
+						if (res.succeeded())
+							taskType.addInstance(new JsonObject().put("task", taskTs).put("state", "finished").encodePrettily());
+						else
+							taskType.addInstance(new JsonObject().put("task", taskTs).put("state", "aborted").encodePrettily());
+						cache.flush();
+					});
+
+				});
+
+			});
+			message.reply("OK");
+
 		});
 
 	}
