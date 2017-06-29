@@ -20,8 +20,7 @@ public class DistributedVerticle extends AbstractVerticle {
 	public static final String PUBLIC_ADDRESS = "publicAddress";
 	public final String PRIVATE_ADDRESS = "privateAddress " + hashCode();
 
-	private final Engine engine = new Engine(System.getenv("HOME") + "/genericsystem/cloud/", Task.class,
-			Message.class);
+	private final Engine engine = new Engine(System.getenv("HOME") + "/genericsystem/cloud/", Task.class, Message.class);
 	private final Cache cache = engine.newCache();
 	private final Generic messageType = engine.find(Message.class);
 	private final Generic taskType = engine.find(Task.class);
@@ -35,7 +34,7 @@ public class DistributedVerticle extends AbstractVerticle {
 
 		VertxOptions vertxOptions = new VertxOptions().setClustered(true).setClusterManager(mgr);
 		vertxOptions.setEventBusOptions(new EventBusOptions()).setClustered(true);
-		vertxOptions.setClusterHost("192.168.1.11");
+		vertxOptions.setClusterHost("192.168.1.16");
 		vertxOptions.setMaxWorkerExecuteTime(Long.MAX_VALUE);
 
 		Vertx.clusteredVertx(vertxOptions, res -> {
@@ -58,26 +57,32 @@ public class DistributedVerticle extends AbstractVerticle {
 			vertx.eventBus().publish(PUBLIC_ADDRESS, PRIVATE_ADDRESS);
 		});
 
-		// Periodic : Maintaining the list of recipients
-		vertx.setPeriodic(5000, m -> {
-			vertx.eventBus().consumer(PUBLIC_ADDRESS, message -> {
-				roundrobin.Register((String) message.body());
-				// System.out.println("List of available verticles : " +
-				// roundrobin.getPrivateAdresses());
-			});
+		vertx.eventBus().consumer(PUBLIC_ADDRESS, message -> {
+			roundrobin.Register((String) message.body());
+			// System.out.println("List of available verticles : " +
+			// roundrobin.getPrivateAdresses());
 		});
+
+		// // Periodic : Maintaining the list of recipients
+		// vertx.setPeriodic(5000, m -> {
+		// vertx.eventBus().consumer(PUBLIC_ADDRESS, message -> {
+		// roundrobin.Register((String) message.body());
+		// // System.out.println("List of available verticles : " +
+		// // roundrobin.getPrivateAdresses());
+		// });
+		// });
 
 		// Periodic : Task creation
 		vertx.setPeriodic(10000, m -> {
 			cache.safeConsum(n -> {
-				messageType.addInstance(
-						new JsonObject().put("task", System.currentTimeMillis()).put("state", "TODO").encodePrettily());
+				messageType.addInstance(new JsonObject().put("task", System.currentTimeMillis()).put("state", "TODO").encodePrettily());
 				cache.flush();
 			});
 		});
 
 		// Periodic : Messages send
 		vertx.setPeriodic(5000, l -> {
+
 			Generic gMessage = getNextMessage();
 
 			if (gMessage != null) {
@@ -89,13 +94,14 @@ public class DistributedVerticle extends AbstractVerticle {
 							if (reply.failed()) {
 								System.out.println(reply.cause());
 								roundrobin.remove(workerAddress);
-								gMessage.updateValue(new JsonObject()
-										.put("task", new JsonObject((String) gMessage.getValue()).getLong("task"))
-										.put("state", "TODO").encodePrettily());
+								gMessage.updateValue(new JsonObject().put("task", new JsonObject((String) gMessage.getValue()).getLong("task")).put("state", "TODO").encodePrettily());
 
 							} else {
+								if ("OK".equals(reply.result().body()))
+									gMessage.remove();
+								else
+									gMessage.updateValue(new JsonObject().put("task", new JsonObject((String) gMessage.getValue()).getLong("task")).put("state", "TODO").encodePrettily());
 
-								gMessage.remove();
 							}
 							cache.flush();
 						});
@@ -110,14 +116,12 @@ public class DistributedVerticle extends AbstractVerticle {
 		});
 
 		// Periodic : Messages handling
-		vertx.setPeriodic(5000, h -> {
 
-			vertx.eventBus().consumer(PRIVATE_ADDRESS, message -> {
+		vertx.eventBus().consumer(PRIVATE_ADDRESS, message -> {
 
-				System.out.println(PRIVATE_ADDRESS + " received " + message.body());
-				// traitement
-				message.reply("");
-			});
+			System.out.println(PRIVATE_ADDRESS + " received " + message.body());
+			// traitement
+			message.reply("KO");
 		});
 
 	}
@@ -129,8 +133,7 @@ public class DistributedVerticle extends AbstractVerticle {
 			for (Generic result : messageType.getInstances()) {
 				JsonObject json = new JsonObject((String) result.getValue());
 				if ("TODO".equals(json.getString("state"))) {
-					result = result.updateValue(new JsonObject().put("task", json.getLong("task"))
-							.put("state", "IN PROGRESS").encodePrettily());
+					result = result.updateValue(new JsonObject().put("task", json.getLong("task")).put("state", "IN PROGRESS").encodePrettily());
 					cache.flush();
 					return result;
 				}
