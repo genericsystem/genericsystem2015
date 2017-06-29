@@ -32,7 +32,7 @@ import org.genericsystem.cv.model.ZoneText;
 public class ComputeTrainedScores {
 
 	private final static String docType = "id-fr-front";
-	private static final String gsPath = System.getenv("HOME") + "/genericsystem/gs-cv_model/";
+	private static final String gsPath = System.getenv("HOME") + "/genericsystem/gs-cv_model2/";
 	private final static Engine engine = new Engine(gsPath, Doc.class,
 			ImgFilter.class, ZoneGeneric.class, ZoneText.class, Score.class, MeanLevenshtein.class);
 	
