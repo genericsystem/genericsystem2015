@@ -29,7 +29,7 @@ import org.opencv.imgcodecs.Imgcodecs;
  * Get the OCR text for all specified documents using pre-treated images.
  * 
  * A score gets computed based on trained data, and stored in csv files. It is
- * recommended to use {@link GetDataInModel}, {@link SetRealValues} and
+ * recommended to use {@link FillModelWithData}, {@link SetRealValues} and
  * {@link ComputeTrainedScores} instead.
  * 
  * @author Pierrik Lassalas

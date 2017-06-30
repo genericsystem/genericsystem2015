@@ -25,9 +25,12 @@ public class DocClass implements Generic {
 			return zoneInstance;
 		}
 
-		public DocInstance addDoc(DocClassInstance docClassInstance, Generic docInstance, String filename){
-			DocInstance doc = (DocInstance) docClassInstance.setHolder(docInstance, filename);
-			return doc;
+		public DocInstance addDoc(Generic docInstance, String filename){
+			return (DocInstance) setHolder(docInstance, filename);
+		}
+		
+		public DocInstance getDoc(Generic docInstance){
+			return (DocInstance) getHolder(docInstance);
 		}
 
 		public ZoneInstance getZone(int num) {
