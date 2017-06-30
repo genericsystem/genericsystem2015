@@ -20,14 +20,32 @@ public class DistributedVerticle extends AbstractVerticle {
 	public static final String PUBLIC_ADDRESS = "publicAddress";
 	public final String PRIVATE_ADDRESS = "privateAddress " + hashCode();
 
-	private final Engine engine = new Engine(System.getenv("HOME") + "/genericsystem/cloud/", Task.class, Message.class);
+	private final Engine engine = new Engine(System.getenv("HOME") + "/genericsystem/cloud/", Task.class,
+			Message.class);
 	private final Cache cache = engine.newCache();
 	private final Generic messageType = engine.find(Message.class);
 	private final Generic taskType = engine.find(Task.class);
 	private final RoundRobin roundrobin = new RoundRobin();
 	private static final DeliveryOptions TIMEOUT = new DeliveryOptions().setSendTimeout(2000);
 
+	private static final String IP_ADDRESS = "192.168.1.11";
 	private static final int ATTEMPTS = 5;
+
+	private static final long AVAILABILITY_PERIODICITY = 5000;
+	private static final long TASK_CREATION_PERIODICITY = 1000;
+	private static final long MESSAGE_SEND_PERIODICITY = 1000;
+
+	private static final String TODO = "TODO";
+	private static final String INPROGRESS = "IN PROGRESS";
+
+	private static final String STARTED = "started";
+	private static final String FINISHED = "finished";
+	private static final String ABORTED = "aborted";
+
+	private static final String OK = "OK";
+	private static final String KO = "KO";
+
+	private int nb_executions;
 
 	public static void main(String[] args) {
 
@@ -35,7 +53,7 @@ public class DistributedVerticle extends AbstractVerticle {
 
 		VertxOptions vertxOptions = new VertxOptions().setClustered(true).setClusterManager(mgr);
 		vertxOptions.setEventBusOptions(new EventBusOptions()).setClustered(true);
-		vertxOptions.setClusterHost("192.168.1.16");
+		vertxOptions.setClusterHost(IP_ADDRESS);
 		vertxOptions.setMaxWorkerExecuteTime(Long.MAX_VALUE);
 
 		Vertx.clusteredVertx(vertxOptions, res -> {
@@ -55,15 +73,19 @@ public class DistributedVerticle extends AbstractVerticle {
 
 		cache.safeConsum(nothing -> {
 			for (Generic task1 : taskType.getInstances()) {
-				if ("started".equals(new JsonObject((String) task1.getValue()).getString("state"))) {
-					Generic message = messageType.addInstance(new JsonObject().put("task", new JsonObject((String) task1.getValue()).getLong("task")).put("state", "TODO").encodePrettily());
+				if (STARTED.equals(new JsonObject((String) task1.getValue()).getString("state"))) {
+					messageType.addInstance(
+							new JsonObject().put("task", new JsonObject((String) task1.getValue()).getLong("task"))
+									.put("state", TODO).put("max_parallel_executions", 5).encodePrettily());
 					task1.remove();
 				}
 			}
 
 			for (Generic message1 : messageType.getInstances()) {
-				if ("IN PROGRESS".equals(new JsonObject((String) message1.getValue()).getString("state"))) {
-					Generic message = messageType.addInstance(new JsonObject().put("task", new JsonObject((String) message1.getValue()).getLong("task")).put("state", "TODO").encodePrettily());
+				if (INPROGRESS.equals(new JsonObject((String) message1.getValue()).getString("state"))) {
+					messageType.addInstance(
+							new JsonObject().put("task", new JsonObject((String) message1.getValue()).getLong("task"))
+									.put("state", TODO).put("max_parallel_executions", 5).encodePrettily());
 					message1.remove();
 				}
 			}
@@ -71,7 +93,7 @@ public class DistributedVerticle extends AbstractVerticle {
 		});
 
 		// Periodic aknowledge of availability
-		vertx.setPeriodic(5000, h -> {
+		vertx.setPeriodic(AVAILABILITY_PERIODICITY, h -> {
 			vertx.eventBus().publish(PUBLIC_ADDRESS, PRIVATE_ADDRESS);
 		});
 
@@ -80,15 +102,16 @@ public class DistributedVerticle extends AbstractVerticle {
 		});
 
 		// Periodic : Task creation
-		vertx.setPeriodic(12123, m -> {
+		vertx.setPeriodic(TASK_CREATION_PERIODICITY, m -> {
 			cache.safeConsum(n -> {
-				messageType.addInstance(new JsonObject().put("task", System.currentTimeMillis()).put("state", "TODO").encodePrettily());
+				messageType.addInstance(new JsonObject().put("task", System.currentTimeMillis()).put("state", TODO)
+						.put("max_parallel_executions", 5).encodePrettily());
 				cache.flush();
 			});
 		});
 
 		// Periodic : Messages send
-		vertx.setPeriodic(5000, l -> {
+		vertx.setPeriodic(MESSAGE_SEND_PERIODICITY, l -> {
 
 			cache.safeConsum(n -> {
 				System.out.println("========================================================================");
@@ -98,12 +121,14 @@ public class DistributedVerticle extends AbstractVerticle {
 				System.out.println("========================================================================");
 				for (Generic message : messageType.getInstances()) {
 					JsonObject json = new JsonObject((String) message.getValue());
-					if ("TODO".equals(json.getString("state"))) {
+					if (TODO.equals(json.getString("state"))) {
 
 						String workerAddress = roundrobin.getNextAddress();
 						if (workerAddress != null) {
 							message.remove();
-							Generic inProgress = messageType.addInstance(new JsonObject().put("task", json.getLong("task")).put("state", "IN PROGRESS").encodePrettily());
+							Generic inProgress = messageType.addInstance(
+									new JsonObject().put("task", json.getLong("task")).put("state", INPROGRESS)
+											.put("max_parallel_executions", 5).encodePrettily());
 							cache.flush();
 							vertx.eventBus().send(workerAddress, inProgress.getValue(), TIMEOUT, reply -> {
 								cache.safeConsum(nothing -> {
@@ -111,12 +136,25 @@ public class DistributedVerticle extends AbstractVerticle {
 									if (reply.failed()) {
 										System.out.println(reply.cause());
 										roundrobin.remove(workerAddress);
-										messageType.addInstance(new JsonObject().put("task", new JsonObject((String) inProgress.getValue()).getLong("task")).put("state", "TODO").encodePrettily());
-
+										messageType
+												.addInstance(new JsonObject()
+														.put("task",
+																new JsonObject((String) inProgress.getValue())
+																		.getLong("task"))
+														.put("state", TODO).put("max_parallel_executions", 5)
+														.encodePrettily());
 									} else {
-										if ("KO".equals(reply.result().body()))
-											messageType.addInstance(new JsonObject().put("task", new JsonObject((String) inProgress.getValue()).getLong("task")).put("state", "TODO").encodePrettily());
-
+										if (KO.equals(reply.result().body()))
+											messageType
+													.addInstance(
+															new JsonObject()
+																	.put("task",
+																			new JsonObject(
+																					(String) inProgress.getValue())
+																							.getLong("task"))
+																	.put("state", TODO)
+																	.put("max_parallel_executions", 5)
+																	.encodePrettily());
 									}
 									cache.flush();
 								});
@@ -132,19 +170,23 @@ public class DistributedVerticle extends AbstractVerticle {
 		});
 
 		// Messages handling
-
 		vertx.eventBus().consumer(PRIVATE_ADDRESS, message -> {
-			// System.out.println("---------------------------------------------------------------");
-			// System.out.println("task received " + message.body());
 
 			cache.safeConsum(nothing -> {
+
+				nb_executions = 0;
 				for (Generic task : taskType.getInstances())
-					if ("started".equals(new JsonObject((String) task.getValue()).getString("state"))) {
-						message.reply("KO");
-						return;
+					if (STARTED.equals(new JsonObject((String) task.getValue()).getString("state"))) {
+						nb_executions++;
 					}
+
+				if (new JsonObject((String) message.body()).getInteger("max_parallel_executions") <= nb_executions) {
+					message.reply(KO);
+					return;
+				}
+
 				long taskTs = new JsonObject((String) message.body()).getLong("task");
-				String messageTask = new JsonObject().put("task", taskTs).put("state", "started").encodePrettily();
+				String messageTask = new JsonObject().put("task", taskTs).put("state", STARTED).encodePrettily();
 				taskType.addInstance(messageTask);
 				cache.flush();
 				vertx.executeBlocking(future -> {
@@ -159,15 +201,18 @@ public class DistributedVerticle extends AbstractVerticle {
 				}, res -> {
 					cache.safeConsum(nothing2 -> {
 						taskType.getInstance(messageTask).remove();
-						if (res.succeeded())
-							taskType.addInstance(new JsonObject().put("task", taskTs).put("state", "finished").encodePrettily());
-						else
-							taskType.addInstance(new JsonObject().put("task", taskTs).put("state", "aborted").encodePrettily());
+						if (res.succeeded()) {
+							taskType.addInstance(
+									new JsonObject().put("task", taskTs).put("state", FINISHED).encodePrettily());
+
+						} else
+							taskType.addInstance(
+									new JsonObject().put("task", taskTs).put("state", ABORTED).encodePrettily());
 						cache.flush();
 					});
 
 				});
-				message.reply("OK");
+				message.reply(OK);
 			});
 
 		});
