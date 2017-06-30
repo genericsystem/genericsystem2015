@@ -11,6 +11,10 @@
 	<packaging>jar</packaging>
 	<name>Generic System Computer Vision</name>
 
+	<properties>
+		<deeplearning4j.version>0.8.1-SNAPSHOT</deeplearning4j.version>
+	</properties>
+
 	<build>
 		<finalName>${project.artifactId}</finalName>
 	</build>
@@ -39,13 +43,17 @@
 		<dependency>
 			<groupId>org.deeplearning4j</groupId>
 			<artifactId>deeplearning4j-core</artifactId>
-			<version>0.8.0</version>
+			<version>${deeplearning4j.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.nd4j</groupId>
-			<artifactId>nd4j-cuda-7.5-platform</artifactId>
-			<version>0.8.0</version>
+			<artifactId>nd4j-cuda-8.0-platform</artifactId>
+			<version>${deeplearning4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.deeplearning4j</groupId>
+			<artifactId>deeplearning4j-zoo</artifactId>
+			<version>${deeplearning4j.version}</version>
 		</dependency>
 	</dependencies>
-
 </project>
