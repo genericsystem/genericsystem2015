@@ -48,33 +48,29 @@ import org.nd4j.linalg.lossfunctions.LossFunctions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class NN {
-	protected static final Logger log = LoggerFactory.getLogger(NN.class);
+public class SimpleCNN {
+	protected static final Logger log = LoggerFactory.getLogger(SimpleCNN.class);
 
 	private static final int seed = 123;
 	private static Random rng = new Random(seed);
 	private static final String[] allowedExtensions = BaseImageLoader.ALLOWED_FORMATS;
 	public static final Random randNumGen = new Random(seed);
 
-	private static int height = 150;
-	private static int width = 100;
+	private static int height = 250;
+	private static int width = 200;
 	private static int channels = 3;
 	protected static int iterations = 1;
 
 	public static void main(String[] args) throws Exception {
-		double learningRate = 0.0001;
+		double learningRate = 0.1;
 		int batchSize = 1;
 		int nEpochs = 100;
 
-		File parentDir = new File(System.getProperty("user.dir"), "classes2");
+		File parentDir = new File(System.getProperty("user.dir"), "training");
 		FileSplit filesInDir = new FileSplit(parentDir, allowedExtensions, randNumGen);
 		ParentPathLabelGenerator labelMaker = new ParentPathLabelGenerator();
-		BalancedPathFilter pathFilter = new BalancedPathFilter(randNumGen, allowedExtensions, labelMaker, 0, 0, 50, 0);
+		BalancedPathFilter pathFilter = new BalancedPathFilter(randNumGen, allowedExtensions, labelMaker, 0, 0, 10, 0);
 
-		// Transformer en DataSet
-		// Appliquer les transformations
-		// Fusionner les DataSets obtenus
-		// Utiliser KFoldIterator pour entraîner
 		InputSplit[] filesInDirSplit = filesInDir.sample(pathFilter, 70, 15, 15);
 		InputSplit trainData = filesInDirSplit[0];
 		InputSplit validData = filesInDirSplit[1];
@@ -83,17 +79,42 @@ public class NN {
 		ImageRecordReader recordReader = new ImageRecordReader(height, width, channels, labelMaker);
 
 		recordReader.initialize(trainData, null);
+		List<String> labels = recordReader.getLabels();
 		int outputNum = recordReader.numLabels();
-		DataSetIterator dataIter = new RecordReaderDataSetIterator(recordReader, batchSize, 1, outputNum);
-		DataNormalization scaler = new ImagePreProcessingScaler(0, 1);
-		scaler.fit(dataIter);
-		dataIter.setPreProcessor(scaler);
 
-		MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder().seed(seed).iterations(iterations).regularization(false).gradientNormalization(GradientNormalization.RenormalizeL2PerLayer).activation(Activation.RELU).learningRate(learningRate)
-				.weightInit(WeightInit.XAVIER).optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT).updater(Updater.RMSPROP).list()
-				.layer(0, new ConvolutionLayer.Builder(new int[] { 5, 5 }, new int[] { 1, 1 }, new int[] { 0, 0 }).name("inputLayer").nIn(channels).nOut(50).biasInit(0).build()).layer(1, maxPool("maxpool1"))
-				.layer(2, new ConvolutionLayer.Builder(new int[] { 5, 5 }, new int[] { 5, 5 }, new int[] { 1, 1 }).name("convLayer").nOut(100).biasInit(0).build()).layer(3, maxPool("maxool2")).layer(4, new DenseLayer.Builder().nOut(500).build())
-				.layer(5, new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD).nOut(outputNum).activation(Activation.SOFTMAX).build()).backprop(true).pretrain(false).setInputType(InputType.convolutional(height, width, channels))
+		MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
+				.seed(seed)
+				.iterations(iterations)
+				.regularization(false)
+				.gradientNormalization(GradientNormalization.RenormalizeL2PerParamType)
+				.activation(Activation.RELU)
+				.learningRate(learningRate)
+				.weightInit(WeightInit.RELU)
+				.optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
+				.updater(Updater.RMSPROP)
+				.list()
+				.layer(0, new ConvolutionLayer.Builder(new int[] { 5, 5 }, new int[] { 2, 2 }, new int[] { 2, 2 })
+						.name("inputLayer")
+						.nIn(channels)
+						.nOut(96)
+						.biasInit(0).build())
+				.layer(1, maxPool("maxpool1"))
+				.layer(2, new ConvolutionLayer.Builder(new int[] { 5, 5 }, new int[] { 1, 1 }, new int[] { 1, 1 })
+						.name("convLayer")
+						.nOut(256)
+						.biasInit(0).build())
+				.layer(3, maxPool("maxpool2"))
+				.layer(4, new ConvolutionLayer.Builder(new int[] { 3, 3 }, new int[] { 1, 1 }, new int[] { 1, 1 })
+						.name("convLayer2")
+						.nOut(256)
+						.biasInit(0).build())
+				.layer(5, maxPool("maxpool3"))
+				.layer(6, new DenseLayer.Builder().nOut(512).build())
+				.layer(7, new DenseLayer.Builder().nOut(256).build())
+				.layer(8, new OutputLayer.Builder(LossFunctions.LossFunction.MCXENT)
+						.nOut(outputNum)
+						.activation(Activation.SOFTMAX).build())
+				.setInputType(InputType.convolutional(height, width, channels))
 				.build();
 
 		MultiLayerNetwork model = new MultiLayerNetwork(conf);
@@ -103,11 +124,15 @@ public class NN {
 		String tempDir = System.getProperty("java.io.tmpdir");
 		String saveDirectory = FilenameUtils.concat(tempDir, "EarlyStoppingIntermediaryResults/");
 		Paths.get(saveDirectory).toFile().mkdirs();
-		EarlyStoppingConfiguration<MultiLayerNetwork> esConf = new EarlyStoppingConfiguration.Builder<MultiLayerNetwork>().epochTerminationConditions(new MaxEpochsTerminationCondition(nEpochs)).evaluateEveryNEpochs(1)// .iterationTerminationConditions(new
-				.epochTerminationConditions(new ScoreImprovementEpochTerminationCondition(20)).scoreCalculator(new DataSetLossCalculator(getDataSetIterator(recordReader, validData, null, batchSize, outputNum), true))
-				.modelSaver(new LocalFileModelSaver(saveDirectory)).build();
+		EarlyStoppingConfiguration<MultiLayerNetwork> esConf = new EarlyStoppingConfiguration.Builder<MultiLayerNetwork>()
+				.epochTerminationConditions(new MaxEpochsTerminationCondition(nEpochs))
+				.evaluateEveryNEpochs(1)
+				.epochTerminationConditions(new ScoreImprovementEpochTerminationCondition(20))
+				.scoreCalculator(new DataSetLossCalculator(getDataSetIterator(recordReader, validData, null, batchSize, outputNum), true))
+				.modelSaver(new LocalFileModelSaver(saveDirectory))
+				.build();
 
-		dataIter = getDataSetIterator(recordReader, trainData, null, batchSize, outputNum);
+		DataSetIterator dataIter = getDataSetIterator(recordReader, trainData, null, batchSize, outputNum);
 		EarlyStoppingTrainer trainer = new EarlyStoppingTrainer(esConf, conf, dataIter);
 
 		EarlyStoppingResult<MultiLayerNetwork> result = trainer.fit();
@@ -125,7 +150,7 @@ public class NN {
 
 		log.info("Evaluate model....");
 		dataIter = getDataSetIterator(recordReader, testData, null, batchSize, outputNum);
-		Evaluation eval = model.evaluate(dataIter);
+		Evaluation eval = model.evaluate(dataIter, labels);
 		log.info(eval.stats(true));
 
 		File modelFile = new File("TrainedModel-" + System.currentTimeMillis() + ".zip");
@@ -140,7 +165,7 @@ public class NN {
 			log.warn("Impossible to initialize recordReader", e);
 		}
 		DataSetIterator dataIter = new RecordReaderDataSetIterator(recordReader, batchSize, 1, outputNum);
-		DataNormalization scaler = new ImagePreProcessingScaler(0, 1);
+		DataNormalization scaler = new ImagePreProcessingScaler(-1, 1);
 		scaler.fit(dataIter);
 		dataIter.setPreProcessor(scaler);
 		return dataIter;

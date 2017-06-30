@@ -5,7 +5,10 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
+import java.util.function.Function;
 
+import org.genericsystem.cv.comparator.FillModelWithData;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Size;
@@ -53,6 +56,30 @@ public class Ocr {
 		}
 		System.gc();
 		System.runFinalization();
+	}
+	
+	// Ongoing work
+	public static void ocrNewClassImg(Path imagePath) {
+		Path imgClassDirectory = imagePath.getParent();
+		Path zonesFile = imgClassDirectory.resolve("zones/zones.json");
+		Zones zones = null;
+		if (zonesFile.toFile().exists()) {
+			System.out.println("Precomputed zones found, file: " + zonesFile);
+			zones = Zones.load(zonesFile.toFile());
+		} else {
+			ImgClass imgClass = ImgClass.fromDirectory(imgClassDirectory.toString());
+			imgClass.addMapper(img -> img.eraseCorners(0.1).dilateBlacks(86, 255, 76, new Size(15, 3)));
+			zones = Zones.get(imgClass.getClosedVarianceZones(new Size(9, 10)), 300, 6, 6);
+		}
+		
+//		Map<String, Function<Img, Img>> imgFilters = FillModelWithData.getFiltersMap();
+		
+//		for (Zone zone : zones) {
+//			ZoneScorer scorer = zone.newUnsupervisedScorer(Tools.classImgsStream(imgClassDirectory + "/mask/" + imagePath.getFileName().toString().replace(".png", "")));
+//			System.out.println("Image " + imagePath + ", found text: " + scorer.getBestText() + " " + Math.floor((scorer.getBestScore() * 10000)) / 100 + "%");
+//		}
+//		System.gc();
+//		System.runFinalization();
 	}
 
 	public static String doWork(Mat mat) {
