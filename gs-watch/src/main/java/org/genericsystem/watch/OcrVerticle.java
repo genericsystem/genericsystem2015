@@ -23,7 +23,8 @@ public class OcrVerticle extends AbstractVerticle {
 		consumer.handler(message -> vertx.executeBlocking(future -> {
 			String imagePath = message.body();
 			System.out.println(">>>>> New image to OCR: " + imagePath);
-			Ocr.ocrClassifiedImage(Paths.get(imagePath));
+//			Ocr.ocrClassifiedImage(Paths.get(imagePath));
+			Ocr.ocrNewClassifiedImg(Paths.get(imagePath));
 			future.complete();
 		}, res -> {
 			if (res.failed())
