@@ -1,9 +1,9 @@
 package org.genericsystem.watch.beta;
 
-import io.vertx.core.AbstractVerticle;
-
 import java.io.File;
 import java.io.FileOutputStream;
+
+import io.vertx.core.AbstractVerticle;
 
 public class ReceiveFile extends AbstractVerticle {
 
@@ -41,6 +41,6 @@ public class ReceiveFile extends AbstractVerticle {
 			// }));
 			// pump.start();
 			// });
-			});
+		});
 	}
 }
