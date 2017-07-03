@@ -1,9 +1,9 @@
 package org.genericsystem.watch.beta;
 
-import io.vertx.core.AbstractVerticle;
-
 import java.io.File;
 import java.io.FileOutputStream;
+
+import io.vertx.core.AbstractVerticle;
 
 public class ReceiveFile extends AbstractVerticle {
 
@@ -28,7 +28,8 @@ public class ReceiveFile extends AbstractVerticle {
 				System.out.println("Ok");
 			});
 
-			// vertx.fileSystem().open("/home/middleware/git/genericsystem2015/gs-watch/image-1.png", new OpenOptions(), ares -> {
+			// vertx.fileSystem().open("/home/middleware/git/genericsystem2015/gs-watch/image-1.png",
+			// new OpenOptions(), ares -> {
 			// if (ares.failed()) {
 			// System.out.println(ares.cause());
 			// return;
@@ -41,6 +42,7 @@ public class ReceiveFile extends AbstractVerticle {
 			// }));
 			// pump.start();
 			// });
-			});
+
+		});
 	}
 }
