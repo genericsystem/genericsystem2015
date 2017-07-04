@@ -58,8 +58,9 @@ public class DistributedVerticle extends AbstractVerticle {
 	private static final String OK = "OK";
 	private static final String KO = "KO";
 
-	private static final String pdfDir = "../src/main/resources/pdf";
-	private static final String pngDir = "../src/main/resources/png";
+	private static final String AbsoluteAddress = System.getenv("HOME") + "/genericsystem/cloud";
+	private static final String pdfDir = AbsoluteAddress + "/pdf";
+	private static final String pngDir = AbsoluteAddress + "/png";
 
 	private static final int port = 8084;
 
@@ -98,14 +99,6 @@ public class DistributedVerticle extends AbstractVerticle {
 							new JsonObject((String) task1.getValue()).getLong("task"), TODO,
 							new JsonObject((String) task1.getValue()).getInteger("max_parallel_executions"));
 
-					// messageType.addInstance(new JsonObject()
-					// .put("task", new JsonObject((String)
-					// task1.getValue()).getLong("task")).put("state", TODO)
-					// .put("max_parallel_executions", 5)
-					// .put("step", new JsonObject((String)
-					// task1.getValue()).getInteger("step"))
-					// .put("file", new JsonObject((String)
-					// task1.getValue()).getString("file")).encodePrettily());
 					task1.remove();
 				}
 			}
@@ -118,15 +111,6 @@ public class DistributedVerticle extends AbstractVerticle {
 							new JsonObject((String) message1.getValue()).getLong("task"), TODO,
 							new JsonObject((String) message1.getValue()).getInteger("max_parallel_executions"));
 
-					// messageType.addInstance(
-					// new JsonObject().put("task", new JsonObject((String)
-					// message1.getValue()).getLong("task"))
-					// .put("state", TODO).put("max_parallel_executions", 5)
-					// .put("step", new JsonObject((String)
-					// message1.getValue()).getInteger("step"))
-					// .put("file", new JsonObject((String)
-					// message1.getValue()).getString("file"))
-					// .encodePrettily());
 					message1.remove();
 				}
 			}
@@ -183,26 +167,13 @@ public class DistributedVerticle extends AbstractVerticle {
 									if (reply.failed()) {
 										System.out.println(reply.cause());
 										roundrobin.remove(workerAddress);
-
 										addMessage(Paths.get(js.getString("file")), js.getInteger("step"),
 												js.getLong("task"), TODO, js.getInteger("max_parallel_executions"));
 
-										// messageType.addInstance(new
-										// JsonObject().put("task",
-										// js.getLong("task"))
-										// .put("state",
-										// TODO).put("max_parallel_executions",
-										// 5)
-										// .put("step",
-										// js.getInteger("step")).put("file",
-										// js.getString("file"))
-										// .encodePrettily());
 									} else {
 										if (KO.equals(reply.result().body()))
-
 											addMessage(Paths.get(js.getString("file")), js.getInteger("step"),
 													js.getLong("task"), TODO, js.getInteger("max_parallel_executions"));
-
 									}
 									cache.flush();
 								});
@@ -242,15 +213,14 @@ public class DistributedVerticle extends AbstractVerticle {
 
 				vertx.executeBlocking(future -> {
 
-					System.out.println("File transfer");
-
 					// get the file to convert from sender and store it in the
 					// corresponding folder
 					String fileType = task.getString("file").substring(task.getString("file").length() - 3);
+					String remoteDirectory = "pdf".equals(fileType) ? pdfDir : pngDir;
 					boolean success = true;
 
 					BlockingQueue<byte[]> blockingQueue = new ArrayBlockingQueue<>(1);
-					vertx.createHttpClient().getNow(port, ip_sender, task.getString("file"),
+					vertx.createHttpClient().getNow(port, ip_sender, remoteDirectory + "/" + task.getString("file"),
 							resp -> resp.bodyHandler(body -> {
 								try {
 									blockingQueue.put(body.getBytes());
@@ -267,11 +237,11 @@ public class DistributedVerticle extends AbstractVerticle {
 					}
 					try {
 						FileOutputStream fos;
-						if (fileType == "png") {
+						if ("png".equals(fileType)) {
 							fos = new FileOutputStream(new File(pngDir + "/" + task.getString("file")));
 							fos.write(bytes);
 							fos.close();
-						} else if (fileType == "pdf") {
+						} else if ("pdf".equals(fileType)) {
 							fos = new FileOutputStream(new File(pdfDir + "/" + task.getString("file")));
 							fos.write(bytes);
 							fos.close();
@@ -297,6 +267,7 @@ public class DistributedVerticle extends AbstractVerticle {
 
 					case 3:
 
+						System.out.println("OCR");
 						ocr(task.getString("file"));
 						break;
 
@@ -308,7 +279,7 @@ public class DistributedVerticle extends AbstractVerticle {
 						future.complete();
 					}
 
-				}, res -> {
+				}, false, res -> {
 					cache.safeConsum(nothing2 -> {
 						taskType.getInstance(messageTask).remove();
 						if (res.succeeded()) {
@@ -316,10 +287,12 @@ public class DistributedVerticle extends AbstractVerticle {
 									.put("state", FINISHED).put("step", task.getInteger("step"))
 									.put("file", task.getString("file")).encodePrettily());
 
-						} else
+						} else {
 							taskType.addInstance(new JsonObject().put("task", task.getLong("task"))
 									.put("state", ABORTED).put("step", task.getInteger("step"))
 									.put("file", task.getString("file")).encodePrettily());
+							System.out.println(res.cause());
+						}
 						cache.flush();
 					});
 
@@ -366,12 +339,12 @@ public class DistributedVerticle extends AbstractVerticle {
 		classesDirectory.toFile().mkdirs();
 		Path savedFile;
 		synchronized (ClassifierVerticle.class) {
-			savedFile = Classifier.classify(classesDirectory, newFile);
+			savedFile = Classifier.classify(classesDirectory, Paths.get(pngDir + "/" + newFile));
 		}
 		if (savedFile != null) {
 			System.gc();
 			System.runFinalization();
-			addMessage(savedFile, task.getInteger("Step") + 1, task.getLong("task"), task.getString("state"),
+			addMessage(savedFile, task.getInteger("step") + 1, task.getLong("task"), TODO,
 					task.getInteger("max_parallel_executions"));
 			return true;
 
@@ -382,11 +355,11 @@ public class DistributedVerticle extends AbstractVerticle {
 
 	private void convertPdfToPng(JsonObject task) {
 
-		Path newFile = Paths.get(task.getString("file"));
+		Path newFile = Paths.get(pdfDir + "/" + task.getString("file"));
 		System.out.println(">> New PDF file: " + newFile);
 		List<Path> createdPngs = PdfToPngConverter.convertPdfToImages(newFile.toFile(), new File(pngDir));
 		for (Path path : createdPngs)
-			addMessage(path, task.getInteger("Step") + 1, task.getLong("task"), task.getString("state"),
+			addMessage(path.getFileName(), task.getInteger("step") + 1, task.getLong("task"), TODO,
 					task.getInteger("max_parallel_executions"));
 		System.gc();
 		System.runFinalization();

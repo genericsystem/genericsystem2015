@@ -37,7 +37,7 @@ public class Seeder extends DistributedVerticle {
 	private static final String file = "INBOX";
 	private static final String username = "watchtestmwf";
 	private static final String password = "WatchTestMWF4";
-	private static final String pdfDir = "../gs-watch/src/main/resources/pdf";
+	private static final String pdfDir = System.getenv("HOME") + "/genericsystem/cloud/pdf";
 	private static final String IP_ADDRESS = "192.168.1.11";
 
 	public static void main(String[] args) {
@@ -141,7 +141,7 @@ public class Seeder extends DistributedVerticle {
 					}
 					System.gc();
 					System.runFinalization();
-					// message persistence
+
 					addMessage(Paths.get(fileName), 1, System.currentTimeMillis(), TODO, 5);
 				}
 			}
