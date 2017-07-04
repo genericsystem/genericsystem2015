@@ -37,6 +37,7 @@ public class Ocr {
 		}
 	}
 
+	@Deprecated
 	public static void ocrClassifiedImage(Path imagePath) {
 		Path imgClassDirectory = imagePath.getParent();
 		Path zonesFile = imgClassDirectory.resolve("zones/zones.json");
@@ -58,7 +59,6 @@ public class Ocr {
 		System.runFinalization();
 	}
 	
-	// Ongoing work
 	public static void ocrNewClassifiedImg(Path imagePath) {
 		FillModelWithData.doImgOcr(imagePath);
 		System.gc();
