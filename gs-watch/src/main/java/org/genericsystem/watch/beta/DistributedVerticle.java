@@ -203,15 +203,6 @@ public class DistributedVerticle extends AbstractVerticle {
 											addMessage(Paths.get(js.getString("file")), js.getInteger("step"),
 													js.getLong("task"), TODO, js.getInteger("max_parallel_executions"));
 
-										// messageType.addInstance(new
-										// JsonObject().put("task",
-										// js.getLong("task"))
-										// .put("state",
-										// TODO).put("max_parallel_executions",
-										// 5)
-										// .put("step", js.getInteger("step"))
-										// .put("file",
-										// js.getString("file")).encodePrettily());
 									}
 									cache.flush();
 								});
