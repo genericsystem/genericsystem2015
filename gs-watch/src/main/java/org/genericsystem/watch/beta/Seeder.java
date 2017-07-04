@@ -141,7 +141,7 @@ public class Seeder extends DistributedVerticle {
 					}
 					System.gc();
 					System.runFinalization();
-
+					// message persistence
 					addMessage(Paths.get(fileName), 1, System.currentTimeMillis(), TODO, 5);
 				}
 			}

@@ -386,7 +386,6 @@ public class DistributedVerticle extends AbstractVerticle {
 		System.out.println(">> New PDF file: " + newFile);
 		List<Path> createdPngs = PdfToPngConverter.convertPdfToImages(newFile.toFile(), new File(pngDir));
 		for (Path path : createdPngs)
-			// publish message
 			addMessage(path, task.getInteger("Step") + 1, task.getLong("task"), task.getString("state"),
 					task.getInteger("max_parallel_executions"));
 		System.gc();
