@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
 public class FillModelWithData {
 
 	private static Logger log = LoggerFactory.getLogger(FillModelWithData.class);
-	private static final String gsPath = System.getenv("HOME") + "/genericsystem/gs-cv_model2/";
+	private static final String gsPath = System.getenv("HOME") + "/genericsystem/gs-cv_model3/";
 	private final static Engine engine = new Engine(gsPath, Doc.class, ImgFilter.class, ZoneGeneric.class,
 			ZoneText.class, Score.class, MeanLevenshtein.class);
 
@@ -97,19 +97,14 @@ public class FillModelWithData {
 		final String imgClassDirectory = "classes/" + docType;
 		final String imgDirectory = imgClassDirectory + "/ref2/";
 		log.info("imgClassDirectory = {} ", imgClassDirectory);
-
 		// Save the current document class
 		DocClass docClass = engine.find(DocClass.class);
 		DocClassInstance docClassInstance = docClass.addDocClass(docType);
-
 		// Set all the filter names
 		Map<String, Function<Img, Img>> imgFilters = filterOptimizationMap();
-		
 		// Load the accurate zones
 		final Zones zones = Zones.load(imgClassDirectory);
-
 		initComputation(imgClassDirectory, docType, imgFilters, zones);
-
 		// Process each file in folder imgDirectory
 		Arrays.asList(new File(imgDirectory).listFiles((dir, name) -> name.endsWith(".png"))).forEach(file -> {
 			processFile(file, docClassInstance, zones, imgFilters.entrySet().stream());
@@ -209,7 +204,8 @@ public class FillModelWithData {
 
 	@SuppressWarnings({ "unused", "unchecked", "rawtypes" })
 	private static void cleanModel() {
-		// TODO : extract the "reality" infos, then erase the model and rebuild?
+		// TODO: not working as expected
+		// TODO: extract the "reality" infos, then erase the model and rebuild?
 		
 		System.out.println("Cleaning model...");
 
@@ -252,6 +248,7 @@ public class FillModelWithData {
 			});
 			i.remove();
 		});
+		engine.getCurrentCache().flush();
 
 		System.out.println("Done!");
 	}
