@@ -29,13 +29,14 @@ import org.genericsystem.cv.model.ZoneText;
 import org.genericsystem.cv.model.ZoneText.ZoneTextInstance;
 import org.genericsystem.kernel.Engine;
 import org.opencv.core.Core;
+import org.opencv.core.Scalar;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The FillModelWithData class can analyze a batch of images and store the OCR
- * text for each zone and each document in GS.
+ * The FillModelWithData class can analyze an image (or a batch of images) and
+ * store all the OCR text for each zone and each document in GS.
  * 
  * @author Pierrik Lassalas
  *
@@ -57,18 +58,26 @@ public class FillModelWithData {
 	public static void main(String[] mainArgs) {
 		engine.newCache().start();
 		compute();
-//		 cleanModel();
+		// cleanModel();
 		engine.close();
 		// doImgOcr(Paths.get("/home/middleware/git/genericsystem2015/gs-cv/classes/id-fr-front"));
 	}
 
+	/**
+	 * This Map will contain the names of the filter that will be applied to a
+	 * specified {@link Img}.
+	 * 
+	 * @return - a Map containing the filter names as key, and a
+	 *         {@link Function} that will apply the specified algorithm to an
+	 *         Img.
+	 */
 	public static Map<String, Function<Img, Img>> getFiltersMap() {
 		final Map<String, Function<Img, Img>> map = new HashMap<>();
 		map.put("original", Img::bgr2Gray);
 		map.put("reality", Img::bgr2Gray);
-//		map.put("bernsen", Img::bernsen);
-//		map.put("equalizeHisto", Img::equalizeHisto);
-//		map.put("equalizeHistoAdaptative", Img::equalizeHistoAdaptative);
+		// map.put("bernsen", Img::bernsen);
+		// map.put("equalizeHisto", Img::equalizeHisto);
+		// map.put("equalizeHistoAdaptative", Img::equalizeHistoAdaptative);
 		return map;
 	}
 
@@ -113,7 +122,8 @@ public class FillModelWithData {
 		engine.getCurrentCache().flush();
 	}
 
-	private static void initComputation(String imgClassDirectory, String docType, Map<String, Function<Img, Img>> imgFilters, Zones zones){
+	private static void initComputation(String imgClassDirectory, String docType,
+			Map<String, Function<Img, Img>> imgFilters, Zones zones) {
 		DocClass docClass = engine.find(DocClass.class);
 		ImgFilter imgFilter = engine.find(ImgFilter.class);
 		DocClassInstance docClassInstance = docClass.getDocClass(docType);
@@ -130,7 +140,7 @@ public class FillModelWithData {
 		// Persist the changes
 		engine.getCurrentCache().flush();
 	}
-	
+
 	private static void processFile(File file, DocClassInstance docClassInstance, Zones zones,
 			Stream<Entry<String, Function<Img, Img>>> imgFilters) {
 		log.info("\nProcessing file: {}", file.getName());
@@ -142,6 +152,16 @@ public class FillModelWithData {
 		// Save the current file (document)
 		DocInstance docInstance = docClassInstance.addDoc(doc, file.getName());
 		engine.getCurrentCache().flush();
+
+		// Draw the image's zones + numbers
+		Img imgCopy = new Img(Imgcodecs.imread(file.getPath()));
+		zones.draw(imgCopy, new Scalar(0, 255, 0), 3);
+		zones.writeNum(imgCopy, new Scalar(0, 0, 255), 3);
+		// Copy the images to the resources folder
+		// TODO implement a filter mechanism to avoid creating
+		// duplicates in a public folder
+		Imgcodecs.imwrite(System.getProperty("user.dir") + "/src/main/resources/" + file.getName(),
+				imgCopy.getSrc());
 
 		// Create a map of Imgs
 		Img originalImg = new Img(Imgcodecs.imread(file.getPath()));
@@ -182,15 +202,19 @@ public class FillModelWithData {
 
 	private static Map<String, Function<Img, Img>> filterOptimizationMap() {
 		final Map<String, Function<Img, Img>> imgFilters = new HashMap<>();
-//		Niblack
-//		List<Integer> blockSizes = Arrays.asList(new Integer[] { 7, 9, 11, 15, 17, 21, 27, 37 });
-//		List<Double> ks = Arrays.asList(new Double[] { -1.0, -0.8, -0.6, -0.5, -0.4, -0.3, -0.2, -0.1, 0.0, 0.1 });
-//		Sauvola, Nick
+		// Niblack
+		// List<Integer> blockSizes = Arrays.asList(new Integer[] { 7, 9, 11,
+		// 15, 17, 21, 27, 37 });
+		// List<Double> ks = Arrays.asList(new Double[] { -1.0, -0.8, -0.6,
+		// -0.5, -0.4, -0.3, -0.2, -0.1, 0.0, 0.1 });
+		// Sauvola, Nick
 		List<Integer> blockSizes = Arrays.asList(new Integer[] { 7, 9, 11, 15, 17, 21, 27, 37 });
 		List<Double> ks = Arrays.asList(new Double[] { 0.0, 0.1, 0.2, 0.3, 0.4 });
-//		Wolf
-//		List<Integer> blockSizes = Arrays.asList(new Integer[] { 7, 9, 11, 15, 17, 21, 27, 37 });
-//		List<Double> ks = Arrays.asList(new Double[] { -0.25, -0.2, -0.15, 0.1, -0.05, 0.0 });
+		// Wolf
+		// List<Integer> blockSizes = Arrays.asList(new Integer[] { 7, 9, 11,
+		// 15, 17, 21, 27, 37 });
+		// List<Double> ks = Arrays.asList(new Double[] { -0.25, -0.2, -0.15,
+		// 0.1, -0.05, 0.0 });
 		for (Integer bs : blockSizes) {
 			for (Double k : ks) {
 				imgFilters.put("nick" + "_" + bs + "_" + k.toString().replace("-", "m"),
@@ -206,7 +230,7 @@ public class FillModelWithData {
 	private static void cleanModel() {
 		// TODO: not working as expected
 		// TODO: extract the "reality" infos, then erase the model and rebuild?
-		
+
 		System.out.println("Cleaning model...");
 
 		final String imgClassDirectory = "classes/" + docType;
@@ -235,6 +259,7 @@ public class FillModelWithData {
 					if (zti != null)
 						zti.remove();
 				});
+				engine.getCurrentCache().flush();
 			});
 		});
 
