@@ -103,7 +103,6 @@ public class Seeder extends DistributedVerticle {
 					}
 				});
 
-				// Wait for new messages.
 				for (;;)
 					inbox.idle();
 			} catch (MessagingException e) {

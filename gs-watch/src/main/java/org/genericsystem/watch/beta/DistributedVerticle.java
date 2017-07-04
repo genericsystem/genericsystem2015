@@ -61,7 +61,6 @@ public class DistributedVerticle extends AbstractVerticle {
 	private static final String AbsoluteAddress = System.getenv("HOME") + "/genericsystem/cloud";
 	private static final String pdfDir = AbsoluteAddress + "/pdf";
 	private static final String pngDir = AbsoluteAddress + "/png";
-
 	private static final int port = 8084;
 
 	private int nb_executions;
