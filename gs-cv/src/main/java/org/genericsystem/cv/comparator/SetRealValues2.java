@@ -3,9 +3,12 @@ package org.genericsystem.cv.comparator;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
-import org.genericsystem.cv.comparator.SetRealValues.DocumentDiv;
+import org.genericsystem.cv.comparator.SetRealValues2.DocumentDiv;
 import org.genericsystem.cv.model.Doc;
+import org.genericsystem.cv.model.Doc.DocInstance;
 import org.genericsystem.cv.model.DocClass;
+import org.genericsystem.cv.model.ImgFilter;
+import org.genericsystem.cv.model.ImgFilter.ImgFilterInstance;
 import org.genericsystem.cv.model.Score;
 import org.genericsystem.cv.model.ZoneGeneric;
 import org.genericsystem.cv.model.ZoneText;
@@ -16,16 +19,21 @@ import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.DependsOnModel;
+import org.genericsystem.reactor.annotations.DirectSelect;
 import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.context.ContextAction;
 import org.genericsystem.reactor.context.ObservableListExtractor;
 import org.genericsystem.reactor.context.TextBinding;
+import org.genericsystem.reactor.gscomponents.Combobox.HtmlRepeatedOption;
+import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledInstancesTable;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlDatalist;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlImg;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlOption;
 import org.genericsystem.reactor.gscomponents.InputTextWithConversion.InputTextEditorWithConversion;
 import org.genericsystem.reactor.gscomponents.RootTagImpl;
 
@@ -37,20 +45,20 @@ import javafx.collections.ObservableList;
  * The SetRealValues class can be used to provide accurate values for the text
  * fields (zones).
  * 
- * These real values are stored in GS, and used by {@link ComputeTrainedScores} to
- * compute the scores for each zone/filter pairs.
+ * These real values are stored in GS, and used by {@link ComputeTrainedScores}
+ * to compute the scores for each zone/filter pairs.
  * 
  * @author middleware
  *
  */
 @DependsOnModel({ Doc.class, DocClass.class, ZoneGeneric.class, ZoneText.class })
 @Children({ DocumentDiv.class })
-public class SetRealValues extends RootTagImpl {
+public class SetRealValues2 extends RootTagImpl {
 
 	private static final String docClass = "id-fr-front";
 
 	public static void main(String[] mainArgs) {
-		ApplicationServer.startSimpleGenericApp(mainArgs, SetRealValues.class, "/gs-cv_model3");
+		ApplicationServer.startSimpleGenericApp(mainArgs, SetRealValues2.class, "/gs-cv_model");
 	}
 
 	/*
@@ -80,7 +88,7 @@ public class SetRealValues extends RootTagImpl {
 	/*
 	 * For each zone, create label + inputText
 	 */
-	@Children({ ZoneLabel.class, ZoneInput.class })
+	@Children({ ZoneLabel.class, ZoneInput.class, FiltersList.class })
 	@ForEach(SELECTOR.class)
 	public static class ZoneLabelInput extends HtmlDiv {
 
@@ -95,6 +103,18 @@ public class SetRealValues extends RootTagImpl {
 	// Define the inputText
 	@BindText
 	public static class ZoneInput extends InputTextEditorWithConversion {
+
+	}
+
+	@ForEach(OCR_SELECTOR.class)
+	@Children(FiltersTextList.class)
+	@BindText
+	public static class FiltersList extends HtmlDiv {
+
+	}
+	
+	@BindText(OCR_LABEL.class)
+	public static class FiltersTextList extends HtmlDiv {
 
 	}
 
@@ -126,6 +146,30 @@ public class SetRealValues extends RootTagImpl {
 			System.out.println("Current doc class : " + currentDocClass);
 			Snapshot<Generic> docInstances = currentDocClass.getHolders(root.find(Doc.class));
 			return docInstances.toObservableList();
+		}
+	}
+	
+	public static class OCR_SELECTOR implements ObservableListExtractor {
+		@Override
+		public ObservableList<Generic> apply(Generic[] generics) {
+			Root root = generics[0].getRoot();
+			ZoneTextInstance zti = (ZoneTextInstance) generics[0];
+			System.out.println("zti : " + zti.getZoneNum() + " " + zti.getImgFilter() + " " + zti.getDoc());
+			Snapshot<Generic> filters = root.find(ImgFilter.class).getInstances();
+			return filters.toObservableList();
+		}
+	}
+
+	
+	public static class OCR_LABEL implements TextBinding {
+		@Override
+		public ObservableValue<String> apply(Context context, Tag tag) {
+			ImgFilterInstance ifi = (ImgFilterInstance) context.getGenerics()[0];
+			ZoneTextInstance zti = (ZoneTextInstance) context.getGenerics()[1];
+			DocInstance doc = zti.getDoc();
+			ZoneText zt = (ZoneText) ifi.getRoot().find(ZoneText.class);
+			ZoneTextInstance text = zt.getZoneText(doc, zti.getZone(), ifi);
+			return new SimpleStringProperty(">>> " + text);
 		}
 	}
 

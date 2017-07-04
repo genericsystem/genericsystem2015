@@ -1,10 +1,8 @@
 package org.genericsystem.cv.comparator;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
 import org.genericsystem.cv.Levenshtein;
@@ -47,7 +45,7 @@ public class ComputeFilterParamOptimization {
 	public static void main(String[] mainArgs) {
 		engine.newCache().start();
 		compute();
-//		printResults(10);
+		printResults(10);
 		engine.close();
 	}
 
@@ -84,11 +82,18 @@ public class ComputeFilterParamOptimization {
 
 				// Loop over all documents in this class
 				for (DocInstance docInstance : docInstances) {
-					String realText = (String) zoneText.getZoneText(docInstance, zoneInstance, realityInstance)
-							.getValue();
+					String realText;
+					try {
+						realText = (String) zoneText.getZoneText(docInstance, zoneInstance, realityInstance)
+								.getValue();
+					} catch (NullPointerException e) {
+						throw new RuntimeException("Unable to load the real values for the supervised training!", e);
+					}
 					ZoneTextInstance zti = zoneText.getZoneText(docInstance, zoneInstance, imgFilterInstance);
-					if (zti == null)
+					if (zti == null){
+						System.out.println(">> no text value for " + imgFilterInstance.getValue());
 						continue;
+					}
 					String text = (String) zti.getValue();
 					// TODO : manipulate the Strings before comparison?
 					// (remove spaces, etc.)
@@ -110,21 +115,19 @@ public class ComputeFilterParamOptimization {
 			}
 			engine.getCurrentCache().flush();
 		}
-		printResults(10);
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private static void printBestResults(ZoneInstance zoneInstance, int limit) {
 		Score score = engine.find(Score.class);
 		MeanLevenshtein meanLevenshtein = engine.find(MeanLevenshtein.class);
 		System.out.println("=> Zone " + zoneInstance.getValue() + " best filters: ");
-		zoneInstance.getHolders(score).stream()
-				.sorted((g2, g1) -> Float.compare((Float) g1.getValue(), (Float) g2.getValue())) // Add another comparator to sort by meanlev
-				.limit(limit)
+		Comparator<Generic> sortByScore = (g1, g2) -> Float.compare((Float) g1.getValue(), (Float) g2.getValue());
+		Comparator<Generic> sortByMeanLev = (g1, g2) -> Float.compare((Float) g1.getHolder(meanLevenshtein).getValue(),
+				(Float) g2.getHolder(meanLevenshtein).getValue());
+		zoneInstance.getHolders(score).stream().sorted(sortByScore.reversed().thenComparing(sortByMeanLev)).limit(limit)
 				.forEach(s -> {
-					System.out.println(((ScoreInstance) s).getImgFilter().getValue()
-							+ " (probability: " + s.getValue() + ", meanLev: "
-							+ s.getHolder(meanLevenshtein).getValue() + ")");
+					System.out.println(((ScoreInstance) s).getImgFilter().getValue() + " (probability: " + s.getValue()
+							+ ", meanLev: " + s.getHolder(meanLevenshtein).getValue() + ")");
 				});
 		System.out.println("");
 	}

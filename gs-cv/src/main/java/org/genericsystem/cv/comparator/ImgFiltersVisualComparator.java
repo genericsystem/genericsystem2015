@@ -71,17 +71,22 @@ public class ImgFiltersVisualComparator extends AbstractApp {
 
 		final Map<String, Function<Img, Img>> imgFilters = new HashMap<>();
 		imgFilters.put("original", Img::bgr2Gray);
-		imgFilters.put("bernsen", i -> i.bernsen(15, 15));
-		imgFilters.put("equalizeHisto", Img::equalizeHisto);
-		imgFilters.put("equalizeHistoAdaptative", i -> i.equalizeHistoAdaptative(4.0, new Size(8, 8)));
-		imgFilters.put("wolf", i -> i.wolfThreshold(15, 0.3));
-		imgFilters.put("nick", i -> i.nickThreshold(21, -0.1));
-		imgFilters.put("otsu", Img::otsu);
-		imgFilters.put("otsuGaussian", i -> i.otsuAfterGaussianBlur(new Size(3, 3)));
-		imgFilters.put("niblack", i -> i.niblackThreshold(15, -0.6));
-		imgFilters.put("sauvola", i -> i.sauvolaThreshold(15, 0.2));
-		imgFilters.put("adaptativeMeanThreshold", Img::adaptativeMeanThreshold);
-		imgFilters.put("adaptativeGaussianThreshold", Img::adaptativeGaussianThreshold);
+		imgFilters.put("niblack_37_m1.0", i -> i.niblackThreshold(37, -1.0));
+		imgFilters.put("niblack_21_m1.0", i -> i.niblackThreshold(21, -1.0));
+		imgFilters.put("niblack_21_m0.3", i -> i.niblackThreshold(21, -0.3));
+		imgFilters.put("niblack_27_m1.8", i -> i.niblackThreshold(27, -0.8));
+		imgFilters.put("niblack_7_m0.4", i -> i.niblackThreshold(7, -0.4));
+//		imgFilters.put("bernsen", i -> i.bernsen(15, 15));
+//		imgFilters.put("equalizeHisto", Img::equalizeHisto);
+//		imgFilters.put("equalizeHistoAdaptative", i -> i.equalizeHistoAdaptative(4.0, new Size(8, 8)));
+//		imgFilters.put("wolf", i -> i.wolfThreshold(15, 0.3));
+//		imgFilters.put("nick", i -> i.nickThreshold(21, -0.1));
+//		imgFilters.put("otsu", Img::otsu);
+//		imgFilters.put("otsuGaussian", i -> i.otsuAfterGaussianBlur(new Size(3, 3)));
+//		imgFilters.put("niblack", i -> i.niblackThreshold(15, -0.6));
+//		imgFilters.put("sauvola", i -> i.sauvolaThreshold(15, 0.2));
+//		imgFilters.put("adaptativeMeanThreshold", Img::adaptativeMeanThreshold);
+//		imgFilters.put("adaptativeGaussianThreshold", Img::adaptativeGaussianThreshold);
 
 		Map<String, Img> imgs = new HashMap<>();
 

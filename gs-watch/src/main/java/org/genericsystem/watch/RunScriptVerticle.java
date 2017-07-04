@@ -7,6 +7,7 @@ import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
+@Deprecated
 public class RunScriptVerticle extends AbstractVerticle {
 
 	private static Logger log = LoggerFactory.getLogger(ClassifierVerticle.class);

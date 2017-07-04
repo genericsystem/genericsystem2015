@@ -11,6 +11,7 @@ public class App {
 		vertx.deployVerticle(new VerticleDeployer(), res -> {
 			if (res.failed())
 				throw new IllegalStateException("Deployment of verticles failed.", res.cause());
+			System.out.println("Deployment finished");
 		});
 	}
 }

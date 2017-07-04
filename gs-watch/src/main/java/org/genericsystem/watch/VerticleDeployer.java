@@ -36,7 +36,7 @@ public class VerticleDeployer extends AbstractVerticle {
 		vertx.deployVerticle(new MailWatcherVerticle());
 		vertx.deployVerticle(new PdfsConverterVerticle());
 		vertx.deployVerticle(new ClassifierVerticle());
-		vertx.deployVerticle(new RunScriptVerticle());
+//		vertx.deployVerticle(new RunScriptVerticle());
 		vertx.deployVerticle(new OcrVerticle());
 		startFuture.complete();
 	}
