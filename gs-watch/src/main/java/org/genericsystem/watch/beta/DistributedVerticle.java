@@ -20,8 +20,6 @@ import org.genericsystem.watch.beta.Model.Message;
 import org.genericsystem.watch.beta.Model.Task;
 
 import io.vertx.core.AbstractVerticle;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.eventbus.DeliveryOptions;
@@ -35,7 +33,8 @@ public class DistributedVerticle extends AbstractVerticle {
 	public static final String PUBLIC_ADDRESS = "publicAddress";
 	public final String PRIVATE_ADDRESS = "privateAddress " + hashCode();
 
-	protected final Engine engine = new Engine(System.getenv("HOME") + "/genericsystem/cloud/", Task.class, Message.class);
+	protected final Engine engine = new Engine(System.getenv("HOME") + "/genericsystem/cloud/", Task.class,
+			Message.class);
 	protected final Cache cache = engine.newCache();
 	protected final Generic messageType = engine.find(Message.class);
 	protected final Generic taskType = engine.find(Task.class);
@@ -47,7 +46,7 @@ public class DistributedVerticle extends AbstractVerticle {
 
 	private static final long AVAILABILITY_PERIODICITY = 5000;
 	private static final long TASK_CREATION_PERIODICITY = 10000;
-	private static final long MESSAGE_SEND_PERIODICITY = 1000;
+	private static final long MESSAGE_SEND_PERIODICITY = 5000;
 
 	protected static final String TODO = "TODO";
 	private static final String INPROGRESS = "IN PROGRESS";
@@ -61,6 +60,8 @@ public class DistributedVerticle extends AbstractVerticle {
 
 	private static final String pdfDir = "../src/main/resources/pdf";
 	private static final String pngDir = "../src/main/resources/png";
+
+	private static final int port = 8084;
 
 	private int nb_executions;
 
@@ -91,16 +92,41 @@ public class DistributedVerticle extends AbstractVerticle {
 		cache.safeConsum(nothing -> {
 			for (Generic task1 : taskType.getInstances()) {
 				if (STARTED.equals(new JsonObject((String) task1.getValue()).getString("state"))) {
-					messageType.addInstance(new JsonObject().put("task", new JsonObject((String) task1.getValue()).getLong("task")).put("state", TODO).put("max_parallel_executions", 5)
-							.put("step", new JsonObject((String) task1.getValue()).getInteger("step")).put("file", new JsonObject((String) task1.getValue()).getString("file")).encodePrettily());
+
+					addMessage(Paths.get(new JsonObject((String) task1.getValue()).getString("file")),
+							new JsonObject((String) task1.getValue()).getInteger("step"),
+							new JsonObject((String) task1.getValue()).getLong("task"), TODO,
+							new JsonObject((String) task1.getValue()).getInteger("max_parallel_executions"));
+
+					// messageType.addInstance(new JsonObject()
+					// .put("task", new JsonObject((String)
+					// task1.getValue()).getLong("task")).put("state", TODO)
+					// .put("max_parallel_executions", 5)
+					// .put("step", new JsonObject((String)
+					// task1.getValue()).getInteger("step"))
+					// .put("file", new JsonObject((String)
+					// task1.getValue()).getString("file")).encodePrettily());
 					task1.remove();
 				}
 			}
 
 			for (Generic message1 : messageType.getInstances()) {
 				if (INPROGRESS.equals(new JsonObject((String) message1.getValue()).getString("state"))) {
-					messageType.addInstance(new JsonObject().put("task", new JsonObject((String) message1.getValue()).getLong("task")).put("state", TODO).put("max_parallel_executions", 5)
-							.put("step", new JsonObject((String) message1.getValue()).getInteger("step")).put("file", new JsonObject((String) message1.getValue()).getString("file")).encodePrettily());
+
+					addMessage(Paths.get(new JsonObject((String) message1.getValue()).getString("file")),
+							new JsonObject((String) message1.getValue()).getInteger("step"),
+							new JsonObject((String) message1.getValue()).getLong("task"), TODO,
+							new JsonObject((String) message1.getValue()).getInteger("max_parallel_executions"));
+
+					// messageType.addInstance(
+					// new JsonObject().put("task", new JsonObject((String)
+					// message1.getValue()).getLong("task"))
+					// .put("state", TODO).put("max_parallel_executions", 5)
+					// .put("step", new JsonObject((String)
+					// message1.getValue()).getInteger("step"))
+					// .put("file", new JsonObject((String)
+					// message1.getValue()).getString("file"))
+					// .encodePrettily());
 					message1.remove();
 				}
 			}
@@ -145,8 +171,10 @@ public class DistributedVerticle extends AbstractVerticle {
 						String workerAddress = roundrobin.getNextAddress();
 						if (workerAddress != null) {
 							message.remove();
-							Generic inProgress = messageType.addInstance(
-									new JsonObject().put("task", json.getLong("task")).put("state", INPROGRESS).put("max_parallel_executions", 5).put("step", json.getLong("step")).put("file", json.getString("file")).put("IP", IP_ADDRESS).encodePrettily());
+							Generic inProgress = messageType.addInstance(new JsonObject()
+									.put("task", json.getLong("task")).put("state", INPROGRESS)
+									.put("max_parallel_executions", 5).put("step", json.getLong("step"))
+									.put("file", json.getString("file")).put("IP", IP_ADDRESS).encodePrettily());
 							cache.flush();
 							vertx.eventBus().send(workerAddress, inProgress.getValue(), TIMEOUT, reply -> {
 								cache.safeConsum(nothing -> {
@@ -155,11 +183,26 @@ public class DistributedVerticle extends AbstractVerticle {
 									if (reply.failed()) {
 										System.out.println(reply.cause());
 										roundrobin.remove(workerAddress);
-										messageType.addInstance(new JsonObject().put("task", js.getLong("task")).put("state", TODO).put("max_parallel_executions", 5).put("step", js.getInteger("step")).put("file", js.getString("file")).encodePrettily());
+
+										addMessage(Paths.get(js.getString("file")), js.getInteger("step"),
+												js.getLong("task"), TODO, js.getInteger("max_parallel_executions"));
+
+										// messageType.addInstance(new
+										// JsonObject().put("task",
+										// js.getLong("task"))
+										// .put("state",
+										// TODO).put("max_parallel_executions",
+										// 5)
+										// .put("step",
+										// js.getInteger("step")).put("file",
+										// js.getString("file"))
+										// .encodePrettily());
 									} else {
 										if (KO.equals(reply.result().body()))
-											messageType
-													.addInstance(new JsonObject().put("task", js.getLong("task")).put("state", TODO).put("max_parallel_executions", 5).put("step", js.getInteger("step")).put("file", js.getString("file")).encodePrettily());
+
+											addMessage(Paths.get(js.getString("file")), js.getInteger("step"),
+													js.getLong("task"), TODO, js.getInteger("max_parallel_executions"));
+
 									}
 									cache.flush();
 								});
@@ -192,10 +235,14 @@ public class DistributedVerticle extends AbstractVerticle {
 
 				JsonObject task = new JsonObject((String) message.body());
 				String ip_sender = task.getString("IP");
-				String messageTask = new JsonObject().put("task", task.getLong("task")).put("state", STARTED).put("step", task.getInteger("step")).put("file", task.getString("file")).encodePrettily();
+				String messageTask = new JsonObject().put("task", task.getLong("task")).put("state", STARTED)
+						.put("step", task.getInteger("step")).put("file", task.getString("file")).encodePrettily();
 				taskType.addInstance(messageTask);
 				cache.flush();
+
 				vertx.executeBlocking(future -> {
+
+					System.out.println("File transfer");
 
 					// get the file to convert from sender and store it in the
 					// corresponding folder
@@ -203,13 +250,14 @@ public class DistributedVerticle extends AbstractVerticle {
 					boolean success = true;
 
 					BlockingQueue<byte[]> blockingQueue = new ArrayBlockingQueue<>(1);
-					vertx.createHttpClient().getNow(8080, ip_sender, task.getString("file"), resp -> resp.bodyHandler(body -> {
-						try {
-							blockingQueue.put(body.getBytes());
-						} catch (InterruptedException e1) {
-							e1.printStackTrace();
-						}
-					}));
+					vertx.createHttpClient().getNow(port, ip_sender, task.getString("file"),
+							resp -> resp.bodyHandler(body -> {
+								try {
+									blockingQueue.put(body.getBytes());
+								} catch (InterruptedException e1) {
+									e1.printStackTrace();
+								}
+							}));
 					byte[] bytes;
 					try {
 						bytes = blockingQueue.take();
@@ -237,14 +285,14 @@ public class DistributedVerticle extends AbstractVerticle {
 
 					case 1:
 
-						convertPdfToPng(task.getString("file"));
-
+						System.out.println("Converting pdf to png");
+						convertPdfToPng(task);
 						break;
 
 					case 2:
 
-						success = classify(task.getString("file"));
-
+						System.out.println("Classification");
+						success = classify(task);
 						break;
 
 					case 3:
@@ -264,10 +312,14 @@ public class DistributedVerticle extends AbstractVerticle {
 					cache.safeConsum(nothing2 -> {
 						taskType.getInstance(messageTask).remove();
 						if (res.succeeded()) {
-							taskType.addInstance(new JsonObject().put("task", task.getLong("task")).put("state", FINISHED).put("step", task.getInteger("step")).put("file", task.getString("file")).encodePrettily());
+							taskType.addInstance(new JsonObject().put("task", task.getLong("task"))
+									.put("state", FINISHED).put("step", task.getInteger("step"))
+									.put("file", task.getString("file")).encodePrettily());
 
 						} else
-							taskType.addInstance(new JsonObject().put("task", task.getLong("task")).put("state", ABORTED).put("step", task.getInteger("step")).put("file", task.getString("file")).encodePrettily());
+							taskType.addInstance(new JsonObject().put("task", task.getLong("task"))
+									.put("state", ABORTED).put("step", task.getInteger("step"))
+									.put("file", task.getString("file")).encodePrettily());
 						cache.flush();
 					});
 
@@ -279,35 +331,36 @@ public class DistributedVerticle extends AbstractVerticle {
 
 	}
 
-	public static <T> T synchronizeTask(Handler<Handler<AsyncResult<T>>> consumer) {
-		BlockingQueue<AsyncResult<T>> blockingQueue = new ArrayBlockingQueue<>(1);
-		consumer.handle(res -> {
-			try {
-				blockingQueue.put(res);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		});
-		AsyncResult<T> res = null;
-		try {
-			res = blockingQueue.take();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		if (res.failed())
-			throw new IllegalStateException(res.cause());
-		return res.result();
-	}
+	// public static <T> T synchronizeTask(Handler<Handler<AsyncResult<T>>>
+	// consumer) {
+	// BlockingQueue<AsyncResult<T>> blockingQueue = new
+	// ArrayBlockingQueue<>(1);
+	// consumer.handle(res -> {
+	// try {
+	// blockingQueue.put(res);
+	// } catch (InterruptedException e) {
+	// e.printStackTrace();
+	// }
+	// });
+	// AsyncResult<T> res = null;
+	// try {
+	// res = blockingQueue.take();
+	// } catch (InterruptedException e) {
+	// e.printStackTrace();
+	// }
+	// if (res.failed())
+	// throw new IllegalStateException(res.cause());
+	// return res.result();
+	// }
 
 	private void ocr(String string) {
 
-		String imagePath = string;
-		System.out.println(">>>>> New image to OCR: " + imagePath);
-		Ocr.ocrClassifiedImage(Paths.get(imagePath));
+		System.out.println(">>>>> New image to OCR: " + string);
+		Ocr.ocrClassifiedImage(Paths.get(string));
 	}
 
-	private boolean classify(String filename) {
-		Path newFile = Paths.get(filename);
+	private boolean classify(JsonObject task) {
+		Path newFile = Paths.get(task.getString("file"));
 		System.out.println(">>> New file to classify: " + newFile);
 		Path classesDirectory = Paths.get("classes");
 		classesDirectory.toFile().mkdirs();
@@ -318,10 +371,8 @@ public class DistributedVerticle extends AbstractVerticle {
 		if (savedFile != null) {
 			System.gc();
 			System.runFinalization();
-			cache.safeConsum(n -> {
-				messageType.addInstance(new JsonObject().put("task", System.currentTimeMillis()).put("state", TODO).put("max_parallel_executions", 5).put("step", 3).put("file", savedFile).encodePrettily());
-				cache.flush();
-			});
+			addMessage(savedFile, task.getInteger("Step") + 1, task.getLong("task"), task.getString("state"),
+					task.getInteger("max_parallel_executions"));
 			return true;
 
 		} else
@@ -329,28 +380,35 @@ public class DistributedVerticle extends AbstractVerticle {
 		return false;
 	}
 
-	private void convertPdfToPng(String filename) {
+	private void convertPdfToPng(JsonObject task) {
 
-		Path newFile = Paths.get(filename);
+		Path newFile = Paths.get(task.getString("file"));
 		System.out.println(">> New PDF file: " + newFile);
 		List<Path> createdPngs = PdfToPngConverter.convertPdfToImages(newFile.toFile(), new File(pngDir));
 		for (Path path : createdPngs)
-			// publish message
-			cache.safeConsum(n -> {
-				messageType.addInstance(new JsonObject().put("task", System.currentTimeMillis()).put("state", TODO).put("max_parallel_executions", 5).put("step", 2).put("file", path).encodePrettily());
-				cache.flush();
-			});
+			addMessage(path, task.getInteger("Step") + 1, task.getLong("task"), task.getString("state"),
+					task.getInteger("max_parallel_executions"));
 		System.gc();
 		System.runFinalization();
+	}
+
+	protected void addMessage(Path file, int step, long timestamp, String state, int parallel_executions) {
+
+		cache.safeConsum(n -> {
+			messageType.addInstance(new JsonObject().put("task", timestamp).put("state", state)
+					.put("max_parallel_executions", parallel_executions).put("step", step).put("file", file.toString())
+					.encodePrettily());
+			cache.flush();
+		});
 	}
 
 	public void startServer() {
 
 		vertx.createHttpServer().requestHandler(req -> {
-			String fileName = req.path().replace("/", "");
+			// String fileName = req.path().replace("/", "");
+			String fileName = req.path();
 			System.out.println("Will send :" + fileName);
 			req.response().sendFile(fileName);
-		}).listen(8080);
+		}).listen(port);
 	}
-
 }
