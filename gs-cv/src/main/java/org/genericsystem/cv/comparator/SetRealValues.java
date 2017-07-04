@@ -50,7 +50,7 @@ public class SetRealValues extends RootTagImpl {
 	private static final String docClass = "id-fr-front";
 
 	public static void main(String[] mainArgs) {
-		ApplicationServer.startSimpleGenericApp(mainArgs, SetRealValues.class, "/gs-cv_model2");
+		ApplicationServer.startSimpleGenericApp(mainArgs, SetRealValues.class, "/gs-cv_model3");
 	}
 
 	/*
