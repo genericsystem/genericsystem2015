@@ -14,3 +14,12 @@ button {
 	width: 150px;
 	margin: 10px;
 }
+
+.ocr_text {
+	font-style: italic;
+	font-weight: normal;
+}
+
+.ocr_label {
+	font-weight: bold;
+}

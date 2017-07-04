@@ -58,7 +58,7 @@ public class FillModelWithData {
 	public static void main(String[] mainArgs) {
 		engine.newCache().start();
 		compute();
-		// cleanModel();
+//		 cleanModel();
 		engine.close();
 		// doImgOcr(Paths.get("/home/middleware/git/genericsystem2015/gs-cv/classes/id-fr-front"));
 	}
@@ -73,8 +73,8 @@ public class FillModelWithData {
 	 */
 	public static Map<String, Function<Img, Img>> getFiltersMap() {
 		final Map<String, Function<Img, Img>> map = new HashMap<>();
-		map.put("original", Img::bgr2Gray);
-		map.put("reality", Img::bgr2Gray);
+		map.put("original", Function.identity());
+		map.put("reality", Function.identity());
 		// map.put("bernsen", Img::bernsen);
 		// map.put("equalizeHisto", Img::equalizeHisto);
 		// map.put("equalizeHistoAdaptative", Img::equalizeHistoAdaptative);
@@ -160,7 +160,8 @@ public class FillModelWithData {
 		// Copy the images to the resources folder
 		// TODO implement a filter mechanism to avoid creating
 		// duplicates in a public folder
-		Imgcodecs.imwrite(System.getProperty("user.dir") + "/src/main/resources/" + file.getName(),
+		log.info("Copying {} to resources folder", file.getName());
+		Imgcodecs.imwrite(System.getProperty("user.dir") + "/../gs-cv/src/main/resources/" + file.getName(),
 				imgCopy.getSrc());
 
 		// Create a map of Imgs
@@ -170,7 +171,7 @@ public class FillModelWithData {
 			log.info("Applying algorithm {}...", entry.getKey());
 			Img img = null;
 			if ("original".equals(entry.getKey()) || "reality".equals(entry.getKey()))
-				img = originalImg.bgr2Gray();
+				img = originalImg;
 			else
 				img = entry.getValue().apply(originalImg);
 			if (null != img)
@@ -221,15 +222,14 @@ public class FillModelWithData {
 						img -> img.niblackThreshold(bs, k));
 			}
 		}
-		imgFilters.put("reality", Img::bgr2Gray);
-		imgFilters.put("original", Img::bgr2Gray);
+		imgFilters.put("reality", Function.identity());
+		imgFilters.put("original", Function.identity());
 		return imgFilters;
 	}
 
 	@SuppressWarnings({ "unused", "unchecked", "rawtypes" })
 	private static void cleanModel() {
-		// TODO: not working as expected
-		// TODO: extract the "reality" infos, then erase the model and rebuild?
+		// TODO: not yet working as expected --> delete the nodes in addition to the instances?
 
 		System.out.println("Cleaning model...");
 
@@ -272,6 +272,7 @@ public class FillModelWithData {
 				}
 			});
 			i.remove();
+			engine.getCurrentCache().flush();
 		});
 		engine.getCurrentCache().flush();
 
