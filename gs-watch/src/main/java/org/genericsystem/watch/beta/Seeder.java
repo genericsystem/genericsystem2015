@@ -54,7 +54,7 @@ public class Seeder extends DistributedVerticle {
 				Vertx vertx = res.result();
 				vertx.deployVerticle(new Seeder(), result -> {
 					System.out.println(result.result());
-					System.out.println(result.cause());
+
 				});
 			} else {
 				throw new IllegalStateException(res.cause());
@@ -142,7 +142,10 @@ public class Seeder extends DistributedVerticle {
 					System.gc();
 					System.runFinalization();
 
-					addMessage(Paths.get(fileName), 1, System.currentTimeMillis(), TODO, 5);
+					cache.safeConsum(nothing -> {
+						addMessage(Paths.get(fileName), 1, System.currentTimeMillis(), TODO, 5);
+					});
+
 				}
 			}
 		} catch (Exception e) {

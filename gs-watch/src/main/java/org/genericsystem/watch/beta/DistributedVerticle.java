@@ -45,7 +45,7 @@ public class DistributedVerticle extends AbstractVerticle {
 	// private static final int ATTEMPTS = 5;
 
 	private static final long AVAILABILITY_PERIODICITY = 5000;
-	private static final long TASK_CREATION_PERIODICITY = 10000;
+	// private static final long TASK_CREATION_PERIODICITY = 10000;
 	private static final long MESSAGE_SEND_PERIODICITY = 5000;
 
 	protected static final String TODO = "TODO";
@@ -58,9 +58,10 @@ public class DistributedVerticle extends AbstractVerticle {
 	private static final String OK = "OK";
 	private static final String KO = "KO";
 
-	private static final String AbsoluteAddress = System.getenv("HOME") + "/git/genericsystem2015/gs-cv";
-	private static final String pdfDir = AbsoluteAddress + "/pdf";
-	private static final String pngDir = AbsoluteAddress + "/png";
+	private static final String AbsoluteAddress = System.getenv("HOME") + "/git/genericsystem2015";
+	private static final String pdfDir = AbsoluteAddress + "/gs-cv/pdf";
+	private static final String pngDir = AbsoluteAddress + "/gs-cv/png";
+	private static final String classesDir = AbsoluteAddress + "/gs-cv/classes";
 
 	private static final int port = 8084;
 
@@ -158,12 +159,14 @@ public class DistributedVerticle extends AbstractVerticle {
 						String workerAddress = roundrobin.getNextAddress();
 						if (workerAddress != null) {
 							message.remove();
-							Generic inProgress = messageType.addInstance(new JsonObject()
-									.put("task", json.getLong("task")).put("state", INPROGRESS)
-									.put("max_parallel_executions", 5).put("step", json.getLong("step"))
-									.put("file", json.getString("file")).put("IP", IP_ADDRESS).encodePrettily());
+							Generic inProgress = messageType.addInstance(
+									new JsonObject().put("task", json.getLong("task")).put("state", INPROGRESS)
+											.put("max_parallel_executions", json.getInteger("max_parallel_executions"))
+											.put("step", json.getLong("step")).put("file", json.getString("file"))
+											.put("IP", IP_ADDRESS).encodePrettily());
 							cache.flush();
 							vertx.eventBus().send(workerAddress, inProgress.getValue(), TIMEOUT, reply -> {
+
 								cache.safeConsum(nothing -> {
 									inProgress.remove();
 									JsonObject js = new JsonObject((String) inProgress.getValue());
@@ -213,6 +216,7 @@ public class DistributedVerticle extends AbstractVerticle {
 						.put("step", task.getInteger("step")).put("file", task.getString("file")).encodePrettily();
 				taskType.addInstance(messageTask);
 				cache.flush();
+				message.reply(OK);
 
 				vertx.executeBlocking(future -> {
 
@@ -221,16 +225,16 @@ public class DistributedVerticle extends AbstractVerticle {
 					String fileType = task.getString("file").substring(task.getString("file").length() - 3);
 					String remoteDirectory;
 					if ("pdf".equals(fileType)) {
-						remoteDirectory = pdfDir;
-					} else if ("png".equals(fileType) && task.getString("file").startsWith("classes")) {
-						remoteDirectory = AbsoluteAddress;
+						remoteDirectory = pdfDir + "/";
+					} else if ("png".equals(fileType) && task.getString("file").contains("classes")) {
+						remoteDirectory = "";
 					} else {
-						remoteDirectory = pngDir;
+						remoteDirectory = pngDir + "/";
 					}
 					boolean success = true;
 
 					BlockingQueue<byte[]> blockingQueue = new ArrayBlockingQueue<>(1);
-					vertx.createHttpClient().getNow(port, ip_sender, remoteDirectory + "/" + task.getString("file"),
+					vertx.createHttpClient().getNow(port, ip_sender, remoteDirectory + task.getString("file"),
 							resp -> resp.bodyHandler(body -> {
 								try {
 									blockingQueue.put(body.getBytes());
@@ -248,13 +252,11 @@ public class DistributedVerticle extends AbstractVerticle {
 					try {
 						FileOutputStream fos;
 						if ("png".equals(fileType)) {
-							if (task.getString("file").startsWith("classes")) {
-
-								fos = new FileOutputStream(new File(AbsoluteAddress + "/" + task.getString("file")));
+							if (task.getString("file").contains("classes")) {
+								fos = new FileOutputStream(new File(task.getString("file")));
 								fos.write(bytes);
 								fos.close();
 							} else {
-
 								fos = new FileOutputStream(new File(pngDir + "/" + task.getString("file")));
 								fos.write(bytes);
 								fos.close();
@@ -316,7 +318,7 @@ public class DistributedVerticle extends AbstractVerticle {
 					});
 
 				});
-				message.reply(OK);
+
 			});
 
 		});
@@ -354,7 +356,7 @@ public class DistributedVerticle extends AbstractVerticle {
 	private boolean classify(JsonObject task) {
 		Path newFile = Paths.get(task.getString("file"));
 		System.out.println(">>> New file to classify: " + newFile);
-		Path classesDirectory = Paths.get("classes");
+		Path classesDirectory = Paths.get(classesDir);
 		classesDirectory.toFile().mkdirs();
 		Path savedFile;
 		synchronized (ClassifierVerticle.class) {
@@ -363,8 +365,11 @@ public class DistributedVerticle extends AbstractVerticle {
 		if (savedFile != null) {
 			System.gc();
 			System.runFinalization();
-			addMessage(savedFile, task.getInteger("step") + 1, task.getLong("task"), TODO,
-					task.getInteger("max_parallel_executions"));
+			cache.safeConsum(nothing -> {
+				addMessage(savedFile, task.getInteger("step") + 1, task.getLong("task"), TODO,
+						task.getInteger("max_parallel_executions"));
+			});
+
 			return true;
 
 		} else
@@ -378,20 +383,21 @@ public class DistributedVerticle extends AbstractVerticle {
 		System.out.println(">> New PDF file: " + newFile);
 		List<Path> createdPngs = PdfToPngConverter.convertPdfToImages(newFile.toFile(), new File(pngDir));
 		for (Path path : createdPngs)
-			addMessage(path.getFileName(), task.getInteger("step") + 1, task.getLong("task"), TODO,
-					task.getInteger("max_parallel_executions"));
+			cache.safeConsum(nothing -> {
+				addMessage(path.getFileName(), task.getInteger("step") + 1, task.getLong("task"), TODO, 1);
+			});
+
 		System.gc();
 		System.runFinalization();
 	}
 
 	protected void addMessage(Path file, int step, long timestamp, String state, int parallel_executions) {
 
-		cache.safeConsum(n -> {
-			messageType.addInstance(new JsonObject().put("task", timestamp).put("state", state)
-					.put("max_parallel_executions", parallel_executions).put("step", step).put("file", file.toString())
-					.encodePrettily());
-			cache.flush();
-		});
+		messageType.addInstance(new JsonObject().put("task", timestamp).put("state", state)
+				.put("max_parallel_executions", parallel_executions).put("step", step).put("file", file.toString())
+				.encodePrettily());
+		cache.flush();
+
 	}
 
 	protected void startServer() {
