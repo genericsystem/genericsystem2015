@@ -7,7 +7,7 @@ input {
 
 img {
 	height: auto;
-	width: 500px;
+	width: 400px;
 }
 
 button {
@@ -15,11 +15,21 @@ button {
 	margin: 10px;
 }
 
-.ocr_text {
+.ocr-row {
+	width: 90%;
+	margin: auto;
+}
+
+.ocr {
+	padding: 3px;
+	font-size: small;
+}
+
+.ocr-text {
 	font-style: italic;
 	font-weight: normal;
 }
 
-.ocr_label {
+.ocr-label {
 	font-weight: bold;
 }

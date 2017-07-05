@@ -91,7 +91,6 @@ public class SetRealValues2 extends RootTagImpl {
 
 	// Define the textdiv
 	@Children({ ZoneLabelInput.class, Validate.class })
-//	@DirectSelect(path = InstancesTable.class, value = ZoneText.class )
 	public static class TextDiv extends HtmlDiv {
 
 	}
@@ -99,7 +98,7 @@ public class SetRealValues2 extends RootTagImpl {
 	/*
 	 * For each zone, create label + inputText
 	 */
-	@Children({ ZoneLabel.class, ZoneInput.class, FiltersList.class})
+	@Children({ ZoneLabel.class, ZoneInput.class, FiltersDiv.class})
 	@ForEach(SELECTOR.class)
 	public static class ZoneLabelInput extends HtmlDiv {
 
@@ -116,17 +115,27 @@ public class SetRealValues2 extends RootTagImpl {
 	public static class ZoneInput extends InputTextEditorWithConversion {
 
 	}
-
+	
+	@FlexDirectionStyle(FlexDirection.ROW)
+	@StyleClass("ocr-row")
+	@Children({ FiltersList.class, FiltersTextList.class })
 	@ForEach(OCR_SELECTOR.class)
-	@Children(FiltersTextList.class)
+	public static class FiltersDiv extends FlexDiv {
+
+	}
+
+	@FlexDirectionStyle(FlexDirection.COLUMN)
+	@Style(name = "flex", value = "1")
 	@BindText
-	@StyleClass("ocr_label")
+	@StyleClass({ "ocr", "ocr-label" })
 	public static class FiltersList extends FlexDiv {
 
 	}
 	
+	@FlexDirectionStyle(FlexDirection.COLUMN)
+	@Style(name = "flex", value = "4")
 	@BindText(OCR_LABEL.class)
-	@StyleClass("ocr_text")
+	@StyleClass({ "ocr", "ocr-text" })
 	public static class FiltersTextList extends FlexDiv {
 
 	}
@@ -182,7 +191,7 @@ public class SetRealValues2 extends RootTagImpl {
 			DocInstance doc = zti.getDoc();
 			ZoneText zt = (ZoneText) ifi.getRoot().find(ZoneText.class);
 			ZoneTextInstance text = zt.getZoneText(doc, zti.getZone(), ifi);
-			return new SimpleStringProperty("\t" + text.getValue().toString());
+			return new SimpleStringProperty(text.getValue().toString());
 		}
 	}
 
