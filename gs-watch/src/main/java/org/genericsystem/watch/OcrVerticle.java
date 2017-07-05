@@ -27,7 +27,7 @@ public class OcrVerticle extends AbstractVerticle {
 		VerticleDeployer.deployVerticle(new AbstractVerticle() {
 			@Override
 			public void start() throws Exception {
-				Path imagePath = Paths.get(System.getProperty("user.dir") + "/../gs-cv/classes/id-fr-front/image-0.png");
+				Path imagePath = Paths.get(System.getProperty("user.dir") + "/../gs-cv/classes/id-fr-front/image-1.png");
 				vertx.eventBus().publish(VerticleDeployer.IMAGE_ADDED_TO_CLASS_ADDRESS, imagePath.toString());
 			}
 		});
