@@ -54,6 +54,7 @@ public class Seeder extends DistributedVerticle {
 				Vertx vertx = res.result();
 				vertx.deployVerticle(new Seeder(), result -> {
 					System.out.println(result.result());
+					System.out.println(result.cause());
 				});
 			} else {
 				throw new IllegalStateException(res.cause());
