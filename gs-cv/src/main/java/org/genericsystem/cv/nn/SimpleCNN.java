@@ -2,12 +2,10 @@ package org.genericsystem.cv;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-import org.apache.commons.io.FilenameUtils;
 import org.datavec.api.io.filters.BalancedPathFilter;
 import org.datavec.api.io.labels.ParentPathLabelGenerator;
 import org.datavec.api.split.FileSplit;
@@ -20,7 +18,6 @@ import org.datavec.image.transform.WarpImageTransform;
 import org.deeplearning4j.datasets.datavec.RecordReaderDataSetIterator;
 import org.deeplearning4j.earlystopping.EarlyStoppingConfiguration;
 import org.deeplearning4j.earlystopping.EarlyStoppingResult;
-import org.deeplearning4j.earlystopping.saver.LocalFileModelSaver;
 import org.deeplearning4j.earlystopping.scorecalc.DataSetLossCalculator;
 import org.deeplearning4j.earlystopping.termination.MaxEpochsTerminationCondition;
 import org.deeplearning4j.earlystopping.termination.ScoreImprovementEpochTerminationCondition;
@@ -62,14 +59,14 @@ public class SimpleCNN {
 	protected static int iterations = 1;
 
 	public static void main(String[] args) throws Exception {
-		double learningRate = 0.1;
-		int batchSize = 1;
+		double learningRate = 0.005;
+		int batchSize = 4;
 		int nEpochs = 100;
 
 		File parentDir = new File(System.getProperty("user.dir"), "training");
 		FileSplit filesInDir = new FileSplit(parentDir, allowedExtensions, randNumGen);
 		ParentPathLabelGenerator labelMaker = new ParentPathLabelGenerator();
-		BalancedPathFilter pathFilter = new BalancedPathFilter(randNumGen, allowedExtensions, labelMaker, 0, 0, 10, 0);
+		BalancedPathFilter pathFilter = new BalancedPathFilter(randNumGen, allowedExtensions, labelMaker, 0, 0, 100, 0);
 
 		InputSplit[] filesInDirSplit = filesInDir.sample(pathFilter, 70, 15, 15);
 		InputSplit trainData = filesInDirSplit[0];
@@ -121,15 +118,11 @@ public class SimpleCNN {
 		model.init();
 		model.setListeners(new ScoreIterationListener(10)); // Print score every 10 parameter updates
 
-		String tempDir = System.getProperty("java.io.tmpdir");
-		String saveDirectory = FilenameUtils.concat(tempDir, "EarlyStoppingIntermediaryResults/");
-		Paths.get(saveDirectory).toFile().mkdirs();
 		EarlyStoppingConfiguration<MultiLayerNetwork> esConf = new EarlyStoppingConfiguration.Builder<MultiLayerNetwork>()
 				.epochTerminationConditions(new MaxEpochsTerminationCondition(nEpochs))
 				.evaluateEveryNEpochs(1)
 				.epochTerminationConditions(new ScoreImprovementEpochTerminationCondition(20))
 				.scoreCalculator(new DataSetLossCalculator(getDataSetIterator(recordReader, validData, null, batchSize, outputNum), true))
-				.modelSaver(new LocalFileModelSaver(saveDirectory))
 				.build();
 
 		DataSetIterator dataIter = getDataSetIterator(recordReader, trainData, null, batchSize, outputNum);

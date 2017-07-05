@@ -37,7 +37,7 @@ public class Seeder extends DistributedVerticle {
 	private static final String file = "INBOX";
 	private static final String username = "watchtestmwf";
 	private static final String password = "WatchTestMWF4";
-	private static final String pdfDir = System.getenv("HOME") + "/genericsystem/cloud/pdf";
+	private static final String pdfDir = System.getenv("HOME") + "/git/genericsystem2015/gs-cv/pdf";
 	private static final String IP_ADDRESS = "192.168.1.11";
 
 	public static void main(String[] args) {
@@ -54,6 +54,7 @@ public class Seeder extends DistributedVerticle {
 				Vertx vertx = res.result();
 				vertx.deployVerticle(new Seeder(), result -> {
 					System.out.println(result.result());
+
 				});
 			} else {
 				throw new IllegalStateException(res.cause());
@@ -64,7 +65,7 @@ public class Seeder extends DistributedVerticle {
 	@Override
 	public void start() throws Exception {
 
-		System.out.println("start");
+		System.out.println("start seeder");
 		super.start();
 
 		vertx.executeBlocking(future -> {
@@ -133,15 +134,19 @@ public class Seeder extends DistributedVerticle {
 							newFile = File
 									.createTempFile(fileNameParts[0] + "-", "." + fileNameParts[1], folder.toFile())
 									.toPath();
-							newFile.toFile().delete(); // We only want the file
-														// name…
+							newFile.toFile().delete(); // We only want the
+														// filename
+
 						}
 						Files.copy(attachment.getInputStream(), newFile);
 					}
 					System.gc();
 					System.runFinalization();
 
-					addMessage(Paths.get(fileName), 1, System.currentTimeMillis(), TODO, 5);
+					cache.safeConsum(nothing -> {
+						addMessage(Paths.get(fileName), 1, System.currentTimeMillis(), TODO, 5);
+					});
+
 				}
 			}
 		} catch (Exception e) {
