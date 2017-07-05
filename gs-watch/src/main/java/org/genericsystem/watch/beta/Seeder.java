@@ -37,7 +37,7 @@ public class Seeder extends DistributedVerticle {
 	private static final String file = "INBOX";
 	private static final String username = "watchtestmwf";
 	private static final String password = "WatchTestMWF4";
-	private static final String pdfDir = System.getenv("HOME") + "/genericsystem/cloud/pdf";
+	private static final String pdfDir = System.getenv("HOME") + "/git/genericsystem2015/gs-cv/pdf";
 	private static final String IP_ADDRESS = "192.168.1.11";
 
 	public static void main(String[] args) {
@@ -64,7 +64,7 @@ public class Seeder extends DistributedVerticle {
 	@Override
 	public void start() throws Exception {
 
-		System.out.println("start");
+		System.out.println("start seeder");
 		super.start();
 
 		vertx.executeBlocking(future -> {

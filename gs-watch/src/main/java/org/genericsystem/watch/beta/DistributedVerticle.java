@@ -58,9 +58,10 @@ public class DistributedVerticle extends AbstractVerticle {
 	private static final String OK = "OK";
 	private static final String KO = "KO";
 
-	private static final String AbsoluteAddress = System.getenv("HOME") + "/genericsystem/cloud";
+	private static final String AbsoluteAddress = System.getenv("HOME") + "/git/genericsystem2015/gs-cv";
 	private static final String pdfDir = AbsoluteAddress + "/pdf";
 	private static final String pngDir = AbsoluteAddress + "/png";
+
 	private static final int port = 8084;
 
 	private int nb_executions;
@@ -80,6 +81,7 @@ public class DistributedVerticle extends AbstractVerticle {
 				vertx.deployVerticle(new DistributedVerticle(), result -> {
 					System.out.println(result.result());
 				});
+
 			} else {
 				throw new IllegalStateException(res.cause());
 			}
@@ -88,6 +90,8 @@ public class DistributedVerticle extends AbstractVerticle {
 
 	@Override
 	public void start() throws Exception {
+
+		System.out.println("start verticle");
 
 		cache.safeConsum(nothing -> {
 			for (Generic task1 : taskType.getInstances()) {
@@ -215,7 +219,14 @@ public class DistributedVerticle extends AbstractVerticle {
 					// get the file to convert from sender and store it in the
 					// corresponding folder
 					String fileType = task.getString("file").substring(task.getString("file").length() - 3);
-					String remoteDirectory = "pdf".equals(fileType) ? pdfDir : pngDir;
+					String remoteDirectory;
+					if ("pdf".equals(fileType)) {
+						remoteDirectory = pdfDir;
+					} else if ("png".equals(fileType) && task.getString("file").startsWith("classes")) {
+						remoteDirectory = AbsoluteAddress;
+					} else {
+						remoteDirectory = pngDir;
+					}
 					boolean success = true;
 
 					BlockingQueue<byte[]> blockingQueue = new ArrayBlockingQueue<>(1);
@@ -237,10 +248,19 @@ public class DistributedVerticle extends AbstractVerticle {
 					try {
 						FileOutputStream fos;
 						if ("png".equals(fileType)) {
-							fos = new FileOutputStream(new File(pngDir + "/" + task.getString("file")));
-							fos.write(bytes);
-							fos.close();
+							if (task.getString("file").startsWith("classes")) {
+
+								fos = new FileOutputStream(new File(AbsoluteAddress + "/" + task.getString("file")));
+								fos.write(bytes);
+								fos.close();
+							} else {
+
+								fos = new FileOutputStream(new File(pngDir + "/" + task.getString("file")));
+								fos.write(bytes);
+								fos.close();
+							}
 						} else if ("pdf".equals(fileType)) {
+
 							fos = new FileOutputStream(new File(pdfDir + "/" + task.getString("file")));
 							fos.write(bytes);
 							fos.close();
@@ -374,7 +394,7 @@ public class DistributedVerticle extends AbstractVerticle {
 		});
 	}
 
-	public void startServer() {
+	protected void startServer() {
 
 		vertx.createHttpServer().requestHandler(req -> {
 			// String fileName = req.path().replace("/", "");
