@@ -67,9 +67,9 @@ public class VisualizeFiltersStatistics extends RootTagImpl {
 	public static class COMPUTE_STATS implements ContextAction {
 		@Override
 		public void accept(Context context, Tag tag) {
-			System.out.println("computing scores...");
+			System.out.println("Computing scores...");
 			ComputeTrainedScores.compute(context.getGeneric().getRoot());
-			System.out.println("method call finished");
+			System.out.println("Done computing scores!");
 		}
 	}
 

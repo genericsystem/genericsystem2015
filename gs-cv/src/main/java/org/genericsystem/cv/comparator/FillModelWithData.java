@@ -12,6 +12,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.genericsystem.common.Generic;
+import org.genericsystem.common.Root;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.Zones;
 import org.genericsystem.cv.model.Doc;
@@ -43,28 +44,27 @@ import org.slf4j.LoggerFactory;
  */
 public class FillModelWithData {
 
-	private static Logger log = LoggerFactory.getLogger(FillModelWithData.class);
-	private static final String gsPath = System.getenv("HOME") + "/genericsystem/gs-cv_model3/";
-	private final static Engine engine = new Engine(gsPath, Doc.class, ImgFilter.class, ZoneGeneric.class,
-			ZoneText.class, Score.class, MeanLevenshtein.class);
-
-	private static final String docType = "id-fr-front";
-
 	static {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 		System.out.println("OpenCV core library loaded");
 	}
 
+	private static Logger log = LoggerFactory.getLogger(FillModelWithData.class);
+	private static final String gsPath = System.getenv("HOME") + "/genericsystem/gs-cv_model3/";
+	private static final String docType = "id-fr-front";
+
 	public static void main(String[] mainArgs) {
+		final Engine engine = new Engine(gsPath, Doc.class, ImgFilter.class, ZoneGeneric.class, ZoneText.class,
+				Score.class, MeanLevenshtein.class);
 		engine.newCache().start();
-		compute();
-//		 cleanModel();
+		compute(engine);
+//		cleanModel(engine);
 		engine.close();
-		// doImgOcr(Paths.get("/home/middleware/git/genericsystem2015/gs-cv/classes/id-fr-front"));
+		// doImgOcr(Paths.get(System.getProperty("user.dir") + "/../gs-cv/classes/id-fr-front/image-1.png"));
 	}
 
 	/**
-	 * This Map will contain the names of the filter that will be applied to a
+	 * This Map will contain the names of the filters that will be applied to a
 	 * specified {@link Img}.
 	 * 
 	 * @return - a Map containing the filter names as key, and a
@@ -81,7 +81,31 @@ public class FillModelWithData {
 		return map;
 	}
 
+	/**
+	 * Process an image, and store all the informations in the engine of Generic
+	 * System. When no Engine is provided, a default one is created.
+	 * 
+	 * @param imagePath
+	 *            - a {@link Path} object pointing to the image to be processed
+	 */
 	public static void doImgOcr(Path imagePath) {
+		final Engine engine = new Engine(gsPath, Doc.class, ImgFilter.class, ZoneGeneric.class, ZoneText.class,
+				Score.class, MeanLevenshtein.class);
+		engine.newCache().start();
+		doImgOcr(engine, imagePath);
+		engine.close();
+	}
+
+	/**
+	 * Process an image, and store all the informations in the engine of Generic
+	 * System.
+	 * 
+	 * @param engine
+	 *            - the engine used to store the data
+	 * @param imagePath
+	 *            - a {@link Path} object pointing to the image to be processed
+	 */
+	public static void doImgOcr(Root engine, Path imagePath) {
 		final Path imgClassDirectory = imagePath.getParent();
 		final String docType = imgClassDirectory.getName(imgClassDirectory.getNameCount() - 1).toString();
 		final String imgDirectory = imgClassDirectory.toString() + "/ref2/";
@@ -96,13 +120,20 @@ public class FillModelWithData {
 		final Zones zones = Zones.load(imgClassDirectory.toString());
 		// Process the image file
 		File file = new File(imagePath.toString());
-		initComputation(imgClassDirectory.toString(), docType, imgFilters, zones);
-		processFile(file, docClassInstance, zones, imgFilters.entrySet().stream());
+		initComputation(engine, imgClassDirectory.toString(), docType, imgFilters, zones);
+		processFile(engine, file, docClassInstance, zones, imgFilters.entrySet().stream());
 		engine.getCurrentCache().flush();
 		engine.close();
 	}
 
-	private static void compute() {
+	/**
+	 * Process all the images in the specified folder, and store all the data in
+	 * Generic System.
+	 * 
+	 * @param engine
+	 *            - the engine used to store the data
+	 */
+	private static void compute(Root engine) {
 		final String imgClassDirectory = "classes/" + docType;
 		final String imgDirectory = imgClassDirectory + "/ref2/";
 		log.info("imgClassDirectory = {} ", imgClassDirectory);
@@ -110,20 +141,21 @@ public class FillModelWithData {
 		DocClass docClass = engine.find(DocClass.class);
 		DocClassInstance docClassInstance = docClass.addDocClass(docType);
 		// Set all the filter names
-		Map<String, Function<Img, Img>> imgFilters = filterOptimizationMap();
+		Map<String, Function<Img, Img>> imgFilters = getFiltersMap();
 		// Load the accurate zones
 		final Zones zones = Zones.load(imgClassDirectory);
-		initComputation(imgClassDirectory, docType, imgFilters, zones);
+		initComputation(engine, imgClassDirectory, docType, imgFilters, zones);
 		// Process each file in folder imgDirectory
 		Arrays.asList(new File(imgDirectory).listFiles((dir, name) -> name.endsWith(".png"))).forEach(file -> {
-			processFile(file, docClassInstance, zones, imgFilters.entrySet().stream());
+			processFile(engine, file, docClassInstance, zones, imgFilters.entrySet().stream());
 			engine.getCurrentCache().flush();
 		});
 		engine.getCurrentCache().flush();
 	}
 
-	private static void initComputation(String imgClassDirectory, String docType,
+	private static void initComputation(Root engine, String imgClassDirectory, String docType,
 			Map<String, Function<Img, Img>> imgFilters, Zones zones) {
+
 		DocClass docClass = engine.find(DocClass.class);
 		ImgFilter imgFilter = engine.find(ImgFilter.class);
 		DocClassInstance docClassInstance = docClass.getDocClass(docType);
@@ -141,7 +173,15 @@ public class FillModelWithData {
 		engine.getCurrentCache().flush();
 	}
 
-	private static void processFile(File file, DocClassInstance docClassInstance, Zones zones,
+	/**
+	 * 
+	 * @param engine
+	 * @param file
+	 * @param docClassInstance
+	 * @param zones
+	 * @param imgFilters
+	 */
+	private static void processFile(Root engine, File file, DocClassInstance docClassInstance, Zones zones,
 			Stream<Entry<String, Function<Img, Img>>> imgFilters) {
 		log.info("\nProcessing file: {}", file.getName());
 
@@ -227,9 +267,15 @@ public class FillModelWithData {
 		return imgFilters;
 	}
 
+	/**
+	 * Remove all the data stored in the engine, except the real values used for
+	 * training (e.g., for which imgFilter = "reality")
+	 * 
+	 * @param engine
+	 *            - the engine used to store the data
+	 */
 	@SuppressWarnings({ "unused", "unchecked", "rawtypes" })
-	private static void cleanModel() {
-		// TODO: not yet working as expected --> delete the nodes in addition to the instances?
+	private static void cleanModel(Root engine) {
 
 		System.out.println("Cleaning model...");
 

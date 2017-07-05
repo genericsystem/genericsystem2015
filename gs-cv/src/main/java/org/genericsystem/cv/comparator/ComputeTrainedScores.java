@@ -32,27 +32,26 @@ import org.genericsystem.cv.model.ZoneText;
  */
 public class ComputeTrainedScores {
 
-	private final static String docType = "id-fr-front";
-	private final static String gsPath = System.getenv("HOME") + "/genericsystem/gs-cv_model2/";
-	private final static Engine engine = new Engine(gsPath, Doc.class,
-			ImgFilter.class, ZoneGeneric.class, ZoneText.class, Score.class, MeanLevenshtein.class);
-	
 	static {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 	}
 
+	private final static String docType = "id-fr-front";
+	private final static String gsPath = System.getenv("HOME") + "/genericsystem/gs-cv_model2/";
+	
+
 	public static void main(String[] mainArgs) {
+		final Engine engine = new Engine(gsPath, Doc.class,
+				ImgFilter.class, ZoneGeneric.class, ZoneText.class, Score.class, MeanLevenshtein.class);
+		
 		engine.newCache().start();
-		compute(null);
+		compute(engine);
 		engine.close();
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static void compute(Root engine) {
-		//TODO: do it differently
-		if (engine == null)
-			engine = ComputeTrainedScores.engine;
-
+		// TODO: loop over all docTypes, or include docType as a method's parameter
 		Generic currentDocClass = engine.find(DocClass.class).getInstance(docType);
 		ImgFilter imgFilter = engine.find(ImgFilter.class);
 		ZoneText zoneText = engine.find(ZoneText.class);
@@ -61,7 +60,6 @@ public class ComputeTrainedScores {
 
 		System.out.println("Current doc class : " + currentDocClass);
 
-		// TODO convert to Stream?
 		List<DocInstance> docInstances = (List) currentDocClass.getHolders(engine.find(Doc.class)).toList();
 		List<ZoneInstance> zoneInstances = (List) currentDocClass.getHolders(engine.find(ZoneGeneric.class)).toList();
 		List<ImgFilterInstance> imgFilterInstances = (List) imgFilter.getInstances()
