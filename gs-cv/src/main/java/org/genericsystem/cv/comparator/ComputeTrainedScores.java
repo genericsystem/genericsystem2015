@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.genericsystem.common.Generic;
+import org.genericsystem.common.Root;
 import org.genericsystem.cv.Levenshtein;
 import org.genericsystem.cv.model.Doc;
 import org.genericsystem.cv.model.Doc.DocInstance;
@@ -32,7 +33,7 @@ import org.genericsystem.cv.model.ZoneText;
 public class ComputeTrainedScores {
 
 	private final static String docType = "id-fr-front";
-	private static final String gsPath = System.getenv("HOME") + "/genericsystem/gs-cv_model2/";
+	private final static String gsPath = System.getenv("HOME") + "/genericsystem/gs-cv_model2/";
 	private final static Engine engine = new Engine(gsPath, Doc.class,
 			ImgFilter.class, ZoneGeneric.class, ZoneText.class, Score.class, MeanLevenshtein.class);
 	
@@ -42,12 +43,15 @@ public class ComputeTrainedScores {
 
 	public static void main(String[] mainArgs) {
 		engine.newCache().start();
-		compute();
+		compute(null);
 		engine.close();
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static void compute() {
+	public static void compute(Root engine) {
+		//TODO: do it differently
+		if (engine == null)
+			engine = ComputeTrainedScores.engine;
 
 		Generic currentDocClass = engine.find(DocClass.class).getInstance(docType);
 		ImgFilter imgFilter = engine.find(ImgFilter.class);

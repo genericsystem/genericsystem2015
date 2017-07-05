@@ -30,13 +30,18 @@ import org.genericsystem.reactor.context.ObservableListExtractor;
 import org.genericsystem.reactor.context.TextBinding;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlDiv;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlH1;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlH2;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlImg;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
 import org.genericsystem.reactor.gscomponents.InputTextWithConversion.InputTextEditorWithConversion;
+import org.genericsystem.reactor.gscomponents.AppHeader;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.FlexDiv;
 import org.genericsystem.reactor.gscomponents.InstancesTable;
 import org.genericsystem.reactor.gscomponents.RootTagImpl;
+import org.genericsystem.reactor.gscomponents.AppHeader.AppTitleDiv;
+import org.genericsystem.reactor.gscomponents.AppHeader.Logo;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
@@ -53,7 +58,11 @@ import javafx.collections.ObservableList;
  *
  */
 @DependsOnModel({ Doc.class, DocClass.class, ZoneGeneric.class, ZoneText.class })
-@Children({ DocumentDiv.class })
+@Style(name = "background-color", value = "#ffffff")
+@Children({ AppHeader.class, DocumentDiv.class })
+@Style(path = AppHeader.class, name = "background-color", value = "#00afeb")
+@Children(path = AppHeader.class, value = { Logo.class, AppTitleDiv.class })
+@SetText(path = { AppHeader.class, AppTitleDiv.class, HtmlH1.class }, value = "OCR results comparator")
 public class SetRealValues2 extends RootTagImpl {
 
 	private static final String docClass = "id-fr-front";
