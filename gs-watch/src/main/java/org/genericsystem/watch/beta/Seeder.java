@@ -134,8 +134,9 @@ public class Seeder extends DistributedVerticle {
 							newFile = File
 									.createTempFile(fileNameParts[0] + "-", "." + fileNameParts[1], folder.toFile())
 									.toPath();
-							newFile.toFile().delete(); // We only want the file
-														// name…
+							newFile.toFile().delete(); // We only want the
+														// filename
+
 						}
 						Files.copy(attachment.getInputStream(), newFile);
 					}

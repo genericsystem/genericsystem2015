@@ -42,10 +42,10 @@ public class DistributedVerticle extends AbstractVerticle {
 	private static final DeliveryOptions TIMEOUT = new DeliveryOptions().setSendTimeout(2000);
 
 	private static final String IP_ADDRESS = "192.168.1.11";
-	// private static final int ATTEMPTS = 5;
+	private static final int ATTEMPTS = 5;
 
 	private static final long AVAILABILITY_PERIODICITY = 5000;
-	// private static final long TASK_CREATION_PERIODICITY = 10000;
+	private static final long TASK_CREATION_PERIODICITY = 10000;
 	private static final long MESSAGE_SEND_PERIODICITY = 5000;
 
 	protected static final String TODO = "TODO";
