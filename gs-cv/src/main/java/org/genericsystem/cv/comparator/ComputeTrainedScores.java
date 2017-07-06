@@ -96,8 +96,8 @@ public class ComputeTrainedScores {
 				float probability = (float) count / (float) docInstances.size();
 				float meanDistance = (float) lev / (float) docInstances.size();
 
-				ScoreInstance scoreInstance = score.addScore(probability, zoneInstance, imgFilterInstance);
-				MeanLevenshteinInstance meanLevenshteinInstance = meanLevenshtein.addMeanLev(meanDistance,
+				ScoreInstance scoreInstance = score.setScore(probability, zoneInstance, imgFilterInstance);
+				MeanLevenshteinInstance meanLevenshteinInstance = meanLevenshtein.setMeanLev(meanDistance,
 						scoreInstance);
 
 				meanLevDistances.add(meanDistance);
