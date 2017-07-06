@@ -227,6 +227,7 @@ public class ApplicationServer extends AbstractBackEnd {
 					indexHtml += "<html>";
 					indexHtml += "<head>";
 					indexHtml += "<meta charset=\"UTF-8\" name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">";
+					indexHtml += "<LINK rel=stylesheet type=\"text/css\" href=\"/reactor.css\"/>";
 					indexHtml += "<LINK rel=stylesheet type=\"text/css\" href=\"" + (appPath.isEmpty() ? "" : ("/" + appPath)) + "/" + application.getApplicationClass().getSimpleName().toLowerCase() + ".css\"/>";
 					indexHtml += "<script>";
 					indexHtml += "var serviceLocation = \"ws://\" + document.location.host + \"" + request.path() + "\";";
