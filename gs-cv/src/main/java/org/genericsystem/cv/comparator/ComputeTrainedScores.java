@@ -10,16 +10,17 @@ import org.genericsystem.cv.model.Doc;
 import org.genericsystem.cv.model.Doc.DocInstance;
 import org.genericsystem.cv.model.DocClass;
 import org.genericsystem.cv.model.ImgFilter;
-import org.genericsystem.cv.model.MeanLevenshtein;
 import org.genericsystem.cv.model.ImgFilter.ImgFilterInstance;
-import org.genericsystem.cv.model.MeanLevenshtein.MeanLevenshteinInstance;
+import org.genericsystem.cv.model.MeanLevenshtein;
 import org.genericsystem.cv.model.Score;
 import org.genericsystem.cv.model.Score.ScoreInstance;
 import org.genericsystem.cv.model.ZoneGeneric;
 import org.genericsystem.cv.model.ZoneGeneric.ZoneInstance;
+import org.genericsystem.cv.model.ZoneText;
 import org.genericsystem.kernel.Engine;
 import org.opencv.core.Core;
-import org.genericsystem.cv.model.ZoneText;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The ComputeTrainedScores class computes the {@link Score} and the
@@ -36,29 +37,33 @@ public class ComputeTrainedScores {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 	}
 
-	private final static String docType = "id-fr-front";
 	private final static String gsPath = System.getenv("HOME") + "/genericsystem/gs-cv_model2/";
-	
+	private static Logger log = LoggerFactory.getLogger(ComputeTrainedScores.class);
 
 	public static void main(String[] mainArgs) {
-		final Engine engine = new Engine(gsPath, Doc.class,
-				ImgFilter.class, ZoneGeneric.class, ZoneText.class, Score.class, MeanLevenshtein.class);
-		
+		final Engine engine = new Engine(gsPath, Doc.class, ImgFilter.class, ZoneGeneric.class, ZoneText.class,
+				Score.class, MeanLevenshtein.class);
+
 		engine.newCache().start();
 		compute(engine);
 		engine.close();
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static void compute(Root engine) {
-		// TODO: loop over all docTypes, or include docType as a method's parameter
+		final String docType = "id-fr-front";
+		compute(engine, docType);
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public static void compute(Root engine, String docType) {
+
 		Generic currentDocClass = engine.find(DocClass.class).getInstance(docType);
 		ImgFilter imgFilter = engine.find(ImgFilter.class);
 		ZoneText zoneText = engine.find(ZoneText.class);
 		Score score = engine.find(Score.class);
 		MeanLevenshtein meanLevenshtein = engine.find(MeanLevenshtein.class);
 
-		System.out.println("Current doc class : " + currentDocClass);
+		log.info("Current doc class : {} ", currentDocClass);
 
 		List<DocInstance> docInstances = (List) currentDocClass.getHolders(engine.find(Doc.class)).toList();
 		List<ZoneInstance> zoneInstances = (List) currentDocClass.getHolders(engine.find(ZoneGeneric.class)).toList();
@@ -68,12 +73,12 @@ public class ComputeTrainedScores {
 
 		// Loop over all zone instances
 		for (ZoneInstance zoneInstance : zoneInstances) {
-			System.out.println("=> Zone " + zoneInstance);
+			log.info("=> Zone {}", zoneInstance);
 
 			List<Float> meanLevDistances = new ArrayList<Float>();
 			List<Float> probabilities = new ArrayList<Float>();
 
-			// Loop over all filters
+			// Loop over all filter instances
 			for (ImgFilterInstance imgFilterInstance : imgFilterInstances) {
 				int lev = 0; // contains the sum of all Levenshtein
 								// distances for a given zone
@@ -86,7 +91,6 @@ public class ComputeTrainedScores {
 					String text = (String) zoneText.getZoneText(docInstance, zoneInstance, imgFilterInstance)
 							.getValue();
 					// TODO : manipulate the Strings before comparison?
-					// (remove spaces, etc.)
 					int dist = Levenshtein.distance(text.replaceAll("[\n ,.]", "").trim(),
 							realText.replaceAll("[\n ,.]", "").trim());
 
@@ -97,17 +101,17 @@ public class ComputeTrainedScores {
 				float meanDistance = (float) lev / (float) docInstances.size();
 
 				ScoreInstance scoreInstance = score.setScore(probability, zoneInstance, imgFilterInstance);
-				MeanLevenshteinInstance meanLevenshteinInstance = meanLevenshtein.setMeanLev(meanDistance,
-						scoreInstance);
+				meanLevenshtein.setMeanLev(meanDistance, scoreInstance);
+				engine.getCurrentCache().flush();
 
 				meanLevDistances.add(meanDistance);
 				probabilities.add(probability);
 			}
-			for (int i = 0; i < imgFilterInstances.size(); i++) {
-				System.out.println(imgFilterInstances.get(i) + " : " + meanLevDistances.get(i) + " (proba : "
-						+ probabilities.get(i) + ")");
-			}
 			engine.getCurrentCache().flush();
+			
+			for (int i = 0; i < imgFilterInstances.size(); i++) {
+				log.info("{}: (proba: {})", imgFilterInstances.get(i), meanLevDistances.get(i), probabilities.get(i));
+			}
 		}
 
 	}

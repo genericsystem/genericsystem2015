@@ -1,5 +1,6 @@
-package org.genericsystem.cv.comparator;
+package org.genericsystem.cv.watch;
 
+import org.genericsystem.cv.comparator.ComputeTrainedScores;
 import org.genericsystem.cv.model.Doc;
 import org.genericsystem.cv.model.DocClass;
 import org.genericsystem.cv.model.ImgFilter;
@@ -7,6 +8,8 @@ import org.genericsystem.cv.model.MeanLevenshtein;
 import org.genericsystem.cv.model.Score;
 import org.genericsystem.cv.model.ZoneGeneric;
 import org.genericsystem.cv.model.ZoneText;
+import org.genericsystem.cv.watch.VisualizeFiltersStatistics.COMPUTE_STATS;
+import org.genericsystem.cv.watch.VisualizeFiltersStatistics.RunScriptButton;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.BindAction;
@@ -28,8 +31,6 @@ import org.genericsystem.reactor.gscomponents.FlexDiv;
 import org.genericsystem.reactor.gscomponents.RootTagImpl;
 import org.genericsystem.reactor.gscomponents.AppHeader.AppTitleDiv;
 import org.genericsystem.reactor.gscomponents.AppHeader.Logo;
-import org.genericsystem.cv.comparator.VisualizeFiltersStatistics.RunScriptButton;
-import org.genericsystem.cv.comparator.VisualizeFiltersStatistics.COMPUTE_STATS;
 
 /**
  * The SetRealValues class can be used to provide accurate values for the text
@@ -38,7 +39,7 @@ import org.genericsystem.cv.comparator.VisualizeFiltersStatistics.COMPUTE_STATS;
  * These real values are stored in GS, and used by {@link ComputeTrainedScores}
  * to compute the scores for each zone/filter pairs.
  * 
- * @author middleware
+ * @author Pierrik Lassalas
  *
  */
 @DependsOnModel({ Doc.class, DocClass.class, ZoneGeneric.class, ZoneText.class, ImgFilter.class, Score.class,
@@ -58,7 +59,6 @@ public class VisualizeFiltersStatistics extends RootTagImpl {
 	}
 	
 	@SetText("Compute statistics")
-	@Style(name = "height", value = "40px")
 	@BindAction(COMPUTE_STATS.class)
 	public static class RunScriptButton extends HtmlButton {
 		
