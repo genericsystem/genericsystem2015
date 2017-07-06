@@ -15,6 +15,13 @@ import org.genericsystem.cv.model.ZoneGeneric.ZoneW;
 import org.genericsystem.cv.model.ZoneGeneric.ZoneX;
 import org.genericsystem.cv.model.ZoneGeneric.ZoneY;
 
+/**
+ * This class stores zones for given class of documents.
+ * 
+ * @author Jean Mathorel
+ * @author Pierrik Lassalas
+ *
+ */
 @SystemGeneric
 @Dependencies({ ZoneX.class, ZoneY.class, ZoneW.class, ZoneH.class })
 @Components(DocClass.class)
@@ -26,10 +33,9 @@ public class ZoneGeneric implements Generic {
 		public DocClassInstance getDocClass() {
 			return (DocClassInstance) this.getHolder(getRoot().find(DocClass.class));
 		}
-
 	}
 
-	public ZoneInstance addZone(int numZone, DocClassInstance docClass) {
+	public ZoneInstance setZone(int numZone, DocClassInstance docClass) {
 		return (ZoneInstance) setInstance(numZone, docClass);
 	}
 

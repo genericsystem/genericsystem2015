@@ -10,13 +10,22 @@ import org.genericsystem.cv.model.ZoneGeneric.ZoneInstance;
 import org.genericsystem.cv.model.ZoneGeneric.ZoneW;
 import org.genericsystem.cv.model.ZoneGeneric.ZoneX;
 import org.genericsystem.cv.model.ZoneGeneric.ZoneY;
+import org.opencv.core.Point;
 
+/**
+ * This class stores the document class.
+ * 
+ * @author Jean Mathorel
+ * @author Pierrik Lassalas
+ *
+ */
 @SystemGeneric
 @InstanceClass(DocClassInstance.class)
 public class DocClass implements Generic {
 
 	public static class DocClassInstance implements Generic {
-		public ZoneInstance addZone(int num, int x, int y, int width, int height) {
+		
+		public ZoneInstance setZone(int num, int x, int y, int width, int height) {
 			ZoneInstance zoneInstance = (ZoneInstance) setHolder(getRoot().find(ZoneGeneric.class), num);
 			zoneInstance.setHolder(getRoot().find(ZoneX.class), x);
 			zoneInstance.setHolder(getRoot().find(ZoneY.class), y);
@@ -24,8 +33,21 @@ public class DocClass implements Generic {
 			zoneInstance.setHolder(getRoot().find(ZoneH.class), height);
 			return zoneInstance;
 		}
+		
+		public ZoneInstance setZone(int num, Point tl, Point br) {
+			ZoneInstance zoneInstance = (ZoneInstance) setHolder(getRoot().find(ZoneGeneric.class), num);
+			int x = ((Double) tl.x).intValue();
+			int y = ((Double) tl.y).intValue();
+			int width = ((Double) br.x).intValue() - x;
+			int height = ((Double) br.y).intValue() - y;
+			zoneInstance.setHolder(getRoot().find(ZoneX.class), x);
+			zoneInstance.setHolder(getRoot().find(ZoneY.class), y);
+			zoneInstance.setHolder(getRoot().find(ZoneW.class), width);
+			zoneInstance.setHolder(getRoot().find(ZoneH.class), height);
+			return zoneInstance;
+		}
 
-		public DocInstance addDoc(Generic docInstance, String filename){
+		public DocInstance setDoc(Generic docInstance, String filename){
 			return (DocInstance) setHolder(docInstance, filename);
 		}
 		
@@ -39,7 +61,7 @@ public class DocClass implements Generic {
 
 	}
 
-	public DocClassInstance addDocClass(String name) {
+	public DocClassInstance setDocClass(String name) {
 		return (DocClassInstance) setInstance(name);
 	}
 

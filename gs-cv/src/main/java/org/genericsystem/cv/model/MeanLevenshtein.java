@@ -9,8 +9,9 @@ import org.genericsystem.cv.model.Score.ScoreInstance;
 import org.genericsystem.cv.model.MeanLevenshtein.MeanLevenshteinInstance;
 
 /**
- * This class stores the mean levenshtein distance for a given
- * {@link ZoneGeneric} and {@link ImgFilter}
+ * This class stores the mean levenshtein distance for a given couple of
+ * {@link ZoneGeneric} and {@link ImgFilter}, among all the documents in a
+ * specific class.
  * 
  * @author Pierrik Lassalas
  *
@@ -26,10 +27,9 @@ public class MeanLevenshtein implements Generic {
 		public ScoreInstance getScore() {
 			return (ScoreInstance) this.getBaseComponent();
 		}
-
 	}
 
-	public MeanLevenshteinInstance addMeanLev(Float meanValue, ScoreInstance scoreInstance) {
+	public MeanLevenshteinInstance setMeanLev(Float meanValue, ScoreInstance scoreInstance) {
 		return (MeanLevenshteinInstance) setInstance(meanValue, scoreInstance);
 	}
 
