@@ -18,7 +18,6 @@ import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.DependsOnModel;
-import org.genericsystem.reactor.annotations.DirectSelect;
 import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
@@ -26,19 +25,18 @@ import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.context.ContextAction;
+import org.genericsystem.reactor.context.ContextAction.CANCEL;
 import org.genericsystem.reactor.context.ObservableListExtractor;
 import org.genericsystem.reactor.context.TextBinding;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlH1;
-import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlH2;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlImg;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
 import org.genericsystem.reactor.gscomponents.InputTextWithConversion.InputTextEditorWithConversion;
 import org.genericsystem.reactor.gscomponents.AppHeader;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.FlexDiv;
-import org.genericsystem.reactor.gscomponents.InstancesTable;
 import org.genericsystem.reactor.gscomponents.RootTagImpl;
 import org.genericsystem.reactor.gscomponents.AppHeader.AppTitleDiv;
 import org.genericsystem.reactor.gscomponents.AppHeader.Logo;
@@ -54,7 +52,7 @@ import javafx.collections.ObservableList;
  * These real values are stored in GS, and used by {@link ComputeTrainedScores}
  * to compute the scores for each zone/filter pairs.
  * 
- * @author middleware
+ * @author Pierrik Lassalas
  *
  */
 @DependsOnModel({ Doc.class, DocClass.class, ZoneGeneric.class, ZoneText.class })
@@ -66,16 +64,17 @@ import javafx.collections.ObservableList;
 public class SetRealValues2 extends RootTagImpl {
 
 	private static final String docClass = "id-fr-front";
+	private static final String gsPath = "/gs-cv_model";
 
 	public static void main(String[] mainArgs) {
-		ApplicationServer.startSimpleGenericApp(mainArgs, SetRealValues2.class, "/gs-cv_model");
+		ApplicationServer.startSimpleGenericApp(mainArgs, SetRealValues2.class, gsPath);
 	}
 
-	/*
-	 * For each document saved in GS, create image + textdiv elements
-	 */
+	// For each document in the doc class, create a div with an image and the
+	// input text
 	@ForEach(DOC_CLASS_SELECTOR.class)
 	@Children({ Image.class, TextDiv.class })
+	@StyleClass("document-div")
 	public static class DocumentDiv extends HtmlDiv {
 
 	}
@@ -90,15 +89,14 @@ public class SetRealValues2 extends RootTagImpl {
 	}
 
 	// Define the textdiv
-	@Children({ ZoneLabelInput.class, Validate.class })
+	@Children({ ZoneLabelInput.class, Validate.class, Cancel.class })
 	public static class TextDiv extends HtmlDiv {
 
 	}
 
-	/*
-	 * For each zone, create label + inputText
-	 */
-	@Children({ ZoneLabel.class, ZoneInput.class, FiltersDiv.class})
+	// For each zone, create label + inputText + print the results for all the
+	// filters
+	@Children({ ZoneLabel.class, ZoneInput.class, FiltersDiv.class })
 	@ForEach(SELECTOR.class)
 	public static class ZoneLabelInput extends HtmlDiv {
 
@@ -115,7 +113,9 @@ public class SetRealValues2 extends RootTagImpl {
 	public static class ZoneInput extends InputTextEditorWithConversion {
 
 	}
-	
+
+	// For each filter, create a row with the filtername and the results of the
+	// ocr
 	@FlexDirectionStyle(FlexDirection.ROW)
 	@StyleClass("ocr-row")
 	@Children({ FiltersList.class, FiltersTextList.class })
@@ -124,6 +124,7 @@ public class SetRealValues2 extends RootTagImpl {
 
 	}
 
+	// Print the filtername
 	@FlexDirectionStyle(FlexDirection.COLUMN)
 	@Style(name = "flex", value = "1")
 	@BindText
@@ -131,7 +132,8 @@ public class SetRealValues2 extends RootTagImpl {
 	public static class FiltersList extends FlexDiv {
 
 	}
-	
+
+	// Print the ocr text for the corresponding filter
 	@FlexDirectionStyle(FlexDirection.COLUMN)
 	@Style(name = "flex", value = "4")
 	@BindText(OCR_LABEL.class)
@@ -140,9 +142,17 @@ public class SetRealValues2 extends RootTagImpl {
 
 	}
 
-	@SetText("Validate")
+	// Create a validate button to persist the changes
+	@SetText("Save")
 	@BindAction(value = SAVE.class)
 	public static class Validate extends HtmlButton {
+
+	}
+
+	// Create a cancel button to cancel the changes
+	@SetText("Cancel")
+	@BindAction(value = CANCEL.class)
+	public static class Cancel extends HtmlButton {
 
 	}
 
@@ -170,7 +180,7 @@ public class SetRealValues2 extends RootTagImpl {
 			return docInstances.toObservableList();
 		}
 	}
-	
+
 	public static class OCR_SELECTOR implements ObservableListExtractor {
 		@Override
 		public ObservableList<Generic> apply(Generic[] generics) {
@@ -181,7 +191,6 @@ public class SetRealValues2 extends RootTagImpl {
 			return filters.toObservableList();
 		}
 	}
-
 
 	public static class OCR_LABEL implements TextBinding {
 		@Override

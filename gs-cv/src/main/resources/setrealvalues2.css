@@ -15,6 +15,10 @@ button {
 	margin: 10px;
 }
 
+.document-div {
+	margin-left: 20px;
+}
+
 .ocr-row {
 	width: 90%;
 	margin: auto;
