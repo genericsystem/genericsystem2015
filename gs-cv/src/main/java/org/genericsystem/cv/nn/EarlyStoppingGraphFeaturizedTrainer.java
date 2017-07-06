@@ -1,4 +1,4 @@
-package org.genericsystem.cv;
+package org.genericsystem.cv.nn;
 
 import org.deeplearning4j.earlystopping.EarlyStoppingConfiguration;
 import org.deeplearning4j.earlystopping.trainer.EarlyStoppingGraphTrainer;
