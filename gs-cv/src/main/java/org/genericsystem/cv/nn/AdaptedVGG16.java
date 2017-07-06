@@ -1,4 +1,4 @@
-package org.genericsystem.cv;
+package org.genericsystem.cv.nn;
 
 import java.io.File;
 import java.io.IOException;
