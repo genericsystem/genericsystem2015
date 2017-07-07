@@ -232,6 +232,7 @@ public class ApplicationServer extends AbstractBackEnd {
 					indexHtml += "<script>";
 					indexHtml += "var serviceLocation = \"ws://\" + document.location.host + \"" + request.path() + "\";";
 					indexHtml += "</script>";
+					indexHtml += "<script type=\"text/javascript\" src=\"/script.js\"></script>";
 					indexHtml += "<script type=\"text/javascript\" src=\"" + (appPath.isEmpty() ? "" : ("/" + appPath)) + "/" + application.getApplicationClass().getSimpleName().toLowerCase() + ".js\"></script>";
 					indexHtml += "</head>";
 					indexHtml += "<body onload=\"connect();\" id=\"" + application.getRootId() + "\">";
