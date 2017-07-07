@@ -10,12 +10,13 @@ import org.genericsystem.cv.model.ZoneGeneric.ZoneInstance;
 import org.genericsystem.cv.model.Score.ScoreInstance;
 
 /**
- * The score class is a relation between a text field (zone) and an image
- * filter.
+ * This class stores the score of a given couple of {@link ZoneGeneric} and
+ * {@link ImgFilter}
  * 
- * When an image is treated with a given filter, and then OCR'd, the probability
- * of the text being correct is given by the score.
+ * When an image is processed, the score represents the probability for a given
+ * filter on a given zone to get an accurate text value after OCR.
  * 
+ * @author Jean Mathorel
  * @author Pierrik Lassalas
  *
  */
@@ -36,7 +37,7 @@ public class Score implements Generic {
 		}
 	}
 
-	public ScoreInstance addScore(Float score, ZoneInstance zoneInstance, ImgFilterInstance imgFilterInstance) {
+	public ScoreInstance setScore(Float score, ZoneInstance zoneInstance, ImgFilterInstance imgFilterInstance) {
 		return (ScoreInstance) setInstance(score, zoneInstance, imgFilterInstance);
 	}
 

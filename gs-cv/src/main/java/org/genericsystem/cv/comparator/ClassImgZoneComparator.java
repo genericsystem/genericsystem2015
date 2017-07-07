@@ -20,6 +20,7 @@ import org.genericsystem.cv.model.DocClass.DocClassInstance;
 import org.genericsystem.cv.model.ImgFilter.ImgFilterInstance;
 import org.genericsystem.cv.model.ZoneGeneric.ZoneInstance;
 import org.genericsystem.cv.model.ZoneText.ZoneTextInstance;
+import org.genericsystem.cv.watch.SetRealValues;
 import org.genericsystem.kernel.Engine;
 import org.opencv.core.Core;
 import org.opencv.core.Size;

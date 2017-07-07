@@ -1,0 +1,58 @@
+@CHARSET "UTF-8";
+
+input {
+	padding: 0.5em;
+	margin-left: 0.1em;
+	margin-right: 1em;
+	flex: 1 1 auto;
+}
+
+label {
+	padding: 0.5em;
+	margin-left: 1em;
+	flex: 0 1 auto;
+}
+
+img {
+	height: auto;
+	width: 400px;
+}
+
+button {
+	width: 150px;
+	margin: 10px;
+}
+
+.glowing-border {
+    border: 1px solid #dadada;
+    border-radius: 7px;
+}
+
+.glowing-border:focus { 
+    outline: none;
+    border-color: #9ecaed;
+    box-shadow: 0 0 10px #9ecaed;
+}
+
+.document-div {
+	margin-left: 20px;
+}
+
+.ocr-row {
+	width: 90%;
+	margin: auto;
+}
+
+.ocr {
+/* 	padding: 3px; */
+	font-size: small;
+}
+
+.ocr-text {
+	font-style: italic;
+	font-weight: normal;
+}
+
+.ocr-label {
+	font-weight: bold;
+}

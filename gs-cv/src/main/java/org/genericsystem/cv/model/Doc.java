@@ -11,6 +11,13 @@ import org.genericsystem.cv.model.Doc.DocInstance;
 import org.genericsystem.cv.model.DocClass.DocClassInstance;
 import org.genericsystem.cv.model.ZoneGeneric.ZoneInstance;
 
+/**
+ * This class stores the documents that belong to the parent class.
+ * 
+ * @author Jean Mathorel
+ * @author Pierrik Lassalas
+ *
+ */
 @SystemGeneric
 @Components(DocClass.class)
 @InstanceClass(DocInstance.class)
@@ -30,7 +37,7 @@ public class Doc implements Generic {
 
 	}
 
-	public DocInstance addDoc(String name, DocClassInstance docClassInstance) {
+	public DocInstance setDoc(String name, DocClassInstance docClassInstance) {
 		return (DocInstance) setInstance(name, docClassInstance);
 	}
 

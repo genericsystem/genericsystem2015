@@ -10,6 +10,14 @@ import org.genericsystem.cv.model.ImgFilter.ImgFilterInstance;
 import org.genericsystem.cv.model.ZoneGeneric.ZoneInstance;
 import org.genericsystem.cv.model.ZoneText.ZoneTextInstance;
 
+/**
+ * This class stores the results of the OCR for a given document, zone, and
+ * filter.
+ * 
+ * @author Jean Mathorel
+ * @author Pierrik Lassalas
+ *
+ */
 @SystemGeneric
 @PropertyConstraint
 @Components({ Doc.class, ZoneGeneric.class, ImgFilter.class })
@@ -25,18 +33,17 @@ public class ZoneText implements Generic {
 		public ZoneInstance getZone() {
 			return (ZoneInstance) this.getComponent(1);
 		}
-		
-		public int getZoneNum() {
-			return (int) getZone().getValue();
-		}
 
 		public ImgFilterInstance getImgFilter() {
 			return (ImgFilterInstance) this.getComponent(2);
 		}
-
+		
+		public int getZoneNum() {
+			return (int) getZone().getValue();
+		}
 	}
 
-	public ZoneTextInstance addZoneText(String text, DocInstance doc, ZoneInstance zone, ImgFilterInstance imgFilter) {
+	public ZoneTextInstance setZoneText(String text, DocInstance doc, ZoneInstance zone, ImgFilterInstance imgFilter) {
 		return (ZoneTextInstance) setInstance(text, doc, zone, imgFilter);
 	}
 

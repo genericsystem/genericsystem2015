@@ -10,7 +10,7 @@ import org.genericsystem.cv.model.ZoneText.ZoneTextInstance;
 import org.genericsystem.cv.model.LevDistance.LevDistanceInstance;
 
 /**
- * This class stores the Levenshtein distance between two {@link ZoneText}
+ * This class stores the Levenshtein distance between two {@link ZoneText}.
  * 
  * @author Pierrik Lassalas
  *
@@ -33,12 +33,12 @@ public class LevDistance implements Generic {
 	}
 
 	// TODO: remove method?
-	public LevDistanceInstance computeLevDistance(ZoneTextInstance zt1, ZoneTextInstance zt2) {
-		int d = Levenshtein.distance((String) zt1.getValue(), (String) zt2.getValue());
-		return (LevDistanceInstance) setInstance(d, zt1, zt2);
-	}
+//	public LevDistanceInstance computeLevDistance(ZoneTextInstance zt1, ZoneTextInstance zt2) {
+//		int d = Levenshtein.distance((String) zt1.getValue(), (String) zt2.getValue());
+//		return (LevDistanceInstance) setInstance(d, zt1, zt2);
+//	}
 
-	public LevDistanceInstance addLevDistance(Integer distance, ZoneTextInstance zt1, ZoneTextInstance zt2) {
+	public LevDistanceInstance setLevDistance(Integer distance, ZoneTextInstance zt1, ZoneTextInstance zt2) {
 		return (LevDistanceInstance) setInstance(distance, zt1, zt2);
 	}
 

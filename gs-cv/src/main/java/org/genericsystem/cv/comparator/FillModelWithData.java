@@ -12,6 +12,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.genericsystem.common.Generic;
+import org.genericsystem.common.Root;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.Zones;
 import org.genericsystem.cv.model.Doc;
@@ -43,28 +44,26 @@ import org.slf4j.LoggerFactory;
  */
 public class FillModelWithData {
 
-	private static Logger log = LoggerFactory.getLogger(FillModelWithData.class);
-	private static final String gsPath = System.getenv("HOME") + "/genericsystem/gs-cv_model3/";
-	private final static Engine engine = new Engine(gsPath, Doc.class, ImgFilter.class, ZoneGeneric.class,
-			ZoneText.class, Score.class, MeanLevenshtein.class);
-
-	private static final String docType = "id-fr-front";
-
 	static {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 		System.out.println("OpenCV core library loaded");
 	}
 
+	private static Logger log = LoggerFactory.getLogger(FillModelWithData.class);
+	private static final String gsPath = System.getenv("HOME") + "/genericsystem/gs-cv_model3/";
+	private static final String docType = "id-fr-front";
+
 	public static void main(String[] mainArgs) {
+		final Engine engine = new Engine(gsPath, Doc.class, ImgFilter.class, ZoneGeneric.class, ZoneText.class,
+				Score.class, MeanLevenshtein.class);
 		engine.newCache().start();
-		compute();
-//		 cleanModel();
+		compute(engine);
+		// cleanModel(engine);
 		engine.close();
-		// doImgOcr(Paths.get("/home/middleware/git/genericsystem2015/gs-cv/classes/id-fr-front"));
 	}
 
 	/**
-	 * This Map will contain the names of the filter that will be applied to a
+	 * This Map will contain the names of the filters that will be applied to a
 	 * specified {@link Img}.
 	 * 
 	 * @return - a Map containing the filter names as key, and a
@@ -81,7 +80,31 @@ public class FillModelWithData {
 		return map;
 	}
 
+	/**
+	 * Process an image, and store all the informations in the engine of Generic
+	 * System. When no Engine is provided, a default one is created.
+	 * 
+	 * @param imagePath
+	 *            - a {@link Path} object pointing to the image to be processed
+	 */
 	public static void doImgOcr(Path imagePath) {
+		final Engine engine = new Engine(gsPath, Doc.class, ImgFilter.class, ZoneGeneric.class, ZoneText.class,
+				Score.class, MeanLevenshtein.class);
+		engine.newCache().start();
+		doImgOcr(engine, imagePath);
+		engine.close();
+	}
+
+	/**
+	 * Process an image, and store all the informations in the engine of Generic
+	 * System.
+	 * 
+	 * @param engine
+	 *            - the engine used to store the data
+	 * @param imagePath
+	 *            - a {@link Path} object pointing to the image to be processed
+	 */
+	public static void doImgOcr(Root engine, Path imagePath) {
 		final Path imgClassDirectory = imagePath.getParent();
 		final String docType = imgClassDirectory.getName(imgClassDirectory.getNameCount() - 1).toString();
 		final String imgDirectory = imgClassDirectory.toString() + "/ref2/";
@@ -89,68 +112,113 @@ public class FillModelWithData {
 		engine.newCache().start();
 		// Find and save the doc class
 		DocClass docClass = engine.find(DocClass.class);
-		DocClassInstance docClassInstance = docClass.addDocClass(docType);
+		DocClassInstance docClassInstance = docClass.setDocClass(docType);
 		engine.getCurrentCache().flush();
 		// Get the filters and the predefined zones
 		final Map<String, Function<Img, Img>> imgFilters = getFiltersMap();
 		final Zones zones = Zones.load(imgClassDirectory.toString());
 		// Process the image file
 		File file = new File(imagePath.toString());
-		initComputation(imgClassDirectory.toString(), docType, imgFilters, zones);
-		processFile(file, docClassInstance, zones, imgFilters.entrySet().stream());
+		initComputation(engine, docType, imgFilters, zones);
+		processFile(engine, file, docClassInstance, zones, imgFilters.entrySet().stream());
 		engine.getCurrentCache().flush();
 		engine.close();
 	}
 
-	private static void compute() {
+	/**
+	 * Process all the images in the specified folder, and store all the data in
+	 * Generic System.
+	 * 
+	 * @param engine
+	 *            - the engine used to store the data
+	 */
+	private static void compute(Root engine) {
 		final String imgClassDirectory = "classes/" + docType;
 		final String imgDirectory = imgClassDirectory + "/ref2/";
 		log.info("imgClassDirectory = {} ", imgClassDirectory);
 		// Save the current document class
 		DocClass docClass = engine.find(DocClass.class);
-		DocClassInstance docClassInstance = docClass.addDocClass(docType);
+		DocClassInstance docClassInstance = docClass.setDocClass(docType);
 		// Set all the filter names
-		Map<String, Function<Img, Img>> imgFilters = filterOptimizationMap();
+		Map<String, Function<Img, Img>> imgFilters = getFiltersMap();
 		// Load the accurate zones
 		final Zones zones = Zones.load(imgClassDirectory);
-		initComputation(imgClassDirectory, docType, imgFilters, zones);
+		initComputation(engine, docType, imgFilters, zones);
 		// Process each file in folder imgDirectory
 		Arrays.asList(new File(imgDirectory).listFiles((dir, name) -> name.endsWith(".png"))).forEach(file -> {
-			processFile(file, docClassInstance, zones, imgFilters.entrySet().stream());
+			processFile(engine, file, docClassInstance, zones, imgFilters.entrySet().stream());
 			engine.getCurrentCache().flush();
 		});
 		engine.getCurrentCache().flush();
 	}
 
-	private static void initComputation(String imgClassDirectory, String docType,
-			Map<String, Function<Img, Img>> imgFilters, Zones zones) {
+	/**
+	 * Initialize the computation.
+	 * 
+	 * This method is used both by {@link #compute(Root)} and
+	 * {@link #doImgOcr(Path)}.
+	 * 
+	 * @param engine
+	 *            - the engine used to store the data
+	 * @param docType
+	 *            - the document type (i.e., class)
+	 * @param imgFilters
+	 *            - a Map containing the filtername as key, and the
+	 *            corresponding function to be applied for this filter
+	 * @param zones
+	 *            - a {@link Zones} object, representing all the zones detected
+	 *            for ocr
+	 */
+	private static void initComputation(Root engine, String docType, Map<String, Function<Img, Img>> imgFilters,
+			Zones zones) {
+
 		DocClass docClass = engine.find(DocClass.class);
 		ImgFilter imgFilter = engine.find(ImgFilter.class);
 		DocClassInstance docClassInstance = docClass.getDocClass(docType);
 		// Save the zones
 		zones.getZones().forEach(z -> {
 			log.info("Adding zone n° {}", z.getNum());
-			docClassInstance.addZone(z.getNum(), z.getRect().x, z.getRect().y, z.getRect().width, z.getRect().height);
+			docClassInstance.setZone(z.getNum(), z.getRect().x, z.getRect().y, z.getRect().width, z.getRect().height);
 		});
 		// Save the filternames
 		imgFilters.entrySet().forEach(entry -> {
 			log.info("Adding algorithm : {} ", entry.getKey());
-			imgFilter.addImgFilter(entry.getKey());
+			imgFilter.setImgFilter(entry.getKey());
 		});
 		// Persist the changes
 		engine.getCurrentCache().flush();
 	}
 
-	private static void processFile(File file, DocClassInstance docClassInstance, Zones zones,
+	/**
+	 * Process an image file.
+	 * 
+	 * Each zone of each image is analyzed through OCR, and the results are
+	 * stored in Generic System engine.
+	 * 
+	 * @param engine
+	 *            - the engine where the data will be stored
+	 * @param file
+	 *            - the file to be processed
+	 * @param docClassInstance
+	 *            - the instance of {@link DocClass} representing the current
+	 *            class of the file
+	 * @param zones
+	 *            - the list of zones for this image
+	 * @param imgFilters
+	 *            - a stream of entry for a Map containing the filternames that
+	 *            will be applied to the original file, and the functions
+	 *            required to apply these filters
+	 */
+	private static void processFile(Root engine, File file, DocClassInstance docClassInstance, Zones zones,
 			Stream<Entry<String, Function<Img, Img>>> imgFilters) {
+		
 		log.info("\nProcessing file: {}", file.getName());
-
 		Generic doc = engine.find(Doc.class);
 		ZoneText zoneText = engine.find(ZoneText.class);
 		ImgFilter imgFilter = engine.find(ImgFilter.class);
 
-		// Save the current file (document)
-		DocInstance docInstance = docClassInstance.addDoc(doc, file.getName());
+		// Save the current file
+		DocInstance docInstance = docClassInstance.setDoc(doc, file.getName());
 		engine.getCurrentCache().flush();
 
 		// Draw the image's zones + numbers
@@ -190,7 +258,7 @@ public class FillModelWithData {
 					// Do not proceed to OCR if the real values are known
 				} else {
 					String ocrText = z.ocr(entry.getValue());
-					zoneText.addZoneText(ocrText.trim(), docInstance, zoneInstance,
+					zoneText.setZoneText(ocrText.trim(), docInstance, zoneInstance,
 							imgFilter.getImgFilter(entry.getKey()));
 				}
 			});
@@ -227,9 +295,15 @@ public class FillModelWithData {
 		return imgFilters;
 	}
 
+	/**
+	 * Remove all the data stored in the engine, except the real values used for
+	 * training (e.g., for which imgFilter = "reality")
+	 * 
+	 * @param engine
+	 *            - the engine used to store the data
+	 */
 	@SuppressWarnings({ "unused", "unchecked", "rawtypes" })
-	private static void cleanModel() {
-		// TODO: not yet working as expected --> delete the nodes in addition to the instances?
+	private static void cleanModel(Root engine) {
 
 		System.out.println("Cleaning model...");
 

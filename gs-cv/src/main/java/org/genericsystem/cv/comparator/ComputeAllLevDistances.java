@@ -82,7 +82,7 @@ public class ComputeAllLevDistances {
 					for (int j = i; j < imgFilterInstances.size(); ++j) {
 						int dist = 0;
 						if (i == j) {
-							levDistance.addLevDistance(0, zoneText1, zoneText1);
+							levDistance.setLevDistance(0, zoneText1, zoneText1);
 							break;
 						}
 						ZoneTextInstance zoneText2 = zoneText.getZoneText(docInstance, zoneInstance,
@@ -91,8 +91,8 @@ public class ComputeAllLevDistances {
 						String text1 = (String) zoneText1.getValue();
 						String text2 = (String) zoneText2.getValue();
 						dist = Levenshtein.distance(text1.trim(), text2.trim());
-						levDistance.addLevDistance(dist, zoneText1, zoneText2);
-						levDistance.addLevDistance(dist, zoneText2, zoneText1);
+						levDistance.setLevDistance(dist, zoneText1, zoneText2);
+						levDistance.setLevDistance(dist, zoneText2, zoneText1);
 					}
 					// Free some resources
 					System.gc();

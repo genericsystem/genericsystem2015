@@ -1,0 +1,17 @@
+@CHARSET "UTF-8";
+
+input {
+	width: 90%;
+	margin: 5px;
+}
+
+img {
+	height: auto;
+	width: 500px;
+}
+
+button {
+	margin: 10px;
+	padding: 10px;
+}
+
