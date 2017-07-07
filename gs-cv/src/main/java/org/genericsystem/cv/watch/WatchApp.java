@@ -16,12 +16,15 @@ import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.annotations.ForEach;
+import org.genericsystem.reactor.annotations.SelectContext;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.context.ContextAction;
 import org.genericsystem.reactor.context.ContextAction.MODAL_DISPLAY_FLEX;
+import org.genericsystem.reactor.context.ContextAction.SET_SELECTION;
+import org.genericsystem.reactor.context.ObservableContextSelector.SELECTION_SELECTOR;
 import org.genericsystem.reactor.context.ObservableListExtractor;
 import org.genericsystem.reactor.gscomponents.AppHeader;
 import org.genericsystem.reactor.gscomponents.AppHeader.AppTitleDiv;
@@ -80,9 +83,9 @@ public class WatchApp extends RootTagImpl {
 
 	@SetText("Edit")
 	@Style(name = "flex", value = "0 0 auto")
-	@BindAction(MODAL_DISPLAY_FLEX.class)
+	@BindAction({ SET_SELECTION.class, MODAL_DISPLAY_FLEX.class })
 	public static class DocumentEditButton extends HtmlButton {
-
+		// TODO: change the way the context is loaded (currently, everything is loaded for every file)
 	}
 
 	public static class DOC_CLASS_SELECTOR implements ObservableListExtractor {

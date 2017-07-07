@@ -13,18 +13,22 @@ import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.Attribute;
 import org.genericsystem.reactor.annotations.BindAction;
+import org.genericsystem.reactor.annotations.BindSelection;
 import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.InheritStyle;
+import org.genericsystem.reactor.annotations.SelectContext;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.context.ContextAction;
 import org.genericsystem.reactor.context.ContextAction.CANCEL;
+import org.genericsystem.reactor.context.ObservableContextSelector.SELECTION_SELECTOR;
 import org.genericsystem.reactor.context.ObservableListExtractor;
 import org.genericsystem.reactor.context.TextBinding;
+import org.genericsystem.reactor.contextproperties.SelectionDefaults;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.FlexDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
@@ -34,7 +38,9 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlImg;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
 import org.genericsystem.reactor.gscomponents.InputTextWithConversion.InputTextEditorWithConversion;
 import org.genericsystem.reactor.gscomponents.Modal.ModalWithDisplay;
+import org.genericsystem.reactor.gscomponents.TagImpl;
 
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -45,16 +51,15 @@ public class EditDocumentZones extends ModalWithDisplay {
 
 	@FlexDirectionStyle(FlexDirection.ROW)
 	@Children({ FlexDiv.class, FlexDiv.class })
-	@Children(path = FlexDiv.class, pos = 0, value = { Image.class, FlexDiv.class })
-	@Children(path = FlexDiv.class, pos = 1, value = ZoneTextDiv.class)
-	@Children(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, -1 }, value = { Validate.class, Cancel.class })
-	@FlexDirectionStyle(path = FlexDiv.class, pos = 0, value = FlexDirection.COLUMN)
-	@FlexDirectionStyle(path = FlexDiv.class, pos = 1, value = FlexDirection.COLUMN)
-	@FlexDirectionStyle(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, -1 }, value = FlexDirection.ROW)
-	@Style(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, -1 }, name = "justify-content", value = "center")
-	@Style(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, -1 }, name = "align-items", value = "center")
+	@Children(path = FlexDiv.class, pos = 0, value = { Image.class, ZoneTextDiv.class })
+	@Children(path = FlexDiv.class, pos = 1, value = { Validate.class, Cancel.class })
+	@FlexDirectionStyle(path = FlexDiv.class, value = FlexDirection.COLUMN)
+	@FlexDirectionStyle(path = { FlexDiv.class, FlexDiv.class }, pos = { -1, -1 }, value = FlexDirection.ROW)
+	@Style(path = { FlexDiv.class, TagImpl.class }, pos = { -1, -1 }, name = "justify-content", value = "center")
+	@Style(path = { FlexDiv.class, TagImpl.class }, pos = { -1, -1 }, name = "align-items", value = "center")
+	@SelectContext(path = FlexDiv.class, pos = 0, value = SELECTION_SELECTOR.class)
 	public static class TextDiv extends FlexDiv {
-
+		
 	}
 
 	@SetText("Save")
