@@ -1,10 +1,10 @@
 package org.genericsystem.cv;
 
 import org.opencv.core.Core;
-import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 
 public class LayoutAnalyser extends AbstractApp {
@@ -20,23 +20,20 @@ public class LayoutAnalyser extends AbstractApp {
 	protected void fillGrid(GridPane mainGrid) {
 		int columnIndex = 0;
 		int rowIndex = 0;
-		Size hSize = new Size(20, 1);
-		Size vSize = new Size(1, 20);
-		int type = Imgproc.MORPH_OPEN;
+
 		Img img = new Img("resources/14342661748973931.jpg");
-		mainGrid.add(img.getImageView(), columnIndex, rowIndex++);
-		mainGrid.add(img.otsuInv().getImageView(), columnIndex, rowIndex++);
+		// mainGrid.add(img.getImageView(), columnIndex, rowIndex++);
+		// mainGrid.add(img.otsuInv().getImageView(), columnIndex, rowIndex++);
 
-		Img hImg = img.otsuInv().morphologyEx(type, Imgproc.MORPH_RECT, hSize);
-		Img vImg = img.otsuInv().morphologyEx(type, Imgproc.MORPH_RECT, vSize);
+		Img hImg = img.otsuInv();
+		hImg = hImg.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(1, 1 + 0.020 * hImg.height()));
+		mainGrid.add(new ImageView(hImg.toJfxImage()), columnIndex, rowIndex++);
 
-		Zones zones = Zones.get(hImg.add(vImg), 10, Imgproc.RETR_TREE);
-		Img result3 = hImg.bitwise(vImg);
-		zones.draw(result3, new Scalar(255), 5);
-		mainGrid.add(result3.getImageView(), columnIndex, rowIndex++);
+		hImg = hImg.projectVertically().toVerticalHistogram(hImg.cols(), 0.0001);
+		mainGrid.add(new ImageView(hImg.toJfxImage()), columnIndex, rowIndex++);
 
-		img.recursivSplit(30, true);
-		mainGrid.add(img.getImageView(), columnIndex, rowIndex++);
+		img.recursivSplit(0.020, 2, 0.0001);
+		mainGrid.add(new ImageView(img.toJfxImage()), columnIndex, rowIndex++);
 
 	}
 

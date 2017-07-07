@@ -202,9 +202,9 @@ public class Img {
 		// The line used as the top of the rectangle makes an angle of 45° max
 		// with an horizontal line.
 		int yMinIndex = 0; // Point with min y, and min x if there are two such
-							// points.
+		// points.
 		int xMinIndex = 0; // Point with min x, and min y if there are two such
-							// points.
+		// points.
 		for (int i = 0; i < list.size(); i++) {
 			double xCurr = list.get(i).x;
 			double xMin = list.get(xMinIndex).x;
@@ -789,30 +789,30 @@ public class Img {
 		return new Img(result);
 	}
 
-	public Img toVerticalHistogram(int cols) {
+	public Img toVerticalHistogram(int cols, double percentage) {
 		Mat result = new Mat(new Size(cols, rows()), CvType.CV_8UC1, new Scalar(0));
 		for (int row = 0; row < rows(); row++) {
-			double x = get(row, 0)[0] / 255;
-			if (x < Integer.valueOf(cols).doubleValue() / 100 || x > 99 * Integer.valueOf(cols).doubleValue() / 100)
-				x = 0;
-			else
-				x = cols;
+			double x = get(row, 0)[0] / 255 / Integer.valueOf(cols).doubleValue();
+			// if (x < percentage || x > 1 - percentage)
+			// x = 0;
+			// else
+			// x = cols;
 			if (x != 0)
-				Imgproc.line(result, new Point(0, row), new Point(x, row), new Scalar(255));
+				Imgproc.line(result, new Point(0, row), new Point(cols, row), new Scalar(255), 1);
 		}
 		return new Img(result);
 	}
 
-	public Img toHorizontalHistogram(int rows) {
+	public Img toHorizontalHistogram(int rows, double percentage) {
 		Mat result = new Mat(new Size(cols(), rows), CvType.CV_8UC1, new Scalar(0));
 		for (int col = 0; col < cols(); col++) {
-			double y = get(0, col)[0] / 255;
-			if (y < Integer.valueOf(rows).doubleValue() / 100 || y > 99 * Integer.valueOf(rows).doubleValue() / 100)
-				y = 0;
-			else
-				y = rows;
+			double y = get(0, col)[0] / 255 / Integer.valueOf(rows).doubleValue();
+			// if (y < percentage || y > 1 - percentage)
+			// y = 0;
+			// else
+			// y = rows;
 			if (y != 0)
-				Imgproc.line(result, new Point(col, 0), new Point(col, y), new Scalar(255));
+				Imgproc.line(result, new Point(col, 0), new Point(col, rows), new Scalar(255), 1);
 		}
 		return new Img(result);
 	}
@@ -829,19 +829,49 @@ public class Img {
 		return new Img(result);
 	}
 
-	public void recursivSplit(double morph, boolean vertical) {
-		Zones zones = Zones.split(this, morph, 0, 0, 0, vertical);
-		assert zones.size() != 0;
-		if (zones.size() == 1) {
-			// if (morph > 2)
-			// recursivSplit(morph / 1.8, !vertical);
+	// public void recursivSplit(double morph) {
+	// Zones vZones = Zones.split(this, morph, 0, true);
+	// assert vZones.size() != 0;
+	// if (vZones.size() == 1) {
+	// Zones hZones = Zones.split(this, morph, 0, false);
+	// if (hZones.size() == 1)
+	// return;
+	// for (Zone zone : hZones) {
+	// Img subRoi = zone.getRoi(this);
+	// subRoi.recursivSplit(morph);
+	// }
+	// hZones.draw(this, new Scalar(0, 255, 0), 2);
+	//
+	// } else {
+	// for (Zone zone : vZones) {
+	// Img subRoi = zone.getRoi(this);
+	// subRoi.recursivSplit(morph);
+	// }
+	// vZones.draw(this, new Scalar(0, 255, 0), 2);
+	// }
+	//
+	// }
+
+	public void recursivSplit(double morph, int level, double percentage) {
+		Zones hZones = Zones.split(this, morph, 0, true, percentage);
+		Zones vZones = Zones.split(this, morph, 0, false, percentage);
+
+		System.out.println("Level : " + level + " Hzones : " + hZones.size() + " Vzones : " + vZones.size());
+
+		if (level <= 0 || (hZones.size() <= 1 && vZones.size() <= 1)) {
 			return;
 		}
-		for (Zone zone : zones) {
+		Zones recusivZones = null;
+		if (hZones.size() == 1)
+			recusivZones = vZones;
+		else
+			recusivZones = hZones;
+
+		for (Zone zone : recusivZones) {
 			Img subRoi = zone.getRoi(this);
-			subRoi.recursivSplit(morph, !vertical);
+			subRoi.recursivSplit(morph, level - 1, percentage);
 		}
-		zones.draw(this, new Scalar(0, 255, 0), 2);
+		recusivZones.draw(this, new Scalar(0, 255, 0), 1);
 	}
 
 	public Img houghLinesP(double rho, double theta, int threshold) {
