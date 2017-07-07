@@ -55,7 +55,7 @@ public class WatchApp extends RootTagImpl {
 	@ForEach(DOC_CLASS_SELECTOR.class)
 	@FlexDirectionStyle(FlexDirection.ROW)
 	@Style(name = "margin", value = "0.5em")
-	@Children({ DocumentName.class, /*Image.class,*/ DocumentEditButtonDiv.class })
+	@Children({ DocumentName.class, DocumentEditButtonDiv.class })
 	public static class DocumentsList extends FlexDiv {
 
 	}
@@ -67,19 +67,6 @@ public class WatchApp extends RootTagImpl {
 	@Style(name = "flex", value = "1 0 auto")
 	public static class DocumentName extends FlexDiv {
 
-	}
-
-	// Map the image source to the filename stored in GS
-	@Style(name = "margin", value = "0.5em")
-	@Style(name = "flex", value = "0 0 auto")
-	@Style(name = "justify-content", value = "center")
-	@Style(name = "align-items", value = "center")
-	public static class Image extends HtmlImg {
-		@Override
-		public void init() {
-			bindAttribute("src", "imgadr",
-					context -> new SimpleStringProperty((String) context.getGeneric().getValue()));
-		}
 	}
 
 	@FlexDirectionStyle(FlexDirection.COLUMN)
@@ -106,13 +93,6 @@ public class WatchApp extends RootTagImpl {
 			System.out.println("Current doc class : " + currentDocClass);
 			Snapshot<Generic> docInstances = currentDocClass.getHolders(root.find(Doc.class));
 			return docInstances.toObservableList();
-		}
-	}
-	
-	public static class MODAL_EDITOR implements ContextAction {
-		@Override
-		public void accept(Context context, Tag tag) {
-			tag.getParent().find(ModalEditor.class).getDisplayProperty(context).setValue("flex");
 		}
 	}
 

@@ -11,6 +11,7 @@ import org.genericsystem.cv.model.ZoneText.ZoneTextInstance;
 import org.genericsystem.cv.watch.EditDocumentZones.TextDiv;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
+import org.genericsystem.reactor.annotations.Attribute;
 import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
@@ -43,16 +44,19 @@ import javafx.collections.ObservableList;
 public class EditDocumentZones extends ModalWithDisplay {
 
 	@FlexDirectionStyle(FlexDirection.ROW)
-//	@Children({ ImageDiv.class, EditDiv.class })
 	@Children({ FlexDiv.class, FlexDiv.class })
-	@Children(path = FlexDiv.class, pos = 0, value = { Image.class, Validate.class, Cancel.class })
-	@FlexDirectionStyle(path = FlexDiv.class, pos = 0, value = FlexDirection.COLUMN)
+	@Children(path = FlexDiv.class, pos = 0, value = { Image.class, FlexDiv.class })
 	@Children(path = FlexDiv.class, pos = 1, value = ZoneTextDiv.class)
+	@Children(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, -1 }, value = { Validate.class, Cancel.class })
+	@FlexDirectionStyle(path = FlexDiv.class, pos = 0, value = FlexDirection.COLUMN)
 	@FlexDirectionStyle(path = FlexDiv.class, pos = 1, value = FlexDirection.COLUMN)
+	@FlexDirectionStyle(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, -1 }, value = FlexDirection.ROW)
+	@Style(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, -1 }, name = "justify-content", value = "center")
+	@Style(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, -1 }, name = "align-items", value = "center")
 	public static class TextDiv extends FlexDiv {
 
 	}
-	
+
 	@SetText("Save")
 	@BindAction(value = SAVE.class)
 	public static class Validate extends HtmlButton {
@@ -64,7 +68,7 @@ public class EditDocumentZones extends ModalWithDisplay {
 	public static class Cancel extends HtmlButton {
 		// Cancel the changes
 	}
-	
+
 	@Style(name = "margin", value = "0.5em")
 	@Style(name = "flex", value = "0 0 auto")
 	@Style(name = "justify-content", value = "center")
@@ -77,63 +81,34 @@ public class EditDocumentZones extends ModalWithDisplay {
 		}
 	}
 
-	// For each zone, create label + inputText + print the results for all the
-	// filters
 	@FlexDirectionStyle(FlexDirection.COLUMN)
-	@Children({ ZoneLabelInput.class, FiltersDiv.class })
-	@ForEach(SELECTOR.class)
+	@Children({ ZoneLabelInput.class, ZonesDetails.class })
+	@ForEach(ZONE_SELECTOR.class)
 	public static class ZoneTextDiv extends FlexDiv {
-
+		// For each zone, create a div with label + inputText
+		// and create a div for the results for all filters
 	}
-	
+
 	@FlexDirectionStyle(FlexDirection.ROW)
 	@Children({ ZoneLabel.class, ZoneInput.class })
 	public static class ZoneLabelInput extends FlexDiv {
 
 	}
 
-	// Define the zone label
 	@BindText(ZONE_LABEL.class)
-	public static class ZoneLabel extends HtmlLabel {
-
+	@BindAction(MODAL_DISPLAY_FLEX_CUSTOM.class)
+	@Attribute(name = "name", value = "zone")
+	public static class ZoneLabel extends HtmlHyperLink {
+		// Define the zone label
 	}
 
-	// Define the inputText
 	@BindText
 	@StyleClass("glowing-border")
 	public static class ZoneInput extends InputTextEditorWithConversion {
-
+		// Define the inputText
 	}
 
-	// For each filter, create a row with the filtername and the results of the
-	// ocr
-	@FlexDirectionStyle(FlexDirection.ROW)
-	@StyleClass("ocr-row")
-	@Children({ FiltersList.class, FiltersTextList.class })
-	@ForEach(OCR_SELECTOR.class)
-	public static class FiltersDiv extends FlexDiv {
-
-	}
-
-	// Print the filtername
-	@FlexDirectionStyle(FlexDirection.COLUMN)
-	@Style(name = "flex", value = "1")
-	@BindText
-	@StyleClass({ "ocr", "ocr-label" })
-	public static class FiltersList extends FlexDiv {
-
-	}
-
-	// Print the ocr text for the corresponding filter
-	@FlexDirectionStyle(FlexDirection.COLUMN)
-	@Style(name = "flex", value = "4")
-	@BindText(OCR_LABEL.class)
-	@StyleClass({ "ocr", "ocr-text" })
-	public static class FiltersTextList extends FlexDiv {
-
-	}
-
-	public static class SELECTOR implements ObservableListExtractor {
+	public static class ZONE_SELECTOR implements ObservableListExtractor {
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		@Override
 		public ObservableList<Generic> apply(Generic[] generics) {
@@ -147,29 +122,6 @@ public class EditDocumentZones extends ModalWithDisplay {
 		}
 	}
 
-	public static class OCR_SELECTOR implements ObservableListExtractor {
-		@Override
-		public ObservableList<Generic> apply(Generic[] generics) {
-			Root root = generics[0].getRoot();
-			ZoneTextInstance zti = (ZoneTextInstance) generics[0];
-			System.out.println("zti : " + zti.getZoneNum() + " " + zti.getImgFilter() + " " + zti.getDoc());
-			Snapshot<Generic> filters = root.find(ImgFilter.class).getInstances();
-			return filters.toObservableList();
-		}
-	}
-
-	public static class OCR_LABEL implements TextBinding {
-		@Override
-		public ObservableValue<String> apply(Context context, Tag tag) {
-			ImgFilterInstance ifi = (ImgFilterInstance) context.getGenerics()[0];
-			ZoneTextInstance zti = (ZoneTextInstance) context.getGenerics()[1];
-			DocInstance doc = zti.getDoc();
-			ZoneText zt = (ZoneText) ifi.getRoot().find(ZoneText.class);
-			ZoneTextInstance text = zt.getZoneText(doc, zti.getZone(), ifi);
-			return new SimpleStringProperty(text.getValue().toString());
-		}
-	}
-
 	public static class SAVE implements ContextAction {
 		@Override
 		public void accept(Context context, Tag tag) {
@@ -177,11 +129,18 @@ public class EditDocumentZones extends ModalWithDisplay {
 			context.getGeneric().getRoot().getCurrentCache().flush();
 		}
 	}
-
+	
 	public static class ZONE_LABEL implements TextBinding {
 		@Override
 		public ObservableValue<String> apply(Context context, Tag tag) {
 			return new SimpleStringProperty("Zone " + ((ZoneTextInstance) context.getGenerics()[0]).getZone());
+		}
+	}
+	
+	public static class MODAL_DISPLAY_FLEX_CUSTOM implements ContextAction {
+		@Override
+		public void accept(Context context, Tag tag) {
+			tag.getParent().getParent().find(ModalWithDisplay.class).getDisplayProperty(context).setValue("flex");
 		}
 	}
 }
