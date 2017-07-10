@@ -12,7 +12,7 @@ public class RoundRobin {
 		return privateAdresses;
 	}
 
-	public boolean Register(String remotePrivateAdress) {
+	public boolean register(String remotePrivateAdress) {
 		return privateAdresses.contains(remotePrivateAdress) ? false : privateAdresses.add(remotePrivateAdress);
 	}
 
@@ -28,5 +28,10 @@ public class RoundRobin {
 	public void remove(String Adresse) {
 		if (privateAdresses.contains(Adresse))
 			privateAdresses.remove(Adresse);
+	}
+
+	@Override
+	public String toString() {
+		return "Round robin : " + privateAdresses.toString();
 	}
 }
