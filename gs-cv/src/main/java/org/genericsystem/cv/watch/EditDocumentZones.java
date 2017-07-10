@@ -49,15 +49,17 @@ import javafx.collections.ObservableList;
 @InheritStyle("background-color")
 public class EditDocumentZones extends ModalWithDisplay {
 
-	@FlexDirectionStyle(FlexDirection.ROW)
+	@FlexDirectionStyle(FlexDirection.COLUMN)
 	@Children({ FlexDiv.class, FlexDiv.class })
 	@Children(path = FlexDiv.class, pos = 0, value = { Image.class, ZoneTextDiv.class })
+//	@Children(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 1 }, value = ZoneTextDiv.class)
 	@Children(path = FlexDiv.class, pos = 1, value = { Validate.class, Cancel.class })
-	@FlexDirectionStyle(path = FlexDiv.class, value = FlexDirection.COLUMN)
-	@FlexDirectionStyle(path = { FlexDiv.class, FlexDiv.class }, pos = { -1, -1 }, value = FlexDirection.ROW)
-	@Style(path = { FlexDiv.class, TagImpl.class }, pos = { -1, -1 }, name = "justify-content", value = "center")
-	@Style(path = { FlexDiv.class, TagImpl.class }, pos = { -1, -1 }, name = "align-items", value = "center")
+//	@FlexDirectionStyle(path = FlexDiv.class, value = FlexDirection.COLUMN) // ROW?
+//	@FlexDirectionStyle(path = { FlexDiv.class, FlexDiv.class }, pos = { -1, -1 }, value = FlexDirection.ROW)
+//	@Style(path = { FlexDiv.class, TagImpl.class }, pos = { -1, -1 }, name = "justify-content", value = "center")
+//	@Style(path = { FlexDiv.class, TagImpl.class }, pos = { -1, -1 }, name = "align-items", value = "center")
 	@SelectContext(path = FlexDiv.class, pos = 0, value = SELECTION_SELECTOR.class)
+//	@SelectContext(path = { FlexDiv.class, FlexDiv.class, FlexDiv.class }, pos = { 0, 1, 0 }, value = SELECTION_SELECTOR.class)
 	public static class TextDiv extends FlexDiv {
 		
 	}
@@ -145,7 +147,7 @@ public class EditDocumentZones extends ModalWithDisplay {
 	public static class MODAL_DISPLAY_FLEX_CUSTOM implements ContextAction {
 		@Override
 		public void accept(Context context, Tag tag) {
-			tag.getParent().getParent().find(ModalWithDisplay.class).getDisplayProperty(context).setValue("flex");
+			tag.getRootTag().find(ModalWithDisplay.class).getDisplayProperty(context).setValue("flex");
 		}
 	}
 }

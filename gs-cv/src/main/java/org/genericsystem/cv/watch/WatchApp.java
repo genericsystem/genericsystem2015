@@ -35,14 +35,15 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlH1;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlImg;
 import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
+import org.genericsystem.reactor.gscomponents.Modal.ModalWithDisplay;
 import org.genericsystem.reactor.gscomponents.RootTagImpl;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
 
 @DependsOnModel({ Doc.class, DocClass.class, ZoneGeneric.class, ZoneText.class, ImgFilter.class })
-//@Style(name = "background-color", value = "#ffffff")
-@Children({ AppHeader.class, DocumentsList.class })
+@Children({ AppHeader.class, FlexDiv.class })
+@Children(path = FlexDiv.class, pos = 1, value = { EditDocumentZones.class, DocumentsList.class })
 @Style(path = AppHeader.class, name = "background-color", value = "#00afeb")
 @Children(path = AppHeader.class, value = { Logo.class, AppTitleDiv.class })
 @SetText(path = { AppHeader.class, AppTitleDiv.class, HtmlH1.class }, value = "GS-Watch interface")
@@ -76,14 +77,14 @@ public class WatchApp extends RootTagImpl {
 	@Style(name = "justify-content", value = "center")
 	@Style(name = "align-items", value = "center")
 	@Style(name = "flex", value = "1 0 auto")
-	@Children({ EditDocumentZones.class, DocumentEditButton.class })
+	@Children({ /*EditDocumentZones.class,*/ DocumentEditButton.class })
 	public static class DocumentEditButtonDiv extends FlexDiv {
 
 	}
 
 	@SetText("Edit")
 	@Style(name = "flex", value = "0 0 auto")
-	@BindAction({ SET_SELECTION.class, MODAL_DISPLAY_FLEX.class })
+	@BindAction({ SET_SELECTION.class, MODAL_DISPLAY_FLEX_CUSTOM.class })
 	public static class DocumentEditButton extends HtmlButton {
 		// TODO: change the way the context is loaded (currently, everything is loaded for every file)
 	}
@@ -96,6 +97,18 @@ public class WatchApp extends RootTagImpl {
 			System.out.println("Current doc class : " + currentDocClass);
 			Snapshot<Generic> docInstances = currentDocClass.getHolders(root.find(Doc.class));
 			return docInstances.toObservableList();
+		}
+	}
+	
+	public static class MODAL_DISPLAY_FLEX_CUSTOM implements ContextAction {
+		@Override
+		public void accept(Context context, Tag tag) {
+			Tag rootTag = tag.getParent().getParent().getParent();
+			Tag modalTag = rootTag.find(ModalWithDisplay.class);
+			ObservableList<Tag> tags = modalTag.getObservableChildren();
+			tags.forEach(System.out::println);
+			modalTag.getDisplayProperty(context).setValue("flex");
+			// TODO: find why the display property is null!
 		}
 	}
 
