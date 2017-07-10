@@ -22,8 +22,8 @@ import io.vertx.core.spi.cluster.ClusterManager;
 import io.vertx.spi.cluster.hazelcast.HazelcastClusterManager;
 
 public class DistributedVerticle extends AbstractVerticle {
-	private static final long AVAILABILITY_PERIODICITY = 10000;
-	private static final long ROUNDROBIN_PERIODICITY = 1000;
+	private static final long REGISTER_PERIODICITY = 1000;
+	private static final long ROUNDROBIN_PERIODICITY = 5000;
 	private static final String PUBLIC_ADDRESS = "publicAddress";
 	public static final String BASE_PATH = System.getenv("HOME") + "/git/genericsystem2015/gs-cv/";
 	private static final String FILENAME = "filename";
@@ -79,32 +79,29 @@ public class DistributedVerticle extends AbstractVerticle {
 				System.out.println("File : " + fileName + " is already dowloaded");
 		});
 		vertx.eventBus().consumer(PUBLIC_ADDRESS, message -> {
-			// System.out.println("Receive on plublic adress private address : "
-			// + (String) message.body() + " on : " + PRIVATE_ADDRESS + " " +
-			// Thread.currentThread());
-			//
+			System.out.println(roundrobin);
 			roundrobin.register((String) message.body());
 		});
-		vertx.setPeriodic(AVAILABILITY_PERIODICITY, h -> {
+		vertx.setPeriodic(REGISTER_PERIODICITY, h -> {
 			// System.out.println("Periodic publish : "+PRIVATE_ADDRESS+" " +
 			// Thread.currentThread());
 			vertx.eventBus().publish(PUBLIC_ADDRESS, PRIVATE_ADDRESS);
 		});
-		vertx.setPeriodic(ROUNDROBIN_PERIODICITY, h -> {
-			for (JsonObject json : new ArrayList<>(messages)) {
-				String robin = roundrobin.getNextAddress();
-				if (robin != null) {
-					System.out.println("Periodic round robin from " + PRIVATE_ADDRESS + " to " + robin + " " + Thread.currentThread());
-					vertx.eventBus().send(robin, json.encodePrettily(), TIMEOUT, replyHandler -> {
-						if (replyHandler.failed())
-							throw new IllegalStateException(replyHandler.cause());
-						System.out.println("Receive response : " + replyHandler.result().body() + " " + Thread.currentThread());
-						if (OK.equals(replyHandler.result().body()))
-							messages.remove(json);
-					});
-				}
-			}
-		});
+		// vertx.setPeriodic(ROUNDROBIN_PERIODICITY, h -> {
+		// for (JsonObject json : new ArrayList<>(messages)) {
+		// String robin = roundrobin.getNextAddress();
+		// if (robin != null) {
+		// System.out.println("Periodic round robin from " + PRIVATE_ADDRESS + " to " + robin + " " + Thread.currentThread());
+		// vertx.eventBus().send(robin, json.encodePrettily(), TIMEOUT, replyHandler -> {
+		// if (replyHandler.failed())
+		// throw new IllegalStateException(replyHandler.cause());
+		// System.out.println("Receive response : " + replyHandler.result().body() + " " + Thread.currentThread());
+		// if (OK.equals(replyHandler.result().body()))
+		// messages.remove(json);
+		// });
+		// }
+		// }
+		// });
 	}
 
 	private <T> void download(Future<T> future, String fileName, String ip) {

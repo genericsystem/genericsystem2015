@@ -29,4 +29,9 @@ public class RoundRobin {
 		if (privateAdresses.contains(Adresse))
 			privateAdresses.remove(Adresse);
 	}
+
+	@Override
+	public String toString() {
+		return "Round robin : " + privateAdresses.toString();
+	}
 }
