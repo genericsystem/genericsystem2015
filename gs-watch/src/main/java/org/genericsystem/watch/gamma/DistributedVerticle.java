@@ -31,8 +31,8 @@ public class DistributedVerticle extends AbstractVerticle {
 	private static final String KO = "KO";
 	private static final String ID = "ID";
 	private static final String IP = "IP";
-	private final String PRIVATE_ADDRESS = "privateAddress" + hashCode();
-	private final String PRIVATE_PATH = System.getenv("HOME") + "/copy/" + PRIVATE_ADDRESS + "/";
+	private final String PRIVATE_ADDRESS;
+	private final String PRIVATE_PATH;
 	private static final DeliveryOptions TIMEOUT = new DeliveryOptions().setSendTimeout(500);
 	private final RoundRobin roundrobin = new RoundRobin();
 	private List<JsonObject> messages = new ArrayList<>();
@@ -42,25 +42,23 @@ public class DistributedVerticle extends AbstractVerticle {
 
 	private DistributedVerticle(String ip) {
 		this.ip = ip;
+		this.PRIVATE_ADDRESS = ip + ":" + hashCode();
+		this.PRIVATE_PATH = System.getenv("HOME") + "/copy/" + PRIVATE_ADDRESS + "/";
 		System.out.println("Ip : " + ip);
 
 		long id = System.currentTimeMillis();
-		messages.add(new JsonObject().put(ID, id).put("task",
-				new JsonObject().put(ID, id).put(FILENAME, "pdf/image.pdf").put(IP, ip)));
+		messages.add(new JsonObject().put(ID, id).put("task", new JsonObject().put(ID, id).put(FILENAME, "pdf/image.pdf").put(IP, ip)));
 		id = System.currentTimeMillis();
-		messages.add(new JsonObject().put(ID, id).put("task",
-				new JsonObject().put(ID, id).put(FILENAME, "pdf/image2.pdf").put(IP, ip)));
+		messages.add(new JsonObject().put(ID, id).put("task", new JsonObject().put(ID, id).put(FILENAME, "pdf/image2.pdf").put(IP, ip)));
 		id = System.currentTimeMillis();
-		messages.add(new JsonObject().put(ID, id).put("task",
-				new JsonObject().put(ID, id).put(FILENAME, "pdf/image3.pdf").put(IP, ip)));
+		messages.add(new JsonObject().put(ID, id).put("task", new JsonObject().put(ID, id).put(FILENAME, "pdf/image3.pdf").put(IP, ip)));
 	}
 
 	@Override
 	public void start() throws Exception {
 
 		vertx.eventBus().consumer(PRIVATE_ADDRESS, handler -> {
-			System.out.println("Receive from : " + (String) handler.body() + " on : " + PRIVATE_ADDRESS + " "
-					+ Thread.currentThread());
+			System.out.println("Receive from : " + (String) handler.body() + " on : " + PRIVATE_ADDRESS + " " + Thread.currentThread());
 			JsonObject task = new JsonObject((String) handler.body()).getJsonObject("task");
 			tasks.add(task);
 			handler.reply(OK);
@@ -73,8 +71,7 @@ public class DistributedVerticle extends AbstractVerticle {
 						throw new IllegalStateException(result.cause());
 					}
 					System.out.println("Blocking task callback on thread : " + Thread.currentThread());
-					System.out
-							.println("Task +" + task.encodePrettily() + "is done, removing " + Thread.currentThread());
+					System.out.println("Task +" + task.encodePrettily() + "is done, removing " + Thread.currentThread());
 					tasks.remove(task);
 
 				});
@@ -97,13 +94,11 @@ public class DistributedVerticle extends AbstractVerticle {
 			for (JsonObject json : new ArrayList<>(messages)) {
 				String robin = roundrobin.getNextAddress();
 				if (robin != null) {
-					System.out.println("Periodic round robin from " + PRIVATE_ADDRESS + " to " + robin + " "
-							+ Thread.currentThread());
+					System.out.println("Periodic round robin from " + PRIVATE_ADDRESS + " to " + robin + " " + Thread.currentThread());
 					vertx.eventBus().send(robin, json.encodePrettily(), TIMEOUT, replyHandler -> {
 						if (replyHandler.failed())
 							throw new IllegalStateException(replyHandler.cause());
-						System.out.println(
-								"Receive response : " + replyHandler.result().body() + " " + Thread.currentThread());
+						System.out.println("Receive response : " + replyHandler.result().body() + " " + Thread.currentThread());
 						if (OK.equals(replyHandler.result().body()))
 							messages.remove(json);
 					});
