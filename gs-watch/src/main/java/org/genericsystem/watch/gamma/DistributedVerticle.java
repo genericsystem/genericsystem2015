@@ -85,6 +85,7 @@ public class DistributedVerticle extends AbstractVerticle {
 			// System.out.println("Receive on plublic adress private address : "
 			// + (String) message.body() + " on : " + PRIVATE_ADDRESS + " " +
 			// Thread.currentThread());
+			//
 			roundrobin.register((String) message.body());
 		});
 		vertx.setPeriodic(AVAILABILITY_PERIODICITY, h -> {
