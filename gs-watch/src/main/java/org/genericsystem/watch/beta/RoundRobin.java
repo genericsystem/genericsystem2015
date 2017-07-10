@@ -12,7 +12,7 @@ public class RoundRobin {
 		return privateAdresses;
 	}
 
-	public boolean Register(String remotePrivateAdress) {
+	public boolean register(String remotePrivateAdress) {
 		return privateAdresses.contains(remotePrivateAdress) ? false : privateAdresses.add(remotePrivateAdress);
 	}
 
