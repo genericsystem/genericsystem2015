@@ -25,7 +25,7 @@ public class DistributedVerticle extends AbstractVerticle {
 	private static final long AVAILABILITY_PERIODICITY = 10000;
 	private static final long ROUNDROBIN_PERIODICITY = 1000;
 	private static final String PUBLIC_ADDRESS = "publicAddress";
-	public static final String BASE_PATH = System.getenv("HOME") + "/git/gs-cv";
+	public static final String BASE_PATH = System.getenv("HOME") + "/git/genericsystem2015/gs-cv/";
 	private static final String FILENAME = "filename";
 	private static final String OK = "OK";
 	private static final String KO = "KO";
@@ -49,7 +49,6 @@ public class DistributedVerticle extends AbstractVerticle {
 		messages.add(new JsonObject().put(ID, id).put("task", new JsonObject().put(ID, id).put(FILENAME, "pdf/image2.pdf").put(IP, ip)));
 		id = System.currentTimeMillis();
 		messages.add(new JsonObject().put(ID, id).put("task", new JsonObject().put(ID, id).put(FILENAME, "pdf/image3.pdf").put(IP, ip)));
-
 	}
 
 	@Override
