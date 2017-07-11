@@ -82,7 +82,7 @@ public class ZonesDetails extends ModalWithDisplay {
 			DocInstance doc = zti.getDoc();
 			ZoneText zt = (ZoneText) ifi.getRoot().find(ZoneText.class);
 			ZoneTextInstance text = zt.getZoneText(doc, zti.getZone(), ifi);
-			return new SimpleStringProperty(text.getValue().toString());
+			return new SimpleStringProperty(text == null ? null : text.getValue().toString());
 		}
 	}
 
