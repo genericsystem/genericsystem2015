@@ -69,7 +69,6 @@ public class ZonesDetails extends ModalWithDisplay {
 		public ObservableList<Generic> apply(Generic[] generics) {
 			Root root = generics[0].getRoot();
 			ZoneTextInstance zti = (ZoneTextInstance) generics[0];
-			System.out.println("zti : " + zti.getZoneNum() + " " + zti.getImgFilter() + " " + zti.getDoc());
 			Snapshot<Generic> filters = root.find(ImgFilter.class).getInstances();
 			return filters.toObservableList();
 		}

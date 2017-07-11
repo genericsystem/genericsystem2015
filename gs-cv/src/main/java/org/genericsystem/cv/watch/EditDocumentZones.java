@@ -3,9 +3,6 @@ package org.genericsystem.cv.watch;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
-import org.genericsystem.cv.model.Doc.DocInstance;
-import org.genericsystem.cv.model.ImgFilter;
-import org.genericsystem.cv.model.ImgFilter.ImgFilterInstance;
 import org.genericsystem.cv.model.ZoneText;
 import org.genericsystem.cv.model.ZoneText.ZoneTextInstance;
 import org.genericsystem.cv.watch.EditDocumentZones.TextDiv;
@@ -13,7 +10,6 @@ import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.Attribute;
 import org.genericsystem.reactor.annotations.BindAction;
-import org.genericsystem.reactor.annotations.BindSelection;
 import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.ForEach;
@@ -25,59 +21,51 @@ import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.context.ContextAction;
 import org.genericsystem.reactor.context.ContextAction.CANCEL;
+import org.genericsystem.reactor.context.ContextAction.RESET_SELECTION;
 import org.genericsystem.reactor.context.ObservableContextSelector.SELECTION_SELECTOR;
 import org.genericsystem.reactor.context.ObservableListExtractor;
 import org.genericsystem.reactor.context.TextBinding;
-import org.genericsystem.reactor.contextproperties.SelectionDefaults;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.FlexDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
-import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlHyperLink;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlImg;
-import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
 import org.genericsystem.reactor.gscomponents.InputTextWithConversion.InputTextEditorWithConversion;
-import org.genericsystem.reactor.gscomponents.Modal;
-import org.genericsystem.reactor.gscomponents.Modal.ModalWithDisplay;
-import org.genericsystem.reactor.gscomponents.TagImpl;
-
-import javafx.beans.binding.Bindings;
+import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
+@Children(FlexDiv.class)
 @Children(path = FlexDiv.class, value = { HtmlHyperLink.class, TextDiv.class })
 @InheritStyle("background-color")
-public class EditDocumentZones extends Modal {
-
-	@Override
-	public void init() {
-		bindStyle(DISPLAY, DISPLAY,
-				model -> Bindings.createStringBinding(
-						() -> getSelectionProperty(model).getValue() != null ? "flex" : "none",
-						getSelectionProperty(model)));
-	}
+@Style(path = FlexDiv.class, name = "max-height", value = "90%")
+@BindAction(path = { FlexDiv.class, HtmlHyperLink.class }, value = { CANCEL.class, RESET_SELECTION.class })
+public class EditDocumentZones extends ModalEditor {
 
 	@FlexDirectionStyle(FlexDirection.COLUMN)
 	@Children({ FlexDiv.class, FlexDiv.class })
-	@Children(path = FlexDiv.class, pos = 0, value = { Image.class, ZoneTextDiv.class })
+	@Children(path = FlexDiv.class, pos = 0, value = { Image.class, FlexDiv.class })
 	@Children(path = FlexDiv.class, pos = 1, value = { Validate.class, Cancel.class })
-	@FlexDirectionStyle(path = FlexDiv.class, pos = 1, value = FlexDirection.ROW)
+	@Children(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, -1 }, value = ZoneTextDiv.class)
+	@FlexDirectionStyle(path = FlexDiv.class, value = FlexDirection.ROW)
 	@Style(path = FlexDiv.class, pos = 1, name = "justify-content", value = "center")
 	@Style(path = FlexDiv.class, pos = 1, name = "align-items", value = "center")
 	@SelectContext(path = FlexDiv.class, pos = 0, value = SELECTION_SELECTOR.class)
+	@SelectContext(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 1 }, value = SELECTION_SELECTOR.class)
+//	@SelectContext(path = { FlexDiv.class, FlexDiv.class, FlexDiv.class }, pos = { 0, -1, -1 }, value = SELECTION_SELECTOR.class)
 	public static class TextDiv extends FlexDiv {
 
 	}
 
 	@SetText("Save")
-	@BindAction(value = SAVE.class)
+	@BindAction(value = { SAVE.class, RESET_SELECTION.class })
 	public static class Validate extends HtmlButton {
 		// Persists the changes
 	}
 
 	@SetText("Cancel")
-	@BindAction(value = CANCEL.class)
+	@BindAction(value = { CANCEL.class, RESET_SELECTION.class })
 	public static class Cancel extends HtmlButton {
 		// Cancel the changes
 	}
@@ -100,6 +88,7 @@ public class EditDocumentZones extends Modal {
 	public static class ZoneTextDiv extends FlexDiv {
 		// For each zone, create a div with label + inputText
 		// and create a div for the results for all filters
+
 	}
 
 	@FlexDirectionStyle(FlexDirection.ROW)
@@ -109,7 +98,7 @@ public class EditDocumentZones extends Modal {
 	}
 
 	@BindText(ZONE_LABEL.class)
-	@BindAction(MODAL_DISPLAY_FLEX_CUSTOM.class)
+//	@BindAction(MODAL_DISPLAY_FLEX_CUSTOM.class)
 	@Attribute(name = "name", value = "zone")
 	public static class ZoneLabel extends HtmlHyperLink {
 		// Define the zone label
