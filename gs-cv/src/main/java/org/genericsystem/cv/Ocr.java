@@ -59,10 +59,11 @@ public class Ocr {
 		System.runFinalization();
 	}
 	
-	public static void ocrNewClassifiedImg(Path imagePath) {
-		FillModelWithData.doImgOcr(imagePath);
+	public static int ocrNewClassifiedImg(Path imagePath) {
+		int result = FillModelWithData.doImgOcr(imagePath);
 		System.gc();
 		System.runFinalization();
+		return result;
 	}
 
 	public static String doWork(Mat mat) {

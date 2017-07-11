@@ -14,12 +14,21 @@ public class VerticleDeployer extends AbstractVerticle {
 	public static final String PDF_WATCHER_ADDRESS = "app.pdfchanges";
 	public static final String PNG_WATCHER_ADDRESS = "app.pngchanges";
 	public static final String IMAGE_ADDED_TO_CLASS_ADDRESS = "app.class.newimage";
+	public static final String ACCURATE_ZONES_NOT_FOUND = "app.class.nozone";
+	public static final String ACCURATE_ZONES_FOUND = "app.class.zone";
 	public static final String IMAGE_TO_OCR = "app.ocr.newimage";
-
+	public static final String NEW_IMAGE_PROCESSED = "app.ocr.newimage.processed";
+	public static final String KNOWN_IMAGE_PROCESSED = "app.ocr.knownimage.updated";
+	public static final String KNOWN_IMAGE_PASSED = "app.ocr.knownimage.passed";
+	
 	public static void deployVerticle(Verticle verticle) {
+		deployVerticle(verticle, new VertxOptions());
+	}
+	
+	public static void deployVerticle(Verticle verticle, VertxOptions vertxOptions) {
 		ClusterManager mgr = new HazelcastClusterManager();
 
-		VertxOptions vertxOptions = new VertxOptions().setClustered(true).setClusterManager(mgr);
+		vertxOptions.setClustered(true).setClusterManager(mgr);
 
 		Vertx.clusteredVertx(vertxOptions, res -> {
 			if (res.succeeded()) {
@@ -36,7 +45,7 @@ public class VerticleDeployer extends AbstractVerticle {
 		vertx.deployVerticle(new MailWatcherVerticle());
 		vertx.deployVerticle(new PdfsConverterVerticle());
 		vertx.deployVerticle(new ClassifierVerticle());
-//		vertx.deployVerticle(new RunScriptVerticle());
+		vertx.deployVerticle(new DezonerVerticle());
 		vertx.deployVerticle(new OcrVerticle());
 		startFuture.complete();
 	}

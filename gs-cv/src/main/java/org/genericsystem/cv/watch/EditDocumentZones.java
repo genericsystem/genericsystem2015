@@ -37,6 +37,7 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlHyperLink;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlImg;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
 import org.genericsystem.reactor.gscomponents.InputTextWithConversion.InputTextEditorWithConversion;
+import org.genericsystem.reactor.gscomponents.Modal;
 import org.genericsystem.reactor.gscomponents.Modal.ModalWithDisplay;
 import org.genericsystem.reactor.gscomponents.TagImpl;
 
@@ -47,19 +48,26 @@ import javafx.collections.ObservableList;
 
 @Children(path = FlexDiv.class, value = { HtmlHyperLink.class, TextDiv.class })
 @InheritStyle("background-color")
-public class EditDocumentZones extends ModalWithDisplay {
+public class EditDocumentZones extends Modal {
 
-	@FlexDirectionStyle(FlexDirection.ROW)
+	@Override
+	public void init() {
+		bindStyle(DISPLAY, DISPLAY,
+				model -> Bindings.createStringBinding(
+						() -> getSelectionProperty(model).getValue() != null ? "flex" : "none",
+						getSelectionProperty(model)));
+	}
+
+	@FlexDirectionStyle(FlexDirection.COLUMN)
 	@Children({ FlexDiv.class, FlexDiv.class })
 	@Children(path = FlexDiv.class, pos = 0, value = { Image.class, ZoneTextDiv.class })
 	@Children(path = FlexDiv.class, pos = 1, value = { Validate.class, Cancel.class })
-	@FlexDirectionStyle(path = FlexDiv.class, value = FlexDirection.COLUMN)
-	@FlexDirectionStyle(path = { FlexDiv.class, FlexDiv.class }, pos = { -1, -1 }, value = FlexDirection.ROW)
-	@Style(path = { FlexDiv.class, TagImpl.class }, pos = { -1, -1 }, name = "justify-content", value = "center")
-	@Style(path = { FlexDiv.class, TagImpl.class }, pos = { -1, -1 }, name = "align-items", value = "center")
+	@FlexDirectionStyle(path = FlexDiv.class, pos = 1, value = FlexDirection.ROW)
+	@Style(path = FlexDiv.class, pos = 1, name = "justify-content", value = "center")
+	@Style(path = FlexDiv.class, pos = 1, name = "align-items", value = "center")
 	@SelectContext(path = FlexDiv.class, pos = 0, value = SELECTION_SELECTOR.class)
 	public static class TextDiv extends FlexDiv {
-		
+
 	}
 
 	@SetText("Save")
@@ -134,18 +142,18 @@ public class EditDocumentZones extends ModalWithDisplay {
 			context.getGeneric().getRoot().getCurrentCache().flush();
 		}
 	}
-	
+
 	public static class ZONE_LABEL implements TextBinding {
 		@Override
 		public ObservableValue<String> apply(Context context, Tag tag) {
 			return new SimpleStringProperty("Zone " + ((ZoneTextInstance) context.getGenerics()[0]).getZone());
 		}
 	}
-	
+
 	public static class MODAL_DISPLAY_FLEX_CUSTOM implements ContextAction {
 		@Override
 		public void accept(Context context, Tag tag) {
-			tag.getParent().getParent().find(ModalWithDisplay.class).getDisplayProperty(context).setValue("flex");
+			tag.getRootTag().find(ModalWithDisplay.class).getDisplayProperty(context).setValue("flex");
 		}
 	}
 }
