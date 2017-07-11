@@ -32,6 +32,7 @@ public class DistributedVerticle extends AbstractVerticle {
 	private static final String OK = "OK";
 	private static final String KO = "KO";
 	private static final String ID = "ID";
+	private static final String TYPE = "type";
 	private static final String IP = "IP";
 	private final String PRIVATE_ADDRESS;
 	private final String PRIVATE_PATH;
@@ -51,11 +52,11 @@ public class DistributedVerticle extends AbstractVerticle {
 		System.out.println("Ip : " + ip);
 
 		long id = System.currentTimeMillis();
-		messages.add(new JsonObject().put(ID, id).put("type", DOWNLOAD).put("task", new JsonObject().put(ID, id).put(FILENAME, "pdf/image.pdf").put(IP, ip)));
+		messages.add(new JsonObject().put(ID, id).put("task", new JsonObject().put(ID, id).put(FILENAME, "pdf/image.pdf").put(IP, ip).put(TYPE, DOWNLOAD)));
 		id = System.currentTimeMillis();
-		messages.add(new JsonObject().put(ID, id).put("type", DOWNLOAD).put("task", new JsonObject().put(ID, id).put(FILENAME, "pdf/image2.pdf").put(IP, ip)));
+		messages.add(new JsonObject().put(ID, id).put("task", new JsonObject().put(ID, id).put(FILENAME, "pdf/image2.pdf").put(IP, ip).put(TYPE, DOWNLOAD)));
 		id = System.currentTimeMillis();
-		messages.add(new JsonObject().put(ID, id).put("type", DOWNLOAD).put("task", new JsonObject().put(ID, id).put(FILENAME, "pdf/image3.pdf").put(IP, ip)));
+		messages.add(new JsonObject().put(ID, id).put("task", new JsonObject().put(ID, id).put(FILENAME, "pdf/image3.pdf").put(IP, ip).put(TYPE, DOWNLOAD)));
 	}
 
 	@Override
@@ -76,10 +77,10 @@ public class DistributedVerticle extends AbstractVerticle {
 					} else {
 						System.out.println("Download successful " + fileName);
 						long id = System.currentTimeMillis();
-						messages.add(new JsonObject().put(ID, id).put("type", PDF_TO_PNG).put("task", new JsonObject().put(ID, id).put(FILENAME, fileName).put(IP, ip)));
+						messages.add(new JsonObject().put(ID, id).put("task", new JsonObject().put(ID, id).put(FILENAME, fileName).put(IP, ip).put(TYPE, PDF_TO_PNG)));
 					}
 					System.out.println("Blocking task callback on thread : " + Thread.currentThread());
-					System.out.println("Task +" + task.encodePrettily() + "is done, removing " + Thread.currentThread());
+					System.out.println("Task " + task.encodePrettily() + " is done, removing " + Thread.currentThread());
 					tasks.remove(task);
 				});
 			} else
@@ -100,6 +101,9 @@ public class DistributedVerticle extends AbstractVerticle {
 				if (res.succeeded()) {
 					for (Path newPng : (List<Path>) res.result())
 						System.out.println("New PNG file : " + newPng);
+					System.out.println("Blocking task callback on thread : " + Thread.currentThread());
+					System.out.println("Task " + task.encodePrettily() + " is done, removing " + Thread.currentThread());
+					tasks.remove(task);
 				}
 			});
 		});
