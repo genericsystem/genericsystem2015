@@ -33,7 +33,6 @@ import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.context.ContextAction;
 import org.genericsystem.reactor.context.ContextAction.CANCEL;
 import org.genericsystem.reactor.context.ContextAction.RESET_SELECTION;
-import org.genericsystem.reactor.context.ObservableContextSelector.HOLDER_ADDITION_ENABLED_SELECTOR;
 import org.genericsystem.reactor.context.ObservableContextSelector.SELECTION_SELECTOR;
 import org.genericsystem.reactor.context.ObservableListExtractor;
 import org.genericsystem.reactor.context.TagSwitcher;
@@ -134,10 +133,12 @@ public class EditDocumentZones extends ModalEditor {
 	@ForEach(path = { HtmlDatalist.class, HtmlOption.class }, value = DATALIST_SELECTOR.class)
 	@Children({ CustomInputDatalist.class, HtmlDatalist.class })
 	@StyleClass(path = CustomInputDatalist.class, value = "glowing-border")
-	@SelectContext(HOLDER_ADDITION_ENABLED_SELECTOR.class)
 	public static class ZoneInput extends InputWithDatalist implements SelectionDefaults {
 		// Define the inputText
+		// TODO: add a remove button to empty the field
+		// TODO: generate the zonetextinstance only when necessary (i.e., not empty)?
 	}
+
 
 	public static class CustomInputDatalist extends InputTextEditorWithConversionForDatalist {
 		@Override
