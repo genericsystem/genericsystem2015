@@ -44,6 +44,7 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlDatalist;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlHyperLink;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlImg;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlOption;
 import org.genericsystem.reactor.gscomponents.InputTextWithConversion.InputTextEditorWithConversionForDatalist;
 import org.genericsystem.reactor.gscomponents.InputWithDatalist;
@@ -126,7 +127,7 @@ public class EditDocumentZones extends ModalEditor {
 	@Switch(TagSwitcher.NORMAL_MODE_ONLY.class)
 	@BindText(ZONE_LABEL.class)
 	@Attribute(name = "name", value = "zone")
-	public static class ZoneLabelNormal extends FlexDiv {
+	public static class ZoneLabelNormal extends HtmlLabel { 
 		// Define the zone label in normal mode
 	}
 
