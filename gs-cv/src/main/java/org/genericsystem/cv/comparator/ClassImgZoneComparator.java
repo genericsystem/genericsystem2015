@@ -56,7 +56,18 @@ public class ClassImgZoneComparator {
 
 	protected static void compute() {
 
-		final Zones zones = Zones.loadZones(imgClassDirectory);
+		ImgClass imgClass = ImgClass.fromDirectory(imgClassDirectory);
+
+		Zones zones;
+		try {
+			zones = Zones.load(imgClassDirectory);
+		} catch (RuntimeException e) {
+			System.out.println("could not load accurate zones");
+			imgClass.addMapper(img -> img.eraseCorners(0.1).dilateBlacks(86, 255, 76, new Size(20, 3)));
+			zones = Zones.get(imgClass.getClosedVarianceZones(new Size(9, 10)), 300, 6, 6);
+		}
+
+		final Zones zones2 = zones;
 
 		/*
 		 * Get the real String value from GS (filtername = "reality")
@@ -85,7 +96,7 @@ public class ClassImgZoneComparator {
 												.replace(".png", ""));
 							});
 
-					for (Zone zone : zones) {
+					for (Zone zone : zones2) {
 						System.out.println("Zone n°" + zone.getNum());
 
 						// Get the document instance

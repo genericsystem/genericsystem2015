@@ -9,22 +9,22 @@ import org.genericsystem.cv.model.ImgFilter;
 import org.genericsystem.cv.model.ZoneGeneric;
 import org.genericsystem.cv.model.ZoneText;
 import org.genericsystem.cv.watch.WatchApp.DocumentsList;
-import org.genericsystem.cv.watch.WatchApp.HeaderRow;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.annotations.Attribute;
 import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.annotations.ForEach;
+import org.genericsystem.reactor.annotations.SelectContext;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
-import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.context.ContextAction;
+import org.genericsystem.reactor.context.ContextAction.MODAL_DISPLAY_FLEX;
 import org.genericsystem.reactor.context.ContextAction.SET_SELECTION;
+import org.genericsystem.reactor.context.ObservableContextSelector.SELECTION_SELECTOR;
 import org.genericsystem.reactor.context.ObservableListExtractor;
 import org.genericsystem.reactor.gscomponents.AppHeader;
 import org.genericsystem.reactor.gscomponents.AppHeader.AppTitleDiv;
@@ -33,21 +33,18 @@ import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.FlexDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlH1;
-import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlH2;
-import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlHyperLink;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlImg;
-import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
-import org.genericsystem.reactor.gscomponents.Modal.ModalWithDisplay;
-import org.genericsystem.reactor.gscomponents.Monitor;
+import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
 import org.genericsystem.reactor.gscomponents.RootTagImpl;
 
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
 
 @DependsOnModel({ Doc.class, DocClass.class, ZoneGeneric.class, ZoneText.class, ImgFilter.class })
-@Children({ EditDocumentZones.class, AppHeader.class, FlexDiv.class, Monitor.class })
-@Children(path = FlexDiv.class, pos = 2, value = { HeaderRow.class, DocumentsList.class })
-@Children(path = AppHeader.class, value = { Logo.class, AppTitleDiv.class })
+//@Style(name = "background-color", value = "#ffffff")
+@Children({ AppHeader.class, DocumentsList.class })
 @Style(path = AppHeader.class, name = "background-color", value = "#00afeb")
+@Children(path = AppHeader.class, value = { Logo.class, AppTitleDiv.class })
 @SetText(path = { AppHeader.class, AppTitleDiv.class, HtmlH1.class }, value = "GS-Watch interface")
 public class WatchApp extends RootTagImpl {
 
@@ -56,25 +53,6 @@ public class WatchApp extends RootTagImpl {
 
 	public static void main(String[] mainArgs) {
 		ApplicationServer.startSimpleGenericApp(mainArgs, WatchApp.class, gsPath);
-	}
-	
-	public WatchApp() {
-		addPrefixBinding(context -> getAdminModeProperty(context).setValue(true));
-	}
-	
-	@Children({ FlexDiv.class, FlexDiv.class })
-	@Children(path = FlexDiv.class, value = HtmlH2.class)
-	@FlexDirectionStyle(FlexDirection.ROW)
-	@Style(path = FlexDiv.class, name = "justify-content", value = "center")
-	@Style(path = FlexDiv.class, name = "align-items", value = "center")
-	@Style(path = FlexDiv.class, name = "flex", value = "1 0 auto")
-	@Style(path = { FlexDiv.class, HtmlH2.class }, name = "justify-content", value = "center")
-	@Style(path = { FlexDiv.class, HtmlH2.class }, name = "align-items", value = "center")
-	@Style(path = { FlexDiv.class, HtmlH2.class }, name = "flex", value = "1 0 auto")
-	@SetText(path = { FlexDiv.class, HtmlH2.class }, pos = { 0, -1 }, value = "Nom")
-	@SetText(path = { FlexDiv.class, HtmlH2.class }, pos = { 1, -1 }, value = "Options")
-	public static class HeaderRow extends FlexDiv {
-		
 	}
 
 	@ForEach(DOC_CLASS_SELECTOR.class)
@@ -98,18 +76,16 @@ public class WatchApp extends RootTagImpl {
 	@Style(name = "justify-content", value = "center")
 	@Style(name = "align-items", value = "center")
 	@Style(name = "flex", value = "1 0 auto")
-	@Children({ /*EditDocumentZones.class,*/ DocumentEditButton.class })
+	@Children({ EditDocumentZones.class, DocumentEditButton.class })
 	public static class DocumentEditButtonDiv extends FlexDiv {
-		
+
 	}
-	
-	@Children(HtmlHyperLink.class)
-	@Children(path = HtmlHyperLink.class, value = HtmlImg.class)
-	@Attribute(path = { HtmlHyperLink.class, HtmlImg.class }, pos = { 0, 0 }, name = "src", value = "edit.png")
-	@StyleClass(path = { HtmlHyperLink.class, HtmlImg.class }, pos = { -1, 0 }, value = "img")
-	@BindAction(SET_SELECTION.class)
-	public static class DocumentEditButton extends DocumentEditButtonDiv {
-		
+
+	@SetText("Edit")
+	@Style(name = "flex", value = "0 0 auto")
+	@BindAction({ SET_SELECTION.class, MODAL_DISPLAY_FLEX.class })
+	public static class DocumentEditButton extends HtmlButton {
+		// TODO: change the way the context is loaded (currently, everything is loaded for every file)
 	}
 
 	public static class DOC_CLASS_SELECTOR implements ObservableListExtractor {
