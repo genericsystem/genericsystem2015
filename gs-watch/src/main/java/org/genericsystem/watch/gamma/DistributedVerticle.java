@@ -3,11 +3,13 @@ package org.genericsystem.watch.gamma;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+import org.genericsystem.cv.PdfToPngConverter;
 import org.genericsystem.watch.beta.RoundRobin;
 
 import io.vertx.core.AbstractVerticle;
@@ -30,9 +32,12 @@ public class DistributedVerticle extends AbstractVerticle {
 	private static final String OK = "OK";
 	private static final String KO = "KO";
 	private static final String ID = "ID";
+	private static final String TYPE = "type";
 	private static final String IP = "IP";
 	private final String PRIVATE_ADDRESS;
 	private final String PRIVATE_PATH;
+	private final String DOWNLOAD = "download";
+	private final String PDF_TO_PNG = "pdfToPng";
 	private static final DeliveryOptions TIMEOUT = new DeliveryOptions().setSendTimeout(500);
 	private final RoundRobin roundrobin = new RoundRobin();
 	private List<JsonObject> messages = new ArrayList<>();
@@ -47,17 +52,17 @@ public class DistributedVerticle extends AbstractVerticle {
 		System.out.println("Ip : " + ip);
 
 		long id = System.currentTimeMillis();
-		messages.add(new JsonObject().put(ID, id).put("task", new JsonObject().put(ID, id).put(FILENAME, "pdf/image.pdf").put(IP, ip)));
+		messages.add(new JsonObject().put(ID, id).put("task", new JsonObject().put(ID, id).put(FILENAME, "pdf/image.pdf").put(IP, ip).put(TYPE, DOWNLOAD)));
 		id = System.currentTimeMillis();
-		messages.add(new JsonObject().put(ID, id).put("task", new JsonObject().put(ID, id).put(FILENAME, "pdf/image2.pdf").put(IP, ip)));
+		messages.add(new JsonObject().put(ID, id).put("task", new JsonObject().put(ID, id).put(FILENAME, "pdf/image2.pdf").put(IP, ip).put(TYPE, DOWNLOAD)));
 		id = System.currentTimeMillis();
-		messages.add(new JsonObject().put(ID, id).put("task", new JsonObject().put(ID, id).put(FILENAME, "pdf/image3.pdf").put(IP, ip)));
+		messages.add(new JsonObject().put(ID, id).put("task", new JsonObject().put(ID, id).put(FILENAME, "pdf/image3.pdf").put(IP, ip).put(TYPE, DOWNLOAD)));
 	}
 
 	@Override
 	public void start() throws Exception {
 
-		vertx.eventBus().consumer(PRIVATE_ADDRESS, handler -> {
+		vertx.eventBus().consumer(PRIVATE_ADDRESS + ":" + DOWNLOAD, handler -> {
 			System.out.println("Receive from : " + (String) handler.body() + " on : " + PRIVATE_ADDRESS + " " + Thread.currentThread());
 			JsonObject task = new JsonObject((String) handler.body()).getJsonObject("task");
 			tasks.add(task);
@@ -69,14 +74,38 @@ public class DistributedVerticle extends AbstractVerticle {
 					if (result.failed()) {
 						System.out.println(result.cause());
 						throw new IllegalStateException(result.cause());
+					} else {
+						System.out.println("Download successful " + fileName);
+						long id = System.currentTimeMillis();
+						messages.add(new JsonObject().put(ID, id).put("task", new JsonObject().put(ID, id).put(FILENAME, fileName).put(IP, ip).put(TYPE, PDF_TO_PNG)));
 					}
 					System.out.println("Blocking task callback on thread : " + Thread.currentThread());
-					System.out.println("Task +" + task.encodePrettily() + "is done, removing " + Thread.currentThread());
+					System.out.println("Task " + task.encodePrettily() + " is done, removing " + Thread.currentThread());
 					tasks.remove(task);
-
 				});
 			} else
 				System.out.println("File : " + fileName + " is already dowloaded");
+		});
+		vertx.eventBus().consumer(PRIVATE_ADDRESS + ":" + PDF_TO_PNG, handler -> {
+			System.out.println("PDF to PNG converter");
+			System.out.println("Receive from : " + (String) handler.body() + " on : " + PRIVATE_ADDRESS + " " + Thread.currentThread());
+			JsonObject task = new JsonObject((String) handler.body()).getJsonObject("task");
+			tasks.add(task);
+			handler.reply(OK);
+			String fileName = task.getString(FILENAME);
+			File file = new File(PRIVATE_PATH + fileName);
+			vertx.executeBlocking(future -> {
+				List<Path> createdPngs = PdfToPngConverter.convertPdfToImages(file, new File("png"));
+				future.complete(createdPngs);
+			}, res -> {
+				if (res.succeeded()) {
+					for (Path newPng : (List<Path>) res.result())
+						System.out.println("New PNG file : " + newPng);
+					System.out.println("Blocking task callback on thread : " + Thread.currentThread());
+					System.out.println("Task " + task.encodePrettily() + " is done, removing " + Thread.currentThread());
+					tasks.remove(task);
+				}
+			});
 		});
 		vertx.eventBus().consumer(PUBLIC_ADDRESS, message -> {
 			System.out.println(roundrobin);

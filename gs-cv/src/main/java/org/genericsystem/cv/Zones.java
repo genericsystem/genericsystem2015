@@ -7,11 +7,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -19,6 +22,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 public class Zones implements Iterable<Zone> {
 	private final List<Zone> zones;
 	private static final ObjectMapper mapper = new ObjectMapper();
+	private static Logger log = LoggerFactory.getLogger(Zones.class);
 
 	public static Zones get(Img img, double minArea) {
 		return new Zones(img.channels() == 1 ? img : img.bgr2Gray(), minArea);
@@ -33,33 +37,78 @@ public class Zones implements Iterable<Zone> {
 	}
 
 	public static Zones split(Img img, double morph, double minarea, boolean vertical, double percentage) {
-		return vertical ? splitVertically(img, morph, minarea, percentage) : splitHorizontally(img, morph, minarea, percentage);
+		return vertical ? verticalCloseToZones(img, morph, percentage)
+				: splitHorizontally(img, morph, minarea, percentage);
 	}
 
-	public static Zones splitVertically(Img img, double morph, double minarea, double percentage) {
-		// System.out.println("morph v " + 1 + morph * img.rows() + " " + img.rows());
-		return get(img.otsuInv().projectVertically().toVerticalHistogram(img.cols(), percentage).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(1, 1 + morph * img.rows())), minarea);
+	// public static Zones splitVertically(Img img, double morph, double
+	// minarea, double percentage) {
+	// // System.out.println("morph v " + 1 + morph * img.rows() + " " +
+	// // img.rows());
+	// return
+	// get(img.otsuInv().projectVertically().toVerticalHistogram(img.cols(),
+	// percentage)
+	// .morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(1, 1 +
+	// morph * img.rows())), minarea);
+	// }
+
+	public static Zones verticalCloseToZones(Img img, double morph, double percentage) {
+
+		Mat m = img.otsuInv().projectVertically().toVerticalHistogram(img.cols(), percentage).getSrc();
+		Mat close = LayoutAnalyser.close(m, morph);
+
+		List<Integer> liste = new ArrayList<Integer>();
+
+		for (int i = 0; i < close.rows(); i++) {
+			if ((i + 1) < close.rows() && close.get(i, 0)[0] == 0 && close.get(i + 1, 0)[0] == 1) {
+				liste.add(i + 1);
+			} else if ((i + 1) < close.rows() && close.get(i, 0)[0] == 1 && close.get(i + 1, 0)[0] == 0) {
+				liste.add(i);
+			} else if ((i + 1) >= close.rows() && close.get(i, 0)[0] == 1) {
+				liste.add(i);
+			}
+		}
+
+		List<Zone> result = new ArrayList<>();
+		assert liste.size() % 2 == 0;
+
+		for (int i = 0; i < liste.size(); i = i + 2) {
+			result.add(new Zone(0, new Rect(0, liste.get(i), close.cols(), liste.get(i + 1) - liste.get(i))));
+		}
+
+		return new Zones(result);
 	}
 
 	public static Zones splitHorizontally(Img img, double morph, double minarea, double percentage) {
-		// System.out.println("morph h " + 1 + morph * img.cols() + " " + img.cols());
-		return get(img.otsuInv().projectHorizontally().toHorizontalHistogram(img.rows(), percentage).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(1 + morph * img.cols(), 1)), minarea);
+		// System.out.println("morph h " + 1 + morph * img.cols() + " " +
+		// img.cols());
+		return get(img.otsuInv().projectHorizontally().toHorizontalHistogram(img.rows(), percentage)
+				.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(1 + morph * img.cols(), 1)), minarea);
 	}
 
-	// public static Zones split(Img img, double morph, double minarea, double dx, double dy, boolean vertical) {
-	// return vertical ? splitVertically(img, morph, minarea, dx, dy) : splitHorizontally(img, morph, minarea, dx, dy);
+	// public static Zones split(Img img, double morph, double minarea, double
+	// dx, double dy, boolean vertical) {
+	// return vertical ? splitVertically(img, morph, minarea, dx, dy) :
+	// splitHorizontally(img, morph, minarea, dx, dy);
 	// }
 	//
-	// public static Zones splitVertically(Img img, double morph, double minarea, double dx, double dy) {
-	// return get(img.otsuInv().projectVertically().toVerticalHistogram(img.cols()).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(1, morph)), minarea, dx, dy);
+	// public static Zones splitVertically(Img img, double morph, double
+	// minarea, double dx, double dy) {
+	// return
+	// get(img.otsuInv().projectVertically().toVerticalHistogram(img.cols()).morphologyEx(Imgproc.MORPH_CLOSE,
+	// Imgproc.MORPH_RECT, new Size(1, morph)), minarea, dx, dy);
 	// }
 	//
-	// public static Zones splitHorizontally(Img img, double morph, double minarea, double dx, double dy) {
-	// return get(img.otsuInv().projectHorizontally().toHorizontalHistogram(img.rows()).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(morph, 1)), minarea, dx, dy);
+	// public static Zones splitHorizontally(Img img, double morph, double
+	// minarea, double dx, double dy) {
+	// return
+	// get(img.otsuInv().projectHorizontally().toHorizontalHistogram(img.rows()).morphologyEx(Imgproc.MORPH_CLOSE,
+	// Imgproc.MORPH_RECT, new Size(morph, 1)), minarea, dx, dy);
 	// }
 
 	private Zones adjust(double dx, double dy, int width, int height) {
-		return new Zones(zones.stream().map(zone -> zone.adjustRect(dx, dy, width, height)).collect(Collectors.toList()));
+		return new Zones(
+				zones.stream().map(zone -> zone.adjustRect(dx, dy, width, height)).collect(Collectors.toList()));
 	}
 
 	public Zones() {
@@ -129,6 +178,24 @@ public class Zones implements Iterable<Zone> {
 
 	public static Zones load(String imgClassDirectory) {
 		return load(new File(imgClassDirectory + "/zones/zones.json"));
+	}
+
+	// TODO: update the algorithm for de-zoning
+	public static Zones loadZones(String imgClassDirectory) {
+		ImgClass imgClass = ImgClass.fromDirectory(imgClassDirectory);
+		Zones zones = null;
+		try {
+			zones = load(imgClassDirectory);
+		} catch (RuntimeException e) {
+			log.warn("Could not load accurate zones!");
+			imgClass.addMapper(img -> img.eraseCorners(0.1).dilateBlacks(86, 255, 76, new Size(20, 3)));
+			zones = get(imgClass.getClosedVarianceZones(new Size(9, 10)), 300, 6, 6);
+		}
+		return zones;
+	}
+
+	public static boolean isZonesFilePresent(String imgClassDirectory) {
+		return new File(imgClassDirectory + "/zones/zones.json").exists();
 	}
 
 	@Override
