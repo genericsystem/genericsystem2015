@@ -57,6 +57,7 @@ public class LayoutAnalyser extends AbstractApp {
 		int rowIndex = 0;
 
 		Img img = new Img("resources/14342661748973931.jpg").bgr2Gray().projectVertically();
+
 		// img.recursivSplit(morph, level, percentage);
 
 		Mat mask = new Mat();

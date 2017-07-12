@@ -52,6 +52,7 @@ public class Zones implements Iterable<Zone> {
 	// morph * img.rows())), minarea);
 	// }
 
+	//
 	public static Zones verticalCloseToZones(Img img, double morph, double percentage) {
 
 		Mat m = img.otsuInv().projectVertically().toVerticalHistogram(img.cols(), percentage).getSrc();
