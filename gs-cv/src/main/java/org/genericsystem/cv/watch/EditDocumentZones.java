@@ -2,6 +2,10 @@ package org.genericsystem.cv.watch;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
@@ -111,7 +115,7 @@ public class EditDocumentZones extends ModalEditor {
 	public static class ZoneLabelInput extends FlexDiv {
 
 	}
-	
+
 	@Switch(TagSwitcher.ADMIN_MODE_ONLY.class)
 	@BindText(ZONE_LABEL.class)
 	@BindAction(MODAL_DISPLAY_FLEX_CUSTOM.class)
@@ -119,7 +123,7 @@ public class EditDocumentZones extends ModalEditor {
 	public static class ZoneLabelAdmin extends HtmlHyperLink {
 		// Define the zone label in admin mode
 	}
-	
+
 	@Switch(TagSwitcher.NORMAL_MODE_ONLY.class)
 	@BindText(ZONE_LABEL.class)
 	@Attribute(name = "name", value = "zone")
@@ -134,29 +138,45 @@ public class EditDocumentZones extends ModalEditor {
 	public static class ZoneInput extends InputWithDatalist implements SelectionDefaults {
 		// Define the inputText
 	}
-	
+
 	public static class CustomInputDatalist extends InputTextEditorWithConversionForDatalist {
 		@Override
 		protected Generic updateGeneric(Context context, Serializable newValue) {
 			ZoneTextInstance zti = (ZoneTextInstance) context.getGeneric();
 			DocInstance docInstance = zti.getDoc();
 			ZoneInstance zoneInstance = zti.getZone();
-			ImgFilterInstance imgFilterInstance = zti.getImgFilter();			
+			ImgFilterInstance imgFilterInstance = zti.getImgFilter();
 			return context.getGeneric().getMeta().setInstance(newValue, docInstance, zoneInstance, imgFilterInstance);
 		}
 	}
-	
+
 	public static class DATALIST_SELECTOR implements ObservableListExtractor {
+
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		@Override
 		public ObservableList<Generic> apply(Generic[] generics) {
 			ZoneTextInstance zti = (ZoneTextInstance) generics[0];
 			Generic currentDoc = generics[1];
 			Root root = currentDoc.getRoot();
+			Predicate<Generic> filterByZone = z -> ((ZoneTextInstance) z).getZoneNum() == zti.getZoneNum()
+					&& !z.getValue().toString().isEmpty();
 			Snapshot<ZoneTextInstance> zoneTextInstances = (Snapshot) currentDoc.getHolders(root.find(ZoneText.class))
-					.filter(z -> ((ZoneTextInstance) z).getZoneNum() == zti.getZoneNum() && !z.getValue().toString().isEmpty());
+					.filter(filterByZone.and(distinctByKey(g -> g.getValue())));
 			return (ObservableList) zoneTextInstances.toObservableList()
 					.sorted((g1, g2) -> Integer.compare(g1.getZoneNum(), g2.getZoneNum()));
+		}
+
+		/**
+		 * Utility function that can be used to filter a stream to get distinct
+		 * values, using a personalized function.
+		 * 
+		 * @param keyExtractor
+		 *            - lambda expression that will provide the filter criteria
+		 * @return
+		 */
+		public <T> Predicate<T> distinctByKey(Function<? super T, Object> keyExtractor) {
+			Map<Object, Boolean> seen = new ConcurrentHashMap<>();
+			return t -> seen.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
 		}
 	}
 
@@ -185,17 +205,16 @@ public class EditDocumentZones extends ModalEditor {
 		@Override
 		public void accept(Context context, Tag tag) {
 			Tag ancestor = tag.getParent().getParent(); // ZoneTextDiv
-//			ancestor.getObservableChildren().forEach(System.out::println);
+			// ancestor.getObservableChildren().forEach(System.out::println);
 			ancestor.find(ModalWithDisplay.class).getDisplayProperty(context).setValue("flex");
 		}
 	}
-	
+
 	public static class SAVE implements ContextAction {
 		@Override
 		public void accept(Context context, Tag tag) {
 			System.out.println("Saving text for class " + Arrays.asList(context.getGenerics()));
 			context.flush();
-//			context.getGeneric().getRoot().getCurrentCache().flush();
 		}
 	}
 }

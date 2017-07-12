@@ -1,20 +1,21 @@
 package org.genericsystem.cv.watch;
 
-import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
 import org.genericsystem.cv.model.Doc;
-import org.genericsystem.cv.model.Doc.DocInstance;
 import org.genericsystem.cv.model.DocClass;
-import org.genericsystem.cv.model.DocClass.DocClassInstance;
 import org.genericsystem.cv.model.ImgFilter;
 import org.genericsystem.cv.model.ZoneGeneric;
 import org.genericsystem.cv.model.ZoneText;
+import org.genericsystem.cv.watch.DocPropertiesCheckerSwitcher.DOC_DEZONED;
+import org.genericsystem.cv.watch.DocPropertiesCheckerSwitcher.DOC_NOT_DEZONED;
+import org.genericsystem.cv.watch.DocPropertiesCheckerSwitcher.DOC_NOT_OCRD;
+import org.genericsystem.cv.watch.DocPropertiesCheckerSwitcher.DOC_NOT_SUPERVISED;
+import org.genericsystem.cv.watch.DocPropertiesCheckerSwitcher.DOC_OCRD;
+import org.genericsystem.cv.watch.DocPropertiesCheckerSwitcher.DOC_SUPERVISED;
 import org.genericsystem.cv.watch.WatchApp.DocumentsList;
 import org.genericsystem.cv.watch.WatchApp.HeaderRow;
 import org.genericsystem.reactor.Context;
@@ -27,31 +28,25 @@ import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
+import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.annotations.Switch;
-import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.appserver.ApplicationServer;
+import org.genericsystem.reactor.context.ContextAction.REMOVE;
 import org.genericsystem.reactor.context.ContextAction.SET_SELECTION;
+import org.genericsystem.reactor.context.ContextAction;
 import org.genericsystem.reactor.context.ObservableListExtractor;
-import org.genericsystem.reactor.context.TagSwitcher;
 import org.genericsystem.reactor.gscomponents.AppHeader;
 import org.genericsystem.reactor.gscomponents.AppHeader.AppTitleDiv;
 import org.genericsystem.reactor.gscomponents.AppHeader.Logo;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.FlexDiv;
-import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlH1;
-import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlH2;
-import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlH4;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlHyperLink;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlImg;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
-import org.genericsystem.reactor.gscomponents.Monitor;
 import org.genericsystem.reactor.gscomponents.RootTagImpl;
 
-import javafx.beans.binding.Bindings;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
 @DependsOnModel({ Doc.class, DocClass.class, ZoneGeneric.class, ZoneText.class, ImgFilter.class })
@@ -140,11 +135,14 @@ public class WatchApp extends RootTagImpl {
 		
 	}
 	
-	@Children(HtmlHyperLink.class)
+	@FlexDirectionStyle(FlexDirection.ROW)
+	@Children({ HtmlHyperLink.class, HtmlHyperLink.class })
 	@Children(path = HtmlHyperLink.class, value = HtmlImg.class)
 	@Attribute(path = { HtmlHyperLink.class, HtmlImg.class }, pos = { 0, 0 }, name = "src", value = "edit.png")
+	@Attribute(path = { HtmlHyperLink.class, HtmlImg.class }, pos = { 1, 0 }, name = "src", value = "delete.png")
 	@StyleClass(path = { HtmlHyperLink.class, HtmlImg.class }, pos = { -1, 0 }, value = "img")
-	@BindAction(SET_SELECTION.class)
+	@BindAction(path = HtmlHyperLink.class, pos = 0, value = SET_SELECTION.class)
+	@BindAction(path = HtmlHyperLink.class, pos = 1, value = REMOVE_CUSTOM.class) // TODO: ask for confirmation?
 	public static class DocumentEditButton extends FlexDiv {
 		
 	}
@@ -160,63 +158,12 @@ public class WatchApp extends RootTagImpl {
 		}
 	}
 	
-	public static class DOC_DEZONED implements TagSwitcher {
+	public static class REMOVE_CUSTOM implements ContextAction {
 		@Override
-		public ObservableValue<Boolean> apply(Context context, Tag tag) {
-			return isClassZoneFilePresent(context);
+		public void accept(Context context, Tag tag) {
+			context.remove();
+			context.flush();
 		}
-	}
-	
-	public static class DOC_NOT_DEZONED implements TagSwitcher {
-		@Override
-		public ObservableValue<Boolean> apply(Context context, Tag tag) {
-			return isClassZoneFilePresent(context).not();
-		}
-	}
-	
-	public static class DOC_OCRD implements TagSwitcher {
-		@Override
-		public ObservableValue<Boolean> apply(Context context, Tag tag) {
-			return isDocOcrd(context);
-		}
-	}
-	
-	public static class DOC_NOT_OCRD implements TagSwitcher {
-		@Override
-		public ObservableValue<Boolean> apply(Context context, Tag tag) {
-			return isDocOcrd(context).not();
-		}
-	}
-	
-	public static class DOC_SUPERVISED implements TagSwitcher {
-		@Override
-		public ObservableValue<Boolean> apply(Context context, Tag tag) {
-			return isDocSupervised(context);
-		}
-	}
-	
-	public static class DOC_NOT_SUPERVISED implements TagSwitcher {
-		@Override
-		public ObservableValue<Boolean> apply(Context context, Tag tag) {
-			return isDocSupervised(context).not();
-		}
-	}
-	
-	public static SimpleBooleanProperty isClassZoneFilePresent (Context context) {
-		DocInstance currentDoc = (DocInstance) context.getGeneric();
-		DocClassInstance docClassInstance = currentDoc.getDocClass();
-		File file = new File(System.getProperty("user.dir") + "/../gs-cv/classes/" + docClassInstance.getValue().toString() + "/zones/zones.json");
-		return new SimpleBooleanProperty(file.exists());
-	}
-	
-	public static SimpleBooleanProperty isDocOcrd (Context context) {
-		// TODO: implement
-		return new SimpleBooleanProperty(true);
-	}
-	
-	public static SimpleBooleanProperty isDocSupervised (Context context) {
-		// TODO: implement
-		return new SimpleBooleanProperty(true);
 	}
 
 }
