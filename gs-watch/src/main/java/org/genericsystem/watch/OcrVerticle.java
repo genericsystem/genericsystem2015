@@ -47,7 +47,7 @@ public class OcrVerticle extends AbstractVerticle {
 		vertx.deployVerticle(new AbstractVerticle() {
 			@Override
 			public void start() throws Exception {
-				Path imagePath = Paths.get(System.getProperty("user.dir") + "/../gs-cv/classes/id-fr-front/image5-0.png");
+				Path imagePath = Paths.get(System.getProperty("user.dir") + "/../gs-cv/classes/id-fr-front/image4-0.png");
 				vertx.eventBus().publish(VerticleDeployer.ACCURATE_ZONES_FOUND, imagePath.toString());
 				}
 			} , res -> {
@@ -61,6 +61,7 @@ public class OcrVerticle extends AbstractVerticle {
 	@Override
 	public void start() throws Exception {
 		MessageConsumer<String> consumer = vertx.eventBus().consumer(VerticleDeployer.ACCURATE_ZONES_FOUND);
+		// TODO: use a worker thread?
 		consumer.handler(message -> vertx.executeBlocking(future -> {
 			String imagePath = message.body();
 			System.out.println(">>>>> New image to OCR: " + imagePath);
