@@ -821,33 +821,33 @@ public class Img {
 	private Zones split(double morph, int matSize) {
 		int k = new Double(Math.floor(morph * src.rows())).intValue();
 		System.out.println("k : " + k);
-		double[] result = new double[src.rows()];
+		boolean[] result = new boolean[src.rows()];
 		for (int i = 0; i < src.rows(); i++) {
-			System.out.println(src.get(i, 0)[0]);
+			// System.out.println(src.get(i, 0)[0]);
 			if (i + 1 < src.rows() && src.get(i, 0)[0] == 255d && src.get(i + 1, 0)[0] == 0) {
 				for (int j = k + 1; j > 0; j--) {
 					if (i + j < src.rows()) {
 						if (src.get(i + j, 0)[0] == 255d) {
-							Arrays.fill(result, i, i + j + 1, 255d);
+							Arrays.fill(result, i, i + j + 1, true);
 							i += j - 1;
 							break;
 						}
-						result[i] = src.get(i, 0)[0];
+						result[i] = src.get(i, 0)[0] != 0;
 					}
 				}
 			} else
-				result[i] = src.get(i, 0)[0];
+				result[i] = src.get(i, 0)[0] != 0;
 		}
 
 		List<Zone> zones = new ArrayList<>();
 		Integer start = null;
 		for (int i = 0; i < result.length; i++) {
-			if ((i + 1) < result.length && result[i] == 0 && result[i + 1] == 1)
+			if ((i + 1) < result.length && !result[i] && result[i + 1])
 				start = i + 1;
-			else if ((i + 1) < result.length && result[i] == 1 && result[i + 1] == 0) {
+			else if ((i + 1) < result.length && result[i] && !result[i + 1]) {
 				zones.add(new Zone(0, new Rect(0, start, matSize, i - start)));
 				start = null;
-			} else if ((i + 1) >= result.length && result[i] == 1) {
+			} else if ((i + 1) >= result.length && result[i]) {
 				zones.add(new Zone(0, new Rect(0, start, matSize, i - start)));
 				start = null;
 			}
