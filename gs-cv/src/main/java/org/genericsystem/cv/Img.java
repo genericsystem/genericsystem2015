@@ -779,13 +779,13 @@ public class Img {
 
 	public Img projectVertically() {
 		Mat result = new Mat();
-		Core.reduce(getSrc(), result, 1, Core.REDUCE_SUM, CvType.CV_32S);
+		Core.reduce(getSrc(), result, 1, Core.REDUCE_AVG, CvType.CV_8U);
 		return new Img(result);
 	}
 
 	public Img projectHorizontally() {
 		Mat result = new Mat();
-		Core.reduce(getSrc(), result, 0, Core.REDUCE_SUM, CvType.CV_32S);
+		Core.reduce(getSrc(), result, 0, Core.REDUCE_AVG, CvType.CV_8U);
 		return new Img(result);
 	}
 
