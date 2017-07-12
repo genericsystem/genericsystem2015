@@ -4,12 +4,15 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+import org.genericsystem.cv.Classifier;
 import org.genericsystem.cv.PdfToPngConverter;
+import org.genericsystem.watch.ClassifierVerticle;
 import org.genericsystem.watch.beta.RoundRobin;
 
 import io.vertx.core.AbstractVerticle;
@@ -38,6 +41,7 @@ public class DistributedVerticle extends AbstractVerticle {
 	private final String PRIVATE_PATH;
 	private final String DOWNLOAD = "download";
 	private final String PDF_TO_PNG = "pdfToPng";
+	private final String CLASSIFY = "classification";
 	private static final DeliveryOptions TIMEOUT = new DeliveryOptions().setSendTimeout(500);
 	private final RoundRobin roundrobin = new RoundRobin();
 	private List<JsonObject> messages = new ArrayList<>();
@@ -87,7 +91,6 @@ public class DistributedVerticle extends AbstractVerticle {
 				System.out.println("File : " + fileName + " is already dowloaded");
 		});
 		vertx.eventBus().consumer(PRIVATE_ADDRESS + ":" + PDF_TO_PNG, handler -> {
-			System.out.println("PDF to PNG converter");
 			System.out.println("Receive from : " + (String) handler.body() + " on : " + PRIVATE_ADDRESS + " " + Thread.currentThread());
 			JsonObject task = new JsonObject((String) handler.body()).getJsonObject("task");
 			tasks.add(task);
@@ -95,16 +98,48 @@ public class DistributedVerticle extends AbstractVerticle {
 			String fileName = task.getString(FILENAME);
 			File file = new File(PRIVATE_PATH + fileName);
 			vertx.executeBlocking(future -> {
-				List<Path> createdPngs = PdfToPngConverter.convertPdfToImages(file, new File("png"));
+				List<Path> createdPngs = PdfToPngConverter.convertPdfToImages(file, new File("../gs-cv/png"));
 				future.complete(createdPngs);
 			}, res -> {
 				if (res.succeeded()) {
-					for (Path newPng : (List<Path>) res.result())
+					for (Path newPng : (List<Path>) res.result()) {
+						long id = System.currentTimeMillis();
+						messages.add(new JsonObject().put(ID, id).put("task", new JsonObject().put(ID, id).put(FILENAME, newPng.toString()).put(IP, ip).put(TYPE, CLASSIFY)));
 						System.out.println("New PNG file : " + newPng);
+					}
 					System.out.println("Blocking task callback on thread : " + Thread.currentThread());
 					System.out.println("Task " + task.encodePrettily() + " is done, removing " + Thread.currentThread());
 					tasks.remove(task);
 				}
+			});
+		});
+		vertx.eventBus().consumer(PRIVATE_ADDRESS + ":" + CLASSIFY, handler -> {
+			System.out.println("Receive from : " + (String) handler.body() + " on : " + PRIVATE_ADDRESS + " " + Thread.currentThread());
+			JsonObject task = new JsonObject((String) handler.body()).getJsonObject("task");
+			tasks.add(task);
+			handler.reply(OK);
+			String fileName = task.getString(FILENAME);
+			File file = new File(fileName);
+			vertx.executeBlocking(future -> {
+				Path savedFile;
+				synchronized (ClassifierVerticle.class) {
+					savedFile = Classifier.classify(Paths.get("../gs-cv/classes/"), file.toPath());
+				}
+				if (savedFile != null)
+					future.complete(savedFile);
+				else
+					future.fail("Impossible to classify image.");
+			}, res -> {
+				if (res.succeeded()) {
+					//					long id = System.currentTimeMillis();
+					//						messages.add(new JsonObject().put(ID, id).put("task", new JsonObject().put(ID, id).put(FILENAME, newPng).put(IP, ip).put(TYPE, CLASSIFY)));
+					System.out.println("Image classified : " + res.result());
+				} else {
+					System.out.println("Impossible to classify image : " + file);
+				}
+				System.out.println("Blocking task callback on thread : " + Thread.currentThread());
+				System.out.println("Task " + task.encodePrettily() + " is done, removing " + Thread.currentThread());
+				tasks.remove(task);
 			});
 		});
 		vertx.eventBus().consumer(PUBLIC_ADDRESS, message -> {
