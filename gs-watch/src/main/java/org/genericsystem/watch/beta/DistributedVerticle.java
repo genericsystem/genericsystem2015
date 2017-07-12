@@ -129,7 +129,7 @@ public class DistributedVerticle extends AbstractVerticle {
 		});
 
 		vertx.eventBus().consumer(PUBLIC_ADDRESS, message -> {
-			roundrobin.Register((String) message.body());
+			roundrobin.register((String) message.body());
 		});
 
 		// // Periodic : Task creation
