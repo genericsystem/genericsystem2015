@@ -824,16 +824,9 @@ public class Img {
 	}
 
 	private Zones split(double morph, int matSize, boolean vertical) {
-		int k = new Double(Math.floor(morph * src.rows())).intValue(); // TODO
-																		// if k
-																		// = 0
-																		// split
-																		// must
-																		// return
-																		// just
-																		// one
-																		// zone
-																		// !
+		int k = new Double(Math.floor(morph * src.rows())).intValue();
+		// TODO if k = 0 split must return just one zone !
+
 		System.out.println("k : " + k);
 		boolean[] result = new boolean[src.rows()];
 		// TODO use Converters.Mat_to_vector_double(m, ds) and avoid to
