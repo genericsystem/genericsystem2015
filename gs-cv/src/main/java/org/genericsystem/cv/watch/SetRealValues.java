@@ -44,6 +44,7 @@ import javafx.collections.ObservableList;
  * @author middleware
  *
  */
+@Deprecated
 @DependsOnModel({ Doc.class, DocClass.class, ZoneGeneric.class, ZoneText.class })
 @Children({ DocumentDiv.class })
 public class SetRealValues extends RootTagImpl {

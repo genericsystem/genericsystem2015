@@ -56,6 +56,7 @@ import javafx.collections.ObservableList;
  * @author Pierrik Lassalas
  *
  */
+@Deprecated
 @DependsOnModel({ Doc.class, DocClass.class, ZoneGeneric.class, ZoneText.class })
 @Style(name = "background-color", value = "#ffffff")
 @Children({ AppHeader.class, DocumentDiv.class })

@@ -17,6 +17,7 @@ import org.genericsystem.cv.model.Score.ScoreInstance;
 import org.genericsystem.cv.model.ZoneGeneric;
 import org.genericsystem.cv.model.ZoneGeneric.ZoneInstance;
 import org.genericsystem.cv.model.ZoneText;
+import org.genericsystem.cv.model.ZoneText.ZoneTextInstance;
 import org.genericsystem.kernel.Engine;
 import org.opencv.core.Core;
 import org.slf4j.Logger;
@@ -33,11 +34,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ComputeTrainedScores {
 
-	static {
-		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-	}
-
-	private final static String gsPath = System.getenv("HOME") + "/genericsystem/gs-cv_model2/";
+	private final static String gsPath = System.getenv("HOME") + "/genericsystem/gs-cv_model3/";
 	private static Logger log = LoggerFactory.getLogger(ComputeTrainedScores.class);
 
 	public static void main(String[] mainArgs) {
@@ -82,35 +79,63 @@ public class ComputeTrainedScores {
 			for (ImgFilterInstance imgFilterInstance : imgFilterInstances) {
 				int lev = 0; // contains the sum of all Levenshtein
 								// distances for a given zone
-				int count = 0; // contains the number of perfect matches
+				int count = 0; // contains the number of "perfect" matches
+				int totalDocs = docInstances.size(); // contains the number of
+														// documents
 
 				// Loop over all documents in this class
 				for (DocInstance docInstance : docInstances) {
-					String realText = (String) zoneText.getZoneText(docInstance, zoneInstance, realityInstance)
-							.getValue();
-					String text = (String) zoneText.getZoneText(docInstance, zoneInstance, imgFilterInstance)
-							.getValue();
-					// TODO : manipulate the Strings before comparison?
-					int dist = Levenshtein.distance(text.replaceAll("[\n ,.]", "").trim(),
-							realText.replaceAll("[\n ,.]", "").trim());
+					ZoneTextInstance realZti = zoneText.getZoneText(docInstance, zoneInstance, realityInstance);
+					// Do not attempt the computation if the document was not
+					// supervised
+					if (realZti == null) {
+						log.debug("Document {} on zone {} was not supervised (passed)", docInstance.getValue(),
+								zoneInstance.getValue());
+						totalDocs--; // Decrement the total size, since this
+										// value will not be accounted for in
+										// the statistics
+					} else {
+						String realText = (String) realZti.getValue();
+						ZoneTextInstance zti = zoneText.getZoneText(docInstance, zoneInstance, imgFilterInstance);
+						// Do not proceed if the zoneText does not exists (i.e.,
+						// the algorithm was not applied to this image)
+						if (zti == null) {
+							log.debug("No text found for {} => zone n°{}, {}", docInstance.getValue(),
+									zoneInstance.getValue(), imgFilterInstance.getValue());
+							totalDocs--; // Decrement the total size, since this
+											// value will not be accounted for
+											// in the statistics
+						} else {
+							String text = (String) zti.getValue();
+							// TODO : manipulate the Strings before comparison?
+							int dist = Levenshtein.distance(text.replaceAll("[\n ,.]", "").trim(),
+									realText.replaceAll("[\n ,.]", "").trim());
 
-					count += (dist == 0) ? 1 : 0;
-					lev += dist;
+							count += (dist == 0) ? 1 : 0;
+							lev += dist;
+						}
+					}
 				}
-				float probability = (float) count / (float) docInstances.size();
-				float meanDistance = (float) lev / (float) docInstances.size();
+				if (totalDocs > 0) {
+					float probability = (float) count / (float) totalDocs;
+					float meanDistance = (float) lev / (float) totalDocs;
 
-				ScoreInstance scoreInstance = score.setScore(probability, zoneInstance, imgFilterInstance);
-				meanLevenshtein.setMeanLev(meanDistance, scoreInstance);
-				engine.getCurrentCache().flush();
+					ScoreInstance scoreInstance = score.setScore(probability, zoneInstance, imgFilterInstance);
+					meanLevenshtein.setMeanLev(meanDistance, scoreInstance);
+					engine.getCurrentCache().flush();
 
-				meanLevDistances.add(meanDistance);
-				probabilities.add(probability);
+					meanLevDistances.add(meanDistance);
+					probabilities.add(probability);
+				} else {
+					log.error("An error has occured while processing the score computation of zone n°{} (class: {})",
+							zoneInstance.getValue(), docType);
+				}
 			}
 			engine.getCurrentCache().flush();
-			
+
 			for (int i = 0; i < imgFilterInstances.size(); i++) {
-				log.info("{}: (proba: {})", imgFilterInstances.get(i), meanLevDistances.get(i), probabilities.get(i));
+				log.info("{}: {} (meanLev: {})", imgFilterInstances.get(i), probabilities.get(i),
+						meanLevDistances.get(i));
 			}
 		}
 

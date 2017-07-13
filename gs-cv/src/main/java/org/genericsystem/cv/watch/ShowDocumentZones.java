@@ -1,5 +1,7 @@
 package org.genericsystem.cv.watch;
 
+import java.util.Arrays;
+
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
@@ -114,7 +116,7 @@ public class ShowDocumentZones extends ModalEditor {
 			Root root = currentDoc.getRoot();
 			System.out.println("Document: " + currentDoc.info());
 			Snapshot<ZoneTextInstance> zoneTextInstances = (Snapshot) currentDoc.getHolders(root.find(ZoneText.class))
-					.filter(zt -> "reality".equals(((ZoneTextInstance) zt).getImgFilter().getValue()));
+					.filter(zt -> "best".equals(((ZoneTextInstance) zt).getImgFilter().getValue()));
 			return (ObservableList) zoneTextInstances.toObservableList()
 					.sorted((g1, g2) -> Integer.compare(g1.getZoneNum(), g2.getZoneNum()));
 		}

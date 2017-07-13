@@ -24,6 +24,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.EventBusOptions;
+import io.vertx.core.http.HttpClient;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.spi.cluster.ClusterManager;
 import io.vertx.spi.cluster.hazelcast.HazelcastClusterManager;
@@ -33,16 +34,14 @@ public class DistributedVerticle extends AbstractVerticle {
 	public static final String PUBLIC_ADDRESS = "publicAddress";
 	public final String PRIVATE_ADDRESS = "privateAddress " + hashCode();
 
-	protected final Engine engine = new Engine(System.getenv("HOME") + "/genericsystem/cloud/", Task.class,
-			Message.class);
+	protected final Engine engine = new Engine(System.getenv("HOME") + "/genericsystem/cloud/", Task.class, Message.class);
 	protected final Cache cache = engine.newCache();
 	protected final Generic messageType = engine.find(Message.class);
 	protected final Generic taskType = engine.find(Task.class);
 	private final RoundRobin roundrobin = new RoundRobin();
 	private static final DeliveryOptions TIMEOUT = new DeliveryOptions().setSendTimeout(2000);
 
-	private static final String IP_ADDRESS = "192.168.1.11";
-	private static final int ATTEMPTS = 5;
+	protected static final String IP_ADDRESS = "192.168.1.16";
 
 	private static final long AVAILABILITY_PERIODICITY = 5000;
 	private static final long TASK_CREATION_PERIODICITY = 10000;
@@ -93,44 +92,48 @@ public class DistributedVerticle extends AbstractVerticle {
 	public void start() throws Exception {
 
 		System.out.println("start verticle");
-
+		System.out.println("AAA");
 		cache.safeConsum(nothing -> {
-			for (Generic task1 : taskType.getInstances()) {
-				if (STARTED.equals(new JsonObject((String) task1.getValue()).getString("state"))) {
+			try {
+				for (Generic task1 : taskType.getInstances()) {
+					if (STARTED.equals(new JsonObject((String) task1.getValue()).getString("state"))) {
+						System.out.println("PROBLEM : " + ((String) task1.getValue()));
+						addMessage(Paths.get(new JsonObject((String) task1.getValue()).getString("file")), new JsonObject((String) task1.getValue()).getInteger("step"), new JsonObject((String) task1.getValue()).getLong("task"), TODO,
+								new JsonObject((String) task1.getValue()).getInteger("max_parallel_executions"));
 
-					addMessage(Paths.get(new JsonObject((String) task1.getValue()).getString("file")),
-							new JsonObject((String) task1.getValue()).getInteger("step"),
-							new JsonObject((String) task1.getValue()).getLong("task"), TODO,
-							new JsonObject((String) task1.getValue()).getInteger("max_parallel_executions"));
-
-					task1.remove();
+						task1.remove();
+					}
 				}
-			}
 
-			for (Generic message1 : messageType.getInstances()) {
-				if (INPROGRESS.equals(new JsonObject((String) message1.getValue()).getString("state"))) {
+				for (Generic message1 : messageType.getInstances()) {
+					if (INPROGRESS.equals(new JsonObject((String) message1.getValue()).getString("state"))) {
 
-					addMessage(Paths.get(new JsonObject((String) message1.getValue()).getString("file")),
-							new JsonObject((String) message1.getValue()).getInteger("step"),
-							new JsonObject((String) message1.getValue()).getLong("task"), TODO,
-							new JsonObject((String) message1.getValue()).getInteger("max_parallel_executions"));
+						addMessage(Paths.get(new JsonObject((String) message1.getValue()).getString("file")), new JsonObject((String) message1.getValue()).getInteger("step"), new JsonObject((String) message1.getValue()).getLong("task"), TODO,
+								new JsonObject((String) message1.getValue()).getInteger("max_parallel_executions"));
 
-					message1.remove();
+						message1.remove();
+					}
 				}
+				cache.flush();
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
-			cache.flush();
 		});
+		System.out.println("BBB");
 
 		startServer();
+		System.out.println("CCC");
 
 		// Periodic aknowledge of availability
 		vertx.setPeriodic(AVAILABILITY_PERIODICITY, h -> {
 			vertx.eventBus().publish(PUBLIC_ADDRESS, PRIVATE_ADDRESS);
 		});
+		System.out.println("DDD");
 
 		vertx.eventBus().consumer(PUBLIC_ADDRESS, message -> {
-			roundrobin.Register((String) message.body());
+			roundrobin.register((String) message.body());
 		});
+		System.out.println("EEE");
 
 		// // Periodic : Task creation
 		// vertx.setPeriodic(TASK_CREATION_PERIODICITY, m -> {
@@ -159,11 +162,8 @@ public class DistributedVerticle extends AbstractVerticle {
 						String workerAddress = roundrobin.getNextAddress();
 						if (workerAddress != null) {
 							message.remove();
-							Generic inProgress = messageType.addInstance(
-									new JsonObject().put("task", json.getLong("task")).put("state", INPROGRESS)
-											.put("max_parallel_executions", json.getInteger("max_parallel_executions"))
-											.put("step", json.getLong("step")).put("file", json.getString("file"))
-											.put("IP", IP_ADDRESS).encodePrettily());
+							Generic inProgress = messageType.addInstance(new JsonObject().put("task", json.getLong("task")).put("state", INPROGRESS).put("max_parallel_executions", json.getInteger("max_parallel_executions"))
+									.put("step", json.getLong("step")).put("file", json.getString("file")).put("IP", IP_ADDRESS).encodePrettily());
 							cache.flush();
 							vertx.eventBus().send(workerAddress, inProgress.getValue(), TIMEOUT, reply -> {
 
@@ -173,13 +173,11 @@ public class DistributedVerticle extends AbstractVerticle {
 									if (reply.failed()) {
 										System.out.println(reply.cause());
 										roundrobin.remove(workerAddress);
-										addMessage(Paths.get(js.getString("file")), js.getInteger("step"),
-												js.getLong("task"), TODO, js.getInteger("max_parallel_executions"));
+										addMessage(Paths.get(js.getString("file")), js.getInteger("step"), js.getLong("task"), TODO, js.getInteger("max_parallel_executions"));
 
 									} else {
 										if (KO.equals(reply.result().body()))
-											addMessage(Paths.get(js.getString("file")), js.getInteger("step"),
-													js.getLong("task"), TODO, js.getInteger("max_parallel_executions"));
+											addMessage(Paths.get(js.getString("file")), js.getInteger("step"), js.getLong("task"), TODO, js.getInteger("max_parallel_executions"));
 									}
 									cache.flush();
 								});
@@ -191,6 +189,7 @@ public class DistributedVerticle extends AbstractVerticle {
 					}
 				}
 			});
+			System.out.println("FFF");
 
 		});
 
@@ -212,8 +211,7 @@ public class DistributedVerticle extends AbstractVerticle {
 
 				JsonObject task = new JsonObject((String) message.body());
 				String ip_sender = task.getString("IP");
-				String messageTask = new JsonObject().put("task", task.getLong("task")).put("state", STARTED)
-						.put("step", task.getInteger("step")).put("file", task.getString("file")).encodePrettily();
+				String messageTask = new JsonObject().put("task", task.getLong("task")).put("state", STARTED).put("step", task.getInteger("step")).put("file", task.getString("file")).encodePrettily();
 				taskType.addInstance(messageTask);
 				cache.flush();
 				message.reply(OK);
@@ -234,14 +232,16 @@ public class DistributedVerticle extends AbstractVerticle {
 					boolean success = true;
 
 					BlockingQueue<byte[]> blockingQueue = new ArrayBlockingQueue<>(1);
-					vertx.createHttpClient().getNow(port, ip_sender, remoteDirectory + task.getString("file"),
-							resp -> resp.bodyHandler(body -> {
-								try {
-									blockingQueue.put(body.getBytes());
-								} catch (InterruptedException e1) {
-									e1.printStackTrace();
-								}
-							}));
+					HttpClient client = vertx.createHttpClient();
+					client.getNow(port, ip_sender, remoteDirectory + task.getString("file"), resp -> resp.bodyHandler(body -> {
+						try {
+
+							blockingQueue.put(body.getBytes());
+							client.close();
+						} catch (InterruptedException e1) {
+							e1.printStackTrace();
+						}
+					}));
 					byte[] bytes;
 					try {
 						bytes = blockingQueue.take();
@@ -271,6 +271,9 @@ public class DistributedVerticle extends AbstractVerticle {
 						e.printStackTrace();
 						return;
 					}
+
+					bytes = null;
+					System.gc();
 
 					switch (task.getInteger("step")) {
 
@@ -304,14 +307,10 @@ public class DistributedVerticle extends AbstractVerticle {
 					cache.safeConsum(nothing2 -> {
 						taskType.getInstance(messageTask).remove();
 						if (res.succeeded()) {
-							taskType.addInstance(new JsonObject().put("task", task.getLong("task"))
-									.put("state", FINISHED).put("step", task.getInteger("step"))
-									.put("file", task.getString("file")).encodePrettily());
+							taskType.addInstance(new JsonObject().put("task", task.getLong("task")).put("state", FINISHED).put("step", task.getInteger("step")).put("file", task.getString("file")).encodePrettily());
 
 						} else {
-							taskType.addInstance(new JsonObject().put("task", task.getLong("task"))
-									.put("state", ABORTED).put("step", task.getInteger("step"))
-									.put("file", task.getString("file")).encodePrettily());
+							taskType.addInstance(new JsonObject().put("task", task.getLong("task")).put("state", ABORTED).put("step", task.getInteger("step")).put("file", task.getString("file")).encodePrettily());
 							System.out.println(res.cause());
 						}
 						cache.flush();
@@ -322,6 +321,7 @@ public class DistributedVerticle extends AbstractVerticle {
 			});
 
 		});
+		System.out.println("GGG");
 
 	}
 
@@ -366,8 +366,7 @@ public class DistributedVerticle extends AbstractVerticle {
 			System.gc();
 			System.runFinalization();
 			cache.safeConsum(nothing -> {
-				addMessage(savedFile, task.getInteger("step") + 1, task.getLong("task"), TODO,
-						task.getInteger("max_parallel_executions"));
+				addMessage(savedFile, task.getInteger("step") + 1, task.getLong("task"), TODO, task.getInteger("max_parallel_executions"));
 			});
 
 			return true;
@@ -393,9 +392,7 @@ public class DistributedVerticle extends AbstractVerticle {
 
 	protected void addMessage(Path file, int step, long timestamp, String state, int parallel_executions) {
 
-		messageType.addInstance(new JsonObject().put("task", timestamp).put("state", state)
-				.put("max_parallel_executions", parallel_executions).put("step", step).put("file", file.toString())
-				.encodePrettily());
+		messageType.addInstance(new JsonObject().put("task", timestamp).put("state", state).put("max_parallel_executions", parallel_executions).put("step", step).put("file", file.toString()).encodePrettily());
 		cache.flush();
 
 	}

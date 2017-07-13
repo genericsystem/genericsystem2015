@@ -25,21 +25,18 @@ import org.genericsystem.reactor.context.TextBinding;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.FlexDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlHyperLink;
-import org.genericsystem.reactor.gscomponents.Modal;
 import org.genericsystem.reactor.gscomponents.Modal.ModalWithDisplay;
 
-import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
-//@Children(FlexDiv.class)
+@Children(FlexDiv.class)
 @Children(path = FlexDiv.class, value = { HtmlHyperLink.class, FiltersDiv.class })
 @StyleClass(path = { FlexDiv.class, FiltersDiv.class }, value = "filter-results")
 @Style(path = FlexDiv.class, name = "display", value = "block")
 @Style(path = FlexDiv.class, name = "padding", value = "1.5em")
 public class ZonesDetails extends ModalWithDisplay {
-	
 	
 	@FlexDirectionStyle(FlexDirection.ROW)
 	@StyleClass("ocr-row")
@@ -69,6 +66,7 @@ public class ZonesDetails extends ModalWithDisplay {
 		public ObservableList<Generic> apply(Generic[] generics) {
 			Root root = generics[0].getRoot();
 			ZoneTextInstance zti = (ZoneTextInstance) generics[0];
+			System.out.println("zti : " + zti.getZoneNum() + " " + zti.getImgFilter() + " " + zti.getDoc());
 			Snapshot<Generic> filters = root.find(ImgFilter.class).getInstances();
 			return filters.toObservableList();
 		}
@@ -82,7 +80,7 @@ public class ZonesDetails extends ModalWithDisplay {
 			DocInstance doc = zti.getDoc();
 			ZoneText zt = (ZoneText) ifi.getRoot().find(ZoneText.class);
 			ZoneTextInstance text = zt.getZoneText(doc, zti.getZone(), ifi);
-			return new SimpleStringProperty(text == null ? null : text.getValue().toString());
+			return new SimpleStringProperty(text.getValue().toString());
 		}
 	}
 
