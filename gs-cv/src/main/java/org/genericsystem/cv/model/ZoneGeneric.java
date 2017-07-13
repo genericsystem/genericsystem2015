@@ -5,15 +5,15 @@ import org.genericsystem.api.core.annotations.Dependencies;
 import org.genericsystem.api.core.annotations.InstanceClass;
 import org.genericsystem.api.core.annotations.SystemGeneric;
 import org.genericsystem.api.core.annotations.constraints.InstanceValueClassConstraint;
-import org.genericsystem.api.core.annotations.constraints.SingularConstraint;
 import org.genericsystem.common.Generic;
+import org.genericsystem.cv.Zone;
 import org.genericsystem.cv.model.DocClass.DocClassInstance;
 import org.genericsystem.cv.model.ZoneGeneric.ZoneH;
 import org.genericsystem.cv.model.ZoneGeneric.ZoneInstance;
-//import org.genericsystem.cv.model.ZoneGeneric.ZoneNum;
 import org.genericsystem.cv.model.ZoneGeneric.ZoneW;
 import org.genericsystem.cv.model.ZoneGeneric.ZoneX;
 import org.genericsystem.cv.model.ZoneGeneric.ZoneY;
+import org.opencv.core.Rect;
 
 /**
  * This class stores zones for given class of documents.
@@ -33,6 +33,16 @@ public class ZoneGeneric implements Generic {
 		public DocClassInstance getDocClass() {
 			return (DocClassInstance) this.getHolder(getRoot().find(DocClass.class));
 		}
+		
+		public Zone getZoneObject(){
+			int num = (int) getHolder(getRoot().find(ZoneGeneric.class)).getValue();
+			int x = (int) getHolder(getRoot().find(ZoneX.class)).getValue();
+			int y = (int) getHolder(getRoot().find(ZoneY.class)).getValue();
+			int width = (int) getHolder(getRoot().find(ZoneW.class)).getValue();
+			int height = (int) getHolder(getRoot().find(ZoneH.class)).getValue();
+			return new Zone(num, new Rect(x, y, width, height));
+		}
+		
 	}
 
 	public ZoneInstance setZone(int numZone, DocClassInstance docClass) {
