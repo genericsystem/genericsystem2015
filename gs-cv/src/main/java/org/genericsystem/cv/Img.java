@@ -14,6 +14,9 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+
 import javax.swing.ImageIcon;
 
 import org.opencv.core.Core;
@@ -39,9 +42,6 @@ import org.opencv.utils.Converters;
 import org.opencv.ximgproc.Ximgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 
 public class Img {
 
@@ -779,41 +779,19 @@ public class Img {
 
 	public Img projectVertically() {
 		Mat result = new Mat();
-		Core.reduce(getSrc(), result, 1, Core.REDUCE_SUM, CvType.CV_32S);
+		Core.reduce(getSrc(), result, 1, Core.REDUCE_AVG, CvType.CV_8U);
 		return new Img(result);
 	}
 
 	public Img projectHorizontally() {
 		Mat result = new Mat();
-		Core.reduce(getSrc(), result, 0, Core.REDUCE_SUM, CvType.CV_32S);
+		Core.reduce(getSrc(), result, 0, Core.REDUCE_AVG, CvType.CV_8U);
 		return new Img(result);
 	}
 
-	public Img toVerticalHistogram(int cols, double percentage) {
-		Mat result = new Mat(new Size(cols, rows()), CvType.CV_8UC1, new Scalar(0));
-		for (int row = 0; row < rows(); row++) {
-			double x = get(row, 0)[0] / 255 / Integer.valueOf(cols).doubleValue();
-			// if (x < percentage || x > 1 - percentage)
-			// x = 0;
-			// else
-			// x = cols;
-			if (x != 0)
-				Imgproc.line(result, new Point(0, row), new Point(cols, row), new Scalar(255), 1);
-		}
-		return new Img(result);
-	}
-
-	public Img toHorizontalHistogram(int rows, double percentage) {
-		Mat result = new Mat(new Size(cols(), rows), CvType.CV_8UC1, new Scalar(0));
-		for (int col = 0; col < cols(); col++) {
-			double y = get(0, col)[0] / 255 / Integer.valueOf(rows).doubleValue();
-			// if (y < percentage || y > 1 - percentage)
-			// y = 0;
-			// else
-			// y = rows;
-			if (y != 0)
-				Imgproc.line(result, new Point(col, 0), new Point(col, rows), new Scalar(255), 1);
-		}
+	private Img range(Scalar scalar, Scalar scalar2) {
+		Mat result = new Mat();
+		Core.inRange(getSrc(), scalar, scalar2, result);
 		return new Img(result);
 	}
 
@@ -829,38 +807,70 @@ public class Img {
 		return new Img(result);
 	}
 
-	// public void recursivSplit(double morph) {
-	// Zones vZones = Zones.split(this, morph, 0, true);
-	// assert vZones.size() != 0;
-	// if (vZones.size() == 1) {
-	// Zones hZones = Zones.split(this, morph, 0, false);
-	// if (hZones.size() == 1)
-	// return;
-	// for (Zone zone : hZones) {
-	// Img subRoi = zone.getRoi(this);
-	// subRoi.recursivSplit(morph);
-	// }
-	// hZones.draw(this, new Scalar(0, 255, 0), 2);
-	//
-	// } else {
-	// for (Zone zone : vZones) {
-	// Img subRoi = zone.getRoi(this);
-	// subRoi.recursivSplit(morph);
-	// }
-	// vZones.draw(this, new Scalar(0, 255, 0), 2);
-	// }
-	//
-	// }
+	public Zones split(double morph, boolean vertical, double concentration) {
+		if ((vertical ? src.cols() : src.rows()) < 4)
+			System.out.println("Zone size to low : " + (vertical ? src.cols() : src.rows()));
+		// return Collections.singletonList(this.getZone());
+		if (vertical)
+			return bgr2Gray().projectVertically().range(new Scalar(concentration * 255), new Scalar((1 - concentration) * 255)).split(morph, src.cols(), true);
+		else
+			return bgr2Gray().projectHorizontally().range(new Scalar(concentration * 255), new Scalar((1 - concentration) * 255)).transpose().split(morph, src.rows(), false);
+	}
 
-	public void recursivSplit(double morph, int level, double percentage) {
-		Zones hZones = Zones.split(this, morph, 0, true, percentage);
-		Zones vZones = Zones.split(this, morph, 0, false, percentage);
+	private Img transpose() {
+		Mat result = new Mat();
+		Core.transpose(src, result);
+		return new Img(result);
+	}
 
-		System.out.println("Level : " + level + " Hzones : " + hZones.size() + " Vzones : " + vZones.size());
-
-		if (level <= 0 || (hZones.size() <= 1 && vZones.size() <= 1)) {
-			return;
+	private Zones split(double morph, int matSize, boolean vertical) {
+		int k = new Double(Math.floor(morph * src.rows())).intValue(); // TODO if k = 0 split must return just one zone !
+		System.out.println("k : " + k);
+		boolean[] result = new boolean[src.rows()];
+		// TODO use Converters.Mat_to_vector_double(m, ds) and avoid to transpose mat if not vertical
+		for (int i = 0; i < src.rows(); i++) {
+			// System.out.println(src.get(i, 0)[0]);
+			if (i + 1 < src.rows() && src.get(i, 0)[0] == 255d && src.get(i + 1, 0)[0] == 0) {
+				for (int j = k + 1; j > 0; j--) {
+					if (i + j < src.rows()) {
+						if (src.get(i + j, 0)[0] == 255d) {
+							Arrays.fill(result, i, i + j + 1, true);
+							i += j - 1;
+							break;
+						}
+						result[i] = src.get(i, 0)[0] != 0;
+					}
+				}
+			} else
+				result[i] = src.get(i, 0)[0] != 0;
 		}
+
+		List<Zone> zones = new ArrayList<>();
+		Integer start = result[0] ? 0 : null;
+		assert result.length >= 1;
+		for (int i = 0; i < result.length - 1; i++)
+			if (!result[i] && result[i + 1])
+				start = i + 1;
+			else if (result[i] && !result[i + 1]) {
+				zones.add(new Zone(0, vertical ? new Rect(0, start, matSize, i - start) : new Rect(start, 0, i - start, matSize)));
+				start = null;
+			}
+		if (result[result.length - 1]) {
+			assert start != null;
+			zones.add(new Zone(0, vertical ? new Rect(0, start, matSize, result.length - 1 - start) : new Rect(start, 0, result.length - 1 - start, matSize)));
+			start = null;
+		}
+		return new Zones(zones);
+	}
+
+	public Img recursivSplit(double morph, int level, double concentration) {
+		Zones hZones = split(morph, false, concentration);
+		Zones vZones = split(morph, true, concentration);
+
+		System.out.println("Level : " + level + "	Vertically : " + vZones.size() + "	Horizontally : " + hZones.size());
+		if (level <= 0 || (hZones.size() <= 1 && vZones.size() <= 1))
+			return this;
+
 		Zones recusivZones = null;
 		if (hZones.size() == 1)
 			recusivZones = vZones;
@@ -869,9 +879,10 @@ public class Img {
 
 		for (Zone zone : recusivZones) {
 			Img subRoi = zone.getRoi(this);
-			subRoi.recursivSplit(morph, level - 1, percentage);
+			subRoi.recursivSplit(morph, level - 1, concentration);
 		}
 		recusivZones.draw(this, new Scalar(0, 255, 0), 1);
+		return this;
 	}
 
 	public Img houghLinesP(double rho, double theta, int threshold) {
