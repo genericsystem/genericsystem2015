@@ -812,9 +812,9 @@ public class Img {
 			System.out.println("Zone size to low : " + (vertical ? src.rows() : src.cols()));
 		// return Collections.singletonList(this.getZone());
 		if (vertical)
-			return bgr2Gray().projectVertically().range(new Scalar(concentration * 255), new Scalar((1 - concentration) * 255)).split(morph, src.cols(), true);
+			return otsu().projectVertically().range(new Scalar(concentration * 255), new Scalar((1 - concentration) * 255)).split(morph, src.cols(), true);
 		else
-			return bgr2Gray().projectHorizontally().range(new Scalar(concentration * 255), new Scalar((1 - concentration) * 255)).transpose().split(morph, src.rows(), false);
+			return otsu().projectHorizontally().range(new Scalar(concentration * 255), new Scalar((1 - concentration) * 255)).transpose().split(morph, src.rows(), false);
 	}
 
 	private Img transpose() {
@@ -831,9 +831,8 @@ public class Img {
 		boolean[] result = new boolean[src.rows()];
 		// TODO use Converters.Mat_to_vector_double(m, ds) and avoid to
 		// transpose mat if not vertical
-		for (int i = 0; i < src.rows(); i++) {
-			// System.out.println(src.get(i, 0)[0]);
-			if (i + 1 < src.rows() && src.get(i, 0)[0] == 255d && src.get(i + 1, 0)[0] == 0) {
+		for (int i = 0; i < src.rows() - 1; i++) {
+			if (src.get(i, 0)[0] == 255d && src.get(i + 1, 0)[0] == 0) {
 				for (int j = k + 1; j > 0; j--) {
 					if (i + j < src.rows()) {
 						if (src.get(i + j, 0)[0] == 255d) {
@@ -847,6 +846,7 @@ public class Img {
 			} else
 				result[i] = src.get(i, 0)[0] != 0;
 		}
+		result[src.rows() - 1] = src.get(src.rows() - 1, 0)[0] != 0;
 
 		List<Zone> zones = new ArrayList<>();
 		Integer start = result[0] ? 0 : null;
