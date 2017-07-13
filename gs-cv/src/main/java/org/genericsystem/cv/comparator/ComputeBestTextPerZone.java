@@ -77,8 +77,9 @@ public class ComputeBestTextPerZone {
 		computeOneFile(engine, docInstance, docType);
 	}
 	
+	// TODO: pass docClassInstance as a parameter instead of docType?
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private static void computeOneFile(Root engine, DocInstance docInstance, String docType) {
+	public static void computeOneFile(Root engine, DocInstance docInstance, String docType) {
 		Generic currentDocClass = engine.find(DocClass.class).getInstance(docType);
 		ImgFilter imgFilter = engine.find(ImgFilter.class);
 		ZoneText zoneText = engine.find(ZoneText.class);
@@ -98,6 +99,7 @@ public class ComputeBestTextPerZone {
 			ZoneTextInstance realTextInstance = zoneText.getZoneText(docInstance, zoneInstance, realityInstance);
 
 			// If not supervised, compute the best text
+			// TODO: deal with the case where a field must be left blank
 			if (realTextInstance == null || realTextInstance.getValue().toString().isEmpty()) {
 				// Map containing the distinct OCR texts as a key, and the
 				// names of the imgFilters that gave this OCR

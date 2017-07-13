@@ -5,6 +5,8 @@ import java.util.Arrays;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
+import org.genericsystem.cv.comparator.ComputeBestTextPerZone;
+import org.genericsystem.cv.model.Doc.DocInstance;
 import org.genericsystem.cv.model.ZoneText;
 import org.genericsystem.cv.model.ZoneText.ZoneTextInstance;
 import org.genericsystem.cv.watch.ShowDocumentZones.TextDiv;
@@ -24,6 +26,7 @@ import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.context.ContextAction.CANCEL;
 import org.genericsystem.reactor.context.ContextAction.RESET_SELECTION;
 import org.genericsystem.reactor.context.ObservableContextSelector.SELECTION_SELECTOR;
+import org.genericsystem.reactor.context.ContextAction;
 import org.genericsystem.reactor.context.ObservableListExtractor;
 import org.genericsystem.reactor.context.TextBinding;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
@@ -50,7 +53,7 @@ public class ShowDocumentZones extends ModalEditor {
 	@Children({ FlexDiv.class, FlexDiv.class })
 	@Children(path = FlexDiv.class, pos = 0, value = { FlexDiv.class, FlexDiv.class })
 	@Children(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 0 }, value = Image.class)
-	@Children(path = FlexDiv.class, pos = 1, value = { CloseButton.class })
+	@Children(path = FlexDiv.class, pos = 1, value = { RefreshButton.class, CloseButton.class })
 	@Children(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 1 }, value = ZoneTextDiv.class)
 	@FlexDirectionStyle(path = FlexDiv.class, value = FlexDirection.ROW)
 	@Style(path = FlexDiv.class, pos = 1, name = "justify-content", value = "center")
@@ -61,10 +64,28 @@ public class ShowDocumentZones extends ModalEditor {
 
 	}
 
+	@SetText("Refresh")
+	@BindAction(value = REFRESH_BEST_TEXT.class)
+	public static class RefreshButton extends HtmlButton {
+		// Run the best text selection algorithm
+	}
+	
+	public static class REFRESH_BEST_TEXT implements ContextAction {
+		@Override
+		public void accept(Context context, Tag tag) {
+			System.out.println("Refreshing best text...");
+			Root engine = context.getGeneric().getRoot();
+			DocInstance docInstance = (DocInstance) context.getGeneric();
+			String docType = docInstance.getDocClass().getValue().toString();
+			ComputeBestTextPerZone.computeOneFile(engine, docInstance, docType);
+			System.out.println("Done!");
+		}
+	}
+	
 	@SetText("Close")
 	@BindAction(value = { CANCEL.class, RESET_SELECTION.class })
 	public static class CloseButton extends HtmlButton {
-		// Persists the changes
+		// Close the window
 	}
 
 	@Style(name = "margin", value = "0.5em")

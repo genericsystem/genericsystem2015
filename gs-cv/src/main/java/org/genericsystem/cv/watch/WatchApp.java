@@ -6,6 +6,9 @@ import org.genericsystem.common.Root;
 import org.genericsystem.cv.model.Doc;
 import org.genericsystem.cv.model.DocClass;
 import org.genericsystem.cv.model.ImgFilter;
+import org.genericsystem.cv.model.LevDistance;
+import org.genericsystem.cv.model.MeanLevenshtein;
+import org.genericsystem.cv.model.Score;
 import org.genericsystem.cv.model.ZoneGeneric;
 import org.genericsystem.cv.model.ZoneText;
 import org.genericsystem.cv.watch.DocPropertiesCheckerSwitcher.DOC_DEZONED;
@@ -55,7 +58,7 @@ import org.genericsystem.reactor.gscomponents.RootTagImpl;
 
 import javafx.collections.ObservableList;
 
-@DependsOnModel({ Doc.class, DocClass.class, ZoneGeneric.class, ZoneText.class, ImgFilter.class })
+@DependsOnModel({ Doc.class, DocClass.class, ZoneGeneric.class, ZoneText.class, ImgFilter.class, LevDistance.class, MeanLevenshtein.class, Score.class })
 @Children({ EditDocumentZones.class, AppHeader.class, FlexDiv.class, Monitor.class })
 @Children(path = FlexDiv.class, pos = 2, value = { HeaderRow.class, DocumentsList.class })
 @Children(path = AppHeader.class, value = { Logo.class, AppTitleDiv.class, FlexDiv.class })
