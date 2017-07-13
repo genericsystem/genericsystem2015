@@ -50,9 +50,9 @@ public class FillModelWithData {
 		System.out.println("OpenCV core library loaded");
 	}
 
-	public static final int NEW_FILE = 0;
-	public static final int KNOWN_FILE = 1;
-	public static final int KNOWN_FILE_UPDATED_FILTERS = 2;
+	public static final int NEW_FILE = 1;
+	public static final int KNOWN_FILE = 2;
+	public static final int KNOWN_FILE_UPDATED_FILTERS = 3;
 
 	private static Logger log = LoggerFactory.getLogger(FillModelWithData.class);
 	private static final String gsPath = System.getenv("HOME") + "/genericsystem/gs-cv_model3/";
