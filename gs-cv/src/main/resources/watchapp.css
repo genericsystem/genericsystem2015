@@ -49,7 +49,7 @@ button {
 }
 
 .widthResponsive {
-    max-width: 60%;
+    /*     max-width: 60%; */
     width: auto;
 }
 
