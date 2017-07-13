@@ -25,7 +25,7 @@ public class MeanLevenshtein implements Generic {
 	public static class MeanLevenshteinInstance implements Generic {
 
 		public ScoreInstance getScore() {
-			return (ScoreInstance) this.getBaseComponent();
+			return (ScoreInstance) getBaseComponent();
 		}
 	}
 
