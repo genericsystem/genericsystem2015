@@ -14,6 +14,9 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+
 import javax.swing.ImageIcon;
 
 import org.opencv.core.Core;
@@ -39,9 +42,6 @@ import org.opencv.utils.Converters;
 import org.opencv.ximgproc.Ximgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 
 public class Img {
 
@@ -808,8 +808,13 @@ public class Img {
 	}
 
 	public Zones split(double morph, boolean vertical, double concentration) {
-		Img img = (vertical ? bgr2Gray().projectVertically() : bgr2Gray().projectHorizontally()).range(new Scalar(concentration * 255), new Scalar((1 - concentration) * 255));
-		return vertical ? img.split(morph, img.cols()) : img.transpose().split(morph, img.rows());
+		if ((vertical ? src.cols() : src.rows()) < 4)
+			System.out.println("Zone size to low : " + (vertical ? src.cols() : src.rows()));
+		// return Collections.singletonList(this.getZone());
+		if (vertical)
+			return bgr2Gray().projectVertically().range(new Scalar(concentration * 255), new Scalar((1 - concentration) * 255)).split(morph, src.cols(), true);
+		else
+			return bgr2Gray().projectHorizontally().range(new Scalar(concentration * 255), new Scalar((1 - concentration) * 255)).transpose().split(morph, src.rows(), false);
 	}
 
 	private Img transpose() {
@@ -818,7 +823,7 @@ public class Img {
 		return new Img(result);
 	}
 
-	private Zones split(double morph, int matSize) {
+	private Zones split(double morph, int matSize, boolean vertical) {
 		int k = new Double(Math.floor(morph * src.rows())).intValue();
 		System.out.println("k : " + k);
 		boolean[] result = new boolean[src.rows()];
@@ -840,15 +845,15 @@ public class Img {
 		}
 
 		List<Zone> zones = new ArrayList<>();
-		Integer start = null;
+		Integer start = result[0] ? 0 : null;
 		for (int i = 0; i < result.length; i++) {
 			if ((i + 1) < result.length && !result[i] && result[i + 1])
 				start = i + 1;
 			else if ((i + 1) < result.length && result[i] && !result[i + 1]) {
-				zones.add(new Zone(0, new Rect(0, start, matSize, i - start)));
+				zones.add(new Zone(0, vertical ? new Rect(0, start, matSize, i - start) : new Rect(start, 0, i - start, matSize)));
 				start = null;
 			} else if ((i + 1) >= result.length && result[i]) {
-				zones.add(new Zone(0, new Rect(0, start, matSize, i - start)));
+				zones.add(new Zone(0, vertical ? new Rect(0, start, matSize, i - start) : new Rect(start, 0, i - start, matSize)));
 				start = null;
 			}
 		}
@@ -856,10 +861,10 @@ public class Img {
 	}
 
 	public Img recursivSplit(double morph, int level, double concentration) {
-		Zones hZones = split(morph, true, concentration);
-		Zones vZones = split(morph, false, concentration);
+		Zones hZones = split(morph, false, concentration);
+		Zones vZones = split(morph, true, concentration);
 
-		System.out.println("Level : " + level + " Hzones : " + hZones.size() + " Vzones : " + vZones.size());
+		System.out.println("Level : " + level + "	Vertically : " + vZones.size() + "	Horizontally : " + hZones.size());
 		if (level <= 0 || (hZones.size() <= 1 && vZones.size() <= 1))
 			return this;
 
