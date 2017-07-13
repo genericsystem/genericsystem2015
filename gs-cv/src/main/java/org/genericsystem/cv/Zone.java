@@ -75,4 +75,37 @@ public class Zone {
 		Imgproc.rectangle(roi, rect.tl(), rect.br(), color, thickness);
 	}
 
+	@Override
+	public String toString() {
+		return "Zone [rect=" + rect + ", num=" + num + "]";
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + num;
+		result = prime * result + ((rect == null) ? 0 : rect.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Zone other = (Zone) obj;
+		if (num != other.num)
+			return false;
+		if (rect == null) {
+			if (other.rect != null)
+				return false;
+		} else if (!rect.equals(other.rect))
+			return false;
+		return true;
+	}
+
 }
