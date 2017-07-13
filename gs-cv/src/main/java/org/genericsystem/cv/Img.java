@@ -813,7 +813,9 @@ public class Img {
 		// return Collections.singletonList(this.getZone());
 		if (vertical)
 			return otsu().projectVertically().range(new Scalar(concentration * 255), new Scalar((1 - concentration) * 255)).split(morph, src.cols(), true);
+		// return bgr2Gray().thresHold(128, 256, Imgproc.THRESH_BINARY).projectVertically().range(new Scalar(concentration * 255), new Scalar((1 - concentration) * 255)).split(morph, src.cols(), true, this);
 		else
+			// return bgr2Gray().thresHold(128, 256, Imgproc.THRESH_BINARY).projectHorizontally().range(new Scalar(concentration * 255), new Scalar((1 - concentration) * 255)).transpose().split(morph, src.rows(), false, this);
 			return otsu().projectHorizontally().range(new Scalar(concentration * 255), new Scalar((1 - concentration) * 255)).transpose().split(morph, src.rows(), false);
 	}
 
@@ -825,12 +827,7 @@ public class Img {
 
 	private Zones split(double morph, int matSize, boolean vertical) {
 		int k = new Double(Math.floor(morph * src.rows())).intValue();
-		// TODO if k = 0 split must return just one zone !!
-
-		System.out.println("k : " + k);
 		boolean[] result = new boolean[src.rows()];
-		// TODO use Converters.Mat_to_vector_double(m, ds) and avoid to
-		// transpose mat if not vertical
 		for (int i = 0; i < src.rows() - 1; i++) {
 			if (src.get(i, 0)[0] == 255d && src.get(i + 1, 0)[0] == 0) {
 				for (int j = k + 1; j > 0; j--) {
@@ -846,7 +843,8 @@ public class Img {
 			} else
 				result[i] = src.get(i, 0)[0] != 0;
 		}
-		result[src.rows() - 1] = src.get(src.rows() - 1, 0)[0] != 0;
+		if (!result[src.rows() - 1])
+			result[src.rows() - 1] = src.get(src.rows() - 1, 0)[0] != 0;
 
 		List<Zone> zones = new ArrayList<>();
 		Integer start = result[0] ? 0 : null;
@@ -867,26 +865,42 @@ public class Img {
 			zones.add(new Zone(0, vertical ? new Rect(0, start, matSize, result.length - start) : new Rect(start, 0, result.length - start, matSize)));
 			start = null;
 		}
+		if (zones.isEmpty()) {
+			List<Byte> tmp = new ArrayList<>();
+			Converters.Mat_to_vector_uchar(src, tmp);
+			System.out.println("tmp : " + tmp + " k: " + k + " " + " result : " + Arrays.toString(result));
+			throw new IllegalStateException();
+		}
 		return new Zones(zones);
+
 	}
 
 	public Img recursivSplit(double morph, int level, double concentration) {
 		Zones hZones = split(morph, false, concentration);
 		Zones vZones = split(morph, true, concentration);
 
-		System.out.println("Level : " + level + "	Vertically : " + vZones.size() + "	Horizontally : " + hZones.size());
-		if (level <= 0 || (hZones.size() <= 1 && vZones.size() <= 1))
+		// System.out.println("Level : " + level + " Vertically : " + vZones.size() + " Horizontally : " + hZones.size());
+
+		if (level <= 0 || (hZones.size() <= 1 && vZones.size() <= 1)) {
+			hZones.draw(this, new Scalar(255, 0, 0), 2);
 			return this;
+		}
 
 		Zones recusivZones = null;
-		if (hZones.size() == 1)
-			recusivZones = vZones;
-		else
+		if (vZones.size() <= 1)
 			recusivZones = hZones;
+		else
+			recusivZones = vZones;
 
 		for (Zone zone : recusivZones) {
 			Img subRoi = zone.getRoi(this);
-			subRoi.recursivSplit(morph, level - 1, concentration);
+			try {
+				subRoi.recursivSplit(morph, level - 1, concentration);
+			} catch (IllegalStateException e) {
+				recusivZones.draw(this, new Scalar(0, 0, 255), 5);
+				// System.out.println("ZONE : " + zone.getRect() + " " + (vZones.size() == 1);
+				// return this;
+			}
 		}
 		recusivZones.draw(this, new Scalar(0, 255, 0), 1);
 		return this;

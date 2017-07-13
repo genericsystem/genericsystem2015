@@ -18,7 +18,7 @@ public class LayoutAnalyser extends AbstractApp {
 	protected void fillGrid(GridPane mainGrid) {
 		int columnIndex = 0;
 		int rowIndex = 0;
-		mainGrid.add(new ImageView(new Img("resources/14342661748973931.jpg").toJfxImage()), columnIndex, rowIndex++);
-		mainGrid.add(new ImageView(new Img("resources/14342661748973931.jpg").recursivSplit(0.02, 3, 0.05).toJfxImage()), columnIndex, rowIndex++);
+		// mainGrid.add(new ImageView(new Img("resources/14342661748973931.jpg").toJfxImage()), columnIndex, rowIndex++);
+		mainGrid.add(new ImageView(new Img("resources/14342661748973931.jpg").recursivSplit(0.01, 6, 0.008).toJfxImage()), columnIndex, rowIndex++);
 	}
 }
