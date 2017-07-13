@@ -65,7 +65,7 @@ public class ComputeTrainedScores {
 		List<DocInstance> docInstances = (List) currentDocClass.getHolders(engine.find(Doc.class)).toList();
 		List<ZoneInstance> zoneInstances = (List) currentDocClass.getHolders(engine.find(ZoneGeneric.class)).toList();
 		List<ImgFilterInstance> imgFilterInstances = (List) imgFilter.getInstances()
-				.filter(f -> !"reality".equals(f.getValue())).toList();
+				.filter(f -> !"reality".equals(f.getValue()) && !"best".equals(f.getValue())).toList();
 		ImgFilterInstance realityInstance = imgFilter.getImgFilter("reality");
 
 		// Loop over all zone instances
