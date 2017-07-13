@@ -1,5 +1,6 @@
 package org.genericsystem.cv.comparator;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +11,7 @@ import org.genericsystem.common.Root;
 import org.genericsystem.cv.model.Doc;
 import org.genericsystem.cv.model.Doc.DocInstance;
 import org.genericsystem.cv.model.DocClass;
+import org.genericsystem.cv.model.DocClass.DocClassInstance;
 import org.genericsystem.cv.model.ImgFilter;
 import org.genericsystem.cv.model.ImgFilter.ImgFilterInstance;
 import org.genericsystem.cv.model.MeanLevenshtein;
@@ -31,7 +33,6 @@ public class ComputeBestTextPerZone {
 	public static void main(String[] mainArgs) {
 		final Engine engine = new Engine(gsPath, Doc.class, ImgFilter.class, ZoneGeneric.class, ZoneText.class,
 				Score.class, MeanLevenshtein.class);
-
 		engine.newCache().start();
 		compute(engine);
 		engine.close();
@@ -46,82 +47,111 @@ public class ComputeBestTextPerZone {
 	public static void compute(Root engine, String docType) {
 
 		Generic currentDocClass = engine.find(DocClass.class).getInstance(docType);
+		List<DocInstance> docInstances = (List) currentDocClass.getHolders(engine.find(Doc.class)).toList();
+		for (DocInstance docInstance : docInstances) {
+			computeOneFile(engine, docInstance, docType);
+		}
+	}
+	
+	public static void computeOneFile(String filename, String docType) {
+		final Engine engine = new Engine(gsPath, Doc.class, ImgFilter.class, ZoneGeneric.class, ZoneText.class,
+				Score.class, MeanLevenshtein.class);
+		engine.newCache().start();
+		computeOneFile(engine, filename, docType);
+		engine.close();
+	}
+	
+	public static void computeOneFile(String filename) {
+		final Engine engine = new Engine(gsPath, Doc.class, ImgFilter.class, ZoneGeneric.class, ZoneText.class,
+				Score.class, MeanLevenshtein.class);
+		final String docType = "id-fr-front";
+		engine.newCache().start();
+		computeOneFile(engine, filename, docType);
+		engine.close();
+	}
+	
+	public static void computeOneFile(Root engine, String filename, String docType) {
+		Doc doc = engine.find(Doc.class);
+		Generic currentDocClass = engine.find(DocClass.class).getInstance(docType);
+		DocInstance docInstance = doc.getDoc(filename, (DocClassInstance) currentDocClass);
+		computeOneFile(engine, docInstance, docType);
+	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private static void computeOneFile(Root engine, DocInstance docInstance, String docType) {
+		Generic currentDocClass = engine.find(DocClass.class).getInstance(docType);
 		ImgFilter imgFilter = engine.find(ImgFilter.class);
 		ZoneText zoneText = engine.find(ZoneText.class);
 		Score score = engine.find(Score.class);
 
-		List<DocInstance> docInstances = (List) currentDocClass.getHolders(engine.find(Doc.class)).toList();
 		List<ZoneInstance> zoneInstances = (List) currentDocClass.getHolders(engine.find(ZoneGeneric.class)).toList();
 		List<ImgFilterInstance> imgFilterInstances = (List) imgFilter.getInstances()
 				.filter(f -> !"reality".equals(f.getValue()) && !"best".equals(f.getValue())).toList();
 		ImgFilterInstance realityInstance = imgFilter.getImgFilter("reality");
 		ImgFilterInstance bestInstance = imgFilter.setImgFilter("best");
+		
+		log.debug("Processing doc: {}", docInstance.getValue());
 
-		for (DocInstance docInstance : docInstances) {
-			log.debug("Processing doc: {}", docInstance.getValue());
+		for (ZoneInstance zoneInstance : zoneInstances) {
+			log.debug("Zone n°{}", zoneInstance.getValue());
 
-			for (ZoneInstance zoneInstance : zoneInstances) {
-				log.debug("Zone n°{}", zoneInstance.getValue());
+			ZoneTextInstance realTextInstance = zoneText.getZoneText(docInstance, zoneInstance, realityInstance);
 
-				ZoneTextInstance realTextInstance = zoneText.getZoneText(docInstance, zoneInstance, realityInstance);
+			// If not supervised, compute the best text
+			if (realTextInstance == null || realTextInstance.getValue().toString().isEmpty()) {
+				// Map containing the distinct OCR texts as a key, and the
+				// names of the imgFilters that gave this OCR
+				Map<String, List<String>> ocrResults = new ConcurrentHashMap<>();
 
-				// If not supervised, compute the best text
-				if (realTextInstance == null || realTextInstance.getValue().toString().isEmpty()) {
-					// Map containing the distinct OCR texts as a key, and the
-					// names of the imgFilters that gave this OCR
-					Map<String, List<String>> ocrResults = new ConcurrentHashMap<>();
+				for (ImgFilterInstance imgFilterInstance : imgFilterInstances) {
+					ZoneTextInstance zti = zoneText.getZoneText(docInstance, zoneInstance, imgFilterInstance);
+					if (zti == null) {
+						// TODO case where zti doesn't exist == filter has
+						// not been applied
+						log.error("No text found for {} => zone n°{}, {}", docInstance.getValue(),
+								zoneInstance.getValue(), imgFilterInstance.getValue());
+					} else {
+						String text = zti.getValue().toString();
+						List<String> filters = ocrResults.get(text);
+						if (filters == null) {
+							filters = new ArrayList<>();
+						}
+						filters.add(imgFilterInstance.getValue().toString());
+						ocrResults.put(text, filters);
+					}
+				}
 
-					for (ImgFilterInstance imgFilterInstance : imgFilterInstances) {
-						ZoneTextInstance zti = zoneText.getZoneText(docInstance, zoneInstance, imgFilterInstance);
-						if (zti == null) {
-							// TODO case where zti doesn't exist == filter has
-							// not been applied
-							log.error("No text found for {} => zone n°{}, {}", docInstance.getValue(),
-									zoneInstance.getValue(), imgFilterInstance.getValue());
+				// Map containing each distinct OCR text as key, and the
+				// corresponding ponderation as a value (i.e., the sum of
+				// the individual scores of each filter that gave this
+				// string)
+				Map<String, Float> ocrElection = new ConcurrentHashMap<>();
+				
+				ocrResults.entrySet().forEach(entry -> {
+					Float ocrWeight = 0f;
+					for (String filter : entry.getValue()) {
+						ScoreInstance scoreInstance = score.getScore(zoneInstance, imgFilter.getImgFilter(filter));
+						if (scoreInstance == null) {
+							log.error("No score found for zone n°{} and filter {}", zoneInstance.getValue(),
+									filter);
 						} else {
-							String text = zti.getValue().toString();
-							List<String> filters = ocrResults.get(text);
-							if (filters == null) {
-								filters = new ArrayList<>();
-							}
-							filters.add(imgFilterInstance.getValue().toString());
-							ocrResults.put(text, filters);
+							ocrWeight += (Float) scoreInstance.getValue();
 						}
 					}
+					ocrElection.put(entry.getKey(), ocrWeight);
+				});
 
-					// Map containing each distinct OCR text as key, and the
-					// corresponding ponderation as a value (i.e., the sum of
-					// the individual scores of each filter that gave this
-					// string)
-					Map<String, Float> ocrElection = new ConcurrentHashMap<>();
-					
-					ocrResults.entrySet().forEach(entry -> {
-						Float ocrWeight = 0f;
-						for (String filter : entry.getValue()) {
-							ScoreInstance scoreInstance = score.getScore(zoneInstance, imgFilter.getImgFilter(filter));
-							if (scoreInstance == null) {
-								log.error("No score found for zone n°{} and filter {}", zoneInstance.getValue(),
-										filter);
-							} else {
-								ocrWeight += (Float) scoreInstance.getValue();
-							}
-						}
-						ocrElection.put(entry.getKey(), ocrWeight);
-					});
+				String bestText = ocrElection.entrySet().stream().max(Map.Entry.comparingByValue()).get().getKey();
+				zoneText.setZoneText(bestText, docInstance, zoneInstance, bestInstance);
 
-					String bestText = ocrElection.entrySet().stream().max(Map.Entry.comparingByValue()).get().getKey();
-					zoneText.setZoneText(bestText, docInstance, zoneInstance, bestInstance);
-
-				} else {
-					// If supervised, set the supervised text to best
-					zoneText.setZoneText(realTextInstance.getValue().toString(), docInstance, zoneInstance,
-							bestInstance);
-				}
-				
-				engine.getCurrentCache().flush();
-//				System.out.println("Best text : " + zoneText.getZoneText(docInstance, zoneInstance, bestInstance));
-
+			} else {
+				// If supervised, set the supervised text to best
+				zoneText.setZoneText(realTextInstance.getValue().toString(), docInstance, zoneInstance,
+						bestInstance);
 			}
+			
+			engine.getCurrentCache().flush();
+//			System.out.println("Best text : " + zoneText.getZoneText(docInstance, zoneInstance, bestInstance));
 		}
 	}
 }
