@@ -31,11 +31,11 @@ public class ZoneGeneric implements Generic {
 	public static class ZoneInstance implements Generic {
 
 		public DocClassInstance getDocClass() {
-			return (DocClassInstance) getHolder(getRoot().find(DocClass.class));
+			return (DocClassInstance) this.getHolder(getRoot().find(DocClass.class));
 		}
 		
 		public Zone getZoneObject(){
-			int num = (int) getValue();
+			int num = (int) getHolder(getRoot().find(ZoneGeneric.class)).getValue();
 			int x = (int) getHolder(getRoot().find(ZoneX.class)).getValue();
 			int y = (int) getHolder(getRoot().find(ZoneY.class)).getValue();
 			int width = (int) getHolder(getRoot().find(ZoneW.class)).getValue();

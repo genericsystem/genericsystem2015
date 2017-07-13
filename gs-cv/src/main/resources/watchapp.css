@@ -1,26 +1,22 @@
 @CHARSET "UTF-8";
 
-input,
-.input-like {
+input {
 	padding: 0.5em;
 	margin: 0.5em 0.1em;
 	min-width: 30em; 		/* To be adjusted more properly */
 	flex: 3 1 auto;
 }
 
-:not(label[name="title"]) {
+label {
 	padding: 0.5em;
 	margin: 0.5em 0.1em;
 	flex: 1 1 auto;
 }
 
-a[name="zone"],
-div[name="zone"],
-label[name="zone"] {
+a[name="zone"] {
 	padding: 0.5em;
 	margin: 0.5em 0.1em;
 	flex: 1 1 auto;
-	font-weight: bold;
 }
 
 img {
