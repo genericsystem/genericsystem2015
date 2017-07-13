@@ -11,6 +11,7 @@ import org.genericsystem.cv.model.MeanLevenshtein;
 import org.genericsystem.cv.model.Score;
 import org.genericsystem.cv.model.ZoneGeneric;
 import org.genericsystem.cv.model.ZoneText;
+import org.genericsystem.cv.model.Doc.DocFilename;
 import org.genericsystem.cv.watch.DocPropertiesCheckerSwitcher.DOC_DEZONED;
 import org.genericsystem.cv.watch.DocPropertiesCheckerSwitcher.DOC_NOT_DEZONED;
 import org.genericsystem.cv.watch.DocPropertiesCheckerSwitcher.DOC_NOT_OCRD;
@@ -58,7 +59,7 @@ import org.genericsystem.reactor.gscomponents.RootTagImpl;
 
 import javafx.collections.ObservableList;
 
-@DependsOnModel({ Doc.class, DocClass.class, ZoneGeneric.class, ZoneText.class, ImgFilter.class, LevDistance.class, MeanLevenshtein.class, Score.class })
+@DependsOnModel({ Doc.class, DocFilename.class, DocClass.class, ZoneGeneric.class, ZoneText.class, ImgFilter.class, LevDistance.class, MeanLevenshtein.class, Score.class})
 @Children({ EditDocumentZones.class, AppHeader.class, FlexDiv.class, Monitor.class })
 @Children(path = FlexDiv.class, pos = 2, value = { HeaderRow.class, DocumentsList.class })
 @Children(path = AppHeader.class, value = { Logo.class, AppTitleDiv.class, FlexDiv.class })
@@ -93,8 +94,8 @@ public class WatchApp extends RootTagImpl {
 	@Style(path = HtmlLabel.class, name = "justify-content", value = "center")
 	@Style(path = HtmlLabel.class, name = "justify-content", value = "center")
 	@Style(path = HtmlLabel.class, name = "align-items", value = "center")
-	@Style(path = HtmlLabel.class, name = "flex", value = "1")
 	@Style(path = HtmlLabel.class, pos = 0, name = "flex", value = "3")
+	@Style(path = HtmlLabel.class, name = "flex", value = "1")
 	@Style(path = HtmlLabel.class, name = "text-align", value = "center")
 	@Style(path = HtmlLabel.class, name = "font-weight", value = "bold")
 	@SetText(path = HtmlLabel.class, value = { "Document name", "De-zoned", "OCR'd", "Supervised", "Edit" })
@@ -122,8 +123,10 @@ public class WatchApp extends RootTagImpl {
 	@Switch(path = { FlexDiv.class, HtmlHyperLink.class, FailedImage.class }, pos = { 3, 0, 0 }, value = DOC_NOT_SUPERVISED.class)
 	@StyleClass(path = { FlexDiv.class, HtmlImg.class }, value = "img")
  	@Style(name = "margin", value = "0.5em")
+	@Style(path = FlexDiv.class, pos = 0, name = "flex", value = "3")
 	@Style(path = FlexDiv.class, name = "flex", value = "1")
 	@Style(path = FlexDiv.class, name = "justify-content", value = "center")
+	@Style(path = FlexDiv.class, pos = 0, name = "align-items", value = "left")
 	@Style(path = FlexDiv.class, name = "align-items", value = "center")
 	public static class DocumentsList extends FlexDiv {
 

@@ -1,7 +1,5 @@
 package org.genericsystem.cv.watch;
 
-import java.util.Arrays;
-
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
@@ -23,10 +21,10 @@ import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.StyleClass;
+import org.genericsystem.reactor.context.ContextAction;
 import org.genericsystem.reactor.context.ContextAction.CANCEL;
 import org.genericsystem.reactor.context.ContextAction.RESET_SELECTION;
 import org.genericsystem.reactor.context.ObservableContextSelector.SELECTION_SELECTOR;
-import org.genericsystem.reactor.context.ContextAction;
 import org.genericsystem.reactor.context.ObservableListExtractor;
 import org.genericsystem.reactor.context.TextBinding;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
