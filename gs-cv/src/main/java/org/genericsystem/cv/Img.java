@@ -824,9 +824,10 @@ public class Img {
 	}
 
 	private Zones split(double morph, int matSize, boolean vertical) {
-		int k = new Double(Math.floor(morph * src.rows())).intValue();
+		int k = new Double(Math.floor(morph * src.rows())).intValue(); // TODO if k = 0 split must return just one zone !
 		System.out.println("k : " + k);
 		boolean[] result = new boolean[src.rows()];
+		// TODO use Converters.Mat_to_vector_double(m, ds) and avoid to transpose mat if not vertical
 		for (int i = 0; i < src.rows(); i++) {
 			// System.out.println(src.get(i, 0)[0]);
 			if (i + 1 < src.rows() && src.get(i, 0)[0] == 255d && src.get(i + 1, 0)[0] == 0) {
@@ -852,7 +853,7 @@ public class Img {
 			else if ((i + 1) < result.length && result[i] && !result[i + 1]) {
 				zones.add(new Zone(0, vertical ? new Rect(0, start, matSize, i - start) : new Rect(start, 0, i - start, matSize)));
 				start = null;
-			} else if ((i + 1) >= result.length && result[i]) {
+			} else if ((i + 1) >= result.length && result[i]) { // TODO todo after le loop
 				zones.add(new Zone(0, vertical ? new Rect(0, start, matSize, i - start) : new Rect(start, 0, i - start, matSize)));
 				start = null;
 			}
