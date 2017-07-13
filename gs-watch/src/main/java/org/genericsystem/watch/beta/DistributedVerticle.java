@@ -23,7 +23,6 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.eventbus.DeliveryOptions;
-import io.vertx.core.eventbus.EventBusOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.spi.cluster.ClusterManager;
 import io.vertx.spi.cluster.hazelcast.HazelcastClusterManager;
@@ -71,9 +70,10 @@ public class DistributedVerticle extends AbstractVerticle {
 
 		ClusterManager mgr = new HazelcastClusterManager();
 
-		VertxOptions vertxOptions = new VertxOptions().setClustered(true).setClusterManager(mgr);
-		vertxOptions.setEventBusOptions(new EventBusOptions()).setClustered(true);
-		vertxOptions.setClusterHost(IP_ADDRESS);
+		VertxOptions vertxOptions = new VertxOptions();// .setClustered(true).setClusterManager(mgr);
+		// vertxOptions.setEventBusOptions(new
+		// EventBusOptions()).setClustered(true);
+		// vertxOptions.setClusterHost(IP_ADDRESS);
 		vertxOptions.setMaxWorkerExecuteTime(Long.MAX_VALUE);
 
 		Vertx.clusteredVertx(vertxOptions, res -> {
@@ -82,7 +82,6 @@ public class DistributedVerticle extends AbstractVerticle {
 				vertx.deployVerticle(new DistributedVerticle(), result -> {
 					System.out.println(result.result());
 				});
-
 			} else {
 				throw new IllegalStateException(res.cause());
 			}
@@ -105,6 +104,23 @@ public class DistributedVerticle extends AbstractVerticle {
 
 					task1.remove();
 				}
+
+				// if (FINISHED.equals(new JsonObject((String)
+				// task1.getValue()).getString("state"))
+				// && new JsonObject((String)
+				// task1.getValue()).getInteger("step") <= 2) {
+				//
+				// addMessage(Paths.get(new JsonObject((String)
+				// task1.getValue()).getString("file")),
+				// new JsonObject((String) task1.getValue()).getInteger("step")
+				// + 1,
+				// new JsonObject((String) task1.getValue()).getLong("task"),
+				// TODO,
+				// new JsonObject((String)
+				// task1.getValue()).getInteger("max_parallel_executions"));
+				//
+				// task1.remove();
+				// }
 			}
 
 			for (Generic message1 : messageType.getInstances()) {
@@ -121,7 +137,7 @@ public class DistributedVerticle extends AbstractVerticle {
 			cache.flush();
 		});
 
-		startServer();
+		// startServer();
 
 		// Periodic aknowledge of availability
 		vertx.setPeriodic(AVAILABILITY_PERIODICITY, h -> {
@@ -129,7 +145,7 @@ public class DistributedVerticle extends AbstractVerticle {
 		});
 
 		vertx.eventBus().consumer(PUBLIC_ADDRESS, message -> {
-			roundrobin.Register((String) message.body());
+			roundrobin.register((String) message.body());
 		});
 
 		// // Periodic : Task creation
@@ -267,6 +283,7 @@ public class DistributedVerticle extends AbstractVerticle {
 							fos.write(bytes);
 							fos.close();
 						}
+
 					} catch (IOException e) {
 						e.printStackTrace();
 						return;
@@ -400,13 +417,13 @@ public class DistributedVerticle extends AbstractVerticle {
 
 	}
 
-	protected void startServer() {
-
-		vertx.createHttpServer().requestHandler(req -> {
-			// String fileName = req.path().replace("/", "");
-			String fileName = req.path();
-			System.out.println("Will send :" + fileName);
-			req.response().sendFile(fileName);
-		}).listen(port);
-	}
+	// protected void startServer() {
+	//
+	// vertx.createHttpServer().requestHandler(req -> {
+	// // String fileName = req.path().replace("/", "");
+	// String fileName = req.path();
+	// System.out.println("Will send :" + fileName);
+	// req.response().sendFile(fileName);
+	// }).listen(port);
+	// }
 }
