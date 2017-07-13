@@ -192,10 +192,12 @@ public class FillModelWithData {
 		final Map<String, Function<Img, Img>> imgFilters = getFiltersMap();
 		// Load the accurate zones
 		final Zones zones = Zones.loadZones(imgClassDirectory);
-		final Map<String, Function<Img, Img>> updatedImgFilters = initComputation(engine, docType, imgFilters, zones);
+//		final Map<String, Function<Img, Img>> updatedImgFilters = initComputation(engine, docType, imgFilters, zones);
+		initComputation(engine, docType, zones);
 		// Process each file in folder imgDirectory
 		Arrays.asList(new File(imgDirectory).listFiles((dir, name) -> name.endsWith(".png"))).forEach(file -> {
-			processFile(engine, file, docClassInstance, zones, updatedImgFilters.entrySet().stream());
+//			processFile(engine, file, docClassInstance, zones, updatedImgFilters.entrySet().stream());
+			processFile(engine, file, docClassInstance, zones, imgFilters);
 			engine.getCurrentCache().flush();
 		});
 		engine.getCurrentCache().flush();
@@ -274,6 +276,34 @@ public class FillModelWithData {
 		engine.getCurrentCache().flush();
 		return updatedImgFilters;
 	}
+	
+	private static void initComputation(Root engine, String docType, Zones zones) {
+
+		DocClass docClass = engine.find(DocClass.class);
+		DocClassInstance docClassInstance = docClass.getDocClass(docType);
+		// Save the zones if necessary
+		// TODO: refactor the code (duplicate)
+		zones.getZones().forEach(z -> {
+			ZoneInstance zoneInstance = docClassInstance.getZone(z.getNum());
+			if (zoneInstance != null){
+				Zone zone = zoneInstance.getZoneObject();
+				// log.info("z : {} ; zone : {}", z, zone);
+				if (z.equals(zone)) {
+					log.info("Zone n°{} already known", z.getNum());
+				} else {
+					log.info("Adding zone n°{} ", z.getNum());
+					docClassInstance.setZone(z.getNum(), z.getRect().x, z.getRect().y, z.getRect().width,
+							z.getRect().height);
+				}
+			} else {
+				log.info("Adding zone n°{} ", z.getNum());
+				docClassInstance.setZone(z.getNum(), z.getRect().x, z.getRect().y, z.getRect().width,
+						z.getRect().height);
+			}
+		});
+		// Persist the changes
+		engine.getCurrentCache().flush();
+	}
 
 	/**
 	 * Process an image file.
@@ -327,6 +357,99 @@ public class FillModelWithData {
 		Img originalImg = new Img(Imgcodecs.imread(file.getPath()));
 		Map<String, Img> imgs = new HashMap<>();
 		imgFilters.forEach(entry -> {
+			log.info("Applying algorithm {}...", entry.getKey());
+			Img img = null;
+			if ("original".equals(entry.getKey()) || "reality".equals(entry.getKey()))
+				img = originalImg;
+			else
+				img = entry.getValue().apply(originalImg);
+			if (null != img)
+				imgs.put(entry.getKey(), img);
+			else
+				log.error("An error as occured for image {} and filter {}", filenameExt, entry.getKey());
+		});
+
+		// Process each zone
+		zones.getZones().forEach(z -> {
+			log.info("Zone n° {}", z.getNum());
+			ZoneInstance zoneInstance = docClassInstance.getZone(z.getNum());
+			imgs.entrySet().forEach(entry -> {
+				if ("reality".equals(entry.getKey())) {
+					// Do not proceed to OCR if the real values are known
+					// By default, the "reality" filter is left empty
+					if (null == zoneText.getZoneText(docInstance, zoneInstance, imgFilter.getImgFilter(entry.getKey())))
+						zoneText.setZoneText("", docInstance, zoneInstance, imgFilter.getImgFilter(entry.getKey()));
+				} else {
+					String ocrText = z.ocr(entry.getValue());
+					zoneText.setZoneText(ocrText.trim(), docInstance, zoneInstance,
+							imgFilter.getImgFilter(entry.getKey()));
+				}
+			});
+			engine.getCurrentCache().flush();
+			// Call the garbage collector to free the resources used by
+			// OpenCV
+			System.gc();
+		});
+	}
+	
+	private static void processFile(Root engine, File file, DocClassInstance docClassInstance, Zones zones,
+			Map<String, Function<Img, Img>> imgFilters) {
+
+		log.info("\nProcessing file: {}", file.getName());
+		Generic doc = engine.find(Doc.class);
+		ZoneText zoneText = engine.find(ZoneText.class);
+		ImgFilter imgFilter = engine.find(ImgFilter.class);
+
+		// Save the current file
+		String filename = ModelTools.getHashFromFile(file.toPath(), "sha-256");
+		String filenameExt = filename + "." + FilenameUtils.getExtension(file.getName());
+		log.info("Hash generated for file {}: {}", file.getName(), filenameExt);
+		
+		DocInstance docInstance = docClassInstance.setDoc(doc, filenameExt);
+		docInstance.setDocFilename(file.getName());
+		engine.getCurrentCache().flush();
+
+		// Draw the image's zones + numbers
+		Img imgCopy = new Img(Imgcodecs.imread(file.getPath()));
+		zones.draw(imgCopy, new Scalar(0, 255, 0), 3);
+		zones.writeNum(imgCopy, new Scalar(0, 0, 255), 3);
+		// Copy the images to the resources folder
+		// TODO implement a filter mechanism to avoid creating
+		// duplicates in a public folder
+		log.info("Copying {} to resources folder", filenameExt);
+		Imgcodecs.imwrite(System.getProperty("user.dir") + "/../gs-cv/src/main/resources/" + filenameExt,
+				imgCopy.getSrc());
+
+		// TODO: test
+		// TODO: refactor the code (duplicates)
+		// Save the filternames if necessary
+		Map<String, Function<Img, Img>> updatedImgFilters = new HashMap<>();
+		imgFilters.entrySet().forEach(entry -> {
+			ImgFilterInstance filter = imgFilter.getImgFilter(entry.getKey());
+			if (filter == null) {
+				log.info("Adding algorithm : {} ", entry.getKey());
+				imgFilter.setImgFilter(entry.getKey());
+				updatedImgFilters.put(entry.getKey(), entry.getValue());
+			} else {
+				// TODO: add another criteria to verify if the filter has been applied on the image
+				boolean containsNull = zones.getZones().stream().anyMatch(z -> {
+					ZoneTextInstance zti = ((ZoneText) engine.find(ZoneText.class)).getZoneText(docInstance, docClassInstance.getZone(z.getNum()), filter);
+					return zti == null;
+				});
+				if (containsNull) {
+					imgFilter.setImgFilter(entry.getKey());
+					updatedImgFilters.put(entry.getKey(), entry.getValue());
+				} else {
+					log.info("Algorithm {} already known", entry.getKey());
+				}
+			}
+		});
+		// TODO: end test
+		
+		// Create a map of Imgs
+		Img originalImg = new Img(Imgcodecs.imread(file.getPath()));
+		Map<String, Img> imgs = new HashMap<>();
+		updatedImgFilters.entrySet().forEach(entry -> {
 			log.info("Applying algorithm {}...", entry.getKey());
 			Img img = null;
 			if ("original".equals(entry.getKey()) || "reality".equals(entry.getKey()))
