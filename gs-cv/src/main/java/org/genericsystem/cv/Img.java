@@ -14,9 +14,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-
 import javax.swing.ImageIcon;
 
 import org.opencv.core.Core;
@@ -42,6 +39,9 @@ import org.opencv.utils.Converters;
 import org.opencv.ximgproc.Ximgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 
 public class Img {
 
@@ -808,8 +808,8 @@ public class Img {
 	}
 
 	public Zones split(double morph, boolean vertical, double concentration) {
-		if ((vertical ? src.cols() : src.rows()) < 4)
-			System.out.println("Zone size to low : " + (vertical ? src.cols() : src.rows()));
+		if ((vertical ? src.rows() : src.cols()) < 4)
+			System.out.println("Zone size to low : " + (vertical ? src.rows() : src.cols()));
 		// return Collections.singletonList(this.getZone());
 		if (vertical)
 			return bgr2Gray().projectVertically().range(new Scalar(concentration * 255), new Scalar((1 - concentration) * 255)).split(morph, src.cols(), true);
@@ -824,10 +824,20 @@ public class Img {
 	}
 
 	private Zones split(double morph, int matSize, boolean vertical) {
-		int k = new Double(Math.floor(morph * src.rows())).intValue(); // TODO if k = 0 split must return just one zone !
+		int k = new Double(Math.floor(morph * src.rows())).intValue(); // TODO
+																		// if k
+																		// = 0
+																		// split
+																		// must
+																		// return
+																		// just
+																		// one
+																		// zone
+																		// !
 		System.out.println("k : " + k);
 		boolean[] result = new boolean[src.rows()];
-		// TODO use Converters.Mat_to_vector_double(m, ds) and avoid to transpose mat if not vertical
+		// TODO use Converters.Mat_to_vector_double(m, ds) and avoid to
+		// transpose mat if not vertical
 		for (int i = 0; i < src.rows(); i++) {
 			// System.out.println(src.get(i, 0)[0]);
 			if (i + 1 < src.rows() && src.get(i, 0)[0] == 255d && src.get(i + 1, 0)[0] == 0) {
@@ -852,12 +862,16 @@ public class Img {
 			if (!result[i] && result[i + 1])
 				start = i + 1;
 			else if (result[i] && !result[i + 1]) {
-				zones.add(new Zone(0, vertical ? new Rect(0, start, matSize, i - start) : new Rect(start, 0, i - start, matSize)));
+				assert matSize > 0;
+				assert i - start + 1 > 0;
+				zones.add(new Zone(0, vertical ? new Rect(0, start, matSize, i - start + 1) : new Rect(start, 0, i - start + 1, matSize)));
 				start = null;
 			}
 		if (result[result.length - 1]) {
 			assert start != null;
-			zones.add(new Zone(0, vertical ? new Rect(0, start, matSize, result.length - 1 - start) : new Rect(start, 0, result.length - 1 - start, matSize)));
+			assert result.length - start > 0;
+			assert matSize > 0;
+			zones.add(new Zone(0, vertical ? new Rect(0, start, matSize, result.length - start) : new Rect(start, 0, result.length - start, matSize)));
 			start = null;
 		}
 		return new Zones(zones);
