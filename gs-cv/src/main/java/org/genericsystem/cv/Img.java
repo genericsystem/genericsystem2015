@@ -847,16 +847,18 @@ public class Img {
 
 		List<Zone> zones = new ArrayList<>();
 		Integer start = result[0] ? 0 : null;
-		for (int i = 0; i < result.length; i++) {
-			if ((i + 1) < result.length && !result[i] && result[i + 1])
+		assert result.length >= 1;
+		for (int i = 0; i < result.length - 1; i++)
+			if (!result[i] && result[i + 1])
 				start = i + 1;
-			else if ((i + 1) < result.length && result[i] && !result[i + 1]) {
-				zones.add(new Zone(0, vertical ? new Rect(0, start, matSize, i - start) : new Rect(start, 0, i - start, matSize)));
-				start = null;
-			} else if ((i + 1) >= result.length && result[i]) { // TODO todo after le loop
+			else if (result[i] && !result[i + 1]) {
 				zones.add(new Zone(0, vertical ? new Rect(0, start, matSize, i - start) : new Rect(start, 0, i - start, matSize)));
 				start = null;
 			}
+		if (result[result.length - 1]) {
+			assert start != null;
+			zones.add(new Zone(0, vertical ? new Rect(0, start, matSize, result.length - 1 - start) : new Rect(start, 0, result.length - 1 - start, matSize)));
+			start = null;
 		}
 		return new Zones(zones);
 	}
