@@ -2,7 +2,6 @@ package org.genericsystem.cv.comparator;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -19,7 +18,6 @@ import org.genericsystem.cv.Zone;
 import org.genericsystem.cv.Zones;
 import org.genericsystem.cv.model.Doc;
 import org.genericsystem.cv.model.Doc.DocFilename;
-import org.genericsystem.cv.model.Doc.DocFilename.DocFilenameInstance;
 import org.genericsystem.cv.model.Doc.DocInstance;
 import org.genericsystem.cv.model.DocClass;
 import org.genericsystem.cv.model.DocClass.DocClassInstance;
@@ -265,6 +263,11 @@ public class FillModelWithData {
 				updatedImgFilters.put(entry.getKey(), entry.getValue());
 			} else {
 				log.info("Algorithm {} already known", entry.getKey());
+				// TODO: add another criteria to verify if the filter has been applied on the image
+//				zones.getZones().stream().anyMatch(z -> {
+//					ZoneTextInstance zti = ((ZoneText) engine.find(ZoneText.class)).getZoneText(doc, z, filter);
+//					return zti == null;
+//				})
 			}
 		});
 		// Persist the changes

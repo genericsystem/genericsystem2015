@@ -160,11 +160,11 @@ public class EditDocumentZones extends ModalEditor {
 			ZoneTextInstance zti = (ZoneTextInstance) generics[0];
 			Generic currentDoc = generics[1];
 			Root root = currentDoc.getRoot();
-			Predicate<Generic> filterByZone = z -> ((ZoneTextInstance) z).getZoneNum() == zti.getZoneNum()
+			Predicate<ZoneTextInstance> filterByZone = z -> ((ZoneTextInstance) z).getZoneNum() == zti.getZoneNum()
 					&& !z.getValue().toString().isEmpty();
-			Snapshot<ZoneTextInstance> zoneTextInstances = (Snapshot) currentDoc.getHolders(root.find(ZoneText.class))
-					.filter(filterByZone.and(distinctByKey(g -> g.getValue())));
+			Snapshot<ZoneTextInstance> zoneTextInstances = (Snapshot) currentDoc.getHolders(root.find(ZoneText.class));
 			return (ObservableList) zoneTextInstances.toObservableList()
+					.filtered(filterByZone.and(distinctByKey(g -> g.getValue())))
 					.sorted((g1, g2) -> Integer.compare(g1.getZoneNum(), g2.getZoneNum()));
 		}
 
@@ -189,9 +189,9 @@ public class EditDocumentZones extends ModalEditor {
 			Generic currentDoc = generics[0];
 			Root root = currentDoc.getRoot();
 			System.out.println("Document: " + currentDoc.info());
-			Snapshot<ZoneTextInstance> zoneTextInstances = (Snapshot) currentDoc.getHolders(root.find(ZoneText.class))
-					.filter(zt -> "reality".equals(((ZoneTextInstance) zt).getImgFilter().getValue()));
+			Snapshot<ZoneTextInstance> zoneTextInstances = (Snapshot) currentDoc.getHolders(root.find(ZoneText.class));
 			return (ObservableList) zoneTextInstances.toObservableList()
+					.filtered(zt -> "reality".equals(((ZoneTextInstance) zt).getImgFilter().getValue()))
 					.sorted((g1, g2) -> Integer.compare(g1.getZoneNum(), g2.getZoneNum()));
 		}
 	}

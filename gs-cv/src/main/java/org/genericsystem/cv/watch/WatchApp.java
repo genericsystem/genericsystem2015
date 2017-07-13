@@ -84,7 +84,7 @@ public class WatchApp extends RootTagImpl {
 	}
 	
 	public WatchApp() {
-		addPrefixBinding(context -> getAdminModeProperty(context).setValue(true));
+//		addPrefixBinding(context -> getAdminModeProperty(context).setValue(true));
 	}
 	
 	@Children({ HtmlLabel.class, HtmlLabel.class, HtmlLabel.class, HtmlLabel.class, HtmlLabel.class })

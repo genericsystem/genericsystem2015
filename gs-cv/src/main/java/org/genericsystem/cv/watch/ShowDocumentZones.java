@@ -23,6 +23,7 @@ import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.context.ContextAction;
 import org.genericsystem.reactor.context.ContextAction.CANCEL;
+import org.genericsystem.reactor.context.ContextAction.FLUSH;
 import org.genericsystem.reactor.context.ContextAction.RESET_SELECTION;
 import org.genericsystem.reactor.context.ObservableContextSelector.SELECTION_SELECTOR;
 import org.genericsystem.reactor.context.ObservableListExtractor;
@@ -63,7 +64,7 @@ public class ShowDocumentZones extends ModalEditor {
 	}
 
 	@SetText("Refresh")
-	@BindAction(value = REFRESH_BEST_TEXT.class)
+	@BindAction(value = { REFRESH_BEST_TEXT.class, FLUSH.class })
 	public static class RefreshButton extends HtmlButton {
 		// Run the best text selection algorithm
 	}
@@ -134,9 +135,9 @@ public class ShowDocumentZones extends ModalEditor {
 			Generic currentDoc = generics[0];
 			Root root = currentDoc.getRoot();
 			System.out.println("Document: " + currentDoc.info());
-			Snapshot<ZoneTextInstance> zoneTextInstances = (Snapshot) currentDoc.getHolders(root.find(ZoneText.class))
-					.filter(zt -> "best".equals(((ZoneTextInstance) zt).getImgFilter().getValue()));
+			Snapshot<ZoneTextInstance> zoneTextInstances = (Snapshot) currentDoc.getHolders(root.find(ZoneText.class));
 			return (ObservableList) zoneTextInstances.toObservableList()
+					.filtered(zt -> "best".equals(((ZoneTextInstance) zt).getImgFilter().getValue()))
 					.sorted((g1, g2) -> Integer.compare(g1.getZoneNum(), g2.getZoneNum()));
 		}
 	}
