@@ -12,7 +12,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
+
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 
 import javax.swing.ImageIcon;
 
@@ -39,9 +43,6 @@ import org.opencv.utils.Converters;
 import org.opencv.ximgproc.Ximgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 
 public class Img {
 
@@ -807,45 +808,44 @@ public class Img {
 		return new Img(result);
 	}
 
-	public Zones split(double morph, boolean vertical, double concentration) {
-		if ((vertical ? src.rows() : src.cols()) < 4)
-			System.out.println("Zone size to low : " + (vertical ? src.rows() : src.cols()));
-		// return Collections.singletonList(this.getZone());
-		if (vertical)
-			return otsu().projectVertically().range(new Scalar(concentration * 255), new Scalar((1 - concentration) * 255)).split(morph, src.cols(), true);
-		// return bgr2Gray().thresHold(128, 256, Imgproc.THRESH_BINARY).projectVertically().range(new Scalar(concentration * 255), new Scalar((1 - concentration) * 255)).split(morph, src.cols(), true, this);
-		else
-			// return bgr2Gray().thresHold(128, 256, Imgproc.THRESH_BINARY).projectHorizontally().range(new Scalar(concentration * 255), new Scalar((1 - concentration) * 255)).transpose().split(morph, src.rows(), false, this);
-			return otsu().projectHorizontally().range(new Scalar(concentration * 255), new Scalar((1 - concentration) * 255)).transpose().split(morph, src.rows(), false);
-	}
-
 	private Img transpose() {
 		Mat result = new Mat();
 		Core.transpose(src, result);
 		return new Img(result);
 	}
 
+	public Zones split(double morph, boolean vertical, double concentration) {
+		assert 1 / (vertical ? src.rows() : src.cols()) < concentration;
+		if ((vertical ? src.rows() : src.cols()) <= 4)
+			System.out.println("size to low : " + (vertical ? src.rows() : src.cols()));
+		if (vertical)
+			return projectVertically().range(new Scalar(concentration * 255), new Scalar((1 - concentration) * 255)).split(morph, src.cols(), true);
+		else
+			return projectHorizontally().range(new Scalar(concentration * 255), new Scalar((1 - concentration) * 255)).transpose().split(morph, src.rows(), false);
+	}
+
 	private Zones split(double morph, int matSize, boolean vertical) {
 		int k = new Double(Math.floor(morph * src.rows())).intValue();
-		boolean[] result = new boolean[src.rows()];
-		for (int i = 0; i < src.rows() - 1; i++) {
+		boolean[] closed = new boolean[src.rows()];
+		for (int i = 0; i < src.rows() - 1; i++)
 			if (src.get(i, 0)[0] == 255d && src.get(i + 1, 0)[0] == 0) {
-				for (int j = k + 1; j > 0; j--) {
+				for (int j = k + 1; j > 0; j--)
 					if (i + j < src.rows()) {
 						if (src.get(i + j, 0)[0] == 255d) {
-							Arrays.fill(result, i, i + j + 1, true);
+							Arrays.fill(closed, i, i + j + 1, true);
 							i += j - 1;
 							break;
 						}
-						result[i] = src.get(i, 0)[0] != 0;
+						closed[i] = src.get(i, 0)[0] != 0;
 					}
-				}
 			} else
-				result[i] = src.get(i, 0)[0] != 0;
-		}
-		if (!result[src.rows() - 1])
-			result[src.rows() - 1] = src.get(src.rows() - 1, 0)[0] != 0;
+				closed[i] = src.get(i, 0)[0] != 0;
+		if (!closed[src.rows() - 1])
+			closed[src.rows() - 1] = src.get(src.rows() - 1, 0)[0] != 0;
+		return extractZones(closed, matSize, vertical);
+	}
 
+	private Zones extractZones(boolean[] result, int matSize, boolean vertical) {
 		List<Zone> zones = new ArrayList<>();
 		Integer start = result[0] ? 0 : null;
 		assert result.length >= 1;
@@ -865,45 +865,44 @@ public class Img {
 			zones.add(new Zone(0, vertical ? new Rect(0, start, matSize, result.length - start) : new Rect(start, 0, result.length - start, matSize)));
 			start = null;
 		}
-		if (zones.isEmpty()) {
-			List<Byte> tmp = new ArrayList<>();
-			Converters.Mat_to_vector_uchar(src, tmp);
-			System.out.println("tmp : " + tmp + " k: " + k + " " + " result : " + Arrays.toString(result));
-			throw new IllegalStateException();
-		}
+		// assert !zones.isEmpty();
 		return new Zones(zones);
-
 	}
 
-	public Img recursivSplit(double morph, int level, double concentration) {
-		Zones hZones = split(morph, false, concentration);
-		Zones vZones = split(morph, true, concentration);
-
-		// System.out.println("Level : " + level + " Vertically : " + vZones.size() + " Horizontally : " + hZones.size());
-
-		if (level <= 0 || (hZones.size() <= 1 && vZones.size() <= 1)) {
-			hZones.draw(this, new Scalar(255, 0, 0), 2);
-			return this;
+	public void recursivSplit(double morph, int level, double concentration, Img imgToDraw, BiConsumer<Img, Zones> visitor) {
+		if (level < 0) {
+			Imgproc.rectangle(imgToDraw.getSrc(), new Point(0, 0), new Point(imgToDraw.width(), imgToDraw.height()), new Scalar(255, 0, 0), -1);
+			return;
 		}
-
-		Zones recusivZones = null;
-		if (vZones.size() <= 1)
-			recusivZones = hZones;
-		else
-			recusivZones = vZones;
-
-		for (Zone zone : recusivZones) {
-			Img subRoi = zone.getRoi(this);
-			try {
-				subRoi.recursivSplit(morph, level - 1, concentration);
-			} catch (IllegalStateException e) {
-				recusivZones.draw(this, new Scalar(0, 0, 255), 5);
-				// System.out.println("ZONE : " + zone.getRect() + " " + (vZones.size() == 1);
-				// return this;
+		boolean vertical = src.size().height > src.size().width;
+		Zones zones = split(morph, vertical, concentration).removeIf(zone -> (vertical ? zone.getRect().height : zone.getRect().width) < 4);
+		if (zones.isEmpty()) {
+			Imgproc.rectangle(imgToDraw.getSrc(), new Point(0, 0), new Point(imgToDraw.width(), imgToDraw.height()), new Scalar(0, 0, 255), -1);
+			System.out.println("Empty zone ?");
+			return;
+		}
+		if (zones.size() == 1) {
+			Rect subRect = zones.iterator().next().getRect();
+			if (subRect.size().equals(size())) {
+				zones = split(morph, !vertical, concentration).removeIf(zone -> (!vertical ? zone.getRect().height : zone.getRect().width) < 4);
+				if (zones.isEmpty()) {
+					Imgproc.rectangle(imgToDraw.getSrc(), new Point(0, 0), new Point(imgToDraw.width(), imgToDraw.height()), new Scalar(0, 0, 255), -1);
+					System.out.println("Empty zone ?");
+					return;
+				}
+				if (zones.size() == 1) {
+					subRect = zones.iterator().next().getRect();
+					if (subRect.size().equals(size())) {
+						// System.out.println("" + size() + " " + zones.iterator().next().getRect());
+						// zones.iterator().next().draw(zones.iterator().next().getRoi(imgToDraw), new Scalar(0, 0, 255), -1);
+						return;
+					}
+				}
 			}
 		}
-		recusivZones.draw(this, new Scalar(0, 255, 0), 1);
-		return this;
+		for (Zone zone : zones)
+			zone.getRoi(this).recursivSplit(morph, level - 1, concentration, zone.getRoi(imgToDraw), visitor);
+		visitor.accept(imgToDraw, zones);
 	}
 
 	public Img houghLinesP(double rho, double theta, int threshold) {
