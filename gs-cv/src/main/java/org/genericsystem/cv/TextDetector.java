@@ -57,8 +57,8 @@ public class TextDetector extends AbstractApp {
 		for (Rect rect : groups_rects.toArray()) {
 			if (rect.tl().x >= 0 && rect.tl().y >= 0 && rect.br().x < src.cols() && rect.br().y < src.height()) {
 				Mat bordered = new Mat(src, rect);
-				Core.copyMakeBorder(bordered, bordered, 15, 15, 15, 15, Core.BORDER_CONSTANT, new Scalar(0));
-				System.out.println(ocr.run(bordered, 90, 1));
+				//Core.copyMakeBorder(bordered, bordered, 15, 15, 15, 15, Core.BORDER_CONSTANT, new Scalar(0));
+				System.out.println(ocr.run(bordered, 50, 1));
 				// System.out.println(Ocr.doWork(bordered));
 				Imgproc.rectangle(src, rect.tl(), rect.br(), src.type() == CvType.CV_8UC3 ? new Scalar(0, 255, 0) : new Scalar(255), 1, Imgproc.LINE_8, 0);
 			}
