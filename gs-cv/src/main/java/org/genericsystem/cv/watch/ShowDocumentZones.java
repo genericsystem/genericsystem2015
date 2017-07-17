@@ -1,5 +1,7 @@
 package org.genericsystem.cv.watch;
 
+import java.util.Arrays;
+
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
@@ -7,6 +9,8 @@ import org.genericsystem.cv.comparator.ComputeBestTextPerZone;
 import org.genericsystem.cv.model.Doc.DocInstance;
 import org.genericsystem.cv.model.ZoneText;
 import org.genericsystem.cv.model.ZoneText.ZoneTextInstance;
+import org.genericsystem.cv.model.ZoneText.ZoneTimestamp;
+import org.genericsystem.cv.model.ZoneText.ZoneTimestamp.ZoneTimestampInstance;
 import org.genericsystem.cv.watch.ShowDocumentZones.TextDiv;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
@@ -36,6 +40,7 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlImg;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
 import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
 
+import javafx.beans.property.Property;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -51,7 +56,7 @@ public class ShowDocumentZones extends ModalEditor {
 	@FlexDirectionStyle(FlexDirection.COLUMN)
 	@Children({ FlexDiv.class, FlexDiv.class })
 	@Children(path = FlexDiv.class, pos = 0, value = { FlexDiv.class, FlexDiv.class })
-	@Children(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 0 }, value = Image.class)
+	@Children(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 0 }, value = { Image.class, LastUpdate.class })
 	@Children(path = FlexDiv.class, pos = 1, value = { RefreshButton.class, CloseButton.class })
 	@Children(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 1 }, value = ZoneTextDiv.class)
 	@FlexDirectionStyle(path = FlexDiv.class, value = FlexDirection.ROW)
@@ -125,6 +130,16 @@ public class ShowDocumentZones extends ModalEditor {
 	@StyleClass("input-like")
 	public static class ZoneField extends FlexDiv {
 		// Define the inputText
+		// TODO: need to escape special HTML characters
+	}
+	
+	@BindText(LAST_UPDATE_LABEL.class)
+	@Style(name = "margin", value = "0.5em")
+	@Style(name = "flex", value = "0 0 auto")
+	@Style(name = "justify-content", value = "center")
+	@Style(name = "align-items", value = "center")
+	public static class LastUpdate extends FlexDiv {
+		// Print the timestamp of the last refresh
 	}
 
 
@@ -146,6 +161,27 @@ public class ShowDocumentZones extends ModalEditor {
 		@Override
 		public ObservableValue<String> apply(Context context, Tag tag) {
 			return new SimpleStringProperty("Zone " + ((ZoneTextInstance) context.getGeneric()).getZone());
+		}
+	}
+	
+	public static class LAST_UPDATE_LABEL implements TextBinding {
+		@Override
+		public ObservableValue<String> apply(Context context, Tag tag) {
+			// TODO use an ObservableValue for displaying the last update in real time
+			Generic currentDoc = context.getGeneric();
+			Root root = currentDoc.getRoot();
+			ZoneTimestamp zoneTimestamp = root.find(ZoneTimestamp.class);
+			ZoneTextInstance zoneTextInstance = (ZoneTextInstance) currentDoc.getHolders(root.find(ZoneText.class))
+					.filter(zt -> "best".equals(((ZoneTextInstance) zt).getImgFilter().getValue()))
+					.first();
+			ZoneTimestampInstance zoneTimestampInstance = null;
+			if (null != zoneTextInstance)
+				zoneTimestampInstance = zoneTimestamp.getZoneTimestamp(zoneTextInstance);
+			
+			if (null == zoneTimestampInstance)
+				return new SimpleStringProperty("Last update: none");
+			else
+				return new SimpleStringProperty("Last update: " + zoneTimestampInstance.getValue());
 		}
 	}
 

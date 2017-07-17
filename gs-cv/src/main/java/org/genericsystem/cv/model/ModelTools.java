@@ -7,6 +7,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 
 import javax.xml.bind.DatatypeConverter;
@@ -19,12 +21,12 @@ import javax.xml.bind.DatatypeConverter;
  *
  */
 public class ModelTools {
-	
+
 	public static void main(String[] args) {
 		Path path = Paths.get(System.getProperty("user.home"), "Downloads", "photosafpa.zip");
 		File file = path.toFile();
 		System.out.println(file.getAbsolutePath());
-		if (!file.exists()){
+		if (!file.exists()) {
 			System.out.println("File does not exists");
 			System.exit(0);
 		}
@@ -33,7 +35,7 @@ public class ModelTools {
 		String sha1 = getHashFromFile(path, "sha-1");
 		String sha256 = getHashFromFile(path, "sha-256");
 		String sha512 = getHashFromFile(path, "sha-512");
-		
+
 		System.out.println("hash: " + hash + " - " + hash.length());
 		System.out.println("md5: " + md5 + " - " + md5.length());
 		System.out.println("sha-1: " + sha1 + " - " + sha1.length());
@@ -72,7 +74,19 @@ public class ModelTools {
 		byte[] hash = md.digest();
 		return DatatypeConverter.printHexBinary(hash);
 	}
-	
+
+	/**
+	 * Generates a simple hash from a file.
+	 * 
+	 * Care must be taken to verify that the file exists before calling this
+	 * method (otherwise an exception is thrown).
+	 * 
+	 * @param path
+	 *            - the {@link Path} of the file
+	 * @return the computed {@code hash} as a hexadecimal String
+	 * @throws RuntimeException
+	 *             when the specified file could not be read
+	 */
 	private static String hashCode(Path path) throws RuntimeException {
 		int hashCode;
 		try {
@@ -81,5 +95,26 @@ public class ModelTools {
 			throw new RuntimeException("Unable to generate a hash code (problem reading the file", e);
 		}
 		return Integer.toHexString(hashCode).toUpperCase();
+	}
+
+	/**
+	 * Returns the current {@link LocalDateTime} formatted as a String with the
+	 * default pattern.
+	 * 
+	 * @return a {@code String} representing the local date time
+	 */
+	public static String getCurrentDate() {
+		return getCurrentDate("uuuu-MM-dd HH:mm:ss");
+	}
+
+	/**
+	 * Returns the current {@link LocalDateTime} formatted as a String with a
+	 * custom pattern.
+	 * 
+	 * @return a {@code String} representing the local date time
+	 */
+	public static String getCurrentDate(String pattern) {
+		LocalDateTime ldt = LocalDateTime.now();
+		return ldt.format(DateTimeFormatter.ofPattern(pattern));
 	}
 }

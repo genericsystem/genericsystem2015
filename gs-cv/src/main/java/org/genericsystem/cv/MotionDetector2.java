@@ -57,7 +57,7 @@ public class MotionDetector2 extends AbstractApp {
 		// mainGrid.add(src3, 0, 1);
 		mainGrid.add(src4, 1, 1);
 
-		Img[] oldFrame = new Img[] { deskiew(frame) };
+		
 		MatOfKeyPoint[] oldKeypoints = new MatOfKeyPoint[] { new MatOfKeyPoint() };
 		Mat[] oldDescriptors = new Mat[] { new Mat() };
 		detector.detect(frame, oldKeypoints[0]);
@@ -73,12 +73,11 @@ public class MotionDetector2 extends AbstractApp {
 				src2.setImage(Tools.mat2jfxImage(frame));
 				src4.setImage(Tools.mat2jfxImage(deskiewed.getSrc()));
 
-				// Img croppedAdaptativ = deskiewed.cvtColor(Imgproc.COLOR_BGR2GRAY).adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 17, 9);
-				// Img croppedDilated = croppedAdaptativ.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(5, 1));
+				Img croppedAdaptativ = deskiewed.cvtColor(Imgproc.COLOR_BGR2GRAY).adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 17, 9);
 				// detection_deskiew_contours(deskiewed.getSrc(), croppedDilated.getSrc());
-				// croppedImg.recursivSplit(5, true);
+				croppedAdaptativ.recursivSplit(new Size(0.036, 0.009), 100, 0.01f, deskiewed, (roi, zones) -> zones.draw(roi, new Scalar(0, 255, 0), 1));
 				// src3.setImage(Tools.mat2jfxImage(croppedDilated.getSrc()));
-				// src4.setImage(Tools.mat2jfxImage(deskiewed.getSrc()));
+				src4.setImage(Tools.mat2jfxImage(deskiewed.getSrc()));
 			} catch (Exception e) {
 				e.printStackTrace();
 
