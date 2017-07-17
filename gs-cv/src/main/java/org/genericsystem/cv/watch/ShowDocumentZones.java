@@ -1,5 +1,6 @@
 package org.genericsystem.cv.watch;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
@@ -132,7 +133,6 @@ public class ShowDocumentZones extends ModalEditor {
 	@StyleClass("input-like")
 	public static class ZoneField extends FlexDiv {
 		// Define the inputText
-		// TODO: need to escape special HTML characters
 	}
 
 	@BindText(LAST_UPDATE_LABEL.class)
@@ -145,6 +145,8 @@ public class ShowDocumentZones extends ModalEditor {
 	}
 
 	public static class ZONE_SELECTOR implements ObservableListExtractor {
+		// TODO: need to escape special HTML characters
+		
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		@Override
 		public ObservableList<Generic> apply(Generic[] generics) {
