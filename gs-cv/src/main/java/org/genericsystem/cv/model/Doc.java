@@ -13,6 +13,8 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.cv.model.Doc.DocFilename;
 import org.genericsystem.cv.model.Doc.DocFilename.DocFilenameInstance;
 import org.genericsystem.cv.model.Doc.DocInstance;
+import org.genericsystem.cv.model.Doc.DocTimestamp.DocTimestampInstance;
+import org.genericsystem.cv.model.Doc.RefreshTimestamp.RefreshTimestampInstance;
 import org.genericsystem.cv.model.DocClass.DocClassInstance;
 import org.genericsystem.cv.model.ZoneGeneric.ZoneInstance;
 
@@ -73,6 +75,50 @@ public class Doc implements Generic {
 			}
 		}
 		
+	}
+	
+	@SystemGeneric
+	@Components(Doc.class)
+	@PropertyConstraint
+	@InstanceClass(RefreshTimestampInstance.class)
+	public static class RefreshTimestamp implements Generic {
+		
+		public static class RefreshTimestampInstance implements Generic {
+
+			public DocInstance getDoc() {
+				return (DocInstance) getBaseComponent();
+			}
+		}
+		
+		public RefreshTimestampInstance setRefreshTimestamp(String timestamp, DocInstance docInstance) {
+			return (RefreshTimestampInstance) setInstance(timestamp, docInstance);
+		}
+		
+		public RefreshTimestampInstance getRefreshTimestamp(DocInstance docInstance) {
+			return (RefreshTimestampInstance) getInstance(docInstance);
+		}
+	}
+	
+	@SystemGeneric
+	@Components(Doc.class)
+	@PropertyConstraint
+	@InstanceClass(DocTimestampInstance.class)
+	public static class DocTimestamp implements Generic {
+		
+		public static class DocTimestampInstance implements Generic {
+
+			public DocInstance getDoc() {
+				return (DocInstance) getBaseComponent();
+			}
+		}
+		
+		public DocTimestampInstance setDocTimestamp(String timestamp, DocInstance docInstance) {
+			return (DocTimestampInstance) setInstance(timestamp, docInstance);
+		}
+		
+		public DocTimestampInstance getDocTimestamp(DocInstance docInstance) {
+			return (DocTimestampInstance) getInstance(docInstance);
+		}
 	}
 
 }
