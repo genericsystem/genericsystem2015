@@ -21,63 +21,70 @@ public class DocPropertiesCheckerSwitcher {
 	public static class DOC_DEZONED implements TagSwitcher {
 		@Override
 		public ObservableValue<Boolean> apply(Context context, Tag tag) {
-			return isClassZoneFilePresent(context);
+			return isClassZoneFilePresent(context, false);
 		}
 	}
 
 	public static class DOC_NOT_DEZONED implements TagSwitcher {
 		@Override
 		public ObservableValue<Boolean> apply(Context context, Tag tag) {
-			return isClassZoneFilePresent(context).not();
+			return isClassZoneFilePresent(context, true);
 		}
 	}
 
 	public static class DOC_OCRD implements TagSwitcher {
 		@Override
 		public ObservableValue<Boolean> apply(Context context, Tag tag) {
-			return isDocOcrd(context);
+			return isDocOcrd(context, false);
 		}
 	}
 
 	public static class DOC_NOT_OCRD implements TagSwitcher {
 		@Override
 		public ObservableValue<Boolean> apply(Context context, Tag tag) {
-			return isDocOcrd(context).not();
+			return isDocOcrd(context, true);
 		}
 	}
 
 	public static class DOC_SUPERVISED implements TagSwitcher {
 		@Override
 		public ObservableValue<Boolean> apply(Context context, Tag tag) {
-			return isDocSupervised(context);
+			return isDocSupervised(context, false);
 		}
 	}
 
 	public static class DOC_NOT_SUPERVISED implements TagSwitcher {
 		@Override
 		public ObservableValue<Boolean> apply(Context context, Tag tag) {
-			return isDocSupervised(context).not();
+			return isDocSupervised(context, true);
 		}
 	}
 
-	public static SimpleBooleanProperty isClassZoneFilePresent(Context context) {
+	public static ObservableValue<Boolean> isClassZoneFilePresent(Context context, boolean reverse) {
 		DocInstance currentDoc = (DocInstance) context.getGeneric();
 		DocClassInstance docClassInstance = currentDoc.getDocClass();
 		File file = new File(System.getProperty("user.dir") + "/../gs-cv/classes/"
 				+ docClassInstance.getValue().toString() + "/zones/zones.json");
-		return new SimpleBooleanProperty(file.exists());
+		if (reverse)
+			return new SimpleBooleanProperty(file.exists()).not();
+		else
+			return new SimpleBooleanProperty(file.exists());
 	}
 
-	public static SimpleBooleanProperty isDocOcrd(Context context) {
+	@SuppressWarnings("rawtypes")
+	public static ObservableValue<Boolean> isDocOcrd(Context context, boolean reverse) {
 		// TODO: verify / test
 		DocInstance currentDoc = (DocInstance) context.getGeneric();
 		Root root = currentDoc.getRoot();
 		Snapshot<ZoneTextInstance> zoneTextInstances = (Snapshot) currentDoc.getHolders(root.find(ZoneText.class));
-		return new SimpleBooleanProperty(zoneTextInstances != null);
+		if (reverse)
+			return new SimpleBooleanProperty(zoneTextInstances != null).not();
+		else
+			return new SimpleBooleanProperty(zoneTextInstances != null);
 	}
 
 	@SuppressWarnings("unchecked")
-	public static SimpleBooleanProperty isDocSupervised(Context context) {
+	public static ObservableValue<Boolean> isDocSupervised(Context context, boolean reverse) {
 		// TODO: will a document be considered as not supervised if a
 		// field needs to be left empty?
 		
@@ -92,7 +99,10 @@ public class DocPropertiesCheckerSwitcher {
 			// If any field is empty, return false otherwise true
 			supervised = !zoneTextInstances.stream().anyMatch(g -> "".equals(g.getValue().toString()));
 		}
-		return new SimpleBooleanProperty(supervised);
+		if (reverse)
+			return new SimpleBooleanProperty(supervised).not();
+		else
+			return new SimpleBooleanProperty(supervised);
 	}
 
 }

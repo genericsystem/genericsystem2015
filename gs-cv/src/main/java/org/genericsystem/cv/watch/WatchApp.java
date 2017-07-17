@@ -6,8 +6,12 @@ import org.genericsystem.common.Root;
 import org.genericsystem.cv.model.Doc;
 import org.genericsystem.cv.model.DocClass;
 import org.genericsystem.cv.model.ImgFilter;
+import org.genericsystem.cv.model.LevDistance;
+import org.genericsystem.cv.model.MeanLevenshtein;
+import org.genericsystem.cv.model.Score;
 import org.genericsystem.cv.model.ZoneGeneric;
 import org.genericsystem.cv.model.ZoneText;
+import org.genericsystem.cv.model.Doc.DocFilename;
 import org.genericsystem.cv.watch.DocPropertiesCheckerSwitcher.DOC_DEZONED;
 import org.genericsystem.cv.watch.DocPropertiesCheckerSwitcher.DOC_NOT_DEZONED;
 import org.genericsystem.cv.watch.DocPropertiesCheckerSwitcher.DOC_NOT_OCRD;
@@ -15,6 +19,7 @@ import org.genericsystem.cv.watch.DocPropertiesCheckerSwitcher.DOC_NOT_SUPERVISE
 import org.genericsystem.cv.watch.DocPropertiesCheckerSwitcher.DOC_OCRD;
 import org.genericsystem.cv.watch.DocPropertiesCheckerSwitcher.DOC_SUPERVISED;
 import org.genericsystem.cv.watch.WatchApp.DocumentsList;
+import org.genericsystem.cv.watch.WatchApp.HeaderRow;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.Attribute;
@@ -32,8 +37,12 @@ import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.context.ContextAction;
 import org.genericsystem.reactor.context.ContextAction.RESET_SELECTION;
+import org.genericsystem.reactor.context.ContextAction.SET_ADMIN_MODE;
+import org.genericsystem.reactor.context.ContextAction.SET_NORMAL_MODE;
 import org.genericsystem.reactor.context.ContextAction.SET_SELECTION;
 import org.genericsystem.reactor.context.ObservableListExtractor;
+import org.genericsystem.reactor.context.TagSwitcher.ADMIN_MODE_ONLY;
+import org.genericsystem.reactor.context.TagSwitcher.NORMAL_MODE_ONLY;
 import org.genericsystem.reactor.gscomponents.AppHeader;
 import org.genericsystem.reactor.gscomponents.AppHeader.AppTitleDiv;
 import org.genericsystem.reactor.gscomponents.AppHeader.Logo;
@@ -45,19 +54,29 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlHyperLink;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlImg;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
 import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
+import org.genericsystem.reactor.gscomponents.Monitor;
 import org.genericsystem.reactor.gscomponents.RootTagImpl;
 
 import javafx.collections.ObservableList;
 
-@DependsOnModel({ Doc.class, DocClass.class, ZoneGeneric.class, ZoneText.class, ImgFilter.class })
-//@Style(name = "background-color", value = "#ffffff")
-@Children({ AppHeader.class, DocumentsList.class })
+@DependsOnModel({ Doc.class, DocFilename.class, DocClass.class, ZoneGeneric.class, ZoneText.class, ImgFilter.class, LevDistance.class, MeanLevenshtein.class, Score.class})
+@Children({ EditDocumentZones.class, AppHeader.class, FlexDiv.class, Monitor.class })
+@Children(path = FlexDiv.class, pos = 2, value = { HeaderRow.class, DocumentsList.class })
+@Children(path = AppHeader.class, value = { Logo.class, AppTitleDiv.class, FlexDiv.class })
+@Children(path = { AppHeader.class, FlexDiv.class }, pos = { 0, 2 }, value = { HtmlButton.class, HtmlButton.class })
+
+@SetText(path = { AppHeader.class, FlexDiv.class, HtmlButton.class }, pos = { 0, 2, 0 }, value = "Switch to admin mode")
+@SetText(path = { AppHeader.class, FlexDiv.class, HtmlButton.class }, pos = { 0, 2, 1 }, value = "Switch to normal mode")
+@BindAction(path = { AppHeader.class, FlexDiv.class, HtmlButton.class }, pos = { 0, 2, 0 }, value = SET_ADMIN_MODE.class)
+@BindAction(path = { AppHeader.class, FlexDiv.class, HtmlButton.class }, pos = { 0, 2, 1 }, value = SET_NORMAL_MODE.class)
+@Switch(path = { AppHeader.class, FlexDiv.class, HtmlButton.class }, pos = { 0, 2, 0 }, value = NORMAL_MODE_ONLY.class)
+@Switch(path = { AppHeader.class, FlexDiv.class, HtmlButton.class }, pos = { 0, 2, 1 }, value = ADMIN_MODE_ONLY.class)
+
 @Style(path = AppHeader.class, name = "background-color", value = "#00afeb")
-@Children(path = AppHeader.class, value = { Logo.class, AppTitleDiv.class })
 @SetText(path = { AppHeader.class, AppTitleDiv.class, HtmlH1.class }, value = "GS-Watch interface")
 public class WatchApp extends RootTagImpl {
 
-	private static final String gsPath = "/gs-cv_model";
+	private static final String gsPath = "/gs-cv_model3";
 	private static final String docClass = "id-fr-front";
 
 	public static void main(String[] mainArgs) {
@@ -65,7 +84,7 @@ public class WatchApp extends RootTagImpl {
 	}
 	
 	public WatchApp() {
-		addPrefixBinding(context -> getAdminModeProperty(context).setValue(true));
+//		addPrefixBinding(context -> getAdminModeProperty(context).setValue(true));
 	}
 	
 	@Children({ HtmlLabel.class, HtmlLabel.class, HtmlLabel.class, HtmlLabel.class, HtmlLabel.class })
@@ -75,8 +94,8 @@ public class WatchApp extends RootTagImpl {
 	@Style(path = HtmlLabel.class, name = "justify-content", value = "center")
 	@Style(path = HtmlLabel.class, name = "justify-content", value = "center")
 	@Style(path = HtmlLabel.class, name = "align-items", value = "center")
-	@Style(path = HtmlLabel.class, name = "flex", value = "1")
 	@Style(path = HtmlLabel.class, pos = 0, name = "flex", value = "3")
+	@Style(path = HtmlLabel.class, name = "flex", value = "1")
 	@Style(path = HtmlLabel.class, name = "text-align", value = "center")
 	@Style(path = HtmlLabel.class, name = "font-weight", value = "bold")
 	@SetText(path = HtmlLabel.class, value = { "Document name", "De-zoned", "OCR'd", "Supervised", "Edit" })
@@ -104,12 +123,15 @@ public class WatchApp extends RootTagImpl {
 	@Switch(path = { FlexDiv.class, HtmlHyperLink.class, FailedImage.class }, pos = { 3, 0, 0 }, value = DOC_NOT_SUPERVISED.class)
 	@StyleClass(path = { FlexDiv.class, HtmlImg.class }, value = "img")
  	@Style(name = "margin", value = "0.5em")
+	@Style(path = FlexDiv.class, pos = 0, name = "flex", value = "3")
 	@Style(path = FlexDiv.class, name = "flex", value = "1")
 	@Style(path = FlexDiv.class, name = "justify-content", value = "center")
+	@Style(path = FlexDiv.class, pos = 0, name = "align-items", value = "left")
 	@Style(path = FlexDiv.class, name = "align-items", value = "center")
 	public static class DocumentsList extends FlexDiv {
 
 	}
+	
 	
 	public static class ModalFlexDiv extends FlexDiv {
 		@Override
@@ -135,7 +157,7 @@ public class WatchApp extends RootTagImpl {
 	@FlexDirectionStyle(FlexDirection.COLUMN)
 	@Style(name = "justify-content", value = "center")
 	@Style(name = "align-items", value = "center")
-	@Style(name = "flex", value = "1 0 auto")
+	@Style(name = "flex", value = "3")
 	public static class DocumentName extends FlexDiv {
 
 	}
@@ -144,7 +166,7 @@ public class WatchApp extends RootTagImpl {
 	@Style(name = "justify-content", value = "center")
 	@Style(name = "align-items", value = "center")
 	@Style(name = "flex", value = "1 0 auto")
-	@Children({ DeleteConfirmation.class, DocumentEditButton.class })
+	@Children({ DeleteConfirmation.class, DocumentDeleteButton.class })
 	public static class DocumentEditButtonDiv extends ModalFlexDiv {
 		
 	}
@@ -154,7 +176,7 @@ public class WatchApp extends RootTagImpl {
 	@Attribute(path = { HtmlHyperLink.class, HtmlImg.class }, name = "src", value = "delete.png")
 	@StyleClass(path = { HtmlHyperLink.class, HtmlImg.class }, value = "img")
 	@BindAction(path = HtmlHyperLink.class, value = SET_SELECTION.class)
-	public static class DocumentEditButton extends HtmlButton {
+	public static class DocumentDeleteButton extends FlexDiv {
 		// TODO: change the way the context is loaded (currently, everything is loaded for every file)
 	}
 	
@@ -182,12 +204,13 @@ public class WatchApp extends RootTagImpl {
 		public ObservableList<Generic> apply(Generic[] generics) {
 			Root root = generics[0].getRoot();
 			Generic currentDocClass = root.find(DocClass.class).getInstance(docClass);
-			System.out.println("Current doc class : " + currentDocClass);
+			System.out.println("Current doc class : " + currentDocClass.info());
 			Snapshot<Generic> docInstances = currentDocClass.getHolders(root.find(Doc.class));
 			return docInstances.toObservableList();
 		}
 	}
 	
+		
 	public static class REMOVE_CUSTOM implements ContextAction {
 		@Override
 		public void accept(Context context, Tag tag) {

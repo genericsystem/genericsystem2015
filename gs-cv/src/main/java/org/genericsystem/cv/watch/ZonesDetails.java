@@ -11,12 +11,9 @@ import org.genericsystem.cv.model.ZoneText.ZoneTextInstance;
 import org.genericsystem.cv.watch.ZonesDetails.FiltersDiv;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.annotations.Attribute;
-import org.genericsystem.reactor.annotations.BindSelection;
 import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.ForEach;
-import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.StyleClass;
@@ -31,12 +28,13 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
-@Children(FlexDiv.class)
+//@Children(FlexDiv.class)
 @Children(path = FlexDiv.class, value = { HtmlHyperLink.class, FiltersDiv.class })
 @StyleClass(path = { FlexDiv.class, FiltersDiv.class }, value = "filter-results")
 @Style(path = FlexDiv.class, name = "display", value = "block")
 @Style(path = FlexDiv.class, name = "padding", value = "1.5em")
 public class ZonesDetails extends ModalWithDisplay {
+	
 	
 	@FlexDirectionStyle(FlexDirection.ROW)
 	@StyleClass("ocr-row")
@@ -79,7 +77,7 @@ public class ZonesDetails extends ModalWithDisplay {
 			DocInstance doc = zti.getDoc();
 			ZoneText zt = (ZoneText) ifi.getRoot().find(ZoneText.class);
 			ZoneTextInstance text = zt.getZoneText(doc, zti.getZone(), ifi);
-			return new SimpleStringProperty(text.getValue().toString());
+			return new SimpleStringProperty(text == null ? "" : text.getValue().toString());
 		}
 	}
 

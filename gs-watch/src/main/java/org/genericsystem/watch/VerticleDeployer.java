@@ -20,11 +20,11 @@ public class VerticleDeployer extends AbstractVerticle {
 	public static final String NEW_IMAGE_PROCESSED = "app.ocr.newimage.processed";
 	public static final String KNOWN_IMAGE_PROCESSED = "app.ocr.knownimage.updated";
 	public static final String KNOWN_IMAGE_PASSED = "app.ocr.knownimage.passed";
-	
+
 	public static void deployVerticle(Verticle verticle) {
 		deployVerticle(verticle, new VertxOptions());
 	}
-	
+
 	public static void deployVerticle(Verticle verticle, VertxOptions vertxOptions) {
 		ClusterManager mgr = new HazelcastClusterManager();
 

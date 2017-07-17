@@ -56,6 +56,7 @@ import javafx.collections.ObservableList;
  * @author Pierrik Lassalas
  *
  */
+@Deprecated
 @DependsOnModel({ Doc.class, DocClass.class, ZoneGeneric.class, ZoneText.class })
 @Style(name = "background-color", value = "#ffffff")
 @Children({ AppHeader.class, DocumentDiv.class })
@@ -164,9 +165,9 @@ public class SetRealValues2 extends RootTagImpl {
 			Generic currentDoc = generics[0];
 			Root root = currentDoc.getRoot();
 			System.out.println("Document : " + currentDoc);
-			Snapshot<ZoneTextInstance> zoneTextInstances = (Snapshot) currentDoc.getHolders(root.find(ZoneText.class))
-					.filter(zt -> "reality".equals(((ZoneTextInstance) zt).getImgFilter().getValue()));
+			Snapshot<ZoneTextInstance> zoneTextInstances = (Snapshot) currentDoc.getHolders(root.find(ZoneText.class));
 			return (ObservableList) zoneTextInstances.toObservableList()
+					.filtered(zt -> "reality".equals(((ZoneTextInstance) zt).getImgFilter().getValue()))
 					.sorted((g1, g2) -> Integer.compare(g1.getZoneNum(), g2.getZoneNum()));
 		}
 	}

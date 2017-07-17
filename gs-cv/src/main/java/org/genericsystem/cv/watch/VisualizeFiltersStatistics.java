@@ -55,7 +55,7 @@ import org.genericsystem.reactor.gscomponents.AppHeader.Logo;
 public class VisualizeFiltersStatistics extends RootTagImpl {
 
 	public static void main(String[] mainArgs) {
-		ApplicationServer.startSimpleGenericApp(mainArgs, VisualizeFiltersStatistics.class, "/gs-cv_model");
+		ApplicationServer.startSimpleGenericApp(mainArgs, VisualizeFiltersStatistics.class, "/gs-cv_model3");
 	}
 	
 	@SetText("Compute statistics")
