@@ -7,6 +7,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 
 import javax.xml.bind.DatatypeConverter;
@@ -93,5 +95,26 @@ public class ModelTools {
 			throw new RuntimeException("Unable to generate a hash code (problem reading the file", e);
 		}
 		return Integer.toHexString(hashCode).toUpperCase();
+	}
+
+	/**
+	 * Returns the current {@link LocalDateTime} formatted as a String with the
+	 * default pattern.
+	 * 
+	 * @return a {@code String} representing the local date time
+	 */
+	public static String getCurrentDate() {
+		return getCurrentDate("uuuu-MM-dd HH:mm:ss");
+	}
+
+	/**
+	 * Returns the current {@link LocalDateTime} formatted as a String with a
+	 * custom pattern.
+	 * 
+	 * @return a {@code String} representing the local date time
+	 */
+	public static String getCurrentDate(String pattern) {
+		LocalDateTime ldt = LocalDateTime.now();
+		return ldt.format(DateTimeFormatter.ofPattern(pattern));
 	}
 }

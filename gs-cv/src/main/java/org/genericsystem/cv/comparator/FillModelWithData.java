@@ -2,7 +2,9 @@ package org.genericsystem.cv.comparator;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +34,7 @@ import org.genericsystem.cv.model.ZoneGeneric;
 import org.genericsystem.cv.model.ZoneGeneric.ZoneInstance;
 import org.genericsystem.cv.model.ZoneText;
 import org.genericsystem.cv.model.ZoneText.ZoneTextInstance;
+import org.genericsystem.cv.model.ZoneText.ZoneTimestamp;
 import org.genericsystem.kernel.Engine;
 import org.opencv.core.Core;
 import org.opencv.core.Scalar;
@@ -64,7 +67,7 @@ public class FillModelWithData {
 
 	public static void main(String[] mainArgs) {
 		final Engine engine = new Engine(gsPath, Doc.class, DocFilename.class, DocClass.class, ZoneGeneric.class,
-				ZoneText.class, ImgFilter.class, LevDistance.class, MeanLevenshtein.class, Score.class);
+				ZoneText.class, ZoneTimestamp.class, ImgFilter.class, LevDistance.class, MeanLevenshtein.class, Score.class);
 		engine.newCache().start();
 		compute(engine);
 		// cleanModel(engine);
@@ -83,7 +86,7 @@ public class FillModelWithData {
 		final Map<String, Function<Img, Img>> map = new HashMap<>();
 		map.put("original", i -> i);
 		map.put("reality", i -> i);
-		map.put("bernsen", Img::bernsen);
+//		map.put("bernsen", Img::bernsen);
 		map.put("equalizeHisto", Img::equalizeHisto);
 		map.put("equalizeHistoAdaptative", Img::equalizeHistoAdaptative);
 		map.put("otsuAfterGaussianBlur", Img::otsuAfterGaussianBlur);
@@ -277,6 +280,7 @@ public class FillModelWithData {
 		Generic doc = engine.find(Doc.class);
 		ZoneText zoneText = engine.find(ZoneText.class);
 		ImgFilter imgFilter = engine.find(ImgFilter.class);
+		ZoneTimestamp zoneTimestamp = engine.find(ZoneTimestamp.class);
 
 		// Save the current file
 		String filename = ModelTools.getHashFromFile(file.toPath(), "sha-256");
@@ -308,7 +312,7 @@ public class FillModelWithData {
 					imgFilter.setImgFilter(entry.getKey());
 					updatedImgFilters.put(entry.getKey(), entry.getValue());
 				} else {
-					log.info("Algorithm {} already known", entry.getKey());
+					log.debug("Algorithm {} already known", entry.getKey());
 				}
 			}
 		});
@@ -368,8 +372,9 @@ public class FillModelWithData {
 						zoneText.setZoneText("", docInstance, zoneInstance, imgFilter.getImgFilter(entry.getKey()));
 				} else {
 					String ocrText = z.ocr(entry.getValue());
-					zoneText.setZoneText(ocrText.trim(), docInstance, zoneInstance,
+					ZoneTextInstance zti = zoneText.setZoneText(ocrText.trim(), docInstance, zoneInstance,
 							imgFilter.getImgFilter(entry.getKey()));
+					zoneTimestamp.setZoneTimestamp(ModelTools.getCurrentDate(), zti); // TODO: test
 				}
 			});
 			engine.getCurrentCache().flush();
