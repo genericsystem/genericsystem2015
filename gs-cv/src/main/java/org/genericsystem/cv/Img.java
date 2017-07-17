@@ -926,11 +926,8 @@ public class Img {
 		}
 		for (Zone zone : zones) {
 
-			double x1 = (double) zone.getRect().x / imgToDraw.width();
-			double x2 = (double) (zone.getRect().x + zone.getRect().width) / imgToDraw.width();
-			double y1 = (double) (zone.getRect().y) / imgToDraw.height();
-			double y2 = (double) (zone.getRect().y + zone.getRect().height) / imgToDraw.height();
-			Shard s = new Shard(x1, x2, y1, y2);
+			Shard s = new Shard((double) zone.getRect().x / imgToDraw.width(), (double) (zone.getRect().x + zone.getRect().width) / imgToDraw.width(), (double) (zone.getRect().y) / imgToDraw.height(),
+					(double) (zone.getRect().y + zone.getRect().height) / imgToDraw.height());
 			shard.addChild(s);
 			zone.getRoi(this).recursivSplit(morph, level - 1, concentration, zone.getRoi(imgToDraw), visitor, s);
 		}

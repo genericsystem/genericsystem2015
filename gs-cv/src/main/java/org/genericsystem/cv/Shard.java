@@ -121,7 +121,7 @@ public class Shard {
 			for (Shard s : shard.getChildren()) {
 				sb.append("\n");
 				for (int i = 0; i < depth; i++)
-					sb.append("   ");
+					sb.append("    ");
 				toString(s, sb, depth);
 			}
 		}
