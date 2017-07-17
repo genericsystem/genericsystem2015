@@ -125,6 +125,7 @@ public class ShowDocumentZones extends ModalEditor {
 	@StyleClass("input-like")
 	public static class ZoneField extends FlexDiv {
 		// Define the inputText
+		// TODO: need to escape special HTML characters
 	}
 
 

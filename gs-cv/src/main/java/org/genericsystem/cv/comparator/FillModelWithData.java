@@ -53,16 +53,18 @@ public class FillModelWithData {
 		System.out.println("OpenCV core library loaded");
 	}
 
-	public static final int NEW_FILE = 0;
-	public static final int KNOWN_FILE = 1;
-	public static final int KNOWN_FILE_UPDATED_FILTERS = 2;
+	public static final int ERROR = 0;
+	public static final int NEW_FILE = 1;
+	public static final int KNOWN_FILE = 2;
+	public static final int KNOWN_FILE_UPDATED_FILTERS = 3;
 
 	private static Logger log = LoggerFactory.getLogger(FillModelWithData.class);
 	private static final String gsPath = System.getenv("HOME") + "/genericsystem/gs-cv_model3/";
 	private static final String docType = "id-fr-front";
 
 	public static void main(String[] mainArgs) {
-		final Engine engine = new Engine(gsPath, Doc.class, DocFilename.class, DocClass.class, ZoneGeneric.class, ZoneText.class, ImgFilter.class, LevDistance.class, MeanLevenshtein.class, Score.class );
+		final Engine engine = new Engine(gsPath, Doc.class, DocFilename.class, DocClass.class, ZoneGeneric.class,
+				ZoneText.class, ImgFilter.class, LevDistance.class, MeanLevenshtein.class, Score.class);
 		engine.newCache().start();
 		compute(engine);
 		// cleanModel(engine);
@@ -84,6 +86,8 @@ public class FillModelWithData {
 		map.put("bernsen", Img::bernsen);
 		map.put("equalizeHisto", Img::equalizeHisto);
 		map.put("equalizeHistoAdaptative", Img::equalizeHistoAdaptative);
+		map.put("otsuAfterGaussianBlur", Img::otsuAfterGaussianBlur);
+		map.put("adaptativeGaussianThreshold", i -> i.adaptativeGaussianThreshold());
 		return map;
 	}
 
@@ -96,12 +100,17 @@ public class FillModelWithData {
 	 *            - the desired file
 	 * @return - true if the file was found in the engine, false otherwise
 	 */
-	// TODO: add a try/catch in case the hash can not be computed
 	private static boolean isFileAlreadyProcessed(Root engine, File file) {
 		Generic doc = engine.find(Doc.class);
 		DocClass docClass = engine.find(DocClass.class);
 		DocClassInstance docClassInstance = docClass.getDocClass(docType);
-		String filename = ModelTools.getHashFromFile(file.toPath(), "sha-256");
+		String filename;
+		try {
+			filename = ModelTools.getHashFromFile(file.toPath(), "sha-256");
+		} catch (RuntimeException e) {
+			log.error("An error has occured during the generation of the hascode from file (assuming false)", e);
+			return false;
+		}
 		String filenameExt = filename + "." + FilenameUtils.getExtension(file.getName());
 		DocInstance docInstance = docClassInstance.getDoc(doc, filenameExt);
 		return null != docInstance ? true : false;
@@ -137,10 +146,14 @@ public class FillModelWithData {
 	 *         {@link #NEW_FILE} or {@link #KNOWN_FILE}
 	 */
 	public static int doImgOcr(Root engine, Path imagePath) {
+
 		final Path imgClassDirectory = imagePath.getParent();
 		final String docType = imgClassDirectory.getName(imgClassDirectory.getNameCount() - 1).toString();
+		// TODO: remove the following line (only present in development)
 		final String imgDirectory = imgClassDirectory.toString() + "/ref2/";
 		log.info("imgDirectory = {} ", imgDirectory);
+
+		int result;
 
 		// Find and save the doc class
 		DocClass docClass = engine.find(DocClass.class);
@@ -154,24 +167,9 @@ public class FillModelWithData {
 		// Process the image file
 		File file = new File(imagePath.toString());
 
-		if (isFileAlreadyProcessed(engine, file)) {
-			final Map<String, Function<Img, Img>> updatedImgFilters = initComputation(engine, docType, imgFilters,
-					zones);
-			if (updatedImgFilters.isEmpty()) {
-				log.info("The image {} has already been processed (pass)", file.getName());
-				return KNOWN_FILE;
-			} else {
-				log.info("New filters detected for image {} ", file.getName());
-				processFile(engine, file, docClassInstance, zones, updatedImgFilters.entrySet().stream());
-				engine.getCurrentCache().flush();
-				return KNOWN_FILE_UPDATED_FILTERS;
-			}
-		} else {
-			log.info("Adding a new image ({}) ", file.getName());
-			initComputation(engine, docType, imgFilters, zones);
-			processFile(engine, file, docClassInstance, zones, imgFilters.entrySet().stream());
-			return NEW_FILE;
-		}
+		initComputation(engine, docType, zones);
+		result = processFile(engine, file, docClassInstance, zones, imgFilters.entrySet().stream());
+		return result;
 	}
 
 	/**
@@ -192,12 +190,10 @@ public class FillModelWithData {
 		final Map<String, Function<Img, Img>> imgFilters = getFiltersMap();
 		// Load the accurate zones
 		final Zones zones = Zones.loadZones(imgClassDirectory);
-//		final Map<String, Function<Img, Img>> updatedImgFilters = initComputation(engine, docType, imgFilters, zones);
 		initComputation(engine, docType, zones);
 		// Process each file in folder imgDirectory
 		Arrays.asList(new File(imgDirectory).listFiles((dir, name) -> name.endsWith(".png"))).forEach(file -> {
-//			processFile(engine, file, docClassInstance, zones, updatedImgFilters.entrySet().stream());
-			processFile(engine, file, docClassInstance, zones, imgFilters);
+			processFile(engine, file, docClassInstance, zones, imgFilters.entrySet().stream());
 			engine.getCurrentCache().flush();
 		});
 		engine.getCurrentCache().flush();
@@ -217,66 +213,11 @@ public class FillModelWithData {
 	 *            - the engine used to store the data
 	 * @param docType
 	 *            - the document type (i.e., class)
-	 * @param imgFilters
-	 *            - a Map containing the filtername as key, and the
-	 *            corresponding function to be applied for this filter
 	 * @param zones
 	 *            - a {@link Zones} object, representing all the zones detected
 	 *            for ocr
-	 * 
-	 * @return an updated Map containing the filtername as key, and the
-	 *         corresponding function to be applied for this filter
 	 */
 	// TODO: change method's name
-	private static Map<String, Function<Img, Img>> initComputation(Root engine, String docType,
-			Map<String, Function<Img, Img>> imgFilters, Zones zones) {
-
-		DocClass docClass = engine.find(DocClass.class);
-		ImgFilter imgFilter = engine.find(ImgFilter.class);
-		DocClassInstance docClassInstance = docClass.getDocClass(docType);
-		// Save the zones if necessary
-		// TODO: refactor the code (duplicate)
-		zones.getZones().forEach(z -> {
-			ZoneInstance zoneInstance = docClassInstance.getZone(z.getNum());
-			if (zoneInstance != null){
-				Zone zone = zoneInstance.getZoneObject();
-				// log.info("z : {} ; zone : {}", z, zone);
-				if (z.equals(zone)) {
-					log.info("Zone n°{} already known", z.getNum());
-				} else {
-					log.info("Adding zone n°{} ", z.getNum());
-					docClassInstance.setZone(z.getNum(), z.getRect().x, z.getRect().y, z.getRect().width,
-							z.getRect().height);
-				}
-			} else {
-				log.info("Adding zone n°{} ", z.getNum());
-				docClassInstance.setZone(z.getNum(), z.getRect().x, z.getRect().y, z.getRect().width,
-						z.getRect().height);
-			}
-			
-		});
-		// Save the filternames if necessary
-		Map<String, Function<Img, Img>> updatedImgFilters = new HashMap<>();
-		imgFilters.entrySet().forEach(entry -> {
-			ImgFilterInstance filter = imgFilter.getImgFilter(entry.getKey());
-			if (filter == null) {
-				log.info("Adding algorithm : {} ", entry.getKey());
-				imgFilter.setImgFilter(entry.getKey());
-				updatedImgFilters.put(entry.getKey(), entry.getValue());
-			} else {
-				log.info("Algorithm {} already known", entry.getKey());
-				// TODO: add another criteria to verify if the filter has been applied on the image
-//				zones.getZones().stream().anyMatch(z -> {
-//					ZoneTextInstance zti = ((ZoneText) engine.find(ZoneText.class)).getZoneText(doc, z, filter);
-//					return zti == null;
-//				})
-			}
-		});
-		// Persist the changes
-		engine.getCurrentCache().flush();
-		return updatedImgFilters;
-	}
-	
 	private static void initComputation(Root engine, String docType, Zones zones) {
 
 		DocClass docClass = engine.find(DocClass.class);
@@ -285,7 +226,7 @@ public class FillModelWithData {
 		// TODO: refactor the code (duplicate)
 		zones.getZones().forEach(z -> {
 			ZoneInstance zoneInstance = docClassInstance.getZone(z.getNum());
-			if (zoneInstance != null){
+			if (zoneInstance != null) {
 				Zone zone = zoneInstance.getZoneObject();
 				// log.info("z : {} ; zone : {}", z, zone);
 				if (z.equals(zone)) {
@@ -324,76 +265,13 @@ public class FillModelWithData {
 	 *            - a stream of entry for a Map containing the filternames that
 	 *            will be applied to the original file, and the functions
 	 *            required to apply these filters
+	 * @return an {@code int} representing {@link #KNOWN_FILE_UPDATED_FILTERS},
+	 *         {@link #NEW_FILE} or {@link #KNOWN_FILE}
 	 */
-	private static void processFile(Root engine, File file, DocClassInstance docClassInstance, Zones zones,
+	private static int processFile(Root engine, File file, DocClassInstance docClassInstance, Zones zones,
 			Stream<Entry<String, Function<Img, Img>>> imgFilters) {
 
-		log.info("\nProcessing file: {}", file.getName());
-		Generic doc = engine.find(Doc.class);
-		ZoneText zoneText = engine.find(ZoneText.class);
-		ImgFilter imgFilter = engine.find(ImgFilter.class);
-
-		// Save the current file
-		String filename = ModelTools.getHashFromFile(file.toPath(), "sha-256");
-		String filenameExt = filename + "." + FilenameUtils.getExtension(file.getName());
-		log.info("Hash generated for file {}: {}", file.getName(), filenameExt);
-		
-		DocInstance docInstance = docClassInstance.setDoc(doc, filenameExt);
-		docInstance.setDocFilename(file.getName());
-		engine.getCurrentCache().flush();
-
-		// Draw the image's zones + numbers
-		Img imgCopy = new Img(Imgcodecs.imread(file.getPath()));
-		zones.draw(imgCopy, new Scalar(0, 255, 0), 3);
-		zones.writeNum(imgCopy, new Scalar(0, 0, 255), 3);
-		// Copy the images to the resources folder
-		// TODO implement a filter mechanism to avoid creating
-		// duplicates in a public folder
-		log.info("Copying {} to resources folder", filenameExt);
-		Imgcodecs.imwrite(System.getProperty("user.dir") + "/../gs-cv/src/main/resources/" + filenameExt,
-				imgCopy.getSrc());
-
-		// Create a map of Imgs
-		Img originalImg = new Img(Imgcodecs.imread(file.getPath()));
-		Map<String, Img> imgs = new HashMap<>();
-		imgFilters.forEach(entry -> {
-			log.info("Applying algorithm {}...", entry.getKey());
-			Img img = null;
-			if ("original".equals(entry.getKey()) || "reality".equals(entry.getKey()))
-				img = originalImg;
-			else
-				img = entry.getValue().apply(originalImg);
-			if (null != img)
-				imgs.put(entry.getKey(), img);
-			else
-				log.error("An error as occured for image {} and filter {}", filenameExt, entry.getKey());
-		});
-
-		// Process each zone
-		zones.getZones().forEach(z -> {
-			log.info("Zone n° {}", z.getNum());
-			ZoneInstance zoneInstance = docClassInstance.getZone(z.getNum());
-			imgs.entrySet().forEach(entry -> {
-				if ("reality".equals(entry.getKey())) {
-					// Do not proceed to OCR if the real values are known
-					// By default, the "reality" filter is left empty
-					if (null == zoneText.getZoneText(docInstance, zoneInstance, imgFilter.getImgFilter(entry.getKey())))
-						zoneText.setZoneText("", docInstance, zoneInstance, imgFilter.getImgFilter(entry.getKey()));
-				} else {
-					String ocrText = z.ocr(entry.getValue());
-					zoneText.setZoneText(ocrText.trim(), docInstance, zoneInstance,
-							imgFilter.getImgFilter(entry.getKey()));
-				}
-			});
-			engine.getCurrentCache().flush();
-			// Call the garbage collector to free the resources used by
-			// OpenCV
-			System.gc();
-		});
-	}
-	
-	private static void processFile(Root engine, File file, DocClassInstance docClassInstance, Zones zones,
-			Map<String, Function<Img, Img>> imgFilters) {
+		int result = ERROR;
 
 		log.info("\nProcessing file: {}", file.getName());
 		Generic doc = engine.find(Doc.class);
@@ -404,36 +282,26 @@ public class FillModelWithData {
 		String filename = ModelTools.getHashFromFile(file.toPath(), "sha-256");
 		String filenameExt = filename + "." + FilenameUtils.getExtension(file.getName());
 		log.info("Hash generated for file {}: {}", file.getName(), filenameExt);
-		
+
 		DocInstance docInstance = docClassInstance.setDoc(doc, filenameExt);
 		docInstance.setDocFilename(file.getName());
 		engine.getCurrentCache().flush();
 
-		// Draw the image's zones + numbers
-		Img imgCopy = new Img(Imgcodecs.imread(file.getPath()));
-		zones.draw(imgCopy, new Scalar(0, 255, 0), 3);
-		zones.writeNum(imgCopy, new Scalar(0, 0, 255), 3);
-		// Copy the images to the resources folder
-		// TODO implement a filter mechanism to avoid creating
-		// duplicates in a public folder
-		log.info("Copying {} to resources folder", filenameExt);
-		Imgcodecs.imwrite(System.getProperty("user.dir") + "/../gs-cv/src/main/resources/" + filenameExt,
-				imgCopy.getSrc());
-
-		// TODO: test
 		// TODO: refactor the code (duplicates)
 		// Save the filternames if necessary
 		Map<String, Function<Img, Img>> updatedImgFilters = new HashMap<>();
-		imgFilters.entrySet().forEach(entry -> {
+		imgFilters.forEach(entry -> {
 			ImgFilterInstance filter = imgFilter.getImgFilter(entry.getKey());
 			if (filter == null) {
 				log.info("Adding algorithm : {} ", entry.getKey());
 				imgFilter.setImgFilter(entry.getKey());
 				updatedImgFilters.put(entry.getKey(), entry.getValue());
 			} else {
-				// TODO: add another criteria to verify if the filter has been applied on the image
+				// TODO: add another criteria to verify if the filter has been
+				// applied on the image
 				boolean containsNull = zones.getZones().stream().anyMatch(z -> {
-					ZoneTextInstance zti = ((ZoneText) engine.find(ZoneText.class)).getZoneText(docInstance, docClassInstance.getZone(z.getNum()), filter);
+					ZoneTextInstance zti = ((ZoneText) engine.find(ZoneText.class)).getZoneText(docInstance,
+							docClassInstance.getZone(z.getNum()), filter);
 					return zti == null;
 				});
 				if (containsNull) {
@@ -444,8 +312,22 @@ public class FillModelWithData {
 				}
 			}
 		});
-		// TODO: end test
-		
+
+		// Check whether or not the file has aldready been stored in the system
+		if (isFileAlreadyProcessed(engine, file)) {
+			if (updatedImgFilters.isEmpty()) {
+				log.info("The image {} has already been processed (pass)", file.getName());
+				result = KNOWN_FILE;
+				return result;
+			} else {
+				log.info("New filters detected for image {} ", file.getName());
+				result = KNOWN_FILE_UPDATED_FILTERS;
+			}
+		} else {
+			log.info("Adding a new image ({}) ", file.getName());
+			result = NEW_FILE;
+		}
+
 		// Create a map of Imgs
 		Img originalImg = new Img(Imgcodecs.imread(file.getPath()));
 		Map<String, Img> imgs = new HashMap<>();
@@ -462,14 +344,26 @@ public class FillModelWithData {
 				log.error("An error as occured for image {} and filter {}", filenameExt, entry.getKey());
 		});
 
+		// Draw the image's zones + numbers
+		Img imgCopy = new Img(Imgcodecs.imread(file.getPath()));
+		zones.draw(imgCopy, new Scalar(0, 255, 0), 3);
+		zones.writeNum(imgCopy, new Scalar(0, 0, 255), 3);
+		// Copy the images to the resources folder
+		// TODO implement a filter mechanism to avoid creating
+		// duplicates in a public folder
+		log.info("Copying {} to resources folder", filenameExt);
+		Imgcodecs.imwrite(System.getProperty("user.dir") + "/../gs-cv/src/main/resources/" + filenameExt,
+				imgCopy.getSrc());
+
 		// Process each zone
 		zones.getZones().forEach(z -> {
 			log.info("Zone n° {}", z.getNum());
 			ZoneInstance zoneInstance = docClassInstance.getZone(z.getNum());
 			imgs.entrySet().forEach(entry -> {
-				if ("reality".equals(entry.getKey())) {
+				if ("reality".equals(entry.getKey()) || "best".equals(entry.getKey())) {
 					// Do not proceed to OCR if the real values are known
-					// By default, the "reality" filter is left empty
+					// By default, the "reality" and "best" filters are left
+					// empty
 					if (null == zoneText.getZoneText(docInstance, zoneInstance, imgFilter.getImgFilter(entry.getKey())))
 						zoneText.setZoneText("", docInstance, zoneInstance, imgFilter.getImgFilter(entry.getKey()));
 				} else {
@@ -482,7 +376,10 @@ public class FillModelWithData {
 			// Call the garbage collector to free the resources used by
 			// OpenCV
 			System.gc();
+			System.runFinalization();
 		});
+
+		return result;
 	}
 
 	private static Map<String, Function<Img, Img>> filterOptimizationMap() {

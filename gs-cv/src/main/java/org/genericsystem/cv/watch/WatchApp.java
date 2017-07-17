@@ -59,7 +59,7 @@ import org.genericsystem.reactor.gscomponents.RootTagImpl;
 
 import javafx.collections.ObservableList;
 
-@DependsOnModel({ Doc.class, DocFilename.class, DocClass.class, ZoneGeneric.class, ZoneText.class, ImgFilter.class, LevDistance.class, MeanLevenshtein.class, Score.class})
+@DependsOnModel({ Doc.class, DocFilename.class, DocClass.class, ZoneGeneric.class, ZoneText.class, ImgFilter.class, LevDistance.class, MeanLevenshtein.class, Score.class })
 @Children({ EditDocumentZones.class, AppHeader.class, FlexDiv.class, Monitor.class })
 @Children(path = FlexDiv.class, pos = 2, value = { HeaderRow.class, DocumentsList.class })
 @Children(path = AppHeader.class, value = { Logo.class, AppTitleDiv.class, FlexDiv.class })
