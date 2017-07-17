@@ -16,9 +16,6 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-
 import javax.swing.ImageIcon;
 
 import org.opencv.core.Core;
@@ -44,6 +41,9 @@ import org.opencv.utils.Converters;
 import org.opencv.ximgproc.Ximgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 
 public class Img {
 
@@ -817,8 +817,8 @@ public class Img {
 
 	public Zones split(double morph, boolean vertical, float concentration) {
 		assert 1 / (vertical ? src.rows() : src.cols()) < concentration;
-		if ((vertical ? src.rows() : src.cols()) <= 4)
-			System.out.println("size to low : " + (vertical ? src.rows() : src.cols()));
+		// if ((vertical ? src.rows() : src.cols()) <= 4)
+		// System.out.println("size too low : " + (vertical ? src.rows() : src.cols()));
 		List<Float> histo = new ArrayList<>();
 		Converters.Mat_to_vector_float((vertical ? projectVertically() : projectHorizontally().transpose()).getSrc(), histo);
 		float min = concentration * 255;
@@ -889,16 +889,18 @@ public class Img {
 		return new Zones(zones);
 	}
 
-	public Img recursivSplit(Size morph, int level, float concentration, Img imgToDraw, BiConsumer<Img, Zones> visitor) {
+	public Img recursivSplit(Size morph, int level, float concentration, Img imgToDraw, BiConsumer<Img, Zones> visitor, Shard shard) {
 		if (level < 0) {
 			Imgproc.rectangle(imgToDraw.getSrc(), new Point(0, 0), new Point(imgToDraw.width(), imgToDraw.height()), new Scalar(255, 0, 0), -1);
+			shard = new Shard(0, 1, 0, 1);
 			return this;
 		}
 		boolean vertical = src.size().height > src.size().width;
 		Zones zones = split(vertical ? morph.height : morph.width, vertical, concentration).removeIf(zone -> (vertical ? zone.getRect().height : zone.getRect().width) < 4);
 		if (zones.isEmpty()) {
 			Imgproc.rectangle(imgToDraw.getSrc(), new Point(0, 0), new Point(imgToDraw.width(), imgToDraw.height()), new Scalar(0, 0, 255), -1);
-			System.out.println("Empty zone ?");
+			// System.out.println("Empty zone ?");
+			shard = new Shard(0, 1, 0, 1);
 			return this;
 		}
 		if (zones.size() == 1) {
@@ -907,7 +909,8 @@ public class Img {
 				zones = split(!vertical ? morph.height : morph.width, !vertical, concentration).removeIf(zone -> (!vertical ? zone.getRect().height : zone.getRect().width) < 4);
 				if (zones.isEmpty()) {
 					Imgproc.rectangle(imgToDraw.getSrc(), new Point(0, 0), new Point(imgToDraw.width(), imgToDraw.height()), new Scalar(0, 0, 255), -1);
-					System.out.println("Empty zone ?");
+					// System.out.println("Empty zone ?");
+					shard = new Shard(0, 1, 0, 1);
 					return this;
 				}
 				if (zones.size() == 1) {
@@ -915,13 +918,22 @@ public class Img {
 					if (subRect.size().equals(size())) {
 						// System.out.println("" + size() + " " + zones.iterator().next().getRect());
 						// zones.iterator().next().draw(zones.iterator().next().getRoi(imgToDraw), new Scalar(0, 0, 255), -1);
+						shard = new Shard(0, 1, 0, 1);
 						return this;
 					}
 				}
 			}
 		}
-		for (Zone zone : zones)
-			zone.getRoi(this).recursivSplit(morph, level - 1, concentration, zone.getRoi(imgToDraw), visitor);
+		for (Zone zone : zones) {
+
+			double x1 = (double) zone.getRect().x / imgToDraw.width();
+			double x2 = (double) (zone.getRect().x + zone.getRect().width) / imgToDraw.width();
+			double y1 = (double) (zone.getRect().y) / imgToDraw.height();
+			double y2 = (double) (zone.getRect().y + zone.getRect().height) / imgToDraw.height();
+			Shard s = new Shard(x1, x2, y1, y2);
+			shard.addChild(s);
+			zone.getRoi(this).recursivSplit(morph, level - 1, concentration, zone.getRoi(imgToDraw), visitor, s);
+		}
 		visitor.accept(imgToDraw, zones);
 		return this;
 	}
