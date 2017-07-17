@@ -49,7 +49,6 @@ public class ImgClass {
 		if (classModel == null && template.toFile().exists())
 			this.classModel = new Img(Imgcodecs.imread(template.toString()));
 		this.directory = bgrDirectory;
-		computeMeanVariance();
 	}
 
 	public Stream<Img> classImgsStream() {
@@ -103,10 +102,14 @@ public class ImgClass {
 	}
 
 	public Img getMean() {
+		if (mean == null)
+			computeMeanVariance();
 		return mean;
 	}
 
 	public Img getVariance() {
+		if (variance == null)
+			computeMeanVariance();
 		return variance;
 	}
 
