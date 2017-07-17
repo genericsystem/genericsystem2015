@@ -21,7 +21,10 @@ import javax.xml.bind.DatatypeConverter;
  *
  */
 public class ModelTools {
-	
+
+	/**
+	 * Default {@code pattern} for formatting the {@link LocalDateTime} objects.
+	 */
 	public static final String DATE_TIME_FORMAT = "uuuu-MM-dd HH:mm:ss";
 
 	public static void main(String[] args) {
@@ -46,7 +49,7 @@ public class ModelTools {
 	}
 
 	/**
-	 * Generates a hash code from a file.
+	 * Generate a hash code from a file.
 	 * 
 	 * Care must be taken to verify that the file exists before calling this
 	 * method (otherwise an exception is thrown).
@@ -78,7 +81,7 @@ public class ModelTools {
 	}
 
 	/**
-	 * Generates a simple hash from a file.
+	 * Generate a simple hash from a file.
 	 * 
 	 * Care must be taken to verify that the file exists before calling this
 	 * method (otherwise an exception is thrown).
@@ -100,7 +103,7 @@ public class ModelTools {
 	}
 
 	/**
-	 * Returns the current {@link LocalDateTime} formatted as a String with the
+	 * Return the current {@link LocalDateTime} formatted as a String with the
 	 * default pattern.
 	 * 
 	 * @return a {@code String} representing the local date time
@@ -110,28 +113,64 @@ public class ModelTools {
 	}
 
 	/**
-	 * Returns the current {@link LocalDateTime} formatted as a String with a
+	 * Return the current {@link LocalDateTime} formatted as a String with a
 	 * custom pattern.
 	 * 
+	 * @param pattern
+	 *            - the pattern to be used for conversion
 	 * @return a {@code String} representing the local date time
 	 */
 	public static String getCurrentDate(String pattern) {
 		LocalDateTime ldt = LocalDateTime.now();
 		return ldt.format(DateTimeFormatter.ofPattern(pattern));
 	}
-	
+
+	/**
+	 * Convert a {@code String} into a {@link LocalDateTime} using default
+	 * pattern.
+	 * 
+	 * @param date
+	 *            the date in a {@code String} format
+	 * @return the corresponding date object
+	 */
 	public static LocalDateTime getCurrentDateFromString(String date) {
 		return LocalDateTime.parse(date, DateTimeFormatter.ofPattern(DATE_TIME_FORMAT));
 	}
-	
+
+	/**
+	 * Convert a {@code String} into a {@link LocalDateTime} using a custom
+	 * pattern.
+	 * 
+	 * @param date
+	 *            - the date in a {@code String} format
+	 * @param pattern
+	 *            - the pattern to be used for conversion
+	 * @return the corresponding date object
+	 */
 	public static LocalDateTime getCurrentDateFromString(String date, String pattern) {
 		return LocalDateTime.parse(date, DateTimeFormatter.ofPattern(pattern));
 	}
-	
+
+	/**
+	 * Format a {@link LocalDateTime} using the default pattern.
+	 * 
+	 * @param date
+	 *            - the date to convert
+	 * @return a {@code String} representation of the date
+	 */
 	public static String formatDate(LocalDateTime date) {
 		return formatDate(date, DATE_TIME_FORMAT);
 	}
 
+	/**
+	 * Format a {@link LocalDateTime} using a custom pattern.
+	 * 
+	 * @param date
+	 *            - the date to convert
+	 * @param pattern
+	 *            - the pattern to be used for conversion
+	 * @return a {@code String} representation of the date
+	 */
 	public static String formatDate(LocalDateTime date, String pattern) {
 		return date.format(DateTimeFormatter.ofPattern(pattern));
 	}
