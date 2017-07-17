@@ -1,16 +1,15 @@
 package org.genericsystem.cv.watch;
 
-import java.util.Arrays;
-
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
 import org.genericsystem.cv.comparator.ComputeBestTextPerZone;
 import org.genericsystem.cv.model.Doc.DocInstance;
+import org.genericsystem.cv.model.Doc.RefreshTimestamp;
+import org.genericsystem.cv.model.Doc.RefreshTimestamp.RefreshTimestampInstance;
+import org.genericsystem.cv.model.ModelTools;
 import org.genericsystem.cv.model.ZoneText;
 import org.genericsystem.cv.model.ZoneText.ZoneTextInstance;
-import org.genericsystem.cv.model.ZoneText.ZoneTimestamp;
-import org.genericsystem.cv.model.ZoneText.ZoneTimestamp.ZoneTimestampInstance;
 import org.genericsystem.cv.watch.ShowDocumentZones.TextDiv;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
@@ -40,6 +39,7 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlImg;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
 import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
 
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
@@ -73,19 +73,21 @@ public class ShowDocumentZones extends ModalEditor {
 	public static class RefreshButton extends HtmlButton {
 		// Run the best text selection algorithm
 	}
-	
+
 	public static class REFRESH_BEST_TEXT implements ContextAction {
 		@Override
 		public void accept(Context context, Tag tag) {
 			System.out.println("Refreshing best text...");
-			Root engine = context.getGeneric().getRoot();
+			Root root = context.getGeneric().getRoot();
 			DocInstance docInstance = (DocInstance) context.getGeneric();
+			RefreshTimestamp refreshTimestamp = root.find(RefreshTimestamp.class);
 			String docType = docInstance.getDocClass().getValue().toString();
-			ComputeBestTextPerZone.computeOneFile(engine, docInstance, docType);
+			ComputeBestTextPerZone.computeOneFile(root, docInstance, docType);
+			refreshTimestamp.setRefreshTimestamp(ModelTools.getCurrentDate(), docInstance);
 			System.out.println("Done!");
 		}
 	}
-	
+
 	@SetText("Close")
 	@BindAction(value = { CANCEL.class, RESET_SELECTION.class })
 	public static class CloseButton extends HtmlButton {
@@ -132,7 +134,7 @@ public class ShowDocumentZones extends ModalEditor {
 		// Define the inputText
 		// TODO: need to escape special HTML characters
 	}
-	
+
 	@BindText(LAST_UPDATE_LABEL.class)
 	@Style(name = "margin", value = "0.5em")
 	@Style(name = "flex", value = "0 0 auto")
@@ -141,7 +143,6 @@ public class ShowDocumentZones extends ModalEditor {
 	public static class LastUpdate extends FlexDiv {
 		// Print the timestamp of the last refresh
 	}
-
 
 	public static class ZONE_SELECTOR implements ObservableListExtractor {
 		@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -163,25 +164,25 @@ public class ShowDocumentZones extends ModalEditor {
 			return new SimpleStringProperty("Zone " + ((ZoneTextInstance) context.getGeneric()).getZone());
 		}
 	}
-	
+
 	public static class LAST_UPDATE_LABEL implements TextBinding {
+
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		@Override
 		public ObservableValue<String> apply(Context context, Tag tag) {
-			// TODO use an ObservableValue for displaying the last update in real time
-			Generic currentDoc = context.getGeneric();
+			// TODO avoid the use of an ObservableList in favor of an ObservableValue?
+			DocInstance currentDoc = (DocInstance) context.getGeneric();
 			Root root = currentDoc.getRoot();
-			ZoneTimestamp zoneTimestamp = root.find(ZoneTimestamp.class);
-			ZoneTextInstance zoneTextInstance = (ZoneTextInstance) currentDoc.getHolders(root.find(ZoneText.class))
-					.filter(zt -> "best".equals(((ZoneTextInstance) zt).getImgFilter().getValue()))
-					.first();
-			ZoneTimestampInstance zoneTimestampInstance = null;
-			if (null != zoneTextInstance)
-				zoneTimestampInstance = zoneTimestamp.getZoneTimestamp(zoneTextInstance);
-			
-			if (null == zoneTimestampInstance)
-				return new SimpleStringProperty("Last update: none");
-			else
-				return new SimpleStringProperty("Last update: " + zoneTimestampInstance.getValue());
+			RefreshTimestamp refreshTimestamp = root.find(RefreshTimestamp.class);
+			ObservableList<RefreshTimestampInstance> snap = (ObservableList) currentDoc.getHolders(refreshTimestamp).toObservableList();
+
+			return Bindings.createStringBinding(() -> {
+				RefreshTimestampInstance refreshTimestampInstance =  refreshTimestamp.getRefreshTimestamp(currentDoc);
+				if (null == refreshTimestampInstance)
+					return "Last update: none";
+				else
+					return "Last update: " + refreshTimestampInstance.getValue().toString();
+			}, snap);
 		}
 	}
 

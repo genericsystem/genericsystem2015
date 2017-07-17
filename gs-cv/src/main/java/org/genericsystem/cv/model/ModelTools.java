@@ -21,6 +21,8 @@ import javax.xml.bind.DatatypeConverter;
  *
  */
 public class ModelTools {
+	
+	public static final String DATE_TIME_FORMAT = "uuuu-MM-dd HH:mm:ss";
 
 	public static void main(String[] args) {
 		Path path = Paths.get(System.getProperty("user.home"), "Downloads", "photosafpa.zip");
@@ -104,7 +106,7 @@ public class ModelTools {
 	 * @return a {@code String} representing the local date time
 	 */
 	public static String getCurrentDate() {
-		return getCurrentDate("uuuu-MM-dd HH:mm:ss");
+		return getCurrentDate(DATE_TIME_FORMAT);
 	}
 
 	/**
@@ -116,5 +118,21 @@ public class ModelTools {
 	public static String getCurrentDate(String pattern) {
 		LocalDateTime ldt = LocalDateTime.now();
 		return ldt.format(DateTimeFormatter.ofPattern(pattern));
+	}
+	
+	public static LocalDateTime getCurrentDateFromString(String date) {
+		return LocalDateTime.parse(date, DateTimeFormatter.ofPattern(DATE_TIME_FORMAT));
+	}
+	
+	public static LocalDateTime getCurrentDateFromString(String date, String pattern) {
+		return LocalDateTime.parse(date, DateTimeFormatter.ofPattern(pattern));
+	}
+	
+	public static String formatDate(LocalDateTime date) {
+		return formatDate(date, DATE_TIME_FORMAT);
+	}
+
+	public static String formatDate(LocalDateTime date, String pattern) {
+		return date.format(DateTimeFormatter.ofPattern(pattern));
 	}
 }

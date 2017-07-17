@@ -2,13 +2,11 @@ package org.genericsystem.cv.comparator;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -21,13 +19,15 @@ import org.genericsystem.cv.Zones;
 import org.genericsystem.cv.model.Doc;
 import org.genericsystem.cv.model.Doc.DocFilename;
 import org.genericsystem.cv.model.Doc.DocInstance;
+import org.genericsystem.cv.model.Doc.DocTimestamp;
+import org.genericsystem.cv.model.Doc.RefreshTimestamp;
 import org.genericsystem.cv.model.DocClass;
 import org.genericsystem.cv.model.DocClass.DocClassInstance;
+import org.genericsystem.cv.model.ImgFilter;
 import org.genericsystem.cv.model.ImgFilter.ImgFilterInstance;
+import org.genericsystem.cv.model.LevDistance;
 import org.genericsystem.cv.model.MeanLevenshtein;
 import org.genericsystem.cv.model.ModelTools;
-import org.genericsystem.cv.model.ImgFilter;
-import org.genericsystem.cv.model.LevDistance;
 import org.genericsystem.cv.model.Score;
 import org.genericsystem.cv.model.Score.ScoreInstance;
 import org.genericsystem.cv.model.ZoneGeneric;
@@ -66,8 +66,9 @@ public class FillModelWithData {
 	private static final String docType = "id-fr-front";
 
 	public static void main(String[] mainArgs) {
-		final Engine engine = new Engine(gsPath, Doc.class, DocFilename.class, DocClass.class, ZoneGeneric.class,
-				ZoneText.class, ZoneTimestamp.class, ImgFilter.class, LevDistance.class, MeanLevenshtein.class, Score.class);
+		final Engine engine = new Engine(gsPath, Doc.class, RefreshTimestamp.class, DocTimestamp.class, DocFilename.class, DocClass.class,
+			ZoneGeneric.class, ZoneText.class, ZoneTimestamp.class, ImgFilter.class, LevDistance.class,
+			MeanLevenshtein.class, Score.class);
 		engine.newCache().start();
 		compute(engine);
 		// cleanModel(engine);
@@ -83,7 +84,7 @@ public class FillModelWithData {
 	 *         Img.
 	 */
 	public static Map<String, Function<Img, Img>> getFiltersMap() {
-		final Map<String, Function<Img, Img>> map = new HashMap<>();
+		final Map<String, Function<Img, Img>> map = new ConcurrentHashMap<>();
 		map.put("original", i -> i);
 		map.put("reality", i -> i);
 //		map.put("bernsen", Img::bernsen);
@@ -293,7 +294,7 @@ public class FillModelWithData {
 
 		// TODO: refactor the code (duplicates)
 		// Save the filternames if necessary
-		Map<String, Function<Img, Img>> updatedImgFilters = new HashMap<>();
+		Map<String, Function<Img, Img>> updatedImgFilters = new ConcurrentHashMap<>();
 		imgFilters.forEach(entry -> {
 			ImgFilterInstance filter = imgFilter.getImgFilter(entry.getKey());
 			if (filter == null) {
@@ -334,7 +335,7 @@ public class FillModelWithData {
 
 		// Create a map of Imgs
 		Img originalImg = new Img(Imgcodecs.imread(file.getPath()));
-		Map<String, Img> imgs = new HashMap<>();
+		Map<String, Img> imgs = new ConcurrentHashMap<>();
 		updatedImgFilters.entrySet().forEach(entry -> {
 			log.info("Applying algorithm {}...", entry.getKey());
 			Img img = null;
@@ -388,7 +389,7 @@ public class FillModelWithData {
 	}
 
 	private static Map<String, Function<Img, Img>> filterOptimizationMap() {
-		final Map<String, Function<Img, Img>> imgFilters = new HashMap<>();
+		final Map<String, Function<Img, Img>> imgFilters = new ConcurrentHashMap<>();
 		// Niblack
 		// List<Integer> blockSizes = Arrays.asList(new Integer[] { 7, 9, 11,
 		// 15, 17, 21, 27, 37 });
