@@ -21,12 +21,12 @@ public class Booster {
 
 	public static void main(String[] args) {
 
-		List<Double> labels = Arrays.asList(1.0, 1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0);
+		List<Integer> labels = Arrays.asList(1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
 		List<double[]> trainingData = Arrays.asList(new double[] { 501, 10 }, new double[] { 508, 15 }, new double[] { 255, 10 }, new double[] { 501, 255 }, new double[] { 10, 501 }, new double[] { 10, 501 }, new double[] { 11, 501 },
 				new double[] { 9, 501 }, new double[] { 10, 502 }, new double[] { 10, 511 }, new double[] { 10, 495 });
 
 		// Mat labelsMat = Converters.vector_float_to_Mat(labels);
-		Mat labelsMat = new Mat(11, 1, CvType.CV_32S);
+		Mat labelsMat = new Mat();
 		for (int i = 0; i < 11; i++)
 			labelsMat.push_back(new Mat(new Size(1, 1), CvType.CV_32S, new Scalar(labels.get(i))));
 
@@ -40,14 +40,17 @@ public class Booster {
 		svm.setType(SVM.C_SVC);
 		svm.setTermCriteria(new TermCriteria(TermCriteria.MAX_ITER, 100, 1e-6));
 		svm.setKernel(SVM.LINEAR);
+		assert labelsMat.rows() == trainingData.size() : labelsMat.rows() + " / " + trainingData.size();
 		svm.train(trainingDataMat, Ml.ROW_SAMPLE, labelsMat);
 
 		Boost boost = Boost.create();
 		boost.train(trainingDataMat, Ml.ROW_SAMPLE, labelsMat);
 
-		// Test the classifiers
-		Mat testSample1 = Converters.vector_double_to_Mat(Arrays.asList(251.0, 5.0));
-		Mat testSample2 = Converters.vector_double_to_Mat(Arrays.asList(502.0, 11.0));
+		Mat testSample1 = Converters.vector_double_to_Mat(Arrays.asList(251.0, 5.0)).reshape(1, 1);
+		testSample1.convertTo(testSample1, CvType.CV_32FC1);
+
+		Mat testSample2 = Converters.vector_double_to_Mat(Arrays.asList(251.0, 5.0)).reshape(1, 1);
+		testSample2.convertTo(testSample2, CvType.CV_32FC1);
 
 		float svmResponse1 = svm.predict(testSample1);
 		float svmResponse2 = svm.predict(testSample2);
