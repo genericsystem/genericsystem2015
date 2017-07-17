@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.opencv.core.MatOfPoint;
@@ -135,4 +136,12 @@ public class Zones implements Iterable<Zone> {
 		return zones.size();
 	}
 
+	public Zones removeIf(Predicate<Zone> filter) {
+		zones.removeIf(filter);
+		return this;
+	}
+
+	public boolean isEmpty() {
+		return zones.isEmpty();
+	}
 }
