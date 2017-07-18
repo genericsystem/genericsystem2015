@@ -36,6 +36,9 @@ public class TextDetectors {
 
 			vidpanel.setIcon(result.getImageIcon());
 			vidpanel.repaint();
+
+			result.close();
+			frameImg.close();
 		}
 
 	}

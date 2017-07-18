@@ -53,6 +53,7 @@ public class ImgClass2 {
 		Mat mean = new Mat(img0.size(), type, Scalar.all(0));
 		Mat m2 = new Mat(img0.size(), type, Scalar.all(0));
 		Mat mask = Mat.ones(img0.size(), CvType.CV_8U);
+		img0.close();
 		int count = 1;
 		Iterator<Img> it = classImgsStream().iterator();
 		while (it.hasNext()) {
@@ -66,11 +67,18 @@ public class ImgClass2 {
 			Mat product = delta.mul(delta2);
 			Core.add(m2, product, m2);
 			count++;
+			img.release();
+			delta.release();
+			delta2.release();
+			product.release();
 		}
 		Mat variance = new Mat(m2.size(), type);
 		Core.multiply(m2, new Scalar(1d / count, 1d / count, 1d / count), variance);
 		variance.convertTo(variance, CvType.CV_8U);
 		mean.convertTo(mean, CvType.CV_8U);
+
+		m2.release();
+		mask.release();
 		this.observableMean.setValue(new Img(mean, false));
 		this.observableVariance.setValue(new Img(variance, false));
 	}

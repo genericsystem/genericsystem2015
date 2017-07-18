@@ -45,7 +45,8 @@ import org.slf4j.LoggerFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
-public class Img {
+
+public class Img implements AutoCloseable {
 
 	private static Logger log = LoggerFactory.getLogger(Img.class);
 
@@ -195,6 +196,9 @@ public class Img {
 		else
 			result = new Img(src);
 		// TODO: Warning if no contour found.
+		blurred.close();
+		gray.close();
+		gray_.close();
 		return result;
 	}
 
@@ -403,7 +407,10 @@ public class Img {
 			Mat roi = new Mat(result, rectant);
 			roi.setTo(new Scalar(255));
 		}
-		return new Img(result, false).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(17, 3));
+		Img img = new Img(result, false);
+		Img result_ = img.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(17, 3));
+		img.close();
+		return result_;
 	}
 
 	public Img grad() {
@@ -452,6 +459,8 @@ public class Img {
 		Imgproc.equalizeHist(channels.get(1), channels.get(1));
 		Imgproc.equalizeHist(channels.get(2), channels.get(2));
 		Core.merge(channels, result);
+		for (Mat channel : channels)
+			channel.release();
 		return new Img(result, false);
 	}
 
@@ -470,6 +479,8 @@ public class Img {
 		clahe.apply(channels.get(1), channels.get(1));
 		clahe.apply(channels.get(2), channels.get(2));
 		Core.merge(channels, result);
+		for (Mat channel : channels)
+			channel.release();
 		return new Img(result, false);
 	}
 
@@ -512,6 +523,7 @@ public class Img {
 		clahe.apply(channelL, channelL);
 		Core.insertChannel(channelL, result, 0);
 		Imgproc.cvtColor(result, result, Imgproc.COLOR_Lab2BGR);
+		channelL.release();
 		return new Img(result, false);
 	}
 
@@ -959,4 +971,8 @@ public class Img {
 		return Tools.mat2jfxImage(src);
 	}
 
+	@Override
+	public void close() {
+		src.release();
+	}
 }

@@ -16,7 +16,7 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
-public class ImgClass {
+public class ImgClass implements AutoCloseable {
 
 	private final static String TEMPLATE_NAME = "template/template.png";
 	private Img classModel;
@@ -61,6 +61,7 @@ public class ImgClass {
 			Mat mean = new Mat(img0.size(), type, Scalar.all(0));
 			Mat m2 = new Mat(img0.size(), type, Scalar.all(0));
 			Mat mask = Mat.ones(img0.size(), CvType.CV_8U);
+			img0.close();
 			int count = 1;
 
 			Iterator<Img> it = classImgsStream().iterator();
@@ -75,12 +76,17 @@ public class ImgClass {
 				Mat product = delta.mul(delta2);
 				Core.add(m2, product, m2);
 				count++;
+				img.release();
+				delta.release();
+				delta2.release();
+				product.release();
 			}
 			Mat variance = new Mat(m2.size(), type);
 			Core.multiply(m2, new Scalar(1d / count, 1d / count, 1d / count), variance);
 			variance.convertTo(variance, CvType.CV_8U);
 			mean.convertTo(mean, CvType.CV_8U);
-
+			m2.release();
+			mask.release();
 			this.mean = new Img(mean, false);
 			this.variance = new Img(variance, false);
 		}
@@ -117,5 +123,15 @@ public class ImgClass {
 
 	public Img getClosedVarianceZones(Size morphClose) {
 		return variance.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, morphClose);
+	}
+
+	@Override
+	public void close() {
+		if (classModel != null)
+			classModel.close();
+		if (mean != null)
+			mean.close();
+		if (variance != null)
+			variance.close();
 	}
 }
