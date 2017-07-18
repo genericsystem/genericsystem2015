@@ -1,6 +1,7 @@
 package org.genericsystem.cv;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
@@ -20,30 +21,30 @@ public class Mlp {
 	int input;
 	int output;
 	ArrayList<float[]> train;
-	ArrayList<Float> label;
+	ArrayList<float[]> label;
 	MatOfFloat result;
 
 	public static void main(String[] args) {
-		Mlp mlp = new Mlp(2);
-		mlp.addData(new float[] { 0, 0 }, 1);
-		mlp.addData(new float[] { 1, 1 }, 1);
-		mlp.addData(new float[] { 0, 1 }, -1);
-		mlp.addData(new float[] { 1, 0 }, -1);
+		Mlp mlp = new Mlp(2, 2);
+		mlp.addData(new float[] { 0, 0 }, new float[] { 1, 0 });
+		mlp.addData(new float[] { 1, 1 }, new float[] { 0, 1 });
+		mlp.addData(new float[] { 0, 1 }, new float[] { 1, 0 });
+		mlp.addData(new float[] { 1, 0 }, new float[] { 1, 0 });
 		// System.out.println(+mlp.getCount() + " " + mlp.label.size());
 		mlp.train();
 		mlp.predict(new float[] { 0, 0 });
-		System.out.println("0 xor 0 = " + mlp.getResult()[0]);
+		System.out.println("0 xor 0, 0 or 0 = " + Arrays.toString(mlp.getResult()));
 		mlp.predict(new float[] { 1, 1 });
-		System.out.println("1 xor 1 = " + mlp.getResult()[0]);
+		System.out.println("1 xor 1, 1 or 1 = " + Arrays.toString(mlp.getResult()));
 		mlp.predict(new float[] { 0, 1 });
-		System.out.println("0 xor 1 = " + mlp.getResult()[0]);
+		System.out.println("0 xor 1, 0 or 1 = " + Arrays.toString(mlp.getResult()));
 		mlp.predict(new float[] { 1, 0 });
-		System.out.println("1 xor 0 = " + mlp.getResult()[0]);
+		System.out.println("1 xor 0, 1 or 0 = " + Arrays.toString(mlp.getResult()));
 	}
 
-	public Mlp(int i) {
+	public Mlp(int i, int o) {
 		input = i;
-		output = 1;
+		output = o;
 		mlp = ANN_MLP.create();
 		MatOfInt m1 = new MatOfInt(input, 8, output);
 		mlp.setLayerSizes(m1);
@@ -55,7 +56,7 @@ public class Mlp {
 		label = new ArrayList<>();
 	}
 
-	void addData(float[] t, float l) {
+	void addData(float[] t, float[] l) {
 		if (t.length != input)
 			return;
 		if (train.size() >= MAX_DATA)
@@ -75,8 +76,10 @@ public class Mlp {
 				tr[i][j] = train.get(i)[j];
 			}
 		}
-		MatOfFloat response = new MatOfFloat();
-		response.fromList(label);
+		Mat response = new Mat(label.size(), label.get(0).length, CvType.CV_32FC1);
+		for (int i = 0; i < label.size(); i++)
+			for (int j = 0; j < label.get(0).length; j++)
+				response.put(i, j, label.get(i)[j]);
 		float[] trf = flatten(tr);
 		Mat trainData = new Mat(train.size(), input, CvType.CV_32FC1);
 		trainData.put(0, 0, trf);
