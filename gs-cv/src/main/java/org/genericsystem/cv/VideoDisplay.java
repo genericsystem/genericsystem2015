@@ -6,7 +6,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
-import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.videoio.VideoCapture;
 
 import javafx.scene.image.ImageView;
@@ -23,7 +22,7 @@ public class VideoDisplay extends AbstractApp {
 	}
 
 	private final static String refPath = "classes/id-fr-front/image4-0.png";
-	private static Img ref = new Img(Imgcodecs.imread(refPath));
+	private static Img ref = new Img(refPath);
 	private final VideoCapture capture = new VideoCapture(0);
 	private ScheduledExecutorService timer = Executors.newSingleThreadScheduledExecutor();
 

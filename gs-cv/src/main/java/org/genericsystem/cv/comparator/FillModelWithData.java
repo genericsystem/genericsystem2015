@@ -334,7 +334,7 @@ public class FillModelWithData {
 		}
 
 		// Create a map of Imgs
-		Img originalImg = new Img(Imgcodecs.imread(file.getPath()));
+		Img originalImg = new Img(file.getPath());
 		Map<String, Img> imgs = new ConcurrentHashMap<>();
 		updatedImgFilters.entrySet().forEach(entry -> {
 			log.info("Applying algorithm {}...", entry.getKey());
@@ -350,7 +350,7 @@ public class FillModelWithData {
 		});
 
 		// Draw the image's zones + numbers
-		Img imgCopy = new Img(Imgcodecs.imread(file.getPath()));
+		Img imgCopy = new Img(file.getPath());
 		zones.draw(imgCopy, new Scalar(0, 255, 0), 3);
 		zones.writeNum(imgCopy, new Scalar(0, 0, 255), 3);
 		// Copy the images to the resources folder

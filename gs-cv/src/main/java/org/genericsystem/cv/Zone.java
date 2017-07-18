@@ -68,7 +68,7 @@ public class Zone {
 	}
 
 	public Img getImg(Img img) {
-		return new Img(new Mat(img.getSrc(), getRect()));
+		return new Img(new Mat(img.getSrc(), getRect()), false);
 	}
 
 	public void draw(Mat roi, Scalar color, int thickness) {

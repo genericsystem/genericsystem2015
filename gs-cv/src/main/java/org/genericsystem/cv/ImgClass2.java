@@ -71,8 +71,8 @@ public class ImgClass2 {
 		Core.multiply(m2, new Scalar(1d / count, 1d / count, 1d / count), variance);
 		variance.convertTo(variance, CvType.CV_8U);
 		mean.convertTo(mean, CvType.CV_8U);
-		this.observableMean.setValue(new Img(mean));
-		this.observableVariance.setValue(new Img(variance));
+		this.observableMean.setValue(new Img(mean, false));
+		this.observableVariance.setValue(new Img(variance, false));
 		System.gc();
 		System.runFinalization();
 	}

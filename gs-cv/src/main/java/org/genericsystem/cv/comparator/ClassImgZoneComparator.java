@@ -24,7 +24,6 @@ import org.genericsystem.cv.watch.SetRealValues;
 import org.genericsystem.kernel.Engine;
 import org.opencv.core.Core;
 import org.opencv.core.Size;
-import org.opencv.imgcodecs.Imgcodecs;
 
 /**
  * Get the OCR text for all specified documents using pre-treated images.
@@ -82,40 +81,40 @@ public class ClassImgZoneComparator {
 
 		// Compute the scores for each image in the "/ref" sub-directory
 		Arrays.asList(new File(imgClassDirectory + "/ref/").listFiles()).stream()
-				.filter(img -> img.getName().endsWith(".png")).forEach(file -> {
-					System.out.println("File : " + file.getName());
-					// Create a Map containing both the img and the name of the
-					// filter
-					Map<Img, String> imgFiltersMap = new HashMap<>();
-					imgFiltersMap.put(new Img(Imgcodecs.imread(file.getPath())), "original");
-					Arrays.asList(
-							new File(imgClassDirectory + "/mask/" + file.getName().replace(".png", "")).listFiles())
-							.stream().filter(img -> img.getName().endsWith(".png")).forEach(img -> {
-								imgFiltersMap.put(new Img(Imgcodecs.imread(img.getPath())),
-										img.getName().replace(file.getName().replace(".png", ""), "").substring(1)
-												.replace(".png", ""));
-							});
+		.filter(img -> img.getName().endsWith(".png")).forEach(file -> {
+			System.out.println("File : " + file.getName());
+			// Create a Map containing both the img and the name of the
+			// filter
+			Map<Img, String> imgFiltersMap = new HashMap<>();
+			imgFiltersMap.put(new Img(file.getPath()), "original");
+			Arrays.asList(
+					new File(imgClassDirectory + "/mask/" + file.getName().replace(".png", "")).listFiles())
+			.stream().filter(img -> img.getName().endsWith(".png")).forEach(img -> {
+				imgFiltersMap.put(new Img(img.getPath()),
+						img.getName().replace(file.getName().replace(".png", ""), "").substring(1)
+						.replace(".png", ""));
+			});
 
-					for (Zone zone : zones2) {
-						System.out.println("Zone n°" + zone.getNum());
+			for (Zone zone : zones2) {
+				System.out.println("Zone n°" + zone.getNum());
 
-						// Get the document instance
-						DocInstance docInstance = (DocInstance) docClassInstance.getHolder(doc, file.getName());
-						ZoneInstance zoneInstance = docClassInstance.getZone(zone.getNum());
-						ImgFilterInstance imgFilterInstance = (ImgFilterInstance) imgFilter.getInstance("reality");
-						// Get the real text from GS
-						ZoneTextInstance zoneTextInstance = (ZoneTextInstance) zoneText.getInstance(docInstance,
-								zoneInstance, imgFilterInstance);
-						String realText = zoneTextInstance.getValue().toString();
-						System.out.println("> real text : " + realText);
+				// Get the document instance
+				DocInstance docInstance = (DocInstance) docClassInstance.getHolder(doc, file.getName());
+				ZoneInstance zoneInstance = docClassInstance.getZone(zone.getNum());
+				ImgFilterInstance imgFilterInstance = (ImgFilterInstance) imgFilter.getInstance("reality");
+				// Get the real text from GS
+				ZoneTextInstance zoneTextInstance = (ZoneTextInstance) zoneText.getInstance(docInstance,
+						zoneInstance, imgFilterInstance);
+				String realText = zoneTextInstance.getValue().toString();
+				System.out.println("> real text : " + realText);
 
-						// ZoneScorerMap scorer =
-						// zone.newUnsupervisedScorerMap(file.getName(),
-						// map.entrySet().stream());
-						ZoneScorerMap scorer = zone.newSupervisedScorerMap(file.getName(), realText,
-								imgFiltersMap.entrySet().stream());
-					}
-				});
+				// ZoneScorerMap scorer =
+				// zone.newUnsupervisedScorerMap(file.getName(),
+				// map.entrySet().stream());
+				ZoneScorerMap scorer = zone.newSupervisedScorerMap(file.getName(), realText,
+						imgFiltersMap.entrySet().stream());
+			}
+		});
 
 		// Call the garbage collector to free the resources
 		System.gc();

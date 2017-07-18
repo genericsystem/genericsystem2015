@@ -14,7 +14,6 @@ import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
-import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
 public class ImgClass {
@@ -47,7 +46,7 @@ public class ImgClass {
 		if (oldTemplate.exists())
 			oldTemplate.renameTo(template.toFile());
 		if (classModel == null && template.toFile().exists())
-			this.classModel = new Img(Imgcodecs.imread(template.toString()));
+			this.classModel = new Img(template.toString());
 		this.directory = bgrDirectory;
 	}
 
@@ -85,8 +84,8 @@ public class ImgClass {
 			variance.convertTo(variance, CvType.CV_8U);
 			mean.convertTo(mean, CvType.CV_8U);
 
-			this.mean = new Img(mean);
-			this.variance = new Img(variance);
+			this.mean = new Img(mean, false);
+			this.variance = new Img(variance, false);
 			System.gc();
 			System.runFinalization();
 		}
