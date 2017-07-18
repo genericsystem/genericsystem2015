@@ -6,7 +6,6 @@ import java.util.stream.Stream;
 import org.opencv.core.Core;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
-import org.opencv.imgcodecs.Imgcodecs;
 
 import javafx.scene.layout.GridPane;
 
@@ -64,7 +63,7 @@ public class ClassImgFieldsDetector extends AbstractApp {
 				System.out.println("File : " + file.getName());
 				if (i++ > 3)
 					continue;
-				Img img = new Img(Imgcodecs.imread(file.getPath()));
+				Img img = new Img(file.getPath());
 				for (Zone zone : zones) {
 					System.out.println("Zone n°" + zone.getNum());
 					zone.draw(img, new Scalar(0, 255, 0), -1);
