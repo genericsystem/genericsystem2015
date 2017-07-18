@@ -154,7 +154,11 @@ public class Img implements AutoCloseable {
 
 	public Img cropAndDeskew() {
 		Img blurred = medianBlur(9);
-		Img gray = blurred.bgr2Gray();
+		Img gray;
+		if (src.channels() == 1)
+			gray = blurred;
+		else
+			gray = blurred.bgr2Gray();
 		Img gray_;
 
 		List<MatOfPoint> contours = new ArrayList<>();
