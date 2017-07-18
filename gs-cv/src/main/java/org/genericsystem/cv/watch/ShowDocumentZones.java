@@ -1,6 +1,5 @@
 package org.genericsystem.cv.watch;
 
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
@@ -41,7 +40,6 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
 import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
 
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.Property;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -101,8 +99,7 @@ public class ShowDocumentZones extends ModalEditor {
 	public static class Image extends HtmlImg {
 		@Override
 		public void init() {
-			bindAttribute("src", "imgadr",
-					context -> new SimpleStringProperty((String) context.getGeneric().getValue()));
+			bindAttribute("src", "imgadr", context -> new SimpleStringProperty((String) context.getGeneric().getValue()));
 		}
 	}
 
@@ -145,7 +142,7 @@ public class ShowDocumentZones extends ModalEditor {
 
 	public static class ZONE_SELECTOR implements ObservableListExtractor {
 		// TODO: need to escape special HTML characters
-		
+
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		@Override
 		public ObservableList<Generic> apply(Generic[] generics) {
@@ -153,9 +150,7 @@ public class ShowDocumentZones extends ModalEditor {
 			Root root = currentDoc.getRoot();
 			System.out.println("Document: " + currentDoc.info());
 			Snapshot<ZoneTextInstance> zoneTextInstances = (Snapshot) currentDoc.getHolders(root.find(ZoneText.class));
-			return (ObservableList) zoneTextInstances.toObservableList()
-					.filtered(zt -> "best".equals(((ZoneTextInstance) zt).getImgFilter().getValue()))
-					.sorted((g1, g2) -> Integer.compare(g1.getZoneNum(), g2.getZoneNum()));
+			return (ObservableList) zoneTextInstances.toObservableList().filtered(zt -> "best".equals(zt.getImgFilter().getValue())).sorted((g1, g2) -> Integer.compare(g1.getZoneNum(), g2.getZoneNum()));
 		}
 	}
 
@@ -178,7 +173,7 @@ public class ShowDocumentZones extends ModalEditor {
 			ObservableList<RefreshTimestampInstance> ol = (ObservableList) currentDoc.getHolders(refreshTimestamp).toObservableList();
 
 			return Bindings.createStringBinding(() -> {
-				RefreshTimestampInstance refreshTimestampInstance =  refreshTimestamp.getRefreshTimestamp(currentDoc);
+				RefreshTimestampInstance refreshTimestampInstance = refreshTimestamp.getRefreshTimestamp(currentDoc);
 				if (null == refreshTimestampInstance)
 					return "Last update: none";
 				else
