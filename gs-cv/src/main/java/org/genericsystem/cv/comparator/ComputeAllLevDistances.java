@@ -56,7 +56,7 @@ public class ComputeAllLevDistances {
 
 		Snapshot<DocInstance> docInstances = (Snapshot) currentDocClass.getHolders(engine.find(Doc.class));
 		Snapshot<ZoneInstance> zoneInstances = (Snapshot) currentDocClass.getHolders(engine.find(ZoneGeneric.class));
-		
+
 		List<ImgFilterInstance> imgFilterInstances = (List) imgFilter.getInstances()
 				.filter(f -> !"reality".equals(f.getValue())).toList();
 
@@ -88,9 +88,6 @@ public class ComputeAllLevDistances {
 						levDistance.setLevDistance(dist, zoneText1, zoneText2);
 						levDistance.setLevDistance(dist, zoneText2, zoneText1);
 					}
-					// Free some resources
-					System.gc();
-					System.runFinalization();
 				}
 				engine.getCurrentCache().flush();
 			});

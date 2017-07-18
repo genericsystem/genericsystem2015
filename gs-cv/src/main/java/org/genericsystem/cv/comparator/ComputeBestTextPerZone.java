@@ -32,8 +32,7 @@ public class ComputeBestTextPerZone {
 	private static Logger log = LoggerFactory.getLogger(ComputeTrainedScores.class);
 
 	public static void main(String[] mainArgs) {
-		final Engine engine = new Engine(gsPath, Doc.class, ImgFilter.class, ZoneGeneric.class, ZoneText.class,
-				ZoneTimestamp.class, Score.class, MeanLevenshtein.class);
+		final Engine engine = new Engine(gsPath, Doc.class, ImgFilter.class, ZoneGeneric.class, ZoneText.class, ZoneTimestamp.class, Score.class, MeanLevenshtein.class);
 		engine.newCache().start();
 		compute(engine);
 		engine.close();
@@ -55,16 +54,14 @@ public class ComputeBestTextPerZone {
 	}
 
 	public static void computeOneFile(String filename, String docType) {
-		final Engine engine = new Engine(gsPath, Doc.class, ImgFilter.class, ZoneGeneric.class, ZoneText.class,
-				Score.class, MeanLevenshtein.class);
+		final Engine engine = new Engine(gsPath, Doc.class, ImgFilter.class, ZoneGeneric.class, ZoneText.class, Score.class, MeanLevenshtein.class);
 		engine.newCache().start();
 		computeOneFile(engine, filename, docType);
 		engine.close();
 	}
 
 	public static void computeOneFile(String filename) {
-		final Engine engine = new Engine(gsPath, Doc.class, ImgFilter.class, ZoneGeneric.class, ZoneText.class,
-				Score.class, MeanLevenshtein.class);
+		final Engine engine = new Engine(gsPath, Doc.class, ImgFilter.class, ZoneGeneric.class, ZoneText.class, Score.class, MeanLevenshtein.class);
 		final String docType = "id-fr-front";
 		engine.newCache().start();
 		computeOneFile(engine, filename, docType);
@@ -87,8 +84,7 @@ public class ComputeBestTextPerZone {
 		Score score = engine.find(Score.class);
 
 		List<ZoneInstance> zoneInstances = (List) currentDocClass.getHolders(engine.find(ZoneGeneric.class)).toList();
-		List<ImgFilterInstance> imgFilterInstances = (List) imgFilter.getInstances()
-				.filter(f -> !"reality".equals(f.getValue()) && !"best".equals(f.getValue())).toList();
+		List<ImgFilterInstance> imgFilterInstances = (List) imgFilter.getInstances().filter(f -> !"reality".equals(f.getValue()) && !"best".equals(f.getValue())).toList();
 		ImgFilterInstance realityInstance = imgFilter.getImgFilter("reality");
 		ImgFilterInstance bestInstance = imgFilter.setImgFilter("best");
 
@@ -111,8 +107,7 @@ public class ComputeBestTextPerZone {
 					if (zti == null) {
 						// TODO case where zti doesn't exist == filter has
 						// not been applied
-						log.error("No text found for {} => zone n°{}, {}", docInstance.getValue(),
-								zoneInstance.getValue(), imgFilterInstance.getValue());
+						log.error("No text found for {} => zone n°{}, {}", docInstance.getValue(), zoneInstance.getValue(), imgFilterInstance.getValue());
 					} else {
 						String text = zti.getValue().toString();
 						List<String> filters = ocrResults.get(text);
@@ -149,8 +144,7 @@ public class ComputeBestTextPerZone {
 
 			} else {
 				// If supervised, set the supervised text to best
-				ZoneTextInstance zti = zoneText.setZoneText(realTextInstance.getValue().toString(), docInstance,
-						zoneInstance, bestInstance);
+				ZoneTextInstance zti = zoneText.setZoneText(realTextInstance.getValue().toString(), docInstance, zoneInstance, bestInstance);
 				zti.setZoneTimestamp(ModelTools.getCurrentDate()); // TODO: concatenate with previous line?
 			}
 
