@@ -11,14 +11,14 @@ import org.genericsystem.cv.ImgClass;
 import org.genericsystem.cv.Zone;
 import org.genericsystem.cv.Zones;
 import org.genericsystem.cv.model.Doc;
-import org.genericsystem.cv.model.DocClass;
-import org.genericsystem.cv.model.ImgFilter;
-import org.genericsystem.cv.model.ZoneGeneric;
-import org.genericsystem.cv.model.ZoneText;
 import org.genericsystem.cv.model.Doc.DocInstance;
+import org.genericsystem.cv.model.DocClass;
 import org.genericsystem.cv.model.DocClass.DocClassInstance;
+import org.genericsystem.cv.model.ImgFilter;
 import org.genericsystem.cv.model.ImgFilter.ImgFilterInstance;
+import org.genericsystem.cv.model.ZoneGeneric;
 import org.genericsystem.cv.model.ZoneGeneric.ZoneInstance;
+import org.genericsystem.cv.model.ZoneText;
 import org.genericsystem.cv.model.ZoneText.ZoneTextInstance;
 import org.genericsystem.cv.watch.SetRealValues;
 import org.genericsystem.kernel.Engine;
@@ -41,7 +41,7 @@ public class ClassImgZoneComparator {
 	private final static String imgClassDirectory = "classes/id-fr-front";
 	private final static Engine engine = new Engine(System.getenv("HOME") + "/genericsystem/gs-cv_model/", Doc.class,
 			DocClass.class, ZoneGeneric.class, ZoneText.class, ImgFilter.class);
-	
+
 	static {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 	}

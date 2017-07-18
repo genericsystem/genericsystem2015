@@ -23,7 +23,7 @@ public class ZoneScorerMap {
 	public ZoneScorerMap(Zone zone, Stream<Entry<Img, String>> stream, String filename, boolean supervised) {
 		this(zone, stream, filename, null, supervised);
 	}
-	
+
 	public ZoneScorerMap(Zone zone, Stream<Entry<Img, String>> stream, String filename, String realText, boolean supervised) {
 		this.zone = zone;
 		this.supervised = supervised;
@@ -34,10 +34,10 @@ public class ZoneScorerMap {
 		try {
 			// Open a file to log the data (default: append = true)
 			writer = new FileWriter(basePath + filename.replaceAll(".png", "") + ".csv", true);
-			
+
 			// Store the parameters in the scores objet
 			scores.setRealText(realText);
-			
+
 			// Loop over each entry and get the OCR
 			stream.forEach(entry -> {
 				String ocrText = zone.ocr(entry.getKey());
@@ -92,7 +92,7 @@ public class ZoneScorerMap {
 	public Map<String, Integer> getResultsMap() {
 		return scores.getResultsMap();
 	}
-	
+
 	public Map<String, Integer> getSupervisedResultsMap() {
 		return scores.getSupervisedResultsMap();
 	}

@@ -5,8 +5,6 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Map;
-import java.util.function.Function;
 
 import org.genericsystem.cv.comparator.FillModelWithData;
 import org.opencv.core.Core;

@@ -67,8 +67,8 @@ public class FillModelWithData {
 
 	public static void main(String[] mainArgs) {
 		final Engine engine = new Engine(gsPath, Doc.class, RefreshTimestamp.class, DocTimestamp.class, DocFilename.class, DocClass.class,
-			ZoneGeneric.class, ZoneText.class, ZoneTimestamp.class, ImgFilter.class, LevDistance.class,
-			MeanLevenshtein.class, Score.class);
+				ZoneGeneric.class, ZoneText.class, ZoneTimestamp.class, ImgFilter.class, LevDistance.class,
+				MeanLevenshtein.class, Score.class);
 		engine.newCache().start();
 		compute(engine);
 		// cleanModel(engine);
