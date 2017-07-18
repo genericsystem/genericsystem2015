@@ -7,7 +7,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 
@@ -103,26 +106,13 @@ public class ModelTools {
 	}
 
 	/**
-	 * Return the current {@link LocalDateTime} formatted as a String with the
-	 * default pattern.
+	 * Return the current {@link LocalDateTime} as the number of milliseconds since Epoch.
 	 * 
-	 * @return a {@code String} representing the local date time
+	 * @return a {@code Long} representing the local timestamp
 	 */
-	public static String getCurrentDate() {
-		return getCurrentDate(DATE_TIME_FORMAT);
-	}
-
-	/**
-	 * Return the current {@link LocalDateTime} formatted as a String with a
-	 * custom pattern.
-	 * 
-	 * @param pattern
-	 *            - the pattern to be used for conversion
-	 * @return a {@code String} representing the local date time
-	 */
-	public static String getCurrentDate(String pattern) {
+	public static Long getCurrentDate() {
 		LocalDateTime ldt = LocalDateTime.now();
-		return ldt.format(DateTimeFormatter.ofPattern(pattern));
+		return ldt.atZone(ZoneOffset.systemDefault()).toInstant().toEpochMilli();
 	}
 
 	/**
@@ -154,24 +144,27 @@ public class ModelTools {
 	/**
 	 * Format a {@link LocalDateTime} using the default pattern.
 	 * 
-	 * @param date
-	 *            - the date to convert
-	 * @return a {@code String} representation of the date
+	 * @param timestamp
+	 *            - the timestamp to convert
+	 * @return a {@code String} representation of the timestamp
 	 */
-	public static String formatDate(LocalDateTime date) {
-		return formatDate(date, DATE_TIME_FORMAT);
+	public static String formatDate(Long timestamp) {
+		return formatDate(timestamp, DATE_TIME_FORMAT);
 	}
 
 	/**
 	 * Format a {@link LocalDateTime} using a custom pattern.
 	 * 
-	 * @param date
-	 *            - the date to convert
+	 * @param timestamp
+	 *            - the timestamp to convert
 	 * @param pattern
 	 *            - the pattern to be used for conversion
-	 * @return a {@code String} representation of the date
+	 * @return a {@code String} representation of the timestamp
 	 */
-	public static String formatDate(LocalDateTime date, String pattern) {
-		return date.format(DateTimeFormatter.ofPattern(pattern));
+	public static String formatDate(Long timestamp, String pattern) {
+		LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneOffset.systemDefault());
+		return ldt.format(DateTimeFormatter.ofPattern(pattern));
 	}
+
+
 }

@@ -107,8 +107,6 @@ public class MailWatcherVerticle extends AbstractVerticle {
 						}
 						Files.copy(attachment.getInputStream(), newFile);
 					}
-					System.gc();
-					System.runFinalization();
 					vertx.eventBus().publish(VerticleDeployer.PDF_WATCHER_ADDRESS, newFile.toString());
 				}
 			}

@@ -45,7 +45,8 @@ import org.slf4j.LoggerFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
-public class Img {
+
+public class Img implements AutoCloseable {
 
 	private static Logger log = LoggerFactory.getLogger(Img.class);
 
@@ -56,12 +57,19 @@ public class Img {
 	}
 
 	public Img(String path) {
-		this(Imgcodecs.imread(path));
+		this(Imgcodecs.imread(path), false);
 	}
 
 	public Img(Mat src) {
-		this.src = new Mat();
-		src.copyTo(this.src);
+		this(src, true);
+	}
+
+	protected Img(Mat src, boolean clone) {
+		if (clone) {
+			this.src = new Mat();
+			src.copyTo(this.src);
+		} else
+			this.src = src;
 	}
 
 	public Img(Img model, Zone zone) {
@@ -71,20 +79,20 @@ public class Img {
 	public Img morphologyEx(int morphOp, int morph, Size size) {
 		Mat result = new Mat();
 		Imgproc.morphologyEx(src, result, morphOp, Imgproc.getStructuringElement(morph, size));
-		return new Img(result);
+		return new Img(result, false);
 	}
 
 	public Img laplacian() {
 		Mat result = new Mat();
 		Imgproc.Laplacian(src, result, CvType.CV_8U);
-		return new Img(result);
+		return new Img(result, false);
 	}
 
 	public List<MatOfPoint> findContours(Img[] hierarchy, int mode, int method) {
 		Mat mat = new Mat();
 		List<MatOfPoint> result = new ArrayList<>();
 		Imgproc.findContours(src, result, mat, mode, method);
-		hierarchy[0] = new Img(mat);
+		hierarchy[0] = new Img(mat, false);
 		return result;
 	}
 
@@ -92,26 +100,26 @@ public class Img {
 		Mat mat = new Mat();
 		List<MatOfPoint> result = new ArrayList<>();
 		Imgproc.findContours(src, result, mat, mode, method, point);
-		hierarchy[0] = new Img(mat);
+		hierarchy[0] = new Img(mat, false);
 		return result;
 	}
 
 	public Img dilate(Mat kernel) {
 		Mat result = new Mat();
 		Imgproc.dilate(src, result, kernel);
-		return new Img(result);
+		return new Img(result, false);
 	}
 
 	public Img canny(double threshold1, double threshold2) {
 		Mat result = new Mat();
 		Imgproc.Canny(src, result, threshold1, threshold2);
-		return new Img(result);
+		return new Img(result, false);
 	}
 
 	public Img canny(double threshold1, double threshold2, int apertureSize, boolean L2gradient) {
 		Mat result = new Mat();
 		Imgproc.Canny(src, result, threshold1, threshold2, apertureSize, L2gradient);
-		return new Img(result);
+		return new Img(result, false);
 	}
 
 	public void drawContours(List<MatOfPoint> contours, int contourIdx, Scalar color, int thickness) {
@@ -121,19 +129,19 @@ public class Img {
 	public Img gaussianBlur(Size ksize, double sigmaX, double sigmaY) {
 		Mat result = new Mat();
 		Imgproc.GaussianBlur(src, result, ksize, sigmaX, sigmaY);
-		return new Img(result);
+		return new Img(result, false);
 	}
 
 	public Img medianBlur(int ksize) {
 		Mat result = new Mat();
 		Imgproc.medianBlur(src, result, ksize);
-		return new Img(result);
+		return new Img(result, false);
 	}
 
 	public Img bgr2Gray() {
 		Mat result = new Mat();
 		Imgproc.cvtColor(src, result, Imgproc.COLOR_BGR2GRAY);
-		return new Img(result);
+		return new Img(result, false);
 	}
 
 	private static double angle(Point p1, Point p2, Point p0) {
@@ -182,10 +190,15 @@ public class Img {
 				}
 			}
 		}
-		Img result = new Img(src);
+		Img result;
 		if (maxId >= 0)
 			result = transform(maxContour);
+		else
+			result = new Img(src);
 		// TODO: Warning if no contour found.
+		blurred.close();
+		gray.close();
+		gray_.close();
 		return result;
 	}
 
@@ -235,7 +248,7 @@ public class Img {
 		List<Point> targets = new LinkedList<>(Arrays.asList(new Point(0, 0), new Point(0, height), new Point(width, height), new Point(width, 0)));
 		Imgproc.warpPerspective(src, target, Imgproc.getPerspectiveTransform(Converters.vector_Point2f_to_Mat(list), Converters.vector_Point2f_to_Mat(targets)), new Size(width, height), Imgproc.INTER_CUBIC);
 
-		Img result = new Img(target);
+		Img result = new Img(target, false);
 		int orientation = result.getOrientation();
 		if (orientation != 0)
 			result = result.rotate(orientation);
@@ -259,7 +272,7 @@ public class Img {
 			Core.transpose(src, result);
 			Core.flip(result, result, 1);
 		}
-		return new Img(result);
+		return new Img(result, false);
 	}
 
 	// List of points corresponding to the ordered vertices of a convex polygon.
@@ -307,7 +320,7 @@ public class Img {
 	public Img cvtColor(int code) {
 		Mat result = new Mat();
 		Imgproc.cvtColor(src, result, code);
-		return new Img(result);
+		return new Img(result, false);
 	}
 
 	public ImageIcon getImageIcon() {
@@ -347,7 +360,7 @@ public class Img {
 		Mat mask = new Mat();
 		Core.inRange(ranged.getSrc(), scalar, scalar2, mask);
 		ranged.getSrc().copyTo(result, mask);
-		Img resultImg = new Img(result);
+		Img resultImg = new Img(result, false);
 		if (hsv)
 			resultImg = resultImg.cvtColor(Imgproc.COLOR_HSV2BGR);
 		return resultImg;
@@ -360,13 +373,13 @@ public class Img {
 	public Img gaussianBlur(Size size) {
 		Mat result = new Mat();
 		Imgproc.GaussianBlur(src, result, size, 0);
-		return new Img(result);
+		return new Img(result, false);
 	}
 
 	public Img multiply(Scalar scalar) {
 		Mat result = new Mat();
 		Core.multiply(src, scalar, result);
-		return new Img(result);
+		return new Img(result, false);
 	}
 
 	public Img mser() {
@@ -394,7 +407,10 @@ public class Img {
 			Mat roi = new Mat(result, rectant);
 			roi.setTo(new Scalar(255));
 		}
-		return new Img(result).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(17, 3));
+		Img img = new Img(result, false);
+		Img result_ = img.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(17, 3));
+		img.close();
+		return result_;
 	}
 
 	public Img grad() {
@@ -443,13 +459,15 @@ public class Img {
 		Imgproc.equalizeHist(channels.get(1), channels.get(1));
 		Imgproc.equalizeHist(channels.get(2), channels.get(2));
 		Core.merge(channels, result);
-		return new Img(result);
+		for (Mat channel : channels)
+			channel.release();
+		return new Img(result, false);
 	}
 
 	public Img resize() {
 		Mat result = new Mat();
 		Imgproc.resize(src, result, new Size(50, 50), 10, 10, Imgproc.INTER_AREA);
-		return new Img(result);
+		return new Img(result, false);
 	}
 
 	public Img equalizeHistoAdaptative() {
@@ -461,7 +479,9 @@ public class Img {
 		clahe.apply(channels.get(1), channels.get(1));
 		clahe.apply(channels.get(2), channels.get(2));
 		Core.merge(channels, result);
-		return new Img(result);
+		for (Mat channel : channels)
+			channel.release();
+		return new Img(result, false);
 	}
 
 	public Img equalizeHistoAdaptative2() {
@@ -503,7 +523,8 @@ public class Img {
 		clahe.apply(channelL, channelL);
 		Core.insertChannel(channelL, result, 0);
 		Imgproc.cvtColor(result, result, Imgproc.COLOR_Lab2BGR);
-		return new Img(result);
+		channelL.release();
+		return new Img(result, false);
 	}
 
 	public Img otsuAfterGaussianBlur(Size blurSize) {
@@ -514,19 +535,19 @@ public class Img {
 	public Img sobel(int ddepth, int dx, int dy, int ksize, double scale, double delta, int borderType) {
 		Mat result = new Mat();
 		Imgproc.Sobel(src, result, ddepth, dx, dy, ksize, scale, delta, borderType);
-		return new Img(result);
+		return new Img(result, false);
 	}
 
 	public Img adaptativeThresHold(double maxValue, int adaptiveMethod, int thresholdType, int blockSize, double C) {
 		Mat result = new Mat();
 		Imgproc.adaptiveThreshold(src, result, maxValue, adaptiveMethod, thresholdType, blockSize, C);
-		return new Img(result);
+		return new Img(result, false);
 	}
 
 	public Img thresHold(double thresh, double maxval, int type) {
 		Mat result = new Mat();
 		Imgproc.threshold(src, result, thresh, maxval, type);
-		return new Img(result);
+		return new Img(result, false);
 	}
 
 	public Img bernsen(int ksize, int contrast_limit) {
@@ -571,7 +592,7 @@ public class Img {
 				}
 			}
 		}
-		return new Img(ret);
+		return new Img(ret, false);
 	}
 
 	public int rows() {
@@ -597,55 +618,55 @@ public class Img {
 	public Img niblackThreshold(int blockSize, double k) {
 		Mat result = new Mat();
 		Ximgproc.niBlackThreshold(bgr2Gray().getSrc(), result, 255, Imgproc.THRESH_BINARY, blockSize, k, Ximgproc.BINARIZATION_NIBLACK);
-		return new Img(result);
+		return new Img(result, false);
 	}
 
 	public Img sauvolaThreshold(int blockSize, double k) {
 		Mat result = new Mat();
 		Ximgproc.niBlackThreshold(bgr2Gray().getSrc(), result, 255, Imgproc.THRESH_BINARY, blockSize, k, Ximgproc.BINARIZATION_SAUVOLA);
-		return new Img(result);
+		return new Img(result, false);
 	}
 
 	public Img nickThreshold(int blockSize, double k) {
 		Mat result = new Mat();
 		Ximgproc.niBlackThreshold(bgr2Gray().getSrc(), result, 255, Imgproc.THRESH_BINARY, blockSize, k, Ximgproc.BINARIZATION_NICK);
-		return new Img(result);
+		return new Img(result, false);
 	}
 
 	public Img wolfThreshold(int blockSize, double k) {
 		Mat result = new Mat();
 		Ximgproc.niBlackThreshold(bgr2Gray().getSrc(), result, 255, Imgproc.THRESH_BINARY, blockSize, k, Ximgproc.BINARIZATION_WOLF);
-		return new Img(result);
+		return new Img(result, false);
 	}
 
 	public Img resize(Size size) {
 		Mat result = new Mat();
 		Imgproc.resize(src, result, size);
-		return new Img(result);
+		return new Img(result, false);
 	}
 
 	public Img resize(double coeff) {
 		Mat result = new Mat();
 		Imgproc.resize(src, result, new Size(src.width() * coeff, src.height() * coeff));
-		return new Img(result);
+		return new Img(result, false);
 	}
 
 	public Img bilateralFilter() {
 		Mat result = new Mat();
 		Imgproc.bilateralFilter(src, result, 30, 80, 80);
-		return new Img(result);
+		return new Img(result, false);
 	}
 
 	public Img distanceTransform() {
 		Mat result = new Mat();
 		Imgproc.distanceTransform(src, result, Imgproc.DIST_L2, 5);
-		return new Img(result);
+		return new Img(result, false);
 	}
 
 	public Img absDiff(Img img) {
 		Mat result = new Mat();
 		Core.absdiff(src, img.getSrc(), result);
-		return new Img(result);
+		return new Img(result, false);
 	}
 
 	public Img hsvChannel(int channel) {
@@ -653,13 +674,13 @@ public class Img {
 		Imgproc.cvtColor(src, result, Imgproc.COLOR_BGR2HSV);
 		List<Mat> channels = new ArrayList<>();
 		Core.split(result, channels);
-		return new Img(channels.get(channel));
+		return new Img(channels.get(channel), false);
 	}
 
 	public Img bgrChannel(int channel) {
 		List<Mat> channels = new ArrayList<>();
 		Core.split(src, channels);
-		return new Img(channels.get(channel));
+		return new Img(channels.get(channel), false);
 	}
 
 	public Img eraseCorners(double proportion) {
@@ -680,7 +701,7 @@ public class Img {
 	public Img fastNlMeansDenoising() {
 		Mat result = new Mat();
 		Photo.fastNlMeansDenoising(src, result);
-		return new Img(result);
+		return new Img(result, false);
 	}
 
 	// private List<Rect> getRects() {
@@ -770,7 +791,6 @@ public class Img {
 				break;
 			}
 			results.put(method, result);
-			System.gc();
 			// System.out.println("for Algo " + method + " comparison : " +
 			// result + "\n");
 		}
@@ -782,37 +802,37 @@ public class Img {
 	public Img projectVertically() {
 		Mat result = new Mat();
 		Core.reduce(getSrc(), result, 1, Core.REDUCE_AVG, CvType.CV_32F);
-		return new Img(result);
+		return new Img(result, false);
 	}
 
 	public Img projectHorizontally() {
 		Mat result = new Mat();
 		Core.reduce(getSrc(), result, 0, Core.REDUCE_AVG, CvType.CV_32F);
-		return new Img(result);
+		return new Img(result, false);
 	}
 
 	private Img range(Scalar scalar, Scalar scalar2) {
 		Mat result = new Mat();
 		Core.inRange(getSrc(), scalar, scalar2, result);
-		return new Img(result);
+		return new Img(result, false);
 	}
 
 	public Img add(Img img) {
 		Mat result = new Mat();
 		Core.add(getSrc(), img.getSrc(), result);
-		return new Img(result);
+		return new Img(result, false);
 	}
 
 	public Img bitwise(Img img) {
 		Mat result = new Mat();
 		Core.bitwise_and(getSrc(), img.getSrc(), result);
-		return new Img(result);
+		return new Img(result, false);
 	}
 
 	private Img transpose() {
 		Mat result = new Mat();
 		Core.transpose(src, result);
-		return new Img(result);
+		return new Img(result, false);
 	}
 
 	public Zones split(double morph, boolean vertical, float concentration) {
@@ -938,17 +958,21 @@ public class Img {
 	public Img houghLinesP(double rho, double theta, int threshold) {
 		Mat result = new Mat();
 		Imgproc.HoughLinesP(src, result, rho, theta, threshold);
-		return new Img(result);
+		return new Img(result, false);
 	}
 
 	public Img houghLinesP(int rho, double theta, int threshold, double mineLineLenght, double maxLineGap) {
 		Mat result = new Mat();
 		Imgproc.HoughLinesP(src, result, rho, theta, threshold, mineLineLenght, maxLineGap);
-		return new Img(result);
+		return new Img(result, false);
 	}
 
 	public Image toJfxImage() {
 		return Tools.mat2jfxImage(src);
 	}
 
+	@Override
+	public void close() {
+		src.release();
+	}
 }

@@ -50,6 +50,14 @@ public class ZoneText implements Generic {
 			return (int) getZone().getValue();
 		}
 		
+		public ZoneTimestampInstance setZoneTimestamp(Long timestamp) {
+			return (ZoneTimestampInstance) setHolder(getRoot().find(ZoneTimestamp.class), timestamp);
+		}
+		
+		public ZoneTimestampInstance getZoneTimestamp(Long timestamp) {
+			return (ZoneTimestampInstance) getHolder(getRoot().find(ZoneTimestamp.class), timestamp);
+		}
+		
 	}
 
 	public ZoneTextInstance setZoneText(String text, DocInstance doc, ZoneInstance zone, ImgFilterInstance imgFilter) {
@@ -62,6 +70,7 @@ public class ZoneText implements Generic {
 	
 	@SystemGeneric
 	@Components(ZoneText.class)
+	@InstanceValueClassConstraint(Long.class)
 	@PropertyConstraint
 	@InstanceClass(ZoneTimestampInstance.class)
 	public static class ZoneTimestamp implements Generic {
@@ -73,7 +82,7 @@ public class ZoneText implements Generic {
 			}
 		}
 		
-		public ZoneTimestampInstance setZoneTimestamp(String timestamp, ZoneTextInstance zoneTextInstance) {
+		public ZoneTimestampInstance setZoneTimestamp(Long timestamp, ZoneTextInstance zoneTextInstance) {
 			return (ZoneTimestampInstance) setInstance(timestamp, zoneTextInstance);
 		}
 		
