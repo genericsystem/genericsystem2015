@@ -62,8 +62,6 @@ public class Ocr {
 	
 	public static int ocrNewClassifiedImg(Root engine, Path imagePath) {
 		int result = FillModelWithData.doImgOcr(engine, imagePath);
-		System.gc();
-		System.runFinalization();
 		return result;
 	}
 
