@@ -898,7 +898,7 @@ public class Img {
 		Zones zones = split(vertical ? morph.height : morph.width, vertical, concentration).removeIf(zone -> (vertical ? zone.getRect().height : zone.getRect().width) < 4);
 		if (zones.isEmpty()) {
 			Imgproc.rectangle(imgToDraw.getSrc(), new Point(0, 0), new Point(imgToDraw.width(), imgToDraw.height()), new Scalar(0, 0, 255), -1);
-			// System.out.println("Empty zone ?");
+			//// System.out.println("Empty zone ?");
 			return this;
 		}
 		if (zones.size() == 1) {
