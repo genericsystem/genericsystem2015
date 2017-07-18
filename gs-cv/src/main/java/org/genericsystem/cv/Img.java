@@ -45,7 +45,6 @@ import org.slf4j.LoggerFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
-
 public class Img implements AutoCloseable {
 
 	private static Logger log = LoggerFactory.getLogger(Img.class);
@@ -74,6 +73,10 @@ public class Img implements AutoCloseable {
 
 	public Img(Img model, Zone zone) {
 		this.src = new Mat(model.getSrc(), zone.getRect());
+	}
+
+	public Img(Img model, Shard shard) {
+		this.src = new Mat(model.getSrc(), new Rect(new Point(shard.getX1() * model.width(), shard.getY1() * model.height()), new Size((shard.getX2() - shard.getX1()) * model.width(), (shard.getY2() - shard.getY1()) * model.height())));
 	}
 
 	public Img morphologyEx(int morphOp, int morph, Size size) {
@@ -829,7 +832,7 @@ public class Img implements AutoCloseable {
 		return new Img(result, false);
 	}
 
-	private Img transpose() {
+	public Img transpose() {
 		Mat result = new Mat();
 		Core.transpose(src, result);
 		return new Img(result, false);
