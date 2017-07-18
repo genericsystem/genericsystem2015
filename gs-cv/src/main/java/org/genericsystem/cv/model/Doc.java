@@ -51,6 +51,21 @@ public class Doc implements Generic {
 			return (DocFilenameInstance) getHolder(getRoot().find(DocFilename.class), filename);
 		}
 
+		public RefreshTimestampInstance setRefreshTimestamp(Long timestamp) {
+			return (RefreshTimestampInstance) setHolder(getRoot().find(RefreshTimestamp.class), timestamp);
+		}
+		
+		public RefreshTimestampInstance getRefreshTimestamp(Long timestamp) {
+			return (RefreshTimestampInstance) getHolder(getRoot().find(RefreshTimestamp.class), timestamp);
+		}
+		
+		public DocTimestampInstance setDocTimestamp(Long timestamp) {
+			return (DocTimestampInstance) setHolder(getRoot().find(DocTimestamp.class), timestamp);
+		}
+		
+		public DocTimestampInstance getDocTimestamp(Long timestamp) {
+			return (DocTimestampInstance) getHolder(getRoot().find(DocTimestamp.class), timestamp);
+		}
 	}
 
 	public DocInstance setDoc(String name, DocClassInstance docClassInstance) {
@@ -69,16 +84,16 @@ public class Doc implements Generic {
 	public static class DocFilename implements Generic {
 		
 		public static class DocFilenameInstance implements Generic {
-			
+	
 			public DocInstance getDoc() {
 				return (DocInstance) getBaseComponent();
 			}
 		}
-		
 	}
 	
 	@SystemGeneric
 	@Components(Doc.class)
+	@InstanceValueClassConstraint(Long.class)
 	@PropertyConstraint
 	@InstanceClass(RefreshTimestampInstance.class)
 	public static class RefreshTimestamp implements Generic {
@@ -90,7 +105,7 @@ public class Doc implements Generic {
 			}
 		}
 		
-		public RefreshTimestampInstance setRefreshTimestamp(String timestamp, DocInstance docInstance) {
+		public RefreshTimestampInstance setRefreshTimestamp(Long timestamp, DocInstance docInstance) {
 			return (RefreshTimestampInstance) setInstance(timestamp, docInstance);
 		}
 		
@@ -101,6 +116,7 @@ public class Doc implements Generic {
 	
 	@SystemGeneric
 	@Components(Doc.class)
+	@InstanceValueClassConstraint(Long.class)
 	@PropertyConstraint
 	@InstanceClass(DocTimestampInstance.class)
 	public static class DocTimestamp implements Generic {
@@ -112,7 +128,7 @@ public class Doc implements Generic {
 			}
 		}
 		
-		public DocTimestampInstance setDocTimestamp(String timestamp, DocInstance docInstance) {
+		public DocTimestampInstance setDocTimestamp(Long timestamp, DocInstance docInstance) {
 			return (DocTimestampInstance) setInstance(timestamp, docInstance);
 		}
 		
@@ -120,5 +136,4 @@ public class Doc implements Generic {
 			return (DocTimestampInstance) getInstance(docInstance);
 		}
 	}
-
 }

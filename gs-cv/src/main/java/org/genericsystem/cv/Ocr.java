@@ -5,9 +5,8 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Map;
-import java.util.function.Function;
 
+import org.genericsystem.common.Root;
 import org.genericsystem.cv.comparator.FillModelWithData;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
@@ -55,14 +54,15 @@ public class Ocr {
 			ZoneScorer scorer = zone.newUnsupervisedScorer(Tools.classImgsStream(imgClassDirectory + "/mask/" + imagePath.getFileName().toString().replace(".png", "")));
 			System.out.println("Image " + imagePath + ", found text: " + scorer.getBestText() + " " + Math.floor((scorer.getBestScore() * 10000)) / 100 + "%");
 		}
-		System.gc();
-		System.runFinalization();
 	}
-	
+
 	public static int ocrNewClassifiedImg(Path imagePath) {
 		int result = FillModelWithData.doImgOcr(imagePath);
-		System.gc();
-		System.runFinalization();
+		return result;
+	}
+
+	public static int ocrNewClassifiedImg(Root engine, Path imagePath) {
+		int result = FillModelWithData.doImgOcr(engine, imagePath);
 		return result;
 	}
 

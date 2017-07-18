@@ -380,8 +380,6 @@ public class DistributedVerticle extends AbstractVerticle {
 			savedFile = Classifier.classify(classesDirectory, Paths.get(pngDir + "/" + newFile));
 		}
 		if (savedFile != null) {
-			System.gc();
-			System.runFinalization();
 			cache.safeConsum(nothing -> {
 				addMessage(savedFile, task.getInteger("step") + 1, task.getLong("task"), TODO,
 						task.getInteger("max_parallel_executions"));
@@ -403,9 +401,6 @@ public class DistributedVerticle extends AbstractVerticle {
 			cache.safeConsum(nothing -> {
 				addMessage(path.getFileName(), task.getInteger("step") + 1, task.getLong("task"), TODO, 1);
 			});
-
-		System.gc();
-		System.runFinalization();
 	}
 
 	protected void addMessage(Path file, int step, long timestamp, String state, int parallel_executions) {

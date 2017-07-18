@@ -30,12 +30,12 @@ public class Zone {
 	public ZoneScorer newUnsupervisedScorer(Stream<Img> imgs) {
 		return new ZoneScorer(this, imgs);
 	}
-	
+
 	public ZoneScorerMap newUnsupervisedScorerMap(String fileName, Stream<Entry<Img, String>> stream) {
 		ZoneScorerMap scorer = new ZoneScorerMap(this, stream, fileName, false);
 		return scorer;
 	}
-	
+
 	public ZoneScorerMap newSupervisedScorerMap(String fileName, String realText, Stream<Entry<Img, String>> stream) {
 		ZoneScorerMap scorer = new ZoneScorerMap(this, stream, fileName, realText, true);
 		return scorer;
@@ -68,7 +68,7 @@ public class Zone {
 	}
 
 	public Img getImg(Img img) {
-		return new Img(new Mat(img.getSrc(), getRect()));
+		return new Img(new Mat(img.getSrc(), getRect()), false);
 	}
 
 	public void draw(Mat roi, Scalar color, int thickness) {

@@ -56,7 +56,7 @@ public class CamCropper extends AbstractApp {
 		timer.scheduleAtFixedRate(() -> {
 			camera.read(frame);
 
-			Img newFrame = new Img(frame);
+			Img newFrame = new Img(frame, false);
 			MatOfKeyPoint newKeypoints = new MatOfKeyPoint();
 			Mat newDescriptors = new Mat();
 			detector.detect(frame, newKeypoints);

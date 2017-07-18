@@ -51,8 +51,6 @@ public abstract class AbstractApp extends Application {
 		});
 		stage.setScene(scene);
 		stage.show();
-		System.gc();
-		System.runFinalization();
 	}
 
 	protected abstract void fillGrid(GridPane mainGrid);

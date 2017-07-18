@@ -140,8 +140,6 @@ public class Seeder extends DistributedVerticle {
 						}
 						Files.copy(attachment.getInputStream(), newFile);
 					}
-					System.gc();
-					System.runFinalization();
 
 					cache.safeConsum(nothing -> {
 						addMessage(Paths.get(fileName), 1, System.currentTimeMillis(), TODO, 5);

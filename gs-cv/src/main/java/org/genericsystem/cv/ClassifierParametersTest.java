@@ -82,8 +82,6 @@ public class ClassifierParametersTest extends Application {
 					gridPane.add(new Label("Not matching"), column++, row);
 			}
 			row++;
-			System.gc();
-			System.runFinalization();
 		}
 		Scene scene = new Scene(new Group());
 		stage.setTitle("Generic System Computer Vision");

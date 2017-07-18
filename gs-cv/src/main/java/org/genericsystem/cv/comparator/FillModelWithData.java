@@ -43,8 +43,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The FillModelWithData class can analyze an image (or a batch of images) and
- * store all the OCR text for each zone and each document in GS.
+ * The FillModelWithData class can analyze an image (or a batch of images) and store all the OCR text for each zone and each document in GS.
  * 
  * @author Pierrik Lassalas
  *
@@ -66,9 +65,8 @@ public class FillModelWithData {
 	private static final String docType = "id-fr-front";
 
 	public static void main(String[] mainArgs) {
-		final Engine engine = new Engine(gsPath, Doc.class, RefreshTimestamp.class, DocTimestamp.class, DocFilename.class, DocClass.class,
-			ZoneGeneric.class, ZoneText.class, ZoneTimestamp.class, ImgFilter.class, LevDistance.class,
-			MeanLevenshtein.class, Score.class);
+		final Engine engine = new Engine(gsPath, Doc.class, RefreshTimestamp.class, DocTimestamp.class, DocFilename.class, DocClass.class, ZoneGeneric.class, ZoneText.class, ZoneTimestamp.class, ImgFilter.class, LevDistance.class, MeanLevenshtein.class,
+				Score.class);
 		engine.newCache().start();
 		compute(engine);
 		// cleanModel(engine);
@@ -76,18 +74,15 @@ public class FillModelWithData {
 	}
 
 	/**
-	 * This Map will contain the names of the filters that will be applied to a
-	 * specified {@link Img}.
+	 * This Map will contain the names of the filters that will be applied to a specified {@link Img}.
 	 * 
-	 * @return - a Map containing the filter names as key, and a
-	 *         {@link Function} that will apply the specified algorithm to an
-	 *         Img.
+	 * @return - a Map containing the filter names as key, and a {@link Function} that will apply the specified algorithm to an Img.
 	 */
 	public static Map<String, Function<Img, Img>> getFiltersMap() {
 		final Map<String, Function<Img, Img>> map = new ConcurrentHashMap<>();
 		map.put("original", i -> i);
 		map.put("reality", i -> i);
-//		map.put("bernsen", Img::bernsen);
+		// map.put("bernsen", Img::bernsen);
 		map.put("equalizeHisto", Img::equalizeHisto);
 		map.put("equalizeHistoAdaptative", Img::equalizeHistoAdaptative);
 		map.put("otsuAfterGaussianBlur", Img::otsuAfterGaussianBlur);
@@ -121,17 +116,14 @@ public class FillModelWithData {
 	}
 
 	/**
-	 * Process an image, and store all the informations in the engine of Generic
-	 * System. When no Engine is provided, a default one is created.
+	 * Process an image, and store all the informations in the engine of Generic System. When no Engine is provided, a default one is created.
 	 * 
 	 * @param imagePath
 	 *            - a {@link Path} object pointing to the image to be processed
-	 * @return an {@code int} representing {@link #KNOWN_FILE_UPDATED_FILTERS},
-	 *         {@link #NEW_FILE} or {@link #KNOWN_FILE}
+	 * @return an {@code int} representing {@link #KNOWN_FILE_UPDATED_FILTERS}, {@link #NEW_FILE} or {@link #KNOWN_FILE}
 	 */
 	public static int doImgOcr(Path imagePath) {
-		final Engine engine = new Engine(gsPath, Doc.class, ImgFilter.class, ZoneGeneric.class, ZoneText.class,
-				Score.class, MeanLevenshtein.class);
+		final Engine engine = new Engine(gsPath, Doc.class, ImgFilter.class, ZoneGeneric.class, ZoneText.class, Score.class, MeanLevenshtein.class);
 		engine.newCache().start();
 		int result = doImgOcr(engine, imagePath);
 		engine.close();
@@ -139,15 +131,13 @@ public class FillModelWithData {
 	}
 
 	/**
-	 * Process an image, and store all the informations in the engine of Generic
-	 * System.
+	 * Process an image, and store all the informations in the engine of Generic System.
 	 * 
 	 * @param engine
 	 *            - the engine used to store the data
 	 * @param imagePath
 	 *            - a {@link Path} object pointing to the image to be processed
-	 * @return an {@code int} representing {@link #KNOWN_FILE_UPDATED_FILTERS},
-	 *         {@link #NEW_FILE} or {@link #KNOWN_FILE}
+	 * @return an {@code int} representing {@link #KNOWN_FILE_UPDATED_FILTERS}, {@link #NEW_FILE} or {@link #KNOWN_FILE}
 	 */
 	public static int doImgOcr(Root engine, Path imagePath) {
 
@@ -177,8 +167,7 @@ public class FillModelWithData {
 	}
 
 	/**
-	 * Process all the images in the specified folder, and store all the data in
-	 * Generic System.
+	 * Process all the images in the specified folder, and store all the data in Generic System.
 	 * 
 	 * @param engine
 	 *            - the engine used to store the data
@@ -206,20 +195,16 @@ public class FillModelWithData {
 	/**
 	 * Initialize the computation.
 	 * 
-	 * The zones are added to the model only if they differ from the ones
-	 * previously saved. Similarly, the imgFilters Map is analyzed, and a new
-	 * Map containing the new filters is returned.
+	 * The zones are added to the model only if they differ from the ones previously saved. Similarly, the imgFilters Map is analyzed, and a new Map containing the new filters is returned.
 	 * 
-	 * This method is used both by {@link #compute(Root)} and
-	 * {@link #doImgOcr(Path)}.
+	 * This method is used both by {@link #compute(Root)} and {@link #doImgOcr(Path)}.
 	 * 
 	 * @param engine
 	 *            - the engine used to store the data
 	 * @param docType
 	 *            - the document type (i.e., class)
 	 * @param zones
-	 *            - a {@link Zones} object, representing all the zones detected
-	 *            for ocr
+	 *            - a {@link Zones} object, representing all the zones detected for ocr
 	 */
 	// TODO: change method's name
 	private static void initComputation(Root engine, String docType, Zones zones) {
@@ -237,13 +222,11 @@ public class FillModelWithData {
 					log.info("Zone n°{} already known", z.getNum());
 				} else {
 					log.info("Adding zone n°{} ", z.getNum());
-					docClassInstance.setZone(z.getNum(), z.getRect().x, z.getRect().y, z.getRect().width,
-							z.getRect().height);
+					docClassInstance.setZone(z.getNum(), z.getRect().x, z.getRect().y, z.getRect().width, z.getRect().height);
 				}
 			} else {
 				log.info("Adding zone n°{} ", z.getNum());
-				docClassInstance.setZone(z.getNum(), z.getRect().x, z.getRect().y, z.getRect().width,
-						z.getRect().height);
+				docClassInstance.setZone(z.getNum(), z.getRect().x, z.getRect().y, z.getRect().width, z.getRect().height);
 			}
 		});
 		// Persist the changes
@@ -253,27 +236,21 @@ public class FillModelWithData {
 	/**
 	 * Process an image file.
 	 * 
-	 * Each zone of each image is analyzed through OCR, and the results are
-	 * stored in Generic System engine.
+	 * Each zone of each image is analyzed through OCR, and the results are stored in Generic System engine.
 	 * 
 	 * @param engine
 	 *            - the engine where the data will be stored
 	 * @param file
 	 *            - the file to be processed
 	 * @param docClassInstance
-	 *            - the instance of {@link DocClass} representing the current
-	 *            class of the file
+	 *            - the instance of {@link DocClass} representing the current class of the file
 	 * @param zones
 	 *            - the list of zones for this image
 	 * @param imgFilters
-	 *            - a stream of entry for a Map containing the filternames that
-	 *            will be applied to the original file, and the functions
-	 *            required to apply these filters
-	 * @return an {@code int} representing {@link #KNOWN_FILE_UPDATED_FILTERS},
-	 *         {@link #NEW_FILE} or {@link #KNOWN_FILE}
+	 *            - a stream of entry for a Map containing the filternames that will be applied to the original file, and the functions required to apply these filters
+	 * @return an {@code int} representing {@link #KNOWN_FILE_UPDATED_FILTERS}, {@link #NEW_FILE} or {@link #KNOWN_FILE}
 	 */
-	private static int processFile(Root engine, File file, DocClassInstance docClassInstance, Zones zones,
-			Stream<Entry<String, Function<Img, Img>>> imgFilters) {
+	private static int processFile(Root engine, File file, DocClassInstance docClassInstance, Zones zones, Stream<Entry<String, Function<Img, Img>>> imgFilters) {
 
 		int result = ERROR;
 
@@ -281,7 +258,6 @@ public class FillModelWithData {
 		Generic doc = engine.find(Doc.class);
 		ZoneText zoneText = engine.find(ZoneText.class);
 		ImgFilter imgFilter = engine.find(ImgFilter.class);
-		ZoneTimestamp zoneTimestamp = engine.find(ZoneTimestamp.class);
 
 		// Save the current file
 		String filename = ModelTools.getHashFromFile(file.toPath(), "sha-256");
@@ -305,8 +281,7 @@ public class FillModelWithData {
 				// TODO: add another criteria to verify if the filter has been
 				// applied on the image
 				boolean containsNull = zones.getZones().stream().anyMatch(z -> {
-					ZoneTextInstance zti = ((ZoneText) engine.find(ZoneText.class)).getZoneText(docInstance,
-							docClassInstance.getZone(z.getNum()), filter);
+					ZoneTextInstance zti = ((ZoneText) engine.find(ZoneText.class)).getZoneText(docInstance, docClassInstance.getZone(z.getNum()), filter);
 					return zti == null;
 				});
 				if (containsNull) {
@@ -333,8 +308,11 @@ public class FillModelWithData {
 			result = NEW_FILE;
 		}
 
+		// If this is a new file, or a new filter has been added, update the last-update doc timestamp
+		docInstance.setDocTimestamp(ModelTools.getCurrentDate());
+
 		// Create a map of Imgs
-		Img originalImg = new Img(Imgcodecs.imread(file.getPath()));
+		Img originalImg = new Img(file.getPath());
 		Map<String, Img> imgs = new ConcurrentHashMap<>();
 		updatedImgFilters.entrySet().forEach(entry -> {
 			log.info("Applying algorithm {}...", entry.getKey());
@@ -350,15 +328,14 @@ public class FillModelWithData {
 		});
 
 		// Draw the image's zones + numbers
-		Img imgCopy = new Img(Imgcodecs.imread(file.getPath()));
+		Img imgCopy = new Img(file.getPath());
 		zones.draw(imgCopy, new Scalar(0, 255, 0), 3);
 		zones.writeNum(imgCopy, new Scalar(0, 0, 255), 3);
 		// Copy the images to the resources folder
 		// TODO implement a filter mechanism to avoid creating
 		// duplicates in a public folder
 		log.info("Copying {} to resources folder", filenameExt);
-		Imgcodecs.imwrite(System.getProperty("user.dir") + "/../gs-cv/src/main/resources/" + filenameExt,
-				imgCopy.getSrc());
+		Imgcodecs.imwrite(System.getProperty("user.dir") + "/../gs-cv/src/main/resources/" + filenameExt, imgCopy.getSrc());
 
 		// Process each zone
 		zones.getZones().forEach(z -> {
@@ -373,16 +350,11 @@ public class FillModelWithData {
 						zoneText.setZoneText("", docInstance, zoneInstance, imgFilter.getImgFilter(entry.getKey()));
 				} else {
 					String ocrText = z.ocr(entry.getValue());
-					ZoneTextInstance zti = zoneText.setZoneText(ocrText.trim(), docInstance, zoneInstance,
-							imgFilter.getImgFilter(entry.getKey()));
-					zoneTimestamp.setZoneTimestamp(ModelTools.getCurrentDate(), zti); // TODO: test
+					ZoneTextInstance zti = zoneText.setZoneText(ocrText.trim(), docInstance, zoneInstance, imgFilter.getImgFilter(entry.getKey()));
+					zti.setZoneTimestamp(ModelTools.getCurrentDate()); // TODO: concatenate with previous line?
 				}
 			});
 			engine.getCurrentCache().flush();
-			// Call the garbage collector to free the resources used by
-			// OpenCV
-			System.gc();
-			System.runFinalization();
 		});
 
 		return result;
@@ -405,8 +377,7 @@ public class FillModelWithData {
 		// 0.1, -0.05, 0.0 });
 		for (Integer bs : blockSizes) {
 			for (Double k : ks) {
-				imgFilters.put("nick" + "_" + bs + "_" + k.toString().replace("-", "m"),
-						img -> img.niblackThreshold(bs, k));
+				imgFilters.put("nick" + "_" + bs + "_" + k.toString().replace("-", "m"), img -> img.niblackThreshold(bs, k));
 			}
 		}
 		imgFilters.put("reality", i -> i);
@@ -415,8 +386,7 @@ public class FillModelWithData {
 	}
 
 	/**
-	 * Remove all the data stored in the engine, except the real values used for
-	 * training (e.g., for which imgFilter = "reality")
+	 * Remove all the data stored in the engine, except the real values used for training (e.g., for which imgFilter = "reality")
 	 * 
 	 * @param engine
 	 *            - the engine used to store the data
@@ -440,8 +410,7 @@ public class FillModelWithData {
 		// Save the current document class
 		Generic currentDocClass = engine.find(DocClass.class).getInstance(docType);
 
-		List<ImgFilterInstance> imgFilterInstances = (List) imgFilter.getInstances()
-				.filter(f -> !"reality".equals(f.getValue())).toList();
+		List<ImgFilterInstance> imgFilterInstances = (List) imgFilter.getInstances().filter(f -> !"reality".equals(f.getValue())).toList();
 		List<ZoneInstance> zoneInstances = (List) currentDocClass.getHolders(engine.find(ZoneGeneric.class)).toList();
 		List<DocInstance> docInstances = (List) currentDocClass.getHolders(engine.find(Doc.class)).toList();
 
