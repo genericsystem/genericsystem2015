@@ -37,14 +37,15 @@ public class OcrVerticle extends AbstractVerticle {
 	}
 
 	public void deployVerticle(VertxOptions options) {
-		Vertx vertx = Vertx.vertx(options);
+		// Vertx vertx = Vertx.vertx(options);
 		OcrVerticle ocrVerticle = new OcrVerticle(engine);
-		vertx.deployVerticle(ocrVerticle, res -> {
-			if (res.failed())
-				throw new IllegalStateException("Deployment of verticles failed.", res.cause());
-			else
-				System.out.println("Verticle deployed");
-		});
+		// vertx.deployVerticle(ocrVerticle, res -> {
+		// if (res.failed())
+		// throw new IllegalStateException("Deployment of verticles failed.", res.cause());
+		// else
+		// System.out.println("Verticle deployed");
+		// });
+		VerticleDeployer.deployVerticle(ocrVerticle);
 	}
 
 	public static void deployOcrVerticle(VertxOptions options) {
@@ -60,18 +61,21 @@ public class OcrVerticle extends AbstractVerticle {
 
 	public static void deployTestVerticle(VertxOptions options) {
 		Vertx vertx = Vertx.vertx(options);
-		vertx.deployVerticle(new AbstractVerticle() {
+		AbstractVerticle testVerticle = new AbstractVerticle() {
 			@Override
 			public void start() throws Exception {
-				Path imagePath = Paths.get(System.getProperty("user.dir") + "/../gs-cv/classes/id-fr-front/image6-0.png");
+				Path imagePath = Paths.get(System.getProperty("user.dir") + "/../gs-cv/classes/id-fr-front/image4-1.png");
 				vertx.eventBus().publish(VerticleDeployer.ACCURATE_ZONES_FOUND, imagePath.toString());
 			}
-		}, res -> {
-			if (res.failed())
-				throw new IllegalStateException("Deployment of verticles failed.", res.cause());
-			else
-				System.out.println("Verticle deployed");
-		});
+		};
+
+		// vertx.deployVerticle(testVerticle, res -> {
+		// if (res.failed())
+		// throw new IllegalStateException("Deployment of verticles failed.", res.cause());
+		// else
+		// System.out.println("Verticle deployed");
+		// });
+		VerticleDeployer.deployVerticle(testVerticle);
 	}
 
 	@Override
@@ -112,13 +116,5 @@ public class OcrVerticle extends AbstractVerticle {
 			if (res.failed())
 				throw new IllegalStateException(res.cause());
 		}));
-	}
-
-	public Root getEngine() {
-		return engine;
-	}
-
-	public void setEngine(Root engine) {
-		this.engine = engine;
 	}
 }

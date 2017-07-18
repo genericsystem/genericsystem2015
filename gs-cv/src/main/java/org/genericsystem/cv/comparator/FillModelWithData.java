@@ -141,13 +141,20 @@ public class FillModelWithData {
 	 */
 	public static int doImgOcr(Root engine, Path imagePath) {
 
+		try {
+			engine.getCurrentCache();
+		} catch (IllegalStateException e) {
+			log.error("Current cache could not be loaded. Starting a new one...");
+			engine.newCache().start();
+		}
+
 		final Path imgClassDirectory = imagePath.getParent();
 		final String docType = imgClassDirectory.getName(imgClassDirectory.getNameCount() - 1).toString();
 		// TODO: remove the following line (only present in development)
 		final String imgDirectory = imgClassDirectory.toString() + "/ref2/";
 		log.info("imgDirectory = {} ", imgDirectory);
 
-		int result;
+		int result = ERROR;
 
 		// Find and save the doc class
 		DocClass docClass = engine.find(DocClass.class);
