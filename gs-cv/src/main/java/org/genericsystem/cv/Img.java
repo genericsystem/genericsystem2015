@@ -913,7 +913,7 @@ public class Img implements AutoCloseable {
 		return new Zones(zones);
 	}
 
-	public Img recursivSplit(Size morph, int level, float concentration, Img imgToDraw, BiConsumer<Img, Zones> visitor, Shard shard) {
+	public Img recursiveSplit(Size morph, int level, float concentration, Img imgToDraw, BiConsumer<Img, Zones> visitor, Shard shard) {
 		if (level < 0) {
 			Imgproc.rectangle(imgToDraw.getSrc(), new Point(0, 0), new Point(imgToDraw.width(), imgToDraw.height()), new Scalar(255, 0, 0), -1);
 			return this;
@@ -949,9 +949,9 @@ public class Img implements AutoCloseable {
 				Shard s = new Shard((double) zone.getRect().x / imgToDraw.width(), (double) (zone.getRect().x + zone.getRect().width) / imgToDraw.width(), (double) (zone.getRect().y) / imgToDraw.height(),
 						(double) (zone.getRect().y + zone.getRect().height) / imgToDraw.height());
 				shard.addChild(s);
-				zone.getRoi(this).recursivSplit(morph, level - 1, concentration, zone.getRoi(imgToDraw), visitor, s);
+				zone.getRoi(this).recursiveSplit(morph, level - 1, concentration, zone.getRoi(imgToDraw), visitor, s);
 			} else {
-				zone.getRoi(this).recursivSplit(morph, level - 1, concentration, zone.getRoi(imgToDraw), visitor, null);
+				zone.getRoi(this).recursiveSplit(morph, level - 1, concentration, zone.getRoi(imgToDraw), visitor, null);
 			}
 
 		}

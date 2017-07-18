@@ -29,7 +29,7 @@ public class LayoutAnalyzer extends AbstractApp {
 		Img img = new Img("resources/14342661748973931.jpg");
 		Img adaptivSplit = img.bgr2Gray();
 		adaptivSplit.adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 17, 15);
-		adaptivSplit.recursivSplit(new Size(0.036, 0.009), 100, 0.01f, img, (roi, zones) -> zones.draw(roi, new Scalar(0, 255, 0), 1), root);
+		adaptivSplit.recursiveSplit(new Size(0.036, 0.009), 100, 0.01f, img, (roi, zones) -> zones.draw(roi, new Scalar(0, 255, 0), 1), root);
 		mainGrid.add(new ImageView(img.toJfxImage()), columnIndex, rowIndex++);
 		// mainGrid.add(new ImageView(adaptivSplit.toJfxImage()), columnIndex, rowIndex++);
 
