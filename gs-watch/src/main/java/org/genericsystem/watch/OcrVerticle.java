@@ -3,11 +3,11 @@ package org.genericsystem.watch;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.genericsystem.common.Root;
 import org.genericsystem.cv.Ocr;
 import org.genericsystem.cv.comparator.FillModelWithData;
 
 import io.vertx.core.AbstractVerticle;
-import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.eventbus.MessageConsumer;
@@ -17,40 +17,56 @@ import io.vertx.core.logging.LoggerFactory;
 public class OcrVerticle extends AbstractVerticle {
 
 	private static Logger log = LoggerFactory.getLogger(ClassifierVerticle.class);
+	private Root engine;
 
 	public static void main(String[] args) {
 		VertxOptions options = new VertxOptions().setMaxWorkerExecuteTime(Long.MAX_VALUE);
-		
-//		VerticleDeployer.deployVerticle(new OcrVerticle(), options);
+		// deployOcrVerticle(options);
+		deployTestVerticle(options);
+
+	}
+
+	public OcrVerticle() {
+		// TODO Auto-generated constructor stub
+		System.out.println(">>> OcrVerticle() called");
+	}
+
+	public OcrVerticle(Root engine) {
+		this.engine = engine;
+		System.out.println(">>> OcrVerticle(Root engine) called");
+	}
+
+	public void deployVerticle(VertxOptions options) {
 		Vertx vertx = Vertx.vertx(options);
-		vertx.deployVerticle(new OcrVerticle(), res -> {
+		OcrVerticle ocrVerticle = new OcrVerticle(engine);
+		vertx.deployVerticle(ocrVerticle, res -> {
 			if (res.failed())
 				throw new IllegalStateException("Deployment of verticles failed.", res.cause());
 			else
 				System.out.println("Verticle deployed");
 		});
-		
-		try {
-			Thread.sleep(5000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		// Added a simple Verticle that will publish an example string on the event bus
-//		VerticleDeployer.deployVerticle(new AbstractVerticle() {
-//			@Override
-//			public void start() throws Exception {
-//				Path imagePath = Paths.get(System.getProperty("user.dir") + "/../gs-cv/classes/id-fr-front/image5-0.png");
-//				vertx.eventBus().publish(VerticleDeployer.ACCURATE_ZONES_FOUND, imagePath.toString());
-//			}
-//		});
+	}
+
+	public static void deployOcrVerticle(VertxOptions options) {
+		Vertx vertx = Vertx.vertx(options);
+		OcrVerticle ocrVerticle = new OcrVerticle();
+		vertx.deployVerticle(ocrVerticle, res -> {
+			if (res.failed())
+				throw new IllegalStateException("Deployment of verticles failed.", res.cause());
+			else
+				System.out.println("Verticle deployed");
+		});
+	}
+
+	public static void deployTestVerticle(VertxOptions options) {
+		Vertx vertx = Vertx.vertx(options);
 		vertx.deployVerticle(new AbstractVerticle() {
 			@Override
 			public void start() throws Exception {
 				Path imagePath = Paths.get(System.getProperty("user.dir") + "/../gs-cv/classes/id-fr-front/image6-0.png");
 				vertx.eventBus().publish(VerticleDeployer.ACCURATE_ZONES_FOUND, imagePath.toString());
-				}
-			} , res -> {
+			}
+		}, res -> {
 			if (res.failed())
 				throw new IllegalStateException("Deployment of verticles failed.", res.cause());
 			else
@@ -65,8 +81,13 @@ public class OcrVerticle extends AbstractVerticle {
 		consumer.handler(message -> vertx.executeBlocking(future -> {
 			String imagePath = message.body();
 			System.out.println(">>>>> New image to OCR: " + imagePath);
-			
-			int result = Ocr.ocrNewClassifiedImg(Paths.get(imagePath));
+
+			int result = FillModelWithData.ERROR;
+			if (null != engine)
+				result = Ocr.ocrNewClassifiedImg(engine, Paths.get(imagePath));
+			else
+				result = Ocr.ocrNewClassifiedImg(Paths.get(imagePath));
+
 			switch (result) {
 			case FillModelWithData.NEW_FILE:
 				System.out.println("New image (processed)");
@@ -91,5 +112,13 @@ public class OcrVerticle extends AbstractVerticle {
 			if (res.failed())
 				throw new IllegalStateException(res.cause());
 		}));
+	}
+
+	public Root getEngine() {
+		return engine;
+	}
+
+	public void setEngine(Root engine) {
+		this.engine = engine;
 	}
 }

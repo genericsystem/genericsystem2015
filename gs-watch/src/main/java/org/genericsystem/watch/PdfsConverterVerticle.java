@@ -25,8 +25,6 @@ public class PdfsConverterVerticle extends AbstractVerticle {
 			List<Path> createdPngs = PdfToPngConverter.convertPdfToImages(newFile.toFile(), new File("../gs-cv/png"));
 			for (Path path : createdPngs)
 				vertx.eventBus().publish(VerticleDeployer.PNG_WATCHER_ADDRESS, path.toString());
-			System.gc();
-			System.runFinalization();
 			future.complete();
 		}, res -> {
 			if (res.failed())
