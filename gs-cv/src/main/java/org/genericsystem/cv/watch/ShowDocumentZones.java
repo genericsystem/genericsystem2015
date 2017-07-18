@@ -81,10 +81,9 @@ public class ShowDocumentZones extends ModalEditor {
 			System.out.println("Refreshing best text...");
 			Root root = context.getGeneric().getRoot();
 			DocInstance docInstance = (DocInstance) context.getGeneric();
-			RefreshTimestamp refreshTimestamp = root.find(RefreshTimestamp.class);
 			String docType = docInstance.getDocClass().getValue().toString();
 			ComputeBestTextPerZone.computeOneFile(root, docInstance, docType);
-			refreshTimestamp.setRefreshTimestamp(ModelTools.getCurrentDate(), docInstance);
+			docInstance.setRefreshTimestamp(ModelTools.getCurrentDate());
 			System.out.println("Done!");
 		}
 	}
@@ -183,7 +182,7 @@ public class ShowDocumentZones extends ModalEditor {
 				if (null == refreshTimestampInstance)
 					return "Last update: none";
 				else
-					return "Last update: " + refreshTimestampInstance.getValue().toString();
+					return "Last update: " + ModelTools.formatDate((Long) refreshTimestampInstance.getValue());
 			}, snap);
 		}
 	}

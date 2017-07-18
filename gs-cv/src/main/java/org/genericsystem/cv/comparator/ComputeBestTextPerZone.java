@@ -85,7 +85,6 @@ public class ComputeBestTextPerZone {
 		ImgFilter imgFilter = engine.find(ImgFilter.class);
 		ZoneText zoneText = engine.find(ZoneText.class);
 		Score score = engine.find(Score.class);
-		ZoneTimestamp zoneTimestamp = engine.find(ZoneTimestamp.class);
 
 		List<ZoneInstance> zoneInstances = (List) currentDocClass.getHolders(engine.find(ZoneGeneric.class)).toList();
 		List<ImgFilterInstance> imgFilterInstances = (List) imgFilter.getInstances()
@@ -146,13 +145,13 @@ public class ComputeBestTextPerZone {
 
 				String bestText = ocrElection.entrySet().stream().max(Map.Entry.comparingByValue()).get().getKey();
 				ZoneTextInstance zti = zoneText.setZoneText(bestText, docInstance, zoneInstance, bestInstance);
-				zoneTimestamp.setZoneTimestamp(ModelTools.getCurrentDate(), zti); // TODO: test
+				zti.setZoneTimestamp(ModelTools.getCurrentDate()); // TODO: concatenate with previous line?
 
 			} else {
 				// If supervised, set the supervised text to best
 				ZoneTextInstance zti = zoneText.setZoneText(realTextInstance.getValue().toString(), docInstance,
 						zoneInstance, bestInstance);
-				zoneTimestamp.setZoneTimestamp(ModelTools.getCurrentDate(), zti); // TODO: test
+				zti.setZoneTimestamp(ModelTools.getCurrentDate()); // TODO: concatenate with previous line?
 			}
 
 			engine.getCurrentCache().flush();

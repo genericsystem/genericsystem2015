@@ -281,7 +281,6 @@ public class FillModelWithData {
 		Generic doc = engine.find(Doc.class);
 		ZoneText zoneText = engine.find(ZoneText.class);
 		ImgFilter imgFilter = engine.find(ImgFilter.class);
-		ZoneTimestamp zoneTimestamp = engine.find(ZoneTimestamp.class);
 
 		// Save the current file
 		String filename = ModelTools.getHashFromFile(file.toPath(), "sha-256");
@@ -332,6 +331,9 @@ public class FillModelWithData {
 			log.info("Adding a new image ({}) ", file.getName());
 			result = NEW_FILE;
 		}
+		
+		// If this is a new file, or a new filter has been added, update the last-update doc timestamp
+		docInstance.setDocTimestamp(ModelTools.getCurrentDate());
 
 		// Create a map of Imgs
 		Img originalImg = new Img(Imgcodecs.imread(file.getPath()));
@@ -375,7 +377,7 @@ public class FillModelWithData {
 					String ocrText = z.ocr(entry.getValue());
 					ZoneTextInstance zti = zoneText.setZoneText(ocrText.trim(), docInstance, zoneInstance,
 							imgFilter.getImgFilter(entry.getKey()));
-					zoneTimestamp.setZoneTimestamp(ModelTools.getCurrentDate(), zti); // TODO: test
+					zti.setZoneTimestamp(ModelTools.getCurrentDate()); // TODO: concatenate with previous line?
 				}
 			});
 			engine.getCurrentCache().flush();
