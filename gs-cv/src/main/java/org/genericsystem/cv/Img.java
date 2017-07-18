@@ -892,7 +892,6 @@ public class Img {
 	public Img recursivSplit(Size morph, int level, float concentration, Img imgToDraw, BiConsumer<Img, Zones> visitor, Shard shard) {
 		if (level < 0) {
 			Imgproc.rectangle(imgToDraw.getSrc(), new Point(0, 0), new Point(imgToDraw.width(), imgToDraw.height()), new Scalar(255, 0, 0), -1);
-			shard = new Shard(0, 1, 0, 1);
 			return this;
 		}
 		boolean vertical = src.size().height > src.size().width;
@@ -900,7 +899,6 @@ public class Img {
 		if (zones.isEmpty()) {
 			Imgproc.rectangle(imgToDraw.getSrc(), new Point(0, 0), new Point(imgToDraw.width(), imgToDraw.height()), new Scalar(0, 0, 255), -1);
 			// System.out.println("Empty zone ?");
-			shard = new Shard(0, 1, 0, 1);
 			return this;
 		}
 		if (zones.size() == 1) {
@@ -910,7 +908,6 @@ public class Img {
 				if (zones.isEmpty()) {
 					Imgproc.rectangle(imgToDraw.getSrc(), new Point(0, 0), new Point(imgToDraw.width(), imgToDraw.height()), new Scalar(0, 0, 255), -1);
 					// System.out.println("Empty zone ?");
-					shard = new Shard(0, 1, 0, 1);
 					return this;
 				}
 				if (zones.size() == 1) {
@@ -918,18 +915,21 @@ public class Img {
 					if (subRect.size().equals(size())) {
 						// System.out.println("" + size() + " " + zones.iterator().next().getRect());
 						// zones.iterator().next().draw(zones.iterator().next().getRoi(imgToDraw), new Scalar(0, 0, 255), -1);
-						shard = new Shard(0, 1, 0, 1);
 						return this;
 					}
 				}
 			}
 		}
 		for (Zone zone : zones) {
+			if (shard != null) {
+				Shard s = new Shard((double) zone.getRect().x / imgToDraw.width(), (double) (zone.getRect().x + zone.getRect().width) / imgToDraw.width(), (double) (zone.getRect().y) / imgToDraw.height(),
+						(double) (zone.getRect().y + zone.getRect().height) / imgToDraw.height());
+				shard.addChild(s);
+				zone.getRoi(this).recursivSplit(morph, level - 1, concentration, zone.getRoi(imgToDraw), visitor, s);
+			} else {
+				zone.getRoi(this).recursivSplit(morph, level - 1, concentration, zone.getRoi(imgToDraw), visitor, null);
+			}
 
-			Shard s = new Shard((double) zone.getRect().x / imgToDraw.width(), (double) (zone.getRect().x + zone.getRect().width) / imgToDraw.width(), (double) (zone.getRect().y) / imgToDraw.height(),
-					(double) (zone.getRect().y + zone.getRect().height) / imgToDraw.height());
-			shard.addChild(s);
-			zone.getRoi(this).recursivSplit(morph, level - 1, concentration, zone.getRoi(imgToDraw), visitor, s);
 		}
 		visitor.accept(imgToDraw, zones);
 		return this;
