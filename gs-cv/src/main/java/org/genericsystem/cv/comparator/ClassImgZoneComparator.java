@@ -115,9 +115,5 @@ public class ClassImgZoneComparator {
 						imgFiltersMap.entrySet().stream());
 			}
 		});
-
-		// Call the garbage collector to free the resources
-		System.gc();
-
 	}
 }

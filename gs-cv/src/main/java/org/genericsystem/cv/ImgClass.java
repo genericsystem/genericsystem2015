@@ -30,11 +30,8 @@ public class ImgClass {
 	}
 
 	private Img applyMappers(Img img) {
-		for (Function<Img, Img> mapper : mappers) {
+		for (Function<Img, Img> mapper : mappers)
 			img = mapper.apply(img);
-			System.gc();
-			System.runFinalization();
-		}
 		return img;
 	}
 
@@ -86,8 +83,6 @@ public class ImgClass {
 
 			this.mean = new Img(mean, false);
 			this.variance = new Img(variance, false);
-			System.gc();
-			System.runFinalization();
 		}
 	}
 

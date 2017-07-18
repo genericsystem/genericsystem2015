@@ -73,8 +73,6 @@ public class ImgClass2 {
 		mean.convertTo(mean, CvType.CV_8U);
 		this.observableMean.setValue(new Img(mean, false));
 		this.observableVariance.setValue(new Img(variance, false));
-		System.gc();
-		System.runFinalization();
 	}
 
 	public void setPreprocessor(Function<Img, Img> after) {

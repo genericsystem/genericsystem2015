@@ -379,10 +379,6 @@ public class FillModelWithData {
 				}
 			});
 			engine.getCurrentCache().flush();
-			// Call the garbage collector to free the resources used by
-			// OpenCV
-			System.gc();
-			System.runFinalization();
 		});
 
 		return result;

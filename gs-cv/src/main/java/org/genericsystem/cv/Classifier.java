@@ -113,8 +113,6 @@ public class Classifier {
 				classResults.add(algoResult);
 				resultsPerClass.put(className, classResults);
 			}
-			System.gc();
-			System.runFinalization();
 		}
 		List<CompareFeatureResult> bestResults = new ArrayList<>();
 		for (Entry<String, List<CompareFeatureResult>> entry : resultsPerClass.entrySet()) {

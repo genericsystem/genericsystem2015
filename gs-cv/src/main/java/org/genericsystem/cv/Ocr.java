@@ -55,14 +55,10 @@ public class Ocr {
 			ZoneScorer scorer = zone.newUnsupervisedScorer(Tools.classImgsStream(imgClassDirectory + "/mask/" + imagePath.getFileName().toString().replace(".png", "")));
 			System.out.println("Image " + imagePath + ", found text: " + scorer.getBestText() + " " + Math.floor((scorer.getBestScore() * 10000)) / 100 + "%");
 		}
-		System.gc();
-		System.runFinalization();
 	}
-	
+
 	public static int ocrNewClassifiedImg(Path imagePath) {
 		int result = FillModelWithData.doImgOcr(imagePath);
-		System.gc();
-		System.runFinalization();
 		return result;
 	}
 

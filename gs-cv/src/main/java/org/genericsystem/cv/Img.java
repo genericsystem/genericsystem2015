@@ -779,7 +779,6 @@ public class Img {
 				break;
 			}
 			results.put(method, result);
-			System.gc();
 			// System.out.println("for Algo " + method + " comparison : " +
 			// result + "\n");
 		}

@@ -47,8 +47,6 @@ public class ZoneScorerMap {
 				// Store the OCR text corresponding to the filter
 				scores.put(entry.getValue(), ocrText);
 			});
-			// Call the garbage collector to free the resources
-			System.gc();
 
 			// Log every OCR and filter names
 			if (supervised){

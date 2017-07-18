@@ -88,9 +88,6 @@ public class ComputeAllLevDistances {
 						levDistance.setLevDistance(dist, zoneText1, zoneText2);
 						levDistance.setLevDistance(dist, zoneText2, zoneText1);
 					}
-					// Free some resources
-					System.gc();
-					System.runFinalization();
 				}
 				engine.getCurrentCache().flush();
 			});
