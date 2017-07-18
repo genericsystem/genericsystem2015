@@ -8,12 +8,16 @@ import org.genericsystem.cv.model.DocClass;
 import org.genericsystem.cv.model.ImgFilter;
 import org.genericsystem.cv.model.LevDistance;
 import org.genericsystem.cv.model.MeanLevenshtein;
+import org.genericsystem.cv.model.ModelTools;
 import org.genericsystem.cv.model.Score;
 import org.genericsystem.cv.model.ZoneGeneric;
 import org.genericsystem.cv.model.ZoneText;
 import org.genericsystem.cv.model.Doc.DocFilename;
+import org.genericsystem.cv.model.Doc.DocInstance;
 import org.genericsystem.cv.model.Doc.DocTimestamp;
 import org.genericsystem.cv.model.Doc.RefreshTimestamp;
+import org.genericsystem.cv.model.Doc.DocTimestamp.DocTimestampInstance;
+import org.genericsystem.cv.model.Doc.RefreshTimestamp.RefreshTimestampInstance;
 import org.genericsystem.cv.model.ZoneText.ZoneTimestamp;
 import org.genericsystem.cv.watch.DocPropertiesCheckerSwitcher.DOC_DEZONED;
 import org.genericsystem.cv.watch.DocPropertiesCheckerSwitcher.DOC_NOT_DEZONED;
@@ -46,6 +50,7 @@ import org.genericsystem.reactor.context.ContextAction.SET_SELECTION;
 import org.genericsystem.reactor.context.ObservableListExtractor;
 import org.genericsystem.reactor.context.TagSwitcher.ADMIN_MODE_ONLY;
 import org.genericsystem.reactor.context.TagSwitcher.NORMAL_MODE_ONLY;
+import org.genericsystem.reactor.context.TextBinding;
 import org.genericsystem.reactor.gscomponents.AppHeader;
 import org.genericsystem.reactor.gscomponents.AppHeader.AppTitleDiv;
 import org.genericsystem.reactor.gscomponents.AppHeader.Logo;
@@ -60,6 +65,8 @@ import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
 import org.genericsystem.reactor.gscomponents.Monitor;
 import org.genericsystem.reactor.gscomponents.RootTagImpl;
 
+import javafx.beans.binding.Bindings;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
 @DependsOnModel({ Doc.class, RefreshTimestamp.class, DocTimestamp.class, DocFilename.class, DocClass.class,
@@ -89,10 +96,10 @@ public class WatchApp extends RootTagImpl {
 	}
 	
 	public WatchApp() {
-
+		System.out.println(">>> constructor called");
 	}
 	
-	@Children({ HtmlLabel.class, HtmlLabel.class, HtmlLabel.class, HtmlLabel.class, HtmlLabel.class })
+	@Children({ HtmlLabel.class, HtmlLabel.class, HtmlLabel.class, HtmlLabel.class, HtmlLabel.class, HtmlLabel.class })
 	@FlexDirectionStyle(FlexDirection.ROW)
 	@Attribute(path = HtmlLabel.class, name = "name", value = "title")
 	@Style(name = "margin", value = "0.5em")
@@ -103,7 +110,7 @@ public class WatchApp extends RootTagImpl {
 	@Style(path = HtmlLabel.class, name = "flex", value = "1")
 	@Style(path = HtmlLabel.class, name = "text-align", value = "center")
 	@Style(path = HtmlLabel.class, name = "font-weight", value = "bold")
-	@SetText(path = HtmlLabel.class, value = { "Document name", "De-zoned", "OCR'd", "Supervised", "Delete" })
+	@SetText(path = HtmlLabel.class, value = { "Document name", "De-zoned", "OCR'd", "Supervised", "Delete", "Last update" })
 	public static class HeaderRow extends FlexDiv {
 		
 	}
@@ -111,7 +118,7 @@ public class WatchApp extends RootTagImpl {
 	@ForEach(DOC_CLASS_SELECTOR.class)
 	@FlexDirectionStyle(FlexDirection.ROW)
 	@Style(name = "margin", value = "0.5em")
-	@Children({ DocumentName.class, FlexDiv.class, ModalFlexDiv.class, FlexDiv.class, DocumentEditButtonDiv.class })
+	@Children({ DocumentName.class, FlexDiv.class, ModalFlexDiv.class, FlexDiv.class, DocumentDeleteButtonDiv.class, LastDocumentUpdateDiv.class })
 	@Children(path = FlexDiv.class, pos = 1, value = { CheckedImage.class, FailedImage.class })
 	@Switch(path = { FlexDiv.class, CheckedImage.class }, pos = { 1, 0 }, value = DOC_DEZONED.class)
 	@Switch(path = { FlexDiv.class, FailedImage.class }, pos = { 1, 0 }, value = DOC_NOT_DEZONED.class)
@@ -136,7 +143,6 @@ public class WatchApp extends RootTagImpl {
 	public static class DocumentsList extends FlexDiv {
 
 	}
-	
 	
 	public static class ModalFlexDiv extends FlexDiv {
 		@Override
@@ -172,7 +178,7 @@ public class WatchApp extends RootTagImpl {
 	@Style(name = "align-items", value = "center")
 	@Style(name = "flex", value = "1 0 auto")
 	@Children({ DeleteConfirmation.class, DocumentDeleteButton.class })
-	public static class DocumentEditButtonDiv extends ModalFlexDiv {
+	public static class DocumentDeleteButtonDiv extends ModalFlexDiv {
 		
 	}
 
@@ -182,7 +188,7 @@ public class WatchApp extends RootTagImpl {
 	@StyleClass(path = { HtmlHyperLink.class, HtmlImg.class }, value = "img")
 	@BindAction(path = HtmlHyperLink.class, value = SET_SELECTION.class)
 	public static class DocumentDeleteButton extends FlexDiv {
-		// TODO: change the way the context is loaded (currently, everything is loaded for every file)
+		// Delete button to delete the selected Generic
 	}
 	
 	@Children(FlexDiv.class)
@@ -203,6 +209,14 @@ public class WatchApp extends RootTagImpl {
 	public static class DeleteConfirmation extends ModalEditor {
 	
 	}
+	
+	@BindText(LAST_UPDATE_LABEL.class)
+	@Style(name = "justify-content", value = "center")
+	@Style(name = "align-items", value = "center")
+	@Style(name = "flex", value = "3")
+	public static class LastDocumentUpdateDiv extends FlexDiv {
+		
+	}
 
 	public static class DOC_CLASS_SELECTOR implements ObservableListExtractor {
 		@Override
@@ -215,7 +229,6 @@ public class WatchApp extends RootTagImpl {
 		}
 	}
 	
-		
 	public static class REMOVE_CUSTOM implements ContextAction {
 		@Override
 		public void accept(Context context, Tag tag) {
@@ -224,4 +237,23 @@ public class WatchApp extends RootTagImpl {
 		}
 	}
 
+	public static class LAST_UPDATE_LABEL implements TextBinding {
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		@Override
+		public ObservableValue<String> apply(Context context, Tag tag) {
+			// TODO avoid the use of an ObservableList in favor of an ObservableValue?
+			DocInstance currentDoc = (DocInstance) context.getGeneric();
+			Root root = currentDoc.getRoot();
+			DocTimestamp docTimestamp = root.find(DocTimestamp.class);
+			ObservableList<RefreshTimestampInstance> ol = (ObservableList) currentDoc.getHolders(docTimestamp).toObservableList();
+
+			return Bindings.createStringBinding(() -> {
+				DocTimestampInstance docTimestampInstance = docTimestamp.getDocTimestamp(currentDoc);
+				if (null == docTimestampInstance)
+					return "n/a";
+				else
+					return ModelTools.formatDate((Long) docTimestampInstance.getValue());
+			}, ol);
+		}
+	}
 }

@@ -175,7 +175,7 @@ public class ShowDocumentZones extends ModalEditor {
 			DocInstance currentDoc = (DocInstance) context.getGeneric();
 			Root root = currentDoc.getRoot();
 			RefreshTimestamp refreshTimestamp = root.find(RefreshTimestamp.class);
-			ObservableList<RefreshTimestampInstance> snap = (ObservableList) currentDoc.getHolders(refreshTimestamp).toObservableList();
+			ObservableList<RefreshTimestampInstance> ol = (ObservableList) currentDoc.getHolders(refreshTimestamp).toObservableList();
 
 			return Bindings.createStringBinding(() -> {
 				RefreshTimestampInstance refreshTimestampInstance =  refreshTimestamp.getRefreshTimestamp(currentDoc);
@@ -183,7 +183,7 @@ public class ShowDocumentZones extends ModalEditor {
 					return "Last update: none";
 				else
 					return "Last update: " + ModelTools.formatDate((Long) refreshTimestampInstance.getValue());
-			}, snap);
+			}, ol);
 		}
 	}
 
