@@ -1,6 +1,5 @@
 package org.genericsystem.cv.comparator;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.genericsystem.api.core.Snapshot;
@@ -10,18 +9,14 @@ import org.genericsystem.cv.model.Doc;
 import org.genericsystem.cv.model.Doc.DocInstance;
 import org.genericsystem.cv.model.DocClass;
 import org.genericsystem.cv.model.ImgFilter;
-import org.genericsystem.cv.model.MeanLevenshtein;
 import org.genericsystem.cv.model.ImgFilter.ImgFilterInstance;
 import org.genericsystem.cv.model.LevDistance;
-import org.genericsystem.cv.model.MeanLevenshtein.MeanLevenshteinInstance;
-import org.genericsystem.cv.model.Score;
-import org.genericsystem.cv.model.Score.ScoreInstance;
 import org.genericsystem.cv.model.ZoneGeneric;
 import org.genericsystem.cv.model.ZoneGeneric.ZoneInstance;
-import org.genericsystem.kernel.Engine;
-import org.opencv.core.Core;
 import org.genericsystem.cv.model.ZoneText;
 import org.genericsystem.cv.model.ZoneText.ZoneTextInstance;
+import org.genericsystem.kernel.Engine;
+import org.opencv.core.Core;
 
 /**
  * The ComputeAllLevDistances class computes the {@link LevDistance} between two
@@ -72,7 +67,6 @@ public class ComputeAllLevDistances {
 			// Loop over all zone instances
 			zoneInstances.forEach(zoneInstance -> {
 				System.out.println("  => Zone " + zoneInstance);
-				engine.getCurrentCache().mount();
 
 				// Loop over all filters
 				for (int i = 0; i < imgFilterInstances.size(); ++i) {
@@ -96,9 +90,9 @@ public class ComputeAllLevDistances {
 					}
 					// Free some resources
 					System.gc();
+					System.runFinalization();
 				}
 				engine.getCurrentCache().flush();
-				engine.getCurrentCache().unmount();
 			});
 		});
 		engine.getCurrentCache().flush();
