@@ -26,25 +26,23 @@ public class Mlp {
 
 	public static void main(String[] args) {
 		Mlp mlp = new Mlp(2, 2);
+
 		mlp.addData(new float[] { 0, 0 }, new float[] { 1, 0 });
 		mlp.addData(new float[] { 1, 1 }, new float[] { 0, 1 });
 		mlp.addData(new float[] { 0, 1 }, new float[] { 1, 0 });
 		mlp.addData(new float[] { 1, 0 }, new float[] { 1, 0 });
-		// System.out.println(+mlp.getCount() + " " + mlp.label.size());
+
 		mlp.train();
-		mlp.predict(new float[] { 0, 0 });
-		System.out.println("0 xor 0, 0 or 0 = " + Arrays.toString(mlp.getResult()));
-		mlp.predict(new float[] { 1, 1 });
-		System.out.println("1 xor 1, 1 or 1 = " + Arrays.toString(mlp.getResult()));
-		mlp.predict(new float[] { 0, 1 });
-		System.out.println("0 xor 1, 0 or 1 = " + Arrays.toString(mlp.getResult()));
-		mlp.predict(new float[] { 1, 0 });
-		System.out.println("1 xor 0, 1 or 0 = " + Arrays.toString(mlp.getResult()));
+
+		System.out.println("0 xor 0, 0 or 0 = " + Arrays.toString(mlp.predict(new float[] { 0, 0 })));
+		System.out.println("1 xor 1, 1 or 1 = " + Arrays.toString(mlp.predict(new float[] { 1, 1 })));
+		System.out.println("0 xor 1, 0 or 1 = " + Arrays.toString(mlp.predict(new float[] { 0, 1 })));
+		System.out.println("1 xor 0, 1 or 0 = " + Arrays.toString(mlp.predict(new float[] { 1, 0 })));
 	}
 
-	public Mlp(int i, int o) {
-		input = i;
-		output = o;
+	public Mlp(int input, int output) {
+		this.input = input;
+		this.output = output;
 		mlp = ANN_MLP.create();
 		MatOfInt m1 = new MatOfInt(input, 8, output);
 		mlp.setLayerSizes(m1);
@@ -90,18 +88,19 @@ public class Mlp {
 		label.clear();
 	}
 
-	float predict(float[] i) {
+	float[] predict(float[] i) {
 		if (i.length != input)
-			return -1;
+			throw new IllegalStateException();
 		Mat test = new Mat(1, input, CvType.CV_32FC1);
 		test.put(0, 0, i);
-		float val = mlp.predict(test, result, 0);
-		return val;
+		double val = mlp.predict(test, result, 0);
+		// if (val != 0)
+		// System.out.println(val);
+		return getResult();
 	}
 
 	float[] getResult() {
-		float[] r = result.toArray();
-		return r;
+		return result.toArray();
 	}
 
 	float[] flatten(float[][] a) {
