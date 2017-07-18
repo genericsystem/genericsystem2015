@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.genericsystem.common.Root;
 import org.genericsystem.cv.comparator.FillModelWithData;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
@@ -59,7 +60,7 @@ public class Ocr {
 		int result = FillModelWithData.doImgOcr(imagePath);
 		return result;
 	}
-	
+
 	public static int ocrNewClassifiedImg(Root engine, Path imagePath) {
 		int result = FillModelWithData.doImgOcr(engine, imagePath);
 		return result;
