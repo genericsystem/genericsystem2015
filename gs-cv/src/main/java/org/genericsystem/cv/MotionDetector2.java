@@ -85,16 +85,20 @@ public class MotionDetector2 extends AbstractApp {
 	}
 
 	private Img deskiew(Mat frame) {
-		Img adaptativThreshold = new Img(frame).cvtColor(Imgproc.COLOR_BGR2GRAY).adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 17, 9);
-		Img closed = adaptativThreshold.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(5, 5));
-		Img copy = new Img(frame);
-		double angle = detection_contours(frame, closed.getSrc());
-		Mat matrix = Imgproc.getRotationMatrix2D(new Point(frame.width() / 2, frame.height() / 2), angle, 1);
-		Mat rotated = new Mat();
-		Imgproc.warpAffine(copy.getSrc(), rotated, matrix, new Size(frame.size().width, frame.size().height));
-		double crop = 0.15;
-		return new Img(new Mat(rotated,
-				new Rect(Double.valueOf(rotated.width() * crop).intValue(), Double.valueOf(rotated.height() * crop).intValue(), Double.valueOf(rotated.width() * (1 - 2 * crop)).intValue(), Double.valueOf(rotated.height() * (1 - 2 * crop)).intValue())));
+		try (Img img = new Img(frame, false);
+				Img adaptativThreshold = img.cvtColor(Imgproc.COLOR_BGR2GRAY).adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 17, 9);
+				Img closed = adaptativThreshold.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(5, 5));) {
+			double angle = detection_contours(frame, closed.getSrc());
+			Mat matrix = Imgproc.getRotationMatrix2D(new Point(frame.width() / 2, frame.height() / 2), angle, 1);
+			Mat rotated = new Mat();
+			Imgproc.warpAffine(frame, rotated, matrix, new Size(frame.size().width, frame.size().height));
+			double crop = 0.15;
+			Img result = new Img(new Mat(rotated,
+					new Rect(Double.valueOf(rotated.width() * crop).intValue(), Double.valueOf(rotated.height() * crop).intValue(), Double.valueOf(rotated.width() * (1 - 2 * crop)).intValue(), Double.valueOf(rotated.height() * (1 - 2 * crop)).intValue())), false);
+			matrix.release();
+			rotated.release();
+			return result;
+		}
 	}
 
 	public double detection_contours(Mat frame, Mat dilated) {

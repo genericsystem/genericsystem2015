@@ -26,8 +26,6 @@ public class HistogramComparator {
 				directories.add(path);
 				ImgClass imgClass = new ImgClass(path.toString());
 				imgs.add(imgClass.getClassModel() != null ? imgClass.getClassModel() : imgClass.getMean());
-				System.gc();
-				System.runFinalization();
 			}
 		} catch (IOException e) {
 			throw new IllegalStateException(e);
@@ -37,8 +35,6 @@ public class HistogramComparator {
 			System.out.println("\n======================= Images of class: " + path);
 			Tools.classImgsStream(path.toString()).forEach(img -> {
 				System.out.println("Best histogram: " + directories.get(img.findBestHisto(imgs)));
-				System.gc();
-				System.runFinalization();
 			});
 		}
 	}
