@@ -67,6 +67,8 @@ public class ClassifierParametersTest extends Application {
 		// row++;
 		// }
 
+		FeatureDetector detector = FeatureDetector.create(FeatureDetector.GFTT);
+		DescriptorExtractor extractor = DescriptorExtractor.create(DescriptorExtractor.OPPONENT_ORB);
 		for (File img1 : pngImgs) {
 			System.out.println("================== image : " + img1.getName());
 			int column = 0;
@@ -75,7 +77,7 @@ public class ClassifierParametersTest extends Application {
 			for (File img2 : adjustedImages) {
 				Mat mat2 = Imgcodecs.imread(img2.getPath());
 				gridPane.add(getImageViewFromMat(mat2), column++, row);
-				Mat result = Classifier.compareFeature(img1.getPath(), img2.getPath(), 50, FeatureDetector.GFTT, DescriptorExtractor.OPPONENT_ORB);
+				Mat result = Classifier.compareFeature(img1.getPath(), img2.getPath(), 50, detector, extractor);
 				if (result != null)
 					gridPane.add(getImageViewFromMat(result), column++, row);
 				else
