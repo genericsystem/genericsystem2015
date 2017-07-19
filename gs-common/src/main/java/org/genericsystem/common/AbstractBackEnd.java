@@ -36,6 +36,10 @@ public abstract class AbstractBackEnd {
 		return this.webSocketsServer;
 	}
 
+	public Map<String, Root> getRoots() {
+		return roots;
+	}
+
 	public static <T> T synchronizeTask(Handler<Handler<AsyncResult<T>>> consumer) {
 		BlockingQueue<AsyncResult<T>> blockingQueue = new ArrayBlockingQueue<>(1);
 		consumer.handle(res -> {
