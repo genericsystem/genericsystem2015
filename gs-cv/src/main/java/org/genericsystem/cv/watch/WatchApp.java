@@ -5,6 +5,7 @@ import java.util.Arrays;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
+import org.genericsystem.cv.comparator.FillModelWithData;
 import org.genericsystem.cv.model.Doc;
 import org.genericsystem.cv.model.Doc.DocFilename;
 import org.genericsystem.cv.model.Doc.DocInstance;
@@ -29,7 +30,7 @@ import org.genericsystem.cv.watch.DocPropertiesCheckerSwitcher.DOC_OCRD;
 import org.genericsystem.cv.watch.DocPropertiesCheckerSwitcher.DOC_SUPERVISED;
 import org.genericsystem.cv.watch.WatchApp.DocumentsList;
 import org.genericsystem.cv.watch.WatchApp.HeaderRow;
-import org.genericsystem.cv.watch.WatchApp.START_OCR_VERTICLE;
+import org.genericsystem.cv.watch.WatchApp.START_COMPUTATION;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.Attribute;
@@ -71,6 +72,7 @@ import org.genericsystem.reactor.gscomponents.RootTagImpl;
 import io.vertx.core.VertxOptions;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 @DependsOnModel({ Doc.class, RefreshTimestamp.class, DocTimestamp.class, DocFilename.class, DocClass.class, ZoneGeneric.class, ZoneText.class, ZoneTimestamp.class, ImgFilter.class, LevDistance.class, MeanLevenshtein.class, Score.class })
@@ -78,8 +80,8 @@ import javafx.collections.ObservableList;
 @Children(path = FlexDiv.class, pos = 2, value = { HeaderRow.class, DocumentsList.class })
 @Children(path = AppHeader.class, value = { Logo.class, AppTitleDiv.class, FlexDiv.class, HtmlButton.class })
 
-@SetText(path = { AppHeader.class, HtmlButton.class }, pos = { 0, 0 }, value = "start ocr verticle")
-@BindAction(path = { AppHeader.class, HtmlButton.class }, pos = { 0, 0 }, value = START_OCR_VERTICLE.class)
+@SetText(path = { AppHeader.class, HtmlButton.class }, pos = { 0, 0 }, value = "Start computation")
+@BindAction(path = { AppHeader.class, HtmlButton.class }, pos = { 0, 0 }, value = START_COMPUTATION.class)
 
 @Children(path = { AppHeader.class, FlexDiv.class }, pos = { 0, 2 }, value = { HtmlButton.class, HtmlButton.class })
 @SetText(path = { AppHeader.class, FlexDiv.class, HtmlButton.class }, pos = { 0, 2, 0 }, value = "Switch to admin mode")
@@ -236,9 +238,13 @@ public class WatchApp extends RootTagImpl {
 		public ObservableList<Generic> apply(Generic[] generics) {
 			Root root = generics[0].getRoot();
 			Generic currentDocClass = root.find(DocClass.class).getInstance(docClass);
-			System.out.println("Current doc class : " + currentDocClass.info());
-			Snapshot<Generic> docInstances = currentDocClass.getHolders(root.find(Doc.class));
-			return docInstances.toObservableList();
+			if (null != currentDocClass) {
+				System.out.println("Current doc class : " + currentDocClass.info());
+				Snapshot<Generic> docInstances = currentDocClass.getHolders(root.find(Doc.class));
+				return docInstances.toObservableList();
+			} else {
+				return FXCollections.emptyObservableList();
+			}
 		}
 	}
 
@@ -250,17 +256,13 @@ public class WatchApp extends RootTagImpl {
 		}
 	}
 
-	public static class START_OCR_VERTICLE implements ContextAction {
+	public static class START_COMPUTATION implements ContextAction {
 		@Override
 		public void accept(Context context, Tag tag) {
 			// TODO
-			// Vertx vertx = Vertx.vertx();
-			// vertx.deployVerticle(new org.genericsystem.watch.OcrVerticle(), res -> {
-			// if (res.failed())
-			// throw new IllegalStateException("Deployment of verticles failed.", res.cause());
-			// else
-			// System.out.println("Verticle deployed");
-			// });
+			System.out.println("Starting computation...");
+			FillModelWithData.compute(context.getGeneric().getRoot());
+			System.out.println("Done!");
 		}
 	}
 

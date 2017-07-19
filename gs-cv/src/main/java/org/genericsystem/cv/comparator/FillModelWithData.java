@@ -179,7 +179,7 @@ public class FillModelWithData {
 	 * @param engine
 	 *            - the engine used to store the data
 	 */
-	private static void compute(Root engine) {
+	public static void compute(Root engine) {
 		final String imgClassDirectory = "classes/" + docType;
 		final String imgDirectory = imgClassDirectory + "/ref2/";
 		log.info("imgClassDirectory = {} ", imgClassDirectory);
@@ -403,9 +403,6 @@ public class FillModelWithData {
 
 		System.out.println("Cleaning model...");
 
-		final String imgClassDirectory = "classes/" + docType;
-		final String imgDirectory = imgClassDirectory + "/ref2/";
-
 		// Get the necessary classes from the engine
 		DocClass docClass = engine.find(DocClass.class);
 		Generic doc = engine.find(Doc.class);
@@ -425,8 +422,10 @@ public class FillModelWithData {
 			imgFilterInstances.forEach(i -> {
 				zoneInstances.forEach(z -> {
 					ZoneTextInstance zti = zoneText.getZoneText(currentDoc, z, i);
-					if (zti != null)
+					if (zti != null) {
+						zti.getHolders(engine.find(ZoneTimestamp.class)).forEach(g -> g.remove());
 						zti.remove();
+					}
 				});
 				engine.getCurrentCache().flush();
 			});
