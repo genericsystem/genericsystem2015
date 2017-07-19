@@ -7,15 +7,15 @@ import java.util.function.Predicate;
 
 import org.opencv.core.Scalar;
 
-public class Shards implements Iterable<Shard> {
+public class Shards implements Iterable<Layout> {
 
-	private final List<Shard> shards;
+	private final List<Layout> shards;
 
 	public Shards() {
-		shards = new ArrayList<Shard>();
+		shards = new ArrayList<Layout>();
 	}
 
-	public Shards(List<Shard> shardsList) {
+	public Shards(List<Layout> shardsList) {
 		this.shards = shardsList;
 	}
 
@@ -23,7 +23,7 @@ public class Shards implements Iterable<Shard> {
 		return shards.isEmpty();
 	}
 
-	public Shards removeIf(Predicate<Shard> filter) {
+	public Shards removeIf(Predicate<Layout> filter) {
 		shards.removeIf(filter);
 		return this;
 	}
@@ -33,7 +33,7 @@ public class Shards implements Iterable<Shard> {
 	}
 
 	@Override
-	public Iterator<Shard> iterator() {
+	public Iterator<Layout> iterator() {
 		return shards.iterator();
 	}
 
