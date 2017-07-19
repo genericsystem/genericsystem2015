@@ -1,4 +1,4 @@
-package org.genericsystem.cv;
+package org.genericsystem.layout;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,9 +9,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
-
+import org.genericsystem.cv.AbstractApp;
+import org.genericsystem.cv.Img;
+import org.genericsystem.cv.Tools;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfKeyPoint;
@@ -27,6 +27,9 @@ import org.opencv.features2d.DescriptorMatcher;
 import org.opencv.features2d.FeatureDetector;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
+
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
 
 public class CamLayoutAnalyzer extends AbstractApp {
 
@@ -73,7 +76,7 @@ public class CamLayoutAnalyzer extends AbstractApp {
 	}
 
 	private Img deskew(Mat frame) {
-		try (Img img = new Img(frame, true);
+		try (Img img = new Img(frame);
 				Img adaptativThreshold = img.cvtColor(Imgproc.COLOR_BGR2GRAY).adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 17, 9);
 				Img closed = adaptativThreshold.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(5, 5));) {
 			double angle = detection_contours(frame, closed.getSrc());
@@ -81,8 +84,9 @@ public class CamLayoutAnalyzer extends AbstractApp {
 			Mat rotated = new Mat();
 			Imgproc.warpAffine(frame, rotated, matrix, new Size(frame.size().width, frame.size().height));
 			double crop = 0.15;
-			Img result = new Img(new Mat(rotated, new Rect(Double.valueOf(rotated.width() * crop).intValue(), Double.valueOf(rotated.height() * crop).intValue(), Double.valueOf(rotated.width() * (1 - 2 * crop)).intValue(), Double.valueOf(
-					rotated.height() * (1 - 2 * crop)).intValue())), false);
+			Img result = new Img(new Mat(rotated,
+					new Rect(Double.valueOf(rotated.width() * crop).intValue(), Double.valueOf(rotated.height() * crop).intValue(), Double.valueOf(rotated.width() * (1 - 2 * crop)).intValue(), Double.valueOf(rotated.height() * (1 - 2 * crop)).intValue())),
+					false);
 			matrix.release();
 			rotated.release();
 			return result;
@@ -125,7 +129,7 @@ public class CamLayoutAnalyzer extends AbstractApp {
 			List<MatOfPoint> mof = Collections.singletonList(new MatOfPoint(new MatOfPoint(result)));
 			Imgproc.drawContours(frame, mof, 0, new Scalar(0, 255, 0), 1);
 			// Imgproc.drawContours(dilated, mof, 0, new Scalar(255), 1);
-			});
+		});
 		return goodAverage;
 	}
 

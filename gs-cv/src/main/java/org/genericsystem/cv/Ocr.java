@@ -56,11 +56,13 @@ public class Ocr {
 		}
 	}
 
+	@Deprecated
 	public static int ocrNewClassifiedImg(Path imagePath) {
 		int result = FillModelWithData.doImgOcr(imagePath);
 		return result;
 	}
 
+	@Deprecated
 	public static int ocrNewClassifiedImg(Root engine, Path imagePath) {
 		int result = FillModelWithData.doImgOcr(engine, imagePath);
 		return result;

@@ -1,20 +1,22 @@
-package org.genericsystem.cv.watch;
+package org.genericsystem.watch.gui;
 
 import java.io.File;
 
-import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Root;
-import org.genericsystem.cv.model.ZoneGeneric;
-import org.genericsystem.cv.model.ZoneText;
 import org.genericsystem.cv.model.Doc.DocInstance;
 import org.genericsystem.cv.model.DocClass.DocClassInstance;
+import org.genericsystem.cv.model.ZoneText;
 import org.genericsystem.cv.model.ZoneText.ZoneTextInstance;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.context.TagSwitcher;
 
-import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 
 public class DocPropertiesCheckerSwitcher {
 
@@ -63,46 +65,50 @@ public class DocPropertiesCheckerSwitcher {
 	public static ObservableValue<Boolean> isClassZoneFilePresent(Context context, boolean reverse) {
 		DocInstance currentDoc = (DocInstance) context.getGeneric();
 		DocClassInstance docClassInstance = currentDoc.getDocClass();
-		File file = new File(System.getProperty("user.dir") + "/../gs-cv/classes/"
-				+ docClassInstance.getValue().toString() + "/zones/zones.json");
+		ObjectProperty<File> file = new SimpleObjectProperty<>(new File(System.getProperty("user.dir") + "/../gs-cv/classes/" + docClassInstance.getValue().toString() + "/zones/zones.json"));
+		BooleanBinding binding = Bindings.createBooleanBinding(() -> {
+			return null != file.get() && file.get().exists();
+		}, file);
 		if (reverse)
-			return new SimpleBooleanProperty(file.exists()).not();
+			return binding.not();
 		else
-			return new SimpleBooleanProperty(file.exists());
+			return binding;
 	}
 
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static ObservableValue<Boolean> isDocOcrd(Context context, boolean reverse) {
 		// TODO: verify / test
 		DocInstance currentDoc = (DocInstance) context.getGeneric();
 		Root root = currentDoc.getRoot();
-		Snapshot<ZoneTextInstance> zoneTextInstances = (Snapshot) currentDoc.getHolders(root.find(ZoneText.class));
+		ObservableList<ZoneTextInstance> zoneTextInstances = (ObservableList) currentDoc.getHolders(root.find(ZoneText.class)).toObservableList();
+		BooleanBinding binding = Bindings.createBooleanBinding(() -> null != zoneTextInstances, zoneTextInstances);
 		if (reverse)
-			return new SimpleBooleanProperty(zoneTextInstances != null).not();
+			return binding.not();
 		else
-			return new SimpleBooleanProperty(zoneTextInstances != null);
+			return binding;
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static ObservableValue<Boolean> isDocSupervised(Context context, boolean reverse) {
 		// TODO: will a document be considered as not supervised if a
 		// field needs to be left empty?
-		
+
 		DocInstance currentDoc = (DocInstance) context.getGeneric();
 		Root root = currentDoc.getRoot();
-		Snapshot<ZoneTextInstance> zoneTextInstances = (Snapshot) currentDoc.getHolders(root.find(ZoneText.class))
-				.filter(zt -> "reality".equals(((ZoneTextInstance) zt).getImgFilter().getValue()));
-		boolean supervised;
-		if (zoneTextInstances == null) {
-			supervised = false;
-		} else {
-			// If any field is empty, return false otherwise true
-			supervised = !zoneTextInstances.stream().anyMatch(g -> "".equals(g.getValue().toString()));
-		}
-		if (reverse)
-			return new SimpleBooleanProperty(supervised).not();
-		else
-			return new SimpleBooleanProperty(supervised);
-	}
+		ObservableList<ZoneTextInstance> zoneTextInstances = (ObservableList) currentDoc.getHolders(root.find(ZoneText.class)).toObservableList().filtered(zt -> "reality".equals(((ZoneTextInstance) zt).getImgFilter().getValue()));
 
+		BooleanBinding binding = Bindings.createBooleanBinding(() -> {
+			if (zoneTextInstances == null) {
+				return false;
+			} else {
+				// If any field is empty, return false otherwise true
+				return !zoneTextInstances.stream().anyMatch(g -> "".equals(g.getValue().toString()));
+			}
+		}, zoneTextInstances);
+
+		if (reverse)
+			return binding.not();
+		else
+			return binding;
+	}
 }

@@ -1,4 +1,4 @@
-package org.genericsystem.cv.watch;
+package org.genericsystem.watch.gui;
 
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
@@ -10,7 +10,6 @@ import org.genericsystem.cv.model.Doc.RefreshTimestamp.RefreshTimestampInstance;
 import org.genericsystem.cv.model.ModelTools;
 import org.genericsystem.cv.model.ZoneText;
 import org.genericsystem.cv.model.ZoneText.ZoneTextInstance;
-import org.genericsystem.cv.watch.ShowDocumentZones.TextDiv;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.Attribute;
@@ -38,6 +37,7 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlHyperLink;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlImg;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
 import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
+import org.genericsystem.watch.gui.ShowDocumentZones.TextDiv;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;

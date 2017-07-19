@@ -1,4 +1,4 @@
-package org.genericsystem.cv.watch;
+package org.genericsystem.watch.gui;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -15,7 +15,6 @@ import org.genericsystem.cv.model.ImgFilter.ImgFilterInstance;
 import org.genericsystem.cv.model.ZoneGeneric.ZoneInstance;
 import org.genericsystem.cv.model.ZoneText;
 import org.genericsystem.cv.model.ZoneText.ZoneTextInstance;
-import org.genericsystem.cv.watch.EditDocumentZones.TextDiv;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.Attribute;
@@ -49,6 +48,7 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlOption;
 import org.genericsystem.reactor.gscomponents.InputTextWithConversion.InputTextEditorWithConversionForDatalist;
 import org.genericsystem.reactor.gscomponents.InputWithDatalist;
 import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
+import org.genericsystem.watch.gui.EditDocumentZones.TextDiv;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
@@ -96,8 +96,7 @@ public class EditDocumentZones extends ModalEditor {
 	public static class Image extends HtmlImg {
 		@Override
 		public void init() {
-			bindAttribute("src", "imgadr",
-					context -> new SimpleStringProperty((String) context.getGeneric().getValue()));
+			bindAttribute("src", "imgadr", context -> new SimpleStringProperty((String) context.getGeneric().getValue()));
 		}
 	}
 
@@ -140,7 +139,6 @@ public class EditDocumentZones extends ModalEditor {
 		// TODO: generate the zonetextinstance only when necessary (i.e., not empty)?
 	}
 
-
 	public static class CustomInputDatalist extends InputTextEditorWithConversionForDatalist {
 		@Override
 		protected Generic updateGeneric(Context context, Serializable newValue) {
@@ -160,17 +158,13 @@ public class EditDocumentZones extends ModalEditor {
 			ZoneTextInstance zti = (ZoneTextInstance) generics[0];
 			Generic currentDoc = generics[1];
 			Root root = currentDoc.getRoot();
-			Predicate<ZoneTextInstance> filterByZone = z -> ((ZoneTextInstance) z).getZoneNum() == zti.getZoneNum()
-					&& !z.getValue().toString().isEmpty();
+			Predicate<ZoneTextInstance> filterByZone = z -> z.getZoneNum() == zti.getZoneNum() && !z.getValue().toString().isEmpty();
 			Snapshot<ZoneTextInstance> zoneTextInstances = (Snapshot) currentDoc.getHolders(root.find(ZoneText.class));
-			return (ObservableList) zoneTextInstances.toObservableList()
-					.filtered(filterByZone.and(distinctByKey(g -> g.getValue())))
-					.sorted((g1, g2) -> Integer.compare(g1.getZoneNum(), g2.getZoneNum()));
+			return (ObservableList) zoneTextInstances.toObservableList().filtered(filterByZone.and(distinctByKey(g -> g.getValue()))).sorted((g1, g2) -> Integer.compare(g1.getZoneNum(), g2.getZoneNum()));
 		}
 
 		/**
-		 * Utility function that can be used to filter a stream to get distinct
-		 * values, using a personalized function.
+		 * Utility function that can be used to filter a stream to get distinct values, using a personalized function.
 		 * 
 		 * @param keyExtractor
 		 *            - lambda expression that will provide the filter criteria
@@ -190,9 +184,7 @@ public class EditDocumentZones extends ModalEditor {
 			Root root = currentDoc.getRoot();
 			System.out.println("Document: " + currentDoc.info());
 			Snapshot<ZoneTextInstance> zoneTextInstances = (Snapshot) currentDoc.getHolders(root.find(ZoneText.class));
-			return (ObservableList) zoneTextInstances.toObservableList()
-					.filtered(zt -> "reality".equals(((ZoneTextInstance) zt).getImgFilter().getValue()))
-					.sorted((g1, g2) -> Integer.compare(g1.getZoneNum(), g2.getZoneNum()));
+			return (ObservableList) zoneTextInstances.toObservableList().filtered(zt -> "reality".equals(zt.getImgFilter().getValue())).sorted((g1, g2) -> Integer.compare(g1.getZoneNum(), g2.getZoneNum()));
 		}
 	}
 

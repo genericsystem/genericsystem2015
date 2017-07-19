@@ -1,4 +1,4 @@
-package org.genericsystem.cv;
+package org.genericsystem.layout;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
+import org.genericsystem.cv.Img;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
@@ -204,14 +205,13 @@ public class Layout {
 			if (!result[i] && result[i + 1])
 				start = i + 1;
 			else if (result[i] && !result[i + 1]) {
-				shards.add(vertical ? new Layout(0, 1, Integer.valueOf(start).doubleValue() / result.length, (Integer.valueOf(i).doubleValue() + 1) / result.length) : new Layout(Integer.valueOf(start).doubleValue() / result.length, (Integer.valueOf(i)
-						.doubleValue() + 1) / result.length, 0, 1));
+				shards.add(vertical ? new Layout(0, 1, Integer.valueOf(start).doubleValue() / result.length, (Integer.valueOf(i).doubleValue() + 1) / result.length)
+						: new Layout(Integer.valueOf(start).doubleValue() / result.length, (Integer.valueOf(i).doubleValue() + 1) / result.length, 0, 1));
 				start = null;
 			}
 		if (result[result.length - 1]) {
-			shards.add(vertical ? new Layout(0, 1, Integer.valueOf(start).doubleValue() / result.length, Integer.valueOf(result.length).doubleValue() / result.length) : new Layout(Integer.valueOf(start).doubleValue() / result.length, Integer.valueOf(
-					result.length).doubleValue()
-					/ result.length, 0, 1));
+			shards.add(vertical ? new Layout(0, 1, Integer.valueOf(start).doubleValue() / result.length, Integer.valueOf(result.length).doubleValue() / result.length)
+					: new Layout(Integer.valueOf(start).doubleValue() / result.length, Integer.valueOf(result.length).doubleValue() / result.length, 0, 1));
 			start = null;
 		}
 		return shards;
@@ -225,8 +225,6 @@ public class Layout {
 	}
 
 	public Layout recursivSplit(Size morph, int level, float concentration, Img img, Img binary) {
-		// System.out.println(this.toString());
-
 		assert img.size().equals(binary.size());
 		if (level < 0) {
 			Imgproc.rectangle(img.getSrc(), new Point(0, 0), new Point(img.width(), img.height()), new Scalar(255, 0, 0), -1);
@@ -244,18 +242,13 @@ public class Layout {
 			if (subShard.equiv(this, 0, 0)) {
 				shards = split(!vertical ? morph.height : morph.width, !vertical, concentration, binary);
 				shards.removeIf(shard -> (!vertical ? (shard.getY2() - shard.getY1()) * img.size().height : (shard.getX2() - shard.getX1()) * img.size().width) < 4);
-				// .removeIf(zone -> (!vertical ? zone.getRect().height : zone.getRect().width) < 4);
 				if (shards.isEmpty()) {
 					Imgproc.rectangle(img.getSrc(), new Point(0, 0), new Point(img.width(), img.height()), new Scalar(0, 0, 255), -1);
-					// System.out.println("Empty zone");
 					return this;
 				}
 				if (shards.size() == 1) {
 					subShard = shards.iterator().next();
 					if (subShard.equiv(new Layout(0, 1, 0, 1), 0, 0)) {
-						// System.out.println("Same zone");
-						// System.out.println("" + size() + " " + zones.iterator().next().getRect());
-						// zones.iterator().next().draw(zones.iterator().next().getRoi(imgToDraw), new Scalar(0, 0, 255), -1);
 						return this;
 					}
 				}

@@ -1,10 +1,12 @@
-package org.genericsystem.cv;
+package org.genericsystem.layout;
+
+import org.genericsystem.cv.AbstractApp;
+import org.genericsystem.cv.Img;
+import org.opencv.core.Core;
+import org.opencv.core.Scalar;
 
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
-
-import org.opencv.core.Core;
-import org.opencv.core.Scalar;
 
 public class LayoutAnalyzer extends AbstractApp {
 	static {

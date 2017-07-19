@@ -68,8 +68,8 @@ public class FillModelWithData {
 		final Engine engine = new Engine(gsPath, Doc.class, RefreshTimestamp.class, DocTimestamp.class, DocFilename.class, DocClass.class, ZoneGeneric.class, ZoneText.class, ZoneTimestamp.class, ImgFilter.class, LevDistance.class, MeanLevenshtein.class,
 				Score.class);
 		engine.newCache().start();
-		compute(engine);
-		// cleanModel(engine);
+		// compute(engine);
+		cleanModel(engine);
 		engine.close();
 	}
 
@@ -150,9 +150,6 @@ public class FillModelWithData {
 
 		final Path imgClassDirectory = imagePath.getParent();
 		final String docType = imgClassDirectory.getName(imgClassDirectory.getNameCount() - 1).toString();
-		// TODO: remove the following line (only present in development)
-		final String imgDirectory = imgClassDirectory.toString() + "/ref2/";
-		log.info("imgDirectory = {} ", imgDirectory);
 
 		int result = ERROR;
 
@@ -179,8 +176,9 @@ public class FillModelWithData {
 	 * @param engine
 	 *            - the engine used to store the data
 	 */
-	private static void compute(Root engine) {
+	public static void compute(Root engine) {
 		final String imgClassDirectory = "classes/" + docType;
+		// TODO: remove the following line (only present in development)
 		final String imgDirectory = imgClassDirectory + "/ref2/";
 		log.info("imgClassDirectory = {} ", imgClassDirectory);
 		// Save the current document class
@@ -343,6 +341,7 @@ public class FillModelWithData {
 		// duplicates in a public folder
 		log.info("Copying {} to resources folder", filenameExt);
 		Imgcodecs.imwrite(System.getProperty("user.dir") + "/../gs-cv/src/main/resources/" + filenameExt, imgCopy.getSrc());
+		Imgcodecs.imwrite(System.getProperty("user.dir") + "/../gs-watch/src/main/resources/" + filenameExt, imgCopy.getSrc());
 
 		// Process each zone
 		zones.getZones().forEach(z -> {
@@ -367,6 +366,7 @@ public class FillModelWithData {
 		return result;
 	}
 
+	@SuppressWarnings("unused")
 	private static Map<String, Function<Img, Img>> filterOptimizationMap() {
 		final Map<String, Function<Img, Img>> imgFilters = new ConcurrentHashMap<>();
 		// Niblack
@@ -403,9 +403,6 @@ public class FillModelWithData {
 
 		System.out.println("Cleaning model...");
 
-		final String imgClassDirectory = "classes/" + docType;
-		final String imgDirectory = imgClassDirectory + "/ref2/";
-
 		// Get the necessary classes from the engine
 		DocClass docClass = engine.find(DocClass.class);
 		Generic doc = engine.find(Doc.class);
@@ -421,17 +418,21 @@ public class FillModelWithData {
 		List<ZoneInstance> zoneInstances = (List) currentDocClass.getHolders(engine.find(ZoneGeneric.class)).toList();
 		List<DocInstance> docInstances = (List) currentDocClass.getHolders(engine.find(Doc.class)).toList();
 
+		// Delete all ZoneTextInstances that are not "reality"
 		docInstances.forEach(currentDoc -> {
 			imgFilterInstances.forEach(i -> {
 				zoneInstances.forEach(z -> {
 					ZoneTextInstance zti = zoneText.getZoneText(currentDoc, z, i);
-					if (zti != null)
+					if (zti != null) {
+						zti.getHolders(engine.find(ZoneTimestamp.class)).forEach(g -> g.remove());
 						zti.remove();
+					}
 				});
 				engine.getCurrentCache().flush();
 			});
 		});
 
+		// Delete all filters that are not reality", and their attached scores
 		imgFilterInstances.forEach(i -> {
 			zoneInstances.forEach(z -> {
 				ScoreInstance scoreInst = score.getScore(z, i);
@@ -443,8 +444,28 @@ public class FillModelWithData {
 			i.remove();
 			engine.getCurrentCache().flush();
 		});
-		engine.getCurrentCache().flush();
 
+		// Finally delete all documents for which no ZoneTextInstances exist (i.e., not supervised)
+		docInstances.forEach(currentDoc -> {
+			zoneInstances.forEach(z -> {
+				boolean result = imgFilter.getInstances().stream().allMatch(i -> {
+					ZoneTextInstance zti = zoneText.getZoneText(currentDoc, z, (ImgFilterInstance) i);
+					return null == zti || zti.getValue().toString().isEmpty();
+				});
+				if (result) {
+					currentDoc.getDependencies().forEach(dependency -> {
+						currentDoc.getHolders(dependency).forEach(g -> g.remove());
+						dependency.remove();
+						engine.getCurrentCache().flush();
+					});
+					// FIXME unable to delete the currentDoc (AliveConstraint violation)
+					currentDoc.remove();
+					engine.getCurrentCache().flush();
+				}
+			});
+		});
+
+		engine.getCurrentCache().flush();
 		System.out.println("Done!");
 	}
 }
