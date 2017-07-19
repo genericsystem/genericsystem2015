@@ -20,7 +20,6 @@ import org.genericsystem.cv.model.ZoneGeneric;
 import org.genericsystem.cv.model.ZoneGeneric.ZoneInstance;
 import org.genericsystem.cv.model.ZoneText;
 import org.genericsystem.cv.model.ZoneText.ZoneTextInstance;
-import org.genericsystem.cv.watch.SetRealValues;
 import org.genericsystem.kernel.Engine;
 import org.opencv.core.Core;
 import org.opencv.core.Size;
@@ -28,9 +27,7 @@ import org.opencv.core.Size;
 /**
  * Get the OCR text for all specified documents using pre-treated images.
  * 
- * A score gets computed based on trained data, and stored in csv files. It is
- * recommended to use {@link FillModelWithData}, {@link SetRealValues} and
- * {@link ComputeTrainedScores} instead.
+ * A score gets computed based on trained data, and stored in csv files. It is recommended to use {@link FillModelWithData}, {@link SetRealValues} and {@link ComputeTrainedScores} instead.
  * 
  * @author Pierrik Lassalas
  *
@@ -39,8 +36,7 @@ import org.opencv.core.Size;
 public class ClassImgZoneComparator {
 
 	private final static String imgClassDirectory = "classes/id-fr-front";
-	private final static Engine engine = new Engine(System.getenv("HOME") + "/genericsystem/gs-cv_model/", Doc.class,
-			DocClass.class, ZoneGeneric.class, ZoneText.class, ImgFilter.class);
+	private final static Engine engine = new Engine(System.getenv("HOME") + "/genericsystem/gs-cv_model/", Doc.class, DocClass.class, ZoneGeneric.class, ZoneText.class, ImgFilter.class);
 
 	static {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
@@ -80,19 +76,14 @@ public class ClassImgZoneComparator {
 		DocClassInstance docClassInstance = docClass.getDocClass(imgClassDirectory.replace("classes/", ""));
 
 		// Compute the scores for each image in the "/ref" sub-directory
-		Arrays.asList(new File(imgClassDirectory + "/ref/").listFiles()).stream()
-		.filter(img -> img.getName().endsWith(".png")).forEach(file -> {
+		Arrays.asList(new File(imgClassDirectory + "/ref/").listFiles()).stream().filter(img -> img.getName().endsWith(".png")).forEach(file -> {
 			System.out.println("File : " + file.getName());
 			// Create a Map containing both the img and the name of the
 			// filter
 			Map<Img, String> imgFiltersMap = new HashMap<>();
 			imgFiltersMap.put(new Img(file.getPath()), "original");
-			Arrays.asList(
-					new File(imgClassDirectory + "/mask/" + file.getName().replace(".png", "")).listFiles())
-			.stream().filter(img -> img.getName().endsWith(".png")).forEach(img -> {
-				imgFiltersMap.put(new Img(img.getPath()),
-						img.getName().replace(file.getName().replace(".png", ""), "").substring(1)
-						.replace(".png", ""));
+			Arrays.asList(new File(imgClassDirectory + "/mask/" + file.getName().replace(".png", "")).listFiles()).stream().filter(img -> img.getName().endsWith(".png")).forEach(img -> {
+				imgFiltersMap.put(new Img(img.getPath()), img.getName().replace(file.getName().replace(".png", ""), "").substring(1).replace(".png", ""));
 			});
 
 			for (Zone zone : zones2) {
@@ -103,16 +94,14 @@ public class ClassImgZoneComparator {
 				ZoneInstance zoneInstance = docClassInstance.getZone(zone.getNum());
 				ImgFilterInstance imgFilterInstance = (ImgFilterInstance) imgFilter.getInstance("reality");
 				// Get the real text from GS
-				ZoneTextInstance zoneTextInstance = (ZoneTextInstance) zoneText.getInstance(docInstance,
-						zoneInstance, imgFilterInstance);
+				ZoneTextInstance zoneTextInstance = (ZoneTextInstance) zoneText.getInstance(docInstance, zoneInstance, imgFilterInstance);
 				String realText = zoneTextInstance.getValue().toString();
 				System.out.println("> real text : " + realText);
 
 				// ZoneScorerMap scorer =
 				// zone.newUnsupervisedScorerMap(file.getName(),
 				// map.entrySet().stream());
-				ZoneScorerMap scorer = zone.newSupervisedScorerMap(file.getName(), realText,
-						imgFiltersMap.entrySet().stream());
+				ZoneScorerMap scorer = zone.newSupervisedScorerMap(file.getName(), realText, imgFiltersMap.entrySet().stream());
 			}
 		});
 	}
