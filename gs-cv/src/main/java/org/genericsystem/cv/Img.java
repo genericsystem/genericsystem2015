@@ -14,11 +14,9 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-
 import javax.swing.ImageIcon;
 
+import org.genericsystem.layout.Layout;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.KeyPoint;
@@ -43,6 +41,9 @@ import org.opencv.ximgproc.Ximgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+
 public class Img implements AutoCloseable {
 
 	private static Logger log = LoggerFactory.getLogger(Img.class);
@@ -61,7 +62,7 @@ public class Img implements AutoCloseable {
 		this(src, true);
 	}
 
-	protected Img(Mat src, boolean clone) {
+	public Img(Mat src, boolean clone) {
 		if (clone) {
 			this.src = new Mat();
 			src.copyTo(this.src);
