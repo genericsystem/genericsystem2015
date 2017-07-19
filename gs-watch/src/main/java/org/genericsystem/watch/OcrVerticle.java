@@ -46,8 +46,7 @@ public class OcrVerticle extends AbstractVerticle {
 	 */
 	public void deployOcrVerticle() {
 		DeploymentOptions options = new DeploymentOptions().setWorker(true);
-		OcrVerticle ocrVerticle = new OcrVerticle(engine);
-		GSVertx.vertx().getVertx().deployVerticle(ocrVerticle, options, res -> {
+		GSVertx.vertx().getVertx().deployVerticle(this, options, res -> {
 			if (res.failed())
 				throw new IllegalStateException("Deployment of verticles failed.", res.cause());
 			else

@@ -27,9 +27,7 @@ public class VerticleDeployer extends AbstractVerticle {
 
 	public static void deployVerticle(Verticle verticle, VertxOptions vertxOptions) {
 		ClusterManager mgr = new HazelcastClusterManager();
-
 		vertxOptions.setClustered(true).setClusterManager(mgr);
-
 		Vertx.clusteredVertx(vertxOptions, res -> {
 			if (res.succeeded()) {
 				Vertx vertx = res.result();

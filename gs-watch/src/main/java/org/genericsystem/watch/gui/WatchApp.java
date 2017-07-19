@@ -57,6 +57,7 @@ import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
 import org.genericsystem.reactor.gscomponents.Monitor;
 import org.genericsystem.reactor.gscomponents.RootTagImpl;
 import org.genericsystem.watch.OcrVerticle;
+import org.genericsystem.watch.VerticleDeployerFromWatchApp;
 import org.genericsystem.watch.gui.DocPropertiesCheckerSwitcher.DOC_DEZONED;
 import org.genericsystem.watch.gui.DocPropertiesCheckerSwitcher.DOC_NOT_DEZONED;
 import org.genericsystem.watch.gui.DocPropertiesCheckerSwitcher.DOC_NOT_OCRD;
@@ -97,11 +98,12 @@ public class WatchApp extends RootTagImpl {
 
 	public static void main(String[] mainArgs) {
 		ApplicationServer server = ApplicationServer.startSimpleGenericApp(mainArgs, WatchApp.class, gsPath);
-		Root root = server.getRoots().get( System.getenv("HOME") + "/genericsystem/" +  gsPath);
-		OcrVerticle ocrVerticle = new OcrVerticle(root);
-		ocrVerticle.deployOcrVerticle();
+		Root root = server.getRoots().get(System.getenv("HOME") + "/genericsystem/" + gsPath);
+		// OcrVerticle ocrVerticle = new OcrVerticle(root);
+		// ocrVerticle.deployOcrVerticle();
+		VerticleDeployerFromWatchApp deployer = new VerticleDeployerFromWatchApp(root);
+		deployer.doDeploy();
 	}
-
 
 	@Children({ HtmlLabel.class, HtmlLabel.class, HtmlLabel.class, HtmlLabel.class, HtmlLabel.class, HtmlLabel.class })
 	@FlexDirectionStyle(FlexDirection.ROW)
