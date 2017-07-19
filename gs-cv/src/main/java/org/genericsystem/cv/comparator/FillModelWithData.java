@@ -150,9 +150,6 @@ public class FillModelWithData {
 
 		final Path imgClassDirectory = imagePath.getParent();
 		final String docType = imgClassDirectory.getName(imgClassDirectory.getNameCount() - 1).toString();
-		// TODO: remove the following line (only present in development)
-		final String imgDirectory = imgClassDirectory.toString() + "/ref2/";
-		log.info("imgDirectory = {} ", imgDirectory);
 
 		int result = ERROR;
 
@@ -181,6 +178,7 @@ public class FillModelWithData {
 	 */
 	public static void compute(Root engine) {
 		final String imgClassDirectory = "classes/" + docType;
+		// TODO: remove the following line (only present in development)
 		final String imgDirectory = imgClassDirectory + "/ref2/";
 		log.info("imgClassDirectory = {} ", imgClassDirectory);
 		// Save the current document class
@@ -343,6 +341,7 @@ public class FillModelWithData {
 		// duplicates in a public folder
 		log.info("Copying {} to resources folder", filenameExt);
 		Imgcodecs.imwrite(System.getProperty("user.dir") + "/../gs-cv/src/main/resources/" + filenameExt, imgCopy.getSrc());
+		Imgcodecs.imwrite(System.getProperty("user.dir") + "/../gs-watch/src/main/resources/" + filenameExt, imgCopy.getSrc());
 
 		// Process each zone
 		zones.getZones().forEach(z -> {
@@ -367,6 +366,7 @@ public class FillModelWithData {
 		return result;
 	}
 
+	@SuppressWarnings("unused")
 	private static Map<String, Function<Img, Img>> filterOptimizationMap() {
 		final Map<String, Function<Img, Img>> imgFilters = new ConcurrentHashMap<>();
 		// Niblack
@@ -418,6 +418,7 @@ public class FillModelWithData {
 		List<ZoneInstance> zoneInstances = (List) currentDocClass.getHolders(engine.find(ZoneGeneric.class)).toList();
 		List<DocInstance> docInstances = (List) currentDocClass.getHolders(engine.find(Doc.class)).toList();
 
+		// Delete all ZoneTextInstances that are not "reality"
 		docInstances.forEach(currentDoc -> {
 			imgFilterInstances.forEach(i -> {
 				zoneInstances.forEach(z -> {
@@ -431,6 +432,7 @@ public class FillModelWithData {
 			});
 		});
 
+		// Delete all filters that are not reality", and their attached scores
 		imgFilterInstances.forEach(i -> {
 			zoneInstances.forEach(z -> {
 				ScoreInstance scoreInst = score.getScore(z, i);
@@ -442,8 +444,19 @@ public class FillModelWithData {
 			i.remove();
 			engine.getCurrentCache().flush();
 		});
-		engine.getCurrentCache().flush();
 
+		// Finally delete all documents for which no ZoneTextInstances exist (i.e., not supervised)
+		docInstances.forEach(currentDoc -> {
+			zoneInstances.forEach(z -> {
+				boolean result = imgFilter.getInstances().stream().allMatch(i -> null == zoneText.getZoneText(currentDoc, z, (ImgFilterInstance) i));
+				if (result) {
+					currentDoc.remove();
+					engine.getCurrentCache().flush();
+				}
+			});
+		});
+
+		engine.getCurrentCache().flush();
 		System.out.println("Done!");
 	}
 }
