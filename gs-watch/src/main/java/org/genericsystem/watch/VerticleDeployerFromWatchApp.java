@@ -36,7 +36,7 @@ public class VerticleDeployerFromWatchApp extends AbstractVerticle {
 	}
 
 	public void doDeploy() {
-		DeploymentOptions options = new DeploymentOptions();
+		DeploymentOptions options = new DeploymentOptions().setWorker(true).setMaxWorkerExecuteTime(Long.MAX_VALUE);
 		GSVertx.vertx().getVertx().deployVerticle(this, options, res -> {
 			if (res.failed())
 				throw new IllegalStateException("Deployment of main verticle (" + deploymentID() + ") failed.", res.cause());
@@ -61,7 +61,7 @@ public class VerticleDeployerFromWatchApp extends AbstractVerticle {
 
 	@Override
 	public void start(Future<Void> startFuture) throws Exception {
-		// deployVerticle(new MailWatcherVerticle(), true);
+		deployVerticle(new MailWatcherVerticle(), true);
 		deployVerticle(new PdfsConverterVerticle(), true);
 		deployVerticle(new ClassifierVerticle(), true);
 		deployVerticle(new DezonerVerticle(), true);
