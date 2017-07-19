@@ -1,4 +1,4 @@
-package org.genericsystem.cv.watch;
+package org.genericsystem.watch.gui;
 
 import java.io.File;
 
@@ -111,5 +111,4 @@ public class DocPropertiesCheckerSwitcher {
 		else
 			return binding;
 	}
-
 }
