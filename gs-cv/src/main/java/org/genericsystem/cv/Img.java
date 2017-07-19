@@ -12,12 +12,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.swing.ImageIcon;
 
+import org.genericsystem.layout.Layout;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.KeyPoint;
@@ -63,7 +62,7 @@ public class Img implements AutoCloseable {
 		this(src, true);
 	}
 
-	protected Img(Mat src, boolean clone) {
+	public Img(Mat src, boolean clone) {
 		if (clone) {
 			this.src = new Mat();
 			src.copyTo(this.src);
@@ -75,7 +74,7 @@ public class Img implements AutoCloseable {
 		this.src = new Mat(model.getSrc(), zone.getRect());
 	}
 
-	public Img(Img model, Shard shard) {
+	public Img(Img model, Layout shard) {
 		this.src = new Mat(model.getSrc(), new Rect(new Point(shard.getX1() * model.width(), shard.getY1() * model.height()), new Size((shard.getX2() - shard.getX1()) * model.width(), (shard.getY2() - shard.getY1()) * model.height())));
 	}
 
@@ -842,126 +841,6 @@ public class Img implements AutoCloseable {
 		return new Img(result, false);
 	}
 
-	public Zones split(double morph, boolean vertical, float concentration) {
-		assert 1 / (vertical ? src.rows() : src.cols()) < concentration;
-		// if ((vertical ? src.rows() : src.cols()) <= 4)
-		// System.out.println("size too low : " + (vertical ? src.rows() : src.cols()));
-		List<Float> histo = new ArrayList<>();
-		Converters.Mat_to_vector_float((vertical ? projectVertically() : projectHorizontally().transpose()).getSrc(), histo);
-		float min = concentration * 255;
-		float max = (1 - concentration) * 255;
-		for (int i = 1; i < histo.size() - 1; i++) {
-			float value = histo.get(i);
-			if (value <= min && histo.size() > 32) {
-				histo.set(i, 0f);
-				// if (vertical)
-				// Imgproc.line(src, new Point(0, i), new Point(src.cols(), i), new Scalar(255));
-				// else
-				// Imgproc.line(src, new Point(i, 0), new Point(i, src.rows()), new Scalar(255));
-			}
-			if (value >= max && histo.size() > 32) {
-				histo.set(i, 0f);
-				// if (vertical)
-				// Imgproc.line(getSrc(), new Point(0, i), new Point(src.cols(), i), new Scalar(255));
-				// else
-				// Imgproc.line(getSrc(), new Point(i, 0), new Point(i, src.rows()), new Scalar(255));
-			}
-		}
-		return split(histo, morph, vertical ? src.cols() : src.rows(), vertical, concentration);
-	}
-
-	private static Zones split(List<Float> histo, double morph, int matSize, boolean vertical, float concentration) {
-		int k = new Double(Math.floor(morph * histo.size())).intValue();
-		boolean[] closed = new boolean[histo.size()];
-		Function<Integer, Boolean> isBlack = i -> histo.get(i) == 0;
-		for (int i = 0; i < histo.size() - 1; i++)
-			if (!isBlack.apply(i) && isBlack.apply(i + 1)) {
-				for (int j = k + 1; j > 0; j--)
-					if (i + j < histo.size()) {
-						if (!isBlack.apply(i + j)) {
-							Arrays.fill(closed, i, i + j + 1, true);
-							i += j - 1;
-							break;
-						}
-						closed[i] = !isBlack.apply(i);
-					}
-			} else
-				closed[i] = !isBlack.apply(i);
-		if (!closed[histo.size() - 1])
-			closed[histo.size() - 1] = !isBlack.apply(histo.size() - 1);
-		return extractZones(closed, matSize, vertical);
-	}
-
-	private static Zones extractZones(boolean[] result, int matSize, boolean vertical) {
-		List<Zone> zones = new ArrayList<>();
-		Integer start = result[0] ? 0 : null;
-		assert result.length >= 1;
-		for (int i = 0; i < result.length - 1; i++)
-			if (!result[i] && result[i + 1])
-				start = i + 1;
-			else if (result[i] && !result[i + 1]) {
-				assert matSize > 0;
-				assert i - start + 1 > 0;
-				zones.add(new Zone(0, vertical ? new Rect(0, start, matSize, i - start + 1) : new Rect(start, 0, i - start + 1, matSize)));
-				start = null;
-			}
-		if (result[result.length - 1]) {
-			assert start != null;
-			assert result.length - start > 0;
-			assert matSize > 0;
-			zones.add(new Zone(0, vertical ? new Rect(0, start, matSize, result.length - start) : new Rect(start, 0, result.length - start, matSize)));
-			start = null;
-		}
-		// assert !zones.isEmpty();
-		return new Zones(zones);
-	}
-
-	public Img recursiveSplit(Size morph, int level, float concentration, Img imgToDraw, BiConsumer<Img, Zones> visitor, Shard shard) {
-		if (level < 0) {
-			Imgproc.rectangle(imgToDraw.getSrc(), new Point(0, 0), new Point(imgToDraw.width(), imgToDraw.height()), new Scalar(255, 0, 0), -1);
-			return this;
-		}
-		boolean vertical = src.size().height > src.size().width;
-		Zones zones = split(vertical ? morph.height : morph.width, vertical, concentration).removeIf(zone -> (vertical ? zone.getRect().height : zone.getRect().width) < 4);
-		if (zones.isEmpty()) {
-			Imgproc.rectangle(imgToDraw.getSrc(), new Point(0, 0), new Point(imgToDraw.width(), imgToDraw.height()), new Scalar(0, 0, 255), -1);
-			//// System.out.println("Empty zone ?");
-			return this;
-		}
-		if (zones.size() == 1) {
-			Rect subRect = zones.iterator().next().getRect();
-			if (subRect.size().equals(size())) {
-				zones = split(!vertical ? morph.height : morph.width, !vertical, concentration).removeIf(zone -> (!vertical ? zone.getRect().height : zone.getRect().width) < 4);
-				if (zones.isEmpty()) {
-					Imgproc.rectangle(imgToDraw.getSrc(), new Point(0, 0), new Point(imgToDraw.width(), imgToDraw.height()), new Scalar(0, 0, 255), -1);
-					// System.out.println("Empty zone ?");
-					return this;
-				}
-				if (zones.size() == 1) {
-					subRect = zones.iterator().next().getRect();
-					if (subRect.size().equals(size())) {
-						// System.out.println("" + size() + " " + zones.iterator().next().getRect());
-						// zones.iterator().next().draw(zones.iterator().next().getRoi(imgToDraw), new Scalar(0, 0, 255), -1);
-						return this;
-					}
-				}
-			}
-		}
-		for (Zone zone : zones) {
-			if (shard != null) {
-				Shard s = new Shard((double) zone.getRect().x / imgToDraw.width(), (double) (zone.getRect().x + zone.getRect().width) / imgToDraw.width(), (double) (zone.getRect().y) / imgToDraw.height(),
-						(double) (zone.getRect().y + zone.getRect().height) / imgToDraw.height());
-				shard.addChild(s);
-				zone.getRoi(this).recursiveSplit(morph, level - 1, concentration, zone.getRoi(imgToDraw), visitor, s);
-			} else {
-				zone.getRoi(this).recursiveSplit(morph, level - 1, concentration, zone.getRoi(imgToDraw), visitor, null);
-			}
-
-		}
-		visitor.accept(imgToDraw, zones);
-		return this;
-	}
-
 	public Img houghLinesP(double rho, double theta, int threshold) {
 		Mat result = new Mat();
 		Imgproc.HoughLinesP(src, result, rho, theta, threshold);
@@ -981,5 +860,10 @@ public class Img implements AutoCloseable {
 	@Override
 	public void close() {
 		src.release();
+	}
+
+	public Layout buildLayout() {
+		Img adaptivSplit = bgr2Gray().adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 17, 15);
+		return new Layout(0, 1, 0, 1).recursivSplit(new Size(0.036, 0.009), 100, 0.01f, this, adaptivSplit);
 	}
 }

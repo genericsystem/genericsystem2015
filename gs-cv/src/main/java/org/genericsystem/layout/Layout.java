@@ -1,4 +1,4 @@
-package org.genericsystem.cv;
+package org.genericsystem.layout;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -6,13 +6,14 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
+import org.genericsystem.cv.Img;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
 
-public class Shard {
+public class Layout {
 
 	private double x1;
 	private double x2;
@@ -20,39 +21,39 @@ public class Shard {
 	private double y2;
 
 	private String label;
-	private List<Shard> children = new ArrayList<Shard>();
-	private Shard parent = null;
+	private List<Layout> children = new ArrayList<Layout>();
+	private Layout parent = null;
 
-	public Shard(double x1, double x2, double y1, double y2) {
+	public Layout(double x1, double x2, double y1, double y2) {
 		this.x1 = x1;
 		this.x2 = x2;
 		this.y1 = y1;
 		this.y2 = y2;
 	}
 
-	public Shard() {
-
-	}
-
 	public Img getRoi(Img img) {
 		return new Img(img, this);
 	}
 
+	// public void draw(Img img, Scalar color, int thickness) {
+	// Imgproc.rectangle(img.getSrc(), new Point(x1 * img.width(), y1 * img.height()), new Point(x2 * img.width(), y2 * img.height()), color, thickness);// rect.tl(), rect.br(), color, thickness);
+	// }
+
 	public void draw(Img img, Scalar color, int thickness) {
-		Imgproc.rectangle(img.getSrc(), new Point(x1 * img.width(), y1 * img.height()), new Point(x2 * img.width(), y2 * img.height()), color, thickness);// rect.tl(), rect.br(), color, thickness);
+		traverse(img, (roi, shard) -> Imgproc.rectangle(roi.getSrc(), new Point(0, 0), new Point(roi.width() - 1, roi.height() - 1), color, thickness));
 	}
 
-	public void addChild(Shard child) {
+	public void addChild(Layout child) {
 		if (!children.contains(child))
 			children.add(child);
 	}
 
-	public void removeChild(Shard child) {
+	public void removeChild(Layout child) {
 		if (children.contains(child))
 			children.remove(child);
 	}
 
-	public boolean equiv(Shard s, double xTolerance, double yTolerance) {
+	public boolean equiv(Layout s, double xTolerance, double yTolerance) {
 
 		if (Math.abs(s.x1 - x1) <= xTolerance && Math.abs(s.x2 - x2) <= xTolerance && Math.abs(s.y1 - y1) <= yTolerance && Math.abs(s.y2 - y2) <= yTolerance)
 			return true;
@@ -60,7 +61,7 @@ public class Shard {
 		return false;
 	}
 
-	public List<Shard> getChildren() {
+	public List<Layout> getChildren() {
 		return children;
 	}
 
@@ -104,11 +105,11 @@ public class Shard {
 		this.label = label;
 	}
 
-	public Shard getParent() {
+	public Layout getParent() {
 		return parent;
 	}
 
-	public void setParent(Shard parent) {
+	public void setParent(Layout parent) {
 		this.parent = parent;
 	}
 
@@ -120,25 +121,23 @@ public class Shard {
 		return false;
 	}
 
-	public String toStringRecursive() {
-
+	public String recursivToString() {
 		StringBuilder sb = new StringBuilder();
-		int depth = 0;
-		toStringRecursive(this, sb, depth);
+		recursivToString(this, sb, 0);
 		return sb.toString();
 	}
 
-	private void toStringRecursive(Shard shard, StringBuilder sb, int depth) {
+	private void recursivToString(Layout shard, StringBuilder sb, int depth) {
 		sb.append("depth : " + depth + " : ");
 		sb.append("((" + shard.x1 + "-" + shard.y1 + "),(" + shard.x2 + "-" + shard.y2 + "))".toString());
 
 		if (shard.hasChildren()) {
 			depth++;
-			for (Shard s : shard.getChildren()) {
+			for (Layout s : shard.getChildren()) {
 				sb.append("\n");
 				for (int i = 0; i < depth; i++)
 					sb.append("    ");
-				toStringRecursive(s, sb, depth);
+				recursivToString(s, sb, depth);
 			}
 		}
 	}
@@ -148,7 +147,7 @@ public class Shard {
 		return "tl : (" + this.x1 + "," + this.y1 + "), br :(" + this.x2 + "," + this.y2 + ")";
 	}
 
-	public static Shards split(double morph, boolean vertical, float concentration, Img binary) {
+	public static List<Layout> split(double morph, boolean vertical, float concentration, Img binary) {
 		// assert 1 / (vertical ? binary.rows() : binary.cols()) < concentration;
 		// if ((vertical ? binary.rows() : binary.cols()) <= 4)
 		// System.out.println("size too low : " + (vertical ? binary.rows() : binary.cols()));
@@ -176,7 +175,7 @@ public class Shard {
 		return split(histo, morph, vertical ? binary.cols() : binary.rows(), vertical, concentration);
 	}
 
-	private static Shards split(List<Float> histo, double morph, int matSize, boolean vertical, float concentration) {
+	private static List<Layout> split(List<Float> histo, double morph, int matSize, boolean vertical, float concentration) {
 		int k = new Double(Math.floor(morph * histo.size())).intValue();
 		boolean[] closed = new boolean[histo.size()];
 		Function<Integer, Boolean> isBlack = i -> histo.get(i) == 0;
@@ -198,66 +197,67 @@ public class Shard {
 		return extractZones(closed, vertical);
 	}
 
-	private static Shards extractZones(boolean[] result, boolean vertical) {
-		List<Shard> shards = new ArrayList<>();
+	private static List<Layout> extractZones(boolean[] result, boolean vertical) {
+		List<Layout> shards = new ArrayList<>();
 		Integer start = result[0] ? 0 : null;
 		assert result.length >= 1;
 		for (int i = 0; i < result.length - 1; i++)
 			if (!result[i] && result[i + 1])
 				start = i + 1;
 			else if (result[i] && !result[i + 1]) {
-				shards.add(vertical ? new Shard(0, 1, Integer.valueOf(start).doubleValue() / result.length, (Integer.valueOf(i).doubleValue() + 1) / result.length)
-						: new Shard(Integer.valueOf(start).doubleValue() / result.length, (Integer.valueOf(i).doubleValue() + 1) / result.length, 0, 1));
+				shards.add(vertical ? new Layout(0, 1, Integer.valueOf(start).doubleValue() / result.length, (Integer.valueOf(i).doubleValue() + 1) / result.length)
+						: new Layout(Integer.valueOf(start).doubleValue() / result.length, (Integer.valueOf(i).doubleValue() + 1) / result.length, 0, 1));
 				start = null;
 			}
 		if (result[result.length - 1]) {
-			shards.add(vertical ? new Shard(0, 1, Integer.valueOf(start).doubleValue() / result.length, Integer.valueOf(result.length).doubleValue() / result.length)
-					: new Shard(Integer.valueOf(start).doubleValue() / result.length, Integer.valueOf(result.length).doubleValue() / result.length, 0, 1));
+			shards.add(vertical ? new Layout(0, 1, Integer.valueOf(start).doubleValue() / result.length, Integer.valueOf(result.length).doubleValue() / result.length)
+					: new Layout(Integer.valueOf(start).doubleValue() / result.length, Integer.valueOf(result.length).doubleValue() / result.length, 0, 1));
 			start = null;
 		}
-		return new Shards(shards);
+		return shards;
 	}
 
-	public Shard recursivSplit(Size morph, int level, float concentration, Img img, Img binary, BiConsumer<Img, Shards> visitor) {
-		// System.out.println(this.toString());
+	public Layout traverse(Img img, BiConsumer<Img, Layout> visitor) {
+		for (Layout shard : getChildren())
+			shard.traverse(shard.getRoi(img), visitor);
+		visitor.accept(img, this);
+		return this;
+	}
 
+	public Layout recursivSplit(Size morph, int level, float concentration, Img img, Img binary) {
 		assert img.size().equals(binary.size());
 		if (level < 0) {
 			Imgproc.rectangle(img.getSrc(), new Point(0, 0), new Point(img.width(), img.height()), new Scalar(255, 0, 0), -1);
 			return this;
 		}
 		boolean vertical = img.size().height > img.size().width;
-		Shards shards = split(vertical ? morph.height : morph.width, vertical, concentration, binary).removeIf(shard -> (vertical ? (shard.getY2() - shard.getY1()) * img.size().height : (shard.getX2() - shard.getX1()) * img.size().width) < 4);
+		List<Layout> shards = split(vertical ? morph.height : morph.width, vertical, concentration, binary);
+		shards.removeIf(shard -> (vertical ? (shard.getY2() - shard.getY1()) * img.size().height : (shard.getX2() - shard.getX1()) * img.size().width) < 4);
 		if (shards.isEmpty()) {
 			Imgproc.rectangle(img.getSrc(), new Point(0, 0), new Point(img.width(), img.height()), new Scalar(0, 0, 255), -1);
 			return this;
 		}
 		if (shards.size() == 1) {
-			Shard subShard = shards.iterator().next();
+			Layout subShard = shards.iterator().next();
 			if (subShard.equiv(this, 0, 0)) {
-				shards = split(!vertical ? morph.height : morph.width, !vertical, concentration, binary).removeIf(shard -> (!vertical ? (shard.getY2() - shard.getY1()) * img.size().height : (shard.getX2() - shard.getX1()) * img.size().width) < 4);
-				// .removeIf(zone -> (!vertical ? zone.getRect().height : zone.getRect().width) < 4);
+				shards = split(!vertical ? morph.height : morph.width, !vertical, concentration, binary);
+				shards.removeIf(shard -> (!vertical ? (shard.getY2() - shard.getY1()) * img.size().height : (shard.getX2() - shard.getX1()) * img.size().width) < 4);
 				if (shards.isEmpty()) {
 					Imgproc.rectangle(img.getSrc(), new Point(0, 0), new Point(img.width(), img.height()), new Scalar(0, 0, 255), -1);
-					// System.out.println("Empty zone");
 					return this;
 				}
 				if (shards.size() == 1) {
 					subShard = shards.iterator().next();
-					if (subShard.equiv(new Shard(0, 1, 0, 1), 0, 0)) {
-						// System.out.println("Same zone");
-						// System.out.println("" + size() + " " + zones.iterator().next().getRect());
-						// zones.iterator().next().draw(zones.iterator().next().getRoi(imgToDraw), new Scalar(0, 0, 255), -1);
+					if (subShard.equiv(new Layout(0, 1, 0, 1), 0, 0)) {
 						return this;
 					}
 				}
 			}
 		}
-		for (Shard shard : shards) {
-			shard.recursivSplit(morph, level - 1, concentration, shard.getRoi(img), shard.getRoi(binary), visitor);
+		for (Layout shard : shards) {
+			shard.recursivSplit(morph, level - 1, concentration, shard.getRoi(img), shard.getRoi(binary));
 			this.addChild(shard);
 		}
-		visitor.accept(img, shards);
 		return this;
 	}
 }

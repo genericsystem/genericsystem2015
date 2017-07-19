@@ -1,4 +1,4 @@
-package org.genericsystem.cv;
+package org.genericsystem.layout;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,6 +9,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import org.genericsystem.cv.AbstractApp;
+import org.genericsystem.cv.Img;
+import org.genericsystem.cv.Tools;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfKeyPoint;
@@ -28,7 +31,7 @@ import org.opencv.videoio.VideoCapture;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 
-public class MotionDetector2 extends AbstractApp {
+public class CamLayoutAnalyzer extends AbstractApp {
 
 	static {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
@@ -48,14 +51,10 @@ public class MotionDetector2 extends AbstractApp {
 		DescriptorMatcher matcher = DescriptorMatcher.create(DescriptorMatcher.BRUTEFORCE_HAMMING);
 		Mat frame = new Mat();
 		capture.read(frame);
-		// ImageView src = new ImageView(Tools.mat2jfxImage(frame));
+		ImageView src = new ImageView(Tools.mat2jfxImage(frame));
 		ImageView src2 = new ImageView(Tools.mat2jfxImage(frame));
-		// ImageView src3 = new ImageView(Tools.mat2jfxImage(frame));
-		ImageView src4 = new ImageView(Tools.mat2jfxImage(frame));
-		// mainGrid.add(src, 0, 0);
-		mainGrid.add(src2, 1, 0);
-		// mainGrid.add(src3, 0, 1);
-		mainGrid.add(src4, 1, 1);
+		mainGrid.add(src, 1, 0);
+		mainGrid.add(src2, 1, 1);
 
 		MatOfKeyPoint[] oldKeypoints = new MatOfKeyPoint[] { new MatOfKeyPoint() };
 		Mat[] oldDescriptors = new Mat[] { new Mat() };
@@ -65,18 +64,10 @@ public class MotionDetector2 extends AbstractApp {
 		timer.scheduleAtFixedRate(() -> {
 			try {
 				capture.read(frame);
-
 				Img deskewed = deskew(frame);
-
-				// src.setImage(Tools.mat2jfxImage(closed.getSrc()));
-				src2.setImage(Tools.mat2jfxImage(frame));
-				src4.setImage(Tools.mat2jfxImage(deskewed.getSrc()));
-
-				Img croppedAdaptativ = deskewed.cvtColor(Imgproc.COLOR_BGR2GRAY).adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 17, 9);
-				//// detection_deskew_contours(deskewed.getSrc(), croppedDilated.getSrc());
-				croppedAdaptativ.recursiveSplit(new Size(0.036, 0.009), 100, 0.01f, deskewed, (roi, zones) -> zones.draw(roi, new Scalar(0, 255, 0), 1), null);
-				// src3.setImage(Tools.mat2jfxImage(croppedDilated.getSrc()));
-				src4.setImage(Tools.mat2jfxImage(deskewed.getSrc()));
+				src.setImage(Tools.mat2jfxImage(frame));
+				deskewed.buildLayout().draw(deskewed, new Scalar(0, 255, 0), 1);
+				src2.setImage(Tools.mat2jfxImage(deskewed.getSrc()));
 			} catch (Exception e) {
 				e.printStackTrace();
 
@@ -85,7 +76,7 @@ public class MotionDetector2 extends AbstractApp {
 	}
 
 	private Img deskew(Mat frame) {
-		try (Img img = new Img(frame, false);
+		try (Img img = new Img(frame);
 				Img adaptativThreshold = img.cvtColor(Imgproc.COLOR_BGR2GRAY).adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 17, 9);
 				Img closed = adaptativThreshold.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(5, 5));) {
 			double angle = detection_contours(frame, closed.getSrc());
@@ -94,7 +85,8 @@ public class MotionDetector2 extends AbstractApp {
 			Imgproc.warpAffine(frame, rotated, matrix, new Size(frame.size().width, frame.size().height));
 			double crop = 0.15;
 			Img result = new Img(new Mat(rotated,
-					new Rect(Double.valueOf(rotated.width() * crop).intValue(), Double.valueOf(rotated.height() * crop).intValue(), Double.valueOf(rotated.width() * (1 - 2 * crop)).intValue(), Double.valueOf(rotated.height() * (1 - 2 * crop)).intValue())), false);
+					new Rect(Double.valueOf(rotated.width() * crop).intValue(), Double.valueOf(rotated.height() * crop).intValue(), Double.valueOf(rotated.width() * (1 - 2 * crop)).intValue(), Double.valueOf(rotated.height() * (1 - 2 * crop)).intValue())),
+					false);
 			matrix.release();
 			rotated.release();
 			return result;
