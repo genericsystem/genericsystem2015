@@ -1,4 +1,4 @@
-package org.genericsystem.cv.watch;
+package org.genericsystem.watch.gui;
 
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
@@ -6,11 +6,9 @@ import org.genericsystem.common.Root;
 import org.genericsystem.cv.comparator.ComputeTrainedScores;
 import org.genericsystem.cv.model.Doc;
 import org.genericsystem.cv.model.DocClass;
-import org.genericsystem.cv.model.Score;
 import org.genericsystem.cv.model.ZoneGeneric;
 import org.genericsystem.cv.model.ZoneText;
 import org.genericsystem.cv.model.ZoneText.ZoneTextInstance;
-import org.genericsystem.cv.watch.SetRealValues.DocumentDiv;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.BindAction;
@@ -29,17 +27,16 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlImg;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
 import org.genericsystem.reactor.gscomponents.InputTextWithConversion.InputTextEditorWithConversion;
 import org.genericsystem.reactor.gscomponents.RootTagImpl;
+import org.genericsystem.watch.gui.SetRealValues.DocumentDiv;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
 /**
- * The SetRealValues class can be used to provide accurate values for the text
- * fields (zones).
+ * The SetRealValues class can be used to provide accurate values for the text fields (zones).
  * 
- * These real values are stored in GS, and used by {@link ComputeTrainedScores} to
- * compute the scores for each zone/filter pairs.
+ * These real values are stored in GS, and used by {@link ComputeTrainedScores} to compute the scores for each zone/filter pairs.
  * 
  * @author middleware
  *
@@ -68,8 +65,7 @@ public class SetRealValues extends RootTagImpl {
 	public static class Image extends HtmlImg {
 		@Override
 		public void init() {
-			bindAttribute("src", "imgadr",
-					context -> new SimpleStringProperty((String) context.getGeneric().getValue()));
+			bindAttribute("src", "imgadr", context -> new SimpleStringProperty((String) context.getGeneric().getValue()));
 		}
 	}
 
@@ -114,9 +110,7 @@ public class SetRealValues extends RootTagImpl {
 			Root root = currentDoc.getRoot();
 			System.out.println("Document : " + currentDoc);
 			Snapshot<ZoneTextInstance> zoneTextInstances = (Snapshot) currentDoc.getHolders(root.find(ZoneText.class));
-			return (ObservableList) zoneTextInstances.toObservableList()
-					.filtered(zt -> "reality".equals(((ZoneTextInstance) zt).getImgFilter().getValue()))
-					.sorted((g1, g2) -> Integer.compare(g1.getZoneNum(), g2.getZoneNum()));
+			return (ObservableList) zoneTextInstances.toObservableList().filtered(zt -> "reality".equals(zt.getImgFilter().getValue())).sorted((g1, g2) -> Integer.compare(g1.getZoneNum(), g2.getZoneNum()));
 		}
 	}
 

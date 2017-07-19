@@ -66,8 +66,10 @@ public class ApplicationServer extends AbstractBackEnd {
 		}
 	}
 
-	public static void startSimpleGenericApp(String[] mainArgs, Class<? extends RootTagImpl> htmlAppClass, String homePersistentDirectoryPath) {
-		new ApplicationServer(new SimpleWebAppConfig(mainArgs, htmlAppClass, homePersistentDirectoryPath)).start();
+	public static ApplicationServer startSimpleGenericApp(String[] mainArgs, Class<? extends RootTagImpl> htmlAppClass, String homePersistentDirectoryPath) {
+		ApplicationServer server = new ApplicationServer(new SimpleWebAppConfig(mainArgs, htmlAppClass, homePersistentDirectoryPath));
+		server.start();
+		return server;
 	}
 
 	protected Root buildRoot(String persistentDirectoryPath, Set<Class<?>> userClasses, Class<? extends Root> applicationClass) {

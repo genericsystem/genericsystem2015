@@ -1,6 +1,4 @@
-package org.genericsystem.cv.watch;
-
-import java.util.Arrays;
+package org.genericsystem.watch.gui;
 
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
@@ -21,15 +19,6 @@ import org.genericsystem.cv.model.Score;
 import org.genericsystem.cv.model.ZoneGeneric;
 import org.genericsystem.cv.model.ZoneText;
 import org.genericsystem.cv.model.ZoneText.ZoneTimestamp;
-import org.genericsystem.cv.watch.DocPropertiesCheckerSwitcher.DOC_DEZONED;
-import org.genericsystem.cv.watch.DocPropertiesCheckerSwitcher.DOC_NOT_DEZONED;
-import org.genericsystem.cv.watch.DocPropertiesCheckerSwitcher.DOC_NOT_OCRD;
-import org.genericsystem.cv.watch.DocPropertiesCheckerSwitcher.DOC_NOT_SUPERVISED;
-import org.genericsystem.cv.watch.DocPropertiesCheckerSwitcher.DOC_OCRD;
-import org.genericsystem.cv.watch.DocPropertiesCheckerSwitcher.DOC_SUPERVISED;
-import org.genericsystem.cv.watch.WatchApp.DocumentsList;
-import org.genericsystem.cv.watch.WatchApp.HeaderRow;
-import org.genericsystem.cv.watch.WatchApp.START_OCR_VERTICLE;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.Attribute;
@@ -67,10 +56,20 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
 import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
 import org.genericsystem.reactor.gscomponents.Monitor;
 import org.genericsystem.reactor.gscomponents.RootTagImpl;
+import org.genericsystem.watch.OcrVerticle;
+import org.genericsystem.watch.gui.DocPropertiesCheckerSwitcher.DOC_DEZONED;
+import org.genericsystem.watch.gui.DocPropertiesCheckerSwitcher.DOC_NOT_DEZONED;
+import org.genericsystem.watch.gui.DocPropertiesCheckerSwitcher.DOC_NOT_OCRD;
+import org.genericsystem.watch.gui.DocPropertiesCheckerSwitcher.DOC_NOT_SUPERVISED;
+import org.genericsystem.watch.gui.DocPropertiesCheckerSwitcher.DOC_OCRD;
+import org.genericsystem.watch.gui.DocPropertiesCheckerSwitcher.DOC_SUPERVISED;
+import org.genericsystem.watch.gui.WatchApp.DocumentsList;
+import org.genericsystem.watch.gui.WatchApp.HeaderRow;
+import org.genericsystem.watch.gui.WatchApp.START_OCR_VERTICLE;
 
-import io.vertx.core.VertxOptions;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 @DependsOnModel({ Doc.class, RefreshTimestamp.class, DocTimestamp.class, DocFilename.class, DocClass.class, ZoneGeneric.class, ZoneText.class, ZoneTimestamp.class, ImgFilter.class, LevDistance.class, MeanLevenshtein.class, Score.class })
@@ -97,20 +96,12 @@ public class WatchApp extends RootTagImpl {
 	private static final String docClass = "id-fr-front";
 
 	public static void main(String[] mainArgs) {
-		ApplicationServer.startSimpleGenericApp(mainArgs, WatchApp.class, gsPath);
+		ApplicationServer server = ApplicationServer.startSimpleGenericApp(mainArgs, WatchApp.class, gsPath);
+		Root root = server.getRoots().get( System.getenv("HOME") + "/genericsystem/" +  gsPath);
+		OcrVerticle ocrVerticle = new OcrVerticle(root);
+		ocrVerticle.deployOcrVerticle();
 	}
 
-	@Override
-	public void init() {
-		System.out.println(">>> WatchApp constructor");
-		addPrefixBinding(context -> {
-			System.out.println("addPrefixBinding");
-			Arrays.asList(context.getGenerics()).forEach(g -> System.out.println(g.info()));
-			VertxOptions options = new VertxOptions().setMaxWorkerExecuteTime(Long.MAX_VALUE);
-			// OcrVerticle ocrVerticle = new OcrVerticle(context.getGeneric().getRoot());
-			// ocrVerticle.deployVerticle(options);
-		});
-	}
 
 	@Children({ HtmlLabel.class, HtmlLabel.class, HtmlLabel.class, HtmlLabel.class, HtmlLabel.class, HtmlLabel.class })
 	@FlexDirectionStyle(FlexDirection.ROW)
@@ -236,9 +227,13 @@ public class WatchApp extends RootTagImpl {
 		public ObservableList<Generic> apply(Generic[] generics) {
 			Root root = generics[0].getRoot();
 			Generic currentDocClass = root.find(DocClass.class).getInstance(docClass);
-			System.out.println("Current doc class : " + currentDocClass.info());
-			Snapshot<Generic> docInstances = currentDocClass.getHolders(root.find(Doc.class));
-			return docInstances.toObservableList();
+			if (null != currentDocClass) {
+				System.out.println("Current doc class : " + currentDocClass.info());
+				Snapshot<Generic> docInstances = currentDocClass.getHolders(root.find(Doc.class));
+				return docInstances.toObservableList();
+			} else {
+				return FXCollections.emptyObservableList();
+			}
 		}
 	}
 
@@ -254,13 +249,7 @@ public class WatchApp extends RootTagImpl {
 		@Override
 		public void accept(Context context, Tag tag) {
 			// TODO
-			// Vertx vertx = Vertx.vertx();
-			// vertx.deployVerticle(new org.genericsystem.watch.OcrVerticle(), res -> {
-			// if (res.failed())
-			// throw new IllegalStateException("Deployment of verticles failed.", res.cause());
-			// else
-			// System.out.println("Verticle deployed");
-			// });
+			OcrVerticle.deployTestVerticle();
 		}
 	}
 

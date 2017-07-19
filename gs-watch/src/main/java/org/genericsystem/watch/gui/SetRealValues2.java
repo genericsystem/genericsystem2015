@@ -1,4 +1,4 @@
-package org.genericsystem.cv.watch;
+package org.genericsystem.watch.gui;
 
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
@@ -12,7 +12,6 @@ import org.genericsystem.cv.model.ImgFilter.ImgFilterInstance;
 import org.genericsystem.cv.model.ZoneGeneric;
 import org.genericsystem.cv.model.ZoneText;
 import org.genericsystem.cv.model.ZoneText.ZoneTextInstance;
-import org.genericsystem.cv.watch.SetRealValues2.DocumentDiv;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.BindAction;
@@ -29,29 +28,28 @@ import org.genericsystem.reactor.context.ContextAction;
 import org.genericsystem.reactor.context.ContextAction.CANCEL;
 import org.genericsystem.reactor.context.ObservableListExtractor;
 import org.genericsystem.reactor.context.TextBinding;
+import org.genericsystem.reactor.gscomponents.AppHeader;
+import org.genericsystem.reactor.gscomponents.AppHeader.AppTitleDiv;
+import org.genericsystem.reactor.gscomponents.AppHeader.Logo;
+import org.genericsystem.reactor.gscomponents.FlexDirection;
+import org.genericsystem.reactor.gscomponents.FlexDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlH1;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlImg;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
 import org.genericsystem.reactor.gscomponents.InputTextWithConversion.InputTextEditorWithConversion;
-import org.genericsystem.reactor.gscomponents.AppHeader;
-import org.genericsystem.reactor.gscomponents.FlexDirection;
-import org.genericsystem.reactor.gscomponents.FlexDiv;
 import org.genericsystem.reactor.gscomponents.RootTagImpl;
-import org.genericsystem.reactor.gscomponents.AppHeader.AppTitleDiv;
-import org.genericsystem.reactor.gscomponents.AppHeader.Logo;
+import org.genericsystem.watch.gui.SetRealValues2.DocumentDiv;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
 /**
- * The SetRealValues class can be used to provide accurate values for the text
- * fields (zones).
+ * The SetRealValues class can be used to provide accurate values for the text fields (zones).
  * 
- * These real values are stored in GS, and used by {@link ComputeTrainedScores}
- * to compute the scores for each zone/filter pairs.
+ * These real values are stored in GS, and used by {@link ComputeTrainedScores} to compute the scores for each zone/filter pairs.
  * 
  * @author Pierrik Lassalas
  *
@@ -85,8 +83,7 @@ public class SetRealValues2 extends RootTagImpl {
 	public static class Image extends HtmlImg {
 		@Override
 		public void init() {
-			bindAttribute("src", "imgadr",
-					context -> new SimpleStringProperty((String) context.getGeneric().getValue()));
+			bindAttribute("src", "imgadr", context -> new SimpleStringProperty((String) context.getGeneric().getValue()));
 		}
 	}
 
@@ -166,9 +163,7 @@ public class SetRealValues2 extends RootTagImpl {
 			Root root = currentDoc.getRoot();
 			System.out.println("Document : " + currentDoc);
 			Snapshot<ZoneTextInstance> zoneTextInstances = (Snapshot) currentDoc.getHolders(root.find(ZoneText.class));
-			return (ObservableList) zoneTextInstances.toObservableList()
-					.filtered(zt -> "reality".equals(((ZoneTextInstance) zt).getImgFilter().getValue()))
-					.sorted((g1, g2) -> Integer.compare(g1.getZoneNum(), g2.getZoneNum()));
+			return (ObservableList) zoneTextInstances.toObservableList().filtered(zt -> "reality".equals(zt.getImgFilter().getValue())).sorted((g1, g2) -> Integer.compare(g1.getZoneNum(), g2.getZoneNum()));
 		}
 	}
 
