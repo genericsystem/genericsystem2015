@@ -51,7 +51,7 @@ public class ImgClass implements AutoCloseable {
 		return Tools.classImgsStream(directory);
 	}
 
-	private void computeMeanVariance() {
+	private synchronized void computeMeanVariance() {
 		Iterator<Img> it_ = classImgsStream().iterator();
 		if (it_.hasNext()) {
 			Img img0 = applyMappers(it_.next());
