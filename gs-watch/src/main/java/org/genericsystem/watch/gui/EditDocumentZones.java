@@ -140,6 +140,7 @@ public class EditDocumentZones extends ModalEditor {
 	}
 
 	public static class CustomInputDatalist extends InputTextEditorWithConversionForDatalist {
+		// FIXME: bug during the edition of the input text field (synchronization)
 		@Override
 		protected Generic updateGeneric(Context context, Serializable newValue) {
 			ZoneTextInstance zti = (ZoneTextInstance) context.getGeneric();
@@ -147,6 +148,7 @@ public class EditDocumentZones extends ModalEditor {
 			ZoneInstance zoneInstance = zti.getZone();
 			ImgFilterInstance imgFilterInstance = zti.getImgFilter();
 			return context.getGeneric().getMeta().setInstance(newValue, docInstance, zoneInstance, imgFilterInstance);
+			// return context.getGeneric().updateValue(newValue);
 		}
 	}
 
