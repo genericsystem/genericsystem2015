@@ -147,12 +147,38 @@ public class Layout {
 		return "tl : (" + this.x1 + "," + this.y1 + "), br :(" + this.x2 + "," + this.y2 + ")";
 	}
 
-	public static List<Layout> split(double morph, boolean vertical, float concentration, Img binary) {
+	public static List<Layout> split(Size morph, float concentration, Img binary) {
 		// assert 1 / (vertical ? binary.rows() : binary.cols()) < concentration;
 		// if ((vertical ? binary.rows() : binary.cols()) <= 4)
 		// System.out.println("size too low : " + (vertical ? binary.rows() : binary.cols()));
-		List<Float> histo = new ArrayList<>();
-		Converters.Mat_to_vector_float((vertical ? binary.projectVertically() : binary.projectHorizontally().transpose()).getSrc(), histo);
+		List<Float> histoVertical = new ArrayList<>();
+		List<Float> histoHorizontal = new ArrayList<>();
+
+		Converters.Mat_to_vector_float(binary.projectVertically().getSrc(), histoVertical);
+		Converters.Mat_to_vector_float((binary.projectHorizontally().transpose()).getSrc(), histoHorizontal);
+
+		histoVertical = getSmoothHisto(concentration, histoVertical);
+		histoHorizontal = getSmoothHisto(concentration, histoHorizontal);
+
+		return split(histoVertical, histoHorizontal, morph, binary, concentration);
+	}
+
+	private static List<Layout> split(List<Float> histoV, List<Float> histoH, Size morph, Img binary, float concentration) {
+
+		int kV = new Double(Math.floor(morph.height * histoV.size())).intValue();
+		int kH = new Double(Math.floor(morph.width * histoH.size())).intValue();
+
+		boolean[] closedV = new boolean[histoV.size()];
+		boolean[] closedH = new boolean[histoH.size()];
+
+		closedV = getClosedFromHisto(kV, histoV);
+		closedH = getClosedFromHisto(kH, histoH);
+
+		return extractZones(closedV, closedH);
+	}
+
+	private static List<Float> getSmoothHisto(float concentration, List<Float> histo) {
+
 		float min = concentration * 255;
 		float max = (1 - concentration) * 255;
 		for (int i = 1; i < histo.size() - 1; i++) {
@@ -172,11 +198,11 @@ public class Layout {
 				// Imgproc.line(getSrc(), new Point(i, 0), new Point(i, src.rows()), new Scalar(255));
 			}
 		}
-		return split(histo, morph, vertical ? binary.cols() : binary.rows(), vertical, concentration);
+		return histo;
 	}
 
-	private static List<Layout> split(List<Float> histo, double morph, int matSize, boolean vertical, float concentration) {
-		int k = new Double(Math.floor(morph * histo.size())).intValue();
+	private static boolean[] getClosedFromHisto(int k, List<Float> histo) {
+
 		boolean[] closed = new boolean[histo.size()];
 		Function<Integer, Boolean> isBlack = i -> histo.get(i) == 0;
 		for (int i = 0; i < histo.size() - 1; i++)
@@ -194,10 +220,24 @@ public class Layout {
 				closed[i] = !isBlack.apply(i);
 		if (!closed[histo.size() - 1])
 			closed[histo.size() - 1] = !isBlack.apply(histo.size() - 1);
-		return extractZones(closed, vertical);
+		return closed;
 	}
 
-	private static List<Layout> extractZones(boolean[] result, boolean vertical) {
+	private static List<Layout> extractZones(boolean[] resultV, boolean[] resultH) {
+
+		List<Layout> shardsV = getShards(resultV, true);
+		List<Layout> shardsH = getShards(resultH, false);
+		List<Layout> shards = new ArrayList<>();
+
+		for (Layout shardv : shardsV) {
+			for (Layout shardh : shardsH) {
+				shards.add(new Layout(shardh.x1, shardh.x2, shardv.y1, shardv.y2));
+			}
+		}
+		return shards;
+	}
+
+	private static List<Layout> getShards(boolean[] result, boolean vertical) {
 		List<Layout> shards = new ArrayList<>();
 		Integer start = result[0] ? 0 : null;
 		assert result.length >= 1;
@@ -225,37 +265,26 @@ public class Layout {
 	}
 
 	public Layout recursivSplit(Size morph, int level, float concentration, Img img, Img binary) {
+		System.out.println("level : " + level);
+		System.out.println("Layout : " + this);
 		assert img.size().equals(binary.size());
 		if (level < 0) {
 			Imgproc.rectangle(img.getSrc(), new Point(0, 0), new Point(img.width(), img.height()), new Scalar(255, 0, 0), -1);
 			return this;
 		}
-		boolean vertical = img.size().height > img.size().width;
-		List<Layout> shards = split(vertical ? morph.height : morph.width, vertical, concentration, binary);
-		shards.removeIf(shard -> (vertical ? (shard.getY2() - shard.getY1()) * img.size().height : (shard.getX2() - shard.getX1()) * img.size().width) < 4);
+		List<Layout> shards = split(morph, concentration, binary);
+		shards.removeIf(shard -> ((shard.getY2() - shard.getY1()) * img.size().height) < 4 || ((shard.getX2() - shard.getX1()) * img.size().width) < 4);
 		if (shards.isEmpty()) {
 			Imgproc.rectangle(img.getSrc(), new Point(0, 0), new Point(img.width(), img.height()), new Scalar(0, 0, 255), -1);
 			return this;
 		}
 		if (shards.size() == 1) {
-			Layout subShard = shards.iterator().next();
-			if (subShard.equiv(this, 0, 0)) {
-				shards = split(!vertical ? morph.height : morph.width, !vertical, concentration, binary);
-				shards.removeIf(shard -> (!vertical ? (shard.getY2() - shard.getY1()) * img.size().height : (shard.getX2() - shard.getX1()) * img.size().width) < 4);
-				if (shards.isEmpty()) {
-					Imgproc.rectangle(img.getSrc(), new Point(0, 0), new Point(img.width(), img.height()), new Scalar(0, 0, 255), -1);
-					return this;
-				}
-				if (shards.size() == 1) {
-					subShard = shards.iterator().next();
-					if (subShard.equiv(new Layout(0, 1, 0, 1), 0, 0)) {
-						return this;
-					}
-				}
-			}
+			return this;
 		}
 		for (Layout shard : shards) {
-			shard.recursivSplit(morph, level - 1, concentration, shard.getRoi(img), shard.getRoi(binary));
+			Img bin = shard.getRoi(binary);
+			assert bin.rows() != 0 && bin.cols() != 0 : shard.toString() + "//" + binary.getSrc();
+			shard.recursivSplit(morph, level - 1, concentration, shard.getRoi(img), bin);
 			this.addChild(shard);
 		}
 		return this;

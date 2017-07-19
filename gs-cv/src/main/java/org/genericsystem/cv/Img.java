@@ -75,7 +75,7 @@ public class Img implements AutoCloseable {
 	}
 
 	public Img(Img model, Layout shard) {
-		this.src = new Mat(model.getSrc(), new Rect(new Point(shard.getX1() * model.width(), shard.getY1() * model.height()), new Size((shard.getX2() - shard.getX1()) * model.width(), (shard.getY2() - shard.getY1()) * model.height())));
+		this.src = new Mat(model.getSrc(), new Rect(new Point(shard.getX1() * model.width(), shard.getY1() * model.height()), new Point(shard.getX2() * model.width(), shard.getY2() * model.height())));
 	}
 
 	public Img morphologyEx(int morphOp, int morph, Size size) {
@@ -865,5 +865,9 @@ public class Img implements AutoCloseable {
 	public Layout buildLayout() {
 		Img adaptivSplit = bgr2Gray().adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 17, 15);
 		return new Layout(0, 1, 0, 1).recursivSplit(new Size(0.036, 0.009), 100, 0.01f, this, adaptivSplit);
+	}
+
+	public Layout buildLayout(Size morph, int level, float concentration, Img img, Img binary) {
+		return new Layout(0, 1, 0, 1).recursivSplit(morph, level, concentration, img, binary);
 	}
 }
