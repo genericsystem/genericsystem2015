@@ -68,8 +68,8 @@ public class FillModelWithData {
 		final Engine engine = new Engine(gsPath, Doc.class, RefreshTimestamp.class, DocTimestamp.class, DocFilename.class, DocClass.class, ZoneGeneric.class, ZoneText.class, ZoneTimestamp.class, ImgFilter.class, LevDistance.class, MeanLevenshtein.class,
 				Score.class);
 		engine.newCache().start();
-		compute(engine);
-		// cleanModel(engine);
+		// compute(engine);
+		cleanModel(engine);
 		engine.close();
 	}
 
@@ -448,8 +448,17 @@ public class FillModelWithData {
 		// Finally delete all documents for which no ZoneTextInstances exist (i.e., not supervised)
 		docInstances.forEach(currentDoc -> {
 			zoneInstances.forEach(z -> {
-				boolean result = imgFilter.getInstances().stream().allMatch(i -> null == zoneText.getZoneText(currentDoc, z, (ImgFilterInstance) i));
+				boolean result = imgFilter.getInstances().stream().allMatch(i -> {
+					ZoneTextInstance zti = zoneText.getZoneText(currentDoc, z, (ImgFilterInstance) i);
+					return null == zti || zti.getValue().toString().isEmpty();
+				});
 				if (result) {
+					currentDoc.getDependencies().forEach(dependency -> {
+						currentDoc.getHolders(dependency).forEach(g -> g.remove());
+						dependency.remove();
+						engine.getCurrentCache().flush();
+					});
+					// FIXME unable to delete the currentDoc (AliveConstraint violation)
 					currentDoc.remove();
 					engine.getCurrentCache().flush();
 				}
