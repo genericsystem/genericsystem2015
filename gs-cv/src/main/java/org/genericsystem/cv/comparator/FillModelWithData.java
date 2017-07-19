@@ -93,13 +93,15 @@ public class FillModelWithData {
 	/**
 	 * Check if a given file has already been processed by the system.
 	 * 
+	 * This verification is conducted by comparing the SHA-256 hash codes generated from the file. If there is a match, the file is assumed to be known.
+	 * 
 	 * @param engine
 	 *            - the engine used to store the data
 	 * @param file
 	 *            - the desired file
-	 * @return - true if the file was found in the engine, false otherwise
+	 * @return - true if the file was not found in the engine, false if it has already been processed
 	 */
-	private static boolean isFileAlreadyProcessed(Root engine, File file) {
+	private static boolean isThisANewFile(Root engine, File file) {
 		Generic doc = engine.find(Doc.class);
 		DocClass docClass = engine.find(DocClass.class);
 		DocClassInstance docClassInstance = docClass.getDocClass(docType);
@@ -107,12 +109,13 @@ public class FillModelWithData {
 		try {
 			filename = ModelTools.getHashFromFile(file.toPath(), "sha-256");
 		} catch (RuntimeException e) {
-			log.error("An error has occured during the generation of the hascode from file (assuming false)", e);
-			return false;
+			log.error("An error has occured during the generation of the hascode from file (assuming new)");
+			log.debug("Stacktrace: ", e);
+			return true;
 		}
 		String filenameExt = filename + "." + FilenameUtils.getExtension(file.getName());
 		DocInstance docInstance = docClassInstance.getDoc(doc, filenameExt);
-		return null != docInstance ? true : false;
+		return null == docInstance ? true : false;
 	}
 
 	/**
@@ -258,6 +261,7 @@ public class FillModelWithData {
 	private static int processFile(Root engine, File file, DocClassInstance docClassInstance, Zones zones, Stream<Entry<String, Function<Img, Img>>> imgFilters) {
 
 		int result = ERROR;
+		boolean newFile = isThisANewFile(engine, file);
 
 		log.info("\nProcessing file: {}", file.getName());
 		Generic doc = engine.find(Doc.class);
@@ -268,7 +272,6 @@ public class FillModelWithData {
 		String filename = ModelTools.getHashFromFile(file.toPath(), "sha-256");
 		String filenameExt = filename + "." + FilenameUtils.getExtension(file.getName());
 		log.info("Hash generated for file {}: {}", file.getName(), filenameExt);
-
 		DocInstance docInstance = docClassInstance.setDoc(doc, filenameExt);
 		docInstance.setDocFilename(file.getName());
 		engine.getCurrentCache().flush();
@@ -298,8 +301,11 @@ public class FillModelWithData {
 			}
 		});
 
-		// Check whether or not the file has aldready been stored in the system
-		if (isFileAlreadyProcessed(engine, file)) {
+		// Check whether or not the file has already been stored in the system
+		if (newFile) {
+			log.info("Adding a new image ({}) ", file.getName());
+			result = NEW_FILE;
+		} else {
 			if (updatedImgFilters.isEmpty()) {
 				log.info("The image {} has already been processed (pass)", file.getName());
 				result = KNOWN_FILE;
@@ -308,9 +314,6 @@ public class FillModelWithData {
 				log.info("New filters detected for image {} ", file.getName());
 				result = KNOWN_FILE_UPDATED_FILTERS;
 			}
-		} else {
-			log.info("Adding a new image ({}) ", file.getName());
-			result = NEW_FILE;
 		}
 
 		// If this is a new file, or a new filter has been added, update the last-update doc timestamp
@@ -340,7 +343,7 @@ public class FillModelWithData {
 		// TODO implement a filter mechanism to avoid creating
 		// duplicates in a public folder
 		log.info("Copying {} to resources folder", filenameExt);
-		Imgcodecs.imwrite(System.getProperty("user.dir") + "/../gs-cv/src/main/resources/" + filenameExt, imgCopy.getSrc());
+		// Imgcodecs.imwrite(System.getProperty("user.dir") + "/../gs-cv/src/main/resources/" + filenameExt, imgCopy.getSrc()); // XXX should not be necessary anymore
 		Imgcodecs.imwrite(System.getProperty("user.dir") + "/../gs-watch/src/main/resources/" + filenameExt, imgCopy.getSrc());
 
 		// Process each zone
