@@ -96,17 +96,12 @@ public class WatchApp extends RootTagImpl {
 	private static final String docClass = "id-fr-front";
 
 	public static void main(String[] mainArgs) {
-		ApplicationServer.startSimpleGenericApp(mainArgs, WatchApp.class, gsPath);
+		ApplicationServer server = ApplicationServer.startSimpleGenericApp(mainArgs, WatchApp.class, gsPath);
+		Root root = server.getRoots().get( System.getenv("HOME") + "/genericsystem/" +  gsPath);
+		OcrVerticle ocrVerticle = new OcrVerticle(root);
+		ocrVerticle.deployOcrVerticle();
 	}
 
-	@Override
-	public void init() {
-		addPrefixBinding(context -> {
-			System.out.println("Starting verticles deployment...");
-			OcrVerticle ocrVerticle = new OcrVerticle(context.getGeneric().getRoot());
-			ocrVerticle.deployOcrVerticle();
-		});
-	}
 
 	@Children({ HtmlLabel.class, HtmlLabel.class, HtmlLabel.class, HtmlLabel.class, HtmlLabel.class, HtmlLabel.class })
 	@FlexDirectionStyle(FlexDirection.ROW)
