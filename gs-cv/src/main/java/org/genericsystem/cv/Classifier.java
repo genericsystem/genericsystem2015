@@ -35,17 +35,21 @@ public class Classifier {
 	public final static int MATCHING_THRESHOLD = 150;
 	private static final String pngDirectoryPath = "png";
 	private static final String classesDirectoryPath = "classes";
+	private static final FeatureDetector[] featureDetectors;
+	private static final DescriptorExtractor[] descriptorExtractors;
 
 	static {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+		featureDetectors = new FeatureDetector[] { FeatureDetector.create(FeatureDetector.BRISK) };
+		descriptorExtractors = new DescriptorExtractor[] { DescriptorExtractor.create(DescriptorExtractor.OPPONENT_ORB) };
 	}
 
 	public static void main(String[] args) {
 		Path classesDirectory = Paths.get(classesDirectoryPath);
-		Arrays.stream(new File(pngDirectoryPath).listFiles()).filter(img -> img.getName().endsWith(".png")).forEach(imgFile -> classify(classesDirectory, imgFile.toPath()));
+		Arrays.stream(new File(pngDirectoryPath).listFiles()).filter(img -> img.getName().endsWith(".png")).forEach(imgFile -> classify(classesDirectory, imgFile.toPath(), featureDetectors, descriptorExtractors));
 	}
 
-	public static Mat compareFeature(String filename1, String filename2, int matching_threshold, int featureDetector, int descriptorExtractor) {
+	public static Mat compareFeature(String filename1, String filename2, int matching_threshold, FeatureDetector featureDetector, DescriptorExtractor descriptorExtractor) {
 		Mat img1 = Imgcodecs.imread(filename1, Imgcodecs.CV_LOAD_IMAGE_COLOR);
 		Mat img2 = Imgcodecs.imread(filename2, Imgcodecs.CV_LOAD_IMAGE_COLOR);
 		CompareFeatureResult result = compareFeature(img1, img2, matching_threshold, featureDetector, descriptorExtractor);
@@ -59,12 +63,16 @@ public class Classifier {
 		return result != null ? result.getImg() : null;
 	}
 
+	public static Path classify(Path classesDirectory, Path imgFile) {
+		return classify(classesDirectory, imgFile, featureDetectors, descriptorExtractors);
+	}
+
 	// Stores the given image in the best class found in the given classesDirectory, creates a new class if necessary.
 	// Returns the path to the stored image (the file name can have been changed to avoid duplicate names).
-	public static Path classify(Path classesDirectory, Path imgFile) {
+	public static Path classify(Path classesDirectory, Path imgFile, FeatureDetector[] featureDetectors, DescriptorExtractor[] descriptorExtractors) {
 		Mat alignedImage = null;
 		try (Img img = new Img(imgFile.toString());
-				CompareFeatureResult bestClass = Classifier.selectBestClass(classesDirectory, img.getSrc())) {
+				CompareFeatureResult bestClass = Classifier.selectBestClass(classesDirectory, img.getSrc(), featureDetectors, descriptorExtractors)) {
 			Path matchingClassDir;
 			if (bestClass != null) {
 				System.out.println("bestClass != null, " + bestClass);
@@ -104,10 +112,8 @@ public class Classifier {
 		}
 	}
 
-	public static CompareFeatureResult selectBestClass(Path classesDirectory, Mat img) {
+	public static CompareFeatureResult selectBestClass(Path classesDirectory, Mat img, FeatureDetector[] featureDetectors, DescriptorExtractor[] descriptorExtractors) {
 		int[] matchingThresholds = new int[] { 30 };
-		int[] featureDetectors = new int[] { FeatureDetector.BRISK };
-		int[] descriptorExtractors = new int[] { DescriptorExtractor.OPPONENT_ORB };
 		Map<String, List<CompareFeatureResult>> resultsPerClass = new HashMap<>();
 		for (int i = 0; i < matchingThresholds.length; i++) {
 			CompareFeatureResult algoResult = selectBestClass(classesDirectory, img, matchingThresholds[i], featureDetectors[i], descriptorExtractors[i]);
@@ -142,16 +148,16 @@ public class Classifier {
 	}
 
 	// Returns the best class for given algorithms and threshold.
-	public static CompareFeatureResult selectBestClass(Path classesDirectory, Mat img, int matching_threshold, int featureDetector, int descriptorExtractor) {
+	public static CompareFeatureResult selectBestClass(Path classesDirectory, Mat img, int matching_threshold, FeatureDetector detector, DescriptorExtractor extractor) {
 		CompareFeatureResult result = null;
 		MatOfKeyPoint keypoints1 = null;
 		Mat descriptors1 = null;
 		try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(classesDirectory, Files::isDirectory)) {
-			keypoints1 = getKeyPoints(img, featureDetector);
-			descriptors1 = getDescriptors(img, keypoints1, descriptorExtractor);
+			keypoints1 = getKeyPoints(img, detector);
+			descriptors1 = getDescriptors(img, keypoints1, extractor);
 			for (Path path : directoryStream) {
 				try (ImgClass imgClass = new ImgClass(path.toString())) {
-					CompareFeatureResult classResult = Classifier.compareFeature(img, keypoints1, descriptors1, imgClass, matching_threshold, featureDetector, descriptorExtractor);
+					CompareFeatureResult classResult = Classifier.compareFeature(img, keypoints1, descriptors1, imgClass, matching_threshold, detector, extractor);
 					if (classResult != null)
 						if (result == null)
 							result = classResult;
@@ -172,18 +178,18 @@ public class Classifier {
 	}
 
 	public static Mat compareFeature(Mat img1, Mat img2, int matching_threshold) {
-		CompareFeatureResult result = compareFeature(img1, img2, matching_threshold, FeatureDetector.PYRAMID_BRISK, DescriptorExtractor.OPPONENT_ORB);
+		CompareFeatureResult result = compareFeature(img1, img2, matching_threshold, FeatureDetector.create(FeatureDetector.PYRAMID_BRISK), DescriptorExtractor.create(DescriptorExtractor.OPPONENT_ORB));
 		return result != null ? result.getImg() : null;
 	}
 
-	public static CompareFeatureResult compareFeature(Mat img1, MatOfKeyPoint keypoints1, Mat descriptors1, ImgClass imgClass, int matchingThreshold, int featureDetector, int descriptorExtractor) {
+	public static CompareFeatureResult compareFeature(Mat img1, MatOfKeyPoint keypoints1, Mat descriptors1, ImgClass imgClass, int matchingThreshold, FeatureDetector featureDetector, DescriptorExtractor descriptorExtractor) {
 		CompareFeatureResult result = compareFeature(img1, keypoints1, descriptors1, imgClass.getClassModel() != null ? imgClass.getClassModel().getSrc() : imgClass.getMean().getSrc(), matchingThreshold, featureDetector, descriptorExtractor);
 		if (result != null)
 			result.setImgClass(imgClass);
 		return result;
 	}
 
-	public static CompareFeatureResult compareFeature(Mat img1, Mat img2, int matchingThreshold, int featureDetector, int descriptorExtractor) {
+	public static CompareFeatureResult compareFeature(Mat img1, Mat img2, int matchingThreshold, FeatureDetector featureDetector, DescriptorExtractor descriptorExtractor) {
 		MatOfKeyPoint keypoints1 = getKeyPoints(img1, featureDetector);
 		Mat descriptors1 = getDescriptors(img1, keypoints1, descriptorExtractor);
 		CompareFeatureResult result = compareFeature(img1, keypoints1, descriptors1, img2, matchingThreshold, featureDetector, descriptorExtractor);
@@ -192,7 +198,7 @@ public class Classifier {
 		return result;
 	}
 
-	private static CompareFeatureResult compareFeature(Mat img1, MatOfKeyPoint keypoints1, Mat descriptors1, Mat img2, int matchingThreshold, int featureDetector, int descriptorExtractor) {
+	private static CompareFeatureResult compareFeature(Mat img1, MatOfKeyPoint keypoints1, Mat descriptors1, Mat img2, int matchingThreshold, FeatureDetector featureDetector, DescriptorExtractor descriptorExtractor) {
 		// Declare key point of images
 		MatOfKeyPoint keypoints2 = getKeyPoints(img2, featureDetector);
 		Mat descriptors2 = getDescriptors(img2, keypoints2, descriptorExtractor);
@@ -249,25 +255,23 @@ public class Classifier {
 				Imgproc.warpPerspective(img1, transformedImage, homography, new Size(img2.cols(), img2.rows()));
 				result = new CompareFeatureResult(transformedImage, goodMatches.size());
 				homography.release();
-				System.out.println("----------------- possible match found, featureDetector: " + featureDetector + ", extractor: " + descriptorExtractor + ", threshold: " + matchingThreshold + ", goodMatches: " + goodMatches.size());
+				System.out.println("----------------- possible match found, threshold: " + matchingThreshold + ", goodMatches: " + goodMatches.size());
 			} else
-				System.out.println("----------------- not a match, featureDetector: " + featureDetector + ", extractor: " + descriptorExtractor + ", threshold: " + matchingThreshold + ", goodMatches: " + goodMatches.size());
+				System.out.println("----------------- not a match, threshold: " + matchingThreshold + ", goodMatches: " + goodMatches.size());
 		}
 		keypoints2.release();
 		descriptors2.release();
 		return result;
 	}
 
-	public static MatOfKeyPoint getKeyPoints(Mat img, int featureDetector) {
+	public static MatOfKeyPoint getKeyPoints(Mat img, FeatureDetector detector) {
 		MatOfKeyPoint keypoints = new MatOfKeyPoint();
-		FeatureDetector detector = FeatureDetector.create(featureDetector);
 		detector.detect(img, keypoints);
 		return keypoints;
 	}
 
-	public static Mat getDescriptors(Mat img, MatOfKeyPoint keypoints, int descriptorExtractor) {
+	public static Mat getDescriptors(Mat img, MatOfKeyPoint keypoints, DescriptorExtractor extractor) {
 		Mat descriptors = new Mat();
-		DescriptorExtractor extractor = DescriptorExtractor.create(descriptorExtractor);
 		extractor.compute(img, keypoints, descriptors);
 		return descriptors;
 	}

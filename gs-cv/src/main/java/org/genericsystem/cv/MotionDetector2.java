@@ -66,17 +66,17 @@ public class MotionDetector2 extends AbstractApp {
 			try {
 				capture.read(frame);
 
-				Img deskiewed = deskiew(frame);
+				Img deskewed = deskew(frame);
 
 				// src.setImage(Tools.mat2jfxImage(closed.getSrc()));
 				src2.setImage(Tools.mat2jfxImage(frame));
-				src4.setImage(Tools.mat2jfxImage(deskiewed.getSrc()));
+				src4.setImage(Tools.mat2jfxImage(deskewed.getSrc()));
 
-				Img croppedAdaptativ = deskiewed.cvtColor(Imgproc.COLOR_BGR2GRAY).adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 17, 9);
-				//// detection_deskiew_contours(deskiewed.getSrc(), croppedDilated.getSrc());
-				croppedAdaptativ.recursivSplit(new Size(0.036, 0.009), 100, 0.01f, deskiewed, (roi, zones) -> zones.draw(roi, new Scalar(0, 255, 0), 1), null);
+				Img croppedAdaptativ = deskewed.cvtColor(Imgproc.COLOR_BGR2GRAY).adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 17, 9);
+				//// detection_deskew_contours(deskewed.getSrc(), croppedDilated.getSrc());
+				croppedAdaptativ.recursiveSplit(new Size(0.036, 0.009), 100, 0.01f, deskewed, (roi, zones) -> zones.draw(roi, new Scalar(0, 255, 0), 1), null);
 				// src3.setImage(Tools.mat2jfxImage(croppedDilated.getSrc()));
-				src4.setImage(Tools.mat2jfxImage(deskiewed.getSrc()));
+				src4.setImage(Tools.mat2jfxImage(deskewed.getSrc()));
 			} catch (Exception e) {
 				e.printStackTrace();
 
@@ -84,7 +84,7 @@ public class MotionDetector2 extends AbstractApp {
 		}, 0, 33, TimeUnit.MILLISECONDS);
 	}
 
-	private Img deskiew(Mat frame) {
+	private Img deskew(Mat frame) {
 		try (Img img = new Img(frame, false);
 				Img adaptativThreshold = img.cvtColor(Imgproc.COLOR_BGR2GRAY).adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 17, 9);
 				Img closed = adaptativThreshold.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(5, 5));) {
@@ -141,7 +141,7 @@ public class MotionDetector2 extends AbstractApp {
 		return goodAverage;
 	}
 
-	public void detection_deskiew_contours(Mat frame, Mat dilated) {
+	public void detection_deskew_contours(Mat frame, Mat dilated) {
 		List<MatOfPoint> contours = new ArrayList<>();
 		Imgproc.findContours(dilated, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
 		double minArea = 100;
