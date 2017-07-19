@@ -282,9 +282,7 @@ public class Layout {
 			return this;
 		}
 		for (Layout shard : shards) {
-			Img bin = shard.getRoi(binary);
-			assert bin.rows() != 0 && bin.cols() != 0 : shard.toString() + "//" + binary.getSrc();
-			shard.recursivSplit(morph, level - 1, concentration, shard.getRoi(img), bin);
+			shard.recursivSplit(morph, level - 1, concentration, shard.getRoi(img), shard.getRoi(binary));
 			this.addChild(shard);
 		}
 		return this;

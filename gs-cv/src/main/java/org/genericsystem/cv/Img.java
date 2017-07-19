@@ -265,7 +265,7 @@ public class Img implements AutoCloseable {
 		return Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
 	}
 
-	// angle is 90, 180 or 270 degrees.
+	// angle is 90, 180 or 270 degrees
 	public Img rotate(int angle) {
 		Mat result = new Mat();
 		if (angle == 90) {

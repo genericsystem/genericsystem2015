@@ -23,7 +23,6 @@ public class LayoutAnalyzer extends AbstractApp {
 	protected void fillGrid(GridPane mainGrid) {
 		int columnIndex = 0;
 		int rowIndex = 0;
-		// mainGrid.add(new ImageView(new Img("resources/14342661748973931.jpg").toJfxImage()), columnIndex, rowIndex++);
 		rowIndex = 0;
 		columnIndex++;
 		Img img = new Img("resources/14342661748973931.jpg");
