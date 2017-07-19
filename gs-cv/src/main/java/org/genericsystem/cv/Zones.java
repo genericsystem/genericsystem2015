@@ -2,6 +2,8 @@ package org.genericsystem.cv;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -123,8 +125,12 @@ public class Zones implements Iterable<Zone> {
 		return zones;
 	}
 
-	public static boolean isZonesFilePresent(String imgClassDirectory) {
-		return new File(imgClassDirectory + "/zones/zones.json").exists();
+	public static boolean isZonesFilePresent(String imgPath) {
+		System.out.println("imgPath: " + imgPath);
+		Path classPath = Paths.get(imgPath).getParent();
+		System.out.println("classPath: " + classPath.toString());
+		Path zonesPath = classPath.resolve("zones/zones.json");
+		return zonesPath.toFile().exists();
 	}
 
 	@Override
