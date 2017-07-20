@@ -56,7 +56,6 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
 import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
 import org.genericsystem.reactor.gscomponents.Monitor;
 import org.genericsystem.reactor.gscomponents.RootTagImpl;
-import org.genericsystem.watch.OcrVerticle;
 import org.genericsystem.watch.VerticleDeployerFromWatchApp;
 import org.genericsystem.watch.gui.DocPropertiesCheckerSwitcher.DOC_DEZONED;
 import org.genericsystem.watch.gui.DocPropertiesCheckerSwitcher.DOC_NOT_DEZONED;
@@ -64,28 +63,20 @@ import org.genericsystem.watch.gui.DocPropertiesCheckerSwitcher.DOC_NOT_OCRD;
 import org.genericsystem.watch.gui.DocPropertiesCheckerSwitcher.DOC_NOT_SUPERVISED;
 import org.genericsystem.watch.gui.DocPropertiesCheckerSwitcher.DOC_OCRD;
 import org.genericsystem.watch.gui.DocPropertiesCheckerSwitcher.DOC_SUPERVISED;
-import org.genericsystem.watch.gui.WatchApp.DOC_CLASS_SELECTOR;
-import org.genericsystem.watch.gui.WatchApp.DocumentsList;
+import org.genericsystem.watch.gui.WatchApp.DocClassDiv;
 import org.genericsystem.watch.gui.WatchApp.HeaderRow;
-import org.genericsystem.watch.gui.WatchApp.START_OCR_VERTICLE;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 @DependsOnModel({ Doc.class, RefreshTimestamp.class, DocTimestamp.class, DocFilename.class, DocClass.class, ZoneGeneric.class, ZoneText.class, ZoneTimestamp.class, ImgFilter.class, LevDistance.class, MeanLevenshtein.class, Score.class })
 @Children({ EditDocumentZones.class, AppHeader.class, FlexDiv.class, Monitor.class })
-@Children(path = FlexDiv.class, pos = 2, value = { HeaderRow.class, FlexDiv.class })
-
-@Children(path = { FlexDiv.class, FlexDiv.class }, pos = { 2, 1 }, value = DocumentsList.class)
-@ForEach(path = { FlexDiv.class, FlexDiv.class }, pos = { 2, 1 }, value = DOC_CLASS_SELECTOR.class)
-
-@Children(path = AppHeader.class, value = { Logo.class, AppTitleDiv.class, FlexDiv.class, HtmlButton.class })
-
-@SetText(path = { AppHeader.class, HtmlButton.class }, pos = { 0, 0 }, value = "start ocr verticle")
-@BindAction(path = { AppHeader.class, HtmlButton.class }, pos = { 0, 0 }, value = START_OCR_VERTICLE.class)
+@Children(path = FlexDiv.class, pos = 2, value = { HeaderRow.class, DocClassDiv.class })
+@Children(path = AppHeader.class, value = { Logo.class, AppTitleDiv.class, FlexDiv.class })
 
 @Children(path = { AppHeader.class, FlexDiv.class }, pos = { 0, 2 }, value = { HtmlButton.class, HtmlButton.class })
 @SetText(path = { AppHeader.class, FlexDiv.class, HtmlButton.class }, pos = { 0, 2, 0 }, value = "Switch to admin mode")
@@ -100,13 +91,25 @@ import javafx.collections.ObservableList;
 public class WatchApp extends RootTagImpl {
 
 	private static final String gsPath = "/gs-cv_model3";
-	private static final String docClass = "id-fr-front";
 
 	public static void main(String[] mainArgs) {
 		ApplicationServer server = ApplicationServer.startSimpleGenericApp(mainArgs, WatchApp.class, gsPath);
 		Root root = server.getRoots().get(System.getenv("HOME") + "/genericsystem/" + gsPath);
 		VerticleDeployerFromWatchApp deployer = new VerticleDeployerFromWatchApp(root);
 		deployer.doDeploy();
+	}
+
+	@Children(FlexDiv.class)
+	@ForEach(path = FlexDiv.class, value = DOC_CLASS_SELECTOR.class)
+	@Children(path = FlexDiv.class, value = { FlexDiv.class, FlexDiv.class })
+	@Children(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 1 }, value = DocumentsList.class)
+	@BindText(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 0 }, value = DOC_CLASS_LABEL.class)
+	@Style(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 0 }, name = "font-variant", value = "petite-caps")
+	@Style(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 0 }, name = "font-weight", value = "bold")
+	@Style(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 0 }, name = "font-size", value = "medium")
+	@Style(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 0 }, name = "margin", value = "0.5em")
+	public static class DocClassDiv extends FlexDiv {
+
 	}
 
 	@Children({ HtmlLabel.class, HtmlLabel.class, HtmlLabel.class, HtmlLabel.class, HtmlLabel.class, HtmlLabel.class })
@@ -229,7 +232,6 @@ public class WatchApp extends RootTagImpl {
 	}
 
 	public static class DOC_CLASS_SELECTOR implements ObservableListExtractor {
-
 		@Override
 		public ObservableList<Generic> apply(Generic[] generics) {
 			Root root = generics[0].getRoot();
@@ -265,11 +267,10 @@ public class WatchApp extends RootTagImpl {
 		}
 	}
 
-	public static class START_OCR_VERTICLE implements ContextAction {
+	public static class DOC_CLASS_LABEL implements TextBinding {
 		@Override
-		public void accept(Context context, Tag tag) {
-			// TODO
-			OcrVerticle.deployTestVerticle();
+		public ObservableValue<String> apply(Context context, Tag tag) {
+			return new SimpleStringProperty("Doc class: " + context.getGeneric().getValue().toString());
 		}
 	}
 
