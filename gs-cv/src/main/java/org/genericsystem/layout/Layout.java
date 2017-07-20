@@ -35,9 +35,9 @@ public class Layout {
 		return new Img(img, this);
 	}
 
-	// public void draw(Img img, Scalar color, int thickness) {
-	// Imgproc.rectangle(img.getSrc(), new Point(x1 * img.width(), y1 * img.height()), new Point(x2 * img.width(), y2 * img.height()), color, thickness);// rect.tl(), rect.br(), color, thickness);
-	// }
+	public void draw2(Img img, Scalar color, int thickness) {
+		Imgproc.rectangle(img.getSrc(), new Point(x1 * img.width(), y1 * img.height()), new Point(x2 * img.width(), y2 * img.height()), color, thickness);// rect.tl(), rect.br(), color, thickness);
+	}
 
 	public void draw(Img img, Scalar color, int thickness) {
 		traverse(img, (roi, shard) -> Imgproc.rectangle(roi.getSrc(), new Point(0, 0), new Point(roi.width() - 1, roi.height() - 1), color, thickness));
@@ -155,7 +155,10 @@ public class Layout {
 		Converters.Mat_to_vector_float(binary.projectVertically().getSrc(), Vhist);
 		Converters.Mat_to_vector_float((binary.projectHorizontally().transpose()).getSrc(), Hhist);
 
-		return new Layout(getX1() * getHistoLimits(Hhist)[0], getX2() * getHistoLimits(Hhist)[1], getY1() * getHistoLimits(Vhist)[0], getY2() * getHistoLimits(Vhist)[1]);
+		double[] x = getHistoLimits(Hhist);
+		double[] y = getHistoLimits(Vhist);
+
+		return new Layout(((getX1() != 0) ? getX1() : 1) * x[0], ((getX2() != 0) ? getX2() : 1) * x[1], ((getY1() != 0) ? getY1() : 1) * y[0], ((getY2() != 0) ? getY2() : 1) * y[1]);
 
 	}
 
@@ -164,18 +167,18 @@ public class Layout {
 		int start = 0;
 		int end = hist.size() - 1;
 		while (start < hist.size()) {
-			if (hist.get(start) == 0)
+			if (hist.get(start) == 255.0)
 				start++;
 			else
 				break;
 		}
 		while (end >= 0) {
-			if (hist.get(end) == 0)
+			if (hist.get(end) == 255.0)
 				end--;
 			else
 				break;
 		}
-		return new double[] { Integer.valueOf(start).doubleValue() / hist.size(), Integer.valueOf(end).doubleValue() / hist.size() };
+		return new double[] { Integer.valueOf(start - 1).doubleValue() / hist.size(), Integer.valueOf(end + 1).doubleValue() / hist.size() };
 	}
 
 	public static List<Layout> split(Size morph, float concentration, Img binary) {
@@ -263,6 +266,7 @@ public class Layout {
 				Img roi = target.getRoi(binary);
 				if (roi.rows() != 0 && roi.cols() != 0)
 					target.tighten(roi);
+
 				shards.add(target);
 			}
 		}
