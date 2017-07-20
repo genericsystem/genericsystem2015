@@ -9,7 +9,6 @@ import org.genericsystem.cv.model.Doc.DocInstance;
 import org.genericsystem.cv.model.Doc.DocTimestamp;
 import org.genericsystem.cv.model.Doc.DocTimestamp.DocTimestampInstance;
 import org.genericsystem.cv.model.Doc.RefreshTimestamp;
-import org.genericsystem.cv.model.Doc.RefreshTimestamp.RefreshTimestampInstance;
 import org.genericsystem.cv.model.DocClass;
 import org.genericsystem.cv.model.DocClass.DocClassInstance;
 import org.genericsystem.cv.model.ImgFilter;
@@ -71,6 +70,7 @@ import org.genericsystem.watch.gui.WatchApp.HeaderRow;
 import org.genericsystem.watch.gui.WatchApp.START_OCR_VERTICLE;
 
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -276,22 +276,19 @@ public class WatchApp extends RootTagImpl {
 	}
 
 	public static class LAST_UPDATE_LABEL implements TextBinding {
-		@SuppressWarnings({ "unchecked", "rawtypes" })
 		@Override
 		public ObservableValue<String> apply(Context context, Tag tag) {
-			// TODO avoid the use of an ObservableList in favor of an ObservableValue?
 			DocInstance currentDoc = (DocInstance) context.getGeneric();
 			Root root = currentDoc.getRoot();
 			DocTimestamp docTimestamp = root.find(DocTimestamp.class);
-			ObservableList<RefreshTimestampInstance> ol = (ObservableList) currentDoc.getHolders(docTimestamp).toObservableList();
-
+			SimpleObjectProperty<Generic> ov = new SimpleObjectProperty<>(currentDoc.getHolder(docTimestamp));
 			return Bindings.createStringBinding(() -> {
 				DocTimestampInstance docTimestampInstance = docTimestamp.getDocTimestamp(currentDoc);
 				if (null == docTimestampInstance)
 					return "n/a";
 				else
 					return ModelTools.formatDate((Long) docTimestampInstance.getValue());
-			}, ol);
+			}, ov);
 		}
 	}
 }
