@@ -11,6 +11,7 @@ import org.genericsystem.cv.model.Doc.DocTimestamp.DocTimestampInstance;
 import org.genericsystem.cv.model.Doc.RefreshTimestamp;
 import org.genericsystem.cv.model.Doc.RefreshTimestamp.RefreshTimestampInstance;
 import org.genericsystem.cv.model.DocClass;
+import org.genericsystem.cv.model.DocClass.DocClassInstance;
 import org.genericsystem.cv.model.ImgFilter;
 import org.genericsystem.cv.model.LevDistance;
 import org.genericsystem.cv.model.MeanLevenshtein;
@@ -64,6 +65,7 @@ import org.genericsystem.watch.gui.DocPropertiesCheckerSwitcher.DOC_NOT_OCRD;
 import org.genericsystem.watch.gui.DocPropertiesCheckerSwitcher.DOC_NOT_SUPERVISED;
 import org.genericsystem.watch.gui.DocPropertiesCheckerSwitcher.DOC_OCRD;
 import org.genericsystem.watch.gui.DocPropertiesCheckerSwitcher.DOC_SUPERVISED;
+import org.genericsystem.watch.gui.WatchApp.DOC_CLASS_SELECTOR;
 import org.genericsystem.watch.gui.WatchApp.DocumentsList;
 import org.genericsystem.watch.gui.WatchApp.HeaderRow;
 import org.genericsystem.watch.gui.WatchApp.START_OCR_VERTICLE;
@@ -75,7 +77,11 @@ import javafx.collections.ObservableList;
 
 @DependsOnModel({ Doc.class, RefreshTimestamp.class, DocTimestamp.class, DocFilename.class, DocClass.class, ZoneGeneric.class, ZoneText.class, ZoneTimestamp.class, ImgFilter.class, LevDistance.class, MeanLevenshtein.class, Score.class })
 @Children({ EditDocumentZones.class, AppHeader.class, FlexDiv.class, Monitor.class })
-@Children(path = FlexDiv.class, pos = 2, value = { HeaderRow.class, DocumentsList.class })
+@Children(path = FlexDiv.class, pos = 2, value = { HeaderRow.class, FlexDiv.class })
+
+@Children(path = { FlexDiv.class, FlexDiv.class }, pos = { 2, 1 }, value = DocumentsList.class)
+@ForEach(path = { FlexDiv.class, FlexDiv.class }, pos = { 2, 1 }, value = DOC_CLASS_SELECTOR.class)
+
 @Children(path = AppHeader.class, value = { Logo.class, AppTitleDiv.class, FlexDiv.class, HtmlButton.class })
 
 @SetText(path = { AppHeader.class, HtmlButton.class }, pos = { 0, 0 }, value = "start ocr verticle")
@@ -121,7 +127,7 @@ public class WatchApp extends RootTagImpl {
 
 	}
 
-	@ForEach(DOC_CLASS_SELECTOR.class)
+	@ForEach(DOC_SELECTOR.class)
 	@FlexDirectionStyle(FlexDirection.ROW)
 	@Style(name = "margin", value = "0.5em")
 	@Children({ DocumentName.class, FlexDiv.class, ModalFlexDiv.class, FlexDiv.class, DocumentDeleteButtonDiv.class, LastDocumentUpdateDiv.class })
@@ -225,10 +231,24 @@ public class WatchApp extends RootTagImpl {
 	}
 
 	public static class DOC_CLASS_SELECTOR implements ObservableListExtractor {
+
 		@Override
 		public ObservableList<Generic> apply(Generic[] generics) {
 			Root root = generics[0].getRoot();
-			Generic currentDocClass = root.find(DocClass.class).getInstance(docClass);
+			DocClass docClass = root.find(DocClass.class);
+			Snapshot<Generic> docClassInstances = docClass.getInstances();
+			if (null != docClassInstances)
+				return docClassInstances.toObservableList();
+			else
+				return FXCollections.emptyObservableList();
+		}
+	}
+
+	public static class DOC_SELECTOR implements ObservableListExtractor {
+		@Override
+		public ObservableList<Generic> apply(Generic[] generics) {
+			DocClassInstance currentDocClass = (DocClassInstance) generics[0];
+			Root root = generics[0].getRoot();
 			if (null != currentDocClass) {
 				System.out.println("Current doc class : " + currentDocClass.info());
 				Snapshot<Generic> docInstances = currentDocClass.getHolders(root.find(Doc.class));
