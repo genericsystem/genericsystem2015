@@ -147,23 +147,51 @@ public class Layout {
 		return "tl : (" + this.x1 + "," + this.y1 + "), br :(" + this.x2 + "," + this.y2 + ")";
 	}
 
+	public Layout tighten(Img binary) {
+
+		List<Float> Vhist = new ArrayList<>();
+		List<Float> Hhist = new ArrayList<>();
+
+		Converters.Mat_to_vector_float(binary.projectVertically().getSrc(), Vhist);
+		Converters.Mat_to_vector_float((binary.projectHorizontally().transpose()).getSrc(), Hhist);
+
+		return new Layout(getX1() * getHistoLimits(Hhist)[0], getX2() * getHistoLimits(Hhist)[1], getY1() * getHistoLimits(Vhist)[0], getY2() * getHistoLimits(Vhist)[1]);
+
+	}
+
+	public static double[] getHistoLimits(List<Float> hist) {
+
+		int start = 0;
+		int end = hist.size() - 1;
+		while (start < hist.size()) {
+			if (hist.get(start) == 0)
+				start++;
+			else
+				break;
+		}
+		while (end >= 0) {
+			if (hist.get(end) == 0)
+				end--;
+			else
+				break;
+		}
+		return new double[] { Integer.valueOf(start).doubleValue() / hist.size(), Integer.valueOf(end).doubleValue() / hist.size() };
+	}
+
 	public static List<Layout> split(Size morph, float concentration, Img binary) {
-		// assert 1 / (vertical ? binary.rows() : binary.cols()) < concentration;
-		// if ((vertical ? binary.rows() : binary.cols()) <= 4)
-		// System.out.println("size too low : " + (vertical ? binary.rows() : binary.cols()));
 		List<Float> histoVertical = new ArrayList<>();
 		List<Float> histoHorizontal = new ArrayList<>();
 
 		Converters.Mat_to_vector_float(binary.projectVertically().getSrc(), histoVertical);
 		Converters.Mat_to_vector_float((binary.projectHorizontally().transpose()).getSrc(), histoHorizontal);
 
-		histoVertical = getSmoothHisto(concentration, histoVertical);
-		histoHorizontal = getSmoothHisto(concentration, histoHorizontal);
+		histoVertical = getSmoothHisto(concentration, histoVertical, true);
+		histoHorizontal = getSmoothHisto(concentration, histoHorizontal, false);
 
-		return split(histoVertical, histoHorizontal, morph, binary, concentration);
+		return split(histoVertical, histoHorizontal, morph, concentration, binary);
 	}
 
-	private static List<Layout> split(List<Float> histoV, List<Float> histoH, Size morph, Img binary, float concentration) {
+	private static List<Layout> split(List<Float> histoV, List<Float> histoH, Size morph, float concentration, Img binary) {
 
 		int kV = new Double(Math.floor(morph.height * histoV.size())).intValue();
 		int kH = new Double(Math.floor(morph.width * histoH.size())).intValue();
@@ -174,10 +202,10 @@ public class Layout {
 		closedV = getClosedFromHisto(kV, histoV);
 		closedH = getClosedFromHisto(kH, histoH);
 
-		return extractZones(closedV, closedH);
+		return extractZones(closedV, closedH, binary);
 	}
 
-	private static List<Float> getSmoothHisto(float concentration, List<Float> histo) {
+	private static List<Float> getSmoothHisto(float concentration, List<Float> histo, boolean vertical) {
 
 		float min = concentration * 255;
 		float max = (1 - concentration) * 255;
@@ -223,7 +251,7 @@ public class Layout {
 		return closed;
 	}
 
-	private static List<Layout> extractZones(boolean[] resultV, boolean[] resultH) {
+	private static List<Layout> extractZones(boolean[] resultV, boolean[] resultH, Img binary) {
 
 		List<Layout> shardsV = getShards(resultV, true);
 		List<Layout> shardsH = getShards(resultH, false);
@@ -231,7 +259,11 @@ public class Layout {
 
 		for (Layout shardv : shardsV) {
 			for (Layout shardh : shardsH) {
-				shards.add(new Layout(shardh.x1, shardh.x2, shardv.y1, shardv.y2));
+				Layout target = new Layout(shardh.x1, shardh.x2, shardv.y1, shardv.y2);
+				Img roi = target.getRoi(binary);
+				if (roi.rows() != 0 && roi.cols() != 0)
+					target.tighten(roi);
+				shards.add(target);
 			}
 		}
 		return shards;
@@ -265,8 +297,8 @@ public class Layout {
 	}
 
 	public Layout recursivSplit(Size morph, int level, float concentration, Img img, Img binary) {
-		System.out.println("level : " + level);
-		System.out.println("Layout : " + this);
+		// System.out.println("level : " + level);
+		// System.out.println("Layout : " + this);
 		assert img.size().equals(binary.size());
 		if (level < 0) {
 			Imgproc.rectangle(img.getSrc(), new Point(0, 0), new Point(img.width(), img.height()), new Scalar(255, 0, 0), -1);
