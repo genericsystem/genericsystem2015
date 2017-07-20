@@ -556,6 +556,7 @@ public class Img implements AutoCloseable {
 		return new Img(result, false);
 	}
 
+	// TODO: make it faster (compute with integral image?)
 	public Img bernsen(int ksize, int contrast_limit) {
 		Img gray = bgr2Gray();
 		Mat ret = Mat.zeros(gray.size(), gray.type());
