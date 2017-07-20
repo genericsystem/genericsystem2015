@@ -868,7 +868,7 @@ public class Img implements AutoCloseable {
 		return new Layout(0, 1, 0, 1).recursivSplit(new Size(0.036, 0.009), 100, 0.01f, this, adaptivSplit);
 	}
 
-	public Layout buildLayout(Size morph, int level, float concentration, Img img, Img binary) {
-		return new Layout(0, 1, 0, 1).recursivSplit(morph, level, concentration, img, binary);
+	public Layout buildLayout(Layout root, Size morph, int level, float concentration, Img img, Img binary) {
+		return root.recursivSplit(morph, level, concentration, img, binary);
 	}
 }
