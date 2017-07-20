@@ -66,6 +66,7 @@ public class VerticleDeployerFromWatchApp extends AbstractVerticle {
 		deployVerticle(new PdfsConverterVerticle(), true);
 		deployVerticle(new ClassifierVerticle(), true);
 		deployVerticle(new DezonerVerticle(), true);
+		deployVerticle(new AddImageToEngineVerticle(root), true);
 		deployVerticle(new OcrVerticle(root), true);
 		startFuture.complete();
 	}

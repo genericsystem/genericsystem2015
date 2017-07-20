@@ -50,7 +50,7 @@ public class MailWatcherVerticle extends AbstractVerticle {
 				throw new IllegalStateException(res.cause());
 			else
 				vertx.setPeriodic(PERIODC_DELAY, handler -> {
-					System.out.println("Periodic call");
+					// System.out.println("Periodic call");
 					checkMail((IMAPFolder) res.result());
 				});
 		});

@@ -65,12 +65,15 @@ public class FillModelWithData {
 	private static final String docType = "id-fr-front";
 
 	public static void main(String[] mainArgs) {
-		final Engine engine = new Engine(gsPath, Doc.class, RefreshTimestamp.class, DocTimestamp.class, DocFilename.class, DocClass.class, ZoneGeneric.class, ZoneText.class, ZoneTimestamp.class, ImgFilter.class, LevDistance.class, MeanLevenshtein.class,
-				Score.class);
+		final Root engine = getEngine();
 		engine.newCache().start();
-		// compute(engine);
-		cleanModel(engine);
+		compute(engine);
+		// cleanModel(engine);
 		engine.close();
+	}
+
+	private static Root getEngine() {
+		return new Engine(gsPath, Doc.class, RefreshTimestamp.class, DocTimestamp.class, DocFilename.class, DocClass.class, ZoneGeneric.class, ZoneText.class, ZoneTimestamp.class, ImgFilter.class, LevDistance.class, MeanLevenshtein.class, Score.class);
 	}
 
 	/**
@@ -93,7 +96,7 @@ public class FillModelWithData {
 	/**
 	 * Check if a given file has already been processed by the system.
 	 * 
-	 * This verification is conducted by comparing the SHA-256 hash codes generated from the file. If there is a match, the file is assumed to be known.
+	 * This verification is conducted by comparing the SHA-256 hash code generated from the file and the one stored in Generic System. If there is a match, the file is assumed to be known.
 	 * 
 	 * @param engine
 	 *            - the engine used to store the data
@@ -102,20 +105,34 @@ public class FillModelWithData {
 	 * @return - true if the file was not found in the engine, false if it has already been processed
 	 */
 	private static boolean isThisANewFile(Root engine, File file) {
+		return isThisANewFile(engine, file, docType);
+	}
+
+	/**
+	 * Check if a given file has already been processed by the system.
+	 * 
+	 * This verification is conducted by comparing the SHA-256 hash code generated from the file and the one stored in Generic System. If there is a match, the file is assumed to be known.
+	 * 
+	 * @param engine
+	 *            - the engine used to store the data
+	 * @param file
+	 *            - the desired file
+	 * @param docType
+	 *            - {@code String} representing the type of document (i.e., class)
+	 * @return - true if the file was not found in the engine, false if it has already been processed
+	 */
+	private static boolean isThisANewFile(Root engine, File file, String docType) {
 		Generic doc = engine.find(Doc.class);
 		DocClass docClass = engine.find(DocClass.class);
 		DocClassInstance docClassInstance = docClass.getDocClass(docType);
-		String filename;
-		try {
-			filename = ModelTools.getHashFromFile(file.toPath(), "sha-256");
-		} catch (RuntimeException e) {
+		String filenameExt = generateFileName(file.toPath());
+		if (null == filenameExt) {
 			log.error("An error has occured during the generation of the hascode from file (assuming new)");
-			log.debug("Stacktrace: ", e);
 			return true;
+		} else {
+			DocInstance docInstance = docClassInstance.getDoc(doc, filenameExt);
+			return null == docInstance ? true : false;
 		}
-		String filenameExt = filename + "." + FilenameUtils.getExtension(file.getName());
-		DocInstance docInstance = docClassInstance.getDoc(doc, filenameExt);
-		return null == docInstance ? true : false;
 	}
 
 	/**
@@ -126,7 +143,7 @@ public class FillModelWithData {
 	 * @return an {@code int} representing {@link #KNOWN_FILE_UPDATED_FILTERS}, {@link #NEW_FILE} or {@link #KNOWN_FILE}
 	 */
 	public static int doImgOcr(Path imagePath) {
-		final Engine engine = new Engine(gsPath, Doc.class, ImgFilter.class, ZoneGeneric.class, ZoneText.class, Score.class, MeanLevenshtein.class);
+		final Root engine = getEngine();
 		engine.newCache().start();
 		int result = doImgOcr(engine, imagePath);
 		engine.close();
@@ -143,17 +160,14 @@ public class FillModelWithData {
 	 * @return an {@code int} representing {@link #KNOWN_FILE_UPDATED_FILTERS}, {@link #NEW_FILE} or {@link #KNOWN_FILE}
 	 */
 	public static int doImgOcr(Root engine, Path imagePath) {
-
 		try {
 			engine.getCurrentCache();
 		} catch (IllegalStateException e) {
 			log.error("Current cache could not be loaded. Starting a new one...");
 			engine.newCache().start();
 		}
-
 		final Path imgClassDirectory = imagePath.getParent();
 		final String docType = imgClassDirectory.getName(imgClassDirectory.getNameCount() - 1).toString();
-
 		int result = ERROR;
 
 		// Find and save the doc class
@@ -166,11 +180,19 @@ public class FillModelWithData {
 		final Zones zones = Zones.loadZones(imgClassDirectory.toString());
 
 		// Process the image file
-		File file = new File(imagePath.toString());
-
 		initComputation(engine, docType, zones);
-		result = processFile(engine, file, docClassInstance, zones, imgFilters.entrySet().stream());
+		result = processFile(engine, imagePath.toFile(), docClassInstance, zones, imgFilters.entrySet().stream());
 		return result;
+	}
+
+	/**
+	 * Process all the images in the specified folder, and store all the data in Generic System. The docType is set to the default value.
+	 * 
+	 * @param engine
+	 *            - the engine used to store the data
+	 */
+	public static void compute(Root engine) {
+		compute(engine, docType);
 	}
 
 	/**
@@ -178,21 +200,20 @@ public class FillModelWithData {
 	 * 
 	 * @param engine
 	 *            - the engine used to store the data
+	 * @param docType
+	 *            - {@code String} representing the type of document (i.e., class)
 	 */
-	public static void compute(Root engine) {
+	public static void compute(Root engine, String docType) {
 		final String imgClassDirectory = "classes/" + docType;
 		// TODO: remove the following line (only present in development)
 		final String imgDirectory = imgClassDirectory + "/ref2/";
-		log.info("imgClassDirectory = {} ", imgClassDirectory);
-		// Save the current document class
+		log.debug("imgClassDirectory = {} ", imgClassDirectory);
 		DocClass docClass = engine.find(DocClass.class);
 		DocClassInstance docClassInstance = docClass.setDocClass(docType);
-		// Set all the filter names
 		final Map<String, Function<Img, Img>> imgFilters = getFiltersMap();
-		// Load the accurate zones
 		final Zones zones = Zones.loadZones(imgClassDirectory);
+
 		initComputation(engine, docType, zones);
-		// Process each file in folder imgDirectory
 		Arrays.asList(new File(imgDirectory).listFiles((dir, name) -> name.endsWith(".png"))).forEach(file -> {
 			processFile(engine, file, docClassInstance, zones, imgFilters.entrySet().stream());
 			engine.getCurrentCache().flush();
@@ -201,11 +222,7 @@ public class FillModelWithData {
 	}
 
 	/**
-	 * Initialize the computation.
-	 * 
-	 * The zones are added to the model only if they differ from the ones previously saved. Similarly, the imgFilters Map is analyzed, and a new Map containing the new filters is returned.
-	 * 
-	 * This method is used both by {@link #compute(Root)} and {@link #doImgOcr(Path)}.
+	 * Initialize the computation. The zones are added to the model only if they differ from the ones previously saved.
 	 * 
 	 * @param engine
 	 *            - the engine used to store the data
@@ -216,7 +233,6 @@ public class FillModelWithData {
 	 */
 	// TODO: change method's name
 	private static void initComputation(Root engine, String docType, Zones zones) {
-
 		DocClass docClass = engine.find(DocClass.class);
 		DocClassInstance docClassInstance = docClass.getDocClass(docType);
 		// Save the zones if necessary
@@ -255,23 +271,25 @@ public class FillModelWithData {
 	 * @param zones
 	 *            - the list of zones for this image
 	 * @param imgFilters
-	 *            - a stream of entry for a Map containing the filternames that will be applied to the original file, and the functions required to apply these filters
+	 *            - a stream of {@link Entry} for a Map containing the filternames that will be applied to the original file, and the functions required to apply these filters
 	 * @return an {@code int} representing {@link #KNOWN_FILE_UPDATED_FILTERS}, {@link #NEW_FILE} or {@link #KNOWN_FILE}
 	 */
 	private static int processFile(Root engine, File file, DocClassInstance docClassInstance, Zones zones, Stream<Entry<String, Function<Img, Img>>> imgFilters) {
-
+		final boolean newFile = isThisANewFile(engine, file);
 		int result = ERROR;
-		boolean newFile = isThisANewFile(engine, file);
-
 		log.info("\nProcessing file: {}", file.getName());
+
 		Generic doc = engine.find(Doc.class);
 		ZoneText zoneText = engine.find(ZoneText.class);
 		ImgFilter imgFilter = engine.find(ImgFilter.class);
 
 		// Save the current file
-		String filename = ModelTools.getHashFromFile(file.toPath(), "sha-256");
-		String filenameExt = filename + "." + FilenameUtils.getExtension(file.getName());
-		log.info("Hash generated for file {}: {}", file.getName(), filenameExt);
+		String filenameExt = generateFileName(file.toPath());
+		if (null == filenameExt) {
+			log.error("An error has occured while saving the file! Aborted...");
+			return result;
+		}
+
 		DocInstance docInstance = docClassInstance.setDoc(doc, filenameExt);
 		docInstance.setDocFilename(file.getName());
 		engine.getCurrentCache().flush();
@@ -288,11 +306,11 @@ public class FillModelWithData {
 			} else {
 				// TODO: add another criteria to verify if the filter has been
 				// applied on the image
-				boolean containsNull = zones.getZones().stream().anyMatch(z -> {
-					ZoneTextInstance zti = ((ZoneText) engine.find(ZoneText.class)).getZoneText(docInstance, docClassInstance.getZone(z.getNum()), filter);
+				boolean containsNullZoneTextInstance = zones.getZones().stream().anyMatch(z -> {
+					ZoneTextInstance zti = zoneText.getZoneText(docInstance, docClassInstance.getZone(z.getNum()), filter);
 					return zti == null;
 				});
-				if (containsNull) {
+				if (containsNullZoneTextInstance) {
 					imgFilter.setImgFilter(entry.getKey());
 					updatedImgFilters.put(entry.getKey(), entry.getValue());
 				} else {
@@ -365,8 +383,79 @@ public class FillModelWithData {
 			});
 			engine.getCurrentCache().flush();
 		});
-
 		return result;
+	}
+
+	/**
+	 * Save a new document in Generic System using the default Engine.
+	 * 
+	 * @param imgPath
+	 *            - the Path of the file
+	 * @return true if this was a success, false otherwise
+	 */
+	public static boolean registerNewFile(Path imgPath) {
+		final Root engine = getEngine();
+		engine.newCache().start();
+		boolean result = registerNewFile(engine, imgPath);
+		engine.close();
+		return result;
+	}
+
+	/**
+	 * Save a new document in Generic System.
+	 * 
+	 * @param imgPath
+	 *            - the Path of the file
+	 * @return true if this was a success, false otherwise
+	 */
+	public static boolean registerNewFile(Root engine, Path imgPath) {
+		try {
+			engine.getCurrentCache();
+		} catch (IllegalStateException e) {
+			log.debug("Current cache could not be loaded. Starting a new one...");
+			engine.newCache().start();
+		}
+		final Path imgClassDirectory = imgPath.getParent();
+		final String docType = imgClassDirectory.getName(imgClassDirectory.getNameCount() - 1).toString();
+
+		// Find and save the doc class
+		DocClass docClass = engine.find(DocClass.class);
+		DocClassInstance docClassInstance = docClass.setDocClass(docType);
+		engine.getCurrentCache().flush();
+
+		final boolean newFile = isThisANewFile(engine, imgPath.toFile(), docType);
+		if (!newFile) {
+			log.info("Image {} is already known", imgPath.getFileName());
+			return true;
+		} else {
+			log.info("Adding a new image ({}) ", imgPath.getFileName());
+			String filenameExt = generateFileName(imgPath);
+			Generic doc = engine.find(Doc.class);
+			DocInstance docInstance = docClassInstance.setDoc(doc, filenameExt);
+			if (null != docInstance) {
+				docInstance.setDocFilename(imgPath.getFileName().toString());
+				docInstance.setDocTimestamp(ModelTools.getCurrentDate());
+				engine.getCurrentCache().flush();
+				return true;
+			} else {
+				log.error("An error has occured while saving file {}", filenameExt);
+				return false;
+			}
+		}
+	}
+
+	private static String generateFileName(Path filePath) {
+		String filename;
+		try {
+			filename = ModelTools.getHashFromFile(filePath, "sha-256");
+			String filenameExt = filename + "." + FilenameUtils.getExtension(filePath.getFileName().toString());
+			log.info("Hash generated for file {}: {}", filePath.getFileName().toString(), filenameExt);
+			return filenameExt;
+		} catch (RuntimeException e) {
+			log.error("An error has occured during the generation of the hascode from file");
+			log.debug("Stacktrace: ", e);
+			return null;
+		}
 	}
 
 	@SuppressWarnings("unused")

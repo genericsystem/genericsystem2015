@@ -105,8 +105,6 @@ public class WatchApp extends RootTagImpl {
 	public static void main(String[] mainArgs) {
 		ApplicationServer server = ApplicationServer.startSimpleGenericApp(mainArgs, WatchApp.class, gsPath);
 		Root root = server.getRoots().get(System.getenv("HOME") + "/genericsystem/" + gsPath);
-		// OcrVerticle ocrVerticle = new OcrVerticle(root);
-		// ocrVerticle.deployOcrVerticle();
 		VerticleDeployerFromWatchApp deployer = new VerticleDeployerFromWatchApp(root);
 		deployer.doDeploy();
 	}

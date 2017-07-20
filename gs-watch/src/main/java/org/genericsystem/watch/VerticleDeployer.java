@@ -14,6 +14,7 @@ public class VerticleDeployer extends AbstractVerticle {
 	public static final String PDF_WATCHER_ADDRESS = "app.pdfchanges";
 	public static final String PNG_WATCHER_ADDRESS = "app.pngchanges";
 	public static final String IMAGE_ADDED_TO_CLASS_ADDRESS = "app.class.newimage";
+	public static final String NEW_IMAGE_ADDED_TO_CLASS = "app.class.newimage.added";
 	public static final String ACCURATE_ZONES_NOT_FOUND = "app.class.nozone";
 	public static final String ACCURATE_ZONES_FOUND = "app.class.zone";
 	public static final String IMAGE_TO_OCR = "app.ocr.newimage";
