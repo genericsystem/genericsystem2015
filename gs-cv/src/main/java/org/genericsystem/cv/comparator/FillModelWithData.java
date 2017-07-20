@@ -338,8 +338,8 @@ public class FillModelWithData {
 		docInstance.setDocTimestamp(ModelTools.getCurrentDate());
 
 		// Create a map of Imgs
-		Img originalImg = new Img(file.getPath());
 		Map<String, Img> imgs = new ConcurrentHashMap<>();
+		Img originalImg = new Img(file.getPath());
 		updatedImgFilters.entrySet().forEach(entry -> {
 			log.info("Applying algorithm {}...", entry.getKey());
 			Img img = null;
@@ -357,11 +357,8 @@ public class FillModelWithData {
 		Img imgCopy = new Img(file.getPath());
 		zones.draw(imgCopy, new Scalar(0, 255, 0), 3);
 		zones.writeNum(imgCopy, new Scalar(0, 0, 255), 3);
-		// Copy the images to the resources folder
-		// TODO implement a filter mechanism to avoid creating
-		// duplicates in a public folder
+		// Copy the images to the resources folder - TODO implement a filter mechanism to avoid creating duplicates in a public folder
 		log.info("Copying {} to resources folder", filenameExt);
-		// Imgcodecs.imwrite(System.getProperty("user.dir") + "/../gs-cv/src/main/resources/" + filenameExt, imgCopy.getSrc()); // XXX should not be necessary anymore
 		Imgcodecs.imwrite(System.getProperty("user.dir") + "/../gs-watch/src/main/resources/" + filenameExt, imgCopy.getSrc());
 
 		// Process each zone
@@ -370,9 +367,7 @@ public class FillModelWithData {
 			ZoneInstance zoneInstance = docClassInstance.getZone(z.getNum());
 			imgs.entrySet().forEach(entry -> {
 				if ("reality".equals(entry.getKey()) || "best".equals(entry.getKey())) {
-					// Do not proceed to OCR if the real values are known
-					// By default, the "reality" and "best" filters are left
-					// empty
+					// Do not proceed to OCR if the real values are known. By default, the "reality" and "best" filters are left empty
 					if (null == zoneText.getZoneText(docInstance, zoneInstance, imgFilter.getImgFilter(entry.getKey())))
 						zoneText.setZoneText("", docInstance, zoneInstance, imgFilter.getImgFilter(entry.getKey()));
 				} else {
@@ -383,6 +378,12 @@ public class FillModelWithData {
 			});
 			engine.getCurrentCache().flush();
 		});
+
+		// Close the images to force freeing OpenCV's resources (native matrices)
+		imgCopy.close();
+		originalImg.close();
+		imgs.entrySet().forEach(entry -> entry.getValue().close());
+
 		return result;
 	}
 
