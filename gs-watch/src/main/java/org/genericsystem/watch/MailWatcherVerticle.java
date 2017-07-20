@@ -24,6 +24,7 @@ import org.apache.commons.mail.util.MimeMessageParser;
 import com.sun.mail.imap.IMAPFolder;
 
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Future;
 
 public class MailWatcherVerticle extends AbstractVerticle {
 
@@ -35,27 +36,46 @@ public class MailWatcherVerticle extends AbstractVerticle {
 	private static final String password = "WatchTestMWF4";
 	private static final String pdfDir = "../gs-cv/pdf";
 
+	private static final Long PERIODC_DELAY = 5000l;
+
 	public static void main(String[] args) {
 		VerticleDeployer.deployVerticle(new MailWatcherVerticle());
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void start() throws Exception {
-		vertx.executeBlocking(future -> checkMail(), res -> {
+		vertx.executeBlocking(fut -> connectToInbox((Future) fut), res -> {
 			if (res.failed())
 				throw new IllegalStateException(res.cause());
+			else
+				vertx.setPeriodic(PERIODC_DELAY, handler -> {
+					// System.out.println("Periodic call");
+					checkMail((IMAPFolder) res.result());
+				});
 		});
 	}
 
-	private void checkMail() {
+	private void connectToInbox(Future<IMAPFolder> future) {
 		Properties props = System.getProperties();
 		Session session = Session.getInstance(props, null);
 		URLName url = new URLName(protocol, host, 993, file, username, password);
 		Store store;
+		IMAPFolder inbox = null;
 		try {
 			store = session.getStore(url);
 			store.connect();
-			IMAPFolder inbox = (IMAPFolder) store.getFolder(url);
+			inbox = (IMAPFolder) store.getFolder(url);
+		} catch (MessagingException e) {
+			future.fail(e);
+		}
+		future.complete(inbox);
+	}
+
+	private void checkMail(IMAPFolder inbox) {
+		if (inbox == null)
+			return;
+		try {
 			inbox.open(Folder.READ_WRITE); // Folder.READ_WRITE to mark the emails as read.
 
 			int start = 1;
@@ -79,10 +99,7 @@ public class MailWatcherVerticle extends AbstractVerticle {
 						processMessage((MimeMessage) msg);
 				}
 			});
-
-			// Wait for new messages. // TODO: uncomment next 2 lines
-			// for (;;)
-			// inbox.idle();
+			inbox.close(false); // Close without purging the deleted messages on exit
 		} catch (MessagingException e) {
 			e.printStackTrace();
 		}
