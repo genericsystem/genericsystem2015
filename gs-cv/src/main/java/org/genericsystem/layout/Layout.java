@@ -21,7 +21,7 @@ public class Layout {
 	private double y2;
 
 	private String label;
-	private List<Layout> children = new ArrayList<Layout>();
+	private List<Layout> children = new ArrayList<>();
 	private Layout parent = null;
 
 	public Layout(double x1, double x2, double y1, double y2) {
@@ -147,7 +147,7 @@ public class Layout {
 		return "tl : (" + this.x1 + "," + this.y1 + "), br :(" + this.x2 + "," + this.y2 + ")";
 	}
 
-	public Layout tighten(Img binary) {
+	public Layout tighten(Img binary, float concentration) {
 
 		List<Float> Vhist = new ArrayList<>();
 		List<Float> Hhist = new ArrayList<>();
@@ -155,11 +155,14 @@ public class Layout {
 		Converters.Mat_to_vector_float(binary.projectVertically().getSrc(), Vhist);
 		Converters.Mat_to_vector_float((binary.projectHorizontally().transpose()).getSrc(), Hhist);
 
+		// Vhist = getSmoothHisto(concentration, Vhist, true, binary);
+		// Hhist = getSmoothHisto(concentration, Hhist, false, binary);
+
 		double[] x = getHistoLimits(Hhist);
+		System.out.println("x " + Arrays.toString(x));
 		double[] y = getHistoLimits(Vhist);
-
-		return new Layout(((getX1() != 0) ? getX1() : 1) * x[0], ((getX2() != 0) ? getX2() : 1) * x[1], ((getY1() != 0) ? getY1() : 1) * y[0], ((getY2() != 0) ? getY2() : 1) * y[1]);
-
+		System.out.println("y " + Arrays.toString(y));
+		return new Layout(getX1() + x[0] * (getX2() - getX1()), getX1() + x[1] * (getX2() - getX1()), getY1() + y[0] * (getY2() - getY1()), getY1() + y[1] * (getY2() - getY1()));
 	}
 
 	public static double[] getHistoLimits(List<Float> hist) {
@@ -178,7 +181,7 @@ public class Layout {
 			else
 				break;
 		}
-		return new double[] { Integer.valueOf(start - 1).doubleValue() / hist.size(), Integer.valueOf(end + 1).doubleValue() / hist.size() };
+		return new double[] { Integer.valueOf(start).doubleValue() / hist.size(), Integer.valueOf(end + 1).doubleValue() / hist.size() };
 	}
 
 	public static List<Layout> split(Size morph, float concentration, Img binary) {
@@ -187,46 +190,41 @@ public class Layout {
 
 		Converters.Mat_to_vector_float(binary.projectVertically().getSrc(), histoVertical);
 		Converters.Mat_to_vector_float((binary.projectHorizontally().transpose()).getSrc(), histoHorizontal);
+		assert histoVertical.size() == binary.height();
+		assert histoHorizontal.size() == binary.width();
 
-		histoVertical = getSmoothHisto(concentration, histoVertical, true);
-		histoHorizontal = getSmoothHisto(concentration, histoHorizontal, false);
+		List<Float> Vhist = getSmoothHisto(concentration, histoVertical, true, binary);
+		List<Float> Hhist = getSmoothHisto(concentration, histoHorizontal, false, binary);
 
-		return split(histoVertical, histoHorizontal, morph, concentration, binary);
+		int kV = new Double(Math.floor(morph.height * histoVertical.size())).intValue();
+		int kH = new Double(Math.floor(morph.width * histoHorizontal.size())).intValue();
+		boolean[] closedV = getClosedFromHisto(kV, Vhist);
+		boolean[] closedH = getClosedFromHisto(kH, Hhist);
+		return extractZones(closedV, closedH, binary, concentration);
 	}
 
-	private static List<Layout> split(List<Float> histoV, List<Float> histoH, Size morph, float concentration, Img binary) {
-
-		int kV = new Double(Math.floor(morph.height * histoV.size())).intValue();
-		int kH = new Double(Math.floor(morph.width * histoH.size())).intValue();
-
-		boolean[] closedV = new boolean[histoV.size()];
-		boolean[] closedH = new boolean[histoH.size()];
-
-		closedV = getClosedFromHisto(kV, histoV);
-		closedH = getClosedFromHisto(kH, histoH);
-
-		return extractZones(closedV, closedH, binary);
-	}
-
-	private static List<Float> getSmoothHisto(float concentration, List<Float> histo, boolean vertical) {
+	private static List<Float> getSmoothHisto(float concentration, List<Float> histo, boolean vertical, Img binary) {
 
 		float min = concentration * 255;
 		float max = (1 - concentration) * 255;
 		for (int i = 1; i < histo.size() - 1; i++) {
 			float value = histo.get(i);
 			if (value <= min && histo.size() > 32) {
-				histo.set(i, 0f);
-				// if (vertical)
-				// Imgproc.line(src, new Point(0, i), new Point(src.cols(), i), new Scalar(255));
-				// else
-				// Imgproc.line(src, new Point(i, 0), new Point(i, src.rows()), new Scalar(255));
+				histo.set(i, 255f);
+				System.out.println("mask black " + (vertical ? "line" : "column") + " " + i);
+				if (vertical)
+					Imgproc.line(binary.getSrc(), new Point(0, i), new Point(binary.getSrc().cols() - 1, i), new Scalar(255));
+				else
+					Imgproc.line(binary.getSrc(), new Point(i, 0), new Point(i, binary.getSrc().rows() - 1), new Scalar(255));
 			}
-			if (value >= max && histo.size() > 32) {
-				histo.set(i, 0f);
-				// if (vertical)
-				// Imgproc.line(getSrc(), new Point(0, i), new Point(src.cols(), i), new Scalar(255));
-				// else
-				// Imgproc.line(getSrc(), new Point(i, 0), new Point(i, src.rows()), new Scalar(255));
+			if (value != 255 && value >= max && histo.size() > 32) {
+				histo.set(i, 255f);
+				System.out.println("mask white " + (vertical ? "line" : "column") + " " + i);
+
+				if (vertical)
+					Imgproc.line(binary.getSrc(), new Point(0, i), new Point(binary.getSrc().cols() - 1, i), new Scalar(255));
+				else
+					Imgproc.line(binary.getSrc(), new Point(i, 0), new Point(i, binary.getSrc().rows() - 1), new Scalar(255));
 			}
 		}
 		return histo;
@@ -254,22 +252,20 @@ public class Layout {
 		return closed;
 	}
 
-	private static List<Layout> extractZones(boolean[] resultV, boolean[] resultH, Img binary) {
+	private static List<Layout> extractZones(boolean[] resultV, boolean[] resultH, Img binary, float concentration) {
 
 		List<Layout> shardsV = getShards(resultV, true);
 		List<Layout> shardsH = getShards(resultH, false);
+		System.out.println("Binary size : " + binary.size());
+		System.out.println("Size spit : " + shardsV.size() + " " + shardsH.size());
 		List<Layout> shards = new ArrayList<>();
-
-		for (Layout shardv : shardsV) {
+		for (Layout shardv : shardsV)
 			for (Layout shardh : shardsH) {
 				Layout target = new Layout(shardh.x1, shardh.x2, shardv.y1, shardv.y2);
 				Img roi = target.getRoi(binary);
-				if (roi.rows() != 0 && roi.cols() != 0)
-					target.tighten(roi);
-
-				shards.add(target);
+				// if (roi.rows() != 0 && roi.cols() != 0)
+				shards.add(target.tighten(roi, concentration));
 			}
-		}
 		return shards;
 	}
 
