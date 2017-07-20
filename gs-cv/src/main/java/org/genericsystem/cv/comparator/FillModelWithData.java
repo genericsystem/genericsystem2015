@@ -436,6 +436,10 @@ public class FillModelWithData {
 				docInstance.setDocFilename(imgPath.getFileName().toString());
 				docInstance.setDocTimestamp(ModelTools.getCurrentDate());
 				engine.getCurrentCache().flush();
+				try (Img img = new Img(imgPath.toString())) {
+					log.info("Copying {} to resources folder", filenameExt);
+					Imgcodecs.imwrite(System.getProperty("user.dir") + "/../gs-watch/src/main/resources/" + filenameExt, img.getSrc());
+				}
 				return true;
 			} else {
 				log.error("An error has occured while saving file {}", filenameExt);

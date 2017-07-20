@@ -35,6 +35,7 @@ import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.context.ContextAction;
+import org.genericsystem.reactor.context.ContextAction.CANCEL;
 import org.genericsystem.reactor.context.ContextAction.RESET_SELECTION;
 import org.genericsystem.reactor.context.ContextAction.SET_ADMIN_MODE;
 import org.genericsystem.reactor.context.ContextAction.SET_NORMAL_MODE;
@@ -132,10 +133,14 @@ public class WatchApp extends RootTagImpl {
 	@FlexDirectionStyle(FlexDirection.ROW)
 	@Style(name = "margin", value = "0.5em")
 	@Children({ DocumentName.class, FlexDiv.class, ModalFlexDiv.class, FlexDiv.class, DocumentDeleteButtonDiv.class, LastDocumentUpdateDiv.class })
-	@Children(path = FlexDiv.class, pos = 1, value = { CheckedImage.class, FailedImage.class })
-	@Switch(path = { FlexDiv.class, CheckedImage.class }, pos = { 1, 0 }, value = DOC_DEZONED.class)
-	@Switch(path = { FlexDiv.class, FailedImage.class }, pos = { 1, 0 }, value = DOC_NOT_DEZONED.class)
+
 	// TODO: include a link to a dezoner for the first column
+	@Children(path = FlexDiv.class, pos = 1, value = HtmlHyperLink.class)
+	@Children(path = { FlexDiv.class, HtmlHyperLink.class }, pos = { 1, 0 }, value = { CheckedImage.class, FailedImage.class })
+	@Switch(path = { FlexDiv.class, HtmlHyperLink.class, CheckedImage.class }, pos = { 1, 0, 0 }, value = DOC_DEZONED.class)
+	@Switch(path = { FlexDiv.class, HtmlHyperLink.class, FailedImage.class }, pos = { 1, 0, 0 }, value = DOC_NOT_DEZONED.class)
+	@BindAction(path = { FlexDiv.class, HtmlHyperLink.class }, pos = { 1, 0 }, value = CANCEL.class)
+
 	@Children(path = FlexDiv.class, pos = 2, value = { ShowDocumentZones.class, HtmlHyperLink.class })
 	@Children(path = { FlexDiv.class, HtmlHyperLink.class }, pos = { 2, 0 }, value = { CheckedImage.class, FailedImage.class })
 	@BindAction(path = { FlexDiv.class, HtmlHyperLink.class }, pos = { 2, 0 }, value = SET_SELECTION.class)
