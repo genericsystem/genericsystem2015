@@ -80,8 +80,11 @@ public class DocPropertiesCheckerSwitcher {
 		// TODO: verify / test
 		DocInstance currentDoc = (DocInstance) context.getGeneric();
 		Root root = currentDoc.getRoot();
-		ObservableList<ZoneTextInstance> zoneTextInstances = (ObservableList) currentDoc.getHolders(root.find(ZoneText.class)).toObservableList();
-		BooleanBinding binding = Bindings.createBooleanBinding(() -> null != zoneTextInstances, zoneTextInstances);
+		ZoneText zoneText = root.find(ZoneText.class);
+		ObservableList<ZoneTextInstance> zoneTextInstances = (ObservableList) currentDoc.getHolders(zoneText).toObservableList();
+		BooleanBinding binding = Bindings.createBooleanBinding(() -> {
+			return !zoneTextInstances.isEmpty();
+		}, zoneTextInstances);
 		if (reverse)
 			return binding.not();
 		else
@@ -92,13 +95,12 @@ public class DocPropertiesCheckerSwitcher {
 	public static ObservableValue<Boolean> isDocSupervised(Context context, boolean reverse) {
 		// TODO: will a document be considered as not supervised if a
 		// field needs to be left empty?
-
 		DocInstance currentDoc = (DocInstance) context.getGeneric();
 		Root root = currentDoc.getRoot();
-		ObservableList<ZoneTextInstance> zoneTextInstances = (ObservableList) currentDoc.getHolders(root.find(ZoneText.class)).toObservableList().filtered(zt -> "reality".equals(((ZoneTextInstance) zt).getImgFilter().getValue()));
-
+		ZoneText zoneText = root.find(ZoneText.class);
+		ObservableList<ZoneTextInstance> zoneTextInstances = (ObservableList) currentDoc.getHolders(zoneText).toObservableList().filtered(zt -> "reality".equals(((ZoneTextInstance) zt).getImgFilter().getValue()));
 		BooleanBinding binding = Bindings.createBooleanBinding(() -> {
-			if (zoneTextInstances == null) {
+			if (zoneTextInstances.isEmpty()) {
 				return false;
 			} else {
 				// If any field is empty, return false otherwise true

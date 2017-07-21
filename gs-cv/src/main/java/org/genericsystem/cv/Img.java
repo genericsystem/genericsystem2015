@@ -14,6 +14,9 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+
 import javax.swing.ImageIcon;
 
 import org.genericsystem.layout.Layout;
@@ -40,9 +43,6 @@ import org.opencv.utils.Converters;
 import org.opencv.ximgproc.Ximgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 
 public class Img implements AutoCloseable {
 
@@ -556,6 +556,7 @@ public class Img implements AutoCloseable {
 		return new Img(result, false);
 	}
 
+	// TODO: make it faster (compute with integral image?)
 	public Img bernsen(int ksize, int contrast_limit) {
 		Img gray = bgr2Gray();
 		Mat ret = Mat.zeros(gray.size(), gray.type());
@@ -867,7 +868,9 @@ public class Img implements AutoCloseable {
 		return new Layout(0, 1, 0, 1).recursivSplit(new Size(0.036, 0.009), 100, 0.01f, this, adaptivSplit);
 	}
 
-	public Layout buildLayout(Layout root, Size morph, int level, float concentration, Img img, Img binary) {
-		return root.recursivSplit(morph, level, concentration, img, binary);
+	public Layout buildLayout(Size morph, int level, float concentration, Img img, Img binary) {
+		Layout root = new Layout(0, 1, 0, 1).tighten(binary, concentration);
+		System.out.println("-------------------------------------------------------");
+		return root.recursivSplit(morph, level, concentration, root.getRoi(img), root.getRoi(binary));
 	}
 }

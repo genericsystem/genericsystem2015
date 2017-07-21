@@ -51,6 +51,7 @@ public class VerticleDeployerFromWatchApp extends AbstractVerticle {
 			options = new DeploymentOptions().setWorker(worker).setMaxWorkerExecuteTime(Long.MAX_VALUE);
 		else
 			options = new DeploymentOptions();
+		// XXX replace with vertx.deployVerticle since vertx should already reference the singleton
 		GSVertx.vertx().getVertx().deployVerticle(verticle, options, res -> {
 			if (res.failed())
 				throw new IllegalStateException("Deployment of verticle failed.", res.cause());
@@ -65,6 +66,7 @@ public class VerticleDeployerFromWatchApp extends AbstractVerticle {
 		deployVerticle(new PdfsConverterVerticle(), true);
 		deployVerticle(new ClassifierVerticle(), true);
 		deployVerticle(new DezonerVerticle(), true);
+		deployVerticle(new AddImageToEngineVerticle(root), true);
 		deployVerticle(new OcrVerticle(root), true);
 		startFuture.complete();
 	}

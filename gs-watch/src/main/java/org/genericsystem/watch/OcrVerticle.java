@@ -17,7 +17,7 @@ import io.vertx.core.logging.LoggerFactory;
 
 public class OcrVerticle extends AbstractVerticle {
 
-	private static Logger log = LoggerFactory.getLogger(ClassifierVerticle.class);
+	private static Logger log = LoggerFactory.getLogger(OcrVerticle.class);
 	private Root engine;
 
 	public static void main(String[] args) {

@@ -1,14 +1,14 @@
 package org.genericsystem.layout;
 
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
+
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
 import org.opencv.core.Core;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
-
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
 
 public class LayoutAnalyzer extends AbstractApp {
 	static {
@@ -28,12 +28,11 @@ public class LayoutAnalyzer extends AbstractApp {
 		Img img = new Img("resources/14342661748973931.jpg");
 		Img adaptivSplit = img.bgr2Gray().adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 17, 15);
 
-		Layout layout = new Layout(0, 1, 0, 1);
-		layout = layout.tighten(layout.getRoi(adaptivSplit));
-		layout = img.buildLayout(layout, new Size(0.036, 0.009), 100, 0.01f, img, adaptivSplit);
+		Layout layout = img.buildLayout(new Size(0.036, 0.009), 10, 0.008f, img, adaptivSplit);
 
 		layout.draw(layout.getRoi(img), new Scalar(0, 255, 0), 1);
 		mainGrid.add(new ImageView(img.toJfxImage()), columnIndex, rowIndex++);
+		mainGrid.add(new ImageView(adaptivSplit.toJfxImage()), columnIndex, rowIndex++);
 
 		System.out.println(layout.recursivToString());
 	}

@@ -21,7 +21,7 @@ public class Layout {
 	private double y2;
 
 	private String label;
-	private List<Layout> children = new ArrayList<Layout>();
+	private List<Layout> children = new ArrayList<>();
 	private Layout parent = null;
 
 	public Layout(double x1, double x2, double y1, double y2) {
@@ -40,7 +40,10 @@ public class Layout {
 	}
 
 	public void draw(Img img, Scalar color, int thickness) {
-		traverse(img, (roi, shard) -> Imgproc.rectangle(roi.getSrc(), new Point(0, 0), new Point(roi.width() - 1, roi.height() - 1), color, thickness));
+		traverse(img, (roi, shard) -> {
+			if (shard.getChildren().isEmpty())
+				Imgproc.rectangle(roi.getSrc(), new Point(0, 0), new Point(roi.width() - 1, roi.height() - 1), color, thickness);
+		});
 	}
 
 	public void addChild(Layout child) {
@@ -147,38 +150,31 @@ public class Layout {
 		return "tl : (" + this.x1 + "," + this.y1 + "), br :(" + this.x2 + "," + this.y2 + ")";
 	}
 
-	public Layout tighten(Img binary) {
+	public Layout tighten(Img binary, float concentration) {
 
 		List<Float> Vhist = new ArrayList<>();
 		List<Float> Hhist = new ArrayList<>();
 
 		Converters.Mat_to_vector_float(binary.projectVertically().getSrc(), Vhist);
-		Converters.Mat_to_vector_float((binary.projectHorizontally().transpose()).getSrc(), Hhist);
+		Converters.Mat_to_vector_float(binary.projectHorizontally().transpose().getSrc(), Hhist);
+
+		Vhist = smoothHisto(concentration, Vhist, true, binary);
+		Hhist = smoothHisto(concentration, Hhist, false, binary);
 
 		double[] x = getHistoLimits(Hhist);
 		double[] y = getHistoLimits(Vhist);
-
-		return new Layout(((getX1() != 0) ? getX1() : 1) * x[0], ((getX2() != 0) ? getX2() : 1) * x[1], ((getY1() != 0) ? getY1() : 1) * y[0], ((getY2() != 0) ? getY2() : 1) * y[1]);
-
+		System.out.println("x " + Arrays.toString(x) + " y " + Arrays.toString(y));
+		return new Layout(getX1() + x[0] * (getX2() - getX1()), getX1() + x[1] * (getX2() - getX1()), getY1() + y[0] * (getY2() - getY1()), getY1() + y[1] * (getY2() - getY1()));
 	}
 
 	public static double[] getHistoLimits(List<Float> hist) {
-
 		int start = 0;
 		int end = hist.size() - 1;
-		while (start < hist.size()) {
-			if (hist.get(start) == 255.0)
-				start++;
-			else
-				break;
-		}
-		while (end >= 0) {
-			if (hist.get(end) == 255.0)
-				end--;
-			else
-				break;
-		}
-		return new double[] { Integer.valueOf(start - 1).doubleValue() / hist.size(), Integer.valueOf(end + 1).doubleValue() / hist.size() };
+		while (start < hist.size() && hist.get(start) == 255.0)
+			start++;
+		while (end >= 0 && hist.get(end) == 255.0)
+			end--;
+		return new double[] { Integer.valueOf(start).doubleValue() / hist.size(), Integer.valueOf(end + 1).doubleValue() / hist.size() };
 	}
 
 	public static List<Layout> split(Size morph, float concentration, Img binary) {
@@ -187,47 +183,34 @@ public class Layout {
 
 		Converters.Mat_to_vector_float(binary.projectVertically().getSrc(), histoVertical);
 		Converters.Mat_to_vector_float((binary.projectHorizontally().transpose()).getSrc(), histoHorizontal);
+		assert histoVertical.size() == binary.height();
+		assert histoHorizontal.size() == binary.width();
+		// System.out.println(histoVertical);
+		histoVertical = smoothHisto(concentration, histoVertical, true, binary);
+		// System.out.println(histoVertical);
+		histoHorizontal = smoothHisto(concentration, histoHorizontal, false, binary);
 
-		histoVertical = getSmoothHisto(concentration, histoVertical, true);
-		histoHorizontal = getSmoothHisto(concentration, histoHorizontal, false);
-
-		return split(histoVertical, histoHorizontal, morph, concentration, binary);
+		int kV = new Double(Math.floor(morph.height * histoVertical.size())).intValue();
+		int kH = new Double(Math.floor(morph.width * histoHorizontal.size())).intValue();
+		boolean[] closedV = getClosedFromHisto(kV, histoVertical);
+		boolean[] closedH = getClosedFromHisto(kH, histoHorizontal);
+		return extractZones(closedV, closedH, binary, concentration);
 	}
 
-	private static List<Layout> split(List<Float> histoV, List<Float> histoH, Size morph, float concentration, Img binary) {
-
-		int kV = new Double(Math.floor(morph.height * histoV.size())).intValue();
-		int kH = new Double(Math.floor(morph.width * histoH.size())).intValue();
-
-		boolean[] closedV = new boolean[histoV.size()];
-		boolean[] closedH = new boolean[histoH.size()];
-
-		closedV = getClosedFromHisto(kV, histoV);
-		closedH = getClosedFromHisto(kH, histoH);
-
-		return extractZones(closedV, closedH, binary);
-	}
-
-	private static List<Float> getSmoothHisto(float concentration, List<Float> histo, boolean vertical) {
-
+	private static List<Float> smoothHisto(float concentration, List<Float> histo, boolean vertical, Img binary) {
 		float min = concentration * 255;
 		float max = (1 - concentration) * 255;
 		for (int i = 1; i < histo.size() - 1; i++) {
 			float value = histo.get(i);
-			if (value <= min && histo.size() > 32) {
-				histo.set(i, 0f);
-				// if (vertical)
-				// Imgproc.line(src, new Point(0, i), new Point(src.cols(), i), new Scalar(255));
-				// else
-				// Imgproc.line(src, new Point(i, 0), new Point(i, src.rows()), new Scalar(255));
-			}
-			if (value >= max && histo.size() > 32) {
-				histo.set(i, 0f);
-				// if (vertical)
-				// Imgproc.line(getSrc(), new Point(0, i), new Point(src.cols(), i), new Scalar(255));
-				// else
-				// Imgproc.line(getSrc(), new Point(i, 0), new Point(i, src.rows()), new Scalar(255));
-			}
+			if (histo.size() > 32)
+				if (value <= min || value >= max) {
+					histo.set(i, 255f);
+					// System.out.println("mask black " + (vertical ? "line" : "column") + " " + i);
+					if (vertical)
+						Imgproc.line(binary.getSrc(), new Point(0, i), new Point(binary.getSrc().width() - 1, i), new Scalar(255));
+					else
+						Imgproc.line(binary.getSrc(), new Point(i, 0), new Point(i, binary.getSrc().rows() - 1), new Scalar(255));
+				}
 		}
 		return histo;
 	}
@@ -235,41 +218,39 @@ public class Layout {
 	private static boolean[] getClosedFromHisto(int k, List<Float> histo) {
 
 		boolean[] closed = new boolean[histo.size()];
-		Function<Integer, Boolean> isBlack = i -> histo.get(i) == 0;
+		Function<Integer, Boolean> isWhite = i -> histo.get(i) == 255;
 		for (int i = 0; i < histo.size() - 1; i++)
-			if (!isBlack.apply(i) && isBlack.apply(i + 1)) {
+			if (!isWhite.apply(i) && isWhite.apply(i + 1)) {
 				for (int j = k + 1; j > 0; j--)
 					if (i + j < histo.size()) {
-						if (!isBlack.apply(i + j)) {
+						if (!isWhite.apply(i + j)) {
 							Arrays.fill(closed, i, i + j + 1, true);
 							i += j - 1;
 							break;
 						}
-						closed[i] = !isBlack.apply(i);
+						closed[i] = !isWhite.apply(i);
 					}
 			} else
-				closed[i] = !isBlack.apply(i);
+				closed[i] = !isWhite.apply(i);
 		if (!closed[histo.size() - 1])
-			closed[histo.size() - 1] = !isBlack.apply(histo.size() - 1);
+			closed[histo.size() - 1] = !isWhite.apply(histo.size() - 1);
 		return closed;
 	}
 
-	private static List<Layout> extractZones(boolean[] resultV, boolean[] resultH, Img binary) {
+	private static List<Layout> extractZones(boolean[] resultV, boolean[] resultH, Img binary, float concentration) {
 
 		List<Layout> shardsV = getShards(resultV, true);
 		List<Layout> shardsH = getShards(resultH, false);
+		System.out.println("Binary size : " + binary.size());
+		System.out.println("Size spit : " + shardsV.size() + " " + shardsH.size());
 		List<Layout> shards = new ArrayList<>();
-
-		for (Layout shardv : shardsV) {
+		for (Layout shardv : shardsV)
 			for (Layout shardh : shardsH) {
 				Layout target = new Layout(shardh.x1, shardh.x2, shardv.y1, shardv.y2);
 				Img roi = target.getRoi(binary);
 				if (roi.rows() != 0 && roi.cols() != 0)
-					target.tighten(roi);
-
-				shards.add(target);
+					shards.add(target.tighten(roi, concentration));
 			}
-		}
 		return shards;
 	}
 
@@ -281,13 +262,14 @@ public class Layout {
 			if (!result[i] && result[i + 1])
 				start = i + 1;
 			else if (result[i] && !result[i + 1]) {
-				shards.add(vertical ? new Layout(0, 1, Integer.valueOf(start).doubleValue() / result.length, (Integer.valueOf(i).doubleValue() + 1) / result.length)
-						: new Layout(Integer.valueOf(start).doubleValue() / result.length, (Integer.valueOf(i).doubleValue() + 1) / result.length, 0, 1));
+				shards.add(vertical ? new Layout(0, 1, Integer.valueOf(start).doubleValue() / result.length, (Integer.valueOf(i).doubleValue() + 1) / result.length) : new Layout(Integer.valueOf(start).doubleValue() / result.length, (Integer.valueOf(i)
+						.doubleValue() + 1) / result.length, 0, 1));
 				start = null;
 			}
 		if (result[result.length - 1]) {
-			shards.add(vertical ? new Layout(0, 1, Integer.valueOf(start).doubleValue() / result.length, Integer.valueOf(result.length).doubleValue() / result.length)
-					: new Layout(Integer.valueOf(start).doubleValue() / result.length, Integer.valueOf(result.length).doubleValue() / result.length, 0, 1));
+			shards.add(vertical ? new Layout(0, 1, Integer.valueOf(start).doubleValue() / result.length, Integer.valueOf(result.length).doubleValue() / result.length) : new Layout(Integer.valueOf(start).doubleValue() / result.length, Integer.valueOf(
+					result.length).doubleValue()
+					/ result.length, 0, 1));
 			start = null;
 		}
 		return shards;

@@ -9,8 +9,8 @@ import org.genericsystem.cv.model.Doc.DocInstance;
 import org.genericsystem.cv.model.Doc.DocTimestamp;
 import org.genericsystem.cv.model.Doc.DocTimestamp.DocTimestampInstance;
 import org.genericsystem.cv.model.Doc.RefreshTimestamp;
-import org.genericsystem.cv.model.Doc.RefreshTimestamp.RefreshTimestampInstance;
 import org.genericsystem.cv.model.DocClass;
+import org.genericsystem.cv.model.DocClass.DocClassInstance;
 import org.genericsystem.cv.model.ImgFilter;
 import org.genericsystem.cv.model.LevDistance;
 import org.genericsystem.cv.model.MeanLevenshtein;
@@ -35,6 +35,7 @@ import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.context.ContextAction;
+import org.genericsystem.reactor.context.ContextAction.CANCEL;
 import org.genericsystem.reactor.context.ContextAction.RESET_SELECTION;
 import org.genericsystem.reactor.context.ContextAction.SET_ADMIN_MODE;
 import org.genericsystem.reactor.context.ContextAction.SET_NORMAL_MODE;
@@ -56,7 +57,6 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
 import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
 import org.genericsystem.reactor.gscomponents.Monitor;
 import org.genericsystem.reactor.gscomponents.RootTagImpl;
-import org.genericsystem.watch.OcrVerticle;
 import org.genericsystem.watch.VerticleDeployerFromWatchApp;
 import org.genericsystem.watch.gui.DocPropertiesCheckerSwitcher.DOC_DEZONED;
 import org.genericsystem.watch.gui.DocPropertiesCheckerSwitcher.DOC_NOT_DEZONED;
@@ -64,22 +64,20 @@ import org.genericsystem.watch.gui.DocPropertiesCheckerSwitcher.DOC_NOT_OCRD;
 import org.genericsystem.watch.gui.DocPropertiesCheckerSwitcher.DOC_NOT_SUPERVISED;
 import org.genericsystem.watch.gui.DocPropertiesCheckerSwitcher.DOC_OCRD;
 import org.genericsystem.watch.gui.DocPropertiesCheckerSwitcher.DOC_SUPERVISED;
-import org.genericsystem.watch.gui.WatchApp.DocumentsList;
+import org.genericsystem.watch.gui.WatchApp.DocClassDiv;
 import org.genericsystem.watch.gui.WatchApp.HeaderRow;
-import org.genericsystem.watch.gui.WatchApp.START_OCR_VERTICLE;
 
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 @DependsOnModel({ Doc.class, RefreshTimestamp.class, DocTimestamp.class, DocFilename.class, DocClass.class, ZoneGeneric.class, ZoneText.class, ZoneTimestamp.class, ImgFilter.class, LevDistance.class, MeanLevenshtein.class, Score.class })
 @Children({ EditDocumentZones.class, AppHeader.class, FlexDiv.class, Monitor.class })
-@Children(path = FlexDiv.class, pos = 2, value = { HeaderRow.class, DocumentsList.class })
-@Children(path = AppHeader.class, value = { Logo.class, AppTitleDiv.class, FlexDiv.class, HtmlButton.class })
-
-@SetText(path = { AppHeader.class, HtmlButton.class }, pos = { 0, 0 }, value = "start ocr verticle")
-@BindAction(path = { AppHeader.class, HtmlButton.class }, pos = { 0, 0 }, value = START_OCR_VERTICLE.class)
+@Children(path = FlexDiv.class, pos = 2, value = { HeaderRow.class, DocClassDiv.class })
+@Children(path = AppHeader.class, value = { Logo.class, AppTitleDiv.class, FlexDiv.class })
 
 @Children(path = { AppHeader.class, FlexDiv.class }, pos = { 0, 2 }, value = { HtmlButton.class, HtmlButton.class })
 @SetText(path = { AppHeader.class, FlexDiv.class, HtmlButton.class }, pos = { 0, 2, 0 }, value = "Switch to admin mode")
@@ -94,15 +92,25 @@ import javafx.collections.ObservableList;
 public class WatchApp extends RootTagImpl {
 
 	private static final String gsPath = "/gs-cv_model3";
-	private static final String docClass = "id-fr-front";
 
 	public static void main(String[] mainArgs) {
 		ApplicationServer server = ApplicationServer.startSimpleGenericApp(mainArgs, WatchApp.class, gsPath);
 		Root root = server.getRoots().get(System.getenv("HOME") + "/genericsystem/" + gsPath);
-		// OcrVerticle ocrVerticle = new OcrVerticle(root);
-		// ocrVerticle.deployOcrVerticle();
 		VerticleDeployerFromWatchApp deployer = new VerticleDeployerFromWatchApp(root);
 		deployer.doDeploy();
+	}
+
+	@Children(FlexDiv.class)
+	@ForEach(path = FlexDiv.class, value = DOC_CLASS_SELECTOR.class)
+	@Children(path = FlexDiv.class, value = { FlexDiv.class, FlexDiv.class })
+	@Children(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 1 }, value = DocumentsList.class)
+	@BindText(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 0 }, value = DOC_CLASS_LABEL.class)
+	@Style(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 0 }, name = "font-variant", value = "petite-caps")
+	@Style(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 0 }, name = "font-weight", value = "bold")
+	@Style(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 0 }, name = "font-size", value = "medium")
+	@Style(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 0 }, name = "margin", value = "0.5em")
+	public static class DocClassDiv extends FlexDiv {
+
 	}
 
 	@Children({ HtmlLabel.class, HtmlLabel.class, HtmlLabel.class, HtmlLabel.class, HtmlLabel.class, HtmlLabel.class })
@@ -121,14 +129,18 @@ public class WatchApp extends RootTagImpl {
 
 	}
 
-	@ForEach(DOC_CLASS_SELECTOR.class)
+	@ForEach(DOC_SELECTOR.class)
 	@FlexDirectionStyle(FlexDirection.ROW)
 	@Style(name = "margin", value = "0.5em")
 	@Children({ DocumentName.class, FlexDiv.class, ModalFlexDiv.class, FlexDiv.class, DocumentDeleteButtonDiv.class, LastDocumentUpdateDiv.class })
-	@Children(path = FlexDiv.class, pos = 1, value = { CheckedImage.class, FailedImage.class })
-	@Switch(path = { FlexDiv.class, CheckedImage.class }, pos = { 1, 0 }, value = DOC_DEZONED.class)
-	@Switch(path = { FlexDiv.class, FailedImage.class }, pos = { 1, 0 }, value = DOC_NOT_DEZONED.class)
+
 	// TODO: include a link to a dezoner for the first column
+	@Children(path = FlexDiv.class, pos = 1, value = HtmlHyperLink.class)
+	@Children(path = { FlexDiv.class, HtmlHyperLink.class }, pos = { 1, 0 }, value = { CheckedImage.class, FailedImage.class })
+	@Switch(path = { FlexDiv.class, HtmlHyperLink.class, CheckedImage.class }, pos = { 1, 0, 0 }, value = DOC_DEZONED.class)
+	@Switch(path = { FlexDiv.class, HtmlHyperLink.class, FailedImage.class }, pos = { 1, 0, 0 }, value = DOC_NOT_DEZONED.class)
+	@BindAction(path = { FlexDiv.class, HtmlHyperLink.class }, pos = { 1, 0 }, value = CANCEL.class)
+
 	@Children(path = FlexDiv.class, pos = 2, value = { ShowDocumentZones.class, HtmlHyperLink.class })
 	@Children(path = { FlexDiv.class, HtmlHyperLink.class }, pos = { 2, 0 }, value = { CheckedImage.class, FailedImage.class })
 	@BindAction(path = { FlexDiv.class, HtmlHyperLink.class }, pos = { 2, 0 }, value = SET_SELECTION.class)
@@ -228,7 +240,20 @@ public class WatchApp extends RootTagImpl {
 		@Override
 		public ObservableList<Generic> apply(Generic[] generics) {
 			Root root = generics[0].getRoot();
-			Generic currentDocClass = root.find(DocClass.class).getInstance(docClass);
+			DocClass docClass = root.find(DocClass.class);
+			Snapshot<Generic> docClassInstances = docClass.getInstances();
+			if (null != docClassInstances)
+				return docClassInstances.toObservableList();
+			else
+				return FXCollections.emptyObservableList();
+		}
+	}
+
+	public static class DOC_SELECTOR implements ObservableListExtractor {
+		@Override
+		public ObservableList<Generic> apply(Generic[] generics) {
+			DocClassInstance currentDocClass = (DocClassInstance) generics[0];
+			Root root = generics[0].getRoot();
 			if (null != currentDocClass) {
 				System.out.println("Current doc class : " + currentDocClass.info());
 				Snapshot<Generic> docInstances = currentDocClass.getHolders(root.find(Doc.class));
@@ -247,31 +272,27 @@ public class WatchApp extends RootTagImpl {
 		}
 	}
 
-	public static class START_OCR_VERTICLE implements ContextAction {
+	public static class DOC_CLASS_LABEL implements TextBinding {
 		@Override
-		public void accept(Context context, Tag tag) {
-			// TODO
-			OcrVerticle.deployTestVerticle();
+		public ObservableValue<String> apply(Context context, Tag tag) {
+			return new SimpleStringProperty("Doc class: " + context.getGeneric().getValue().toString());
 		}
 	}
 
 	public static class LAST_UPDATE_LABEL implements TextBinding {
-		@SuppressWarnings({ "unchecked", "rawtypes" })
 		@Override
 		public ObservableValue<String> apply(Context context, Tag tag) {
-			// TODO avoid the use of an ObservableList in favor of an ObservableValue?
 			DocInstance currentDoc = (DocInstance) context.getGeneric();
 			Root root = currentDoc.getRoot();
 			DocTimestamp docTimestamp = root.find(DocTimestamp.class);
-			ObservableList<RefreshTimestampInstance> ol = (ObservableList) currentDoc.getHolders(docTimestamp).toObservableList();
-
+			SimpleObjectProperty<Generic> ov = new SimpleObjectProperty<>(currentDoc.getHolder(docTimestamp));
 			return Bindings.createStringBinding(() -> {
 				DocTimestampInstance docTimestampInstance = docTimestamp.getDocTimestamp(currentDoc);
 				if (null == docTimestampInstance)
 					return "n/a";
 				else
 					return ModelTools.formatDate((Long) docTimestampInstance.getValue());
-			}, ol);
+			}, ov);
 		}
 	}
 }
