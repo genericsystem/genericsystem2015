@@ -8,6 +8,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import org.genericsystem.api.core.Snapshot;
+import org.genericsystem.common.GSVertx;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
 import org.genericsystem.cv.model.Doc.DocInstance;
@@ -49,9 +50,6 @@ import org.genericsystem.reactor.gscomponents.InputTextWithConversion.InputTextE
 import org.genericsystem.reactor.gscomponents.InputWithDatalist;
 import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
 import org.genericsystem.watch.gui.EditDocumentZones.TextDiv;
-import org.genericsystem.watch.gui.ShowDocumentZones.CloseButton;
-import org.genericsystem.watch.gui.ShowDocumentZones.LastUpdate;
-import org.genericsystem.watch.gui.ShowDocumentZones.RefreshButton;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
@@ -69,8 +67,8 @@ public class EditDocumentZones extends ModalEditor {
 	@FlexDirectionStyle(path = FlexDiv.class, value = FlexDirection.ROW)
 	@Children({ FlexDiv.class, FlexDiv.class, FlexDiv.class })
 	@Children(path = FlexDiv.class, pos = 1, value = { FlexDiv.class, FlexDiv.class })
-	@Children(path = { FlexDiv.class, FlexDiv.class }, pos = { 1, 0 }, value = { Image.class, LastUpdate.class })
-	@Children(path = FlexDiv.class, pos = 2, value = { RefreshButton.class, CloseButton.class })
+	@Children(path = { FlexDiv.class, FlexDiv.class }, pos = { 1, 0 }, value = Image.class)
+	@Children(path = FlexDiv.class, pos = 2, value = { Validate.class, Cancel.class })
 	@Children(path = { FlexDiv.class, FlexDiv.class }, pos = { 1, 1 }, value = ZoneTextDiv.class)
 	@BindText(path = FlexDiv.class, pos = 0)
 	@StyleClass(path = FlexDiv.class, pos = 0, value = "doc-title")
@@ -110,9 +108,7 @@ public class EditDocumentZones extends ModalEditor {
 	@Children({ ZoneLabelInput.class, ZonesDetails.class })
 	@ForEach(ZONE_SELECTOR.class)
 	public static class ZoneTextDiv extends FlexDiv {
-		// For each zone, create a div with label + inputText
-		// and create a div for the results for all filters
-
+		// For each zone, create a div with label + inputText and create a div for the results for all filters
 	}
 
 	@FlexDirectionStyle(FlexDirection.ROW)
@@ -216,7 +212,21 @@ public class EditDocumentZones extends ModalEditor {
 		@Override
 		public void accept(Context context, Tag tag) {
 			System.out.println("Saving text for class " + Arrays.asList(context.getGenerics()));
-			context.flush();
+			GSVertx.vertx().getVertx().executeBlocking(future -> {
+				try {
+					context.getGeneric().getCurrentCache();
+				} catch (IllegalStateException e) {
+					log.error("Current cache could not be loaded. Starting a new one...");
+					context.getGeneric().getRoot().newCache().start();
+				}
+				context.flush();
+				future.complete();
+			}, res -> {
+				if (res.failed())
+					throw new IllegalStateException(res.cause());
+				else
+					System.out.println("Done!");
+			});
 		}
 	}
 }

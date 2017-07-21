@@ -1,6 +1,7 @@
 package org.genericsystem.watch.gui;
 
 import org.genericsystem.api.core.Snapshot;
+import org.genericsystem.common.GSVertx;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
 import org.genericsystem.cv.comparator.ComputeBestTextPerZone;
@@ -83,9 +84,17 @@ public class ShowDocumentZones extends ModalEditor {
 			Root root = context.getGeneric().getRoot();
 			DocInstance docInstance = (DocInstance) context.getGeneric();
 			String docType = docInstance.getDocClass().getValue().toString();
-			ComputeBestTextPerZone.computeOneFile(root, docInstance, docType);
-			docInstance.setRefreshTimestamp(ModelTools.getCurrentDate());
-			System.out.println("Done!");
+
+			GSVertx.vertx().getVertx().executeBlocking(future -> {
+				ComputeBestTextPerZone.computeOneFile(root, docInstance, docType);
+				docInstance.setRefreshTimestamp(ModelTools.getCurrentDate());
+				future.complete();
+			}, res -> {
+				if (res.failed())
+					throw new IllegalStateException(res.cause());
+				else
+					System.out.println("Done!");
+			});
 		}
 	}
 
