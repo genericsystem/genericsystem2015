@@ -9,14 +9,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
-
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.Tools;
 import org.opencv.calib3d.Calib3d;
 import org.opencv.core.Core;
+import org.opencv.core.CvType;
 import org.opencv.core.DMatch;
 import org.opencv.core.KeyPoint;
 import org.opencv.core.Mat;
@@ -32,13 +30,19 @@ import org.opencv.core.Size;
 import org.opencv.features2d.DescriptorExtractor;
 import org.opencv.features2d.DescriptorMatcher;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.utils.Converters;
 import org.opencv.videoio.VideoCapture;
+
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
 
 public class CamLayoutAnalyzer extends AbstractApp {
 
 	static {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 	}
+
+	private double crop = 0.10;
 
 	public static void main(String[] args) {
 		launch(args);
@@ -55,7 +59,7 @@ public class CamLayoutAnalyzer extends AbstractApp {
 		Mat frame = new Mat();
 		capture.read(frame);
 		ImageView src = new ImageView(Tools.mat2jfxImage(frame));
-		Img deskewed = deskew(frame);
+		Img deskewed = deskew(frame, new double[1]);
 
 		ImageView src2 = new ImageView(deskewed.toJfxImage());
 		ImageView src3 = new ImageView(deskewed.toJfxImage());
@@ -66,11 +70,14 @@ public class CamLayoutAnalyzer extends AbstractApp {
 		Mat[] oldDescriptors = new Mat[] { new Mat() };
 		extractor.compute(deskewed.bgr2Gray().getSrc(), oldKeypoints[0], oldDescriptors[0]);
 		int[] count = new int[] { 0 };
+		Mat transformedImage = new Mat();
 		timer.scheduleAtFixedRate(() -> {
 			try {
 				capture.read(frame);
-				Img deskewed_ = deskew(frame);
+				double[] angle = new double[1];
+				Img deskewed_ = deskew(frame, angle);
 				src.setImage(deskewed_.toJfxImage());
+
 				MatOfKeyPoint newKeypoints = detect(deskewed_.getSrc());
 				Mat newDescriptors = new Mat();
 				extractor.compute(deskewed_.bgr2Gray().getSrc(), newKeypoints, newDescriptors);
@@ -97,10 +104,32 @@ public class CamLayoutAnalyzer extends AbstractApp {
 				// System.out.println(goodNewKeypoints);
 				// System.out.println(goodOldKeypoints);
 
-				if (goodMatches.size() > 30) {
-					Mat homography = Calib3d.findHomography(new MatOfPoint2f(goodNewKeypoints.stream().toArray(Point[]::new)), new MatOfPoint2f(goodOldKeypoints.stream().toArray(Point[]::new)), Calib3d.RANSAC, 10);
-					Mat transformedImage = new Mat();
-					Imgproc.warpPerspective(deskewed_.getSrc(), transformedImage, homography, new Size(deskewed_.getSrc().cols(), deskewed_.getSrc().rows()));
+				if (goodMatches.size() > 20) {
+
+					Point[] oldPoints = goodOldKeypoints.stream().toArray(Point[]::new);
+					Mat goodNewPoints = Converters.vector_Point2f_to_Mat(goodNewKeypoints);
+					MatOfPoint2f originalNewPoints = new MatOfPoint2f();
+
+					Core.transform(goodNewPoints, originalNewPoints, Imgproc.getRotationMatrix2D(new Point(deskewed_.width() / 2, deskewed_.height() / 2), -angle[0], 1));
+
+					List<Point> shiftPoints = new ArrayList<>();
+					Converters.Mat_to_vector_Point2f(originalNewPoints, shiftPoints);
+
+					for (int i = 0; i < shiftPoints.size(); i++) {
+						double x = shiftPoints.get(i).x + crop * frame.width();
+						double y = shiftPoints.get(i).y + crop * frame.height();
+						shiftPoints.set(i, new Point(x, y));
+					}
+
+					Mat homography = Calib3d.findHomography(new MatOfPoint2f(shiftPoints.stream().toArray(Point[]::new)), new MatOfPoint2f(oldPoints), Calib3d.RANSAC, 10);
+
+					Mat mask = new Mat(deskewed_.size(), CvType.CV_8UC1, new Scalar(255));
+					Mat maskWarpped = new Mat();
+					Imgproc.warpPerspective(mask, maskWarpped, homography, new Size(deskewed_.cols(), deskewed_.rows()));
+					Mat tmp = new Mat();
+					Imgproc.warpPerspective(frame, tmp, homography, new Size(deskewed_.cols(), deskewed_.rows()), Imgproc.INTER_LINEAR, Core.BORDER_WRAP, Scalar.all(255));
+					tmp.copyTo(transformedImage, maskWarpped);
+
 					Img stabilized = new Img(transformedImage);
 					stabilized.buildLayout().draw(stabilized, new Scalar(0, 255, 0), 1);
 					src2.setImage(stabilized.toJfxImage());
@@ -139,17 +168,17 @@ public class CamLayoutAnalyzer extends AbstractApp {
 		}
 	}
 
-	private Img deskew(Mat frame) {
+	private Img deskew(Mat frame, double[] angle) {
 		try (Img img = new Img(frame);
 				Img adaptativThreshold = img.cvtColor(Imgproc.COLOR_BGR2GRAY).adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 17, 9);
 				Img closed = adaptativThreshold.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(5, 5));) {
-			double angle = detection_contours(frame, closed.getSrc());
-			Mat matrix = Imgproc.getRotationMatrix2D(new Point(frame.width() / 2, frame.height() / 2), angle, 1);
+			angle[0] = detection_contours(frame, closed.getSrc());
+			Mat matrix = Imgproc.getRotationMatrix2D(new Point(frame.width() / 2, frame.height() / 2), angle[0], 1);
 			Mat rotated = new Mat();
 			Imgproc.warpAffine(frame, rotated, matrix, new Size(frame.size().width, frame.size().height));
-			double crop = 0.15;
-			Img result = new Img(new Mat(rotated, new Rect(Double.valueOf(rotated.width() * crop).intValue(), Double.valueOf(rotated.height() * crop).intValue(), Double.valueOf(rotated.width() * (1 - 2 * crop)).intValue(), Double.valueOf(
-					rotated.height() * (1 - 2 * crop)).intValue())), false);
+			Img result = new Img(new Mat(rotated,
+					new Rect(Double.valueOf(rotated.width() * crop).intValue(), Double.valueOf(rotated.height() * crop).intValue(), Double.valueOf(rotated.width() * (1 - 2 * crop)).intValue(), Double.valueOf(rotated.height() * (1 - 2 * crop)).intValue())),
+					false);
 			matrix.release();
 			rotated.release();
 			return result;
@@ -160,7 +189,6 @@ public class CamLayoutAnalyzer extends AbstractApp {
 		List<MatOfPoint> contours = new ArrayList<>();
 		Imgproc.findContours(dilated, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
 		double minArea = 100;
-		double crop = 0.10;
 		Predicate<RotatedRect> filter = rect -> rect.center.x > Double.valueOf(frame.width() * crop).intValue() && rect.center.y > Double.valueOf(frame.height() * crop).intValue() && rect.center.x < Double.valueOf(frame.width() * (1 - crop)).intValue()
 				&& rect.center.y < Double.valueOf(frame.height() * (1 - crop)).intValue();
 		List<RotatedRect> rotatedRects = contours.stream().filter(contour -> Imgproc.contourArea(contour) > minArea).map(contour -> Imgproc.minAreaRect(new MatOfPoint2f(contour.toArray()))).filter(filter).collect(Collectors.toList());
@@ -192,7 +220,7 @@ public class CamLayoutAnalyzer extends AbstractApp {
 			List<MatOfPoint> mof = Collections.singletonList(new MatOfPoint(new MatOfPoint(result)));
 			// Imgproc.drawContours(frame, mof, 0, new Scalar(0, 255, 0), 1);
 			// Imgproc.drawContours(dilated, mof, 0, new Scalar(255), 1);
-			});
+		});
 		return goodAverage;
 	}
 
