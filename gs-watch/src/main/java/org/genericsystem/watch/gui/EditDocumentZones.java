@@ -49,6 +49,9 @@ import org.genericsystem.reactor.gscomponents.InputTextWithConversion.InputTextE
 import org.genericsystem.reactor.gscomponents.InputWithDatalist;
 import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
 import org.genericsystem.watch.gui.EditDocumentZones.TextDiv;
+import org.genericsystem.watch.gui.ShowDocumentZones.CloseButton;
+import org.genericsystem.watch.gui.ShowDocumentZones.LastUpdate;
+import org.genericsystem.watch.gui.ShowDocumentZones.RefreshButton;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
@@ -63,16 +66,19 @@ import javafx.collections.ObservableList;
 public class EditDocumentZones extends ModalEditor {
 
 	@FlexDirectionStyle(FlexDirection.COLUMN)
-	@Children({ FlexDiv.class, FlexDiv.class })
-	@Children(path = FlexDiv.class, pos = 0, value = { FlexDiv.class, FlexDiv.class })
-	@Children(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 0 }, value = Image.class)
-	@Children(path = FlexDiv.class, pos = 1, value = { Validate.class, Cancel.class })
-	@Children(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 1 }, value = ZoneTextDiv.class)
 	@FlexDirectionStyle(path = FlexDiv.class, value = FlexDirection.ROW)
-	@Style(path = FlexDiv.class, pos = 1, name = "justify-content", value = "center")
-	@Style(path = FlexDiv.class, pos = 1, name = "align-items", value = "center")
+	@Children({ FlexDiv.class, FlexDiv.class, FlexDiv.class })
+	@Children(path = FlexDiv.class, pos = 1, value = { FlexDiv.class, FlexDiv.class })
+	@Children(path = { FlexDiv.class, FlexDiv.class }, pos = { 1, 0 }, value = { Image.class, LastUpdate.class })
+	@Children(path = FlexDiv.class, pos = 2, value = { RefreshButton.class, CloseButton.class })
+	@Children(path = { FlexDiv.class, FlexDiv.class }, pos = { 1, 1 }, value = ZoneTextDiv.class)
+	@BindText(path = FlexDiv.class, pos = 0)
+	@StyleClass(path = FlexDiv.class, pos = 0, value = "doc-title")
+	@Style(path = FlexDiv.class, pos = 2, name = "justify-content", value = "center")
+	@Style(path = FlexDiv.class, pos = 2, name = "align-items", value = "center")
 	@SelectContext(path = FlexDiv.class, pos = 0, value = SELECTION_SELECTOR.class)
-	@SelectContext(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, -1 }, value = SELECTION_SELECTOR.class)
+	@SelectContext(path = FlexDiv.class, pos = 1, value = SELECTION_SELECTOR.class)
+	@SelectContext(path = { FlexDiv.class, FlexDiv.class }, pos = { 1, -1 }, value = SELECTION_SELECTOR.class)
 	public static class TextDiv extends FlexDiv {
 
 	}

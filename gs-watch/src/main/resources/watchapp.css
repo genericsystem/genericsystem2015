@@ -23,6 +23,20 @@ label[name="zone"] {
 	font-weight: bold;
 }
 
+.doc-class-title {
+	font-variant: petite-caps;
+	font-weight: bold;
+	font-size: medium;
+	margin: 0.5em;
+}
+
+.doc-title {
+	justify-content: center;
+	align-items: center;
+	font-weight: bold;
+	margin: 0.5em;
+}
+
 img {
 	height: auto;
 	width: 400px;
