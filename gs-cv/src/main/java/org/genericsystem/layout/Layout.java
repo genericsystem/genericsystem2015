@@ -35,9 +35,9 @@ public class Layout {
 		return new Img(img, this);
 	}
 
-	public void draw2(Img img, Scalar color, int thickness) {
-		Imgproc.rectangle(img.getSrc(), new Point(x1 * img.width(), y1 * img.height()), new Point(x2 * img.width(), y2 * img.height()), color, thickness);// rect.tl(), rect.br(), color, thickness);
-	}
+	// public void draw2(Img img, Scalar color, int thickness) {
+	// Imgproc.rectangle(img.getSrc(), new Point(x1 * img.width(), y1 * img.height()), new Point(x2 * img.width(), y2 * img.height()), color, thickness);// rect.tl(), rect.br(), color, thickness);
+	// }
 
 	public void draw(Img img, Scalar color, int thickness) {
 		traverse(img, (roi, shard) -> {
@@ -158,13 +158,25 @@ public class Layout {
 		Converters.Mat_to_vector_float(binary.projectVertically().getSrc(), Vhist);
 		Converters.Mat_to_vector_float(binary.projectHorizontally().transpose().getSrc(), Hhist);
 
+		// System.out.println("Vhist before smooth: " + Vhist.toString());
 		Vhist = smoothHisto(concentration, Vhist, true, binary);
+		// System.out.println("Vhist after smooth: " + Vhist.toString());
+
+		// System.out.println("Hhist before smooth: " + Hhist.toString());
 		Hhist = smoothHisto(concentration, Hhist, false, binary);
+		// System.out.println("Hhist after smooth: " + Hhist.toString());
 
 		double[] x = getHistoLimits(Hhist);
 		double[] y = getHistoLimits(Vhist);
-		System.out.println("x " + Arrays.toString(x) + " y " + Arrays.toString(y));
-		return new Layout(getX1() + x[0] * (getX2() - getX1()), getX1() + x[1] * (getX2() - getX1()), getY1() + y[0] * (getY2() - getY1()), getY1() + y[1] * (getY2() - getY1()));
+
+		// System.out.println("x " + Arrays.toString(x) + " y " + Arrays.toString(y));
+
+		if (x[0] <= x[1] && y[0] <= y[1]) {
+			return new Layout(getX1() + x[0] * (getX2() - getX1()), getX1() + x[1] * (getX2() - getX1()), getY1() + y[0] * (getY2() - getY1()), getY1() + y[1] * (getY2() - getY1()));
+		} else {
+			return new Layout(getX1(), getX2(), getY1(), getY2());
+		}
+
 	}
 
 	public static double[] getHistoLimits(List<Float> hist) {
@@ -185,9 +197,8 @@ public class Layout {
 		Converters.Mat_to_vector_float((binary.projectHorizontally().transpose()).getSrc(), histoHorizontal);
 		assert histoVertical.size() == binary.height();
 		assert histoHorizontal.size() == binary.width();
-		// System.out.println(histoVertical);
+
 		histoVertical = smoothHisto(concentration, histoVertical, true, binary);
-		// System.out.println(histoVertical);
 		histoHorizontal = smoothHisto(concentration, histoHorizontal, false, binary);
 
 		int kV = new Double(Math.floor(morph.height * histoVertical.size())).intValue();
@@ -241,13 +252,14 @@ public class Layout {
 
 		List<Layout> shardsV = getShards(resultV, true);
 		List<Layout> shardsH = getShards(resultH, false);
-		System.out.println("Binary size : " + binary.size());
-		System.out.println("Size spit : " + shardsV.size() + " " + shardsH.size());
+		// System.out.println("Binary size : " + binary.size());
+		// System.out.println("Size spit : " + shardsV.size() + " " + shardsH.size());
 		List<Layout> shards = new ArrayList<>();
 		for (Layout shardv : shardsV)
 			for (Layout shardh : shardsH) {
 				Layout target = new Layout(shardh.x1, shardh.x2, shardv.y1, shardv.y2);
 				Img roi = target.getRoi(binary);
+				// System.out.println("roi : rows :" + roi.rows() + " , cols :" + roi.cols());
 				if (roi.rows() != 0 && roi.cols() != 0)
 					shards.add(target.tighten(roi, concentration));
 			}
@@ -262,14 +274,13 @@ public class Layout {
 			if (!result[i] && result[i + 1])
 				start = i + 1;
 			else if (result[i] && !result[i + 1]) {
-				shards.add(vertical ? new Layout(0, 1, Integer.valueOf(start).doubleValue() / result.length, (Integer.valueOf(i).doubleValue() + 1) / result.length) : new Layout(Integer.valueOf(start).doubleValue() / result.length, (Integer.valueOf(i)
-						.doubleValue() + 1) / result.length, 0, 1));
+				shards.add(vertical ? new Layout(0, 1, Integer.valueOf(start).doubleValue() / result.length, (Integer.valueOf(i).doubleValue() + 1) / result.length)
+						: new Layout(Integer.valueOf(start).doubleValue() / result.length, (Integer.valueOf(i).doubleValue() + 1) / result.length, 0, 1));
 				start = null;
 			}
 		if (result[result.length - 1]) {
-			shards.add(vertical ? new Layout(0, 1, Integer.valueOf(start).doubleValue() / result.length, Integer.valueOf(result.length).doubleValue() / result.length) : new Layout(Integer.valueOf(start).doubleValue() / result.length, Integer.valueOf(
-					result.length).doubleValue()
-					/ result.length, 0, 1));
+			shards.add(vertical ? new Layout(0, 1, Integer.valueOf(start).doubleValue() / result.length, Integer.valueOf(result.length).doubleValue() / result.length)
+					: new Layout(Integer.valueOf(start).doubleValue() / result.length, Integer.valueOf(result.length).doubleValue() / result.length, 0, 1));
 			start = null;
 		}
 		return shards;
