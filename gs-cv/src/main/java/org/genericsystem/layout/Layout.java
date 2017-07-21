@@ -40,7 +40,10 @@ public class Layout {
 	}
 
 	public void draw(Img img, Scalar color, int thickness) {
-		traverse(img, (roi, shard) -> Imgproc.rectangle(roi.getSrc(), new Point(0, 0), new Point(roi.width() - 1, roi.height() - 1), color, thickness));
+		traverse(img, (roi, shard) -> {
+			if (shard.getChildren().isEmpty())
+				Imgproc.rectangle(roi.getSrc(), new Point(0, 0), new Point(roi.width() - 1, roi.height() - 1), color, thickness);
+		});
 	}
 
 	public void addChild(Layout child) {
@@ -182,9 +185,9 @@ public class Layout {
 		Converters.Mat_to_vector_float((binary.projectHorizontally().transpose()).getSrc(), histoHorizontal);
 		assert histoVertical.size() == binary.height();
 		assert histoHorizontal.size() == binary.width();
-		System.out.println(histoVertical);
+		// System.out.println(histoVertical);
 		histoVertical = smoothHisto(concentration, histoVertical, true, binary);
-		System.out.println(histoVertical);
+		// System.out.println(histoVertical);
 		histoHorizontal = smoothHisto(concentration, histoHorizontal, false, binary);
 
 		int kV = new Double(Math.floor(morph.height * histoVertical.size())).intValue();
