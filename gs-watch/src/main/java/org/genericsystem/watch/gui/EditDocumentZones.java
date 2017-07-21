@@ -1,14 +1,12 @@
 package org.genericsystem.watch.gui;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
 import org.genericsystem.api.core.Snapshot;
-import org.genericsystem.common.GSVertx;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
 import org.genericsystem.cv.model.Doc.DocInstance;
@@ -149,8 +147,11 @@ public class EditDocumentZones extends ModalEditor {
 			DocInstance docInstance = zti.getDoc();
 			ZoneInstance zoneInstance = zti.getZone();
 			ImgFilterInstance imgFilterInstance = zti.getImgFilter();
-			return context.getGeneric().getMeta().setInstance(newValue, docInstance, zoneInstance, imgFilterInstance);
-			// return context.getGeneric().updateValue(newValue);
+			// return context.getGeneric().getMeta().setInstance(newValue, docInstance, zoneInstance, imgFilterInstance);
+			long start = System.currentTimeMillis();
+			Generic updateValue = context.getGeneric().updateValue(newValue);
+			System.out.println("zzzzzzzzzz" + (System.currentTimeMillis() - start));
+			return updateValue;
 		}
 	}
 
@@ -203,7 +204,6 @@ public class EditDocumentZones extends ModalEditor {
 		@Override
 		public void accept(Context context, Tag tag) {
 			Tag ancestor = tag.getParent().getParent(); // ZoneTextDiv
-			// ancestor.getObservableChildren().forEach(System.out::println);
 			ancestor.find(ModalWithDisplay.class).getDisplayProperty(context).setValue("flex");
 		}
 	}
@@ -211,22 +211,13 @@ public class EditDocumentZones extends ModalEditor {
 	public static class SAVE implements ContextAction {
 		@Override
 		public void accept(Context context, Tag tag) {
-			System.out.println("Saving text for class " + Arrays.asList(context.getGenerics()));
-			GSVertx.vertx().getVertx().executeBlocking(future -> {
-				try {
-					context.getGeneric().getCurrentCache();
-				} catch (IllegalStateException e) {
-					log.error("Current cache could not be loaded. Starting a new one...");
-					context.getGeneric().getRoot().newCache().start();
-				}
-				context.flush();
-				future.complete();
-			}, res -> {
-				if (res.failed())
-					throw new IllegalStateException(res.cause());
-				else
-					System.out.println("Done!");
-			});
+			System.out.println("Saving...");
+			Root root = context.getGeneric().getRoot();
+			System.out.println("Current thread (save): " + Thread.currentThread().getName());
+			long start = System.nanoTime();
+			root.getCurrentCache().flush();
+			long stop = System.nanoTime();
+			System.out.println("Saved in " + (stop - start) / 1_000_000 + "ms");
 		}
 	}
 }

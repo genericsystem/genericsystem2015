@@ -1,7 +1,6 @@
 package org.genericsystem.watch.gui;
 
 import org.genericsystem.api.core.Snapshot;
-import org.genericsystem.common.GSVertx;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
 import org.genericsystem.cv.comparator.ComputeBestTextPerZone;
@@ -38,8 +37,10 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlHyperLink;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlImg;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
 import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
+import org.genericsystem.watch.VerticleDeployerFromWatchApp;
 import org.genericsystem.watch.gui.ShowDocumentZones.TextDiv;
 
+import io.vertx.core.Verticle;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
@@ -72,7 +73,7 @@ public class ShowDocumentZones extends ModalEditor {
 	}
 
 	@SetText("Refresh")
-	@BindAction(value = { REFRESH_BEST_TEXT.class, FLUSH.class })
+	@BindAction(value = { REFRESH_BEST_TEXT.class, FLUSH.class }) // XXX include the flush in the refresh function to do it asynchronously?
 	public static class RefreshButton extends HtmlButton {
 		// Run the best text selection algorithm
 	}
@@ -85,16 +86,17 @@ public class ShowDocumentZones extends ModalEditor {
 			DocInstance docInstance = (DocInstance) context.getGeneric();
 			String docType = docInstance.getDocClass().getValue().toString();
 
-			GSVertx.vertx().getVertx().executeBlocking(future -> {
-				ComputeBestTextPerZone.computeOneFile(root, docInstance, docType);
-				docInstance.setRefreshTimestamp(ModelTools.getCurrentDate());
-				future.complete();
-			}, res -> {
-				if (res.failed())
-					throw new IllegalStateException(res.cause());
-				else
+			System.out.println("Current thread (refresh): " + Thread.currentThread().getName());
+
+			Verticle worker = new WorkerVerticle() {
+				@Override
+				public void start() throws Exception {
+					ComputeBestTextPerZone.computeOneFile(root, docInstance, docType);
+					docInstance.setRefreshTimestamp(ModelTools.getCurrentDate());
 					System.out.println("Done!");
-			});
+				}
+			};
+			VerticleDeployerFromWatchApp.deployWorkerVerticle(worker, "Failed to execute the task");
 		}
 	}
 

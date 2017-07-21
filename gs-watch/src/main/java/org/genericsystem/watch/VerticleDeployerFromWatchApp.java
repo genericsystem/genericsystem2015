@@ -24,6 +24,8 @@ import io.vertx.core.Verticle;
 public class VerticleDeployerFromWatchApp extends AbstractVerticle {
 
 	private static final String gsPath = System.getenv("HOME") + "/genericsystem/gs-cv_model3/";
+	private static final DeploymentOptions OPTIONS_NORMAL = new DeploymentOptions();
+	private static final DeploymentOptions OPTIONS_WORKER = new DeploymentOptions().setWorker(true).setMaxWorkerExecuteTime(Long.MAX_VALUE);
 	private Root root;
 
 	public VerticleDeployerFromWatchApp() {
@@ -35,9 +37,15 @@ public class VerticleDeployerFromWatchApp extends AbstractVerticle {
 		this.root = root;
 	}
 
+	public static void deployWorkerVerticle(Verticle verticle, String errorMessage) throws IllegalStateException {
+		GSVertx.vertx().getVertx().deployVerticle(verticle, OPTIONS_WORKER, res -> {
+			if (res.failed())
+				throw new IllegalStateException(errorMessage != null ? errorMessage : "Deployment of worker verticle failed.", res.cause());
+		});
+	}
+
 	public void doDeploy() {
-		DeploymentOptions options = new DeploymentOptions().setWorker(true).setMaxWorkerExecuteTime(Long.MAX_VALUE);
-		GSVertx.vertx().getVertx().deployVerticle(this, options, res -> {
+		GSVertx.vertx().getVertx().deployVerticle(this, OPTIONS_WORKER, res -> {
 			if (res.failed())
 				throw new IllegalStateException("Deployment of main verticle (" + deploymentID() + ") failed.", res.cause());
 			else
@@ -46,13 +54,7 @@ public class VerticleDeployerFromWatchApp extends AbstractVerticle {
 	}
 
 	private void deployVerticle(Verticle verticle, boolean worker) throws IllegalStateException {
-		DeploymentOptions options;
-		if (worker)
-			options = new DeploymentOptions().setWorker(worker).setMaxWorkerExecuteTime(Long.MAX_VALUE);
-		else
-			options = new DeploymentOptions();
-		// XXX replace with vertx.deployVerticle since vertx should already reference the singleton
-		GSVertx.vertx().getVertx().deployVerticle(verticle, options, res -> {
+		vertx.deployVerticle(verticle, worker ? OPTIONS_WORKER : OPTIONS_NORMAL, res -> {
 			if (res.failed())
 				throw new IllegalStateException("Deployment of verticle failed.", res.cause());
 			else

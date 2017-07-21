@@ -55,9 +55,7 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlHyperLink;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlImg;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
 import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
-import org.genericsystem.reactor.gscomponents.Monitor;
 import org.genericsystem.reactor.gscomponents.RootTagImpl;
-import org.genericsystem.watch.VerticleDeployerFromWatchApp;
 import org.genericsystem.watch.gui.DocPropertiesCheckerSwitcher.DOC_DEZONED;
 import org.genericsystem.watch.gui.DocPropertiesCheckerSwitcher.DOC_NOT_DEZONED;
 import org.genericsystem.watch.gui.DocPropertiesCheckerSwitcher.DOC_NOT_OCRD;
@@ -75,7 +73,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 @DependsOnModel({ Doc.class, RefreshTimestamp.class, DocTimestamp.class, DocFilename.class, DocClass.class, ZoneGeneric.class, ZoneText.class, ZoneTimestamp.class, ImgFilter.class, LevDistance.class, MeanLevenshtein.class, Score.class })
-@Children({ EditDocumentZones.class, AppHeader.class, FlexDiv.class, Monitor.class })
+@Children({ EditDocumentZones.class, AppHeader.class, FlexDiv.class/* , Monitor.class */ })
 @Children(path = FlexDiv.class, pos = 2, value = { HeaderRow.class, DocClassDiv.class })
 @Children(path = AppHeader.class, value = { Logo.class, AppTitleDiv.class, FlexDiv.class })
 @Children(path = { AppHeader.class, FlexDiv.class }, pos = { 0, 2 }, value = { HtmlButton.class, HtmlButton.class })
@@ -93,9 +91,9 @@ public class WatchApp extends RootTagImpl {
 
 	public static void main(String[] mainArgs) {
 		ApplicationServer server = ApplicationServer.startSimpleGenericApp(mainArgs, WatchApp.class, gsPath);
-		Root root = server.getRoots().get(System.getenv("HOME") + "/genericsystem/" + gsPath);
-		VerticleDeployerFromWatchApp deployer = new VerticleDeployerFromWatchApp(root);
-		deployer.doDeploy();
+		// Root root = server.getRoots().get(System.getenv("HOME") + "/genericsystem/" + gsPath);
+		// VerticleDeployerFromWatchApp deployer = new VerticleDeployerFromWatchApp(root);
+		// deployer.doDeploy();
 	}
 
 	@Children(FlexDiv.class)
