@@ -31,6 +31,8 @@ public class AddImageToEngineVerticle extends AbstractVerticle {
 	public void start() throws Exception {
 		MessageConsumer<String> consumer = vertx.eventBus().consumer(VerticleDeployer.IMAGE_ADDED_TO_CLASS_ADDRESS);
 		consumer.handler(message -> vertx.executeBlocking(future -> {
+			System.out.println(">>> add image: " + Thread.currentThread().getName());
+
 			String imagePath = message.body();
 			System.out.println(">>>>> New image to register: " + imagePath);
 			boolean result;

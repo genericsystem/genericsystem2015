@@ -23,6 +23,8 @@ public class ClassifierVerticle extends AbstractVerticle {
 	public void start() {
 		MessageConsumer<String> consumer = vertx.eventBus().consumer(VerticleDeployer.PNG_WATCHER_ADDRESS);
 		consumer.handler(message -> vertx.executeBlocking(future -> {
+			System.out.println(">>> classifier: " + Thread.currentThread().getName());
+
 			Path newFile = Paths.get(message.body());
 			System.out.println(">>> New file to classify: " + newFile);
 			// Only one access to classesDirectory at a time to avoid duplicate classes.
