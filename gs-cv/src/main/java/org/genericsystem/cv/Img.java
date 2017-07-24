@@ -81,6 +81,7 @@ public class Img implements AutoCloseable {
 	public Img morphologyEx(int morphOp, int morph, Size size) {
 		Mat result = new Mat();
 		Imgproc.morphologyEx(src, result, morphOp, Imgproc.getStructuringElement(morph, size));
+		// Imgproc.morphologyEx(src, result, morphOp, Imgproc.getStructuringElement(morph, size), new Point(-1, -1), 1, Core.BORDER_CONSTANT, new Scalar(255));
 		return new Img(result, false);
 	}
 
@@ -889,6 +890,15 @@ public class Img implements AutoCloseable {
 	public Layout buildLayout(Size morph, int level, float concentration, Img img, Img binary) {
 		Layout root = new Layout(0, 1, 0, 1).tighten(binary, concentration);
 		return root.recursivSplit(morph, level, concentration, root.getRoi(img), root.getRoi(binary));
+	}
+
+	public Img cleanTables() {
+
+		Img hImg = this.bgr2Gray().adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 17, 15).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(20, 1));
+		Img vImg = this.bgr2Gray().adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 17, 15).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(1, 20));
+
+		Img result = bgr2Gray().adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 17, 15).bitwise_xor(hImg.bitwise_and(vImg).bitwise_not());
+		return new Img(result.src);
 	}
 
 }
