@@ -43,8 +43,9 @@ public class LayoutAnalyzer extends AbstractApp {
 		mainGrid.add(new ImageView(img.toJfxImage()), columnIndex, rowIndex++);
 
 		// System.out.println(layout.recursivToString());
-
-		layout.ocrTree(new Img("resources/14342661748973931.jpg"));
+		Img total = new Img("resources/14342661748973931.jpg");
+		System.out.println(layout);
+		layout.ocrTree(layout.getRoi(total), layout.getEnlargedRoi(total, 1));
 		System.out.println(layout.recursivToString());
 
 	}
