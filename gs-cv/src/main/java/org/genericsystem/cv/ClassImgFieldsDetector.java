@@ -1,7 +1,6 @@
 package org.genericsystem.cv;
 
 import java.io.File;
-import java.util.stream.Stream;
 
 import org.opencv.core.Core;
 import org.opencv.core.Scalar;
@@ -67,7 +66,7 @@ public class ClassImgFieldsDetector extends AbstractApp {
 				for (Zone zone : zones) {
 					System.out.println("Zone n°" + zone.getNum());
 					zone.draw(img, new Scalar(0, 255, 0), -1);
-					ZoneScorer scorer = zone.newUnsupervisedScorer(Stream.concat(Tools.classImgsStream(imgClassDirectory, file.getName()), Tools.classImgsStream(imgClassDirectory + "/mask/" + file.getName().replace(".png", ""))));
+					ZoneScorer scorer = zone.newUnsupervisedScorer(Tools.classImgsStream(imgClassDirectory, file.getName()));
 					// // zone.write(img,
 					// // scorer.getBestText() + " " +
 					// // Math.floor((scorer.getBestScore() * 10000)) / 100 +

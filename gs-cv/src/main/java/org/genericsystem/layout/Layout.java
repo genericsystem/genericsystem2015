@@ -7,7 +7,10 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import org.genericsystem.cv.Img;
+import org.genericsystem.cv.Ocr;
+import org.opencv.core.Mat;
 import org.opencv.core.Point;
+import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
@@ -35,14 +38,50 @@ public class Layout {
 		return new Img(img, this);
 	}
 
+	public Img getEnlargedRoi(Img img, int delta) {
+
+		double newX1 = getX1() * img.width() - delta > 0 ? getX1() * img.width() - delta : 0;
+		double newY1 = getY1() * img.height() - delta > 0 ? getY1() * img.height() - delta : 0;
+		double newX2 = getX2() * img.width() + delta < img.width() ? getX2() * img.width() + delta : img.width();
+		double newY2 = getY2() * img.height() + delta < img.height() ? getY2() * img.height() + delta : img.height();
+
+		return new Img(new Mat(img.getSrc(), new Rect(new Point(newX1, newY1), new Point(newX2, newY2))));
+	}
+
 	// public void draw2(Img img, Scalar color, int thickness) {
 	// Imgproc.rectangle(img.getSrc(), new Point(x1 * img.width(), y1 * img.height()), new Point(x2 * img.width(), y2 * img.height()), color, thickness);// rect.tl(), rect.br(), color, thickness);
 	// }
+
+	public Layout traverse(Img img, BiConsumer<Img, Layout> visitor) {
+		for (Layout shard : getChildren())
+			shard.traverse(shard.getRoi(img), visitor);
+		visitor.accept(img, this);
+		return this;
+	}
 
 	public void draw(Img img, Scalar color, int thickness) {
 		traverse(img, (roi, shard) -> {
 			if (shard.getChildren().isEmpty())
 				Imgproc.rectangle(roi.getSrc(), new Point(0, 0), new Point(roi.width() - 1, roi.height() - 1), color, thickness);
+		});
+	}
+
+	//
+	public Layout traverseOCR(Img img, Img enlarged, BiConsumer<Img, Layout> visitor) {
+		for (Layout shard : getChildren())
+			shard.traverseOCR(shard.getRoi(img), shard.getEnlargedRoi(img, 1), visitor);
+		visitor.accept(img, this);
+		return this;
+	}
+
+	//
+	public void ocrTree(Img img, Img enlarged) {
+		traverseOCR(img, enlarged, (roi, layout) -> {
+			if (layout.getChildren().isEmpty()) {
+				// System.out.println(roi.getSrc() + " " + layout.toString());
+				layout.setLabel(Ocr.doWork(img.getSrc()));
+				System.out.println(layout.getLabel());
+			}
 		});
 	}
 
@@ -133,6 +172,8 @@ public class Layout {
 	private void recursivToString(Layout shard, StringBuilder sb, int depth) {
 		sb.append("depth : " + depth + " : ");
 		sb.append("((" + shard.x1 + "-" + shard.y1 + "),(" + shard.x2 + "-" + shard.y2 + "))".toString());
+		if (shard.getChildren().isEmpty())
+			sb.append(" : Label : " + shard.label);
 
 		if (shard.hasChildren()) {
 			depth++;
@@ -272,24 +313,16 @@ public class Layout {
 			if (!result[i] && result[i + 1])
 				start = i + 1;
 			else if (result[i] && !result[i + 1]) {
-				shards.add(vertical ? new Layout(0, 1, Integer.valueOf(start).doubleValue() / result.length, (Integer.valueOf(i).doubleValue() + 1) / result.length) : new Layout(Integer.valueOf(start).doubleValue() / result.length, (Integer.valueOf(i)
-						.doubleValue() + 1) / result.length, 0, 1));
+				shards.add(vertical ? new Layout(0, 1, Integer.valueOf(start).doubleValue() / result.length, (Integer.valueOf(i).doubleValue() + 1) / result.length)
+						: new Layout(Integer.valueOf(start).doubleValue() / result.length, (Integer.valueOf(i).doubleValue() + 1) / result.length, 0, 1));
 				start = null;
 			}
 		if (result[result.length - 1]) {
-			shards.add(vertical ? new Layout(0, 1, Integer.valueOf(start).doubleValue() / result.length, Integer.valueOf(result.length).doubleValue() / result.length) : new Layout(Integer.valueOf(start).doubleValue() / result.length, Integer.valueOf(
-					result.length).doubleValue()
-					/ result.length, 0, 1));
+			shards.add(vertical ? new Layout(0, 1, Integer.valueOf(start).doubleValue() / result.length, Integer.valueOf(result.length).doubleValue() / result.length)
+					: new Layout(Integer.valueOf(start).doubleValue() / result.length, Integer.valueOf(result.length).doubleValue() / result.length, 0, 1));
 			start = null;
 		}
 		return shards;
-	}
-
-	public Layout traverse(Img img, BiConsumer<Img, Layout> visitor) {
-		for (Layout shard : getChildren())
-			shard.traverse(shard.getRoi(img), visitor);
-		visitor.accept(img, this);
-		return this;
 	}
 
 	public Layout recursivSplit(Size morph, int level, float concentration, Img img, Img binary) {
