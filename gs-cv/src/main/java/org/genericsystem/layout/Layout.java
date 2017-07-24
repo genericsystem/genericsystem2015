@@ -8,7 +8,7 @@ import java.util.function.Function;
 
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.Ocr;
-import org.genericsystem.cv.Zone;
+import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
@@ -38,6 +38,16 @@ public class Layout {
 		return new Img(img, this);
 	}
 
+	public Img getEnlargedRoi(Img img, int delta) {
+
+		double newX1 = getX1() * img.width() - delta > 0 ? getX1() * img.width() - delta : 0;
+		double newY1 = getY1() * img.height() - delta > 0 ? getY1() * img.height() - delta : 0;
+		double newX2 = getX2() * img.width() + delta < img.width() ? getX2() * img.width() + delta : img.width();
+		double newY2 = getY2() * img.height() + delta < img.height() ? getY2() * img.height() + delta : img.height();
+
+		return new Img(new Mat(img.getSrc(), new Rect(new Point(newX1, newY1), new Point(newX2, newY2))));
+	}
+
 	// public void draw2(Img img, Scalar color, int thickness) {
 	// Imgproc.rectangle(img.getSrc(), new Point(x1 * img.width(), y1 * img.height()), new Point(x2 * img.width(), y2 * img.height()), color, thickness);// rect.tl(), rect.br(), color, thickness);
 	// }
@@ -57,21 +67,22 @@ public class Layout {
 	}
 
 	//
-	public Layout traverseOCR(Img img, BiConsumer<Img, Layout> visitor, Img roiParent) {
-		for (Layout shard : getChildren()) {
-			Zone z = new Zone(0, new Rect(new Point(shard.getX1() * roiParent.width(), shard.getY1() * roiParent.height()), new Point(1 + shard.getX2() * roiParent.width(), 1 + shard.getY2() * roiParent.height())));
-			shard.traverseOCR(z.getRoi(img), visitor, this.getRoi(img));
-		}
+	public Layout traverseOCR(Img img, Img enlarged, BiConsumer<Img, Layout> visitor) {
+		for (Layout shard : getChildren())
+			shard.traverseOCR(shard.getRoi(img), shard.getEnlargedRoi(img, 1), visitor);
 		visitor.accept(img, this);
 		return this;
 	}
 
 	//
-	public void ocrTree(Img img) {
-		traverseOCR(img, (roi, layout) -> {
-			if (layout.getChildren().isEmpty())
-				layout.setLabel(Ocr.doWork(roi.getSrc(), 0));
-		}, img);
+	public void ocrTree(Img img, Img enlarged) {
+		traverseOCR(img, enlarged, (roi, layout) -> {
+			if (layout.getChildren().isEmpty()) {
+				// System.out.println(roi.getSrc() + " " + layout.toString());
+				layout.setLabel(Ocr.doWork(img.getSrc()));
+				System.out.println(layout.getLabel());
+			}
+		});
 	}
 
 	public void addChild(Layout child) {
