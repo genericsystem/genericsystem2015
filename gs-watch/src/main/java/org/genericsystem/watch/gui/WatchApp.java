@@ -7,7 +7,6 @@ import org.genericsystem.cv.model.Doc;
 import org.genericsystem.cv.model.Doc.DocFilename;
 import org.genericsystem.cv.model.Doc.DocInstance;
 import org.genericsystem.cv.model.Doc.DocTimestamp;
-import org.genericsystem.cv.model.Doc.DocTimestamp.DocTimestampInstance;
 import org.genericsystem.cv.model.Doc.RefreshTimestamp;
 import org.genericsystem.cv.model.DocClass;
 import org.genericsystem.cv.model.DocClass.DocClassInstance;
@@ -234,10 +233,9 @@ public class WatchApp extends RootTagImpl {
 			Root root = generics[0].getRoot();
 			DocClass docClass = root.find(DocClass.class);
 			Snapshot<Generic> docClassInstances = docClass.getInstances();
-			if (null != docClassInstances)
-				return docClassInstances.toObservableList();
-			else
+			if (null == docClassInstances)
 				return FXCollections.emptyObservableList();
+			return docClassInstances.toObservableList();
 		}
 	}
 
@@ -245,14 +243,15 @@ public class WatchApp extends RootTagImpl {
 		@Override
 		public ObservableList<Generic> apply(Generic[] generics) {
 			DocClassInstance currentDocClass = (DocClassInstance) generics[0];
-			Root root = generics[0].getRoot();
-			if (null != currentDocClass) {
-				System.out.println("Current doc class : " + currentDocClass.info());
-				Snapshot<Generic> docInstances = currentDocClass.getHolders(root.find(Doc.class));
-				return docInstances.toObservableList();
-			} else {
+			Doc doc = generics[0].getRoot().find(Doc.class);
+			if (null == currentDocClass)
 				return FXCollections.emptyObservableList();
-			}
+			System.out.println("Current doc class : " + currentDocClass.info());
+			Snapshot<Generic> docInstances = currentDocClass.getHolders(doc);
+			if (null == docInstances)
+				return FXCollections.emptyObservableList();
+			return docInstances.toObservableList();
+
 		}
 	}
 
@@ -277,14 +276,10 @@ public class WatchApp extends RootTagImpl {
 			DocInstance currentDoc = (DocInstance) context.getGeneric();
 			Root root = currentDoc.getRoot();
 			DocTimestamp docTimestamp = root.find(DocTimestamp.class);
-			SimpleObjectProperty<Generic> ov = new SimpleObjectProperty<>(currentDoc.getHolder(docTimestamp));
+			SimpleObjectProperty<Generic> timeStamp = new SimpleObjectProperty<>(docTimestamp.getDocTimestamp(currentDoc));
 			return Bindings.createStringBinding(() -> {
-				DocTimestampInstance docTimestampInstance = docTimestamp.getDocTimestamp(currentDoc);
-				if (null == docTimestampInstance)
-					return "n/a";
-				else
-					return ModelTools.formatDate((Long) docTimestampInstance.getValue());
-			}, ov);
+				return null == timeStamp ? "n/a" : ModelTools.formatDate((Long) timeStamp.get().getValue());
+			}, timeStamp);
 		}
 	}
 }

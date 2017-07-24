@@ -9,9 +9,6 @@ import java.util.function.Predicate;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
-import org.genericsystem.cv.model.Doc.DocInstance;
-import org.genericsystem.cv.model.ImgFilter.ImgFilterInstance;
-import org.genericsystem.cv.model.ZoneGeneric.ZoneInstance;
 import org.genericsystem.cv.model.ZoneText;
 import org.genericsystem.cv.model.ZoneText.ZoneTextInstance;
 import org.genericsystem.reactor.Context;
@@ -51,6 +48,7 @@ import org.genericsystem.watch.gui.EditDocumentZones.TextDiv;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 @Children(FlexDiv.class)
@@ -143,20 +141,19 @@ public class EditDocumentZones extends ModalEditor {
 		// FIXME: bug during the edition of the input text field (synchronization)
 		@Override
 		protected Generic updateGeneric(Context context, Serializable newValue) {
-			ZoneTextInstance zti = (ZoneTextInstance) context.getGeneric();
-			DocInstance docInstance = zti.getDoc();
-			ZoneInstance zoneInstance = zti.getZone();
-			ImgFilterInstance imgFilterInstance = zti.getImgFilter();
+			// ZoneTextInstance zti = (ZoneTextInstance) context.getGeneric();
+			// DocInstance docInstance = zti.getDoc();
+			// ZoneInstance zoneInstance = zti.getZone();
+			// ImgFilterInstance imgFilterInstance = zti.getImgFilter();
 			// return context.getGeneric().getMeta().setInstance(newValue, docInstance, zoneInstance, imgFilterInstance);
-			long start = System.currentTimeMillis();
+			long start = System.nanoTime();
 			Generic updateValue = context.getGeneric().updateValue(newValue);
-			System.out.println("zzzzzzzzzz" + (System.currentTimeMillis() - start));
+			System.out.println("==> update: " + (System.nanoTime() - start) * 1_000_000 + "ms");
 			return updateValue;
 		}
 	}
 
 	public static class DATALIST_SELECTOR implements ObservableListExtractor {
-
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		@Override
 		public ObservableList<Generic> apply(Generic[] generics) {
@@ -173,7 +170,7 @@ public class EditDocumentZones extends ModalEditor {
 		 * 
 		 * @param keyExtractor
 		 *            - lambda expression that will provide the filter criteria
-		 * @return
+		 * @return a predicate
 		 */
 		public <T> Predicate<T> distinctByKey(Function<? super T, Object> keyExtractor) {
 			Map<Object, Boolean> seen = new ConcurrentHashMap<>();
@@ -189,6 +186,8 @@ public class EditDocumentZones extends ModalEditor {
 			Root root = currentDoc.getRoot();
 			System.out.println("Document: " + currentDoc.info());
 			Snapshot<ZoneTextInstance> zoneTextInstances = (Snapshot) currentDoc.getHolders(root.find(ZoneText.class));
+			if (zoneTextInstances == null)
+				return FXCollections.emptyObservableList();
 			return (ObservableList) zoneTextInstances.toObservableList().filtered(zt -> "reality".equals(zt.getImgFilter().getValue())).sorted((g1, g2) -> Integer.compare(g1.getZoneNum(), g2.getZoneNum()));
 		}
 	}
@@ -196,7 +195,7 @@ public class EditDocumentZones extends ModalEditor {
 	public static class ZONE_LABEL implements TextBinding {
 		@Override
 		public ObservableValue<String> apply(Context context, Tag tag) {
-			return new SimpleStringProperty("Zone " + ((ZoneTextInstance) context.getGenerics()[0]).getZone());
+			return new SimpleStringProperty("Zone " + ((ZoneTextInstance) context.getGeneric()).getZone());
 		}
 	}
 

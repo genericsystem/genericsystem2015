@@ -42,8 +42,10 @@ import org.genericsystem.watch.gui.ShowDocumentZones.TextDiv;
 
 import io.vertx.core.Verticle;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 @Children(FlexDiv.class)
@@ -164,6 +166,8 @@ public class ShowDocumentZones extends ModalEditor {
 			Root root = currentDoc.getRoot();
 			System.out.println("Document: " + currentDoc.info());
 			Snapshot<ZoneTextInstance> zoneTextInstances = (Snapshot) currentDoc.getHolders(root.find(ZoneText.class));
+			if (zoneTextInstances == null)
+				return FXCollections.emptyObservableList();
 			return (ObservableList) zoneTextInstances.toObservableList().filtered(zt -> "best".equals(zt.getImgFilter().getValue())).sorted((g1, g2) -> Integer.compare(g1.getZoneNum(), g2.getZoneNum()));
 		}
 	}
@@ -176,23 +180,18 @@ public class ShowDocumentZones extends ModalEditor {
 	}
 
 	public static class LAST_UPDATE_LABEL implements TextBinding {
-
-		@SuppressWarnings({ "unchecked", "rawtypes" })
 		@Override
 		public ObservableValue<String> apply(Context context, Tag tag) {
-			// TODO avoid the use of an ObservableList in favor of an ObservableValue?
 			DocInstance currentDoc = (DocInstance) context.getGeneric();
 			Root root = currentDoc.getRoot();
 			RefreshTimestamp refreshTimestamp = root.find(RefreshTimestamp.class);
-			ObservableList<RefreshTimestampInstance> ol = (ObservableList) currentDoc.getHolders(refreshTimestamp).toObservableList();
-
+			RefreshTimestampInstance instance = refreshTimestamp.getRefreshTimestamp(currentDoc);
+			if (instance == null)
+				return new SimpleStringProperty("Last update: none");
+			SimpleObjectProperty<Generic> timeStamp = new SimpleObjectProperty<>(instance);
 			return Bindings.createStringBinding(() -> {
-				RefreshTimestampInstance refreshTimestampInstance = refreshTimestamp.getRefreshTimestamp(currentDoc);
-				if (null == refreshTimestampInstance)
-					return "Last update: none";
-				else
-					return "Last update: " + ModelTools.formatDate((Long) refreshTimestampInstance.getValue());
-			}, ol);
+				return timeStamp == null ? "Last update: none" : "Last update: " + ModelTools.formatDate((Long) timeStamp.get().getValue());
+			}, timeStamp);
 		}
 	}
 

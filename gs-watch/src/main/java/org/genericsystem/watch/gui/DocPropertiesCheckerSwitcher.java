@@ -70,20 +70,17 @@ public class DocPropertiesCheckerSwitcher {
 		BooleanBinding binding = Bindings.createBooleanBinding(() -> {
 			return null != file.get() && file.get().exists();
 		}, file);
-		if (reverse)
-			return binding.not();
-		else
-			return binding;
+		return reverse ? binding.not() : binding;
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static ObservableValue<Boolean> isDocOcrd(Context context, boolean reverse) {
-		// TODO: verify / test
+		// TODO: modify the algorithm so each zone needs to be processed before returning true
 		DocInstance currentDoc = (DocInstance) context.getGeneric();
 		Root root = currentDoc.getRoot();
 		ZoneText zoneText = root.find(ZoneText.class);
 		ZoneGeneric zoneGeneric = root.find(ZoneGeneric.class);
-		ObservableList<ZoneGeneric> zoneGenerics = (ObservableList) zoneGeneric.getInstances().toObservableList(); // XXX maybe juste a list
+		ObservableList<ZoneGeneric> zoneGenerics = (ObservableList) zoneGeneric.getInstances().toObservableList(); // XXX maybe just a list
 		ObservableList<ZoneTextInstance> zoneTextInstances = (ObservableList) currentDoc.getHolders(zoneText).toObservableList();
 		BooleanBinding binding = Bindings.createBooleanBinding(() -> {
 			// zoneGenerics.stream().allMatch(g -> {
@@ -91,10 +88,7 @@ public class DocPropertiesCheckerSwitcher {
 			// });
 			return !zoneTextInstances.isEmpty();
 		}, zoneTextInstances);
-		if (reverse)
-			return binding.not();
-		else
-			return binding;
+		return reverse ? binding.not() : binding;
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -113,10 +107,6 @@ public class DocPropertiesCheckerSwitcher {
 				return !zoneTextInstances.stream().anyMatch(g -> "".equals(g.getValue().toString()));
 			}
 		}, zoneTextInstances);
-
-		if (reverse)
-			return binding.not();
-		else
-			return binding;
+		return reverse ? binding.not() : binding;
 	}
 }

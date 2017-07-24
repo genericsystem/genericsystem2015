@@ -29,6 +29,7 @@ import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
+import io.vertx.core.Verticle;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpServer;
@@ -156,13 +157,23 @@ public class ApplicationServer extends AbstractBackEnd {
 		public WebSocketsServer(String host, int port) {
 			super(host, port);
 
-			GSVertx.vertx().getVertx().setPeriodic(1000, l -> caches.forEach(cacheSocketContext -> {
-				((EventLoopContext) cacheSocketContext.getContext()).executeAsync(v -> {
-					Cache cache = cacheSocketContext.getCache();
-					if (caches.stream().anyMatch(csc -> cache.equals(csc.getCache())))
-						cache.safeConsum((f) -> cache.shiftTs());
-				});
-			}));
+			Verticle verticle = new AbstractVerticle() {
+				@Override
+				public void start() throws Exception {
+					GSVertx.vertx().getVertx().setPeriodic(1000, event -> caches.forEach(cacheSocketContext -> {
+						((EventLoopContext) cacheSocketContext.getContext()).executeAsync(v -> {
+							Cache cache = cacheSocketContext.getCache();
+							if (caches.stream().anyMatch(csc -> cache.equals(csc.getCache())))
+								cache.safeConsum((f) -> cache.shiftTs());
+						});
+					}));
+				}
+			};
+			DeploymentOptions options = new DeploymentOptions().setWorker(true).setMaxWorkerExecuteTime(Long.MAX_VALUE).setWorkerPoolName("vert.x-web-socket-worker").setWorkerPoolSize(10);
+			GSVertx.vertx().getVertx().deployVerticle(verticle, options, res -> {
+				if (res.failed())
+					throw new IllegalStateException(res.cause());
+			});
 		}
 
 		@Override
