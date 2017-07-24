@@ -888,7 +888,6 @@ public class Img implements AutoCloseable {
 
 	public Layout buildLayout(Size morph, int level, float concentration, Img img, Img binary) {
 		Layout root = new Layout(0, 1, 0, 1).tighten(binary, concentration);
-		System.out.println("-------------------------------------------------------");
 		return root.recursivSplit(morph, level, concentration, root.getRoi(img), root.getRoi(binary));
 	}
 

@@ -39,6 +39,7 @@ public class LayoutAnalyzer extends AbstractApp {
 
 		mainGrid.add(new ImageView(hImg.toJfxImage()), columnIndex, rowIndex++);
 		mainGrid.add(new ImageView(vImg.toJfxImage()), columnIndex, rowIndex++);
+		// bitwise and
 		mainGrid.add(new ImageView(hImg.bitwise_and(vImg).toJfxImage()), columnIndex, rowIndex++);
 
 		Img ultimate = new Img("resources/14342661748973931.jpg").bgr2Gray().adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 17, 15).bitwise_xor(hImg.bitwise_and(vImg).bitwise_not());
