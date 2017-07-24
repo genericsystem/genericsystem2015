@@ -9,9 +9,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
-
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.Tools;
@@ -35,6 +32,9 @@ import org.opencv.features2d.DescriptorMatcher;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
 import org.opencv.videoio.VideoCapture;
+
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
 
 public class CamLayoutAnalyzer extends AbstractApp {
 
@@ -73,46 +73,49 @@ public class CamLayoutAnalyzer extends AbstractApp {
 		extractor.compute(deskewed.bgr2Gray().getSrc(), oldKeypoints[0], oldDescriptors[0]);
 		int[] count = new int[] { 0 };
 		Mat stabilizedMat = new Mat();
-		timer.scheduleAtFixedRate(
-				() -> {
-					MatOfKeyPoint newKeypoints = null;
-					Mat newDescriptors = null;
-					try {
-						capture.read(frame);
-						double[] angle = new double[1];
-						Size newSize = new Size(frame.width() * (1 - 2 * crop), frame.height() * (1 - 2 * crop));
-						Img frameImg = new Img(
-								new Mat(frame, new Rect(Double.valueOf(crop * frame.width()).intValue(), Double.valueOf(crop * frame.height()).intValue(), Double.valueOf(newSize.width).intValue(), Double.valueOf(newSize.height).intValue())), false)
-								.resize(newSize);
-						src0.setImage(frameImg.toJfxImage());
-						Img deskewed_ = deskew(frame, angle);
-						src1.setImage(deskewed_.toJfxImage());
+		Layout[] layout = new Layout[] { null };
+		timer.scheduleAtFixedRate(() -> {
+			MatOfKeyPoint newKeypoints = null;
+			Mat newDescriptors = null;
+			try {
+				capture.read(frame);
+				double[] angle = new double[1];
+				Size newSize = new Size(frame.width() * (1 - 2 * crop), frame.height() * (1 - 2 * crop));
+				Img frameImg = new Img(new Mat(frame, new Rect(Double.valueOf(crop * frame.width()).intValue(), Double.valueOf(crop * frame.height()).intValue(), Double.valueOf(newSize.width).intValue(), Double.valueOf(newSize.height).intValue())), false)
+						.resize(newSize);
+				src0.setImage(frameImg.toJfxImage());
+				Img deskewed_ = deskew(frame, angle);
+				src1.setImage(deskewed_.toJfxImage());
 
-						newKeypoints = detect(deskewed_.getSrc());
-						newDescriptors = new Mat();
-						extractor.compute(deskewed_.bgr2Gray().getSrc(), newKeypoints, newDescriptors);
+				newKeypoints = detect(deskewed_.getSrc());
+				newDescriptors = new Mat();
+				extractor.compute(deskewed_.bgr2Gray().getSrc(), newKeypoints, newDescriptors);
 
-						Img deskiewedCopy = new Img(deskewed_.getSrc(), true);
-						deskewed_.buildLayout().draw(deskiewedCopy, new Scalar(0, 255, 0), 1);
-						src2.setImage(Tools.mat2jfxImage(deskiewedCopy.getSrc()));
+				Img deskiewedCopy = new Img(deskewed_.getSrc(), true);
+				deskewed_.buildLayout().draw(deskiewedCopy, new Scalar(0, 255, 0), 1);
+				src2.setImage(Tools.mat2jfxImage(deskiewedCopy.getSrc()));
 
-						Img stabilized = stabilize(frame, stabilizedMat, deskewed_.size(), matcher, oldKeypoints[0], newKeypoints, oldDescriptors[0], newDescriptors, angle[0], crop);
-						if (stabilized != null) {
-							Img stabilizedCopy = new Img(stabilized.getSrc(), true);
-							stabilized.buildLayout().draw(stabilizedCopy, new Scalar(0, 255, 0), 1);
-							src3.setImage(stabilizedCopy.toJfxImage());
-						}
+				Img stabilized = stabilize(frame, stabilizedMat, deskewed_.size(), matcher, oldKeypoints[0], newKeypoints, oldDescriptors[0], newDescriptors, angle[0], crop);
 
-						count[0]++;
-					} catch (Exception e) {
-						e.printStackTrace();
-					} finally {
-						if ((count[0] % 10) == 0) {
-							oldKeypoints[0] = newKeypoints;
-							oldDescriptors[0] = newDescriptors;
-						}
-					}
-				}, 0, 33, TimeUnit.MILLISECONDS);
+				if (stabilized != null) {
+					Img stabilizedCopy = new Img(stabilized.getSrc(), true);
+					if (layout[0] == null)
+						layout[0] = stabilized.buildLayout();
+					layout[0].draw(stabilizedCopy, new Scalar(0, 255, 0), 1);
+					src3.setImage(stabilizedCopy.toJfxImage());
+				}
+
+				count[0]++;
+			} catch (Exception e) {
+				e.printStackTrace();
+			} finally {
+				if ((count[0] % 10) == 0) {
+					oldKeypoints[0] = newKeypoints;
+					oldDescriptors[0] = newDescriptors;
+					layout[0] = null;
+				}
+			}
+		}, 0, 33, TimeUnit.MILLISECONDS);
 	}
 
 	private Img stabilize(Mat frame, Mat stabilized, Size size, DescriptorMatcher matcher, MatOfKeyPoint oldKeypoints, MatOfKeyPoint newKeypoints, Mat oldDescriptors, Mat newDescriptors, double angle, double crop) {
@@ -189,8 +192,9 @@ public class CamLayoutAnalyzer extends AbstractApp {
 			Mat matrix = Imgproc.getRotationMatrix2D(new Point(frame.width() / 2, frame.height() / 2), angle[0], 1);
 			Mat rotated = new Mat();
 			Imgproc.warpAffine(frame, rotated, matrix, new Size(frame.size().width, frame.size().height));
-			Img result = new Img(new Mat(rotated, new Rect(Double.valueOf(rotated.width() * crop).intValue(), Double.valueOf(rotated.height() * crop).intValue(), Double.valueOf(rotated.width() * (1 - 2 * crop)).intValue(), Double.valueOf(
-					rotated.height() * (1 - 2 * crop)).intValue())), false);
+			Img result = new Img(new Mat(rotated,
+					new Rect(Double.valueOf(rotated.width() * crop).intValue(), Double.valueOf(rotated.height() * crop).intValue(), Double.valueOf(rotated.width() * (1 - 2 * crop)).intValue(), Double.valueOf(rotated.height() * (1 - 2 * crop)).intValue())),
+					false);
 			matrix.release();
 			rotated.release();
 			return result;
@@ -232,7 +236,7 @@ public class CamLayoutAnalyzer extends AbstractApp {
 			List<MatOfPoint> mof = Collections.singletonList(new MatOfPoint(new MatOfPoint(result)));
 			// Imgproc.drawContours(frame, mof, 0, new Scalar(0, 255, 0), 1);
 			// Imgproc.drawContours(dilated, mof, 0, new Scalar(255), 1);
-			});
+		});
 		return goodAverage;
 	}
 

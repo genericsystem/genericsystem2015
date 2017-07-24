@@ -1,14 +1,14 @@
 package org.genericsystem.layout;
 
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
-
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
 import org.opencv.core.Core;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
+
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
 
 public class LayoutAnalyzer extends AbstractApp {
 	static {
@@ -39,9 +39,10 @@ public class LayoutAnalyzer extends AbstractApp {
 
 		mainGrid.add(new ImageView(hImg.toJfxImage()), columnIndex, rowIndex++);
 		mainGrid.add(new ImageView(vImg.toJfxImage()), columnIndex, rowIndex++);
-		mainGrid.add(new ImageView(hImg.bitwise_or(vImg).toJfxImage()), columnIndex, rowIndex++);
+		// bitwise and
+		mainGrid.add(new ImageView(hImg.bitwise_and(vImg).toJfxImage()), columnIndex, rowIndex++);
 
-		Img ultimate = new Img("resources/14342661748973931.jpg").bgr2Gray().adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 17, 15).bitwise_xor(hImg.bitwise_or(vImg).bitwise_not());
+		Img ultimate = new Img("resources/14342661748973931.jpg").bgr2Gray().adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 17, 15).bitwise_xor(hImg.bitwise_and(vImg).bitwise_not());
 		mainGrid.add(new ImageView(ultimate.toJfxImage()), columnIndex, rowIndex++);
 		img = new Img("resources/14342661748973931.jpg");
 		layout = img.buildLayout(new Size(0.036, 0.008), 7, 0.008f, img, ultimate);
