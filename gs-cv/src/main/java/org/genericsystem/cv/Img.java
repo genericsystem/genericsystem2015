@@ -14,9 +14,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-
 import javax.swing.ImageIcon;
 
 import org.genericsystem.layout.Layout;
@@ -43,6 +40,9 @@ import org.opencv.utils.Converters;
 import org.opencv.ximgproc.Ximgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 
 public class Img implements AutoCloseable {
 
@@ -838,7 +838,7 @@ public class Img implements AutoCloseable {
 
 	public Img bitwise_or(Img img) {
 		Mat result = new Mat();
-		Core.bitwise_and(getSrc(), img.getSrc(), result);
+		Core.bitwise_or(getSrc(), img.getSrc(), result);
 		return new Img(result, false);
 	}
 
