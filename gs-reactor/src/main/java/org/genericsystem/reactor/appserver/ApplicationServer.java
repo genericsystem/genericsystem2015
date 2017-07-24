@@ -188,7 +188,7 @@ public class ApplicationServer extends AbstractBackEnd {
 			GSVertx.vertx().getVertx().deployVerticle(domNodeVerticle, new DeploymentOptions().setWorker(true));
 			caches.add(new CacheSocketContext(cache, webSocket, GSVertx.vertx().getVertx().getOrCreateContext()));
 			return buffer -> {
-				// log.info("Receive new message for socket : " + socket);
+				// log.info("Receive new message for socket : " + webSocket); // XXX comment
 				GSBuffer gsBuffer = new GSBuffer(buffer);
 				String message = gsBuffer.getString(0, gsBuffer.length());
 				JsonObject json = new JsonObject(message);

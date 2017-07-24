@@ -25,7 +25,6 @@ import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.context.ContextAction;
 import org.genericsystem.reactor.context.ContextAction.CANCEL;
-import org.genericsystem.reactor.context.ContextAction.FLUSH;
 import org.genericsystem.reactor.context.ContextAction.RESET_SELECTION;
 import org.genericsystem.reactor.context.ObservableContextSelector.SELECTION_SELECTOR;
 import org.genericsystem.reactor.context.ObservableListExtractor;
@@ -75,7 +74,7 @@ public class ShowDocumentZones extends ModalEditor {
 	}
 
 	@SetText("Refresh")
-	@BindAction(value = { REFRESH_BEST_TEXT.class, FLUSH.class }) // XXX include the flush in the refresh function to do it asynchronously?
+	@BindAction(value = REFRESH_BEST_TEXT.class)
 	public static class RefreshButton extends HtmlButton {
 		// Run the best text selection algorithm
 	}
@@ -90,15 +89,18 @@ public class ShowDocumentZones extends ModalEditor {
 
 			System.out.println("Current thread (refresh): " + Thread.currentThread().getName());
 
-			Verticle worker = new WorkerVerticle() {
+			Verticle worker = new WorkerVerticle(root) {
 				@Override
 				public void start() throws Exception {
 					ComputeBestTextPerZone.computeOneFile(root, docInstance, docType);
 					docInstance.setRefreshTimestamp(ModelTools.getCurrentDate());
+					root.getCurrentCache().flush();
 					System.out.println("Done!");
 				}
 			};
 			VerticleDeployerFromWatchApp.deployWorkerVerticle(worker, "Failed to execute the task");
+
+			// FIXME: bug that prevent the text from being updated after the refresh (because the worker is done by an external verticle)
 		}
 	}
 
@@ -123,9 +125,7 @@ public class ShowDocumentZones extends ModalEditor {
 	@Children(ZoneLabelField.class)
 	@ForEach(ZONE_SELECTOR.class)
 	public static class ZoneTextDiv extends FlexDiv {
-		// For each zone, create a div with label + inputText
-		// and create a div for the results for all filters
-
+		// For each zone, create a div with label + inputText and create a div for the results for all filters
 	}
 
 	@FlexDirectionStyle(FlexDirection.ROW)
@@ -190,6 +190,7 @@ public class ShowDocumentZones extends ModalEditor {
 				return new SimpleStringProperty("Last update: none");
 			SimpleObjectProperty<Generic> timeStamp = new SimpleObjectProperty<>(instance);
 			return Bindings.createStringBinding(() -> {
+				System.out.println("binding called?");
 				return timeStamp == null ? "Last update: none" : "Last update: " + ModelTools.formatDate((Long) timeStamp.get().getValue());
 			}, timeStamp);
 		}

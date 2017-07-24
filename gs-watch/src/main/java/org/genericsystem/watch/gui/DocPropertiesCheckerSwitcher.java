@@ -80,7 +80,7 @@ public class DocPropertiesCheckerSwitcher {
 		Root root = currentDoc.getRoot();
 		ZoneText zoneText = root.find(ZoneText.class);
 		ZoneGeneric zoneGeneric = root.find(ZoneGeneric.class);
-		ObservableList<ZoneGeneric> zoneGenerics = (ObservableList) zoneGeneric.getInstances().toObservableList(); // XXX maybe just a list
+		// ObservableList<ZoneGeneric> zoneGenerics = (ObservableList) zoneGeneric.getInstances().toObservableList(); // XXX maybe just a list
 		ObservableList<ZoneTextInstance> zoneTextInstances = (ObservableList) currentDoc.getHolders(zoneText).toObservableList();
 		BooleanBinding binding = Bindings.createBooleanBinding(() -> {
 			// zoneGenerics.stream().allMatch(g -> {
@@ -93,8 +93,7 @@ public class DocPropertiesCheckerSwitcher {
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static ObservableValue<Boolean> isDocSupervised(Context context, boolean reverse) {
-		// TODO: will a document be considered as not supervised if a
-		// field needs to be left empty?
+		// TODO: will a document be considered as not supervised if a field needs to be left empty?
 		DocInstance currentDoc = (DocInstance) context.getGeneric();
 		Root root = currentDoc.getRoot();
 		ZoneText zoneText = root.find(ZoneText.class);
