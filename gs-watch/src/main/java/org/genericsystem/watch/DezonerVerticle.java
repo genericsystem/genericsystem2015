@@ -19,6 +19,8 @@ public class DezonerVerticle extends AbstractVerticle {
 	public void start() throws Exception {
 		MessageConsumer<String> consumer = vertx.eventBus().consumer(VerticleDeployer.NEW_IMAGE_ADDED_TO_CLASS);
 		consumer.handler(message -> vertx.executeBlocking(future -> {
+			System.out.println(">>> dezoner: " + Thread.currentThread().getName());
+
 			String imagePath = message.body();
 			System.out.println(">>>>> New image to de-zone: " + imagePath);
 			if (Zones.isZonesFilePresent(imagePath)) {

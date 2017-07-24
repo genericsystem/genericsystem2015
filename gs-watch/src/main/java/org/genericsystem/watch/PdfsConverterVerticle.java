@@ -20,6 +20,8 @@ public class PdfsConverterVerticle extends AbstractVerticle {
 	public void start() {
 		MessageConsumer<String> consumer = vertx.eventBus().consumer(VerticleDeployer.PDF_WATCHER_ADDRESS);
 		consumer.handler(message -> vertx.executeBlocking(future -> {
+			System.out.println(">>> pdfs converter: " + Thread.currentThread().getName());
+
 			Path newFile = Paths.get(message.body());
 			System.out.println(">> New PDF file: " + newFile);
 			List<Path> createdPngs = PdfToPngConverter.convertPdfToImages(newFile.toFile(), new File("../gs-cv/png"));

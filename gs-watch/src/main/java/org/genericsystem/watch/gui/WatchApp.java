@@ -55,9 +55,7 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlHyperLink;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlImg;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
 import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
-import org.genericsystem.reactor.gscomponents.Monitor;
 import org.genericsystem.reactor.gscomponents.RootTagImpl;
-import org.genericsystem.watch.VerticleDeployerFromWatchApp;
 import org.genericsystem.watch.gui.DocPropertiesCheckerSwitcher.DOC_DEZONED;
 import org.genericsystem.watch.gui.DocPropertiesCheckerSwitcher.DOC_NOT_DEZONED;
 import org.genericsystem.watch.gui.DocPropertiesCheckerSwitcher.DOC_NOT_OCRD;
@@ -75,10 +73,9 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 @DependsOnModel({ Doc.class, RefreshTimestamp.class, DocTimestamp.class, DocFilename.class, DocClass.class, ZoneGeneric.class, ZoneText.class, ZoneTimestamp.class, ImgFilter.class, LevDistance.class, MeanLevenshtein.class, Score.class })
-@Children({ EditDocumentZones.class, AppHeader.class, FlexDiv.class, Monitor.class })
+@Children({ EditDocumentZones.class, AppHeader.class, FlexDiv.class/* , Monitor.class */ })
 @Children(path = FlexDiv.class, pos = 2, value = { HeaderRow.class, DocClassDiv.class })
 @Children(path = AppHeader.class, value = { Logo.class, AppTitleDiv.class, FlexDiv.class })
-
 @Children(path = { AppHeader.class, FlexDiv.class }, pos = { 0, 2 }, value = { HtmlButton.class, HtmlButton.class })
 @SetText(path = { AppHeader.class, FlexDiv.class, HtmlButton.class }, pos = { 0, 2, 0 }, value = "Switch to admin mode")
 @SetText(path = { AppHeader.class, FlexDiv.class, HtmlButton.class }, pos = { 0, 2, 1 }, value = "Switch to normal mode")
@@ -86,7 +83,6 @@ import javafx.collections.ObservableList;
 @BindAction(path = { AppHeader.class, FlexDiv.class, HtmlButton.class }, pos = { 0, 2, 1 }, value = SET_NORMAL_MODE.class)
 @Switch(path = { AppHeader.class, FlexDiv.class, HtmlButton.class }, pos = { 0, 2, 0 }, value = NORMAL_MODE_ONLY.class)
 @Switch(path = { AppHeader.class, FlexDiv.class, HtmlButton.class }, pos = { 0, 2, 1 }, value = ADMIN_MODE_ONLY.class)
-
 @Style(path = AppHeader.class, name = "background-color", value = "#00afeb")
 @SetText(path = { AppHeader.class, AppTitleDiv.class, HtmlH1.class }, value = "GS-Watch interface")
 public class WatchApp extends RootTagImpl {
@@ -95,9 +91,9 @@ public class WatchApp extends RootTagImpl {
 
 	public static void main(String[] mainArgs) {
 		ApplicationServer server = ApplicationServer.startSimpleGenericApp(mainArgs, WatchApp.class, gsPath);
-		Root root = server.getRoots().get(System.getenv("HOME") + "/genericsystem/" + gsPath);
-		VerticleDeployerFromWatchApp deployer = new VerticleDeployerFromWatchApp(root);
-		deployer.doDeploy();
+		// Root root = server.getRoots().get(System.getenv("HOME") + "/genericsystem/" + gsPath);
+		// VerticleDeployerFromWatchApp deployer = new VerticleDeployerFromWatchApp(root);
+		// deployer.doDeploy();
 	}
 
 	@Children(FlexDiv.class)
@@ -105,10 +101,7 @@ public class WatchApp extends RootTagImpl {
 	@Children(path = FlexDiv.class, value = { FlexDiv.class, FlexDiv.class })
 	@Children(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 1 }, value = DocumentsList.class)
 	@BindText(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 0 }, value = DOC_CLASS_LABEL.class)
-	@Style(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 0 }, name = "font-variant", value = "petite-caps")
-	@Style(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 0 }, name = "font-weight", value = "bold")
-	@Style(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 0 }, name = "font-size", value = "medium")
-	@Style(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 0 }, name = "margin", value = "0.5em")
+	@StyleClass(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 0 }, value = "doc-class-title")
 	public static class DocClassDiv extends FlexDiv {
 
 	}
@@ -117,7 +110,6 @@ public class WatchApp extends RootTagImpl {
 	@FlexDirectionStyle(FlexDirection.ROW)
 	@Attribute(path = HtmlLabel.class, name = "name", value = "title")
 	@Style(name = "margin", value = "0.5em")
-	@Style(path = HtmlLabel.class, name = "justify-content", value = "center")
 	@Style(path = HtmlLabel.class, name = "justify-content", value = "center")
 	@Style(path = HtmlLabel.class, name = "align-items", value = "center")
 	@Style(path = HtmlLabel.class, pos = 0, name = "flex", value = "3")

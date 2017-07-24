@@ -37,8 +37,10 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlHyperLink;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlImg;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
 import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
+import org.genericsystem.watch.VerticleDeployerFromWatchApp;
 import org.genericsystem.watch.gui.ShowDocumentZones.TextDiv;
 
+import io.vertx.core.Verticle;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
@@ -53,22 +55,25 @@ import javafx.collections.ObservableList;
 public class ShowDocumentZones extends ModalEditor {
 
 	@FlexDirectionStyle(FlexDirection.COLUMN)
-	@Children({ FlexDiv.class, FlexDiv.class })
-	@Children(path = FlexDiv.class, pos = 0, value = { FlexDiv.class, FlexDiv.class })
-	@Children(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 0 }, value = { Image.class, LastUpdate.class })
-	@Children(path = FlexDiv.class, pos = 1, value = { RefreshButton.class, CloseButton.class })
-	@Children(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 1 }, value = ZoneTextDiv.class)
 	@FlexDirectionStyle(path = FlexDiv.class, value = FlexDirection.ROW)
-	@Style(path = FlexDiv.class, pos = 1, name = "justify-content", value = "center")
-	@Style(path = FlexDiv.class, pos = 1, name = "align-items", value = "center")
+	@Children({ FlexDiv.class, FlexDiv.class, FlexDiv.class })
+	@Children(path = FlexDiv.class, pos = 1, value = { FlexDiv.class, FlexDiv.class })
+	@Children(path = { FlexDiv.class, FlexDiv.class }, pos = { 1, 0 }, value = { Image.class, LastUpdate.class })
+	@Children(path = FlexDiv.class, pos = 2, value = { RefreshButton.class, CloseButton.class })
+	@Children(path = { FlexDiv.class, FlexDiv.class }, pos = { 1, 1 }, value = ZoneTextDiv.class)
+	@BindText(path = FlexDiv.class, pos = 0)
+	@StyleClass(path = FlexDiv.class, pos = 0, value = "doc-title")
+	@Style(path = FlexDiv.class, pos = 2, name = "justify-content", value = "center")
+	@Style(path = FlexDiv.class, pos = 2, name = "align-items", value = "center")
 	@SelectContext(path = FlexDiv.class, pos = 0, value = SELECTION_SELECTOR.class)
-	@SelectContext(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, -1 }, value = SELECTION_SELECTOR.class)
+	@SelectContext(path = FlexDiv.class, pos = 1, value = SELECTION_SELECTOR.class)
+	@SelectContext(path = { FlexDiv.class, FlexDiv.class }, pos = { 1, -1 }, value = SELECTION_SELECTOR.class)
 	public static class TextDiv extends FlexDiv {
 
 	}
 
 	@SetText("Refresh")
-	@BindAction(value = { REFRESH_BEST_TEXT.class, FLUSH.class })
+	@BindAction(value = { REFRESH_BEST_TEXT.class, FLUSH.class }) // XXX include the flush in the refresh function to do it asynchronously?
 	public static class RefreshButton extends HtmlButton {
 		// Run the best text selection algorithm
 	}
@@ -80,9 +85,18 @@ public class ShowDocumentZones extends ModalEditor {
 			Root root = context.getGeneric().getRoot();
 			DocInstance docInstance = (DocInstance) context.getGeneric();
 			String docType = docInstance.getDocClass().getValue().toString();
-			ComputeBestTextPerZone.computeOneFile(root, docInstance, docType);
-			docInstance.setRefreshTimestamp(ModelTools.getCurrentDate());
-			System.out.println("Done!");
+
+			System.out.println("Current thread (refresh): " + Thread.currentThread().getName());
+
+			Verticle worker = new WorkerVerticle() {
+				@Override
+				public void start() throws Exception {
+					ComputeBestTextPerZone.computeOneFile(root, docInstance, docType);
+					docInstance.setRefreshTimestamp(ModelTools.getCurrentDate());
+					System.out.println("Done!");
+				}
+			};
+			VerticleDeployerFromWatchApp.deployWorkerVerticle(worker, "Failed to execute the task");
 		}
 	}
 

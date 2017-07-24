@@ -79,6 +79,8 @@ public class OcrVerticle extends AbstractVerticle {
 	public void start() throws Exception {
 		MessageConsumer<String> consumer = vertx.eventBus().consumer(VerticleDeployer.ACCURATE_ZONES_FOUND);
 		consumer.handler(message -> vertx.executeBlocking(future -> {
+			System.out.println(">>> ocr: " + Thread.currentThread().getName());
+
 			String imagePath = message.body();
 			System.out.println(">>>>> New image to OCR: " + imagePath);
 

@@ -1,7 +1,6 @@
 package org.genericsystem.watch.gui;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
@@ -63,16 +62,19 @@ import javafx.collections.ObservableList;
 public class EditDocumentZones extends ModalEditor {
 
 	@FlexDirectionStyle(FlexDirection.COLUMN)
-	@Children({ FlexDiv.class, FlexDiv.class })
-	@Children(path = FlexDiv.class, pos = 0, value = { FlexDiv.class, FlexDiv.class })
-	@Children(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 0 }, value = Image.class)
-	@Children(path = FlexDiv.class, pos = 1, value = { Validate.class, Cancel.class })
-	@Children(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 1 }, value = ZoneTextDiv.class)
 	@FlexDirectionStyle(path = FlexDiv.class, value = FlexDirection.ROW)
-	@Style(path = FlexDiv.class, pos = 1, name = "justify-content", value = "center")
-	@Style(path = FlexDiv.class, pos = 1, name = "align-items", value = "center")
+	@Children({ FlexDiv.class, FlexDiv.class, FlexDiv.class })
+	@Children(path = FlexDiv.class, pos = 1, value = { FlexDiv.class, FlexDiv.class })
+	@Children(path = { FlexDiv.class, FlexDiv.class }, pos = { 1, 0 }, value = Image.class)
+	@Children(path = FlexDiv.class, pos = 2, value = { Validate.class, Cancel.class })
+	@Children(path = { FlexDiv.class, FlexDiv.class }, pos = { 1, 1 }, value = ZoneTextDiv.class)
+	@BindText(path = FlexDiv.class, pos = 0)
+	@StyleClass(path = FlexDiv.class, pos = 0, value = "doc-title")
+	@Style(path = FlexDiv.class, pos = 2, name = "justify-content", value = "center")
+	@Style(path = FlexDiv.class, pos = 2, name = "align-items", value = "center")
 	@SelectContext(path = FlexDiv.class, pos = 0, value = SELECTION_SELECTOR.class)
-	@SelectContext(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, -1 }, value = SELECTION_SELECTOR.class)
+	@SelectContext(path = FlexDiv.class, pos = 1, value = SELECTION_SELECTOR.class)
+	@SelectContext(path = { FlexDiv.class, FlexDiv.class }, pos = { 1, -1 }, value = SELECTION_SELECTOR.class)
 	public static class TextDiv extends FlexDiv {
 
 	}
@@ -104,9 +106,7 @@ public class EditDocumentZones extends ModalEditor {
 	@Children({ ZoneLabelInput.class, ZonesDetails.class })
 	@ForEach(ZONE_SELECTOR.class)
 	public static class ZoneTextDiv extends FlexDiv {
-		// For each zone, create a div with label + inputText
-		// and create a div for the results for all filters
-
+		// For each zone, create a div with label + inputText and create a div for the results for all filters
 	}
 
 	@FlexDirectionStyle(FlexDirection.ROW)
@@ -147,8 +147,11 @@ public class EditDocumentZones extends ModalEditor {
 			DocInstance docInstance = zti.getDoc();
 			ZoneInstance zoneInstance = zti.getZone();
 			ImgFilterInstance imgFilterInstance = zti.getImgFilter();
-			return context.getGeneric().getMeta().setInstance(newValue, docInstance, zoneInstance, imgFilterInstance);
-			// return context.getGeneric().updateValue(newValue);
+			// return context.getGeneric().getMeta().setInstance(newValue, docInstance, zoneInstance, imgFilterInstance);
+			long start = System.currentTimeMillis();
+			Generic updateValue = context.getGeneric().updateValue(newValue);
+			System.out.println("zzzzzzzzzz" + (System.currentTimeMillis() - start));
+			return updateValue;
 		}
 	}
 
@@ -201,7 +204,6 @@ public class EditDocumentZones extends ModalEditor {
 		@Override
 		public void accept(Context context, Tag tag) {
 			Tag ancestor = tag.getParent().getParent(); // ZoneTextDiv
-			// ancestor.getObservableChildren().forEach(System.out::println);
 			ancestor.find(ModalWithDisplay.class).getDisplayProperty(context).setValue("flex");
 		}
 	}
@@ -209,8 +211,13 @@ public class EditDocumentZones extends ModalEditor {
 	public static class SAVE implements ContextAction {
 		@Override
 		public void accept(Context context, Tag tag) {
-			System.out.println("Saving text for class " + Arrays.asList(context.getGenerics()));
-			context.flush();
+			System.out.println("Saving...");
+			Root root = context.getGeneric().getRoot();
+			System.out.println("Current thread (save): " + Thread.currentThread().getName());
+			long start = System.nanoTime();
+			root.getCurrentCache().flush();
+			long stop = System.nanoTime();
+			System.out.println("Saved in " + (stop - start) / 1_000_000 + "ms");
 		}
 	}
 }

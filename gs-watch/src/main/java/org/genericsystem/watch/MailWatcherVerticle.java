@@ -73,6 +73,8 @@ public class MailWatcherVerticle extends AbstractVerticle {
 	}
 
 	private void checkMail(IMAPFolder inbox) {
+		// System.out.println(">>> mail watcher (check): " + Thread.currentThread().getName());
+
 		if (inbox == null)
 			return;
 		try {
@@ -106,6 +108,7 @@ public class MailWatcherVerticle extends AbstractVerticle {
 	}
 
 	private void processMessage(MimeMessage msg) {
+		System.out.println(">>> mail watcher (process): " + Thread.currentThread().getName());
 		try {
 			MimeMessageParser parser = new MimeMessageParser(msg).parse();
 			System.out.println("> New email: " + parser.getSubject());

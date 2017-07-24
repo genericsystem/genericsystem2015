@@ -5,6 +5,7 @@ import java.io.File;
 import org.genericsystem.common.Root;
 import org.genericsystem.cv.model.Doc.DocInstance;
 import org.genericsystem.cv.model.DocClass.DocClassInstance;
+import org.genericsystem.cv.model.ZoneGeneric;
 import org.genericsystem.cv.model.ZoneText;
 import org.genericsystem.cv.model.ZoneText.ZoneTextInstance;
 import org.genericsystem.reactor.Context;
@@ -81,8 +82,13 @@ public class DocPropertiesCheckerSwitcher {
 		DocInstance currentDoc = (DocInstance) context.getGeneric();
 		Root root = currentDoc.getRoot();
 		ZoneText zoneText = root.find(ZoneText.class);
+		ZoneGeneric zoneGeneric = root.find(ZoneGeneric.class);
+		ObservableList<ZoneGeneric> zoneGenerics = (ObservableList) zoneGeneric.getInstances().toObservableList(); // XXX maybe juste a list
 		ObservableList<ZoneTextInstance> zoneTextInstances = (ObservableList) currentDoc.getHolders(zoneText).toObservableList();
 		BooleanBinding binding = Bindings.createBooleanBinding(() -> {
+			// zoneGenerics.stream().allMatch(g -> {
+			// zoneTextInstances.filtered(zti -> zti.getZoneNum());
+			// });
 			return !zoneTextInstances.isEmpty();
 		}, zoneTextInstances);
 		if (reverse)
