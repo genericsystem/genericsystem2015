@@ -195,8 +195,6 @@ public class Layout {
 
 		Converters.Mat_to_vector_float(binary.projectVertically().getSrc(), histoVertical);
 		Converters.Mat_to_vector_float((binary.projectHorizontally().transpose()).getSrc(), histoHorizontal);
-		assert histoVertical.size() == binary.height();
-		assert histoHorizontal.size() == binary.width();
 
 		histoVertical = smoothHisto(concentration, histoVertical, true, binary);
 		histoHorizontal = smoothHisto(concentration, histoHorizontal, false, binary);
@@ -274,13 +272,14 @@ public class Layout {
 			if (!result[i] && result[i + 1])
 				start = i + 1;
 			else if (result[i] && !result[i + 1]) {
-				shards.add(vertical ? new Layout(0, 1, Integer.valueOf(start).doubleValue() / result.length, (Integer.valueOf(i).doubleValue() + 1) / result.length)
-						: new Layout(Integer.valueOf(start).doubleValue() / result.length, (Integer.valueOf(i).doubleValue() + 1) / result.length, 0, 1));
+				shards.add(vertical ? new Layout(0, 1, Integer.valueOf(start).doubleValue() / result.length, (Integer.valueOf(i).doubleValue() + 1) / result.length) : new Layout(Integer.valueOf(start).doubleValue() / result.length, (Integer.valueOf(i)
+						.doubleValue() + 1) / result.length, 0, 1));
 				start = null;
 			}
 		if (result[result.length - 1]) {
-			shards.add(vertical ? new Layout(0, 1, Integer.valueOf(start).doubleValue() / result.length, Integer.valueOf(result.length).doubleValue() / result.length)
-					: new Layout(Integer.valueOf(start).doubleValue() / result.length, Integer.valueOf(result.length).doubleValue() / result.length, 0, 1));
+			shards.add(vertical ? new Layout(0, 1, Integer.valueOf(start).doubleValue() / result.length, Integer.valueOf(result.length).doubleValue() / result.length) : new Layout(Integer.valueOf(start).doubleValue() / result.length, Integer.valueOf(
+					result.length).doubleValue()
+					/ result.length, 0, 1));
 			start = null;
 		}
 		return shards;
