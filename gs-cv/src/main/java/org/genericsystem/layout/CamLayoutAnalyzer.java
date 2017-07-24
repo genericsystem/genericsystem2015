@@ -17,6 +17,7 @@ import org.genericsystem.cv.Img;
 import org.genericsystem.cv.Tools;
 import org.opencv.calib3d.Calib3d;
 import org.opencv.core.Core;
+import org.opencv.core.CvType;
 import org.opencv.core.DMatch;
 import org.opencv.core.KeyPoint;
 import org.opencv.core.Mat;
@@ -32,6 +33,7 @@ import org.opencv.core.Size;
 import org.opencv.features2d.DescriptorExtractor;
 import org.opencv.features2d.DescriptorMatcher;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.utils.Converters;
 import org.opencv.videoio.VideoCapture;
 
 public class CamLayoutAnalyzer extends AbstractApp {
@@ -39,6 +41,8 @@ public class CamLayoutAnalyzer extends AbstractApp {
 	static {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 	}
+
+	private double crop = 0.10;
 
 	public static void main(String[] args) {
 		launch(args);
@@ -54,70 +58,108 @@ public class CamLayoutAnalyzer extends AbstractApp {
 		DescriptorMatcher matcher = DescriptorMatcher.create(DescriptorMatcher.BRUTEFORCE_HAMMING);
 		Mat frame = new Mat();
 		capture.read(frame);
-		ImageView src = new ImageView(Tools.mat2jfxImage(frame));
-		Img deskewed = deskew(frame);
-
+		ImageView src0 = new ImageView(Tools.mat2jfxImage(frame));
+		ImageView src1 = new ImageView(Tools.mat2jfxImage(frame));
+		Img deskewed = deskew(frame, new double[1]);
 		ImageView src2 = new ImageView(deskewed.toJfxImage());
 		ImageView src3 = new ImageView(deskewed.toJfxImage());
-		mainGrid.add(src, 0, 0);
-		mainGrid.add(src2, 0, 1);
-		mainGrid.add(src3, 0, 2);
+		mainGrid.add(src0, 0, 0);
+		mainGrid.add(src1, 0, 1);
+		mainGrid.add(src2, 1, 0);
+		mainGrid.add(src3, 1, 1);
+
 		MatOfKeyPoint[] oldKeypoints = new MatOfKeyPoint[] { detect(deskewed.getSrc()) };
 		Mat[] oldDescriptors = new Mat[] { new Mat() };
 		extractor.compute(deskewed.bgr2Gray().getSrc(), oldKeypoints[0], oldDescriptors[0]);
 		int[] count = new int[] { 0 };
-		timer.scheduleAtFixedRate(() -> {
-			try {
-				capture.read(frame);
-				Img deskewed_ = deskew(frame);
-				src.setImage(deskewed_.toJfxImage());
-				MatOfKeyPoint newKeypoints = detect(deskewed_.getSrc());
-				Mat newDescriptors = new Mat();
-				extractor.compute(deskewed_.bgr2Gray().getSrc(), newKeypoints, newDescriptors);
-				MatOfDMatch matches = new MatOfDMatch();
-				matcher.match(oldDescriptors[0], newDescriptors, matches);
-				List<DMatch> goodMatches = new ArrayList<>();
-				DMatch[] matches_ = matches.toArray();
-				for (DMatch dMatch : matches_) {
-					if (dMatch.distance <= 40) {
-						goodMatches.add(dMatch);
+		Mat stabilizedMat = new Mat();
+		timer.scheduleAtFixedRate(
+				() -> {
+					MatOfKeyPoint newKeypoints = null;
+					Mat newDescriptors = null;
+					try {
+						capture.read(frame);
+						double[] angle = new double[1];
+						Size newSize = new Size(frame.width() * (1 - 2 * crop), frame.height() * (1 - 2 * crop));
+						Img frameImg = new Img(
+								new Mat(frame, new Rect(Double.valueOf(crop * frame.width()).intValue(), Double.valueOf(crop * frame.height()).intValue(), Double.valueOf(newSize.width).intValue(), Double.valueOf(newSize.height).intValue())), false)
+								.resize(newSize);
+						src0.setImage(frameImg.toJfxImage());
+						Img deskewed_ = deskew(frame, angle);
+						src1.setImage(deskewed_.toJfxImage());
+
+						newKeypoints = detect(deskewed_.getSrc());
+						newDescriptors = new Mat();
+						extractor.compute(deskewed_.bgr2Gray().getSrc(), newKeypoints, newDescriptors);
+
+						Img deskiewedCopy = new Img(deskewed_.getSrc(), true);
+						deskewed_.buildLayout().draw(deskiewedCopy, new Scalar(0, 255, 0), 1);
+						src2.setImage(Tools.mat2jfxImage(deskiewedCopy.getSrc()));
+
+						Img stabilized = stabilize(frame, stabilizedMat, deskewed_.size(), matcher, oldKeypoints[0], newKeypoints, oldDescriptors[0], newDescriptors, angle[0], crop);
+						if (stabilized != null) {
+							Img stabilizedCopy = new Img(stabilized.getSrc(), true);
+							stabilized.buildLayout().draw(stabilizedCopy, new Scalar(0, 255, 0), 1);
+							src3.setImage(stabilizedCopy.toJfxImage());
+						}
+
+						count[0]++;
+					} catch (Exception e) {
+						e.printStackTrace();
+					} finally {
+						if ((count[0] % 10) == 0) {
+							oldKeypoints[0] = newKeypoints;
+							oldDescriptors[0] = newDescriptors;
+						}
 					}
-				}
-				List<KeyPoint> newKeypoints_ = newKeypoints.toList();
-				List<KeyPoint> oldKeypoints_ = oldKeypoints[0].toList();
-				System.out.println(goodMatches.size() + " " + newKeypoints_.size() + " " + oldKeypoints_.size());
+				}, 0, 33, TimeUnit.MILLISECONDS);
+	}
 
-				List<Point> goodNewKeypoints = new ArrayList<>();
-				List<Point> goodOldKeypoints = new ArrayList<>();
-				for (DMatch goodMatch : goodMatches) {
-					goodNewKeypoints.add(newKeypoints_.get(goodMatch.trainIdx).pt);
-					goodOldKeypoints.add(oldKeypoints_.get(goodMatch.queryIdx).pt);
-				}
-				// System.out.println("------------------------------------------");
-				// System.out.println(goodNewKeypoints);
-				// System.out.println(goodOldKeypoints);
-
-				if (goodMatches.size() > 30) {
-					Mat homography = Calib3d.findHomography(new MatOfPoint2f(goodNewKeypoints.stream().toArray(Point[]::new)), new MatOfPoint2f(goodOldKeypoints.stream().toArray(Point[]::new)), Calib3d.RANSAC, 10);
-					Mat transformedImage = new Mat();
-					Imgproc.warpPerspective(deskewed_.getSrc(), transformedImage, homography, new Size(deskewed_.getSrc().cols(), deskewed_.getSrc().rows()));
-					Img stabilized = new Img(transformedImage);
-					stabilized.buildLayout().draw(stabilized, new Scalar(0, 255, 0), 1);
-					src2.setImage(stabilized.toJfxImage());
-				}
-
-				deskewed_.buildLayout().draw(deskewed_, new Scalar(0, 255, 0), 1);
-				src3.setImage(Tools.mat2jfxImage(deskewed_.getSrc()));
-				count[0]++;
-				if ((count[0] % 100) == 0) {
-					oldKeypoints[0] = newKeypoints;
-					oldDescriptors[0] = newDescriptors;
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-
+	private Img stabilize(Mat frame, Mat stabilized, Size size, DescriptorMatcher matcher, MatOfKeyPoint oldKeypoints, MatOfKeyPoint newKeypoints, Mat oldDescriptors, Mat newDescriptors, double angle, double crop) {
+		MatOfDMatch matches = new MatOfDMatch();
+		matcher.match(oldDescriptors, newDescriptors, matches);
+		List<DMatch> goodMatches = new ArrayList<>();
+		for (DMatch dMatch : matches.toArray()) {
+			if (dMatch.distance <= 40) {
+				goodMatches.add(dMatch);
 			}
-		}, 0, 33, TimeUnit.MILLISECONDS);
+		}
+		List<KeyPoint> newKeypoints_ = newKeypoints.toList();
+		List<KeyPoint> oldKeypoints_ = oldKeypoints.toList();
+		// System.out.println(goodMatches.size() + " " + newKeypoints_.size() + " " + oldKeypoints_.size());
+
+		List<Point> goodNewKeypoints = new ArrayList<>();
+		List<Point> goodOldKeypoints = new ArrayList<>();
+		for (DMatch goodMatch : goodMatches) {
+			goodNewKeypoints.add(newKeypoints_.get(goodMatch.trainIdx).pt);
+			goodOldKeypoints.add(oldKeypoints_.get(goodMatch.queryIdx).pt);
+		}
+		// System.out.println("------------------------------------------");
+		// System.out.println(goodNewKeypoints);
+		// System.out.println(goodOldKeypoints);
+
+		if (goodMatches.size() > 20) {
+			Mat goodNewPoints = Converters.vector_Point2f_to_Mat(goodNewKeypoints);
+			MatOfPoint2f originalNewPoints = new MatOfPoint2f();
+			Core.transform(goodNewPoints, originalNewPoints, Imgproc.getRotationMatrix2D(new Point(size.width / 2, size.height / 2), -angle, 1));
+			List<Point> shiftPoints = new ArrayList<>();
+			Converters.Mat_to_vector_Point2f(originalNewPoints, shiftPoints);
+			for (int i = 0; i < shiftPoints.size(); i++) {
+				double x = shiftPoints.get(i).x + crop * size.width / (1 - 2 * crop);
+				double y = shiftPoints.get(i).y + crop * size.height / (1 - 2 * crop);
+				shiftPoints.set(i, new Point(x, y));
+			}
+			Mat homography = Calib3d.findHomography(new MatOfPoint2f(shiftPoints.stream().toArray(Point[]::new)), new MatOfPoint2f(goodOldKeypoints.stream().toArray(Point[]::new)), Calib3d.RANSAC, 10);
+			Mat mask = new Mat(new Size(size.width / (1 - 2 * crop), size.height / (1 - 2 * crop)), CvType.CV_8UC1, new Scalar(255));
+			Mat maskWarpped = new Mat();
+			Imgproc.warpPerspective(mask, maskWarpped, homography, size);
+			Mat tmp = new Mat();
+			Imgproc.warpPerspective(frame, tmp, homography, size, Imgproc.INTER_LINEAR, Core.BORDER_WRAP, Scalar.all(255));
+			tmp.copyTo(stabilized, maskWarpped);
+			return new Img(stabilized, false);
+		}
+		return null;
+
 	}
 
 	private MatOfKeyPoint detect(Mat src) {
@@ -139,15 +181,14 @@ public class CamLayoutAnalyzer extends AbstractApp {
 		}
 	}
 
-	private Img deskew(Mat frame) {
+	private Img deskew(Mat frame, double[] angle) {
 		try (Img img = new Img(frame);
 				Img adaptativThreshold = img.cvtColor(Imgproc.COLOR_BGR2GRAY).adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 17, 9);
 				Img closed = adaptativThreshold.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(5, 5));) {
-			double angle = detection_contours(frame, closed.getSrc());
-			Mat matrix = Imgproc.getRotationMatrix2D(new Point(frame.width() / 2, frame.height() / 2), angle, 1);
+			angle[0] = detection_contours(frame, closed.getSrc());
+			Mat matrix = Imgproc.getRotationMatrix2D(new Point(frame.width() / 2, frame.height() / 2), angle[0], 1);
 			Mat rotated = new Mat();
 			Imgproc.warpAffine(frame, rotated, matrix, new Size(frame.size().width, frame.size().height));
-			double crop = 0.15;
 			Img result = new Img(new Mat(rotated, new Rect(Double.valueOf(rotated.width() * crop).intValue(), Double.valueOf(rotated.height() * crop).intValue(), Double.valueOf(rotated.width() * (1 - 2 * crop)).intValue(), Double.valueOf(
 					rotated.height() * (1 - 2 * crop)).intValue())), false);
 			matrix.release();
@@ -160,7 +201,6 @@ public class CamLayoutAnalyzer extends AbstractApp {
 		List<MatOfPoint> contours = new ArrayList<>();
 		Imgproc.findContours(dilated, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
 		double minArea = 100;
-		double crop = 0.10;
 		Predicate<RotatedRect> filter = rect -> rect.center.x > Double.valueOf(frame.width() * crop).intValue() && rect.center.y > Double.valueOf(frame.height() * crop).intValue() && rect.center.x < Double.valueOf(frame.width() * (1 - crop)).intValue()
 				&& rect.center.y < Double.valueOf(frame.height() * (1 - crop)).intValue();
 		List<RotatedRect> rotatedRects = contours.stream().filter(contour -> Imgproc.contourArea(contour) > minArea).map(contour -> Imgproc.minAreaRect(new MatOfPoint2f(contour.toArray()))).filter(filter).collect(Collectors.toList());
@@ -196,13 +236,13 @@ public class CamLayoutAnalyzer extends AbstractApp {
 		return goodAverage;
 	}
 
-	public void detection_deskew_contours(Mat frame, Mat dilated) {
-		List<MatOfPoint> contours = new ArrayList<>();
-		Imgproc.findContours(dilated, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
-		double minArea = 100;
-		List<Rect> rects = contours.stream().filter(contour -> Imgproc.contourArea(contour) > minArea).map(contour -> Imgproc.boundingRect(contour)).collect(Collectors.toList());
-		rects.forEach(rect -> Imgproc.rectangle(frame, rect.tl(), rect.br(), new Scalar(0, 255, 0), 1));
-	}
+	// public void detection_deskew_contours(Mat frame, Mat dilated) {
+	// List<MatOfPoint> contours = new ArrayList<>();
+	// Imgproc.findContours(dilated, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+	// double minArea = 100;
+	// List<Rect> rects = contours.stream().filter(contour -> Imgproc.contourArea(contour) > minArea).map(contour -> Imgproc.boundingRect(contour)).collect(Collectors.toList());
+	// rects.forEach(rect -> Imgproc.rectangle(frame, rect.tl(), rect.br(), new Scalar(0, 255, 0), 1));
+	// }
 
 	@Override
 	public void stop() throws Exception {

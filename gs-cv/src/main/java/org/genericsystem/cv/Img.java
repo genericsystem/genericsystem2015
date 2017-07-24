@@ -830,9 +830,27 @@ public class Img implements AutoCloseable {
 		return new Img(result, false);
 	}
 
-	public Img bitwise(Img img) {
+	public Img bitwise_and(Img img) {
 		Mat result = new Mat();
 		Core.bitwise_and(getSrc(), img.getSrc(), result);
+		return new Img(result, false);
+	}
+
+	public Img bitwise_or(Img img) {
+		Mat result = new Mat();
+		Core.bitwise_and(getSrc(), img.getSrc(), result);
+		return new Img(result, false);
+	}
+
+	public Img bitwise_xor(Img img) {
+		Mat result = new Mat();
+		Core.bitwise_xor(getSrc(), img.getSrc(), result);
+		return new Img(result, false);
+	}
+
+	public Img bitwise_not() {
+		Mat result = new Mat();
+		Core.bitwise_not(getSrc(), result);
 		return new Img(result, false);
 	}
 
@@ -865,7 +883,7 @@ public class Img implements AutoCloseable {
 
 	public Layout buildLayout() {
 		Img adaptivSplit = bgr2Gray().adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 17, 15);
-		return new Layout(0, 1, 0, 1).recursivSplit(new Size(0.036, 0.009), 100, 0.01f, this, adaptivSplit);
+		return new Layout(0, 1, 0, 1).recursivSplit(new Size(0.036, 0.009), 3, 0.008f, this, adaptivSplit);
 	}
 
 	public Layout buildLayout(Size morph, int level, float concentration, Img img, Img binary) {
@@ -873,4 +891,5 @@ public class Img implements AutoCloseable {
 		System.out.println("-------------------------------------------------------");
 		return root.recursivSplit(morph, level, concentration, root.getRoi(img), root.getRoi(binary));
 	}
+
 }
