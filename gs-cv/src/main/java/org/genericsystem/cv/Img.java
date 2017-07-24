@@ -81,7 +81,7 @@ public class Img implements AutoCloseable {
 	public Img morphologyEx(int morphOp, int morph, Size size) {
 		Mat result = new Mat();
 		Imgproc.morphologyEx(src, result, morphOp, Imgproc.getStructuringElement(morph, size));
-		// Imgproc.morphologyEx(src, result, morphOp, Imgproc.getStructuringElement(morph, size), new Point(-1, -1), 1, Core.BORDER_CONSTANT, new Scalar(255));
+		//// Imgproc.morphologyEx(src, result, morphOp, Imgproc.getStructuringElement(morph, size), new Point(-1, -1), 1, Core.BORDER_CONSTANT, new Scalar(255));
 		return new Img(result, false);
 	}
 

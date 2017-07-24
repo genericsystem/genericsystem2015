@@ -56,6 +56,7 @@ public class Layout {
 		});
 	}
 
+	//
 	public Layout traverseOCR(Img img, BiConsumer<Img, Layout> visitor, Img roiParent) {
 		for (Layout shard : getChildren()) {
 			Zone z = new Zone(0, new Rect(new Point(shard.getX1() * roiParent.width(), shard.getY1() * roiParent.height()), new Point(1 + shard.getX2() * roiParent.width(), 1 + shard.getY2() * roiParent.height())));
@@ -65,6 +66,7 @@ public class Layout {
 		return this;
 	}
 
+	//
 	public void ocrTree(Img img) {
 		traverseOCR(img, (roi, layout) -> {
 			if (layout.getChildren().isEmpty())

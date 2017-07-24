@@ -33,7 +33,7 @@ public class LayoutAnalyzer extends AbstractApp {
 		// layout.draw(layout.getRoi(img), new Scalar(0, 255, 0), 1);
 		// mainGrid.add(new ImageView(img.toJfxImage()), columnIndex, rowIndex++);
 		// mainGrid.add(new ImageView(adaptivSplit.toJfxImage()), columnIndex, rowIndex++);
-
+		//
 		Img ultimate = new Img("resources/14342661748973931.jpg").cleanTables();
 
 		mainGrid.add(new ImageView(ultimate.toJfxImage()), columnIndex, rowIndex++);
