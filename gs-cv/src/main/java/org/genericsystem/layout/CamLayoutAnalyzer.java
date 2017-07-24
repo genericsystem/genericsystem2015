@@ -157,7 +157,7 @@ public class CamLayoutAnalyzer extends AbstractApp {
 			Mat maskWarpped = new Mat();
 			Imgproc.warpPerspective(mask, maskWarpped, homography, size);
 			Mat tmp = new Mat();
-			Imgproc.warpPerspective(frame, tmp, homography, size, Imgproc.INTER_LINEAR, Core.BORDER_WRAP, Scalar.all(255));
+			Imgproc.warpPerspective(frame, tmp, homography, size, Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(255));
 			tmp.copyTo(stabilized, maskWarpped);
 			return new Img(stabilized, false);
 		}
