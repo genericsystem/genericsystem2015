@@ -68,11 +68,20 @@ public class VisualizeFiltersStatistics extends RootTagImpl {
 	}
 
 	public static class COMPUTE_STATS implements ContextAction {
+		// TODO: implement for each doc Class
 		@Override
 		public void accept(Context context, Tag tag) {
 			System.out.println("Computing scores...");
-			ComputeTrainedScores.compute(context.getGeneric().getRoot());
-			System.out.println("Done computing scores!");
+			Root root = context.getGeneric().getRoot();
+			Verticle worker = new WorkerVerticle() {
+				@Override
+				public void start() throws Exception {
+					ComputeTrainedScores.compute(root);
+					System.out.println("Done computing scores!");
+				}
+			};
+			VerticleDeployerFromWatchApp.deployWorkerVerticle(worker, "Failed to execute the task");
+
 		}
 	}
 
