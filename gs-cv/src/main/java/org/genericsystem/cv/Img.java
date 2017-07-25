@@ -894,11 +894,11 @@ public class Img implements AutoCloseable {
 
 	public Img cleanTables() {
 
-		Img hImg = this.bgr2Gray().adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 17, 15).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(20, 1));
-		Img vImg = this.bgr2Gray().adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 17, 15).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(1, 20));
+		Img gray = this.bgr2Gray().adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 17, 15);
+		Img hImg = gray.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(20, 1));
+		Img vImg = gray.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(1, 20));
 
-		Img result = bgr2Gray().adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 17, 15).bitwise_xor(hImg.bitwise_and(vImg).bitwise_not());
-		return new Img(result.src);
+		return new Img(gray.bitwise_xor(hImg.bitwise_and(vImg).bitwise_not()).getSrc());
 	}
 
 }

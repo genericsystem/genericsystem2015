@@ -8,7 +8,7 @@ import java.util.function.Function;
 
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.Ocr;
-import org.opencv.core.Mat;
+import org.genericsystem.cv.Zone;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
@@ -38,15 +38,38 @@ public class Layout {
 		return new Img(img, this);
 	}
 
-	public Img getEnlargedRoi(Img img, int delta) {
-
-		double newX1 = getX1() * img.width() - delta > 0 ? getX1() * img.width() - delta : 0;
-		double newY1 = getY1() * img.height() - delta > 0 ? getY1() * img.height() - delta : 0;
-		double newX2 = getX2() * img.width() + delta < img.width() ? getX2() * img.width() + delta : img.width();
-		double newY2 = getY2() * img.height() + delta < img.height() ? getY2() * img.height() + delta : img.height();
-
-		return new Img(new Mat(img.getSrc(), new Rect(new Point(newX1, newY1), new Point(newX2, newY2))));
+	public Rect getRect(Img img) {
+		if (getParent() != null) {
+			double X1 = getParent().getX1() + x1 * (getParent().getX2() - getParent().getX1());
+			double X2 = getParent().getX1() + x2 * (getParent().getX2() - getParent().getX1());
+			double Y1 = getParent().getY1() + y1 * (getParent().getY2() - getParent().getY1());
+			double Y2 = getParent().getY1() + y2 * (getParent().getY2() - getParent().getY1());
+			return getParent().getRect(X1, X2, Y1, Y2, img);
+		} else {
+			return new Rect(new Point(getX1() * img.width(), getX2() * img.height()), new Point(getY1() * img.width(), getY2() * img.height()));
+		}
 	}
+
+	private Rect getRect(double x12, double x22, double y12, double y22, Img img) {
+		while (getParent() != null) {
+			double X1 = getParent().getX1() + x12 * (getParent().getX2() - getParent().getX1());
+			double X2 = getParent().getX1() + x22 * (getParent().getX2() - getParent().getX1());
+			double Y1 = getParent().getY1() + y12 * (getParent().getY2() - getParent().getY1());
+			double Y2 = getParent().getY1() + y22 * (getParent().getY2() - getParent().getY1());
+			return getParent().getRect(X1, X2, Y1, Y2, img);
+		}
+		return new Rect(new Point(x12 * img.width(), y12 * img.height()), new Point(x22 * img.width(), y22 * img.height()));
+	}
+
+	// public Img getEnlargedRoi(Img img, int delta) {
+	//
+	// double newX1 = getX1() * img.width() - delta > 0 ? getX1() * img.width() - delta : 0;
+	// double newY1 = getY1() * img.height() - delta > 0 ? getY1() * img.height() - delta : 0;
+	// double newX2 = getX2() * img.width() + delta < img.width() ? getX2() * img.width() + delta : img.width();
+	// double newY2 = getY2() * img.height() + delta < img.height() ? getY2() * img.height() + delta : img.height();
+	//
+	// return new Img(new Mat(img.getSrc(), new Rect(new Point(newX1, newY1), new Point(newX2, newY2))));
+	// }
 
 	// public void draw2(Img img, Scalar color, int thickness) {
 	// Imgproc.rectangle(img.getSrc(), new Point(x1 * img.width(), y1 * img.height()), new Point(x2 * img.width(), y2 * img.height()), color, thickness);// rect.tl(), rect.br(), color, thickness);
@@ -66,21 +89,23 @@ public class Layout {
 		});
 	}
 
-	//
-	public Layout traverseOCR(Img img, Img enlarged, BiConsumer<Img, Layout> visitor) {
+	public Layout traverseOCR(Img img, BiConsumer<Img, Layout> visitor) {
 		for (Layout shard : getChildren())
-			shard.traverseOCR(shard.getRoi(img), shard.getEnlargedRoi(img, 1), visitor);
+			shard.traverseOCR(shard.getRoi(img), visitor);
 		visitor.accept(img, this);
 		return this;
 	}
 
-	//
-	public void ocrTree(Img img, Img enlarged) {
-		traverseOCR(img, enlarged, (roi, layout) -> {
+	public void ocrTree(Img img, Img rootImg) {
+		traverseOCR(img, (roi, layout) -> {
 			if (layout.getChildren().isEmpty()) {
-				// System.out.println(roi.getSrc() + " " + layout.toString());
-				layout.setLabel(Ocr.doWork(img.getSrc()));
-				System.out.println(layout.getLabel());
+				Rect rect = layout.getRect(rootImg);
+				rect.height++;
+				rect.width++;
+				Zone z = new Zone(0, rect);
+				Img sub = z.getRoi(rootImg);
+				layout.setLabel(Ocr.doWork(sub.getSrc()));
+				// layout.setLabel(Ocr.doWork(roi.getSrc()));
 			}
 		});
 	}
