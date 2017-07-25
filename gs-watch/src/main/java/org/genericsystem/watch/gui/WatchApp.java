@@ -61,6 +61,7 @@ import org.genericsystem.watch.gui.DocPropertiesCheckerSwitcher.DOC_NOT_OCRD;
 import org.genericsystem.watch.gui.DocPropertiesCheckerSwitcher.DOC_NOT_SUPERVISED;
 import org.genericsystem.watch.gui.DocPropertiesCheckerSwitcher.DOC_OCRD;
 import org.genericsystem.watch.gui.DocPropertiesCheckerSwitcher.DOC_SUPERVISED;
+import org.genericsystem.watch.gui.PageSwitcher.HOME_PAGE;
 import org.genericsystem.watch.gui.WatchApp.DocClassDiv;
 import org.genericsystem.watch.gui.WatchApp.HeaderRow;
 
