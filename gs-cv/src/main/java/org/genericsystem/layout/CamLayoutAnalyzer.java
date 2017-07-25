@@ -70,7 +70,7 @@ public class CamLayoutAnalyzer extends AbstractApp {
 
 		MatOfKeyPoint[] oldKeypoints = new MatOfKeyPoint[] { detect(deskewed.getSrc()) };
 		Mat[] oldDescriptors = new Mat[] { new Mat() };
-		extractor.compute(deskewed.bgr2Gray().getSrc(), oldKeypoints[0], oldDescriptors[0]);
+		extractor.compute(deskewed.getSrc(), oldKeypoints[0], oldDescriptors[0]);
 		int[] count = new int[] { 0 };
 		Mat stabilizedMat = new Mat();
 		Layout[] layout = new Layout[] { null };
@@ -81,17 +81,15 @@ public class CamLayoutAnalyzer extends AbstractApp {
 				capture.read(frame);
 				double[] angle = new double[1];
 				Size newSize = new Size(frame.width() * (1 - 2 * crop), frame.height() * (1 - 2 * crop));
-				Img frameImg = new Img(new Mat(frame, new Rect(Double.valueOf(crop * frame.width()).intValue(), Double.valueOf(crop * frame.height()).intValue(), Double.valueOf(newSize.width).intValue(), Double.valueOf(newSize.height).intValue())), false)
-						.resize(newSize);
+				Img frameImg = new Img(frame, false).resize(newSize);
 				src0.setImage(frameImg.toJfxImage());
 				Img deskewed_ = deskew(frame, angle);
+				Img deskiewedCopy = new Img(deskewed_.getSrc(), true);
 				src1.setImage(deskewed_.toJfxImage());
-
 				newKeypoints = detect(deskewed_.getSrc());
 				newDescriptors = new Mat();
-				extractor.compute(deskewed_.bgr2Gray().getSrc(), newKeypoints, newDescriptors);
+				extractor.compute(deskewed_.getSrc(), newKeypoints, newDescriptors);
 
-				Img deskiewedCopy = new Img(deskewed_.getSrc(), true);
 				deskewed_.buildLayout().draw(deskiewedCopy, new Scalar(0, 255, 0), 1);
 				src2.setImage(Tools.mat2jfxImage(deskiewedCopy.getSrc()));
 
@@ -109,7 +107,7 @@ public class CamLayoutAnalyzer extends AbstractApp {
 			} catch (Exception e) {
 				e.printStackTrace();
 			} finally {
-				if ((count[0] % 10) == 0) {
+				if ((count[0] % 50) == 0) {
 					oldKeypoints[0] = newKeypoints;
 					oldDescriptors[0] = newDescriptors;
 					layout[0] = null;
@@ -194,7 +192,7 @@ public class CamLayoutAnalyzer extends AbstractApp {
 			Imgproc.warpAffine(frame, rotated, matrix, new Size(frame.size().width, frame.size().height));
 			Img result = new Img(new Mat(rotated,
 					new Rect(Double.valueOf(rotated.width() * crop).intValue(), Double.valueOf(rotated.height() * crop).intValue(), Double.valueOf(rotated.width() * (1 - 2 * crop)).intValue(), Double.valueOf(rotated.height() * (1 - 2 * crop)).intValue())),
-					false);
+					true);
 			matrix.release();
 			rotated.release();
 			return result;
