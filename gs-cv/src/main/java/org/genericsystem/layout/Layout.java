@@ -27,7 +27,8 @@ public class Layout {
 	private List<Layout> children = new ArrayList<>();
 	private Layout parent = null;
 
-	public Layout(double x1, double x2, double y1, double y2) {
+	public Layout(Layout parent, double x1, double x2, double y1, double y2) {
+		this.parent = parent;
 		this.x1 = x1;
 		this.x2 = x2;
 		this.y1 = y1;
@@ -38,19 +39,15 @@ public class Layout {
 		return new Img(img, this);
 	}
 
-	public Img getEnlargedRoi(Img img, int delta) {
-
-		double newX1 = getX1() * img.width() - delta > 0 ? getX1() * img.width() - delta : 0;
-		double newY1 = getY1() * img.height() - delta > 0 ? getY1() * img.height() - delta : 0;
-		double newX2 = getX2() * img.width() + delta < img.width() ? getX2() * img.width() + delta : img.width();
-		double newY2 = getY2() * img.height() + delta < img.height() ? getY2() * img.height() + delta : img.height();
-
-		return new Img(new Mat(img.getSrc(), new Rect(new Point(newX1, newY1), new Point(newX2, newY2))));
+	public Rect getRect(Img imgRoot) {
+		Rect parentRect = getParent() != null ? getParent().getRect(imgRoot) : new Rect(0, 0, imgRoot.width(), imgRoot.height());
+		return new Rect(new Point(parentRect.tl().x + parentRect.width * getX1(), parentRect.tl().y + parentRect.height * getY1()), new Point(parentRect.tl().x + parentRect.width * getX2(), parentRect.tl().y + parentRect.height * getY2()));
 	}
 
-	// public void draw2(Img img, Scalar color, int thickness) {
-	// Imgproc.rectangle(img.getSrc(), new Point(x1 * img.width(), y1 * img.height()), new Point(x2 * img.width(), y2 * img.height()), color, thickness);// rect.tl(), rect.br(), color, thickness);
-	// }
+	public Rect getLargeRect(Img imgRoot, int delta) {
+		Rect rect = getRect(imgRoot);
+		return new Rect(new Point(rect.tl().x - delta, rect.tl().y - delta), new Point(rect.br().x + delta, rect.br().y + delta));
+	}
 
 	public Layout traverse(Img img, BiConsumer<Img, Layout> visitor) {
 		for (Layout shard : getChildren())
@@ -66,22 +63,10 @@ public class Layout {
 		});
 	}
 
-	//
-	public Layout traverseOCR(Img img, Img enlarged, BiConsumer<Img, Layout> visitor) {
-		for (Layout shard : getChildren())
-			shard.traverseOCR(shard.getRoi(img), shard.getEnlargedRoi(img, 1), visitor);
-		visitor.accept(img, this);
-		return this;
-	}
-
-	//
-	public void ocrTree(Img img, Img enlarged) {
-		traverseOCR(img, enlarged, (roi, layout) -> {
-			if (layout.getChildren().isEmpty()) {
-				// System.out.println(roi.getSrc() + " " + layout.toString());
-				layout.setLabel(Ocr.doWork(img.getSrc()));
-				System.out.println(layout.getLabel());
-			}
+	public void ocrTree(Img rootImg, int delta) {
+		traverse(rootImg, (root, layout) -> {
+			if (layout.getChildren().isEmpty())
+				layout.setLabel(Ocr.doWork(new Mat(rootImg.getSrc(), layout.getRect(rootImg))));
 		});
 	}
 
@@ -213,9 +198,9 @@ public class Layout {
 		// System.out.println("x " + Arrays.toString(x) + " y " + Arrays.toString(y));
 
 		if (x[0] <= x[1] && y[0] <= y[1]) {
-			return new Layout(getX1() + x[0] * (getX2() - getX1()), getX1() + x[1] * (getX2() - getX1()), getY1() + y[0] * (getY2() - getY1()), getY1() + y[1] * (getY2() - getY1()));
+			return new Layout(this.getParent(), getX1() + x[0] * (getX2() - getX1()), getX1() + x[1] * (getX2() - getX1()), getY1() + y[0] * (getY2() - getY1()), getY1() + y[1] * (getY2() - getY1()));
 		} else {
-			return new Layout(getX1(), getX2(), getY1(), getY2());
+			return new Layout(this.getParent(), getX1(), getX2(), getY1(), getY2());
 		}
 
 	}
@@ -230,7 +215,7 @@ public class Layout {
 		return new double[] { Integer.valueOf(start).doubleValue() / hist.size(), Integer.valueOf(end + 1).doubleValue() / hist.size() };
 	}
 
-	public static List<Layout> split(Size morph, float concentration, Img binary) {
+	public List<Layout> split(Size morph, float concentration, Img binary) {
 		List<Float> histoVertical = new ArrayList<>();
 		List<Float> histoHorizontal = new ArrayList<>();
 
@@ -287,7 +272,7 @@ public class Layout {
 		return closed;
 	}
 
-	private static List<Layout> extractZones(boolean[] resultV, boolean[] resultH, Img binary, float concentration) {
+	private List<Layout> extractZones(boolean[] resultV, boolean[] resultH, Img binary, float concentration) {
 
 		List<Layout> shardsV = getShards(resultV, true);
 		List<Layout> shardsH = getShards(resultH, false);
@@ -296,7 +281,7 @@ public class Layout {
 		List<Layout> shards = new ArrayList<>();
 		for (Layout shardv : shardsV)
 			for (Layout shardh : shardsH) {
-				Layout target = new Layout(shardh.x1, shardh.x2, shardv.y1, shardv.y2);
+				Layout target = new Layout(this, shardh.x1, shardh.x2, shardv.y1, shardv.y2);
 				Img roi = target.getRoi(binary);
 				// System.out.println("roi : rows :" + roi.rows() + " , cols :" + roi.cols());
 				if (roi.rows() != 0 && roi.cols() != 0)
@@ -305,7 +290,7 @@ public class Layout {
 		return shards;
 	}
 
-	private static List<Layout> getShards(boolean[] result, boolean vertical) {
+	private List<Layout> getShards(boolean[] result, boolean vertical) {
 		List<Layout> shards = new ArrayList<>();
 		Integer start = result[0] ? 0 : null;
 		assert result.length >= 1;
@@ -313,13 +298,13 @@ public class Layout {
 			if (!result[i] && result[i + 1])
 				start = i + 1;
 			else if (result[i] && !result[i + 1]) {
-				shards.add(vertical ? new Layout(0, 1, Integer.valueOf(start).doubleValue() / result.length, (Integer.valueOf(i).doubleValue() + 1) / result.length)
-						: new Layout(Integer.valueOf(start).doubleValue() / result.length, (Integer.valueOf(i).doubleValue() + 1) / result.length, 0, 1));
+				shards.add(vertical ? new Layout(this, 0, 1, Integer.valueOf(start).doubleValue() / result.length, (Integer.valueOf(i).doubleValue() + 1) / result.length)
+						: new Layout(this, Integer.valueOf(start).doubleValue() / result.length, (Integer.valueOf(i).doubleValue() + 1) / result.length, 0, 1));
 				start = null;
 			}
 		if (result[result.length - 1]) {
-			shards.add(vertical ? new Layout(0, 1, Integer.valueOf(start).doubleValue() / result.length, Integer.valueOf(result.length).doubleValue() / result.length)
-					: new Layout(Integer.valueOf(start).doubleValue() / result.length, Integer.valueOf(result.length).doubleValue() / result.length, 0, 1));
+			shards.add(vertical ? new Layout(this, 0, 1, Integer.valueOf(start).doubleValue() / result.length, Integer.valueOf(result.length).doubleValue() / result.length)
+					: new Layout(this, Integer.valueOf(start).doubleValue() / result.length, Integer.valueOf(result.length).doubleValue() / result.length, 0, 1));
 			start = null;
 		}
 		return shards;
