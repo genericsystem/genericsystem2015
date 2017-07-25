@@ -49,43 +49,6 @@ public class Layout {
 		return new Rect(new Point(rect.tl().x - delta, rect.tl().y - delta), new Point(rect.br().x + delta, rect.br().y + delta));
 	}
 
-	// public Rect getRect(Img img) {
-	// if (getParent() != null) {
-	// double X1 = getParent().getX1() + x1 * (getParent().getX2() - getParent().getX1());
-	// double X2 = getParent().getX1() + x2 * (getParent().getX2() - getParent().getX1());
-	// double Y1 = getParent().getY1() + y1 * (getParent().getY2() - getParent().getY1());
-	// double Y2 = getParent().getY1() + y2 * (getParent().getY2() - getParent().getY1());
-	// return getParent().getRect(X1, X2, Y1, Y2, img);
-	// } else {
-	// return new Rect(new Point(getX1() * img.width(), getX2() * img.height()), new Point(getY1() * img.width(), getY2() * img.height()));
-	// }
-	// }
-	//
-	// private Rect getRect(double x12, double x22, double y12, double y22, Img img) {
-	// while (getParent() != null) {
-	// double X1 = getParent().getX1() + x12 * (getParent().getX2() - getParent().getX1());
-	// double X2 = getParent().getX1() + x22 * (getParent().getX2() - getParent().getX1());
-	// double Y1 = getParent().getY1() + y12 * (getParent().getY2() - getParent().getY1());
-	// double Y2 = getParent().getY1() + y22 * (getParent().getY2() - getParent().getY1());
-	// return getParent().getRect(X1, X2, Y1, Y2, img);
-	// }
-	// return new Rect(new Point(x12 * img.width(), y12 * img.height()), new Point(x22 * img.width(), y22 * img.height()));
-	// }
-
-	// public Img getEnlargedRoi(Img img, int delta) {
-	//
-	// double newX1 = getX1() * img.width() - delta > 0 ? getX1() * img.width() - delta : 0;
-	// double newY1 = getY1() * img.height() - delta > 0 ? getY1() * img.height() - delta : 0;
-	// double newX2 = getX2() * img.width() + delta < img.width() ? getX2() * img.width() + delta : img.width();
-	// double newY2 = getY2() * img.height() + delta < img.height() ? getY2() * img.height() + delta : img.height();
-	//
-	// return new Img(new Mat(img.getSrc(), new Rect(new Point(newX1, newY1), new Point(newX2, newY2))));
-	// }
-
-	// public void draw2(Img img, Scalar color, int thickness) {
-	// Imgproc.rectangle(img.getSrc(), new Point(x1 * img.width(), y1 * img.height()), new Point(x2 * img.width(), y2 * img.height()), color, thickness);// rect.tl(), rect.br(), color, thickness);
-	// }
-
 	public Layout traverse(Img img, BiConsumer<Img, Layout> visitor) {
 		for (Layout shard : getChildren())
 			shard.traverse(shard.getRoi(img), visitor);
@@ -98,13 +61,6 @@ public class Layout {
 			if (shard.getChildren().isEmpty())
 				Imgproc.rectangle(roi.getSrc(), new Point(0, 0), new Point(roi.width() - 1, roi.height() - 1), color, thickness);
 		});
-	}
-
-	public Layout traverseOCR(Img img, BiConsumer<Img, Layout> visitor) {
-		for (Layout shard : getChildren())
-			shard.traverseOCR(shard.getRoi(img), visitor);
-		visitor.accept(img, this);
-		return this;
 	}
 
 	public void ocrTree(Img rootImg, int delta) {
@@ -241,7 +197,7 @@ public class Layout {
 
 		// System.out.println("x " + Arrays.toString(x) + " y " + Arrays.toString(y));
 
-		if (x[0] <= x[1] && y[0] <= y[1]) {
+		if (x[0] <= x[1] || y[0] <= y[1]) {
 			return new Layout(this.getParent(), getX1() + x[0] * (getX2() - getX1()), getX1() + x[1] * (getX2() - getX1()), getY1() + y[0] * (getY2() - getY1()), getY1() + y[1] * (getY2() - getY1()));
 		} else {
 			return new Layout(this.getParent(), getX1(), getX2(), getY1(), getY2());
@@ -359,13 +315,13 @@ public class Layout {
 		// System.out.println("Layout : " + this);
 		assert img.size().equals(binary.size());
 		if (level < 0) {
-			Imgproc.rectangle(img.getSrc(), new Point(0, 0), new Point(img.width(), img.height()), new Scalar(255, 0, 0), -1);
+			// Imgproc.rectangle(img.getSrc(), new Point(0, 0), new Point(img.width(), img.height()), new Scalar(255, 0, 0), -1);
 			return this;
 		}
 		List<Layout> shards = split(morph, concentration, binary);
 		shards.removeIf(shard -> ((shard.getY2() - shard.getY1()) * img.size().height) < 4 || ((shard.getX2() - shard.getX1()) * img.size().width) < 4);
 		if (shards.isEmpty()) {
-			Imgproc.rectangle(img.getSrc(), new Point(0, 0), new Point(img.width(), img.height()), new Scalar(0, 0, 255), -1);
+			// Imgproc.rectangle(img.getSrc(), new Point(0, 0), new Point(img.width(), img.height()), new Scalar(0, 0, 255), -1);
 			return this;
 		}
 		if (shards.size() == 1) {
