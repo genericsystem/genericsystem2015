@@ -21,7 +21,6 @@ import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.DependsOnModel;
-import org.genericsystem.reactor.annotations.DirectSelect;
 import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
@@ -39,7 +38,6 @@ import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.FlexDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlH1;
-import org.genericsystem.reactor.gscomponents.InstancesTable;
 import org.genericsystem.reactor.gscomponents.RootTagImpl;
 import org.genericsystem.watch.VerticleDeployerFromWatchApp;
 import org.genericsystem.watch.gui.PageSwitcher.FILTERS_STATISTICS;
@@ -76,7 +74,7 @@ public class VisualizeFiltersStatistics extends RootTagImpl {
 	}
 
 	@Children({ FlexDiv.class, FlexDiv.class })
-	@Children(path = FlexDiv.class, pos = 1, value = InstancesTable.class)
+	@Children(path = FlexDiv.class, pos = 1, value = StatisticsTable.class)
 	@Children(path = FlexDiv.class, pos = 0, value = { FlexDiv.class, FlexDiv.class })
 	@Children(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 1 }, value = ButtonDiv.class)
 	@BindText(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 0 })
@@ -89,20 +87,27 @@ public class VisualizeFiltersStatistics extends RootTagImpl {
 	@Style(name = "width", value = "90%")
 	@Style(name = "margin", value = "auto")
 	@ForEach(DOC_CLASS_SELECTOR.class)
-	@DirectSelect(path = { FlexDiv.class, InstancesTable.class }, pos = { 1, 0 }, value = Score.class)
+	// @DirectSelect(path = { FlexDiv.class, StatisticsTable.class }, pos = { 1, 0 }, value = Score.class)
 	// @Switch(path = { FlexDiv.class, InstancesTable.class }, pos = { 1, 0 }, value = SCORE_SWITCHER.class)
 	public static class DocClassStatisticsDiv extends FlexDiv {
 
 	}
 
-	@Children(RunScriptButton.class)
+	@Children({ ComputeStatsButton.class, ComputeStatsStrictButton.class })
+	@FlexDirectionStyle(FlexDirection.ROW)
 	public static class ButtonDiv extends FlexDiv {
 
 	}
 
 	@SetText("Compute statistics")
 	@BindAction({ COMPUTE_STATS.class })
-	public static class RunScriptButton extends HtmlButton {
+	public static class ComputeStatsButton extends HtmlButton {
+
+	}
+
+	@SetText("Compute statistics (strict mode)")
+	@BindAction({ COMPUTE_STATS.class })
+	public static class ComputeStatsStrictButton extends HtmlButton {
 
 	}
 
@@ -136,18 +141,30 @@ public class VisualizeFiltersStatistics extends RootTagImpl {
 		@Override
 		public void accept(Context context, Tag tag) {
 			System.out.println("Computing scores...");
-			DocClassInstance docClassInstance = (DocClassInstance) context.getGeneric();
-			Root root = docClassInstance.getRoot();
-			Arrays.asList(context.getGenerics()).forEach(g -> System.out.println(g.info()));
-			Verticle worker = new WorkerVerticle() {
-				@Override
-				public void start() throws Exception {
-					ComputeTrainedScores.compute(root, docClassInstance.getValue().toString());
-					System.out.println("Done computing scores!");
-				}
-			};
-			VerticleDeployerFromWatchApp.deployWorkerVerticle(worker, "Failed to execute the task");
+			computeStatistics(context, tag, false);
 		}
+	}
+
+	public static class COMPUTE_STATS_STRICT implements ContextAction {
+		@Override
+		public void accept(Context context, Tag tag) {
+			System.out.println("Computing scores (using strict mode)...");
+			computeStatistics(context, tag, true);
+		}
+	}
+
+	public static void computeStatistics(Context context, Tag tag, boolean useStrict) {
+		DocClassInstance docClassInstance = (DocClassInstance) context.getGeneric();
+		Root root = docClassInstance.getRoot();
+		Arrays.asList(context.getGenerics()).forEach(g -> System.out.println(g.info()));
+		Verticle worker = new WorkerVerticle() {
+			@Override
+			public void start() throws Exception {
+				ComputeTrainedScores.compute(root, docClassInstance.getValue().toString(), useStrict);
+				System.out.println("Done computing scores!");
+			}
+		};
+		VerticleDeployerFromWatchApp.deployWorkerVerticle(worker, "Failed to execute the task");
 	}
 
 }
