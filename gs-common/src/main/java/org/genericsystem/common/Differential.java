@@ -1,7 +1,9 @@
 package org.genericsystem.common;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import org.genericsystem.api.core.FiltersBuilder;
@@ -28,6 +30,7 @@ public class Differential implements IDifferential<Generic> {
 	private final IDifferential<Generic> subDifferential;
 	protected final PseudoConcurrentCollection<Generic> adds = new PseudoConcurrentCollection<>();
 	protected final PseudoConcurrentCollection<Generic> removes = new PseudoConcurrentCollection<>();
+	private Map<Generic, ObservableList<Generic>> dependenciesAsOservableListCacheMap = new HashMap<>();
 
 	public Differential(IDifferential<Generic> subDifferential) {
 		this.subDifferential = subDifferential;
@@ -110,18 +113,23 @@ public class Differential implements IDifferential<Generic> {
 
 			@Override
 			public ObservableList<Generic> toObservableList() {
-				return BindingsTools.createMinimalUnitaryChangesBinding(BindingsTools.transmitSuccessiveInvalidations(new ListBinding<Generic>() {
-					private final Observable invalidator = cache != null ? cache.getObservable(generic) : getObservable(generic);
-					{
-						bind(invalidator);
-						invalidate();
-					}
+				ObservableList<Generic> result = dependenciesAsOservableListCacheMap.get(generic);
+				if (result == null) {
+					result = BindingsTools.createMinimalUnitaryChangesBinding(BindingsTools.transmitSuccessiveInvalidations(new ListBinding<Generic>() {
+						private final Observable invalidator = cache != null ? cache.getObservable(generic) : getObservable(generic);
+						{
+							bind(invalidator);
+							invalidate();
+						}
 
-					@Override
-					protected ObservableList<Generic> computeValue() {
-						return FXCollections.observableList(cache != null ? cache.getDependencies(generic).toList() : Differential.this.getDependencies(generic).toList());
-					}
-				}));
+						@Override
+						protected ObservableList<Generic> computeValue() {
+							return FXCollections.observableList(cache != null ? cache.getDependencies(generic).toList() : Differential.this.getDependencies(generic).toList());
+						}
+					}));
+					dependenciesAsOservableListCacheMap.put(generic, result);
+				}
+				return result;
 			}
 		};
 	}

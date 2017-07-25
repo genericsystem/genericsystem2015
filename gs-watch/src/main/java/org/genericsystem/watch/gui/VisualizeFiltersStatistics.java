@@ -1,5 +1,6 @@
 package org.genericsystem.watch.gui;
 
+import org.genericsystem.common.Root;
 import org.genericsystem.cv.comparator.ComputeTrainedScores;
 import org.genericsystem.cv.model.Doc;
 import org.genericsystem.cv.model.DocClass;
@@ -16,6 +17,7 @@ import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.annotations.DirectSelect;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
+import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.context.ContextAction;
 import org.genericsystem.reactor.gscomponents.AppHeader;
@@ -25,16 +27,20 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlH1;
 import org.genericsystem.reactor.gscomponents.InstancesTable;
 import org.genericsystem.reactor.gscomponents.RootTagImpl;
+import org.genericsystem.watch.VerticleDeployerFromWatchApp;
+import org.genericsystem.watch.gui.PageSwitcher.FILTERS_STATISTICS;
 import org.genericsystem.watch.gui.VisualizeFiltersStatistics.RunScriptButton;
 
+import io.vertx.core.Verticle;
+
 /**
- * The SetRealValues class can be used to provide accurate values for the text fields (zones).
  * 
- * These real values are stored in GS, and used by {@link ComputeTrainedScores} to compute the scores for each zone/filter pairs.
  * 
  * @author Pierrik Lassalas
  *
  */
+// TODO: redesign the interface (smaller, add foreach loops)
+@Switch(FILTERS_STATISTICS.class)
 @DependsOnModel({ Doc.class, DocClass.class, ZoneGeneric.class, ZoneText.class, ImgFilter.class, Score.class, MeanLevenshtein.class })
 @Style(name = "background-color", value = "#ffffff")
 @Children({ AppHeader.class, InstancesTable.class })
@@ -50,6 +56,11 @@ public class VisualizeFiltersStatistics extends RootTagImpl {
 		ApplicationServer.startSimpleGenericApp(mainArgs, VisualizeFiltersStatistics.class, "/gs-cv_model3");
 	}
 
+	@Override
+	public void init() {
+		createNewInitializedProperty(PageSwitcher.PAGE, c -> PageSwitcher.FILTERS_STATISTICS);
+	}
+
 	@SetText("Compute statistics")
 	@BindAction(COMPUTE_STATS.class)
 	public static class RunScriptButton extends HtmlButton {
@@ -57,11 +68,20 @@ public class VisualizeFiltersStatistics extends RootTagImpl {
 	}
 
 	public static class COMPUTE_STATS implements ContextAction {
+		// TODO: implement for each doc Class
 		@Override
 		public void accept(Context context, Tag tag) {
 			System.out.println("Computing scores...");
-			ComputeTrainedScores.compute(context.getGeneric().getRoot());
-			System.out.println("Done computing scores!");
+			Root root = context.getGeneric().getRoot();
+			Verticle worker = new WorkerVerticle() {
+				@Override
+				public void start() throws Exception {
+					ComputeTrainedScores.compute(root);
+					System.out.println("Done computing scores!");
+				}
+			};
+			VerticleDeployerFromWatchApp.deployWorkerVerticle(worker, "Failed to execute the task");
+
 		}
 	}
 

@@ -24,13 +24,11 @@ import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.StyleClass;
-import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.context.ContextAction;
 import org.genericsystem.reactor.context.ContextAction.CANCEL;
 import org.genericsystem.reactor.context.ContextAction.RESET_SELECTION;
 import org.genericsystem.reactor.context.ObservableContextSelector.SELECTION_SELECTOR;
 import org.genericsystem.reactor.context.ObservableListExtractor;
-import org.genericsystem.reactor.context.TagSwitcher;
 import org.genericsystem.reactor.context.TextBinding;
 import org.genericsystem.reactor.contextproperties.SelectionDefaults;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
@@ -101,27 +99,27 @@ public class EditDocumentZones extends ModalEditor {
 	}
 
 	@FlexDirectionStyle(FlexDirection.COLUMN)
-	@Children({ ZoneLabelInput.class, ZonesDetails.class })
+	@Children({ ZoneLabelInput.class/* , ZonesDetails.class */ }) // XXX
 	@ForEach(ZONE_SELECTOR.class)
 	public static class ZoneTextDiv extends FlexDiv {
 		// For each zone, create a div with label + inputText and create a div for the results for all filters
 	}
 
 	@FlexDirectionStyle(FlexDirection.ROW)
-	@Children({ ZoneLabelAdmin.class, ZoneLabelNormal.class, ZoneInput.class })
+	@Children({ /* ZoneLabelAdmin.class, */ ZoneLabelNormal.class, ZoneInput.class })
 	public static class ZoneLabelInput extends FlexDiv {
 
 	}
 
-	@Switch(TagSwitcher.ADMIN_MODE_ONLY.class)
-	@BindText(ZONE_LABEL.class)
-	@BindAction(MODAL_DISPLAY_FLEX_CUSTOM.class)
-	@Attribute(name = "name", value = "zone")
-	public static class ZoneLabelAdmin extends HtmlHyperLink {
-		// Define the zone label in admin mode
-	}
+	// @Switch(TagSwitcher.ADMIN_MODE_ONLY.class)
+	// @BindText(ZONE_LABEL.class)
+	// @BindAction(MODAL_DISPLAY_FLEX_CUSTOM.class)
+	// @Attribute(name = "name", value = "zone")
+	// public static class ZoneLabelAdmin extends HtmlHyperLink {
+	// // Define the zone label in admin mode
+	// }
 
-	@Switch(TagSwitcher.NORMAL_MODE_ONLY.class)
+	// @Switch(TagSwitcher.NORMAL_MODE_ONLY.class)
 	@BindText(ZONE_LABEL.class)
 	@Attribute(name = "name", value = "zone")
 	public static class ZoneLabelNormal extends HtmlLabel { // FlexDiv?
@@ -148,7 +146,7 @@ public class EditDocumentZones extends ModalEditor {
 			// return context.getGeneric().getMeta().setInstance(newValue, docInstance, zoneInstance, imgFilterInstance);
 			long start = System.nanoTime();
 			Generic updateValue = context.getGeneric().updateValue(newValue);
-			System.out.println("==> update: " + (System.nanoTime() - start) * 1_000_000 + "ms");
+			System.out.println("==> update: " + (System.nanoTime() - start) / 1_000_000 + "ms");
 			return updateValue;
 		}
 	}
@@ -188,7 +186,11 @@ public class EditDocumentZones extends ModalEditor {
 			Snapshot<ZoneTextInstance> zoneTextInstances = (Snapshot) currentDoc.getHolders(root.find(ZoneText.class));
 			if (zoneTextInstances == null)
 				return FXCollections.emptyObservableList();
-			return (ObservableList) zoneTextInstances.toObservableList().filtered(zt -> "reality".equals(zt.getImgFilter().getValue())).sorted((g1, g2) -> Integer.compare(g1.getZoneNum(), g2.getZoneNum()));
+			long start = System.nanoTime();
+			ObservableList ol = zoneTextInstances.toObservableList().filtered(zt -> "reality".equals(zt.getImgFilter().getValue())).sorted((g1, g2) -> Integer.compare(g1.getZoneNum(), g2.getZoneNum()));
+			long stop = System.nanoTime();
+			System.out.println("--------- zone selector: " + (stop - start) / 1_000_000 + "ms");
+			return ol;
 		}
 	}
 
