@@ -5,24 +5,30 @@ import java.nio.file.Paths;
 import org.genericsystem.common.Root;
 import org.genericsystem.cv.comparator.FillModelWithData;
 
+import com.sun.xml.internal.ws.api.pipe.Engine;
+
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.MessageConsumer;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 
+/**
+ * The AddImageToEngineVerticle receives a message from the event bus when an image was classified. After saving the document in Generic System, a message is sent to the {@link DezonerVerticle}. A reference to an {@link Engine} must be givent to be able to
+ * store the data in Generic System.
+ * 
+ * @author Pierrik Lassalas
+ */
 public class AddImageToEngineVerticle extends AbstractVerticle {
 
-	private static Logger log = LoggerFactory.getLogger(AddImageToEngineVerticle.class);
 	private Root engine;
 
 	public static void main(String[] args) {
-		VerticleDeployer.deployVerticle(new AddImageToEngineVerticle());
+		VerticleDeployer.deployVerticle(new AddImageToEngineVerticle(FillModelWithData.getEngine()));
 	}
 
-	public AddImageToEngineVerticle() {
-
-	}
-
+	/**
+	 * Default constructor. A reference to the engine must be provided.
+	 * 
+	 * @param engine - the engine used to store the data
+	 */
 	public AddImageToEngineVerticle(Root engine) {
 		this.engine = engine;
 	}

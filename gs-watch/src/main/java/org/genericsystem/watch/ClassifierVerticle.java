@@ -9,8 +9,14 @@ import org.opencv.core.Core;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.MessageConsumer;
 
+/**
+ * The ClassifierVerticle receives a message from the event bus when a new PNG image has been created. The image is classified, and a new file is created. Finally, a message is sent to the {@link AddImageToEngineVerticle}.
+ * 
+ * @author middleware
+ */
 public class ClassifierVerticle extends AbstractVerticle {
 
+	// Not necessary?
 	static {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 	}

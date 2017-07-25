@@ -10,6 +10,11 @@ import org.genericsystem.cv.PdfToPngConverter;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.MessageConsumer;
 
+/**
+ * The PdfsConverterVerticle receives a message from the event bus when a new PDF was added. The file is processed, and each page is converted to a PNG. Finally, a message is sent to the {@link ClassifierVerticle}.
+ * 
+ * @author middleware
+ */
 public class PdfsConverterVerticle extends AbstractVerticle {
 
 	public static void main(String[] args) {

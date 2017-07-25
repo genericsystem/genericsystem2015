@@ -26,6 +26,12 @@ import com.sun.mail.imap.IMAPFolder;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 
+/**
+ * The MailWatcherVerticle connects to an email account, and analyzes periodically the content of the inbox. When a new email is received, the pdf attachments are extracted and stored locally. A message is then sent to the event bus to the
+ * {@link PdfsConverterVerticle} to convert these files to PNG.
+ * 
+ * @author middleware
+ */
 public class MailWatcherVerticle extends AbstractVerticle {
 
 	// TODO: Store config in a config file.
@@ -36,7 +42,10 @@ public class MailWatcherVerticle extends AbstractVerticle {
 	private static final String password = "WatchTestMWF4";
 	private static final String pdfDir = "../gs-cv/pdf";
 
-	private static final Long PERIODC_DELAY = 5000l;
+	/**
+	 * Delay (in ms) for the periodic call to visit the inbox and process new messages.
+	 */
+	private static final Long PERIODIC_DELAY = 5000l;
 
 	public static void main(String[] args) {
 		VerticleDeployer.deployVerticle(new MailWatcherVerticle());
@@ -49,13 +58,18 @@ public class MailWatcherVerticle extends AbstractVerticle {
 			if (res.failed())
 				throw new IllegalStateException(res.cause());
 			else
-				vertx.setPeriodic(PERIODC_DELAY, handler -> {
+				vertx.setPeriodic(PERIODIC_DELAY, handler -> {
 					// System.out.println("Periodic call");
 					checkMail((IMAPFolder) res.result());
 				});
 		});
 	}
 
+	/**
+	 * Connect to the inbox asynchronously. If the connection succeeds, an {@link IMAPFolder} is sent.
+	 * 
+	 * @param future - the {@link Future} event
+	 */
 	private void connectToInbox(Future<IMAPFolder> future) {
 		Properties props = System.getProperties();
 		Session session = Session.getInstance(props, null);
@@ -72,14 +86,17 @@ public class MailWatcherVerticle extends AbstractVerticle {
 		future.complete(inbox);
 	}
 
+	/**
+	 * Periodically check for new emails arriving in the inbox.
+	 * 
+	 * @param inbox - the inbox
+	 */
 	private void checkMail(IMAPFolder inbox) {
 		// System.out.println(">>> mail watcher (check): " + Thread.currentThread().getName());
-
 		if (inbox == null)
 			return;
 		try {
 			inbox.open(Folder.READ_WRITE); // Folder.READ_WRITE to mark the emails as read.
-
 			int start = 1;
 			int end = inbox.getMessageCount();
 			// Process unseen messages.
@@ -91,7 +108,6 @@ public class MailWatcherVerticle extends AbstractVerticle {
 				start = end + 1;
 				end = inbox.getMessageCount();
 			}
-
 			// Listen for new messages.
 			inbox.addMessageCountListener(new MessageCountAdapter() {
 				@Override
@@ -107,8 +123,13 @@ public class MailWatcherVerticle extends AbstractVerticle {
 		}
 	}
 
+	/**
+	 * Process a message. Any pdf attachment is extracted in the folder specified in {@link #pdfDir} ({@value #pdfDir}), and a message is published to the event bus.
+	 * 
+	 * @param msg - the message to process
+	 */
 	private void processMessage(MimeMessage msg) {
-		System.out.println(">>> mail watcher (process): " + Thread.currentThread().getName());
+		// System.out.println(">>> mail watcher (process): " + Thread.currentThread().getName());
 		try {
 			MimeMessageParser parser = new MimeMessageParser(msg).parse();
 			System.out.println("> New email: " + parser.getSubject());
