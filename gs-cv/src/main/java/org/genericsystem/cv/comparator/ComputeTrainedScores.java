@@ -1,6 +1,5 @@
 package org.genericsystem.cv.comparator;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.genericsystem.common.Generic;
@@ -79,11 +78,9 @@ public class ComputeTrainedScores {
 		ImgFilterInstance realityInstance = imgFilter.getImgFilter("reality");
 
 		for (ZoneInstance zoneInstance : zoneInstances) {
-			log.info("=> Zone {}", zoneInstance);
-
-			List<Float> meanLevDistances = new ArrayList<>();
-			List<Float> probabilities = new ArrayList<>();
-
+			// log.info("=> Zone {}", zoneInstance);
+			// List<Float> meanLevDistances = new ArrayList<>();
+			// List<Float> probabilities = new ArrayList<>();
 			for (ImgFilterInstance imgFilterInstance : imgFilterInstances) {
 				int lev = 0; // contains the sum of all Levenshtein distances for a given zone
 				int count = 0; // contains the number of "perfect" matches
@@ -126,18 +123,16 @@ public class ComputeTrainedScores {
 					ScoreInstance scoreInstance = score.setScore(probability, zoneInstance, imgFilterInstance);
 					meanLevenshtein.setMeanLev(meanDistance, scoreInstance);
 					engine.getCurrentCache().flush();
-
-					meanLevDistances.add(meanDistance);
-					probabilities.add(probability);
+					// meanLevDistances.add(meanDistance);
+					// probabilities.add(probability);
 				} else {
 					log.error("An error has occured while processing the score computation of zone n°{} (class: {})", zoneInstance.getValue(), docType);
 				}
 			}
 			engine.getCurrentCache().flush();
-
-			for (int i = 0; i < imgFilterInstances.size(); i++) {
-				log.info("{}: {} (meanLev: {})", imgFilterInstances.get(i), probabilities.get(i), meanLevDistances.get(i));
-			}
+			// for (int i = 0; i < imgFilterInstances.size(); i++) {
+			// log.info("{}: {} (meanLev: {})", imgFilterInstances.get(i), probabilities.get(i), meanLevDistances.get(i));
+			// }
 		}
 
 	}
