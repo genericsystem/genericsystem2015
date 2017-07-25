@@ -12,8 +12,8 @@ import io.vertx.core.json.JsonObject;
 
 public class PdfConverterVerticle extends ActionVerticle {
 
-	public PdfConverterVerticle(String privateAddress, String privatePath, String ip, List<JsonObject> messages, List<JsonObject> tasks) {
-		super(privateAddress, privatePath, ip, messages, tasks);
+	public PdfConverterVerticle(String privateAddress, String privatePath, String ip) {
+		super(privateAddress, privatePath, ip);
 	}
 
 	public static final String ACTION = "pdfToPng";
@@ -24,21 +24,17 @@ public class PdfConverterVerticle extends ActionVerticle {
 	}
 
 	@Override
-	protected void handle(Future<Object> future, String fileName, JsonObject task) {
-		File file = new File(getPrivatePath() + fileName);
+	protected void handle(Future<Object> future, JsonObject task) {
+		File file = new File(task.getString(DistributedVerticle.FILENAME));
 		List<Path> createdPngs = PdfToPngConverter.convertPdfToImages(file, new File("../gs-cv/png"));
 		future.complete(createdPngs);
 	}
 
 	@Override
-	protected void handleResult(AsyncResult<Object> res, String fileName) {
+	protected void handleResult(AsyncResult<Object> res, JsonObject task) {
 		if (res.succeeded()) {
-			for (Path newPng : (List<Path>) res.result()) {
-				long id = System.currentTimeMillis();
-				getMessages().add(new JsonObject().put(DistributedVerticle.ID, id).put("task", new JsonObject().put(DistributedVerticle.ID, id)
-						.put(DistributedVerticle.FILENAME, newPng.toString()).put(DistributedVerticle.IP, getIp()).put(DistributedVerticle.TYPE, ClassifierVerticle.ACTION)));
-				System.out.println("New PNG file : " + newPng);
-			}
+			for (Path newPng : (List<Path>) res.result())
+				addTask(newPng.toString(), getIp(), ClassifierVerticle.ACTION);
 		}
 	}
 }
