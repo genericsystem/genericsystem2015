@@ -23,12 +23,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The ComputeTrainedScores class computes the {@link Score} and the {@link MeanLevenshtein} for each zone and each filter.
- * 
- * The data is retrieved from GS, and stored in GS.
+ * The ComputeTrainedScores class computes the {@link Score} and the {@link MeanLevenshtein} for each zone and each filter. The data is retrieved from GS, and stored in GS.
  * 
  * @author Pierrik Lassalas
- *
  */
 public class ComputeTrainedScores {
 
@@ -45,6 +42,11 @@ public class ComputeTrainedScores {
 
 	public static void compute(Root engine) {
 		final String docType = "id-fr-front";
+		final boolean useStrict = false;
+		compute(engine, docType, useStrict);
+	}
+
+	public static void compute(Root engine, String docType) {
 		final boolean useStrict = false;
 		compute(engine, docType, useStrict);
 	}
@@ -79,8 +81,8 @@ public class ComputeTrainedScores {
 		for (ZoneInstance zoneInstance : zoneInstances) {
 			log.info("=> Zone {}", zoneInstance);
 
-			List<Float> meanLevDistances = new ArrayList<Float>();
-			List<Float> probabilities = new ArrayList<Float>();
+			List<Float> meanLevDistances = new ArrayList<>();
+			List<Float> probabilities = new ArrayList<>();
 
 			for (ImgFilterInstance imgFilterInstance : imgFilterInstances) {
 				int lev = 0; // contains the sum of all Levenshtein distances for a given zone

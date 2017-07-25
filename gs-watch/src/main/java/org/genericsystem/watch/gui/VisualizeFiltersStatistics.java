@@ -62,26 +62,26 @@ public class VisualizeFiltersStatistics extends RootTagImpl {
 	}
 
 	@SetText("Compute statistics")
-	@BindAction(COMPUTE_STATS.class)
+	@BindAction({ COMPUTE_STATS.class })
 	public static class RunScriptButton extends HtmlButton {
 
 	}
 
 	public static class COMPUTE_STATS implements ContextAction {
-		// TODO: implement for each doc Class
 		@Override
 		public void accept(Context context, Tag tag) {
 			System.out.println("Computing scores...");
-			Root root = context.getGeneric().getRoot();
+			DocClassInstance docClassInstance = (DocClassInstance) context.getGeneric();
+			Root root = docClassInstance.getRoot();
+			Arrays.asList(context.getGenerics()).forEach(g -> System.out.println(g.info()));
 			Verticle worker = new WorkerVerticle() {
 				@Override
 				public void start() throws Exception {
-					ComputeTrainedScores.compute(root);
+					ComputeTrainedScores.compute(root, docClassInstance.getValue().toString());
 					System.out.println("Done computing scores!");
 				}
 			};
 			VerticleDeployerFromWatchApp.deployWorkerVerticle(worker, "Failed to execute the task");
-
 		}
 	}
 
