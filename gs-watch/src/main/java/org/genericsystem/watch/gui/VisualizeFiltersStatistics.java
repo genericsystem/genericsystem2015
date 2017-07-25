@@ -1,5 +1,6 @@
 package org.genericsystem.watch.gui;
 
+import org.genericsystem.common.Root;
 import org.genericsystem.cv.comparator.ComputeTrainedScores;
 import org.genericsystem.cv.model.Doc;
 import org.genericsystem.cv.model.DocClass;
@@ -16,6 +17,7 @@ import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.annotations.DirectSelect;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
+import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.context.ContextAction;
 import org.genericsystem.reactor.gscomponents.AppHeader;

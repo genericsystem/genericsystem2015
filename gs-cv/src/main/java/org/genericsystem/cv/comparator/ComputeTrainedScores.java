@@ -19,13 +19,11 @@ import org.genericsystem.cv.model.ZoneGeneric.ZoneInstance;
 import org.genericsystem.cv.model.ZoneText;
 import org.genericsystem.cv.model.ZoneText.ZoneTextInstance;
 import org.genericsystem.kernel.Engine;
-import org.opencv.core.Core;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The ComputeTrainedScores class computes the {@link Score} and the
- * {@link MeanLevenshtein} for each zone and each filter.
+ * The ComputeTrainedScores class computes the {@link Score} and the {@link MeanLevenshtein} for each zone and each filter.
  * 
  * The data is retrieved from GS, and stored in GS.
  * 
@@ -34,12 +32,11 @@ import org.slf4j.LoggerFactory;
  */
 public class ComputeTrainedScores {
 
-	private final static String gsPath = System.getenv("HOME") + "/genericsystem/gs-cv_model3/";
-	private static Logger log = LoggerFactory.getLogger(ComputeTrainedScores.class);
+	private static final Logger log = LoggerFactory.getLogger(ComputeTrainedScores.class);
+	private static final String gsPath = System.getenv("HOME") + "/genericsystem/gs-cv_model3/";
 
 	public static void main(String[] mainArgs) {
-		final Engine engine = new Engine(gsPath, Doc.class, ImgFilter.class, ZoneGeneric.class, ZoneText.class,
-				Score.class, MeanLevenshtein.class);
+		final Engine engine = new Engine(gsPath, Doc.class, ImgFilter.class, ZoneGeneric.class, ZoneText.class, Score.class, MeanLevenshtein.class);
 
 		engine.newCache().start();
 		compute(engine);
