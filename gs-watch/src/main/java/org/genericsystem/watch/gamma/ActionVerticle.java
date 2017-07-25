@@ -1,7 +1,5 @@
 package org.genericsystem.watch.gamma;
 
-import java.util.List;
-
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -12,15 +10,11 @@ public abstract class ActionVerticle extends AbstractVerticle {
 	private final String privateAddress;
 	private final String privatePath;
 	private final String ip;
-	private final List<JsonObject> messages;
-	private final List<JsonObject> tasks;
 
-	public ActionVerticle(String privateAddress, String privatePath, String ip, List<JsonObject> messages, List<JsonObject> tasks) {
+	public ActionVerticle(String privateAddress, String privatePath, String ip) {
 		this.privateAddress = privateAddress;
 		this.privatePath = privatePath;
 		this.ip = ip;
-		this.messages = messages;
-		this.tasks = tasks;
 	}
 
 	public String getPrivateAddress() {
@@ -35,14 +29,6 @@ public abstract class ActionVerticle extends AbstractVerticle {
 		return ip;
 	}
 
-	public List<JsonObject> getMessages() {
-		return messages;
-	}
-
-	public List<JsonObject> getTasks() {
-		return tasks;
-	}
-
 	public String getAction() {
 		throw new IllegalStateException("The getAction method must be overridden by extending classes.");
 	}
@@ -50,21 +36,32 @@ public abstract class ActionVerticle extends AbstractVerticle {
 	@Override
 	public void start() throws Exception {
 		vertx.eventBus().consumer(privateAddress + ":" + getAction(), handler -> {
-			System.out.println("Receive from : " + (String) handler.body() + " on : " + privateAddress + " " + Thread.currentThread());
-			JsonObject task = new JsonObject((String) handler.body()).getJsonObject("task");
-			tasks.add(task);
+			System.out.println("Receive from : " + handler.body() + " on : " + privateAddress + " " + Thread.currentThread());
+			JsonObject task = new JsonObject((String) handler.body());
 			handler.reply(DistributedVerticle.OK);
-			String fileName = task.getString(DistributedVerticle.FILENAME);
-			vertx.executeBlocking(future -> handle(future, fileName, task), res -> {
-				handleResult(res, fileName);
-				System.out.println("Blocking task callback on thread : " + Thread.currentThread());
-				System.out.println("Task " + task.encodePrettily() + " is done, removing " + Thread.currentThread());
-				tasks.remove(task);			
+			vertx.executeBlocking(future -> handle(future, task), res -> {
+				handleResult(res, task);
+				if (res.succeeded())
+					task.put(Dispatcher.STATE, Dispatcher.FINISHED);
+				else {
+					System.out.println("Task aborted, cause: " + res.cause().getMessage());
+					task.put(Dispatcher.STATE, Dispatcher.ABORTED);
+				}
+				vertx.eventBus().send(Dispatcher.ADDRESS + ":add", task.encodePrettily());
 			});
 		});
 	}
 
-	protected abstract void handle(Future<Object> future, String fileName, JsonObject task);
+	protected abstract void handle(Future<Object> future, JsonObject task);
 
-	protected abstract void handleResult(AsyncResult<Object> res, String fileName);
+	protected abstract void handleResult(AsyncResult<Object> res, JsonObject task);
+
+
+	public void addTask(String fileName, String ip, String type) {
+		JsonObject task = new JsonObject().put(Dispatcher.STATE, Dispatcher.TODO)
+				.put(DistributedVerticle.IP, ip)
+				.put(DistributedVerticle.FILENAME, fileName)
+				.put(DistributedVerticle.TYPE, type);
+		vertx.eventBus().publish(Dispatcher.ADDRESS + ":add", task.encodePrettily());
+	}
 }
