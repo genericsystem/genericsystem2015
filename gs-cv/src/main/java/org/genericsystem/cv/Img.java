@@ -883,22 +883,20 @@ public class Img implements AutoCloseable {
 	}
 
 	public Layout buildLayout() {
-		Img adaptivSplit = bgr2Gray().adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 17, 15);
-		return new Layout(0, 1, 0, 1).recursivSplit(new Size(0.036, 0.009), 3, 0.008f, this, adaptivSplit);
+		return buildLayout(new Size(0.036, 0.008), 7, 0.008f);
 	}
 
-	public Layout buildLayout(Size morph, int level, float concentration, Img img, Img binary) {
-		Layout root = new Layout(0, 1, 0, 1).tighten(binary, concentration);
-		return root.recursivSplit(morph, level, concentration, root.getRoi(img), root.getRoi(binary));
+	public Layout buildLayout(Size morph, int level, float concentration) {
+		Img binary = bgr2Gray().adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 17, 15);
+		binary = binary.cleanTables();
+		Layout root = new Layout(null, 0, 1, 0, 1).tighten(binary, concentration);
+		return root.recursivSplit(morph, level, concentration, root.getRoi(this), root.getRoi(binary));
 	}
 
 	public Img cleanTables() {
-
-		Img gray = this.bgr2Gray().adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 17, 15);
-		Img hImg = gray.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(20, 1));
-		Img vImg = gray.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(1, 20));
-
-		return new Img(gray.bitwise_xor(hImg.bitwise_and(vImg).bitwise_not()).getSrc());
+		Img hImg = this.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(20, 1));
+		Img vImg = this.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(1, 20));
+		return new Img(this.bitwise_xor(hImg.bitwise_and(vImg).bitwise_not()).getSrc());
 	}
 
 }

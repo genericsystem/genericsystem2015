@@ -8,7 +8,7 @@ import java.util.function.Function;
 
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.Ocr;
-import org.genericsystem.cv.Zone;
+import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
@@ -27,7 +27,8 @@ public class Layout {
 	private List<Layout> children = new ArrayList<>();
 	private Layout parent = null;
 
-	public Layout(double x1, double x2, double y1, double y2) {
+	public Layout(Layout parent, double x1, double x2, double y1, double y2) {
+		this.parent = parent;
 		this.x1 = x1;
 		this.x2 = x2;
 		this.y1 = y1;
@@ -38,28 +39,38 @@ public class Layout {
 		return new Img(img, this);
 	}
 
-	public Rect getRect(Img img) {
-		if (getParent() != null) {
-			double X1 = getParent().getX1() + x1 * (getParent().getX2() - getParent().getX1());
-			double X2 = getParent().getX1() + x2 * (getParent().getX2() - getParent().getX1());
-			double Y1 = getParent().getY1() + y1 * (getParent().getY2() - getParent().getY1());
-			double Y2 = getParent().getY1() + y2 * (getParent().getY2() - getParent().getY1());
-			return getParent().getRect(X1, X2, Y1, Y2, img);
-		} else {
-			return new Rect(new Point(getX1() * img.width(), getX2() * img.height()), new Point(getY1() * img.width(), getY2() * img.height()));
-		}
+	public Rect getRect(Img imgRoot) {
+		Rect parentRect = getParent() != null ? getParent().getRect(imgRoot) : new Rect(0, 0, imgRoot.width(), imgRoot.height());
+		return new Rect(new Point(parentRect.tl().x + parentRect.width * getX1(), parentRect.tl().y + parentRect.height * getY1()), new Point(parentRect.tl().x + parentRect.width * getX2(), parentRect.tl().y + parentRect.height * getY2()));
 	}
 
-	private Rect getRect(double x12, double x22, double y12, double y22, Img img) {
-		while (getParent() != null) {
-			double X1 = getParent().getX1() + x12 * (getParent().getX2() - getParent().getX1());
-			double X2 = getParent().getX1() + x22 * (getParent().getX2() - getParent().getX1());
-			double Y1 = getParent().getY1() + y12 * (getParent().getY2() - getParent().getY1());
-			double Y2 = getParent().getY1() + y22 * (getParent().getY2() - getParent().getY1());
-			return getParent().getRect(X1, X2, Y1, Y2, img);
-		}
-		return new Rect(new Point(x12 * img.width(), y12 * img.height()), new Point(x22 * img.width(), y22 * img.height()));
+	public Rect getLargeRect(Img imgRoot, int delta) {
+		Rect rect = getRect(imgRoot);
+		return new Rect(new Point(rect.tl().x - delta, rect.tl().y - delta), new Point(rect.br().x + delta, rect.br().y + delta));
 	}
+
+	// public Rect getRect(Img img) {
+	// if (getParent() != null) {
+	// double X1 = getParent().getX1() + x1 * (getParent().getX2() - getParent().getX1());
+	// double X2 = getParent().getX1() + x2 * (getParent().getX2() - getParent().getX1());
+	// double Y1 = getParent().getY1() + y1 * (getParent().getY2() - getParent().getY1());
+	// double Y2 = getParent().getY1() + y2 * (getParent().getY2() - getParent().getY1());
+	// return getParent().getRect(X1, X2, Y1, Y2, img);
+	// } else {
+	// return new Rect(new Point(getX1() * img.width(), getX2() * img.height()), new Point(getY1() * img.width(), getY2() * img.height()));
+	// }
+	// }
+	//
+	// private Rect getRect(double x12, double x22, double y12, double y22, Img img) {
+	// while (getParent() != null) {
+	// double X1 = getParent().getX1() + x12 * (getParent().getX2() - getParent().getX1());
+	// double X2 = getParent().getX1() + x22 * (getParent().getX2() - getParent().getX1());
+	// double Y1 = getParent().getY1() + y12 * (getParent().getY2() - getParent().getY1());
+	// double Y2 = getParent().getY1() + y22 * (getParent().getY2() - getParent().getY1());
+	// return getParent().getRect(X1, X2, Y1, Y2, img);
+	// }
+	// return new Rect(new Point(x12 * img.width(), y12 * img.height()), new Point(x22 * img.width(), y22 * img.height()));
+	// }
 
 	// public Img getEnlargedRoi(Img img, int delta) {
 	//
@@ -96,17 +107,10 @@ public class Layout {
 		return this;
 	}
 
-	public void ocrTree(Img img, Img rootImg) {
-		traverseOCR(img, (roi, layout) -> {
-			if (layout.getChildren().isEmpty()) {
-				Rect rect = layout.getRect(rootImg);
-				rect.height++;
-				rect.width++;
-				Zone z = new Zone(0, rect);
-				Img sub = z.getRoi(rootImg);
-				layout.setLabel(Ocr.doWork(sub.getSrc()));
-				// layout.setLabel(Ocr.doWork(roi.getSrc()));
-			}
+	public void ocrTree(Img rootImg, int delta) {
+		traverse(rootImg, (root, layout) -> {
+			if (layout.getChildren().isEmpty())
+				layout.setLabel(Ocr.doWork(new Mat(rootImg.getSrc(), layout.getRect(rootImg))));
 		});
 	}
 
@@ -238,9 +242,9 @@ public class Layout {
 		// System.out.println("x " + Arrays.toString(x) + " y " + Arrays.toString(y));
 
 		if (x[0] <= x[1] && y[0] <= y[1]) {
-			return new Layout(getX1() + x[0] * (getX2() - getX1()), getX1() + x[1] * (getX2() - getX1()), getY1() + y[0] * (getY2() - getY1()), getY1() + y[1] * (getY2() - getY1()));
+			return new Layout(this.getParent(), getX1() + x[0] * (getX2() - getX1()), getX1() + x[1] * (getX2() - getX1()), getY1() + y[0] * (getY2() - getY1()), getY1() + y[1] * (getY2() - getY1()));
 		} else {
-			return new Layout(getX1(), getX2(), getY1(), getY2());
+			return new Layout(this.getParent(), getX1(), getX2(), getY1(), getY2());
 		}
 
 	}
@@ -255,7 +259,7 @@ public class Layout {
 		return new double[] { Integer.valueOf(start).doubleValue() / hist.size(), Integer.valueOf(end + 1).doubleValue() / hist.size() };
 	}
 
-	public static List<Layout> split(Size morph, float concentration, Img binary) {
+	public List<Layout> split(Size morph, float concentration, Img binary) {
 		List<Float> histoVertical = new ArrayList<>();
 		List<Float> histoHorizontal = new ArrayList<>();
 
@@ -312,7 +316,7 @@ public class Layout {
 		return closed;
 	}
 
-	private static List<Layout> extractZones(boolean[] resultV, boolean[] resultH, Img binary, float concentration) {
+	private List<Layout> extractZones(boolean[] resultV, boolean[] resultH, Img binary, float concentration) {
 
 		List<Layout> shardsV = getShards(resultV, true);
 		List<Layout> shardsH = getShards(resultH, false);
@@ -321,7 +325,7 @@ public class Layout {
 		List<Layout> shards = new ArrayList<>();
 		for (Layout shardv : shardsV)
 			for (Layout shardh : shardsH) {
-				Layout target = new Layout(shardh.x1, shardh.x2, shardv.y1, shardv.y2);
+				Layout target = new Layout(this, shardh.x1, shardh.x2, shardv.y1, shardv.y2);
 				Img roi = target.getRoi(binary);
 				// System.out.println("roi : rows :" + roi.rows() + " , cols :" + roi.cols());
 				if (roi.rows() != 0 && roi.cols() != 0)
@@ -330,7 +334,7 @@ public class Layout {
 		return shards;
 	}
 
-	private static List<Layout> getShards(boolean[] result, boolean vertical) {
+	private List<Layout> getShards(boolean[] result, boolean vertical) {
 		List<Layout> shards = new ArrayList<>();
 		Integer start = result[0] ? 0 : null;
 		assert result.length >= 1;
@@ -338,13 +342,13 @@ public class Layout {
 			if (!result[i] && result[i + 1])
 				start = i + 1;
 			else if (result[i] && !result[i + 1]) {
-				shards.add(vertical ? new Layout(0, 1, Integer.valueOf(start).doubleValue() / result.length, (Integer.valueOf(i).doubleValue() + 1) / result.length)
-						: new Layout(Integer.valueOf(start).doubleValue() / result.length, (Integer.valueOf(i).doubleValue() + 1) / result.length, 0, 1));
+				shards.add(vertical ? new Layout(this, 0, 1, Integer.valueOf(start).doubleValue() / result.length, (Integer.valueOf(i).doubleValue() + 1) / result.length)
+						: new Layout(this, Integer.valueOf(start).doubleValue() / result.length, (Integer.valueOf(i).doubleValue() + 1) / result.length, 0, 1));
 				start = null;
 			}
 		if (result[result.length - 1]) {
-			shards.add(vertical ? new Layout(0, 1, Integer.valueOf(start).doubleValue() / result.length, Integer.valueOf(result.length).doubleValue() / result.length)
-					: new Layout(Integer.valueOf(start).doubleValue() / result.length, Integer.valueOf(result.length).doubleValue() / result.length, 0, 1));
+			shards.add(vertical ? new Layout(this, 0, 1, Integer.valueOf(start).doubleValue() / result.length, Integer.valueOf(result.length).doubleValue() / result.length)
+					: new Layout(this, Integer.valueOf(start).doubleValue() / result.length, Integer.valueOf(result.length).doubleValue() / result.length, 0, 1));
 			start = null;
 		}
 		return shards;
