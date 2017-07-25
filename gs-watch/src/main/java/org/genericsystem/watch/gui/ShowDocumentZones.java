@@ -1,5 +1,6 @@
 package org.genericsystem.watch.gui;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
@@ -136,10 +137,10 @@ public class ShowDocumentZones extends ModalEditor {
 	}
 
 	@Children(HtmlLabel.class)
-	@BindText
+	@BindText(ZONE_TEXT.class)
 	@StyleClass("input-like")
 	public static class ZoneField extends FlexDiv {
-		// Define the inputText
+		// Define the div containing the OCR text
 	}
 
 	@BindText(LAST_UPDATE_LABEL.class)
@@ -152,8 +153,6 @@ public class ShowDocumentZones extends ModalEditor {
 	}
 
 	public static class ZONE_SELECTOR implements ObservableListExtractor {
-		// TODO: need to escape special HTML characters
-
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		@Override
 		public ObservableList<Generic> apply(Generic[] generics) {
@@ -171,6 +170,13 @@ public class ShowDocumentZones extends ModalEditor {
 		@Override
 		public ObservableValue<String> apply(Context context, Tag tag) {
 			return new SimpleStringProperty("Zone " + ((ZoneTextInstance) context.getGeneric()).getZone());
+		}
+	}
+
+	public static class ZONE_TEXT implements TextBinding {
+		@Override
+		public ObservableValue<String> apply(Context context, Tag tag) {
+			return new SimpleStringProperty(StringEscapeUtils.escapeHtml4(context.getGeneric().getValue().toString()));
 		}
 	}
 
