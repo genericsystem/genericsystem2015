@@ -1,5 +1,7 @@
 package org.genericsystem.watch;
 
+import org.genericsystem.cv.comparator.FillModelWithData;
+
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
@@ -45,7 +47,7 @@ public class VerticleDeployer extends AbstractVerticle {
 		vertx.deployVerticle(new PdfsConverterVerticle());
 		vertx.deployVerticle(new ClassifierVerticle());
 		vertx.deployVerticle(new DezonerVerticle());
-		vertx.deployVerticle(new OcrVerticle());
+		vertx.deployVerticle(new OcrVerticle(FillModelWithData.getEngine()));
 		startFuture.complete();
 	}
 }
