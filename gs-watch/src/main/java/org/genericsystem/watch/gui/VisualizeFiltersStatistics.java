@@ -27,16 +27,20 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlH1;
 import org.genericsystem.reactor.gscomponents.InstancesTable;
 import org.genericsystem.reactor.gscomponents.RootTagImpl;
+import org.genericsystem.watch.VerticleDeployerFromWatchApp;
+import org.genericsystem.watch.gui.PageSwitcher.FILTERS_STATISTICS;
 import org.genericsystem.watch.gui.VisualizeFiltersStatistics.RunScriptButton;
 
+import io.vertx.core.Verticle;
+
 /**
- * The SetRealValues class can be used to provide accurate values for the text fields (zones).
  * 
- * These real values are stored in GS, and used by {@link ComputeTrainedScores} to compute the scores for each zone/filter pairs.
  * 
  * @author Pierrik Lassalas
  *
  */
+// TODO: redesign the interface (smaller, add foreach loops)
+@Switch(FILTERS_STATISTICS.class)
 @DependsOnModel({ Doc.class, DocClass.class, ZoneGeneric.class, ZoneText.class, ImgFilter.class, Score.class, MeanLevenshtein.class })
 @Style(name = "background-color", value = "#ffffff")
 @Children({ AppHeader.class, InstancesTable.class })
@@ -50,6 +54,11 @@ public class VisualizeFiltersStatistics extends RootTagImpl {
 
 	public static void main(String[] mainArgs) {
 		ApplicationServer.startSimpleGenericApp(mainArgs, VisualizeFiltersStatistics.class, "/gs-cv_model3");
+	}
+
+	@Override
+	public void init() {
+		createNewInitializedProperty(PageSwitcher.PAGE, c -> PageSwitcher.FILTERS_STATISTICS);
 	}
 
 	@SetText("Compute statistics")

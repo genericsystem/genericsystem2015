@@ -72,6 +72,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
+@Switch(HOME_PAGE.class)
 @DependsOnModel({ Doc.class, RefreshTimestamp.class, DocTimestamp.class, DocFilename.class, DocClass.class, ZoneGeneric.class, ZoneText.class, ZoneTimestamp.class, ImgFilter.class, LevDistance.class, MeanLevenshtein.class, Score.class })
 @Children({ EditDocumentZones.class, AppHeader.class, FlexDiv.class/* , Monitor.class */ })
 @Children(path = FlexDiv.class, pos = 2, value = { HeaderRow.class, DocClassDiv.class })
@@ -94,6 +95,11 @@ public class WatchApp extends RootTagImpl {
 		// Root root = server.getRoots().get(System.getenv("HOME") + "/genericsystem/" + gsPath);
 		// VerticleDeployerFromWatchApp deployer = new VerticleDeployerFromWatchApp(root);
 		// deployer.doDeploy();
+	}
+
+	@Override
+	public void init() {
+		createNewInitializedProperty(PageSwitcher.PAGE, c -> PageSwitcher.HOME_PAGE);
 	}
 
 	@Children(FlexDiv.class)
