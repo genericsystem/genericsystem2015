@@ -41,7 +41,6 @@ import org.genericsystem.watch.gui.ShowDocumentZones.TextDiv;
 
 import io.vertx.core.Verticle;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -86,9 +85,7 @@ public class ShowDocumentZones extends ModalEditor {
 			Root root = context.getGeneric().getRoot();
 			DocInstance docInstance = (DocInstance) context.getGeneric();
 			String docType = docInstance.getDocClass().getValue().toString();
-
-			System.out.println("Current thread (refresh): " + Thread.currentThread().getName());
-
+			// System.out.println("Current thread (refresh): " + Thread.currentThread().getName());
 			Verticle worker = new WorkerVerticle(root) {
 				@Override
 				public void start() throws Exception {
@@ -99,8 +96,6 @@ public class ShowDocumentZones extends ModalEditor {
 				}
 			};
 			VerticleDeployerFromWatchApp.deployWorkerVerticle(worker, "Failed to execute the task");
-
-			// FIXME: bug that prevent the text from being updated after the refresh (because the worker is done by an external verticle)
 		}
 	}
 
@@ -185,14 +180,10 @@ public class ShowDocumentZones extends ModalEditor {
 			DocInstance currentDoc = (DocInstance) context.getGeneric();
 			Root root = currentDoc.getRoot();
 			RefreshTimestamp refreshTimestamp = root.find(RefreshTimestamp.class);
-			RefreshTimestampInstance instance = refreshTimestamp.getRefreshTimestamp(currentDoc);
-			if (instance == null)
-				return new SimpleStringProperty("Last update: none");
-			SimpleObjectProperty<Generic> timeStamp = new SimpleObjectProperty<>(instance);
 			return Bindings.createStringBinding(() -> {
-				System.out.println("binding called?");
-				return timeStamp == null ? "Last update: none" : "Last update: " + ModelTools.formatDate((Long) timeStamp.get().getValue());
-			}, timeStamp);
+				RefreshTimestampInstance timeStamp = refreshTimestamp.getRefreshTimestamp(currentDoc);
+				return timeStamp == null ? "Last update: none" : "Last update: " + ModelTools.formatDate((Long) timeStamp.getValue());
+			}, refreshTimestamp.getInstances().toObservableList());
 		}
 	}
 
