@@ -197,7 +197,7 @@ public class Layout {
 
 		// System.out.println("x " + Arrays.toString(x) + " y " + Arrays.toString(y));
 
-		if (x[0] <= x[1] && y[0] <= y[1]) {
+		if (x[0] <= x[1] || y[0] <= y[1]) {
 			return new Layout(this.getParent(), getX1() + x[0] * (getX2() - getX1()), getX1() + x[1] * (getX2() - getX1()), getY1() + y[0] * (getY2() - getY1()), getY1() + y[1] * (getY2() - getY1()));
 		} else {
 			return new Layout(this.getParent(), getX1(), getX2(), getY1(), getY2());
@@ -315,13 +315,13 @@ public class Layout {
 		// System.out.println("Layout : " + this);
 		assert img.size().equals(binary.size());
 		if (level < 0) {
-			Imgproc.rectangle(img.getSrc(), new Point(0, 0), new Point(img.width(), img.height()), new Scalar(255, 0, 0), -1);
+			// Imgproc.rectangle(img.getSrc(), new Point(0, 0), new Point(img.width(), img.height()), new Scalar(255, 0, 0), -1);
 			return this;
 		}
 		List<Layout> shards = split(morph, concentration, binary);
 		shards.removeIf(shard -> ((shard.getY2() - shard.getY1()) * img.size().height) < 4 || ((shard.getX2() - shard.getX1()) * img.size().width) < 4);
 		if (shards.isEmpty()) {
-			Imgproc.rectangle(img.getSrc(), new Point(0, 0), new Point(img.width(), img.height()), new Scalar(0, 0, 255), -1);
+			// Imgproc.rectangle(img.getSrc(), new Point(0, 0), new Point(img.width(), img.height()), new Scalar(0, 0, 255), -1);
 			return this;
 		}
 		if (shards.size() == 1) {
