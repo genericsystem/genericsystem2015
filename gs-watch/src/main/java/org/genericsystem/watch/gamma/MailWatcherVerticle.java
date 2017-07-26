@@ -99,7 +99,7 @@ public class MailWatcherVerticle extends AbstractVerticle {
 					JsonObject task = new JsonObject().put(Dispatcher.STATE, Dispatcher.TODO)
 							.put(DistributedVerticle.IP, LocalNet.getIpAddress())
 							.put(DistributedVerticle.FILENAME, newFile.toString().replaceFirst(DistributedVerticle.BASE_PATH, ""))
-							.put(DistributedVerticle.TYPE, DownloadVerticle.ACTION);
+							.put(DistributedVerticle.TYPE, PdfConverterVerticle.ACTION);
 					vertx.eventBus().publish(Dispatcher.ADDRESS + ":add", task.encodePrettily());
 				}
 			}

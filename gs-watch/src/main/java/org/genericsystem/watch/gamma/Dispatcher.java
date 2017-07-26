@@ -87,7 +87,7 @@ public class Dispatcher extends AbstractVerticle {
 							vertx.eventBus().send(robin + ":" + json.getString(DistributedVerticle.TYPE), json.encodePrettily(), TIMEOUT, reply -> {
 								if (reply.failed()) {
 									roundRobin.remove(robin);
-									throw new IllegalStateException(reply.cause());
+									// throw new IllegalStateException(reply.cause());
 								} else if (OK.equals(reply.result().body()))
 									cache.safeConsum(unused_ -> task.remove());
 							});

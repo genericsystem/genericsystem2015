@@ -38,7 +38,6 @@ public class DistributedVerticle extends AbstractVerticle {
 
 	@Override
 	public void start() throws Exception {
-		vertx.deployVerticle(new DownloadVerticle(PRIVATE_ADDRESS, ip));
 		vertx.deployVerticle(new PdfConverterVerticle(PRIVATE_ADDRESS, ip));
 		vertx.deployVerticle(new ClassifierVerticle(PRIVATE_ADDRESS, ip));
 		vertx.eventBus().consumer(PUBLIC_ADDRESS, message -> {

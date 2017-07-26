@@ -25,7 +25,7 @@ public class ClassifierVerticle extends ActionVerticle {
 
 	@Override
 	protected void handle(Future<Object> future, JsonObject task) {
-		File file = new File(task.getString(DistributedVerticle.FILENAME));
+		File file = new File(DistributedVerticle.BASE_PATH + task.getString(DistributedVerticle.FILENAME));
 		Path savedFile;
 		synchronized (ClassifierVerticle.class) {
 			savedFile = Classifier.classify(Paths.get("../gs-cv/classes/"), file.toPath());
