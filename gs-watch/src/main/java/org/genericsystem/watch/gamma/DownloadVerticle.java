@@ -15,8 +15,8 @@ public class DownloadVerticle extends ActionVerticle {
 
 	public static final String ACTION = "download";
 
-	public DownloadVerticle(String privateAddress, String privatePath, String ip) {
-		super(privateAddress, privatePath, ip);
+	public DownloadVerticle(String privateAddress, String ip) {
+		super(privateAddress, ip);
 	}
 
 	@Override
@@ -27,12 +27,12 @@ public class DownloadVerticle extends ActionVerticle {
 	@Override
 	protected void handle(Future<Object> future, JsonObject task) {
 		String fileName = task.getString(DistributedVerticle.FILENAME);
-		File file = new File(getPrivatePath() + fileName);
+		File file = new File(DistributedVerticle.BASE_PATH + fileName);
 		if (!file.exists())
-			download(future, fileName, task.getString(DistributedVerticle.IP));
+			download((Future) future, fileName, task.getString(DistributedVerticle.IP));
 		else {
 			System.out.println("File : " + fileName + " is already dowloaded");
-			future.complete();	
+			future.complete(fileName);	
 		}
 	}
 
@@ -44,11 +44,11 @@ public class DownloadVerticle extends ActionVerticle {
 		} else {
 			String fileName = task.getString(DistributedVerticle.FILENAME);
 			System.out.println("Download successful " + fileName);
-			addTask(getPrivatePath() + fileName, getIp(), PdfConverterVerticle.ACTION);
+			addTask(DistributedVerticle.BASE_PATH + fileName, getIp(), PdfConverterVerticle.ACTION);
 		}
 	}
 
-	private <T> void download(Future<T> future, String fileName, String ip) {
+	private <T> void download(Future<String> future, String fileName, String ip) {
 		BlockingQueue<byte[]> blockingQueue = new ArrayBlockingQueue<>(1);
 		HttpClient httpClient = vertx.createHttpClient().getNow(8084, ip, fileName, resp -> resp.bodyHandler(body -> {
 			try {
@@ -70,16 +70,16 @@ public class DownloadVerticle extends ActionVerticle {
 		FileOutputStream fos;
 
 		try {
-			File file = new File(getPrivatePath() + fileName);
-			new File(getPrivatePath() + fileName.substring(0, fileName.lastIndexOf("/"))).mkdirs();
+			File file = new File(DistributedVerticle.BASE_PATH + fileName);
+			new File(DistributedVerticle.BASE_PATH + fileName.substring(0, fileName.lastIndexOf("/"))).mkdirs();
 			fos = new FileOutputStream(file);
 			fos.write(bytes);
 			fos.close();
+			future.complete(file.toString());
 		} catch (IOException e) {
 			e.printStackTrace();
 			future.fail(e);
 			return;
 		}
-		future.complete();
 	}
 }

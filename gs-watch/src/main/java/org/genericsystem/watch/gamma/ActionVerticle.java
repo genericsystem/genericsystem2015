@@ -8,21 +8,15 @@ import io.vertx.core.json.JsonObject;
 public abstract class ActionVerticle extends AbstractVerticle {
 
 	private final String privateAddress;
-	private final String privatePath;
 	private final String ip;
 
-	public ActionVerticle(String privateAddress, String privatePath, String ip) {
+	public ActionVerticle(String privateAddress, String ip) {
 		this.privateAddress = privateAddress;
-		this.privatePath = privatePath;
 		this.ip = ip;
 	}
 
 	public String getPrivateAddress() {
 		return privateAddress;
-	}
-
-	public String getPrivatePath() {
-		return privatePath;
 	}
 
 	public String getIp() {

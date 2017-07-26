@@ -12,8 +12,8 @@ import io.vertx.core.json.JsonObject;
 
 public class ClassifierVerticle extends ActionVerticle {
 
-	public ClassifierVerticle(String privateAddress, String privatePath, String ip) {
-		super(privateAddress, privatePath, ip);
+	public ClassifierVerticle(String privateAddress, String ip) {
+		super(privateAddress, ip);
 	}
 
 	public static final String ACTION = "classification";
