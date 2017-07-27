@@ -2,7 +2,6 @@ package org.genericsystem.watch.gui.pages;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.genericsystem.common.Root;
-import org.genericsystem.cv.comparator.ComputeBestTextPerZone;
 import org.genericsystem.cv.model.Doc.DocInstance;
 import org.genericsystem.cv.model.Doc.RefreshTimestamp;
 import org.genericsystem.cv.model.Doc.RefreshTimestamp.RefreshTimestampInstance;
@@ -21,7 +20,6 @@ import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.StyleClass;
-import org.genericsystem.reactor.context.ContextAction;
 import org.genericsystem.reactor.context.ContextAction.CANCEL;
 import org.genericsystem.reactor.context.ContextAction.RESET_SELECTION;
 import org.genericsystem.reactor.context.ObservableContextSelector.SELECTION_SELECTOR;
@@ -33,12 +31,10 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlHyperLink;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlImg;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
 import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
-import org.genericsystem.watch.VerticleDeployerFromWatchApp;
 import org.genericsystem.watch.gui.pages.DocZonesShow.TextDiv;
+import org.genericsystem.watch.gui.utils.ContextActionCustom.REFRESH_BEST_TEXT;
 import org.genericsystem.watch.gui.utils.ObservableListExtractorCustom.ZONE_SELECTOR_BEST;
-import org.genericsystem.watch.gui.utils.WorkerVerticle;
 
-import io.vertx.core.Verticle;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
@@ -73,27 +69,6 @@ public class DocZonesShow extends ModalEditor {
 	@BindAction(value = REFRESH_BEST_TEXT.class)
 	public static class RefreshButton extends HtmlButton {
 		// Run the best text selection algorithm
-	}
-
-	public static class REFRESH_BEST_TEXT implements ContextAction {
-		@Override
-		public void accept(Context context, Tag tag) {
-			System.out.println("Refreshing best text...");
-			Root root = context.getGeneric().getRoot();
-			DocInstance docInstance = (DocInstance) context.getGeneric();
-			String docType = docInstance.getDocClass().getValue().toString();
-			// System.out.println("Current thread (refresh): " + Thread.currentThread().getName());
-			Verticle worker = new WorkerVerticle(root) {
-				@Override
-				public void start() throws Exception {
-					ComputeBestTextPerZone.computeOneFile(root, docInstance, docType);
-					docInstance.setRefreshTimestamp(ModelTools.getCurrentDate());
-					root.getCurrentCache().flush();
-					System.out.println("Done!");
-				}
-			};
-			VerticleDeployerFromWatchApp.deployWorkerVerticle(worker, "Failed to execute the task");
-		}
 	}
 
 	@SetText("Close")

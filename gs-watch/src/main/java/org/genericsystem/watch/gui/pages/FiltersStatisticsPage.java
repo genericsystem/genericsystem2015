@@ -1,14 +1,7 @@
 package org.genericsystem.watch.gui.pages;
 
-import java.util.Arrays;
-
-import org.genericsystem.common.Root;
-import org.genericsystem.cv.comparator.ComputeTrainedScores;
-import org.genericsystem.cv.model.DocClass.DocClassInstance;
 import org.genericsystem.cv.model.MeanLevenshtein;
 import org.genericsystem.cv.model.Score;
-import org.genericsystem.reactor.Context;
-import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
@@ -18,7 +11,6 @@ import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.annotations.Switch;
-import org.genericsystem.reactor.context.ContextAction;
 import org.genericsystem.reactor.gscomponents.AppHeader;
 import org.genericsystem.reactor.gscomponents.AppHeader.AppTitleDiv;
 import org.genericsystem.reactor.gscomponents.AppHeader.Logo;
@@ -26,15 +18,13 @@ import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.FlexDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlH1;
-import org.genericsystem.watch.VerticleDeployerFromWatchApp;
 import org.genericsystem.watch.gui.pages.FiltersStatisticsPage.DocClassStatisticsDiv;
 import org.genericsystem.watch.gui.pages.FiltersStatisticsPage.GeneralButtonsDiv;
+import org.genericsystem.watch.gui.utils.ContextActionCustom.CALL_HOME_PAGE;
+import org.genericsystem.watch.gui.utils.ContextActionCustom.COMPUTE_STATS;
+import org.genericsystem.watch.gui.utils.ContextActionCustom.COMPUTE_STATS_STRICT;
 import org.genericsystem.watch.gui.utils.ObservableListExtractorCustom.DOC_CLASS_SELECTOR;
-import org.genericsystem.watch.gui.utils.PageSwitcher;
 import org.genericsystem.watch.gui.utils.PageSwitcher.FILTERS_STATISTICS;
-import org.genericsystem.watch.gui.utils.WorkerVerticle;
-
-import io.vertx.core.Verticle;
 
 /**
  * This class provides a gs-reactor application to visualize and update the {@link Score} and {@link MeanLevenshtein} distances for each filters.
@@ -90,47 +80,9 @@ public class FiltersStatisticsPage extends FlexDiv {
 	}
 
 	@SetText("Compute statistics (strict mode)")
-	@BindAction({ COMPUTE_STATS.class })
+	@BindAction({ COMPUTE_STATS_STRICT.class })
 	public static class ComputeStatsStrictButton extends HtmlButton {
 
-	}
-
-	public static class CALL_HOME_PAGE implements ContextAction {
-		@Override
-		public void accept(Context context, Tag tag) {
-			System.out.println("Redirecting to home page");
-			tag.setInheritedContextPropertyValue(PageSwitcher.PAGE, context, PageSwitcher.HOME_PAGE);
-		}
-	}
-
-	public static class COMPUTE_STATS implements ContextAction {
-		@Override
-		public void accept(Context context, Tag tag) {
-			System.out.println("Computing scores...");
-			computeStatistics(context, tag, false);
-		}
-	}
-
-	public static class COMPUTE_STATS_STRICT implements ContextAction {
-		@Override
-		public void accept(Context context, Tag tag) {
-			System.out.println("Computing scores (using strict mode)...");
-			computeStatistics(context, tag, true);
-		}
-	}
-
-	public static void computeStatistics(Context context, Tag tag, boolean useStrict) {
-		DocClassInstance docClassInstance = (DocClassInstance) context.getGeneric();
-		Root root = docClassInstance.getRoot();
-		Arrays.asList(context.getGenerics()).forEach(g -> System.out.println(g.info()));
-		Verticle worker = new WorkerVerticle() {
-			@Override
-			public void start() throws Exception {
-				ComputeTrainedScores.compute(root, docClassInstance.getValue().toString(), useStrict);
-				System.out.println("Done computing scores!");
-			}
-		};
-		VerticleDeployerFromWatchApp.deployWorkerVerticle(worker, "Failed to execute the task");
 	}
 
 }

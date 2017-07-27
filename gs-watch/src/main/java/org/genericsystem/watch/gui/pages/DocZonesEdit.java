@@ -3,7 +3,6 @@ package org.genericsystem.watch.gui.pages;
 import java.io.Serializable;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.common.Root;
 import org.genericsystem.cv.model.ZoneText.ZoneTextInstance;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
@@ -18,7 +17,6 @@ import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.StyleClass;
-import org.genericsystem.reactor.context.ContextAction;
 import org.genericsystem.reactor.context.ContextAction.CANCEL;
 import org.genericsystem.reactor.context.ContextAction.RESET_SELECTION;
 import org.genericsystem.reactor.context.ObservableContextSelector.SELECTION_SELECTOR;
@@ -36,6 +34,7 @@ import org.genericsystem.reactor.gscomponents.InputTextWithConversion.InputTextE
 import org.genericsystem.reactor.gscomponents.InputWithDatalist;
 import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
 import org.genericsystem.watch.gui.pages.DocZonesEdit.TextDiv;
+import org.genericsystem.watch.gui.utils.ContextActionCustom.SAVE;
 import org.genericsystem.watch.gui.utils.ObservableListExtractorCustom.DATALIST_SELECTOR;
 import org.genericsystem.watch.gui.utils.ObservableListExtractorCustom.ZONE_SELECTOR_REALITY;
 
@@ -151,24 +150,4 @@ public class DocZonesEdit extends ModalEditor {
 		}
 	}
 
-	public static class MODAL_DISPLAY_FLEX_CUSTOM implements ContextAction {
-		@Override
-		public void accept(Context context, Tag tag) {
-			Tag ancestor = tag.getParent().getParent(); // ZoneTextDiv
-			ancestor.find(ModalWithDisplay.class).getDisplayProperty(context).setValue("flex");
-		}
-	}
-
-	public static class SAVE implements ContextAction {
-		@Override
-		public void accept(Context context, Tag tag) {
-			System.out.println("Saving...");
-			Root root = context.getGeneric().getRoot();
-			System.out.println("Current thread (save): " + Thread.currentThread().getName());
-			long start = System.nanoTime();
-			root.getCurrentCache().flush();
-			long stop = System.nanoTime();
-			System.out.println("Saved in " + (stop - start) / 1_000_000 + "ms");
-		}
-	}
 }

@@ -18,7 +18,6 @@ import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.annotations.Switch;
-import org.genericsystem.reactor.context.ContextAction;
 import org.genericsystem.reactor.context.ContextAction.CANCEL;
 import org.genericsystem.reactor.context.ContextAction.RESET_SELECTION;
 import org.genericsystem.reactor.context.ContextAction.SET_ADMIN_MODE;
@@ -41,6 +40,9 @@ import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
 import org.genericsystem.watch.gui.pages.HomePage.DocClassDiv;
 import org.genericsystem.watch.gui.pages.HomePage.GeneralActionsButtonsDiv;
 import org.genericsystem.watch.gui.pages.HomePage.HeaderRow;
+import org.genericsystem.watch.gui.utils.ContextActionCustom.CALL_STATISTICS_PAGE;
+import org.genericsystem.watch.gui.utils.ContextActionCustom.REMOVE_CUSTOM;
+import org.genericsystem.watch.gui.utils.ContextActionCustom.TEST;
 import org.genericsystem.watch.gui.utils.DocPropertiesSwitcher.DOC_DEZONED;
 import org.genericsystem.watch.gui.utils.DocPropertiesSwitcher.DOC_NOT_DEZONED;
 import org.genericsystem.watch.gui.utils.DocPropertiesSwitcher.DOC_NOT_OCRD;
@@ -49,7 +51,6 @@ import org.genericsystem.watch.gui.utils.DocPropertiesSwitcher.DOC_OCRD;
 import org.genericsystem.watch.gui.utils.DocPropertiesSwitcher.DOC_SUPERVISED;
 import org.genericsystem.watch.gui.utils.ObservableListExtractorCustom.DOC_CLASS_SELECTOR;
 import org.genericsystem.watch.gui.utils.ObservableListExtractorCustom.DOC_SELECTOR;
-import org.genericsystem.watch.gui.utils.PageSwitcher;
 import org.genericsystem.watch.gui.utils.PageSwitcher.HOME_PAGE;
 
 import javafx.beans.binding.Bindings;
@@ -211,29 +212,6 @@ public class HomePage extends FlexDiv {
 	@Style(name = "flex", value = "3")
 	public static class LastDocumentUpdateDiv extends FlexDiv {
 
-	}
-
-	public static class REMOVE_CUSTOM implements ContextAction {
-		@Override
-		public void accept(Context context, Tag tag) {
-			context.remove();
-			context.flush();
-		}
-	}
-
-	public static class TEST implements ContextAction {
-		@Override
-		public void accept(Context context, Tag tag) {
-			System.out.println("called from " + tag.getTag());
-		}
-	}
-
-	public static class CALL_STATISTICS_PAGE implements ContextAction {
-		@Override
-		public void accept(Context context, Tag tag) {
-			System.out.println("Redirecting to statistics page");
-			tag.setInheritedContextPropertyValue(PageSwitcher.PAGE, context, PageSwitcher.FILTERS_STATISTICS);
-		}
 	}
 
 	public static class DOC_CLASS_LABEL implements TextBinding {
