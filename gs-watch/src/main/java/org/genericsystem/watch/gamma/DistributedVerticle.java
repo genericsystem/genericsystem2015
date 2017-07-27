@@ -1,51 +1,49 @@
 package org.genericsystem.watch.gamma;
 
-import org.genericsystem.watch.beta.RoundRobin;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
-import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.EventBusOptions;
 import io.vertx.core.spi.cluster.ClusterManager;
 import io.vertx.spi.cluster.hazelcast.HazelcastClusterManager;
 
 public class DistributedVerticle extends AbstractVerticle {
-	private static final long REGISTER_PERIODICITY = 1000;
-	private static final long ROUNDROBIN_PERIODICITY = 5000;
-	public static final String PUBLIC_ADDRESS = "publicAddress";
 	public static final String BASE_PATH = System.getenv("HOME") + "/git/genericsystem2015/gs-cv/";
 	protected static final String FILENAME = "filename";
-	protected static final String OK = "OK";
-	private static final String KO = "KO";
 	protected static final String TYPE = "type";
 	protected static final String IP = "IP";
-	private final String PRIVATE_ADDRESS;
-	private static final DeliveryOptions TIMEOUT = new DeliveryOptions().setSendTimeout(500);
-	private final RoundRobin roundrobin;
 
 	private final String ip;
 
-	private DistributedVerticle(String ip) {
-		this(ip, new RoundRobin());
+	private static AtomicInteger currentExecutions = new AtomicInteger();
+
+	public static void incrementExecutions() {
+		currentExecutions.incrementAndGet();
 	}
 
-	protected DistributedVerticle(String ip, RoundRobin roundRobin) {
+	public static void decrementExecutions() {
+		currentExecutions.decrementAndGet();
+	}
+
+	public static int getExecutionsCount() {
+		return currentExecutions.intValue();
+	}
+
+	public static int getMaxExecutions() {
+		// TODO: Add some logic here…
+		return 4;
+	}
+
+	private DistributedVerticle(String ip) {
 		this.ip = ip;
-		this.roundrobin = roundRobin;
-		this.PRIVATE_ADDRESS = ip + ":" + hashCode();
 	}
 
 	@Override
 	public void start() throws Exception {
-		vertx.deployVerticle(new PdfConverterVerticle(PRIVATE_ADDRESS, ip));
-		vertx.deployVerticle(new ClassifierVerticle(PRIVATE_ADDRESS, ip));
-		vertx.eventBus().consumer(PUBLIC_ADDRESS, message -> {
-			roundrobin.register((String) message.body());
-		});
-		vertx.setPeriodic(REGISTER_PERIODICITY, h -> {
-			vertx.eventBus().publish(PUBLIC_ADDRESS, PRIVATE_ADDRESS);
-		});
+		vertx.deployVerticle(new PdfConverterVerticle(ip));
+		vertx.deployVerticle(new ClassifierVerticle(ip));
 	}
 
 	public static void main(String[] args) {

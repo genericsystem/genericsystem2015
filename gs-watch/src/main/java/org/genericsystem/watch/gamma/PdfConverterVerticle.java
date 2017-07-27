@@ -12,8 +12,8 @@ import io.vertx.core.json.JsonObject;
 
 public class PdfConverterVerticle extends ActionVerticle {
 
-	public PdfConverterVerticle(String privateAddress, String ip) {
-		super(privateAddress, ip);
+	public PdfConverterVerticle(String ip) {
+		super(ip);
 	}
 
 	public static final String ACTION = "pdfToPng";
