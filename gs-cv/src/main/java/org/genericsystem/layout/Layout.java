@@ -23,7 +23,7 @@ public class Layout {
 	private double y1;
 	private double y2;
 
-	private String label;
+	private List<String> labels = new ArrayList<>();
 	private List<Layout> children = new ArrayList<>();
 	private Layout parent = null;
 
@@ -67,11 +67,8 @@ public class Layout {
 		traverse(rootImg, (root, layout) -> {
 			if (layout.getChildren().isEmpty()) {
 				String ocr = Ocr.doWork(new Mat(rootImg.getSrc(), layout.getLargeRect(rootImg, delta)));
-				// if (!ocr.equals(layout.getLabel())) {
-				// System.out.println(layout.getLabel() + " // " + ocr);
-				// layout.setLabel(Ocr.doWork(new Mat(rootImg.getSrc(), layout.getLargeRect(rootImg, delta))));
-				// }
-				layout.setLabel(Ocr.doWork(new Mat(rootImg.getSrc(), layout.getLargeRect(rootImg, delta))));
+				layout.getLabels().add(ocr);
+				System.out.println(layout.getLabels());
 			}
 		});
 	}
@@ -130,12 +127,8 @@ public class Layout {
 		this.y2 = y2;
 	}
 
-	public String getLabel() {
-		return label;
-	}
-
-	public void setLabel(String label) {
-		this.label = label;
+	public List<String> getLabels() {
+		return labels;
 	}
 
 	public Layout getParent() {
@@ -164,7 +157,9 @@ public class Layout {
 		sb.append("depth : " + depth + " : ");
 		sb.append("((" + shard.x1 + "-" + shard.y1 + "),(" + shard.x2 + "-" + shard.y2 + "))".toString());
 		if (shard.getChildren().isEmpty())
-			sb.append(" : Label : " + shard.label);
+			sb.append(" : Label : ");
+		for (String label : shard.labels)
+			sb.append("/" + label);
 
 		if (shard.hasChildren()) {
 			depth++;

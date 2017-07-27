@@ -71,7 +71,7 @@ public class CamLayoutAnalyzer extends AbstractApp {
 		MatOfKeyPoint[] oldKeypoints = new MatOfKeyPoint[] { detect(deskewed.getSrc()) };
 		Mat[] oldDescriptors = new Mat[] { new Mat() };
 		extractor.compute(deskewed.getSrc(), oldKeypoints[0], oldDescriptors[0]);
-		int[] count = new int[] { 0 };
+		int[] count = new int[] { 1 };
 		Mat stabilizedMat = new Mat();
 		Layout[] layout = new Layout[] { null };
 		timer.scheduleAtFixedRate(() -> {
@@ -100,8 +100,11 @@ public class CamLayoutAnalyzer extends AbstractApp {
 				Img stabilized = stabilize(frame, stabilizedMat, newSize, matcher, oldKeypoints[0], newKeypoints, oldDescriptors[0], newDescriptors, angle[0], crop);
 				if (stabilized != null) {
 					Img stabilizedCopy = new Img(stabilized.getSrc(), true);
-					if (layout[0] == null)
+					if (layout[0] == null) {
 						layout[0] = stabilized.buildLayout();
+						// System.out.println(layout[0].recursivToString());
+					}
+					layout[0].ocrTree(stabilized, 0);
 					layout[0].draw(stabilizedCopy, new Scalar(0, 255, 0), 1);
 					src3.setImage(stabilizedCopy.toJfxImage());
 				}
