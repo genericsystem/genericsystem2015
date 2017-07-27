@@ -1,10 +1,6 @@
 package org.genericsystem.watch.gui.pages;
 
-import org.genericsystem.api.core.Snapshot;
-import org.genericsystem.common.Generic;
-import org.genericsystem.common.Root;
 import org.genericsystem.cv.model.Doc.DocInstance;
-import org.genericsystem.cv.model.ImgFilter;
 import org.genericsystem.cv.model.ImgFilter.ImgFilterInstance;
 import org.genericsystem.cv.model.ZoneText;
 import org.genericsystem.cv.model.ZoneText.ZoneTextInstance;
@@ -16,18 +12,16 @@ import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.StyleClass;
-import org.genericsystem.reactor.context.ObservableListExtractor;
 import org.genericsystem.reactor.context.TextBinding;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.FlexDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlHyperLink;
 import org.genericsystem.reactor.gscomponents.Modal.ModalWithDisplay;
 import org.genericsystem.watch.gui.pages.DocZonesShowDetails.FiltersDiv;
+import org.genericsystem.watch.gui.utils.ObservableListExtractorCustom.OCR_SELECTOR;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 
 //@Children(FlexDiv.class)
 @Children(path = FlexDiv.class, value = { HtmlHyperLink.class, FiltersDiv.class })
@@ -56,17 +50,6 @@ public class DocZonesShowDetails extends ModalWithDisplay {
 	@StyleClass({ "ocr", "ocr-text" })
 	public static class FiltersOcrText extends FlexDiv {
 		// Print the ocr text for the corresponding filter
-	}
-
-	public static class OCR_SELECTOR implements ObservableListExtractor {
-		@Override
-		public ObservableList<Generic> apply(Generic[] generics) {
-			Root root = generics[0].getRoot();
-			Snapshot<Generic> filters = root.find(ImgFilter.class).getInstances();
-			if (filters == null)
-				return FXCollections.emptyObservableList();
-			return filters.toObservableList();
-		}
 	}
 
 	public static class OCR_TEXT implements TextBinding {

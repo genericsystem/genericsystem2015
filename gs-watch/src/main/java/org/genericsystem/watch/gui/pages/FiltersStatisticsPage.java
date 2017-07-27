@@ -2,11 +2,8 @@ package org.genericsystem.watch.gui.pages;
 
 import java.util.Arrays;
 
-import org.genericsystem.api.core.Snapshot;
-import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
 import org.genericsystem.cv.comparator.ComputeTrainedScores;
-import org.genericsystem.cv.model.DocClass;
 import org.genericsystem.cv.model.DocClass.DocClassInstance;
 import org.genericsystem.cv.model.MeanLevenshtein;
 import org.genericsystem.cv.model.Score;
@@ -22,7 +19,6 @@ import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.context.ContextAction;
-import org.genericsystem.reactor.context.ObservableListExtractor;
 import org.genericsystem.reactor.gscomponents.AppHeader;
 import org.genericsystem.reactor.gscomponents.AppHeader.AppTitleDiv;
 import org.genericsystem.reactor.gscomponents.AppHeader.Logo;
@@ -33,13 +29,12 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlH1;
 import org.genericsystem.watch.VerticleDeployerFromWatchApp;
 import org.genericsystem.watch.gui.pages.FiltersStatisticsPage.DocClassStatisticsDiv;
 import org.genericsystem.watch.gui.pages.FiltersStatisticsPage.GeneralButtonsDiv;
+import org.genericsystem.watch.gui.utils.ObservableListExtractorCustom.DOC_CLASS_SELECTOR;
 import org.genericsystem.watch.gui.utils.PageSwitcher;
 import org.genericsystem.watch.gui.utils.PageSwitcher.FILTERS_STATISTICS;
 import org.genericsystem.watch.gui.utils.WorkerVerticle;
 
 import io.vertx.core.Verticle;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 
 /**
  * This class provides a gs-reactor application to visualize and update the {@link Score} and {@link MeanLevenshtein} distances for each filters.
@@ -78,8 +73,6 @@ public class FiltersStatisticsPage extends FlexDiv {
 	@Style(name = "width", value = "90%")
 	@Style(name = "margin", value = "auto")
 	@ForEach(DOC_CLASS_SELECTOR.class)
-	// @DirectSelect(path = { FlexDiv.class, StatisticsTable.class }, pos = { 1, 0 }, value = Score.class)
-	// @Switch(path = { FlexDiv.class, InstancesTable.class }, pos = { 1, 0 }, value = SCORE_SWITCHER.class)
 	public static class DocClassStatisticsDiv extends FlexDiv {
 
 	}
@@ -100,18 +93,6 @@ public class FiltersStatisticsPage extends FlexDiv {
 	@BindAction({ COMPUTE_STATS.class })
 	public static class ComputeStatsStrictButton extends HtmlButton {
 
-	}
-
-	public static class DOC_CLASS_SELECTOR implements ObservableListExtractor {
-		@Override
-		public ObservableList<Generic> apply(Generic[] generics) {
-			Root root = generics[0].getRoot();
-			DocClass docClass = root.find(DocClass.class);
-			Snapshot<Generic> docClassInstances = docClass.getInstances();
-			if (null == docClassInstances)
-				return FXCollections.emptyObservableList();
-			return docClassInstances.toObservableList();
-		}
 	}
 
 	public static class CALL_HOME_PAGE implements ContextAction {

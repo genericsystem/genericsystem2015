@@ -1,15 +1,12 @@
 package org.genericsystem.watch.gui.pages;
 
 import org.apache.commons.lang3.StringEscapeUtils;
-import org.genericsystem.api.core.Snapshot;
-import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
 import org.genericsystem.cv.comparator.ComputeBestTextPerZone;
 import org.genericsystem.cv.model.Doc.DocInstance;
 import org.genericsystem.cv.model.Doc.RefreshTimestamp;
 import org.genericsystem.cv.model.Doc.RefreshTimestamp.RefreshTimestampInstance;
 import org.genericsystem.cv.model.ModelTools;
-import org.genericsystem.cv.model.ZoneText;
 import org.genericsystem.cv.model.ZoneText.ZoneTextInstance;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
@@ -28,7 +25,6 @@ import org.genericsystem.reactor.context.ContextAction;
 import org.genericsystem.reactor.context.ContextAction.CANCEL;
 import org.genericsystem.reactor.context.ContextAction.RESET_SELECTION;
 import org.genericsystem.reactor.context.ObservableContextSelector.SELECTION_SELECTOR;
-import org.genericsystem.reactor.context.ObservableListExtractor;
 import org.genericsystem.reactor.context.TextBinding;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.FlexDiv;
@@ -39,14 +35,13 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
 import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
 import org.genericsystem.watch.VerticleDeployerFromWatchApp;
 import org.genericsystem.watch.gui.pages.DocZonesShow.TextDiv;
+import org.genericsystem.watch.gui.utils.ObservableListExtractorCustom.ZONE_SELECTOR_BEST;
 import org.genericsystem.watch.gui.utils.WorkerVerticle;
 
 import io.vertx.core.Verticle;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 
 @Children(FlexDiv.class)
 @Children(path = FlexDiv.class, value = { HtmlHyperLink.class, TextDiv.class })
@@ -120,7 +115,7 @@ public class DocZonesShow extends ModalEditor {
 
 	@FlexDirectionStyle(FlexDirection.COLUMN)
 	@Children(ZoneLabelField.class)
-	@ForEach(ZONE_SELECTOR.class)
+	@ForEach(ZONE_SELECTOR_BEST.class)
 	public static class ZoneTextDiv extends FlexDiv {
 		// For each zone, create a div with label + inputText and create a div for the results for all filters
 	}
@@ -151,20 +146,6 @@ public class DocZonesShow extends ModalEditor {
 	@Style(name = "align-items", value = "center")
 	public static class LastUpdate extends FlexDiv {
 		// Print the timestamp of the last refresh
-	}
-
-	public static class ZONE_SELECTOR implements ObservableListExtractor {
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		@Override
-		public ObservableList<Generic> apply(Generic[] generics) {
-			Generic currentDoc = generics[0];
-			Root root = currentDoc.getRoot();
-			System.out.println("Document: " + currentDoc.info());
-			Snapshot<ZoneTextInstance> zoneTextInstances = (Snapshot) currentDoc.getHolders(root.find(ZoneText.class));
-			if (zoneTextInstances == null)
-				return FXCollections.emptyObservableList();
-			return (ObservableList) zoneTextInstances.toObservableList().filtered(zt -> "best".equals(zt.getImgFilter().getValue())).sorted((g1, g2) -> Integer.compare(g1.getZoneNum(), g2.getZoneNum()));
-		}
 	}
 
 	public static class ZONE_LABEL implements TextBinding {

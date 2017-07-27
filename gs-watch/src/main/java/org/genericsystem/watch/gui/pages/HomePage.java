@@ -1,13 +1,9 @@
 package org.genericsystem.watch.gui.pages;
 
-import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
-import org.genericsystem.cv.model.Doc;
 import org.genericsystem.cv.model.Doc.DocInstance;
 import org.genericsystem.cv.model.Doc.DocTimestamp;
-import org.genericsystem.cv.model.DocClass;
-import org.genericsystem.cv.model.DocClass.DocClassInstance;
 import org.genericsystem.cv.model.ModelTools;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
@@ -28,7 +24,6 @@ import org.genericsystem.reactor.context.ContextAction.RESET_SELECTION;
 import org.genericsystem.reactor.context.ContextAction.SET_ADMIN_MODE;
 import org.genericsystem.reactor.context.ContextAction.SET_NORMAL_MODE;
 import org.genericsystem.reactor.context.ContextAction.SET_SELECTION;
-import org.genericsystem.reactor.context.ObservableListExtractor;
 import org.genericsystem.reactor.context.TagSwitcher.ADMIN_MODE_ONLY;
 import org.genericsystem.reactor.context.TagSwitcher.NORMAL_MODE_ONLY;
 import org.genericsystem.reactor.context.TextBinding;
@@ -46,22 +41,21 @@ import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
 import org.genericsystem.watch.gui.pages.HomePage.DocClassDiv;
 import org.genericsystem.watch.gui.pages.HomePage.GeneralActionsButtonsDiv;
 import org.genericsystem.watch.gui.pages.HomePage.HeaderRow;
-import org.genericsystem.watch.gui.utils.DocPropertiesSwitcher;
-import org.genericsystem.watch.gui.utils.PageSwitcher;
 import org.genericsystem.watch.gui.utils.DocPropertiesSwitcher.DOC_DEZONED;
 import org.genericsystem.watch.gui.utils.DocPropertiesSwitcher.DOC_NOT_DEZONED;
 import org.genericsystem.watch.gui.utils.DocPropertiesSwitcher.DOC_NOT_OCRD;
 import org.genericsystem.watch.gui.utils.DocPropertiesSwitcher.DOC_NOT_SUPERVISED;
 import org.genericsystem.watch.gui.utils.DocPropertiesSwitcher.DOC_OCRD;
 import org.genericsystem.watch.gui.utils.DocPropertiesSwitcher.DOC_SUPERVISED;
+import org.genericsystem.watch.gui.utils.ObservableListExtractorCustom.DOC_CLASS_SELECTOR;
+import org.genericsystem.watch.gui.utils.ObservableListExtractorCustom.DOC_SELECTOR;
+import org.genericsystem.watch.gui.utils.PageSwitcher;
 import org.genericsystem.watch.gui.utils.PageSwitcher.HOME_PAGE;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 
 @Switch(HOME_PAGE.class)
 @Children({ DocZonesEdit.class, AppHeader.class, FlexDiv.class/* , Monitor.class */ })
@@ -217,34 +211,6 @@ public class HomePage extends FlexDiv {
 	@Style(name = "flex", value = "3")
 	public static class LastDocumentUpdateDiv extends FlexDiv {
 
-	}
-
-	public static class DOC_CLASS_SELECTOR implements ObservableListExtractor {
-		@Override
-		public ObservableList<Generic> apply(Generic[] generics) {
-			Root root = generics[0].getRoot();
-			DocClass docClass = root.find(DocClass.class);
-			Snapshot<Generic> docClassInstances = docClass.getInstances();
-			if (null == docClassInstances)
-				return FXCollections.emptyObservableList();
-			return docClassInstances.toObservableList();
-		}
-	}
-
-	public static class DOC_SELECTOR implements ObservableListExtractor {
-		@Override
-		public ObservableList<Generic> apply(Generic[] generics) {
-			DocClassInstance currentDocClass = (DocClassInstance) generics[0];
-			Doc doc = generics[0].getRoot().find(Doc.class);
-			if (null == currentDocClass)
-				return FXCollections.emptyObservableList();
-			System.out.println("Current doc class : " + currentDocClass.info());
-			Snapshot<Generic> docInstances = currentDocClass.getHolders(doc);
-			if (null == docInstances)
-				return FXCollections.emptyObservableList();
-			return docInstances.toObservableList();
-
-		}
 	}
 
 	public static class REMOVE_CUSTOM implements ContextAction {

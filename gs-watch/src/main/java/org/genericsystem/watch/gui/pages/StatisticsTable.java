@@ -1,15 +1,9 @@
 package org.genericsystem.watch.gui.pages;
 
-import org.genericsystem.api.core.Snapshot;
-import org.genericsystem.common.Generic;
-import org.genericsystem.common.Root;
 import org.genericsystem.cv.model.ImgFilter.ImgFilterInstance;
 import org.genericsystem.cv.model.MeanLevenshtein;
 import org.genericsystem.cv.model.MeanLevenshtein.MeanLevenshteinInstance;
-import org.genericsystem.cv.model.Score;
 import org.genericsystem.cv.model.Score.ScoreInstance;
-import org.genericsystem.cv.model.ZoneGeneric;
-import org.genericsystem.cv.model.ZoneGeneric.ZoneInstance;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.Attribute;
@@ -19,7 +13,6 @@ import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
-import org.genericsystem.reactor.context.ObservableListExtractor;
 import org.genericsystem.reactor.context.TextBinding;
 import org.genericsystem.reactor.contextproperties.SelectionDefaults;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
@@ -27,12 +20,11 @@ import org.genericsystem.reactor.gscomponents.FlexDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
 import org.genericsystem.watch.gui.pages.StatisticsTable.ContentRow;
 import org.genericsystem.watch.gui.pages.StatisticsTable.HeaderRow;
-import org.genericsystem.watch.gui.pages.StatisticsTable.ZONE_SELECTOR;
+import org.genericsystem.watch.gui.utils.ObservableListExtractorCustom.SCORE_SELECTOR;
+import org.genericsystem.watch.gui.utils.ObservableListExtractorCustom.ZONE_SELECTOR;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 
 @Children({ HeaderRow.class, FlexDiv.class })
 @Children(path = FlexDiv.class, pos = 1, value = ContentRow.class)
@@ -67,35 +59,6 @@ public class StatisticsTable extends FlexDiv implements SelectionDefaults {
 	@BindText(path = FlexDiv.class, pos = 3, value = MEAN_LEV_LABEL.class)
 	public static class ContentRow extends FlexDiv {
 
-	}
-
-	public static class ZONE_SELECTOR implements ObservableListExtractor {
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		@Override
-		public ObservableList<Generic> apply(Generic[] generics) {
-			Generic currentDocClass = generics[0];
-			Root root = currentDocClass.getRoot();
-			System.out.println("Current docClass: " + currentDocClass.info());
-			Snapshot<ZoneInstance> zones = (Snapshot) currentDocClass.getHolders(root.find(ZoneGeneric.class));
-			if (zones == null)
-				return FXCollections.emptyObservableList();
-			return (ObservableList) zones.toObservableList().sorted();
-		}
-	}
-
-	public static class SCORE_SELECTOR implements ObservableListExtractor {
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		@Override
-		public ObservableList<Generic> apply(Generic[] generics) {
-			ZoneInstance zoneInstance = (ZoneInstance) generics[0];
-			Root root = zoneInstance.getRoot();
-			System.out.println("Current zone: " + zoneInstance.info());
-			Snapshot<ScoreInstance> scores = (Snapshot) zoneInstance.getHolders(root.find(Score.class));
-			// scores.forEach(g -> System.out.println(g.info()));
-			if (scores == null)
-				return FXCollections.emptyObservableList();
-			return (ObservableList) scores.toObservableList();
-		}
 	}
 
 	public static class ZONE_LABEL implements TextBinding {

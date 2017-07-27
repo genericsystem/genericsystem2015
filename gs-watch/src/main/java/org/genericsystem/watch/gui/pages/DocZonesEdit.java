@@ -1,15 +1,9 @@
 package org.genericsystem.watch.gui.pages;
 
 import java.io.Serializable;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
-import java.util.function.Predicate;
 
-import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
-import org.genericsystem.cv.model.ZoneText;
 import org.genericsystem.cv.model.ZoneText.ZoneTextInstance;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
@@ -28,7 +22,6 @@ import org.genericsystem.reactor.context.ContextAction;
 import org.genericsystem.reactor.context.ContextAction.CANCEL;
 import org.genericsystem.reactor.context.ContextAction.RESET_SELECTION;
 import org.genericsystem.reactor.context.ObservableContextSelector.SELECTION_SELECTOR;
-import org.genericsystem.reactor.context.ObservableListExtractor;
 import org.genericsystem.reactor.context.TextBinding;
 import org.genericsystem.reactor.contextproperties.SelectionDefaults;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
@@ -43,11 +36,11 @@ import org.genericsystem.reactor.gscomponents.InputTextWithConversion.InputTextE
 import org.genericsystem.reactor.gscomponents.InputWithDatalist;
 import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
 import org.genericsystem.watch.gui.pages.DocZonesEdit.TextDiv;
+import org.genericsystem.watch.gui.utils.ObservableListExtractorCustom.DATALIST_SELECTOR;
+import org.genericsystem.watch.gui.utils.ObservableListExtractorCustom.ZONE_SELECTOR_REALITY;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 
 @Children(FlexDiv.class)
 @Children(path = FlexDiv.class, value = { HtmlHyperLink.class, TextDiv.class })
@@ -100,7 +93,7 @@ public class DocZonesEdit extends ModalEditor {
 
 	@FlexDirectionStyle(FlexDirection.COLUMN)
 	@Children({ ZoneLabelInput.class/* , DocZonesShowDetails.class */ }) // XXX
-	@ForEach(ZONE_SELECTOR.class)
+	@ForEach(ZONE_SELECTOR_REALITY.class)
 	public static class ZoneTextDiv extends FlexDiv {
 		// For each zone, create a div with label + inputText and create a div for the results for all filters
 	}
@@ -136,7 +129,7 @@ public class DocZonesEdit extends ModalEditor {
 	}
 
 	public static class CustomInputDatalist extends InputTextEditorWithConversionForDatalist {
-		// FIXME: bug during the edition of the input text field (synchronization)
+		// TODO: remove next function?
 		@Override
 		protected Generic updateGeneric(Context context, Serializable newValue) {
 			// ZoneTextInstance zti = (ZoneTextInstance) context.getGeneric();
@@ -148,49 +141,6 @@ public class DocZonesEdit extends ModalEditor {
 			Generic updateValue = context.getGeneric().updateValue(newValue);
 			System.out.println("==> update: " + (System.nanoTime() - start) / 1_000_000 + "ms");
 			return updateValue;
-		}
-	}
-
-	public static class DATALIST_SELECTOR implements ObservableListExtractor {
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		@Override
-		public ObservableList<Generic> apply(Generic[] generics) {
-			ZoneTextInstance zti = (ZoneTextInstance) generics[0];
-			Generic currentDoc = generics[1];
-			Root root = currentDoc.getRoot();
-			Predicate<ZoneTextInstance> filterByZone = z -> z.getZoneNum() == zti.getZoneNum() && !z.getValue().toString().isEmpty();
-			Snapshot<ZoneTextInstance> zoneTextInstances = (Snapshot) currentDoc.getHolders(root.find(ZoneText.class));
-			return (ObservableList) zoneTextInstances.toObservableList().filtered(filterByZone.and(distinctByKey(g -> g.getValue()))).sorted((g1, g2) -> Integer.compare(g1.getZoneNum(), g2.getZoneNum()));
-		}
-
-		/**
-		 * Utility function that can be used to filter a stream to get distinct values, using a personalized function.
-		 * 
-		 * @param keyExtractor
-		 *            - lambda expression that will provide the filter criteria
-		 * @return a predicate
-		 */
-		public <T> Predicate<T> distinctByKey(Function<? super T, Object> keyExtractor) {
-			Map<Object, Boolean> seen = new ConcurrentHashMap<>();
-			return t -> seen.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
-		}
-	}
-
-	public static class ZONE_SELECTOR implements ObservableListExtractor {
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		@Override
-		public ObservableList<Generic> apply(Generic[] generics) {
-			Generic currentDoc = generics[0];
-			Root root = currentDoc.getRoot();
-			System.out.println("Document: " + currentDoc.info());
-			Snapshot<ZoneTextInstance> zoneTextInstances = (Snapshot) currentDoc.getHolders(root.find(ZoneText.class));
-			if (zoneTextInstances == null)
-				return FXCollections.emptyObservableList();
-			long start = System.nanoTime();
-			ObservableList ol = zoneTextInstances.toObservableList().filtered(zt -> "reality".equals(zt.getImgFilter().getValue())).sorted((g1, g2) -> Integer.compare(g1.getZoneNum(), g2.getZoneNum()));
-			long stop = System.nanoTime();
-			System.out.println("--------- zone selector: " + (stop - start) / 1_000_000 + "ms");
-			return ol;
 		}
 	}
 
