@@ -57,7 +57,7 @@ public class Layout {
 	}
 
 	public void draw(Img img, Scalar color, int thickness) {
-		traverse(img, (roi, shard) -> {
+		traverse(getRoi(img), (roi, shard) -> {
 			if (shard.getChildren().isEmpty())
 				Imgproc.rectangle(roi.getSrc(), new Point(0, 0), new Point(roi.width() - 1, roi.height() - 1), color, thickness);
 		});
@@ -65,8 +65,14 @@ public class Layout {
 
 	public void ocrTree(Img rootImg, int delta) {
 		traverse(rootImg, (root, layout) -> {
-			if (layout.getChildren().isEmpty())
-				layout.setLabel(Ocr.doWork(new Mat(rootImg.getSrc(), layout.getRect(rootImg))));
+			if (layout.getChildren().isEmpty()) {
+				String ocr = Ocr.doWork(new Mat(rootImg.getSrc(), layout.getLargeRect(rootImg, delta)));
+				// if (!ocr.equals(layout.getLabel())) {
+				// System.out.println(layout.getLabel() + " // " + ocr);
+				// layout.setLabel(Ocr.doWork(new Mat(rootImg.getSrc(), layout.getLargeRect(rootImg, delta))));
+				// }
+				layout.setLabel(Ocr.doWork(new Mat(rootImg.getSrc(), layout.getLargeRect(rootImg, delta))));
+			}
 		});
 	}
 
@@ -184,6 +190,14 @@ public class Layout {
 		Converters.Mat_to_vector_float(binary.projectVertically().getSrc(), Vhist);
 		Converters.Mat_to_vector_float(binary.projectHorizontally().transpose().getSrc(), Hhist);
 
+		for (int i = 0; i < binary.getSrc().rows(); i++) {
+			for (int j = 0; j < binary.getSrc().cols(); j++) {
+				double value = binary.getSrc().get(i, j)[0];
+				if (value > 255.0)
+					System.out.println(value);
+			}
+		}
+
 		// System.out.println("Vhist before smooth: " + Vhist.toString());
 		Vhist = smoothHisto(concentration, Vhist, true, binary);
 		// System.out.println("Vhist after smooth: " + Vhist.toString());
@@ -200,7 +214,7 @@ public class Layout {
 		if (x[0] <= x[1] || y[0] <= y[1]) {
 			return new Layout(this.getParent(), getX1() + x[0] * (getX2() - getX1()), getX1() + x[1] * (getX2() - getX1()), getY1() + y[0] * (getY2() - getY1()), getY1() + y[1] * (getY2() - getY1()));
 		} else {
-			return new Layout(this.getParent(), getX1(), getX2(), getY1(), getY2());
+			return new Layout(this.getParent(), 0, 0, 0, 0);
 		}
 
 	}
@@ -208,9 +222,9 @@ public class Layout {
 	public static double[] getHistoLimits(List<Float> hist) {
 		int start = 0;
 		int end = hist.size() - 1;
-		while (start < hist.size() && hist.get(start) == 255.0)
+		while (start < hist.size() && hist.get(start) >= 255.0)
 			start++;
-		while (end >= 0 && hist.get(end) == 255.0)
+		while (end >= 0 && hist.get(end) >= 255.0)
 			end--;
 		return new double[] { Integer.valueOf(start).doubleValue() / hist.size(), Integer.valueOf(end + 1).doubleValue() / hist.size() };
 	}
@@ -235,7 +249,7 @@ public class Layout {
 	private static List<Float> smoothHisto(float concentration, List<Float> histo, boolean vertical, Img binary) {
 		float min = concentration * 255;
 		float max = (1 - concentration) * 255;
-		for (int i = 1; i < histo.size() - 1; i++) {
+		for (int i = 0; i < histo.size(); i++) {
 			float value = histo.get(i);
 			if (histo.size() > 32)
 				if (value <= min || value >= max) {
@@ -282,6 +296,7 @@ public class Layout {
 		for (Layout shardv : shardsV)
 			for (Layout shardh : shardsH) {
 				Layout target = new Layout(this, shardh.x1, shardh.x2, shardv.y1, shardv.y2);
+				// (0.5223880597014925-0.3358302122347066),(1.0-0.34519350811485644)
 				Img roi = target.getRoi(binary);
 				// System.out.println("roi : rows :" + roi.rows() + " , cols :" + roi.cols());
 				if (roi.rows() != 0 && roi.cols() != 0)

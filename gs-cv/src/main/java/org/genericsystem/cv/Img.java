@@ -890,8 +890,7 @@ public class Img implements AutoCloseable {
 		// return buildLayout(new Size(0.036, 0.008), 7, 0.008f);
 	}
 
-	public Layout buildLayout(Size morph, int level, float concentration) {
-		Img binary = bgr2Gray().adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 17, 15).cleanTables();
+	public Layout buildLayout(Size morph, int level, float concentration, Img binary) {
 		Layout root = new Layout(null, 0, 1, 0, 1).tighten(binary, concentration);
 		return root.recursivSplit(morph, level, concentration, root.getRoi(this), root.getRoi(binary));
 	}
