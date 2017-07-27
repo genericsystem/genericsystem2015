@@ -15,9 +15,11 @@ import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.StyleClass;
+import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.context.ContextAction.CANCEL;
 import org.genericsystem.reactor.context.ContextAction.RESET_SELECTION;
 import org.genericsystem.reactor.context.ObservableContextSelector.SELECTION_SELECTOR;
+import org.genericsystem.reactor.context.TagSwitcher;
 import org.genericsystem.reactor.contextproperties.SelectionDefaults;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.FlexDiv;
@@ -31,6 +33,7 @@ import org.genericsystem.reactor.gscomponents.InputTextWithConversion.InputTextE
 import org.genericsystem.reactor.gscomponents.InputWithDatalist;
 import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
 import org.genericsystem.watch.gui.pages.DocZonesEdit.TextDiv;
+import org.genericsystem.watch.gui.utils.ContextActionCustom.MODAL_DISPLAY_FLEX_CUSTOM;
 import org.genericsystem.watch.gui.utils.ContextActionCustom.SAVE;
 import org.genericsystem.watch.gui.utils.ObservableListExtractorCustom.DATALIST_SELECTOR;
 import org.genericsystem.watch.gui.utils.ObservableListExtractorCustom.ZONE_SELECTOR_REALITY;
@@ -88,27 +91,27 @@ public class DocZonesEdit extends ModalEditor {
 	}
 
 	@FlexDirectionStyle(FlexDirection.COLUMN)
-	@Children({ ZoneLabelInput.class/* , DocZonesShowDetails.class */ }) // XXX
+	@Children({ ZoneLabelInput.class, DocZonesShowDetails.class })
 	@ForEach(ZONE_SELECTOR_REALITY.class)
 	public static class ZoneTextDiv extends FlexDiv {
 		// For each zone, create a div with label + inputText and create a div for the results for all filters
 	}
 
 	@FlexDirectionStyle(FlexDirection.ROW)
-	@Children({ /* ZoneLabelAdmin.class, */ ZoneLabelNormal.class, ZoneInput.class })
+	@Children({ ZoneLabelAdmin.class, ZoneLabelNormal.class, ZoneInput.class })
 	public static class ZoneLabelInput extends FlexDiv {
 
 	}
 
-	// @Switch(TagSwitcher.ADMIN_MODE_ONLY.class)
-	// @BindText(ZONE_LABEL.class)
-	// @BindAction(MODAL_DISPLAY_FLEX_CUSTOM.class)
-	// @Attribute(name = "name", value = "zone")
-	// public static class ZoneLabelAdmin extends HtmlHyperLink {
-	// // Define the zone label in admin mode
-	// }
+	@Switch(TagSwitcher.ADMIN_MODE_ONLY.class)
+	@BindText(ZONE_LABEL.class)
+	@BindAction(MODAL_DISPLAY_FLEX_CUSTOM.class)
+	@Attribute(name = "name", value = "zone")
+	public static class ZoneLabelAdmin extends HtmlHyperLink {
+		// Define the zone label in admin mode
+	}
 
-	// @Switch(TagSwitcher.NORMAL_MODE_ONLY.class)
+	@Switch(TagSwitcher.NORMAL_MODE_ONLY.class)
 	@BindText(ZONE_LABEL.class)
 	@Attribute(name = "name", value = "zone")
 	public static class ZoneLabelNormal extends HtmlLabel { // FlexDiv?

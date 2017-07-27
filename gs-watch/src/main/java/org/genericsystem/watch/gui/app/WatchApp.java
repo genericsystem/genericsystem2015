@@ -18,10 +18,18 @@ import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.gscomponents.RootTagImpl;
 import org.genericsystem.watch.VerticleDeployerFromWatchApp;
-import org.genericsystem.watch.gui.pages.HomePage;
 import org.genericsystem.watch.gui.pages.FiltersStatisticsPage;
+import org.genericsystem.watch.gui.pages.HomePage;
 import org.genericsystem.watch.gui.utils.PageSwitcher;
 
+/**
+ * This application can be used to deploy the verticles of gs-watch to automatically process the documents sent to a specific email address.
+ * <p>
+ * The main view shows a list of documents for each document's class. Each record can be visualized, and supervised (provided that it was OCR'r first).
+ * 
+ * @author Pierrik Lassalas
+ */
+@SuppressWarnings("unused")
 @DependsOnModel({ Doc.class, RefreshTimestamp.class, DocTimestamp.class, DocFilename.class, DocClass.class, ZoneGeneric.class, ZoneText.class, ZoneTimestamp.class, ImgFilter.class, LevDistance.class, MeanLevenshtein.class, Score.class })
 @Children({ HomePage.class, FiltersStatisticsPage.class })
 public class WatchApp extends RootTagImpl {
