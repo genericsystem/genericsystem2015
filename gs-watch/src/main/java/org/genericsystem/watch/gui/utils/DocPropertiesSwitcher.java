@@ -2,7 +2,9 @@ package org.genericsystem.watch.gui.utils;
 
 import java.io.File;
 
+import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
+import org.genericsystem.cv.model.Doc;
 import org.genericsystem.cv.model.Doc.DocInstance;
 import org.genericsystem.cv.model.DocClass.DocClassInstance;
 import org.genericsystem.cv.model.ZoneGeneric;
@@ -20,6 +22,34 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
 public class DocPropertiesSwitcher {
+
+	public static class DOC_CLASS_EMPTY implements TagSwitcher {
+		@Override
+		public ObservableValue<Boolean> apply(Context context, Tag tag) {
+			return isDocClassEmpty(context, false);
+		}
+	}
+
+	public static class DOC_CLASS_NOT_EMPTY implements TagSwitcher {
+		@Override
+		public ObservableValue<Boolean> apply(Context context, Tag tag) {
+			return isDocClassEmpty(context, true);
+		}
+	}
+
+	public static class SUPERVISION_AVAILABLE implements TagSwitcher {
+		@Override
+		public ObservableValue<Boolean> apply(Context context, Tag tag) {
+			return isSupervisionAvailable(context, false);
+		}
+	}
+
+	public static class SUPERVISION_NOT_AVAILABLE implements TagSwitcher {
+		@Override
+		public ObservableValue<Boolean> apply(Context context, Tag tag) {
+			return isSupervisionAvailable(context, true);
+		}
+	}
 
 	public static class DOC_DEZONED implements TagSwitcher {
 		@Override
@@ -61,6 +91,25 @@ public class DocPropertiesSwitcher {
 		public ObservableValue<Boolean> apply(Context context, Tag tag) {
 			return isDocSupervised(context, true);
 		}
+	}
+
+	public static ObservableValue<Boolean> isDocClassEmpty(Context context, boolean reverse) {
+		DocClassInstance currentDocClass = (DocClassInstance) context.getGeneric();
+		Doc doc = context.getGeneric().getRoot().find(Doc.class);
+		ObservableList<Generic> docInstances = currentDocClass.getHolders(doc).toObservableList();
+		BooleanBinding binding = Bindings.createBooleanBinding(() -> {
+			return null == docInstances || docInstances.isEmpty();
+		}, docInstances);
+		return reverse ? binding.not() : binding;
+	}
+
+	public static ObservableValue<Boolean> isSupervisionAvailable(Context context, boolean reverse) {
+		DocClassInstance currentDocClass = (DocClassInstance) context.getGeneric();
+		ObjectProperty<File> file = new SimpleObjectProperty<>(new File(System.getProperty("user.dir") + "/../gs-cv/classes/" + currentDocClass.getValue().toString() + "/zones/zones.json"));
+		BooleanBinding binding = Bindings.createBooleanBinding(() -> {
+			return null != file.get() && file.get().exists();
+		}, file);
+		return reverse ? binding.not() : binding;
 	}
 
 	public static ObservableValue<Boolean> isClassZoneFilePresent(Context context, boolean reverse) {

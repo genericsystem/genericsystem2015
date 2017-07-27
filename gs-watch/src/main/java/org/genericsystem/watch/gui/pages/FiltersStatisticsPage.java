@@ -23,6 +23,7 @@ import org.genericsystem.watch.gui.pages.FiltersStatisticsPage.GeneralButtonsDiv
 import org.genericsystem.watch.gui.utils.ContextActionCustom.CALL_HOME_PAGE;
 import org.genericsystem.watch.gui.utils.ContextActionCustom.COMPUTE_STATS;
 import org.genericsystem.watch.gui.utils.ContextActionCustom.COMPUTE_STATS_STRICT;
+import org.genericsystem.watch.gui.utils.DocPropertiesSwitcher.SUPERVISION_AVAILABLE;
 import org.genericsystem.watch.gui.utils.ObservableListExtractorCustom.DOC_CLASS_SELECTOR;
 import org.genericsystem.watch.gui.utils.PageSwitcher.FILTERS_STATISTICS;
 
@@ -62,6 +63,7 @@ public class FiltersStatisticsPage extends FlexDiv {
 	@StyleClass(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 0 }, value = "doc-class-title")
 	@Style(name = "width", value = "90%")
 	@Style(name = "margin", value = "auto")
+	@Switch(SUPERVISION_AVAILABLE.class)
 	@ForEach(DOC_CLASS_SELECTOR.class)
 	public static class DocClassStatisticsDiv extends FlexDiv {
 

@@ -35,6 +35,7 @@ import org.genericsystem.watch.gui.pages.HomePage.HeaderRow;
 import org.genericsystem.watch.gui.utils.ContextActionCustom.CALL_STATISTICS_PAGE;
 import org.genericsystem.watch.gui.utils.ContextActionCustom.REMOVE_CUSTOM;
 import org.genericsystem.watch.gui.utils.ContextActionCustom.TEST;
+import org.genericsystem.watch.gui.utils.DocPropertiesSwitcher.DOC_CLASS_NOT_EMPTY;
 import org.genericsystem.watch.gui.utils.DocPropertiesSwitcher.DOC_DEZONED;
 import org.genericsystem.watch.gui.utils.DocPropertiesSwitcher.DOC_NOT_DEZONED;
 import org.genericsystem.watch.gui.utils.DocPropertiesSwitcher.DOC_NOT_OCRD;
@@ -87,6 +88,7 @@ public class HomePage extends FlexDiv {
 	}
 
 	@Children(FlexDiv.class)
+	@Switch(path = FlexDiv.class, value = DOC_CLASS_NOT_EMPTY.class)
 	@ForEach(path = FlexDiv.class, value = DOC_CLASS_SELECTOR.class)
 	@Children(path = FlexDiv.class, value = { FlexDiv.class, FlexDiv.class })
 	@Children(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 1 }, value = DocumentsList.class)
