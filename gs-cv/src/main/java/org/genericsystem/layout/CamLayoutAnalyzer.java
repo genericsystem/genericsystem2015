@@ -42,8 +42,6 @@ public class CamLayoutAnalyzer extends AbstractApp {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 	}
 
-	private double crop = 0.15;
-
 	public static void main(String[] args) {
 		launch(args);
 	}
@@ -71,7 +69,7 @@ public class CamLayoutAnalyzer extends AbstractApp {
 		MatOfKeyPoint[] oldKeypoints = new MatOfKeyPoint[] { detect(deskewed.getSrc()) };
 		Mat[] oldDescriptors = new Mat[] { new Mat() };
 		extractor.compute(deskewed.getSrc(), oldKeypoints[0], oldDescriptors[0]);
-		int[] count = new int[] { 0 };
+		int[] count = new int[] { 1 };
 		Mat stabilizedMat = new Mat();
 		Layout[] layout = new Layout[] { null };
 		timer.scheduleAtFixedRate(() -> {
@@ -80,28 +78,24 @@ public class CamLayoutAnalyzer extends AbstractApp {
 			try {
 				capture.read(frame);
 				double[] angle = new double[1];
-				Size newSize = new Size(frame.width() * (1 - 2 * crop), frame.height() * (1 - 2 * crop));
-				Img frameImg = new Img(new Mat(frame, new Rect(Double.valueOf(crop * frame.width()).intValue(), Double.valueOf(crop * frame.height()).intValue(), Double.valueOf(newSize.width).intValue(), Double.valueOf(newSize.height).intValue())), true);
+				Img frameImg = new Img(frame);
 				src0.setImage(frameImg.toJfxImage());
 				Img deskewed_ = deskew(frame, angle);
-
-				Img deskiewedImg = new Img(
-						new Mat(deskewed_.getSrc(), new Rect(Double.valueOf(crop * frame.width()).intValue(), Double.valueOf(crop * frame.height()).intValue(), Double.valueOf(newSize.width).intValue(), Double.valueOf(newSize.height).intValue())), true);
-
-				src1.setImage(deskiewedImg.toJfxImage());
+				src1.setImage(deskewed_.toJfxImage());
 				newKeypoints = detect(deskewed_.getSrc());
 				newDescriptors = new Mat();
 				extractor.compute(deskewed_.getSrc(), newKeypoints, newDescriptors);
 
-				Img deskiewedCopy = new Img(deskiewedImg.getSrc(), true);
-				deskiewedImg.buildLayout().draw(deskiewedCopy, new Scalar(0, 255, 0), 1);
+				Img deskiewedCopy = new Img(deskewed_.getSrc(), true);
+				deskewed_.buildLayout().draw(deskiewedCopy, new Scalar(0, 255, 0), 1);
 				src2.setImage(deskiewedCopy.toJfxImage());
 
-				Img stabilized = stabilize(frame, stabilizedMat, newSize, matcher, oldKeypoints[0], newKeypoints, oldDescriptors[0], newDescriptors, angle[0], crop);
+				Img stabilized = stabilize(frame, stabilizedMat, matcher, oldKeypoints[0], newKeypoints, oldDescriptors[0], newDescriptors, angle[0]);
 				if (stabilized != null) {
 					Img stabilizedCopy = new Img(stabilized.getSrc(), true);
 					if (layout[0] == null)
 						layout[0] = stabilized.buildLayout();
+					layout[0].ocrTree(stabilized, 0);
 					layout[0].draw(stabilizedCopy, new Scalar(0, 255, 0), 1);
 					src3.setImage(stabilizedCopy.toJfxImage());
 				}
@@ -119,48 +113,40 @@ public class CamLayoutAnalyzer extends AbstractApp {
 		}, 0, 66, TimeUnit.MILLISECONDS);
 	}
 
-	private Img stabilize(Mat frame, Mat stabilized, Size size, DescriptorMatcher matcher, MatOfKeyPoint oldKeypoints, MatOfKeyPoint newKeypoints, Mat oldDescriptors, Mat newDescriptors, double angle, double crop) {
+	private Img stabilize(Mat frame, Mat stabilized, DescriptorMatcher matcher, MatOfKeyPoint oldKeypoints, MatOfKeyPoint newKeypoints, Mat oldDescriptors, Mat newDescriptors, double angle) {
 		MatOfDMatch matches = new MatOfDMatch();
-		matcher.match(oldDescriptors, newDescriptors, matches);
-		List<DMatch> goodMatches = new ArrayList<>();
-		for (DMatch dMatch : matches.toArray()) {
-			if (dMatch.distance <= 40) {
-				goodMatches.add(dMatch);
+		if (!oldDescriptors.empty() && (!newDescriptors.empty())) {
+			matcher.match(oldDescriptors, newDescriptors, matches);
+			List<DMatch> goodMatches = new ArrayList<>();
+			for (DMatch dMatch : matches.toArray()) {
+				if (dMatch.distance <= 40) {
+					goodMatches.add(dMatch);
+				}
 			}
-		}
-		List<KeyPoint> newKeypoints_ = newKeypoints.toList();
-		List<KeyPoint> oldKeypoints_ = oldKeypoints.toList();
-		// System.out.println(goodMatches.size() + " " + newKeypoints_.size() + " " + oldKeypoints_.size());
+			List<KeyPoint> newKeypoints_ = newKeypoints.toList();
+			List<KeyPoint> oldKeypoints_ = oldKeypoints.toList();
+			// System.out.println(goodMatches.size() + " " + newKeypoints_.size() + " " + oldKeypoints_.size());
 
-		List<Point> goodNewKeypoints = new ArrayList<>();
-		List<Point> goodOldKeypoints = new ArrayList<>();
-		for (DMatch goodMatch : goodMatches) {
-			goodNewKeypoints.add(newKeypoints_.get(goodMatch.trainIdx).pt);
-			goodOldKeypoints.add(oldKeypoints_.get(goodMatch.queryIdx).pt);
-		}
-		// System.out.println("------------------------------------------");
-		// System.out.println(goodNewKeypoints);
-		// System.out.println(goodOldKeypoints);
-
-		if (goodMatches.size() > 30) {
-			Mat goodNewPoints = Converters.vector_Point2f_to_Mat(goodNewKeypoints);
-			MatOfPoint2f originalNewPoints = new MatOfPoint2f();
-			Core.transform(goodNewPoints, originalNewPoints, Imgproc.getRotationMatrix2D(new Point(frame.size().width / 2, frame.size().height / 2), -angle, 1));
-			List<Point> shiftPoints = new ArrayList<>();
-			Converters.Mat_to_vector_Point2f(originalNewPoints, shiftPoints);
-			for (int i = 0; i < shiftPoints.size(); i++) {
-				double x = shiftPoints.get(i).x;// + crop * size.width / (1 - 2 * crop);
-				double y = shiftPoints.get(i).y;// + crop * size.height / (1 - 2 * crop);
-				shiftPoints.set(i, new Point(x, y));
+			List<Point> goodNewKeypoints = new ArrayList<>();
+			List<Point> goodOldKeypoints = new ArrayList<>();
+			for (DMatch goodMatch : goodMatches) {
+				goodNewKeypoints.add(newKeypoints_.get(goodMatch.trainIdx).pt);
+				goodOldKeypoints.add(oldKeypoints_.get(goodMatch.queryIdx).pt);
 			}
-			Mat homography = Calib3d.findHomography(new MatOfPoint2f(shiftPoints.stream().toArray(Point[]::new)), new MatOfPoint2f(goodOldKeypoints.stream().toArray(Point[]::new)), Calib3d.RANSAC, 10);
-			Mat mask = new Mat(frame.size(), CvType.CV_8UC1, new Scalar(255));
-			Mat maskWarpped = new Mat();
-			Imgproc.warpPerspective(mask, maskWarpped, homography, frame.size());
-			Mat tmp = new Mat();
-			Imgproc.warpPerspective(frame, tmp, homography, frame.size(), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(255));
-			tmp.copyTo(stabilized, maskWarpped);
-			return new Img(stabilized, false);
+
+			if (goodMatches.size() > 30) {
+				Mat goodNewPoints = Converters.vector_Point2f_to_Mat(goodNewKeypoints);
+				MatOfPoint2f originalNewPoints = new MatOfPoint2f();
+				Core.transform(goodNewPoints, originalNewPoints, Imgproc.getRotationMatrix2D(new Point(frame.size().width / 2, frame.size().height / 2), -angle, 1));
+				Mat homography = Calib3d.findHomography(originalNewPoints, new MatOfPoint2f(goodOldKeypoints.stream().toArray(Point[]::new)), Calib3d.RANSAC, 10);
+				Mat mask = new Mat(frame.size(), CvType.CV_8UC1, new Scalar(255));
+				Mat maskWarpped = new Mat();
+				Imgproc.warpPerspective(mask, maskWarpped, homography, frame.size());
+				Mat tmp = new Mat();
+				Imgproc.warpPerspective(frame, tmp, homography, frame.size(), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(255));
+				tmp.copyTo(stabilized, maskWarpped);
+				return new Img(stabilized, false);
+			}
 		}
 		return null;
 
@@ -203,6 +189,7 @@ public class CamLayoutAnalyzer extends AbstractApp {
 		List<MatOfPoint> contours = new ArrayList<>();
 		Imgproc.findContours(dilated, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
 		double minArea = 100;
+		double crop = 0.15;
 		Predicate<RotatedRect> filter = rect -> rect.center.x > Double.valueOf(frame.width() * crop).intValue() && rect.center.y > Double.valueOf(frame.height() * crop).intValue() && rect.center.x < Double.valueOf(frame.width() * (1 - crop)).intValue()
 				&& rect.center.y < Double.valueOf(frame.height() * (1 - crop)).intValue();
 		List<RotatedRect> rotatedRects = contours.stream().filter(contour -> Imgproc.contourArea(contour) > minArea).map(contour -> Imgproc.minAreaRect(new MatOfPoint2f(contour.toArray()))).filter(filter).collect(Collectors.toList());
@@ -225,9 +212,6 @@ public class CamLayoutAnalyzer extends AbstractApp {
 		}
 		final double goodAverage = goodRectsMean / goodRects.size();
 		goodRects.forEach(rotatedRect -> rotatedRect.angle = goodAverage);
-		// System.out.println(average);
-		// System.out.println(goodAverage);
-
 		goodRects.forEach(rotatedRect -> {
 			Point[] result = new Point[4];
 			rotatedRect.points(result);
