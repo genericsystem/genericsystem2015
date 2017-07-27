@@ -73,6 +73,6 @@ public class Ocr {
 	}
 
 	public static String doWork(Mat mat, int minConfidence) {
-		return instance.run(mat, minConfidence, 1);
+		return instance.run(mat, 50, 1).replace("\n", "").trim();
 	}
 }

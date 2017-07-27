@@ -11,7 +11,6 @@ public class ZoneScorer {
 		this.zone = zone;
 		imgs.forEach(img -> {
 			String s = zone.ocr(img);
-			s = s.replace("\n", "").replace(" ", "").trim();
 			System.out.println("------ " + s);
 			scores.put(s);
 		});

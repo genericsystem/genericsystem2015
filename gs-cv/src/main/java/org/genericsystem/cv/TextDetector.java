@@ -12,7 +12,6 @@ import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.text.ERFilter;
-import org.opencv.text.OCRTesseract;
 import org.opencv.text.Text;
 import org.opencv.videoio.VideoCapture;
 
@@ -28,7 +27,6 @@ public class TextDetector extends AbstractApp {
 	// private final static String imgClassDirectory = "classes/id-fr-front";
 	private final VideoCapture camera = new VideoCapture(0);
 	private final ScheduledExecutorService timer = Executors.newSingleThreadScheduledExecutor();
-	private final OCRTesseract ocr = OCRTesseract.create("/usr/share/tesseract-ocr/4.00/", "fra", "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM0123456789.-,<'", 1, 7);
 
 	public static void main(String[] args) {
 		launch(args);
@@ -57,9 +55,8 @@ public class TextDetector extends AbstractApp {
 		for (Rect rect : groups_rects.toArray()) {
 			if (rect.tl().x >= 0 && rect.tl().y >= 0 && rect.br().x < src.cols() && rect.br().y < src.height()) {
 				Mat bordered = new Mat(src, rect);
-				//Core.copyMakeBorder(bordered, bordered, 15, 15, 15, 15, Core.BORDER_CONSTANT, new Scalar(0));
-				System.out.println(ocr.run(bordered, 50, 1));
-				// System.out.println(Ocr.doWork(bordered));
+				// Core.copyMakeBorder(bordered, bordered, 15, 15, 15, 15, Core.BORDER_CONSTANT, new Scalar(0));
+				System.out.println(Ocr.doWork(bordered));
 				Imgproc.rectangle(src, rect.tl(), rect.br(), src.type() == CvType.CV_8UC3 ? new Scalar(0, 255, 0) : new Scalar(255), 1, Imgproc.LINE_8, 0);
 			}
 		}
