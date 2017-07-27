@@ -11,7 +11,6 @@ import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.eventbus.DeliveryOptions;
-import io.vertx.core.eventbus.EventBusOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.spi.cluster.ClusterManager;
 import io.vertx.spi.cluster.hazelcast.HazelcastClusterManager;
@@ -26,8 +25,11 @@ public class Dispatcher extends AbstractVerticle {
 	public static final String KO = "KO";
 
 	public static final String ADDRESS = "org.genericsystem.repartitor";
+	protected static final String TASK = "task";
+	protected static final String NEW_STATE = "newState";
 	protected static final String STATE = "state";
 	protected static final String TODO = "todo";
+	protected static final String RUNNING = "running";
 	protected static final String FINISHED = "finished";
 	protected static final String ABORTED = "aborted";
 	private static final long MESSAGE_SEND_PERIODICITY = 5000;
@@ -37,9 +39,7 @@ public class Dispatcher extends AbstractVerticle {
 		ClusterManager mgr = new HazelcastClusterManager();
 
 		VertxOptions vertxOptions = new VertxOptions().setClustered(true).setClusterManager(mgr);
-		vertxOptions.setEventBusOptions(new EventBusOptions()).setClustered(true);
-		String ip = LocalNet.getIpAddress();
-		vertxOptions.setClusterHost(ip);
+		vertxOptions.setClusterHost(LocalNet.getIpAddress());
 		vertxOptions.setMaxWorkerExecuteTime(Long.MAX_VALUE);
 		Vertx.clusteredVertx(vertxOptions, res -> {
 			if (res.failed())
@@ -54,6 +54,13 @@ public class Dispatcher extends AbstractVerticle {
 
 	@Override
 	public void start(Future<Void> startFuture) throws Exception {
+		cache.safeConsum(nothing -> {
+			for (Generic task : taskType.getInstances()) {
+				JsonObject json = new JsonObject((String) task.getValue());
+				if (RUNNING.equals(json.getString(STATE)))
+					updateTaskState(json, TODO);
+			}
+		});
 		watchMail();
 		vertx.deployVerticle(new HttpServerVerticle(), ar -> {
 			if (ar.failed())
@@ -64,6 +71,10 @@ public class Dispatcher extends AbstractVerticle {
 		vertx.eventBus().consumer(ADDRESS + ":watchMail", message -> {
 			System.out.println("Restarting mail watcher thread…");
 			watchMail();
+		});
+		vertx.eventBus().consumer(ADDRESS + ":updateState", message -> {
+			JsonObject json = new JsonObject((String) message.body());
+			updateTaskState(json.getJsonObject(TASK), json.getString(NEW_STATE));
 		});
 		vertx.eventBus().consumer(ADDRESS + ":add", message -> {
 			cache.safeConsum(unused -> {
@@ -76,12 +87,11 @@ public class Dispatcher extends AbstractVerticle {
 				for (Generic task : taskType.getInstances()) {
 					JsonObject json = new JsonObject((String) task.getValue());
 					if (TODO.equals(json.getString(STATE))) {
-						vertx.eventBus().send(json.getString(DistributedVerticle.TYPE), json.encodePrettily(), new DeliveryOptions().setSendTimeout(TIMEOUT), reply -> {
+						vertx.eventBus().send(json.getString(DistributedVerticle.TYPE), new JsonObject(json.encode()).put(STATE, RUNNING).encodePrettily(), new DeliveryOptions().setSendTimeout(TIMEOUT), reply -> {
 							if (reply.failed()) {
 								System.out.println("Failed: " + reply.cause());
 							} else if (OK.equals(reply.result().body()))
-								// TODO: Mark the task as started instead of removing it completely.
-								cache.safeConsum(unused_ -> task.remove());
+								updateTaskState(json, RUNNING);
 						});
 					}
 				}
@@ -89,6 +99,16 @@ public class Dispatcher extends AbstractVerticle {
 			});
 		});
 		startFuture.complete();
+	}
+
+	private void updateTaskState(JsonObject oldValue, String newState) {
+		System.out.println("Updating: " + oldValue.encodePrettily() + ", newState:" + newState);
+		cache.safeConsum(unused -> {
+			Generic task = taskType.getInstances().filter(g -> oldValue.equals(new JsonObject((String) g.getValue()))).first();
+			JsonObject newValue = new JsonObject(oldValue.encode()).put(STATE, newState);
+			task.update(newValue.encodePrettily());
+			cache.flush();
+		});
 	}
 
 	private void watchMail() {

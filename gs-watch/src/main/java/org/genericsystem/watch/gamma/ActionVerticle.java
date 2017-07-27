@@ -53,12 +53,11 @@ public abstract class ActionVerticle extends AbstractVerticle {
 					return;
 				handleResult(res, task);
 				if (res.succeeded())
-					task.put(Dispatcher.STATE, Dispatcher.FINISHED);
+					vertx.eventBus().send(Dispatcher.ADDRESS + ":updateState", new JsonObject().put(Dispatcher.TASK, task).put(Dispatcher.NEW_STATE, Dispatcher.FINISHED).encodePrettily());
 				else {
+					vertx.eventBus().send(Dispatcher.ADDRESS + ":updateState", new JsonObject().put(Dispatcher.TASK, task).put(Dispatcher.NEW_STATE, Dispatcher.ABORTED).encodePrettily());
 					System.out.println("Task aborted, cause: " + res.cause().getMessage());
-					task.put(Dispatcher.STATE, Dispatcher.ABORTED);
 				}
-				vertx.eventBus().send(Dispatcher.ADDRESS + ":add", task.encodePrettily());
 				DistributedVerticle.decrementExecutions();
 			});
 		});
