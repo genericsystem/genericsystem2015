@@ -3,27 +3,29 @@ package org.genericsystem.watch;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.genericsystem.common.GSVertx;
 import org.genericsystem.common.Root;
 import org.genericsystem.cv.comparator.FillModelWithData;
 
+import com.sun.xml.internal.ws.api.pipe.Engine;
+
 import io.vertx.core.AbstractVerticle;
-import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.eventbus.MessageConsumer;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 
+/**
+ * The OcrVerticle receives a message from the event bus when an image has been successfully de-zoned. The image is then processed (e.g., transformed and OCR'd) and the results from the OCR are stored in Generic System.
+ * 
+ * @author Pierrik Lassalas
+ */
 public class OcrVerticle extends AbstractVerticle {
 
-	private static Logger log = LoggerFactory.getLogger(OcrVerticle.class);
 	private Root engine;
 
 	public static void main(String[] args) {
 		VertxOptions options = new VertxOptions().setMaxWorkerExecuteTime(Long.MAX_VALUE);
 		Vertx vertx = Vertx.vertx(options);
-		OcrVerticle ocrVerticle = new OcrVerticle();
+		OcrVerticle ocrVerticle = new OcrVerticle(FillModelWithData.getEngine());
 		vertx.deployVerticle(ocrVerticle, res -> {
 			if (res.failed())
 				throw new IllegalStateException("Deployment of verticles failed.", res.cause());
@@ -33,30 +35,19 @@ public class OcrVerticle extends AbstractVerticle {
 		deployTestVerticle();
 	}
 
-	public OcrVerticle() {
-
-	}
-
+	/**
+	 * Default constructor. A reference to an {@link Engine} must be provided to be able to save the results.
+	 * 
+	 * @param engine - the engine used to store the data
+	 */
 	public OcrVerticle(Root engine) {
 		this.engine = engine;
 	}
 
 	/**
-	 * Deploy an OcrVerticle as a new worker. This Verticle is given a reference to the GS engine, which will be passed as an argument in the external method calls.
-	 */
-	public void deployOcrVerticle() {
-		DeploymentOptions options = new DeploymentOptions().setWorker(true);
-		GSVertx.vertx().getVertx().deployVerticle(this, options, res -> {
-			if (res.failed())
-				throw new IllegalStateException("Deployment of verticles failed.", res.cause());
-			else
-				System.out.println("OcrVerticle deployed");
-		});
-	}
-
-	/**
 	 * Test method to deploy a test Verticle that will send a message to the OCR Verticle.
-	 * 
+	 * <p>
+	 * <b>This method should only be used for testing purposes.</b>
 	 */
 	public static void deployTestVerticle() {
 		AbstractVerticle testVerticle = new AbstractVerticle() {
@@ -66,15 +57,10 @@ public class OcrVerticle extends AbstractVerticle {
 				vertx.eventBus().publish(VerticleDeployer.ACCURATE_ZONES_FOUND, imagePath.toString());
 			}
 		};
-		// VerticleDeployer.deployVerticle(testVerticle);
-		GSVertx.vertx().getVertx().deployVerticle(testVerticle, res -> {
-			if (res.failed())
-				throw new IllegalStateException("Deployment of verticles failed.", res.cause());
-			else
-				System.out.println("Test verticle deployed");
-		});
+		VerticleDeployerFromWatchApp.deployWorkerVerticle(testVerticle, "Deployment of verticles failed.");
 	}
 
+	// TODO: refactor the code, since the file is now stored before being sent to OCR (and thus, is always known)
 	@Override
 	public void start() throws Exception {
 		MessageConsumer<String> consumer = vertx.eventBus().consumer(VerticleDeployer.ACCURATE_ZONES_FOUND);

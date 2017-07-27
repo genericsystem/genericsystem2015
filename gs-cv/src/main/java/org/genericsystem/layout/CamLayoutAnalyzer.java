@@ -110,7 +110,7 @@ public class CamLayoutAnalyzer extends AbstractApp {
 			} catch (Exception e) {
 				e.printStackTrace();
 			} finally {
-				if ((count[0] % 10) == 0) {
+				if ((count[0] % 50) == 0) {
 					oldKeypoints[0] = newKeypoints;
 					oldDescriptors[0] = newDescriptors;
 					layout[0] = null;
@@ -145,20 +145,20 @@ public class CamLayoutAnalyzer extends AbstractApp {
 		if (goodMatches.size() > 30) {
 			Mat goodNewPoints = Converters.vector_Point2f_to_Mat(goodNewKeypoints);
 			MatOfPoint2f originalNewPoints = new MatOfPoint2f();
-			Core.transform(goodNewPoints, originalNewPoints, Imgproc.getRotationMatrix2D(new Point(size.width / 2, size.height / 2), -angle, 1));
+			Core.transform(goodNewPoints, originalNewPoints, Imgproc.getRotationMatrix2D(new Point(frame.size().width / 2, frame.size().height / 2), -angle, 1));
 			List<Point> shiftPoints = new ArrayList<>();
 			Converters.Mat_to_vector_Point2f(originalNewPoints, shiftPoints);
 			for (int i = 0; i < shiftPoints.size(); i++) {
-				double x = shiftPoints.get(i).x + crop * size.width / (1 - 2 * crop);
-				double y = shiftPoints.get(i).y + crop * size.height / (1 - 2 * crop);
+				double x = shiftPoints.get(i).x;// + crop * size.width / (1 - 2 * crop);
+				double y = shiftPoints.get(i).y;// + crop * size.height / (1 - 2 * crop);
 				shiftPoints.set(i, new Point(x, y));
 			}
 			Mat homography = Calib3d.findHomography(new MatOfPoint2f(shiftPoints.stream().toArray(Point[]::new)), new MatOfPoint2f(goodOldKeypoints.stream().toArray(Point[]::new)), Calib3d.RANSAC, 10);
 			Mat mask = new Mat(frame.size(), CvType.CV_8UC1, new Scalar(255));
 			Mat maskWarpped = new Mat();
-			Imgproc.warpPerspective(mask, maskWarpped, homography, size);
+			Imgproc.warpPerspective(mask, maskWarpped, homography, frame.size());
 			Mat tmp = new Mat();
-			Imgproc.warpPerspective(frame, tmp, homography, size, Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(255));
+			Imgproc.warpPerspective(frame, tmp, homography, frame.size(), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(255));
 			tmp.copyTo(stabilized, maskWarpped);
 			return new Img(stabilized, false);
 		}

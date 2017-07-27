@@ -4,12 +4,13 @@ import org.genericsystem.cv.Zones;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.MessageConsumer;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 
+/**
+ * The DezonerVerticle receives a message from the event bus when a new image has been added to a class. If this class has already been dezoned, a message will be sent to the {@link OcrVerticle}.
+ * 
+ * @author Pierrik Lassalas
+ */
 public class DezonerVerticle extends AbstractVerticle {
-
-	private static Logger log = LoggerFactory.getLogger(DezonerVerticle.class);
 
 	public static void main(String[] args) {
 		VerticleDeployer.deployVerticle(new DezonerVerticle());

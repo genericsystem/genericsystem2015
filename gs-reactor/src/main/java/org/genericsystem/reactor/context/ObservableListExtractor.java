@@ -13,16 +13,16 @@ import javafx.collections.ObservableList;
 public interface ObservableListExtractor extends Function<Generic[], ObservableList<Generic>> {
 
 	public static ObservableListExtractor from(Class<?>... genericClasses) {
-		return gs -> FXCollections.observableArrayList(Arrays.stream(genericClasses).map(gs[0].getRoot()::<Generic> find).collect(Collectors.toList()));
+		return gs -> FXCollections.observableArrayList(Arrays.stream(genericClasses).map(gs[0].getRoot()::<Generic>find).collect(Collectors.toList()));
 	}
 
 	public static final ObservableListExtractor INSTANCES = generics -> {
-		// System.out.println("INSTANCES : " + Arrays.toString(generics) + " " + generics[0].getObservableInstances());
+		// System.out.println("INSTANCES : " + Arrays.toString(generics) + " " + generics[0].getInstances().toObservableList());
 		return generics[0].getInstances().toObservableList();
 	};
 
 	public static final ObservableListExtractor SUBINSTANCES = generics -> {
-		// System.out.println("INSTANCES : " + Arrays.toString(generics) + " " + generics[0].getObservableSubInstances());
+		// System.out.println("INSTANCES : " + Arrays.toString(generics) + " " + generics[0].getSubInstances().toObservableList());
 		return generics[0].getSubInstances().toObservableList();
 	};
 
@@ -31,14 +31,12 @@ public interface ObservableListExtractor extends Function<Generic[], ObservableL
 	};
 
 	public static final ObservableListExtractor ATTRIBUTES_OF_TYPE = generics -> {
-		// System.out.println("ATTRIBUTES_OF_TYPE : " + Arrays.toString(generics) + " " + generics[0].getObservableAttributes().filtered(attribute ->
-		// attribute.isCompositeForInstances(generics[0])));
+		// System.out.println("ATTRIBUTES_OF_TYPE : " + Arrays.toString(generics) + " " + generics[0].getAttributes().toObservableList().filtered(attribute -> attribute.isCompositeForInstances(generics[0])));
 		return generics[0].getAttributes().toObservableList().filtered(attribute -> attribute.isCompositeForInstances(generics[0]));
 	};
 
 	public static final ObservableListExtractor ATTRIBUTES_OF_INSTANCES = generics -> {
-		// System.out.println("ATTRIBUTES_OF_INSTANCES : " + Arrays.toString(generics) + " " + generics[1].getObservableAttributes().filtered(attribute ->
-		// attribute.isCompositeForInstances(generics[1])));
+		// System.out.println("ATTRIBUTES_OF_INSTANCES : " + Arrays.toString(generics) + " " + generics[1].getAttributes().toObservableList().filtered(attribute -> attribute.isCompositeForInstances(generics[1])));
 		return generics[1].getAttributes().toObservableList().filtered(attribute -> attribute.isCompositeForInstances(generics[1]));
 	};
 
@@ -48,7 +46,7 @@ public interface ObservableListExtractor extends Function<Generic[], ObservableL
 	};
 
 	public static final ObservableListExtractor HOLDERS = generics -> {
-		// System.out.println("HOLDERS : " + Arrays.toString(generics) + " " + generics[1].getObservableHolders(generics[0]));
+		// System.out.println("HOLDERS : " + Arrays.toString(generics) + " " + generics[1].getHolders(generics[0]).toObservableList());
 		ObservableList<Generic> holders = generics[1].getHolders(generics[0]).toObservableList();
 		return holders;
 	};

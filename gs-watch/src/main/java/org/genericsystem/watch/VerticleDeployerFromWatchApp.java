@@ -12,25 +12,17 @@ import io.vertx.core.Verticle;
  * This class allow the deployment of a series of verticles from a gs-reactor application (WatchApp).
  * 
  * @author Pierrik Lassalas
- *
  */
 public class VerticleDeployerFromWatchApp extends AbstractVerticle {
 
-	private static final String gsPath = System.getenv("HOME") + "/genericsystem/gs-cv_model3/";
 	private static final DeploymentOptions OPTIONS_NORMAL = new DeploymentOptions();
 	private static final DeploymentOptions OPTIONS_WORKER = new DeploymentOptions().setWorker(true).setMaxWorkerExecuteTime(Long.MAX_VALUE);
 	private Root root;
 
-	// public VerticleDeployerFromWatchApp() {
-	// this.root = new Engine(gsPath, Doc.class, RefreshTimestamp.class, DocTimestamp.class, DocFilename.class, DocClass.class, ZoneGeneric.class, ZoneText.class, ZoneTimestamp.class, ImgFilter.class, LevDistance.class, MeanLevenshtein.class,
-	// Score.class);
-	// }
-
 	/**
 	 * Constructor of this class.
 	 * 
-	 * @param root
-	 *            - the engine (from the application deployed with gs-reactor)
+	 * @param root - the engine (from the application deployed with gs-reactor)
 	 */
 	public VerticleDeployerFromWatchApp(Root root) {
 		this.root = root;
@@ -39,12 +31,9 @@ public class VerticleDeployerFromWatchApp extends AbstractVerticle {
 	/**
 	 * Deploy a single worker verticle.
 	 * 
-	 * @param verticle
-	 *            - the verticle to deploy
-	 * @param errorMessage
-	 *            - the error message that will be displayed if the deployment fails
-	 * @throws IllegalStateException
-	 *             when the verticle can not be deployed
+	 * @param verticle - the verticle to deploy
+	 * @param errorMessage - the error message that will be displayed if the deployment fails
+	 * @throws IllegalStateException when the verticle can not be deployed
 	 */
 	public static void deployWorkerVerticle(Verticle verticle, String errorMessage) throws IllegalStateException {
 		GSVertx.vertx().getVertx().deployVerticle(verticle, OPTIONS_WORKER, res -> {

@@ -12,8 +12,8 @@ import io.vertx.core.json.JsonObject;
 
 public class PdfConverterVerticle extends ActionVerticle {
 
-	public PdfConverterVerticle(String privateAddress, String privatePath, String ip) {
-		super(privateAddress, privatePath, ip);
+	public PdfConverterVerticle(String privateAddress, String ip) {
+		super(privateAddress, ip);
 	}
 
 	public static final String ACTION = "pdfToPng";
@@ -25,7 +25,7 @@ public class PdfConverterVerticle extends ActionVerticle {
 
 	@Override
 	protected void handle(Future<Object> future, JsonObject task) {
-		File file = new File(task.getString(DistributedVerticle.FILENAME));
+		File file = new File(DistributedVerticle.BASE_PATH + task.getString(DistributedVerticle.FILENAME));
 		List<Path> createdPngs = PdfToPngConverter.convertPdfToImages(file, new File("../gs-cv/png"));
 		future.complete(createdPngs);
 	}

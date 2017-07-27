@@ -7,6 +7,7 @@ import org.genericsystem.watch.beta.Model.Task;
 import org.genericsystem.watch.beta.RoundRobin;
 
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
@@ -29,21 +30,10 @@ public class Dispatcher extends AbstractVerticle {
 	public static final String ADDRESS = "org.genericsystem.repartitor";
 	protected static final String STATE = "state";
 	protected static final String TODO = "todo";
-	private static final String INPROGRESS = "IN PROGRESS";
-	private static final String STARTED = "started";
 	protected static final String FINISHED = "finished";
 	protected static final String ABORTED = "aborted";
 	private static final long MESSAGE_SEND_PERIODICITY = 5000;
 	private static final DeliveryOptions TIMEOUT = new DeliveryOptions().setSendTimeout(2000);
-
-	public Dispatcher(String ip) {
-		cache.safeConsum(nothing -> {
-			taskType.addInstance(new JsonObject().put(STATE, TODO).put(DistributedVerticle.FILENAME, "pdf/image.pdf").put(DistributedVerticle.IP, ip).put(DistributedVerticle.TYPE, DownloadVerticle.ACTION).encodePrettily());
-			taskType.addInstance(new JsonObject().put(STATE, TODO).put(DistributedVerticle.FILENAME, "pdf/image2.pdf").put(DistributedVerticle.IP, ip).put(DistributedVerticle.TYPE, DownloadVerticle.ACTION).encodePrettily());
-			taskType.addInstance(new JsonObject().put(STATE, TODO).put(DistributedVerticle.FILENAME, "pdf/image3.pdf").put(DistributedVerticle.IP, ip).put(DistributedVerticle.TYPE, DownloadVerticle.ACTION).encodePrettily());
-			cache.flush();
-		});
-	}
 
 	public static void main(String[] args) {
 		ClusterManager mgr = new HazelcastClusterManager();
@@ -57,7 +47,7 @@ public class Dispatcher extends AbstractVerticle {
 			if (res.failed())
 				throw new IllegalStateException(res.cause());
 			Vertx vertx = res.result();
-			vertx.deployVerticle(new Dispatcher(ip), res_ -> {
+			vertx.deployVerticle(new Dispatcher(), res_ -> {
 				if (res_.failed())
 					throw new IllegalStateException(res_.cause());
 			});
@@ -66,11 +56,21 @@ public class Dispatcher extends AbstractVerticle {
 
 	@Override
 	public void start(Future<Void> startFuture) throws Exception {
+		watchMail();
+		vertx.deployVerticle(new HttpServerVerticle(), ar -> {
+			if (ar.failed())
+				throw new IllegalStateException("Unable to create HTTP server.", ar.cause());
+			else
+				System.out.println("HTTP server started.");
+		});
+		vertx.eventBus().consumer(ADDRESS + ":watchMail", message -> {
+			System.out.println("Restarting mail watcher thread…");
+			watchMail();
+		});
 		vertx.eventBus().consumer(DistributedVerticle.PUBLIC_ADDRESS, message -> {
 			roundRobin.register((String) message.body());
 		});
 		vertx.eventBus().consumer(ADDRESS + ":add", message -> {
-			System.out.println("Add consumer: " + message.body());
 			cache.safeConsum(unused -> {
 				taskType.addInstance((String) message.body());
 				cache.flush();
@@ -87,7 +87,7 @@ public class Dispatcher extends AbstractVerticle {
 							vertx.eventBus().send(robin + ":" + json.getString(DistributedVerticle.TYPE), json.encodePrettily(), TIMEOUT, reply -> {
 								if (reply.failed()) {
 									roundRobin.remove(robin);
-									throw new IllegalStateException(reply.cause());
+									// throw new IllegalStateException(reply.cause());
 								} else if (OK.equals(reply.result().body()))
 									cache.safeConsum(unused_ -> task.remove());
 							});
@@ -98,5 +98,19 @@ public class Dispatcher extends AbstractVerticle {
 			});
 		});
 		startFuture.complete();
+	}
+
+	private void watchMail() {
+		vertx.fileSystem().readFile("src/main/conf/MailWatcherVerticle.json", ar -> {
+			if (ar.failed())
+				throw new IllegalStateException("Impossible to load configuration for MailWatcherVerticle.", ar.cause());
+			else {
+				JsonObject config = new JsonObject(ar.result());
+				vertx.deployVerticle(new MailWatcherVerticle(), new DeploymentOptions().setConfig(config), res_ -> {
+					if (res_.failed())
+						throw new IllegalStateException("Unable to deploy MailWatcherVerticle", res_.cause());
+				});				
+			}
+		});
 	}
 }

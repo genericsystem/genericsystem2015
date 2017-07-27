@@ -12,8 +12,8 @@ import io.vertx.core.json.JsonObject;
 
 public class ClassifierVerticle extends ActionVerticle {
 
-	public ClassifierVerticle(String privateAddress, String privatePath, String ip) {
-		super(privateAddress, privatePath, ip);
+	public ClassifierVerticle(String privateAddress, String ip) {
+		super(privateAddress, ip);
 	}
 
 	public static final String ACTION = "classification";
@@ -25,7 +25,7 @@ public class ClassifierVerticle extends ActionVerticle {
 
 	@Override
 	protected void handle(Future<Object> future, JsonObject task) {
-		File file = new File(task.getString(DistributedVerticle.FILENAME));
+		File file = new File(DistributedVerticle.BASE_PATH + task.getString(DistributedVerticle.FILENAME));
 		Path savedFile;
 		synchronized (ClassifierVerticle.class) {
 			savedFile = Classifier.classify(Paths.get("../gs-cv/classes/"), file.toPath());

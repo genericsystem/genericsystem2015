@@ -21,7 +21,6 @@ public class DistributedVerticle extends AbstractVerticle {
 	protected static final String TYPE = "type";
 	protected static final String IP = "IP";
 	private final String PRIVATE_ADDRESS;
-	private final String PRIVATE_PATH;
 	private static final DeliveryOptions TIMEOUT = new DeliveryOptions().setSendTimeout(500);
 	private final RoundRobin roundrobin;
 
@@ -35,14 +34,12 @@ public class DistributedVerticle extends AbstractVerticle {
 		this.ip = ip;
 		this.roundrobin = roundRobin;
 		this.PRIVATE_ADDRESS = ip + ":" + hashCode();
-		this.PRIVATE_PATH = System.getenv("HOME") + "/copy/" + PRIVATE_ADDRESS + "/";
 	}
 
 	@Override
 	public void start() throws Exception {
-		vertx.deployVerticle(new DownloadVerticle(PRIVATE_ADDRESS, PRIVATE_PATH, ip));
-		vertx.deployVerticle(new PdfConverterVerticle(PRIVATE_ADDRESS, PRIVATE_PATH, ip));
-		vertx.deployVerticle(new ClassifierVerticle(PRIVATE_ADDRESS, PRIVATE_PATH, ip));
+		vertx.deployVerticle(new PdfConverterVerticle(PRIVATE_ADDRESS, ip));
+		vertx.deployVerticle(new ClassifierVerticle(PRIVATE_ADDRESS, ip));
 		vertx.eventBus().consumer(PUBLIC_ADDRESS, message -> {
 			roundrobin.register((String) message.body());
 		});
