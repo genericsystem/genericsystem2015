@@ -1,14 +1,5 @@
 package org.genericsystem.watch.gui.pages;
 
-import org.apache.commons.lang3.StringEscapeUtils;
-import org.genericsystem.common.Root;
-import org.genericsystem.cv.model.Doc.DocInstance;
-import org.genericsystem.cv.model.Doc.RefreshTimestamp;
-import org.genericsystem.cv.model.Doc.RefreshTimestamp.RefreshTimestampInstance;
-import org.genericsystem.cv.model.ModelTools;
-import org.genericsystem.cv.model.ZoneText.ZoneTextInstance;
-import org.genericsystem.reactor.Context;
-import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.Attribute;
 import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.BindText;
@@ -23,7 +14,6 @@ import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.context.ContextAction.CANCEL;
 import org.genericsystem.reactor.context.ContextAction.RESET_SELECTION;
 import org.genericsystem.reactor.context.ObservableContextSelector.SELECTION_SELECTOR;
-import org.genericsystem.reactor.context.TextBinding;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.FlexDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
@@ -34,10 +24,11 @@ import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
 import org.genericsystem.watch.gui.pages.DocZonesShow.TextDiv;
 import org.genericsystem.watch.gui.utils.ContextActionCustom.REFRESH_BEST_TEXT;
 import org.genericsystem.watch.gui.utils.ObservableListExtractorCustom.ZONE_SELECTOR_BEST;
+import org.genericsystem.watch.gui.utils.TextBindingCustom.LAST_REFRESH_UPDATE_LABEL;
+import org.genericsystem.watch.gui.utils.TextBindingCustom.ZONE_LABEL;
+import org.genericsystem.watch.gui.utils.TextBindingCustom.ZONE_TEXT;
 
-import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.value.ObservableValue;
 
 @Children(FlexDiv.class)
 @Children(path = FlexDiv.class, value = { HtmlHyperLink.class, TextDiv.class })
@@ -114,40 +105,13 @@ public class DocZonesShow extends ModalEditor {
 		// Define the div containing the OCR text
 	}
 
-	@BindText(LAST_UPDATE_LABEL.class)
+	@BindText(LAST_REFRESH_UPDATE_LABEL.class)
 	@Style(name = "margin", value = "0.5em")
 	@Style(name = "flex", value = "0 0 auto")
 	@Style(name = "justify-content", value = "center")
 	@Style(name = "align-items", value = "center")
 	public static class LastUpdate extends FlexDiv {
 		// Print the timestamp of the last refresh
-	}
-
-	public static class ZONE_LABEL implements TextBinding {
-		@Override
-		public ObservableValue<String> apply(Context context, Tag tag) {
-			return new SimpleStringProperty("Zone " + ((ZoneTextInstance) context.getGeneric()).getZone());
-		}
-	}
-
-	public static class ZONE_TEXT implements TextBinding {
-		@Override
-		public ObservableValue<String> apply(Context context, Tag tag) {
-			return new SimpleStringProperty(StringEscapeUtils.escapeHtml4(context.getGeneric().getValue().toString()));
-		}
-	}
-
-	public static class LAST_UPDATE_LABEL implements TextBinding {
-		@Override
-		public ObservableValue<String> apply(Context context, Tag tag) {
-			DocInstance currentDoc = (DocInstance) context.getGeneric();
-			Root root = currentDoc.getRoot();
-			RefreshTimestamp refreshTimestamp = root.find(RefreshTimestamp.class);
-			return Bindings.createStringBinding(() -> {
-				RefreshTimestampInstance timeStamp = refreshTimestamp.getRefreshTimestamp(currentDoc);
-				return timeStamp == null ? "Last update: none" : "Last update: " + ModelTools.formatDate((Long) timeStamp.getValue());
-			}, refreshTimestamp.getInstances().toObservableList());
-		}
 	}
 
 }

@@ -1,27 +1,18 @@
 package org.genericsystem.watch.gui.pages;
 
-import org.genericsystem.cv.model.Doc.DocInstance;
-import org.genericsystem.cv.model.ImgFilter.ImgFilterInstance;
-import org.genericsystem.cv.model.ZoneText;
-import org.genericsystem.cv.model.ZoneText.ZoneTextInstance;
-import org.genericsystem.reactor.Context;
-import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.StyleClass;
-import org.genericsystem.reactor.context.TextBinding;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.FlexDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlHyperLink;
 import org.genericsystem.reactor.gscomponents.Modal.ModalWithDisplay;
 import org.genericsystem.watch.gui.pages.DocZonesShowDetails.FiltersDiv;
 import org.genericsystem.watch.gui.utils.ObservableListExtractorCustom.OCR_SELECTOR;
-
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.value.ObservableValue;
+import org.genericsystem.watch.gui.utils.TextBindingCustom.OCR_TEXT;
 
 //@Children(FlexDiv.class)
 @Children(path = FlexDiv.class, value = { HtmlHyperLink.class, FiltersDiv.class })
@@ -50,18 +41,6 @@ public class DocZonesShowDetails extends ModalWithDisplay {
 	@StyleClass({ "ocr", "ocr-text" })
 	public static class FiltersOcrText extends FlexDiv {
 		// Print the ocr text for the corresponding filter
-	}
-
-	public static class OCR_TEXT implements TextBinding {
-		@Override
-		public ObservableValue<String> apply(Context context, Tag tag) {
-			ZoneText zt = (ZoneText) context.getGeneric().getRoot().find(ZoneText.class);
-			ImgFilterInstance ifi = (ImgFilterInstance) context.getGeneric();
-			ZoneTextInstance zti = (ZoneTextInstance) context.getGenerics()[1];
-			DocInstance doc = zti.getDoc();
-			ZoneTextInstance text = zt.getZoneText(doc, zti.getZone(), ifi);
-			return new SimpleStringProperty(text == null ? "" : text.getValue().toString());
-		}
 	}
 
 }

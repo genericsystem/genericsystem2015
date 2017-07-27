@@ -1,12 +1,5 @@
 package org.genericsystem.watch.gui.pages;
 
-import org.genericsystem.common.Generic;
-import org.genericsystem.common.Root;
-import org.genericsystem.cv.model.Doc.DocInstance;
-import org.genericsystem.cv.model.Doc.DocTimestamp;
-import org.genericsystem.cv.model.ModelTools;
-import org.genericsystem.reactor.Context;
-import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.Attribute;
 import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.BindText;
@@ -25,7 +18,6 @@ import org.genericsystem.reactor.context.ContextAction.SET_NORMAL_MODE;
 import org.genericsystem.reactor.context.ContextAction.SET_SELECTION;
 import org.genericsystem.reactor.context.TagSwitcher.ADMIN_MODE_ONLY;
 import org.genericsystem.reactor.context.TagSwitcher.NORMAL_MODE_ONLY;
-import org.genericsystem.reactor.context.TextBinding;
 import org.genericsystem.reactor.gscomponents.AppHeader;
 import org.genericsystem.reactor.gscomponents.AppHeader.AppTitleDiv;
 import org.genericsystem.reactor.gscomponents.AppHeader.Logo;
@@ -52,11 +44,8 @@ import org.genericsystem.watch.gui.utils.DocPropertiesSwitcher.DOC_SUPERVISED;
 import org.genericsystem.watch.gui.utils.ObservableListExtractorCustom.DOC_CLASS_SELECTOR;
 import org.genericsystem.watch.gui.utils.ObservableListExtractorCustom.DOC_SELECTOR;
 import org.genericsystem.watch.gui.utils.PageSwitcher.HOME_PAGE;
-
-import javafx.beans.binding.Bindings;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.value.ObservableValue;
+import org.genericsystem.watch.gui.utils.TextBindingCustom.DOC_CLASS_LABEL;
+import org.genericsystem.watch.gui.utils.TextBindingCustom.LAST_DOC_UPDATE_LABEL;
 
 @Switch(HOME_PAGE.class)
 @Children({ DocZonesEdit.class, AppHeader.class, FlexDiv.class/* , Monitor.class */ })
@@ -206,7 +195,7 @@ public class HomePage extends FlexDiv {
 
 	}
 
-	@BindText(LAST_UPDATE_LABEL.class)
+	@BindText(LAST_DOC_UPDATE_LABEL.class)
 	@Style(name = "justify-content", value = "center")
 	@Style(name = "align-items", value = "center")
 	@Style(name = "flex", value = "3")
@@ -214,23 +203,4 @@ public class HomePage extends FlexDiv {
 
 	}
 
-	public static class DOC_CLASS_LABEL implements TextBinding {
-		@Override
-		public ObservableValue<String> apply(Context context, Tag tag) {
-			return new SimpleStringProperty("Doc class: " + context.getGeneric().getValue().toString());
-		}
-	}
-
-	public static class LAST_UPDATE_LABEL implements TextBinding {
-		@Override
-		public ObservableValue<String> apply(Context context, Tag tag) {
-			DocInstance currentDoc = (DocInstance) context.getGeneric();
-			Root root = currentDoc.getRoot();
-			DocTimestamp docTimestamp = root.find(DocTimestamp.class);
-			SimpleObjectProperty<Generic> timeStamp = new SimpleObjectProperty<>(docTimestamp.getDocTimestamp(currentDoc));
-			return Bindings.createStringBinding(() -> {
-				return null == timeStamp ? "n/a" : ModelTools.formatDate((Long) timeStamp.get().getValue());
-			}, timeStamp);
-		}
-	}
 }

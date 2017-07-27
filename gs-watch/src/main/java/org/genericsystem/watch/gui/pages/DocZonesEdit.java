@@ -3,9 +3,7 @@ package org.genericsystem.watch.gui.pages;
 import java.io.Serializable;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.cv.model.ZoneText.ZoneTextInstance;
 import org.genericsystem.reactor.Context;
-import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.Attribute;
 import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.BindText;
@@ -20,7 +18,6 @@ import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.context.ContextAction.CANCEL;
 import org.genericsystem.reactor.context.ContextAction.RESET_SELECTION;
 import org.genericsystem.reactor.context.ObservableContextSelector.SELECTION_SELECTOR;
-import org.genericsystem.reactor.context.TextBinding;
 import org.genericsystem.reactor.contextproperties.SelectionDefaults;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.FlexDiv;
@@ -37,9 +34,9 @@ import org.genericsystem.watch.gui.pages.DocZonesEdit.TextDiv;
 import org.genericsystem.watch.gui.utils.ContextActionCustom.SAVE;
 import org.genericsystem.watch.gui.utils.ObservableListExtractorCustom.DATALIST_SELECTOR;
 import org.genericsystem.watch.gui.utils.ObservableListExtractorCustom.ZONE_SELECTOR_REALITY;
+import org.genericsystem.watch.gui.utils.TextBindingCustom.ZONE_LABEL;
 
 import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.value.ObservableValue;
 
 @Children(FlexDiv.class)
 @Children(path = FlexDiv.class, value = { HtmlHyperLink.class, TextDiv.class })
@@ -131,22 +128,10 @@ public class DocZonesEdit extends ModalEditor {
 		// TODO: remove next function?
 		@Override
 		protected Generic updateGeneric(Context context, Serializable newValue) {
-			// ZoneTextInstance zti = (ZoneTextInstance) context.getGeneric();
-			// DocInstance docInstance = zti.getDoc();
-			// ZoneInstance zoneInstance = zti.getZone();
-			// ImgFilterInstance imgFilterInstance = zti.getImgFilter();
-			// return context.getGeneric().getMeta().setInstance(newValue, docInstance, zoneInstance, imgFilterInstance);
 			long start = System.nanoTime();
 			Generic updateValue = context.getGeneric().updateValue(newValue);
 			System.out.println("==> update: " + (System.nanoTime() - start) / 1_000_000 + "ms");
 			return updateValue;
-		}
-	}
-
-	public static class ZONE_LABEL implements TextBinding {
-		@Override
-		public ObservableValue<String> apply(Context context, Tag tag) {
-			return new SimpleStringProperty("Zone " + ((ZoneTextInstance) context.getGeneric()).getZone());
 		}
 	}
 
