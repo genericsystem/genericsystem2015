@@ -15,6 +15,8 @@ public class Zone {
 	private Rect rect;
 	private int num;
 
+	private String label;
+
 	public Zone() {
 	}
 
@@ -106,6 +108,14 @@ public class Zone {
 		} else if (!rect.equals(other.rect))
 			return false;
 		return true;
+	}
+
+	public String getLabel() {
+		return label;
+	}
+
+	public void setLabel(String label) {
+		this.label = label;
 	}
 
 }

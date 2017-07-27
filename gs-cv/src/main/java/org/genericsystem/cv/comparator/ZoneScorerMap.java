@@ -41,7 +41,6 @@ public class ZoneScorerMap {
 			// Loop over each entry and get the OCR
 			stream.forEach(entry -> {
 				String ocrText = zone.ocr(entry.getKey());
-				ocrText = ocrText.replace("\n", "").replaceAll("\t", "").trim();
 				// Store the OCR text
 				scores.put(ocrText);
 				// Store the OCR text corresponding to the filter
@@ -49,7 +48,7 @@ public class ZoneScorerMap {
 			});
 
 			// Log every OCR and filter names
-			if (supervised){
+			if (supervised) {
 				log(writer, this.getSupervisedResultsMap());
 			} else {
 				log(writer, this.getResultsMap());
@@ -73,8 +72,7 @@ public class ZoneScorerMap {
 	private void log(FileWriter writer, Map<String, Integer> map) throws IOException {
 		map.entrySet().stream().forEach(entry -> {
 			try {
-				writer.append(Integer.toString(zone.getNum())).append(delimiter).append(entry.getKey())
-						.append(delimiter).append(entry.getValue().toString()).append("\n");
+				writer.append(Integer.toString(zone.getNum())).append(delimiter).append(entry.getKey()).append(delimiter).append(entry.getValue().toString()).append("\n");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
