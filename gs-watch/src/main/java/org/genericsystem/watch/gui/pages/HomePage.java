@@ -68,7 +68,7 @@ public class HomePage extends FlexDiv {
 	@BindAction(path = HtmlButton.class, pos = 0, value = CALL_STATISTICS_PAGE.class)
 	@BindAction(path = HtmlButton.class, pos = 1, value = TEST.class)
 	public static class GeneralActionsButtonsDiv extends FlexDiv {
-
+		// TODO implement the action that will resume the waiting tasks
 	}
 
 	@Children({ HtmlLabel.class, HtmlLabel.class, HtmlLabel.class, HtmlLabel.class, HtmlLabel.class, HtmlLabel.class })
@@ -92,13 +92,15 @@ public class HomePage extends FlexDiv {
 	@Children(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 1 }, value = DocumentsList.class)
 	@BindText(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 0 }, value = DOC_CLASS_LABEL.class)
 	@StyleClass(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 0 }, value = "doc-class-title")
+	@Style(name = "width", value = "90%")
+	@Style(name = "margin", value = "auto")
 	public static class DocClassDiv extends FlexDiv {
 
 	}
 
 	@ForEach(DOC_SELECTOR.class)
+	@StyleClass("alternate-rows")
 	@FlexDirectionStyle(FlexDirection.ROW)
-	@Style(name = "margin", value = "0.5em")
 	@Children({ DocumentName.class, FlexDiv.class, ModalFlexDiv.class, FlexDiv.class, DocumentDeleteButtonDiv.class, LastDocumentUpdateDiv.class })
 
 	// TODO: include a link to a dezoner for the first column
@@ -119,7 +121,6 @@ public class HomePage extends FlexDiv {
 	@Switch(path = { FlexDiv.class, HtmlHyperLink.class, CheckedImage.class }, pos = { 3, 0, 0 }, value = DOC_SUPERVISED.class)
 	@Switch(path = { FlexDiv.class, HtmlHyperLink.class, FailedImage.class }, pos = { 3, 0, 0 }, value = DOC_NOT_SUPERVISED.class)
 	@StyleClass(path = { FlexDiv.class, HtmlImg.class }, value = "img")
-	@Style(name = "margin", value = "0.5em")
 	@Style(path = FlexDiv.class, pos = 0, name = "flex", value = "3")
 	@Style(path = FlexDiv.class, name = "flex", value = "1")
 	@Style(path = FlexDiv.class, name = "justify-content", value = "center")

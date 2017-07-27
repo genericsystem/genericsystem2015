@@ -7,6 +7,7 @@ import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
+import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.contextproperties.SelectionDefaults;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.FlexDiv;
@@ -23,13 +24,14 @@ import org.genericsystem.watch.gui.utils.TextBindingCustom.ZONE_LABEL2;
 @Children({ HeaderRow.class, FlexDiv.class })
 @Children(path = FlexDiv.class, pos = 1, value = ContentRow.class)
 @ForEach(path = FlexDiv.class, pos = 1, value = ZONE_SELECTOR.class)
+@StyleClass(path = FlexDiv.class, pos = 1, value = "alternate-rows")
 @FlexDirectionStyle(path = FlexDiv.class, pos = 1, value = FlexDirection.COLUMN)
 public class StatisticsTable extends FlexDiv implements SelectionDefaults {
 
 	@Children({ HtmlLabel.class, HtmlLabel.class, HtmlLabel.class, HtmlLabel.class })
 	@FlexDirectionStyle(FlexDirection.ROW)
 	@Attribute(path = HtmlLabel.class, name = "name", value = "title")
-	@Style(name = "margin", value = "0.5em")
+	@StyleClass("statistics-header-row")
 	@Style(path = HtmlLabel.class, name = "justify-content", value = "center")
 	@Style(path = HtmlLabel.class, name = "align-items", value = "center")
 	@Style(path = HtmlLabel.class, name = "flex", value = "1")

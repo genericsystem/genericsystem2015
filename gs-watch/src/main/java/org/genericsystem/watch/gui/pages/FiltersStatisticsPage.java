@@ -59,7 +59,7 @@ public class FiltersStatisticsPage extends FlexDiv {
 	@Style(path = FlexDiv.class, pos = 0, name = "align-items", value = "center")
 	@Style(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 0 }, name = "flex", value = "1 1 auto")
 	@Style(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 1 }, name = "flex", value = "0 1 auto")
-	@StyleClass(path = FlexDiv.class, pos = 0, value = "doc-class-title")
+	@StyleClass(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 0 }, value = "doc-class-title")
 	@Style(name = "width", value = "90%")
 	@Style(name = "margin", value = "auto")
 	@ForEach(DOC_CLASS_SELECTOR.class)
