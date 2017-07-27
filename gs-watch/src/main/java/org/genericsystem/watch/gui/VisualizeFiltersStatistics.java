@@ -6,28 +6,22 @@ import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
 import org.genericsystem.cv.comparator.ComputeTrainedScores;
-import org.genericsystem.cv.model.Doc;
 import org.genericsystem.cv.model.DocClass;
 import org.genericsystem.cv.model.DocClass.DocClassInstance;
-import org.genericsystem.cv.model.ImgFilter;
 import org.genericsystem.cv.model.MeanLevenshtein;
 import org.genericsystem.cv.model.Score;
 import org.genericsystem.cv.model.Score.ScoreInstance;
-import org.genericsystem.cv.model.ZoneGeneric;
-import org.genericsystem.cv.model.ZoneText;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
-import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.annotations.Switch;
-import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.context.ContextAction;
 import org.genericsystem.reactor.context.ObservableListExtractor;
 import org.genericsystem.reactor.context.TagSwitcher;
@@ -38,10 +32,10 @@ import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.FlexDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlH1;
-import org.genericsystem.reactor.gscomponents.RootTagImpl;
 import org.genericsystem.watch.VerticleDeployerFromWatchApp;
 import org.genericsystem.watch.gui.PageSwitcher.FILTERS_STATISTICS;
 import org.genericsystem.watch.gui.VisualizeFiltersStatistics.DocClassStatisticsDiv;
+import org.genericsystem.watch.gui.VisualizeFiltersStatistics.GeneralButtonsDiv;
 
 import io.vertx.core.Verticle;
 import javafx.beans.binding.Bindings;
@@ -56,21 +50,20 @@ import javafx.collections.ObservableList;
  */
 // TODO: redesign the interface (smaller, add foreach loops)
 @Switch(FILTERS_STATISTICS.class)
-@DependsOnModel({ Doc.class, DocClass.class, ZoneGeneric.class, ZoneText.class, ImgFilter.class, Score.class, MeanLevenshtein.class })
 @Style(name = "background-color", value = "#ffffff")
-@Children({ AppHeader.class, DocClassStatisticsDiv.class })
+@Children({ AppHeader.class, FlexDiv.class })
+@Children(path = FlexDiv.class, pos = 1, value = { GeneralButtonsDiv.class, DocClassStatisticsDiv.class })
 @Style(path = AppHeader.class, name = "background-color", value = "#00afeb")
 @Children(path = AppHeader.class, value = { Logo.class, AppTitleDiv.class })
 @SetText(path = { AppHeader.class, AppTitleDiv.class, HtmlH1.class }, value = "Global OCR accuracy per zone")
-public class VisualizeFiltersStatistics extends RootTagImpl {
+public class VisualizeFiltersStatistics extends FlexDiv {
 
-	public static void main(String[] mainArgs) {
-		ApplicationServer.startSimpleGenericApp(mainArgs, VisualizeFiltersStatistics.class, "/gs-cv_model3");
-	}
+	@FlexDirectionStyle(FlexDirection.ROW)
+	@Children(HtmlButton.class)
+	@SetText(path = HtmlButton.class, value = "Home Page")
+	@BindAction(path = HtmlButton.class, pos = 0, value = CALL_HOME_PAGE.class)
+	public static class GeneralButtonsDiv extends FlexDiv {
 
-	@Override
-	public void init() {
-		createNewInitializedProperty(PageSwitcher.PAGE, c -> PageSwitcher.FILTERS_STATISTICS);
 	}
 
 	@Children({ FlexDiv.class, FlexDiv.class })
@@ -134,6 +127,14 @@ public class VisualizeFiltersStatistics extends RootTagImpl {
 				score.getInstances().forEach(g -> System.out.println(((ScoreInstance) g).getZone().getDocClass())); // XXX why null?
 				return true;
 			});
+		}
+	}
+
+	public static class CALL_HOME_PAGE implements ContextAction {
+		@Override
+		public void accept(Context context, Tag tag) {
+			System.out.println("Redirecting to home page");
+			tag.setInheritedContextPropertyValue(PageSwitcher.PAGE, context, PageSwitcher.HOME_PAGE);
 		}
 	}
 
