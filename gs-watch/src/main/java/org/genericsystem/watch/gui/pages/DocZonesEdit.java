@@ -1,4 +1,4 @@
-package org.genericsystem.watch.gui;
+package org.genericsystem.watch.gui.pages;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -42,7 +42,7 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlOption;
 import org.genericsystem.reactor.gscomponents.InputTextWithConversion.InputTextEditorWithConversionForDatalist;
 import org.genericsystem.reactor.gscomponents.InputWithDatalist;
 import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
-import org.genericsystem.watch.gui.EditDocumentZones.TextDiv;
+import org.genericsystem.watch.gui.pages.DocZonesEdit.TextDiv;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
@@ -55,7 +55,7 @@ import javafx.collections.ObservableList;
 @Style(path = FlexDiv.class, name = "max-height", value = "90%")
 @Style(path = FlexDiv.class, name = "width", value = "inherit")
 @BindAction(path = { FlexDiv.class, HtmlHyperLink.class }, value = RESET_SELECTION.class)
-public class EditDocumentZones extends ModalEditor {
+public class DocZonesEdit extends ModalEditor {
 
 	@FlexDirectionStyle(FlexDirection.COLUMN)
 	@FlexDirectionStyle(path = FlexDiv.class, value = FlexDirection.ROW)
@@ -99,7 +99,7 @@ public class EditDocumentZones extends ModalEditor {
 	}
 
 	@FlexDirectionStyle(FlexDirection.COLUMN)
-	@Children({ ZoneLabelInput.class/* , ZonesDetails.class */ }) // XXX
+	@Children({ ZoneLabelInput.class/* , DocZonesShowDetails.class */ }) // XXX
 	@ForEach(ZONE_SELECTOR.class)
 	public static class ZoneTextDiv extends FlexDiv {
 		// For each zone, create a div with label + inputText and create a div for the results for all filters

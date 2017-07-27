@@ -1,4 +1,4 @@
-package org.genericsystem.watch.gui;
+package org.genericsystem.watch.gui.pages;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.genericsystem.api.core.Snapshot;
@@ -38,7 +38,8 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlImg;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
 import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
 import org.genericsystem.watch.VerticleDeployerFromWatchApp;
-import org.genericsystem.watch.gui.ShowDocumentZones.TextDiv;
+import org.genericsystem.watch.gui.pages.DocZonesShow.TextDiv;
+import org.genericsystem.watch.gui.utils.WorkerVerticle;
 
 import io.vertx.core.Verticle;
 import javafx.beans.binding.Bindings;
@@ -53,7 +54,7 @@ import javafx.collections.ObservableList;
 @Style(path = FlexDiv.class, name = "max-height", value = "90%")
 @Style(path = FlexDiv.class, name = "width", value = "inherit")
 @BindAction(path = { FlexDiv.class, HtmlHyperLink.class }, value = RESET_SELECTION.class)
-public class ShowDocumentZones extends ModalEditor {
+public class DocZonesShow extends ModalEditor {
 
 	@FlexDirectionStyle(FlexDirection.COLUMN)
 	@FlexDirectionStyle(path = FlexDiv.class, value = FlexDirection.ROW)

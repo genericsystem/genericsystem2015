@@ -1,4 +1,4 @@
-package org.genericsystem.watch.gui;
+package org.genericsystem.watch.gui.pages;
 
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
@@ -22,7 +22,7 @@ import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.FlexDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlHyperLink;
 import org.genericsystem.reactor.gscomponents.Modal.ModalWithDisplay;
-import org.genericsystem.watch.gui.ZonesDetails.FiltersDiv;
+import org.genericsystem.watch.gui.pages.DocZonesShowDetails.FiltersDiv;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
@@ -34,7 +34,7 @@ import javafx.collections.ObservableList;
 @StyleClass(path = { FlexDiv.class, FiltersDiv.class }, value = "filter-results")
 @Style(path = FlexDiv.class, name = "display", value = "block")
 @Style(path = FlexDiv.class, name = "padding", value = "1.5em")
-public class ZonesDetails extends ModalWithDisplay {
+public class DocZonesShowDetails extends ModalWithDisplay {
 
 	@FlexDirectionStyle(FlexDirection.ROW)
 	@StyleClass("ocr-row")

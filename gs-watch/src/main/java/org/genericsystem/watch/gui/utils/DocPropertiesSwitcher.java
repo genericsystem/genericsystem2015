@@ -1,4 +1,4 @@
-package org.genericsystem.watch.gui;
+package org.genericsystem.watch.gui.utils;
 
 import java.io.File;
 
@@ -19,7 +19,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
-public class DocPropertiesCheckerSwitcher {
+public class DocPropertiesSwitcher {
 
 	public static class DOC_DEZONED implements TagSwitcher {
 		@Override

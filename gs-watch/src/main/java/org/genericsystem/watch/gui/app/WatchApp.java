@@ -1,5 +1,6 @@
-package org.genericsystem.watch.gui;
+package org.genericsystem.watch.gui.app;
 
+import org.genericsystem.common.Root;
 import org.genericsystem.cv.model.Doc;
 import org.genericsystem.cv.model.Doc.DocFilename;
 import org.genericsystem.cv.model.Doc.DocTimestamp;
@@ -16,18 +17,21 @@ import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.gscomponents.RootTagImpl;
+import org.genericsystem.watch.VerticleDeployerFromWatchApp;
+import org.genericsystem.watch.gui.pages.HomePage;
+import org.genericsystem.watch.gui.pages.FiltersStatisticsPage;
+import org.genericsystem.watch.gui.utils.PageSwitcher;
 
 @DependsOnModel({ Doc.class, RefreshTimestamp.class, DocTimestamp.class, DocFilename.class, DocClass.class, ZoneGeneric.class, ZoneText.class, ZoneTimestamp.class, ImgFilter.class, LevDistance.class, MeanLevenshtein.class, Score.class })
-@Children({ HomePage.class, VisualizeFiltersStatistics.class })
+@Children({ HomePage.class, FiltersStatisticsPage.class })
 public class WatchApp extends RootTagImpl {
 
 	private static final String gsPath = "/gs-cv_model3";
 
 	public static void main(String[] mainArgs) {
 		ApplicationServer server = ApplicationServer.startSimpleGenericApp(mainArgs, WatchApp.class, gsPath);
-		// Root root = server.getRoots().get(System.getenv("HOME") + "/genericsystem/" + gsPath);
-		// VerticleDeployerFromWatchApp deployer = new VerticleDeployerFromWatchApp(root);
-		// deployer.doDeploy();
+		Root root = server.getRoots().get(System.getenv("HOME") + "/genericsystem/" + gsPath);
+		// deployVerticles(root);
 	}
 
 	@Override
@@ -35,4 +39,8 @@ public class WatchApp extends RootTagImpl {
 		createNewInitializedProperty(PageSwitcher.PAGE, c -> PageSwitcher.HOME_PAGE);
 	}
 
+	private static void deployVerticles(Root root) {
+		VerticleDeployerFromWatchApp deployer = new VerticleDeployerFromWatchApp(root);
+		deployer.doDeploy();
+	}
 }

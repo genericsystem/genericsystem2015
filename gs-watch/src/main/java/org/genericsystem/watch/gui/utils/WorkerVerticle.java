@@ -1,4 +1,4 @@
-package org.genericsystem.watch.gui;
+package org.genericsystem.watch.gui.utils;
 
 import org.genericsystem.common.Root;
 
@@ -12,7 +12,8 @@ import io.vertx.core.Future;
  */
 public class WorkerVerticle extends AbstractVerticle {
 
-	private Root root;
+	@SuppressWarnings("unused")
+	private final Root root;
 
 	public WorkerVerticle() {
 		this(null);

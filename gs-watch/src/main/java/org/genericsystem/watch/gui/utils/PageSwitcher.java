@@ -1,4 +1,4 @@
-package org.genericsystem.watch.gui;
+package org.genericsystem.watch.gui.utils;
 
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;

@@ -1,4 +1,4 @@
-package org.genericsystem.watch.gui;
+package org.genericsystem.watch.gui.pages;
 
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
@@ -43,16 +43,18 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlHyperLink;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlImg;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
 import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
-import org.genericsystem.watch.gui.DocPropertiesCheckerSwitcher.DOC_DEZONED;
-import org.genericsystem.watch.gui.DocPropertiesCheckerSwitcher.DOC_NOT_DEZONED;
-import org.genericsystem.watch.gui.DocPropertiesCheckerSwitcher.DOC_NOT_OCRD;
-import org.genericsystem.watch.gui.DocPropertiesCheckerSwitcher.DOC_NOT_SUPERVISED;
-import org.genericsystem.watch.gui.DocPropertiesCheckerSwitcher.DOC_OCRD;
-import org.genericsystem.watch.gui.DocPropertiesCheckerSwitcher.DOC_SUPERVISED;
-import org.genericsystem.watch.gui.HomePage.DocClassDiv;
-import org.genericsystem.watch.gui.HomePage.GeneralActionsButtonsDiv;
-import org.genericsystem.watch.gui.HomePage.HeaderRow;
-import org.genericsystem.watch.gui.PageSwitcher.HOME_PAGE;
+import org.genericsystem.watch.gui.pages.HomePage.DocClassDiv;
+import org.genericsystem.watch.gui.pages.HomePage.GeneralActionsButtonsDiv;
+import org.genericsystem.watch.gui.pages.HomePage.HeaderRow;
+import org.genericsystem.watch.gui.utils.DocPropertiesSwitcher;
+import org.genericsystem.watch.gui.utils.PageSwitcher;
+import org.genericsystem.watch.gui.utils.DocPropertiesSwitcher.DOC_DEZONED;
+import org.genericsystem.watch.gui.utils.DocPropertiesSwitcher.DOC_NOT_DEZONED;
+import org.genericsystem.watch.gui.utils.DocPropertiesSwitcher.DOC_NOT_OCRD;
+import org.genericsystem.watch.gui.utils.DocPropertiesSwitcher.DOC_NOT_SUPERVISED;
+import org.genericsystem.watch.gui.utils.DocPropertiesSwitcher.DOC_OCRD;
+import org.genericsystem.watch.gui.utils.DocPropertiesSwitcher.DOC_SUPERVISED;
+import org.genericsystem.watch.gui.utils.PageSwitcher.HOME_PAGE;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleObjectProperty;
@@ -62,7 +64,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 @Switch(HOME_PAGE.class)
-@Children({ EditDocumentZones.class, AppHeader.class, FlexDiv.class/* , Monitor.class */ })
+@Children({ DocZonesEdit.class, AppHeader.class, FlexDiv.class/* , Monitor.class */ })
 @Children(path = FlexDiv.class, pos = 2, value = { GeneralActionsButtonsDiv.class, HeaderRow.class, DocClassDiv.class })
 @Children(path = AppHeader.class, value = { Logo.class, AppTitleDiv.class, FlexDiv.class })
 @Children(path = { AppHeader.class, FlexDiv.class }, pos = { 0, 2 }, value = { HtmlButton.class, HtmlButton.class })
@@ -122,7 +124,7 @@ public class HomePage extends FlexDiv {
 	@Switch(path = { FlexDiv.class, HtmlHyperLink.class, FailedImage.class }, pos = { 1, 0, 0 }, value = DOC_NOT_DEZONED.class)
 	@BindAction(path = { FlexDiv.class, HtmlHyperLink.class }, pos = { 1, 0 }, value = CANCEL.class)
 
-	@Children(path = FlexDiv.class, pos = 2, value = { ShowDocumentZones.class, HtmlHyperLink.class })
+	@Children(path = FlexDiv.class, pos = 2, value = { DocZonesShow.class, HtmlHyperLink.class })
 	@Children(path = { FlexDiv.class, HtmlHyperLink.class }, pos = { 2, 0 }, value = { CheckedImage.class, FailedImage.class })
 	@BindAction(path = { FlexDiv.class, HtmlHyperLink.class }, pos = { 2, 0 }, value = SET_SELECTION.class)
 	@Switch(path = { FlexDiv.class, HtmlHyperLink.class, CheckedImage.class }, pos = { 2, 0, 0 }, value = DOC_OCRD.class)

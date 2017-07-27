@@ -1,4 +1,4 @@
-package org.genericsystem.watch.gui;
+package org.genericsystem.watch.gui.pages;
 
 import java.util.Arrays;
 
@@ -10,7 +10,6 @@ import org.genericsystem.cv.model.DocClass;
 import org.genericsystem.cv.model.DocClass.DocClassInstance;
 import org.genericsystem.cv.model.MeanLevenshtein;
 import org.genericsystem.cv.model.Score;
-import org.genericsystem.cv.model.Score.ScoreInstance;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.BindAction;
@@ -24,7 +23,6 @@ import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.context.ContextAction;
 import org.genericsystem.reactor.context.ObservableListExtractor;
-import org.genericsystem.reactor.context.TagSwitcher;
 import org.genericsystem.reactor.gscomponents.AppHeader;
 import org.genericsystem.reactor.gscomponents.AppHeader.AppTitleDiv;
 import org.genericsystem.reactor.gscomponents.AppHeader.Logo;
@@ -33,13 +31,13 @@ import org.genericsystem.reactor.gscomponents.FlexDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlH1;
 import org.genericsystem.watch.VerticleDeployerFromWatchApp;
-import org.genericsystem.watch.gui.PageSwitcher.FILTERS_STATISTICS;
-import org.genericsystem.watch.gui.VisualizeFiltersStatistics.DocClassStatisticsDiv;
-import org.genericsystem.watch.gui.VisualizeFiltersStatistics.GeneralButtonsDiv;
+import org.genericsystem.watch.gui.pages.FiltersStatisticsPage.DocClassStatisticsDiv;
+import org.genericsystem.watch.gui.pages.FiltersStatisticsPage.GeneralButtonsDiv;
+import org.genericsystem.watch.gui.utils.PageSwitcher;
+import org.genericsystem.watch.gui.utils.PageSwitcher.FILTERS_STATISTICS;
+import org.genericsystem.watch.gui.utils.WorkerVerticle;
 
 import io.vertx.core.Verticle;
-import javafx.beans.binding.Bindings;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -56,7 +54,7 @@ import javafx.collections.ObservableList;
 @Style(path = AppHeader.class, name = "background-color", value = "#00afeb")
 @Children(path = AppHeader.class, value = { Logo.class, AppTitleDiv.class })
 @SetText(path = { AppHeader.class, AppTitleDiv.class, HtmlH1.class }, value = "Global OCR accuracy per zone")
-public class VisualizeFiltersStatistics extends FlexDiv {
+public class FiltersStatisticsPage extends FlexDiv {
 
 	@FlexDirectionStyle(FlexDirection.ROW)
 	@Children(HtmlButton.class)
@@ -113,20 +111,6 @@ public class VisualizeFiltersStatistics extends FlexDiv {
 			if (null == docClassInstances)
 				return FXCollections.emptyObservableList();
 			return docClassInstances.toObservableList();
-		}
-	}
-
-	public static class SCORE_SWITCHER implements TagSwitcher {
-		@Override
-		public ObservableValue<Boolean> apply(Context context, Tag tag) {
-			return Bindings.createBooleanBinding(() -> {
-				Score score = (Score) context.getGeneric();
-				DocClassInstance docClassInstance = (DocClassInstance) context.getGenerics()[1];
-				// System.out.println("score: " + score.info());
-				// System.out.println("docClass: " + docClassInstance.info());
-				score.getInstances().forEach(g -> System.out.println(((ScoreInstance) g).getZone().getDocClass())); // XXX why null?
-				return true;
-			});
 		}
 	}
 

@@ -1,4 +1,4 @@
-package org.genericsystem.watch.gui;
+package org.genericsystem.watch.gui.pages;
 
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
@@ -25,9 +25,9 @@ import org.genericsystem.reactor.contextproperties.SelectionDefaults;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.FlexDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
-import org.genericsystem.watch.gui.StatisticsTable.ContentRow;
-import org.genericsystem.watch.gui.StatisticsTable.HeaderRow;
-import org.genericsystem.watch.gui.StatisticsTable.ZONE_SELECTOR;
+import org.genericsystem.watch.gui.pages.StatisticsTable.ContentRow;
+import org.genericsystem.watch.gui.pages.StatisticsTable.HeaderRow;
+import org.genericsystem.watch.gui.pages.StatisticsTable.ZONE_SELECTOR;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
