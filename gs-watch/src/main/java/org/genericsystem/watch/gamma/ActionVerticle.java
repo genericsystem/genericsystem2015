@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeoutException;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.AsyncResult;
@@ -14,16 +15,10 @@ import io.vertx.core.json.JsonObject;
 
 public abstract class ActionVerticle extends AbstractVerticle {
 
-	private final String privateAddress;
 	private final String ip;
 
-	public ActionVerticle(String privateAddress, String ip) {
-		this.privateAddress = privateAddress;
+	public ActionVerticle(String ip) {
 		this.ip = ip;
-	}
-
-	public String getPrivateAddress() {
-		return privateAddress;
 	}
 
 	public String getIp() {
@@ -36,24 +31,35 @@ public abstract class ActionVerticle extends AbstractVerticle {
 
 	@Override
 	public void start() throws Exception {
-		vertx.eventBus().consumer(privateAddress + ":" + getAction(), handler -> {
-			System.out.println("Receive from : " + handler.body() + " on : " + privateAddress + " " + Thread.currentThread());
-			handler.reply(DistributedVerticle.OK);
-			JsonObject task = new JsonObject((String) handler.body());
-			vertx.executeBlocking(future -> download(future, task), res -> {
-				if (res.succeeded())
-					vertx.executeBlocking(future_ -> handle(future_, task), res_ -> {
-						handleResult(res_, task);
-						if (res_.succeeded())
-							task.put(Dispatcher.STATE, Dispatcher.FINISHED);
-						else {
-							System.out.println("Task aborted, cause: " + res_.cause().getMessage());
-							task.put(Dispatcher.STATE, Dispatcher.ABORTED);
-						}
-						vertx.eventBus().send(Dispatcher.ADDRESS + ":add", task.encodePrettily());
-					});
+		// TODO: Abort if send timed out.
+		vertx.eventBus().consumer(getAction(), message -> {
+			JsonObject task = new JsonObject((String) message.body());
+
+			if (DistributedVerticle.getMaxExecutions() <= DistributedVerticle.getExecutionsCount()) {
+				message.reply(Dispatcher.KO);
+				return;
+			}
+			DistributedVerticle.incrementExecutions();
+			message.reply(Dispatcher.OK);
+
+			vertx.executeBlocking(future -> {
+				download(future, task);
+				if (!future.failed())
+					handle(future, task);
 				else
-					throw new IllegalStateException("Impossible to download file " + task.getString(DistributedVerticle.FILENAME), res.cause());
+					throw new IllegalStateException("Impossible to download file " + task.getString(DistributedVerticle.FILENAME), future.cause());
+			}, res -> {
+				if (res.failed() && res.cause() instanceof TimeoutException)
+					return;
+				handleResult(res, task);
+				if (res.succeeded())
+					task.put(Dispatcher.STATE, Dispatcher.FINISHED);
+				else {
+					System.out.println("Task aborted, cause: " + res.cause().getMessage());
+					task.put(Dispatcher.STATE, Dispatcher.ABORTED);
+				}
+				vertx.eventBus().send(Dispatcher.ADDRESS + ":add", task.encodePrettily());
+				DistributedVerticle.decrementExecutions();
 			});
 		});
 	}
@@ -91,7 +97,6 @@ public abstract class ActionVerticle extends AbstractVerticle {
 				fos = new FileOutputStream(file);
 				fos.write(bytes);
 				fos.close();
-				future.complete(file.toString());
 			} catch (IOException e) {
 				e.printStackTrace();
 				future.fail(e);
@@ -99,7 +104,6 @@ public abstract class ActionVerticle extends AbstractVerticle {
 			}
 		} else {
 			System.out.println("File : " + fileName + " is already dowloaded");
-			future.complete(file.toString());	
 		}
 	}
 
