@@ -2,7 +2,9 @@ package org.genericsystem.layout;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -23,7 +25,7 @@ public class Layout {
 	private double y1;
 	private double y2;
 
-	private List<String> labels = new ArrayList<>();
+	private Map<String, Integer> labels = new HashMap<>();
 	private List<Layout> children = new ArrayList<>();
 	private Layout parent = null;
 
@@ -67,8 +69,11 @@ public class Layout {
 		traverse(rootImg, (root, layout) -> {
 			if (layout.getChildren().isEmpty()) {
 				String ocr = Ocr.doWork(new Mat(rootImg.getSrc(), layout.getLargeRect(rootImg, delta)));
-				layout.getLabels().add(ocr);
-				System.out.println(layout.getLabels());
+				if (!"".equals(ocr)) {
+					Integer count = labels.get(ocr);
+					layout.getLabels().put(ocr, 1 + (count != null ? count : 0));
+					System.out.println(layout.getLabels());
+				}
 			}
 		});
 	}
@@ -127,16 +132,16 @@ public class Layout {
 		this.y2 = y2;
 	}
 
-	public List<String> getLabels() {
-		return labels;
-	}
-
 	public Layout getParent() {
 		return parent;
 	}
 
 	public void setParent(Layout parent) {
 		this.parent = parent;
+	}
+
+	public Map<String, Integer> getLabels() {
+		return labels;
 	}
 
 	public boolean hasChildren() {
@@ -158,7 +163,7 @@ public class Layout {
 		sb.append("((" + shard.x1 + "-" + shard.y1 + "),(" + shard.x2 + "-" + shard.y2 + "))".toString());
 		if (shard.getChildren().isEmpty())
 			sb.append(" : Label : ");
-		for (String label : shard.labels)
+		for (String label : shard.labels.keySet())
 			sb.append("/" + label);
 
 		if (shard.hasChildren()) {
@@ -324,7 +329,7 @@ public class Layout {
 		// System.out.println("level : " + level);
 		// System.out.println("Layout : " + this);
 		assert img.size().equals(binary.size());
-		if (level < 0) {
+		if (level <= 0) {
 			// Imgproc.rectangle(img.getSrc(), new Point(0, 0), new Point(img.width(), img.height()), new Scalar(255, 0, 0), -1);
 			return this;
 		}
