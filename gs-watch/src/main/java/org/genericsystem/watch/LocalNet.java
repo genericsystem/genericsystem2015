@@ -1,4 +1,4 @@
-package org.genericsystem.watch.gamma;
+package org.genericsystem.watch;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;

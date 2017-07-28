@@ -1,4 +1,4 @@
-package org.genericsystem.watch.gamma;
+package org.genericsystem.watch;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -98,7 +98,7 @@ public abstract class ActionVerticle extends AbstractVerticle {
 				return;
 			}
 		} else {
-			System.out.println("File : " + fileName + " is already dowloaded");
+			System.out.println("File : " + fileName + " is already downloaded");
 		}
 	}
 

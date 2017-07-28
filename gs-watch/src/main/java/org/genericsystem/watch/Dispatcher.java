@@ -1,9 +1,9 @@
-package org.genericsystem.watch.gamma;
+package org.genericsystem.watch;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.kernel.Cache;
 import org.genericsystem.kernel.Engine;
-import org.genericsystem.watch.beta.Model.Task;
+import org.genericsystem.watch.Model.Task;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
