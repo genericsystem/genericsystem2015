@@ -422,9 +422,9 @@ public class Img implements AutoCloseable {
 
 	public Img grad() {
 		Img gray = bgr2Gray();
-		Img grad = gray.morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(3, 3));
-		Img threshold = grad.thresHold(0.0, 255.0, Imgproc.THRESH_OTSU + Imgproc.THRESH_BINARY).morphologyEx(Imgproc.MORPH_ERODE, Imgproc.MORPH_RECT, new Size(3, 3));
-		return threshold.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(17, 3));
+		Img grad = gray.morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_RECT, new Size(3, 3));
+		return grad.thresHold(0.0, 255.0, Imgproc.THRESH_OTSU + Imgproc.THRESH_BINARY);
+		// return threshold.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(17, 3));
 	}
 
 	// public Img classic() {
@@ -439,7 +439,7 @@ public class Img implements AutoCloseable {
 		Img gray = bgr2Gray();
 		Img sobel = gray.sobel(CvType.CV_8UC1, 1, 0, 3, 1, 0, Core.BORDER_DEFAULT);
 		Img threshold = sobel.thresHold(0, 255, Imgproc.THRESH_BINARY + Imgproc.THRESH_OTSU);
-		return threshold.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(17, 3));
+		return threshold;
 	}
 
 	public Img bernsen() {
