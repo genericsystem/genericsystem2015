@@ -60,20 +60,20 @@ public class DistributedVerticle extends AbstractVerticle {
 				if (complete.failed())
 					throw new IllegalStateException(complete.cause());
 				vertx.deployVerticle(new DistributedVerticle(ip), result -> {
-					if (complete.failed())
-						throw new IllegalStateException(complete.cause());
+					if (result.failed())
+						throw new IllegalStateException(result.cause());
 				});
 				vertx.deployVerticle(new DistributedVerticle(ip), result -> {
-					if (complete.failed())
-						throw new IllegalStateException(complete.cause());
+					if (result.failed())
+						throw new IllegalStateException(result.cause());
 				});
 				vertx.deployVerticle(new DistributedVerticle(ip), result -> {
-					if (complete.failed())
-						throw new IllegalStateException(complete.cause());
+					if (result.failed())
+						throw new IllegalStateException(result.cause());
 				});
 				vertx.deployVerticle(new DistributedVerticle(ip), result -> {
-					if (complete.failed())
-						throw new IllegalStateException(complete.cause());
+					if (result.failed())
+						throw new IllegalStateException(result.cause());
 				});
 			});
 		});
