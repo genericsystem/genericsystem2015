@@ -18,8 +18,6 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCodeCombination;
-import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -53,18 +51,17 @@ public abstract class AbstractApp extends Application {
 			}
 		});
 
-		KeyCombination cntrlZ = new KeyCodeCombination(KeyCode.SPACE, KeyCodeCombination.CONTROL_DOWN);
 		scene.setOnKeyPressed(event -> {
-			if (cntrlZ.match(event))
-				onCtrlSpace();
+			if (event.getCode() == KeyCode.SPACE)
+				onSpace();
 		});
 		stage.setScene(scene);
 		stage.show();
 	}
 
 	// hook
-	protected void onCtrlSpace() {
-		System.out.println("ctrl space");
+	protected void onSpace() {
+		System.out.println("space pressed");
 	}
 
 	protected abstract void fillGrid(GridPane mainGrid);

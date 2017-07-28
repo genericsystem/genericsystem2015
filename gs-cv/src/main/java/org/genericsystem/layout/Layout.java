@@ -60,6 +60,8 @@ public class Layout {
 		traverse(getRoi(img), (roi, shard) -> {
 			if (shard.getChildren().isEmpty())
 				Imgproc.rectangle(roi.getSrc(), new Point(0, 0), new Point(roi.width() - 1, roi.height() - 1), color, thickness);
+//			else
+//				Imgproc.rectangle(roi.getSrc(), new Point(0, 0), new Point(roi.width() - 1, roi.height() - 1), new Scalar(0, 0, 255), thickness);
 		});
 	}
 
@@ -324,7 +326,7 @@ public class Layout {
 		// System.out.println("level : " + level);
 		// System.out.println("Layout : " + this);
 		assert img.size().equals(binary.size());
-		if (level < 0) {
+		if (level <= 0) {
 			// Imgproc.rectangle(img.getSrc(), new Point(0, 0), new Point(img.width(), img.height()), new Scalar(255, 0, 0), -1);
 			return this;
 		}
