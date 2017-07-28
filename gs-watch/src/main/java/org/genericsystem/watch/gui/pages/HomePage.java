@@ -13,7 +13,9 @@ import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.context.ContextAction.SET_ADMIN_MODE;
 import org.genericsystem.reactor.context.ContextAction.SET_NORMAL_MODE;
 import org.genericsystem.reactor.context.TagSwitcher.ADMIN_MODE_ONLY;
+import org.genericsystem.reactor.context.TagSwitcher.LOGGED_USER;
 import org.genericsystem.reactor.context.TagSwitcher.NORMAL_MODE_ONLY;
+import org.genericsystem.reactor.context.TagSwitcher.NO_LOGGED_USER;
 import org.genericsystem.reactor.gscomponents.AppHeader;
 import org.genericsystem.reactor.gscomponents.AppHeader.AppTitleDiv;
 import org.genericsystem.reactor.gscomponents.AppHeader.Logo;
@@ -21,6 +23,7 @@ import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.FlexDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlH1;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
 import org.genericsystem.reactor.gscomponents.Monitor;
 import org.genericsystem.watch.gui.pages.HomePage.DocClassDiv;
 import org.genericsystem.watch.gui.pages.HomePage.GeneralActionsButtonsDiv;
@@ -32,15 +35,19 @@ import org.genericsystem.watch.gui.utils.PageSwitcher.HOME_PAGE;
 import org.genericsystem.watch.gui.utils.TextBindingCustom.DOC_CLASS_LABEL;
 
 @Switch(HOME_PAGE.class)
-@Children({ DocZonesEdit.class, AppHeader.class, FlexDiv.class, Monitor.class })
+@Children({ DocZonesEdit.class, AppHeader.class, FlexDiv.class, FlexDiv.class, Monitor.class })
+@Switch(path = FlexDiv.class, pos = 2, value = LOGGED_USER.class)
 @Children(path = FlexDiv.class, pos = 2, value = { GeneralActionsButtonsDiv.class, DocClassDiv.class })
-@Children(path = AppHeader.class, value = { Logo.class, AppTitleDiv.class, FlexDiv.class })
+@Switch(path = FlexDiv.class, pos = 3, value = NO_LOGGED_USER.class)
+@Children(path = FlexDiv.class, pos = 3, value = HtmlLabel.class)
+@SetText(path = FlexDiv.class, pos = 3, value = "You must be identified in order to access this page.")
+@Children(path = AppHeader.class, value = { Logo.class, AppTitleDiv.class, FlexDiv.class, HomePageUserLogin.class })
 @Children(path = { AppHeader.class, FlexDiv.class }, pos = { 0, 2 }, value = { HtmlButton.class, HtmlButton.class })
 @SetText(path = { AppHeader.class, FlexDiv.class, HtmlButton.class }, pos = { 0, 2, 0 }, value = "Switch to admin mode")
 @SetText(path = { AppHeader.class, FlexDiv.class, HtmlButton.class }, pos = { 0, 2, 1 }, value = "Switch to normal mode")
 @BindAction(path = { AppHeader.class, FlexDiv.class, HtmlButton.class }, pos = { 0, 2, 0 }, value = SET_ADMIN_MODE.class)
 @BindAction(path = { AppHeader.class, FlexDiv.class, HtmlButton.class }, pos = { 0, 2, 1 }, value = SET_NORMAL_MODE.class)
-@Switch(path = { AppHeader.class, FlexDiv.class, HtmlButton.class }, pos = { 0, 2, 0 }, value = NORMAL_MODE_ONLY.class)
+@Switch(path = { AppHeader.class, FlexDiv.class, HtmlButton.class }, pos = { 0, 2, 0 }, value = { LOGGED_USER.class, NORMAL_MODE_ONLY.class })
 @Switch(path = { AppHeader.class, FlexDiv.class, HtmlButton.class }, pos = { 0, 2, 1 }, value = ADMIN_MODE_ONLY.class)
 @Style(path = AppHeader.class, name = "background-color", value = "#00afeb")
 @SetText(path = { AppHeader.class, AppTitleDiv.class, HtmlH1.class }, value = "GS-Watch interface")

@@ -1,31 +1,40 @@
 @CHARSET "UTF-8";
 
-input,
-.input-like {
+input:not (.login ), .input-like {
 	padding: 0.5em;
 	margin: 0.5em 0.1em;
-	min-width: 30em; 		/* To be adjusted more properly */
+	min-width: 30em; /* To be adjusted more properly */
 	flex: 3 1 auto;
 }
 
-:not(label[name="title"]) {
+input.login {
+	padding: 0.5em;
+	margin: 0.5em 0.1em;
+	flex: 0;
+}
+
+label.login {
+	padding: 0.5em;
+	margin: 0.5em 0.1em;
+	flex: 1;
+}
+
+:not (label[name="title"] ) {
 	padding: 0.5em;
 	margin: 0.5em 0.1em;
 	flex: 1 1 auto;
 }
 
-a[name="zone"],
-div[name="zone"],
-label[name="zone"] {
+a[name="zone"], div[name="zone"], label[name="zone"] {
 	padding: 0.5em;
 	margin: 0.5em 0.1em;
 	flex: 1 1 auto;
 	font-weight: bold;
 }
 
-a > .fa {
-  color: #4d4d4d;
-  text-decoration: none;
+a>.fa {
+	color: #4d4d4d;
+	text-decoration: none;
 }
 
 .doc-class-title {
@@ -48,18 +57,18 @@ img {
 }
 
 button {
-	margin: 10px;
+	margin: 0.5em;
 }
 
 .glowing-border {
-    border: 1px solid #dadada;
-    border-radius: 7px;
+	border: 1px solid #dadada;
+	border-radius: 7px;
 }
 
-.glowing-border:focus { 
-    outline: none;
-    border-color: #9ecaed;
-    box-shadow: 0 0 10px #9ecaed;
+.glowing-border:focus {
+	outline: none;
+	border-color: #9ecaed;
+	box-shadow: 0 0 10px #9ecaed;
 }
 
 .filter-results {
@@ -71,8 +80,8 @@ button {
 }
 
 .widthResponsive {
-    /*     max-width: 60%; */
-    width: auto;
+	/*     max-width: 60%; */
+	width: auto;
 }
 
 .ocr-row {
@@ -81,7 +90,7 @@ button {
 }
 
 .ocr {
- 	margin: 0.2em 0.5em;
+	margin: 0.2em 0.5em;
 }
 
 .ocr-text {
@@ -107,11 +116,6 @@ button {
 
 .statistics-header-row {
 	background-color: #4d4d4d;
-    color: white;
-    padding: 0.5em;
+	color: white;
+	padding: 0.5em;
 }
-
-
-
-
-
