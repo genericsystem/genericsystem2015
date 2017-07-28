@@ -1,5 +1,6 @@
 package org.genericsystem.watch.gui.pages;
 
+import org.genericsystem.reactor.annotations.Attribute;
 import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
@@ -47,9 +48,10 @@ public class HomePage extends FlexDiv {
 
 	@FlexDirectionStyle(FlexDirection.ROW)
 	@Children({ HtmlButton.class, HtmlButton.class })
-	@SetText(path = HtmlButton.class, value = { "Visualize statistics", "Resume interrupted tasks" })
+	@SetText(path = HtmlButton.class, value = { "Visualize statistics", "Resume pending tasks" })
 	@BindAction(path = HtmlButton.class, pos = 0, value = CALL_STATISTICS_PAGE.class)
 	@BindAction(path = HtmlButton.class, pos = 1, value = TEST.class)
+	@Attribute(path = HtmlButton.class, pos = 1, name = "disabled", value = "true")
 	public static class GeneralActionsButtonsDiv extends FlexDiv {
 		// TODO implement the action that will resume the waiting tasks
 	}
