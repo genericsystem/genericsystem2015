@@ -17,6 +17,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -49,8 +50,18 @@ public abstract class AbstractApp extends Application {
 				}
 			}
 		});
+
+		scene.setOnKeyPressed(event -> {
+			if (event.getCode() == KeyCode.SPACE)
+				onSpace();
+		});
 		stage.setScene(scene);
 		stage.show();
+	}
+
+	// hook
+	protected void onSpace() {
+		System.out.println("space pressed");
 	}
 
 	protected abstract void fillGrid(GridPane mainGrid);

@@ -10,7 +10,6 @@ import javax.activation.DataSource;
 import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.Message;
-import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.Store;
 import javax.mail.URLName;
@@ -25,78 +24,44 @@ import com.sun.mail.imap.IMAPFolder;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
+import io.vertx.core.json.JsonObject;
 
 /**
- * The MailWatcherVerticle connects to an email account, and analyzes periodically the content of the inbox. When a new email is received, the pdf attachments are extracted and stored locally. A message is then sent to the event bus to the
- * {@link PdfsConverterVerticle} to convert these files to PNG.
+ * The MailWatcherVerticle connects to an email account. For each unread mail each new mail received afterwards, the PDF attachments are extracted and stored locally. A message is then sent to the event bus to the
+ * {@link PdfConverterVerticle} to extract each page of these files as PNG files.
  * 
  * @author middleware
  */
 public class MailWatcherVerticle extends AbstractVerticle {
 
-	// TODO: Store config in a config file.
-	private static final String protocol = "imaps";
-	private static final String host = "imap.gmail.com";
-	private static final String file = "INBOX";
-	private static final String username = "watchtestmwf";
-	private static final String password = "WatchTestMWF4";
-	private static final String pdfDir = "../gs-cv/pdf";
+	private final String ip = LocalNet.getIpAddress();
 
-	/**
-	 * Delay (in ms) for the periodic call to visit the inbox and process new messages.
-	 */
-	private static final Long PERIODIC_DELAY = 5000l;
-
-	public static void main(String[] args) {
-		VerticleDeployer.deployVerticle(new MailWatcherVerticle());
-	}
-
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void start() throws Exception {
-		vertx.executeBlocking(fut -> connectToInbox((Future) fut), res -> {
+		vertx.executeBlocking(fut -> checkMail(fut), res -> {
 			if (res.failed())
-				throw new IllegalStateException(res.cause());
-			else
-				vertx.setPeriodic(PERIODIC_DELAY, handler -> {
-					// System.out.println("Periodic call");
-					checkMail((IMAPFolder) res.result());
-				});
+				vertx.eventBus().publish(Dispatcher.ADDRESS + ":watchMail", null);
 		});
 	}
 
 	/**
-	 * Connect to the inbox asynchronously. If the connection succeeds, an {@link IMAPFolder} is sent.
+	 * Check for new emails arriving in the mailbox defined by the configuration file src/main/conf/MailWatcherVerticle.json.
 	 * 
-	 * @param future - the {@link Future} event
+	 * @param future - A future that is failed if there is an exception.
 	 */
-	private void connectToInbox(Future<IMAPFolder> future) {
+	private void checkMail(Future<Object> future) {
 		Properties props = System.getProperties();
 		Session session = Session.getInstance(props, null);
-		URLName url = new URLName(protocol, host, 993, file, username, password);
+		JsonObject config = vertx.getOrCreateContext().config();
+		URLName url = new URLName(config.getString("protocol"), config.getString("host"), config.getInteger("port"), config.getString("file"), config.getString("username"), config.getString("password"));
 		Store store;
 		IMAPFolder inbox = null;
 		try {
 			store = session.getStore(url);
 			store.connect();
 			inbox = (IMAPFolder) store.getFolder(url);
-		} catch (MessagingException e) {
-			future.fail(e);
-		}
-		future.complete(inbox);
-	}
-
-	/**
-	 * Periodically check for new emails arriving in the inbox.
-	 * 
-	 * @param inbox - the inbox
-	 */
-	private void checkMail(IMAPFolder inbox) {
-		// System.out.println(">>> mail watcher (check): " + Thread.currentThread().getName());
-		if (inbox == null)
-			return;
-		try {
 			inbox.open(Folder.READ_WRITE); // Folder.READ_WRITE to mark the emails as read.
+
 			int start = 1;
 			int end = inbox.getMessageCount();
 			// Process unseen messages.
@@ -108,6 +73,7 @@ public class MailWatcherVerticle extends AbstractVerticle {
 				start = end + 1;
 				end = inbox.getMessageCount();
 			}
+
 			// Listen for new messages.
 			inbox.addMessageCountListener(new MessageCountAdapter() {
 				@Override
@@ -117,19 +83,19 @@ public class MailWatcherVerticle extends AbstractVerticle {
 						processMessage((MimeMessage) msg);
 				}
 			});
-			inbox.close(false); // Close without purging the deleted messages on exit
-		} catch (MessagingException e) {
-			e.printStackTrace();
+			for(;;)
+				inbox.idle();
+		} catch (Exception e) {
+			future.fail(e);
 		}
 	}
 
 	/**
-	 * Process a message. Any pdf attachment is extracted in the folder specified in {@link #pdfDir} ({@value #pdfDir}), and a message is published to the event bus.
+	 * Process a message. Any pdf attachment is extracted in the folder specified in {@link #DistributedVerticle.BASE_PATH + "pdf/"} ({@value #DistributedVerticle.BASE_PATH + "pdf/"}), and a message is published to the event bus.
 	 * 
 	 * @param msg - the message to process
 	 */
 	private void processMessage(MimeMessage msg) {
-		// System.out.println(">>> mail watcher (process): " + Thread.currentThread().getName());
 		try {
 			MimeMessageParser parser = new MimeMessageParser(msg).parse();
 			System.out.println("> New email: " + parser.getSubject());
@@ -137,7 +103,7 @@ public class MailWatcherVerticle extends AbstractVerticle {
 				String contentType = attachment.getContentType().toLowerCase();
 				if (contentType.contains("application/pdf") || contentType.contains("application/x-pdf")) {
 					String fileName = attachment.getName();
-					Path folder = Paths.get(pdfDir);
+					Path folder = Paths.get(DistributedVerticle.BASE_PATH + "pdf/");
 					folder.toFile().mkdirs();
 					Path newFile = folder.resolve(fileName);
 					synchronized (MailWatcherVerticle.class) {
@@ -148,7 +114,11 @@ public class MailWatcherVerticle extends AbstractVerticle {
 						}
 						Files.copy(attachment.getInputStream(), newFile);
 					}
-					vertx.eventBus().publish(VerticleDeployer.PDF_WATCHER_ADDRESS, newFile.toString());
+					JsonObject task = new JsonObject().put(Dispatcher.STATE, Dispatcher.TODO)
+							.put(DistributedVerticle.IP, ip)
+							.put(DistributedVerticle.FILENAME, newFile.toString().replaceFirst(DistributedVerticle.BASE_PATH, ""))
+							.put(DistributedVerticle.TYPE, PdfConverterVerticle.ACTION);
+					vertx.eventBus().publish(Dispatcher.ADDRESS + ":add", task.encodePrettily());
 				}
 			}
 		} catch (Exception e) {

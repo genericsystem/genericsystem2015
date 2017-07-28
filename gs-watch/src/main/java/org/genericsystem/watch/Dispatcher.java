@@ -1,18 +1,16 @@
-package org.genericsystem.watch.gamma;
+package org.genericsystem.watch;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.kernel.Cache;
 import org.genericsystem.kernel.Engine;
-import org.genericsystem.watch.beta.Model.Task;
-import org.genericsystem.watch.beta.RoundRobin;
+import org.genericsystem.watch.Model.Task;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
-import io.vertx.core.eventbus.DeliveryOptions;
-import io.vertx.core.eventbus.EventBusOptions;
+import io.vertx.core.eventbus.ReplyException;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.spi.cluster.ClusterManager;
 import io.vertx.spi.cluster.hazelcast.HazelcastClusterManager;
@@ -22,26 +20,22 @@ public class Dispatcher extends AbstractVerticle {
 	protected final Engine engine = new Engine(System.getenv("HOME") + "/genericsystem/tasks/", Task.class);
 	protected Cache cache = engine.newCache();
 	protected final Generic taskType = engine.find(Task.class);
-	private final RoundRobin roundRobin = new RoundRobin();
-
-	private static final String OK = "OK";
-	private static final String KO = "KO";
 
 	public static final String ADDRESS = "org.genericsystem.repartitor";
+	protected static final String TASK = "task";
+	protected static final String NEW_STATE = "newState";
 	protected static final String STATE = "state";
 	protected static final String TODO = "todo";
+	protected static final String RUNNING = "running";
 	protected static final String FINISHED = "finished";
 	protected static final String ABORTED = "aborted";
 	private static final long MESSAGE_SEND_PERIODICITY = 5000;
-	private static final DeliveryOptions TIMEOUT = new DeliveryOptions().setSendTimeout(2000);
 
 	public static void main(String[] args) {
 		ClusterManager mgr = new HazelcastClusterManager();
 
 		VertxOptions vertxOptions = new VertxOptions().setClustered(true).setClusterManager(mgr);
-		vertxOptions.setEventBusOptions(new EventBusOptions()).setClustered(true);
-		String ip = LocalNet.getIpAddress();
-		vertxOptions.setClusterHost(ip);
+		vertxOptions.setClusterHost(LocalNet.getIpAddress());
 		vertxOptions.setMaxWorkerExecuteTime(Long.MAX_VALUE);
 		Vertx.clusteredVertx(vertxOptions, res -> {
 			if (res.failed())
@@ -56,6 +50,13 @@ public class Dispatcher extends AbstractVerticle {
 
 	@Override
 	public void start(Future<Void> startFuture) throws Exception {
+		cache.safeConsum(nothing -> {
+			for (Generic task : taskType.getInstances()) {
+				JsonObject json = new JsonObject((String) task.getValue());
+				if (RUNNING.equals(json.getString(STATE)))
+					updateTaskState(json, TODO);
+			}
+		});
 		watchMail();
 		vertx.deployVerticle(new HttpServerVerticle(), ar -> {
 			if (ar.failed())
@@ -67,8 +68,9 @@ public class Dispatcher extends AbstractVerticle {
 			System.out.println("Restarting mail watcher thread…");
 			watchMail();
 		});
-		vertx.eventBus().consumer(DistributedVerticle.PUBLIC_ADDRESS, message -> {
-			roundRobin.register((String) message.body());
+		vertx.eventBus().consumer(ADDRESS + ":updateState", message -> {
+			JsonObject json = new JsonObject((String) message.body());
+			updateTaskState(json.getJsonObject(TASK), json.getString(NEW_STATE));
 		});
 		vertx.eventBus().consumer(ADDRESS + ":add", message -> {
 			cache.safeConsum(unused -> {
@@ -81,17 +83,22 @@ public class Dispatcher extends AbstractVerticle {
 				for (Generic task : taskType.getInstances()) {
 					JsonObject json = new JsonObject((String) task.getValue());
 					if (TODO.equals(json.getString(STATE))) {
-						String robin = roundRobin.getNextAddress();
-						System.out.println("task: " + task + ", adress: " + robin);
-						if (robin != null) {
-							vertx.eventBus().send(robin + ":" + json.getString(DistributedVerticle.TYPE), json.encodePrettily(), TIMEOUT, reply -> {
-								if (reply.failed()) {
-									roundRobin.remove(robin);
-									// throw new IllegalStateException(reply.cause());
-								} else if (OK.equals(reply.result().body()))
-									cache.safeConsum(unused_ -> task.remove());
-							});
-						}
+						vertx.eventBus().send(json.getString(DistributedVerticle.TYPE), new JsonObject(json.encode()).put(STATE, RUNNING).encodePrettily(), reply -> {
+							if (reply.failed())
+								switch (((ReplyException) reply.cause()).failureType()) {
+									case NO_HANDLERS:
+										System.out.println("No handler for task: " + json.encodePrettily());
+										break;
+									case TIMEOUT:
+										System.out.println("Sending of task " + json.encodePrettily() + " timed out: " + reply.cause().getMessage());
+										break;
+									case RECIPIENT_FAILURE:
+										System.out.println("Task: " + json.encodePrettily() + " rejected by recipient: " + reply.cause().getMessage());
+										break;
+								}
+							else
+								updateTaskState(json, RUNNING);
+						});
 					}
 				}
 				cache.flush();
@@ -100,15 +107,25 @@ public class Dispatcher extends AbstractVerticle {
 		startFuture.complete();
 	}
 
+	private void updateTaskState(JsonObject oldValue, String newState) {
+		System.out.println("Updating: " + oldValue.encodePrettily() + ", newState:" + newState);
+		cache.safeConsum(unused -> {
+			Generic task = taskType.getInstances().filter(g -> oldValue.equals(new JsonObject((String) g.getValue()))).first();
+			JsonObject newValue = new JsonObject(oldValue.encode()).put(STATE, newState);
+			task.update(newValue.encodePrettily());
+			cache.flush();
+		});
+	}
+
 	private void watchMail() {
 		vertx.fileSystem().readFile("src/main/conf/MailWatcherVerticle.json", ar -> {
 			if (ar.failed())
 				throw new IllegalStateException("Impossible to load configuration for MailWatcherVerticle.", ar.cause());
 			else {
 				JsonObject config = new JsonObject(ar.result());
-				vertx.deployVerticle(new MailWatcherVerticle(), new DeploymentOptions().setConfig(config), res_ -> {
-					if (res_.failed())
-						throw new IllegalStateException("Unable to deploy MailWatcherVerticle", res_.cause());
+				vertx.deployVerticle(new MailWatcherVerticle(), new DeploymentOptions().setConfig(config), res -> {
+					if (res.failed())
+						throw new IllegalStateException("Unable to deploy MailWatcherVerticle", res.cause());
 				});				
 			}
 		});

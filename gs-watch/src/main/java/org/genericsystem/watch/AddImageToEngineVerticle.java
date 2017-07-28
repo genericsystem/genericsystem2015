@@ -7,22 +7,21 @@ import org.genericsystem.cv.comparator.FillModelWithData;
 
 import com.sun.xml.internal.ws.api.pipe.Engine;
 
-import io.vertx.core.AbstractVerticle;
-import io.vertx.core.eventbus.MessageConsumer;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Future;
+import io.vertx.core.json.JsonObject;
 
 /**
- * The AddImageToEngineVerticle receives a message from the event bus when an image was classified. After saving the document in Generic System, a message is sent to the {@link DezonerVerticle}. A reference to an {@link Engine} must be givent to be able to
+ * The AddImageToEngineVerticle receives a message from the event bus when an image was classified. After saving the document in Generic System, a message is sent to the {@link DezonerVerticle}. A reference to an {@link Engine} must be given to be able to
  * store the data in Generic System.
  * 
  * @author Pierrik Lassalas
  */
-public class AddImageToEngineVerticle extends AbstractVerticle {
+public class AddImageToEngineVerticle extends ActionVerticle {
+
+	public static final String ACTION = "newImage";
 
 	private Root engine;
-
-	public static void main(String[] args) {
-		VerticleDeployer.deployVerticle(new AddImageToEngineVerticle(FillModelWithData.getEngine()));
-	}
 
 	/**
 	 * Default constructor. A reference to the engine must be provided.
@@ -34,26 +33,29 @@ public class AddImageToEngineVerticle extends AbstractVerticle {
 	}
 
 	@Override
-	public void start() throws Exception {
-		MessageConsumer<String> consumer = vertx.eventBus().consumer(VerticleDeployer.IMAGE_ADDED_TO_CLASS_ADDRESS);
-		consumer.handler(message -> vertx.executeBlocking(future -> {
-			System.out.println(">>> add image: " + Thread.currentThread().getName());
+	public String getAction() {
+		return ACTION;
+	}
 
-			String imagePath = message.body();
-			System.out.println(">>>>> New image to register: " + imagePath);
-			boolean result;
-			if (null != engine)
-				result = FillModelWithData.registerNewFile(engine, Paths.get(imagePath));
-			else
-				result = FillModelWithData.registerNewFile(Paths.get(imagePath));
-			if (result) {
-				vertx.eventBus().publish(VerticleDeployer.NEW_IMAGE_ADDED_TO_CLASS, imagePath);
-				future.complete();
-			} else
-				future.fail("An error has occured while saving file " + imagePath);
-		}, res -> {
-			if (res.failed())
-				throw new IllegalStateException(res.cause());
-		}));
+	@Override
+	protected void handle(Future<Object> future, JsonObject task) {
+		String imagePath = task.getString(DistributedVerticle.FILENAME);
+		boolean result;
+		if (null != engine)
+			result = FillModelWithData.registerNewFile(engine, Paths.get(imagePath));
+		else
+			result = FillModelWithData.registerNewFile(Paths.get(imagePath));
+		if (result)
+			future.complete(imagePath);
+		else
+			future.fail("An error has occured while saving file " + imagePath);
+	}
+
+	@Override
+	protected void handleResult(AsyncResult<Object> res, JsonObject task) {
+		if (res.succeeded())
+			addTask((String) res.result(), DezonerVerticle.ACTION);
+		else
+			throw new IllegalStateException("An error has occurred while saving file " + task.getString(DistributedVerticle.FILENAME));
 	}
 }

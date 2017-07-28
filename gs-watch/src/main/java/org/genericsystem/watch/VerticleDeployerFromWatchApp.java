@@ -65,12 +65,9 @@ public class VerticleDeployerFromWatchApp extends AbstractVerticle {
 
 	@Override
 	public void start(Future<Void> startFuture) throws Exception {
-		deployVerticle(new MailWatcherVerticle(), true);
-		deployVerticle(new PdfsConverterVerticle(), true);
-		deployVerticle(new ClassifierVerticle(), true);
-		deployVerticle(new DezonerVerticle(), true);
-		deployVerticle(new AddImageToEngineVerticle(root), true);
-		deployVerticle(new OcrVerticle(root), true);
+		deployVerticle(new Dispatcher(), true);
+		deployVerticle(new DistributedVerticle(), true);
+		deployVerticle(new OcrEngineHolderVerticle(root), true);
 		startFuture.complete();
 	}
 }

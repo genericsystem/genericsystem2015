@@ -1,4 +1,4 @@
-package org.genericsystem.watch.gamma;
+package org.genericsystem.watch;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -14,21 +14,7 @@ import io.vertx.core.json.JsonObject;
 
 public abstract class ActionVerticle extends AbstractVerticle {
 
-	private final String privateAddress;
-	private final String ip;
-
-	public ActionVerticle(String privateAddress, String ip) {
-		this.privateAddress = privateAddress;
-		this.ip = ip;
-	}
-
-	public String getPrivateAddress() {
-		return privateAddress;
-	}
-
-	public String getIp() {
-		return ip;
-	}
+	private static final String ip = LocalNet.getIpAddress();
 
 	public String getAction() {
 		throw new IllegalStateException("The getAction method must be overridden by extending classes.");
@@ -36,24 +22,31 @@ public abstract class ActionVerticle extends AbstractVerticle {
 
 	@Override
 	public void start() throws Exception {
-		vertx.eventBus().consumer(privateAddress + ":" + getAction(), handler -> {
-			System.out.println("Receive from : " + handler.body() + " on : " + privateAddress + " " + Thread.currentThread());
-			handler.reply(DistributedVerticle.OK);
-			JsonObject task = new JsonObject((String) handler.body());
-			vertx.executeBlocking(future -> download(future, task), res -> {
-				if (res.succeeded())
-					vertx.executeBlocking(future_ -> handle(future_, task), res_ -> {
-						handleResult(res_, task);
-						if (res_.succeeded())
-							task.put(Dispatcher.STATE, Dispatcher.FINISHED);
-						else {
-							System.out.println("Task aborted, cause: " + res_.cause().getMessage());
-							task.put(Dispatcher.STATE, Dispatcher.ABORTED);
-						}
-						vertx.eventBus().send(Dispatcher.ADDRESS + ":add", task.encodePrettily());
-					});
+		vertx.eventBus().consumer(getAction(), message -> {
+			JsonObject task = new JsonObject((String) message.body());
+
+			if (DistributedVerticle.getMaxExecutions() <= DistributedVerticle.getExecutionsCount()) {
+				message.fail(1, "Too many ongoing executions on " + ip);
+				return;
+			}
+			DistributedVerticle.incrementExecutions();
+			message.reply(null);
+
+			vertx.executeBlocking(future -> {
+				download(future, task);
+				if (!future.failed())
+					handle(future, task);
 				else
-					throw new IllegalStateException("Impossible to download file " + task.getString(DistributedVerticle.FILENAME), res.cause());
+					throw new IllegalStateException("Impossible to download file " + task.getString(DistributedVerticle.FILENAME), future.cause());
+			}, res -> {
+				handleResult(res, task);
+				if (res.succeeded())
+					vertx.eventBus().send(Dispatcher.ADDRESS + ":updateState", new JsonObject().put(Dispatcher.TASK, task).put(Dispatcher.NEW_STATE, Dispatcher.FINISHED).encodePrettily());
+				else {
+					vertx.eventBus().send(Dispatcher.ADDRESS + ":updateState", new JsonObject().put(Dispatcher.TASK, task).put(Dispatcher.NEW_STATE, Dispatcher.ABORTED).encodePrettily());
+					System.out.println("Task aborted, cause: " + res.cause().getMessage());
+				}
+				DistributedVerticle.decrementExecutions();
 			});
 		});
 	}
@@ -91,19 +84,17 @@ public abstract class ActionVerticle extends AbstractVerticle {
 				fos = new FileOutputStream(file);
 				fos.write(bytes);
 				fos.close();
-				future.complete(file.toString());
 			} catch (IOException e) {
 				e.printStackTrace();
 				future.fail(e);
 				return;
 			}
 		} else {
-			System.out.println("File : " + fileName + " is already dowloaded");
-			future.complete(file.toString());	
+			System.out.println("File : " + fileName + " is already downloaded");
 		}
 	}
 
-	public void addTask(String fileName, String ip, String type) {
+	public void addTask(String fileName, String type) {
 		JsonObject task = new JsonObject().put(Dispatcher.STATE, Dispatcher.TODO)
 				.put(DistributedVerticle.IP, ip)
 				.put(DistributedVerticle.FILENAME, fileName)
