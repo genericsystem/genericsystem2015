@@ -38,6 +38,13 @@ import javafx.scene.layout.GridPane;
 
 public class CamLayoutAnalyzer extends AbstractApp {
 
+	private int[] count;
+	private MatOfKeyPoint[] oldKeypoints;
+	private MatOfKeyPoint newKeypoints;
+	private Mat[] oldDescriptors;
+	private Mat newDescriptors;
+	private Layout[] layout;
+
 	static {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 	}
@@ -66,51 +73,60 @@ public class CamLayoutAnalyzer extends AbstractApp {
 		mainGrid.add(src2, 1, 0);
 		mainGrid.add(src3, 1, 1);
 
-		MatOfKeyPoint[] oldKeypoints = new MatOfKeyPoint[] { detect(deskewed.getSrc()) };
-		Mat[] oldDescriptors = new Mat[] { new Mat() };
-		extractor.compute(deskewed.getSrc(), oldKeypoints[0], oldDescriptors[0]);
-		int[] count = new int[] { 1 };
+		setOldKeypoints(new MatOfKeyPoint[] { detect(deskewed.getSrc()) });
+		setOldDescriptors(new Mat[] { new Mat() });
+		extractor.compute(deskewed.getSrc(), getOldKeypoints()[0], getOldDescriptors()[0]);
+		setCount(new int[] { 1 });
 		Mat stabilizedMat = new Mat();
-		Layout[] layout = new Layout[] { null };
+		setLayout(new Layout[] { null });
 		timer.scheduleAtFixedRate(() -> {
-			MatOfKeyPoint newKeypoints = null;
-			Mat newDescriptors = null;
-			try {
-				capture.read(frame);
-				double[] angle = new double[1];
-				Img frameImg = new Img(frame);
-				src0.setImage(frameImg.toJfxImage());
-				Img deskewed_ = deskew(frame, angle);
-				src1.setImage(deskewed_.toJfxImage());
-				newKeypoints = detect(deskewed_.getSrc());
-				newDescriptors = new Mat();
-				extractor.compute(deskewed_.getSrc(), newKeypoints, newDescriptors);
 
-				Img deskiewedCopy = new Img(deskewed_.getSrc(), true);
-				deskewed_.buildLayout().draw(deskiewedCopy, new Scalar(0, 255, 0), 1);
-				src2.setImage(deskiewedCopy.toJfxImage());
+			synchronized (this) {
+				setNewKeypoints(null);
+				setNewDescriptors(null);
+				try {
+					capture.read(frame);
+					double[] angle = new double[1];
+					Img frameImg = new Img(frame);
+					src0.setImage(frameImg.toJfxImage());
+					Img deskewed_ = deskew(frame, angle);
+					src1.setImage(deskewed_.toJfxImage());
+					setNewKeypoints(detect(deskewed_.getSrc()));
+					setNewDescriptors(new Mat());
+					extractor.compute(deskewed_.getSrc(), getNewKeypoints(), getNewDescriptors());
 
-				Img stabilized = stabilize(frame, stabilizedMat, matcher, oldKeypoints[0], newKeypoints, oldDescriptors[0], newDescriptors, angle[0]);
-				if (stabilized != null) {
-					Img stabilizedCopy = new Img(stabilized.getSrc(), true);
-					if (layout[0] == null)
-						layout[0] = stabilized.buildLayout();
-					layout[0].ocrTree(stabilized, 0);
-					layout[0].draw(stabilizedCopy, new Scalar(0, 255, 0), 1);
-					src3.setImage(stabilizedCopy.toJfxImage());
-				}
+					Img deskiewedCopy = new Img(deskewed_.getSrc(), true);
+					deskewed_.buildLayout().draw(deskiewedCopy, new Scalar(0, 255, 0), 1);
+					src2.setImage(deskiewedCopy.toJfxImage());
 
-				count[0]++;
-			} catch (Exception e) {
-				e.printStackTrace();
-			} finally {
-				if ((count[0] % 50) == 0) {
-					oldKeypoints[0] = newKeypoints;
-					oldDescriptors[0] = newDescriptors;
-					layout[0] = null;
+					Img stabilized = stabilize(frame, stabilizedMat, matcher, getOldKeypoints()[0], getNewKeypoints(), getOldDescriptors()[0], getNewDescriptors(), angle[0]);
+					if (stabilized != null) {
+						Img stabilizedCopy = new Img(stabilized.getSrc(), true);
+						if (getLayout()[0] == null)
+							getLayout()[0] = stabilized.buildLayout();
+						getLayout()[0].ocrTree(stabilized, 0);
+						getLayout()[0].draw(stabilizedCopy, new Scalar(0, 255, 0), 1);
+						src3.setImage(stabilizedCopy.toJfxImage());
+					}
+
+					this.getCount()[0]++;
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
 			}
+
 		}, 0, 66, TimeUnit.MILLISECONDS);
+	}
+
+	@Override
+	protected synchronized void onCtrlSpace() {
+		// if ((getCount()[0] % 10) == 0) {
+
+		setOldKeypoints(new MatOfKeyPoint[] { getNewKeypoints() });
+		setOldDescriptors(new Mat[] { getNewDescriptors() });
+		setLayout(new Layout[] { null });
+
+		// }
 	}
 
 	private Img stabilize(Mat frame, Mat stabilized, DescriptorMatcher matcher, MatOfKeyPoint oldKeypoints, MatOfKeyPoint newKeypoints, Mat oldDescriptors, Mat newDescriptors, double angle) {
@@ -227,5 +243,53 @@ public class CamLayoutAnalyzer extends AbstractApp {
 		timer.shutdown();
 		capture.release();
 		super.stop();
+	}
+
+	public int[] getCount() {
+		return count;
+	}
+
+	public void setCount(int[] count) {
+		this.count = count;
+	}
+
+	public MatOfKeyPoint[] getOldKeypoints() {
+		return oldKeypoints;
+	}
+
+	public void setOldKeypoints(MatOfKeyPoint[] oldKeypoints) {
+		this.oldKeypoints = oldKeypoints;
+	}
+
+	public MatOfKeyPoint getNewKeypoints() {
+		return newKeypoints;
+	}
+
+	public void setNewKeypoints(MatOfKeyPoint newKeypoints) {
+		this.newKeypoints = newKeypoints;
+	}
+
+	public Mat getNewDescriptors() {
+		return newDescriptors;
+	}
+
+	public void setNewDescriptors(Mat newDescriptors) {
+		this.newDescriptors = newDescriptors;
+	}
+
+	public Mat[] getOldDescriptors() {
+		return oldDescriptors;
+	}
+
+	public void setOldDescriptors(Mat[] oldDescriptors) {
+		this.oldDescriptors = oldDescriptors;
+	}
+
+	public Layout[] getLayout() {
+		return layout;
+	}
+
+	public void setLayout(Layout[] layout) {
+		this.layout = layout;
 	}
 }
