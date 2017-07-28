@@ -7,11 +7,12 @@ import org.genericsystem.api.core.annotations.SystemGeneric;
 import org.genericsystem.api.core.annotations.constraints.InstanceValueClassConstraint;
 import org.genericsystem.api.core.annotations.constraints.SingularConstraint;
 import org.genericsystem.api.core.annotations.value.StringValue;
+import org.genericsystem.common.Generic;
 import org.genericsystem.security.model.User.Password;
 
 @SystemGeneric
 @Dependencies({ Password.class, UserRole.class })
-public class User {
+public class User implements Generic {
 
 	@SystemGeneric
 	@Components(User.class)
@@ -19,7 +20,7 @@ public class User {
 	@HashedInstanceValue
 	@InstanceValueClassConstraint(byte[].class)
 	@Dependencies(Salt.class)
-	public static class Password {
+	public static class Password implements Generic {
 
 	}
 
@@ -29,7 +30,7 @@ public class User {
 	@HashedInstanceValue
 	@InstanceValueClassConstraint(byte[].class)
 	@StringValue("Salt")
-	public static class Salt {
+	public static class Salt implements Generic {
 
 	}
 }
