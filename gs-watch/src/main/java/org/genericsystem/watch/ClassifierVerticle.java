@@ -1,53 +1,46 @@
 package org.genericsystem.watch;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.genericsystem.cv.Classifier;
-import org.opencv.core.Core;
 
-import io.vertx.core.AbstractVerticle;
-import io.vertx.core.eventbus.MessageConsumer;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Future;
+import io.vertx.core.json.JsonObject;
 
-/**
- * The ClassifierVerticle receives a message from the event bus when a new PNG image has been created. The image is classified, and a new file is created. Finally, a message is sent to the {@link AddImageToEngineVerticle}.
- * 
- * @author middleware
- */
-public class ClassifierVerticle extends AbstractVerticle {
+public class ClassifierVerticle extends ActionVerticle {
 
-	// Not necessary?
-	static {
-		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+	public ClassifierVerticle(String ip) {
+		super(ip);
 	}
 
-	public static void main(String[] args) {
-		VerticleDeployer.deployVerticle(new ClassifierVerticle());
+	public static final String ACTION = "classification";
+
+	@Override
+	public String getAction() {
+		return ACTION;
 	}
 
 	@Override
-	public void start() {
-		MessageConsumer<String> consumer = vertx.eventBus().consumer(VerticleDeployer.PNG_WATCHER_ADDRESS);
-		consumer.handler(message -> vertx.executeBlocking(future -> {
-			System.out.println(">>> classifier: " + Thread.currentThread().getName());
+	protected void handle(Future<Object> future, JsonObject task) {
+		File file = new File(DistributedVerticle.BASE_PATH + task.getString(DistributedVerticle.FILENAME));
+		Path savedFile;
+		synchronized (ClassifierVerticle.class) {
+			savedFile = Classifier.classify(Paths.get("../gs-cv/classes/"), file.toPath());
+		}
+		if (savedFile != null)
+			future.complete(savedFile.toString());
+		else
+			future.fail("Impossible to classify image.");
+	}
 
-			Path newFile = Paths.get(message.body());
-			System.out.println(">>> New file to classify: " + newFile);
-			// Only one access to classesDirectory at a time to avoid duplicate classes.
-			Path classesDirectory = Paths.get("..", "gs-cv", "classes");
-			classesDirectory.toFile().mkdirs();
-			Path savedFile;
-			synchronized (ClassifierVerticle.class) {
-				savedFile = Classifier.classify(classesDirectory, newFile);
-			}
-			if (savedFile != null) {
-				vertx.eventBus().publish(VerticleDeployer.IMAGE_ADDED_TO_CLASS_ADDRESS, savedFile.toString());
-				future.complete();
-			} else
-				future.fail("Impossible to classify image " + newFile);
-		}, res -> {
-			if (res.failed())
-				throw new IllegalStateException(res.cause());
-		}));
+	@Override
+	protected void handleResult(AsyncResult<Object> res, JsonObject task) {
+		if (res.succeeded())
+			addTask((String) res.result(), getIp(), AddImageToEngineVerticle.ACTION);
+		else
+			throw new IllegalStateException("Error when classifying the image " + task.getString(DistributedVerticle.FILENAME), res.cause());
 	}
 }

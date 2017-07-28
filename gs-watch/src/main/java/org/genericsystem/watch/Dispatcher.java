@@ -1,16 +1,15 @@
-package org.genericsystem.watch.gamma;
+package org.genericsystem.watch;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.kernel.Cache;
 import org.genericsystem.kernel.Engine;
-import org.genericsystem.watch.beta.Model.Task;
+import org.genericsystem.watch.Model.Task;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
-import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.spi.cluster.ClusterManager;
 import io.vertx.spi.cluster.hazelcast.HazelcastClusterManager;
@@ -33,7 +32,6 @@ public class Dispatcher extends AbstractVerticle {
 	protected static final String FINISHED = "finished";
 	protected static final String ABORTED = "aborted";
 	private static final long MESSAGE_SEND_PERIODICITY = 5000;
-	public static final long TIMEOUT = 2000;
 
 	public static void main(String[] args) {
 		ClusterManager mgr = new HazelcastClusterManager();
@@ -87,7 +85,7 @@ public class Dispatcher extends AbstractVerticle {
 				for (Generic task : taskType.getInstances()) {
 					JsonObject json = new JsonObject((String) task.getValue());
 					if (TODO.equals(json.getString(STATE))) {
-						vertx.eventBus().send(json.getString(DistributedVerticle.TYPE), new JsonObject(json.encode()).put(STATE, RUNNING).encodePrettily(), new DeliveryOptions().setSendTimeout(TIMEOUT), reply -> {
+						vertx.eventBus().send(json.getString(DistributedVerticle.TYPE), new JsonObject(json.encode()).put(STATE, RUNNING).encodePrettily(), reply -> {
 							if (reply.failed()) {
 								System.out.println("Failed: " + reply.cause());
 							} else if (OK.equals(reply.result().body()))

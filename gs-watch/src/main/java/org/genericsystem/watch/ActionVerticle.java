@@ -1,11 +1,10 @@
-package org.genericsystem.watch.gamma;
+package org.genericsystem.watch;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.TimeoutException;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.AsyncResult;
@@ -31,7 +30,6 @@ public abstract class ActionVerticle extends AbstractVerticle {
 
 	@Override
 	public void start() throws Exception {
-		// TODO: Abort if send timed out.
 		vertx.eventBus().consumer(getAction(), message -> {
 			JsonObject task = new JsonObject((String) message.body());
 
@@ -49,8 +47,6 @@ public abstract class ActionVerticle extends AbstractVerticle {
 				else
 					throw new IllegalStateException("Impossible to download file " + task.getString(DistributedVerticle.FILENAME), future.cause());
 			}, res -> {
-				if (res.failed() && res.cause() instanceof TimeoutException)
-					return;
 				handleResult(res, task);
 				if (res.succeeded())
 					vertx.eventBus().send(Dispatcher.ADDRESS + ":updateState", new JsonObject().put(Dispatcher.TASK, task).put(Dispatcher.NEW_STATE, Dispatcher.FINISHED).encodePrettily());
@@ -102,7 +98,7 @@ public abstract class ActionVerticle extends AbstractVerticle {
 				return;
 			}
 		} else {
-			System.out.println("File : " + fileName + " is already dowloaded");
+			System.out.println("File : " + fileName + " is already downloaded");
 		}
 	}
 
