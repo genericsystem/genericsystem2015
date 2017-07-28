@@ -32,14 +32,14 @@ public class OcrEngineHolderVerticle extends AbstractVerticle {
 			if (res.failed())
 				throw new IllegalStateException(res.cause());
 			Vertx vertx = res.result();
-			//			vertx.deployVerticle(new HttpServerVerticle(), complete -> {
-			//				if (complete.failed())
-			//					throw new IllegalStateException(complete.cause());
+			vertx.deployVerticle(new HttpServerVerticle(), complete -> {
+				if (complete.failed())
+					throw new IllegalStateException(complete.cause());
+			});
 			vertx.deployVerticle(new OcrEngineHolderVerticle(FillModelWithData.getEngine()), result -> {
 				if (result.failed())
 					throw new IllegalStateException(result.cause());
 			});
-			//			});
 		});
 	}
 
