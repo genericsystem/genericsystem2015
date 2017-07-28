@@ -62,8 +62,8 @@ public class Layout {
 		traverse(getRoi(img), (roi, shard) -> {
 			if (shard.getChildren().isEmpty())
 				Imgproc.rectangle(roi.getSrc(), new Point(0, 0), new Point(roi.width() - 1, roi.height() - 1), color, thickness);
-//			else
-//				Imgproc.rectangle(roi.getSrc(), new Point(0, 0), new Point(roi.width() - 1, roi.height() - 1), new Scalar(0, 0, 255), thickness);
+			// else
+			// Imgproc.rectangle(roi.getSrc(), new Point(0, 0), new Point(roi.width() - 1, roi.height() - 1), new Scalar(0, 0, 255), thickness);
 		});
 	}
 
