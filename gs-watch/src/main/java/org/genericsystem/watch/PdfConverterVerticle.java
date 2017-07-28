@@ -1,4 +1,4 @@
-package org.genericsystem.watch.gamma;
+package org.genericsystem.watch;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -10,6 +10,11 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 
+/**
+ * The PdfConverterVerticle receives a message from the event bus when a new PDF was added. The file is processed, and each page is converted to a PNG. Finally, a message is sent to the {@link ClassifierVerticle}.
+ * 
+ * @author middleware
+ */
 public class PdfConverterVerticle extends ActionVerticle {
 
 	public PdfConverterVerticle(String ip) {

@@ -119,7 +119,7 @@ public class CamLayoutAnalyzer extends AbstractApp {
 	}
 
 	@Override
-	protected synchronized void onCtrlSpace() {
+	protected synchronized void onSpace() {
 		// if ((getCount()[0] % 10) == 0) {
 
 		setOldKeypoints(new MatOfKeyPoint[] { getNewKeypoints() });

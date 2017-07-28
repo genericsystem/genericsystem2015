@@ -1,11 +1,10 @@
-package org.genericsystem.watch.gamma;
+package org.genericsystem.watch;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
-import io.vertx.core.eventbus.EventBusOptions;
 import io.vertx.core.spi.cluster.ClusterManager;
 import io.vertx.spi.cluster.hazelcast.HazelcastClusterManager;
 
@@ -36,7 +35,7 @@ public class DistributedVerticle extends AbstractVerticle {
 		return 4;
 	}
 
-	private DistributedVerticle(String ip) {
+	public DistributedVerticle(String ip) {
 		this.ip = ip;
 	}
 
@@ -50,7 +49,6 @@ public class DistributedVerticle extends AbstractVerticle {
 		ClusterManager mgr = new HazelcastClusterManager();
 
 		VertxOptions vertxOptions = new VertxOptions().setClustered(true).setClusterManager(mgr);
-		vertxOptions.setEventBusOptions(new EventBusOptions()).setClustered(true);
 		String ip = LocalNet.getIpAddress();
 		vertxOptions.setClusterHost(ip);
 		vertxOptions.setMaxWorkerExecuteTime(Long.MAX_VALUE);
@@ -62,20 +60,20 @@ public class DistributedVerticle extends AbstractVerticle {
 				if (complete.failed())
 					throw new IllegalStateException(complete.cause());
 				vertx.deployVerticle(new DistributedVerticle(ip), result -> {
-					if (complete.failed())
-						throw new IllegalStateException(complete.cause());
+					if (result.failed())
+						throw new IllegalStateException(result.cause());
 				});
 				vertx.deployVerticle(new DistributedVerticle(ip), result -> {
-					if (complete.failed())
-						throw new IllegalStateException(complete.cause());
+					if (result.failed())
+						throw new IllegalStateException(result.cause());
 				});
 				vertx.deployVerticle(new DistributedVerticle(ip), result -> {
-					if (complete.failed())
-						throw new IllegalStateException(complete.cause());
+					if (result.failed())
+						throw new IllegalStateException(result.cause());
 				});
 				vertx.deployVerticle(new DistributedVerticle(ip), result -> {
-					if (complete.failed())
-						throw new IllegalStateException(complete.cause());
+					if (result.failed())
+						throw new IllegalStateException(result.cause());
 				});
 			});
 		});
