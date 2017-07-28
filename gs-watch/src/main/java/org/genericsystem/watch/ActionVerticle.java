@@ -14,15 +14,7 @@ import io.vertx.core.json.JsonObject;
 
 public abstract class ActionVerticle extends AbstractVerticle {
 
-	private final String ip;
-
-	public ActionVerticle(String ip) {
-		this.ip = ip;
-	}
-
-	public String getIp() {
-		return ip;
-	}
+	private static final String ip = LocalNet.getIpAddress();
 
 	public String getAction() {
 		throw new IllegalStateException("The getAction method must be overridden by extending classes.");
@@ -102,7 +94,7 @@ public abstract class ActionVerticle extends AbstractVerticle {
 		}
 	}
 
-	public void addTask(String fileName, String ip, String type) {
+	public void addTask(String fileName, String type) {
 		JsonObject task = new JsonObject().put(Dispatcher.STATE, Dispatcher.TODO)
 				.put(DistributedVerticle.IP, ip)
 				.put(DistributedVerticle.FILENAME, fileName)

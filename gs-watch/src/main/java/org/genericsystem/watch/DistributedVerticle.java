@@ -14,8 +14,6 @@ public class DistributedVerticle extends AbstractVerticle {
 	protected static final String TYPE = "type";
 	protected static final String IP = "IP";
 
-	private final String ip;
-
 	private static AtomicInteger currentExecutions = new AtomicInteger();
 
 	public static void incrementExecutions() {
@@ -35,22 +33,17 @@ public class DistributedVerticle extends AbstractVerticle {
 		return 4;
 	}
 
-	public DistributedVerticle(String ip) {
-		this.ip = ip;
-	}
-
 	@Override
 	public void start() throws Exception {
-		vertx.deployVerticle(new PdfConverterVerticle(ip));
-		vertx.deployVerticle(new ClassifierVerticle(ip));
+		vertx.deployVerticle(new PdfConverterVerticle());
+		vertx.deployVerticle(new ClassifierVerticle());
 	}
 
 	public static void main(String[] args) {
 		ClusterManager mgr = new HazelcastClusterManager();
 
 		VertxOptions vertxOptions = new VertxOptions().setClustered(true).setClusterManager(mgr);
-		String ip = LocalNet.getIpAddress();
-		vertxOptions.setClusterHost(ip);
+		vertxOptions.setClusterHost(LocalNet.getIpAddress());
 		vertxOptions.setMaxWorkerExecuteTime(Long.MAX_VALUE);
 		Vertx.clusteredVertx(vertxOptions, res -> {
 			if (res.failed())
@@ -59,19 +52,19 @@ public class DistributedVerticle extends AbstractVerticle {
 			vertx.deployVerticle(new HttpServerVerticle(), complete -> {
 				if (complete.failed())
 					throw new IllegalStateException(complete.cause());
-				vertx.deployVerticle(new DistributedVerticle(ip), result -> {
+				vertx.deployVerticle(new DistributedVerticle(), result -> {
 					if (result.failed())
 						throw new IllegalStateException(result.cause());
 				});
-				vertx.deployVerticle(new DistributedVerticle(ip), result -> {
+				vertx.deployVerticle(new DistributedVerticle(), result -> {
 					if (result.failed())
 						throw new IllegalStateException(result.cause());
 				});
-				vertx.deployVerticle(new DistributedVerticle(ip), result -> {
+				vertx.deployVerticle(new DistributedVerticle(), result -> {
 					if (result.failed())
 						throw new IllegalStateException(result.cause());
 				});
-				vertx.deployVerticle(new DistributedVerticle(ip), result -> {
+				vertx.deployVerticle(new DistributedVerticle(), result -> {
 					if (result.failed())
 						throw new IllegalStateException(result.cause());
 				});
