@@ -18,8 +18,8 @@ import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.FlexDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlHyperLink;
-import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlImg;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlSpan;
 import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
 import org.genericsystem.watch.gui.pages.HomePageTable.DocumentsList;
 import org.genericsystem.watch.gui.pages.HomePageTable.HeaderRow;
@@ -72,7 +72,6 @@ public class HomePageTable extends FlexDiv {
 	@BindAction(path = { FlexDiv.class, HtmlHyperLink.class }, pos = { 3, 0 }, value = SET_SELECTION.class)
 	@Switch(path = { FlexDiv.class, HtmlHyperLink.class, CheckedImage.class }, pos = { 3, 0, 0 }, value = DOC_SUPERVISED.class)
 	@Switch(path = { FlexDiv.class, HtmlHyperLink.class, FailedImage.class }, pos = { 3, 0, 0 }, value = DOC_NOT_SUPERVISED.class)
-	@StyleClass(path = { FlexDiv.class, HtmlImg.class }, value = "img")
 	@Style(path = FlexDiv.class, pos = 0, name = "flex", value = "3")
 	@Style(path = FlexDiv.class, name = "flex", value = "1")
 	@Style(path = FlexDiv.class, name = "justify-content", value = "center")
@@ -90,15 +89,15 @@ public class HomePageTable extends FlexDiv {
 		}
 	}
 
-	@StyleClass("img")
-	@Attribute(name = "src", value = "checked.png")
-	public static class CheckedImage extends HtmlImg {
+	@StyleClass({ "fa", "fa-check-square-o", "fa-2x" })
+	@Style(name = "color", value = "#6fcc9f")
+	public static class CheckedImage extends HtmlSpan {
 
 	}
 
-	@StyleClass("img")
-	@Attribute(name = "src", value = "failed.png")
-	public static class FailedImage extends HtmlImg {
+	@StyleClass({ "fa", "fa-times", "fa-2x" })
+	@Style(name = "color", value = "#d33f3f")
+	public static class FailedImage extends HtmlSpan {
 
 	}
 
@@ -121,9 +120,9 @@ public class HomePageTable extends FlexDiv {
 	}
 
 	@Children(HtmlHyperLink.class)
-	@Children(path = HtmlHyperLink.class, value = HtmlImg.class)
-	@Attribute(path = { HtmlHyperLink.class, HtmlImg.class }, name = "src", value = "delete.png")
-	@StyleClass(path = { HtmlHyperLink.class, HtmlImg.class }, value = "img")
+	@Children(path = HtmlHyperLink.class, value = HtmlSpan.class)
+	@StyleClass(path = { HtmlHyperLink.class, HtmlSpan.class }, value = { "fa", "fa-trash-o", "fa-2x" })
+	@Style(path = { HtmlHyperLink.class, HtmlSpan.class }, name = "color", value = "#d33f3f")
 	@BindAction(path = HtmlHyperLink.class, value = SET_SELECTION.class)
 	public static class DocumentDeleteButton extends FlexDiv {
 		// Delete button to delete the selected Generic

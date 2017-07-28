@@ -23,6 +23,11 @@ label[name="zone"] {
 	font-weight: bold;
 }
 
+a > .fa {
+  color: #4d4d4d;
+  text-decoration: none;
+}
+
 .doc-class-title {
 	font-variant: petite-caps;
 	font-weight: bold;
@@ -43,7 +48,6 @@ img {
 }
 
 button {
-/* 	width: 150px; */
 	margin: 10px;
 }
 
