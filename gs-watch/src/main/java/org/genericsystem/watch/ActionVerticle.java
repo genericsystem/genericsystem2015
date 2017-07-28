@@ -34,11 +34,11 @@ public abstract class ActionVerticle extends AbstractVerticle {
 			JsonObject task = new JsonObject((String) message.body());
 
 			if (DistributedVerticle.getMaxExecutions() <= DistributedVerticle.getExecutionsCount()) {
-				message.reply(Dispatcher.KO);
+				message.fail(1, "Too many ongoing executions on " + ip);
 				return;
 			}
 			DistributedVerticle.incrementExecutions();
-			message.reply(Dispatcher.OK);
+			message.reply(null);
 
 			vertx.executeBlocking(future -> {
 				download(future, task);
