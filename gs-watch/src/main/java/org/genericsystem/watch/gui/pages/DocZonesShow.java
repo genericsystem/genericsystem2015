@@ -19,7 +19,6 @@ import org.genericsystem.reactor.gscomponents.FlexDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlHyperLink;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlImg;
-import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
 import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
 import org.genericsystem.watch.gui.pages.DocZonesShow.TextDiv;
 import org.genericsystem.watch.gui.utils.ContextActionCustom.REFRESH_BEST_TEXT;
@@ -98,7 +97,6 @@ public class DocZonesShow extends ModalEditor {
 		// Define the zone label in normal mode
 	}
 
-	@Children(HtmlLabel.class)
 	@BindText(ZONE_TEXT.class)
 	@StyleClass("input-like")
 	public static class ZoneField extends FlexDiv {

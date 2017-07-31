@@ -1,9 +1,9 @@
 @CHARSET "UTF-8";
 
-input:not (.login ), .input-like {
+.input-like, input:not(.login) {
 	padding: 0.5em;
 	margin: 0.5em 0.1em;
-	min-width: 30em; /* To be adjusted more properly */
+	min-width: 30em;
 	flex: 3 1 auto;
 }
 
@@ -19,7 +19,7 @@ label.login {
 	flex: 1;
 }
 
-:not (label[name="title"] ) {
+:not(label[name="title"] ) {
 	padding: 0.5em;
 	margin: 0.5em 0.1em;
 	flex: 1 1 auto;
