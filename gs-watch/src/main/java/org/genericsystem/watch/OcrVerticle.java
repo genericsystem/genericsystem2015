@@ -4,6 +4,8 @@ import java.nio.file.Paths;
 
 import org.genericsystem.common.Root;
 import org.genericsystem.cv.comparator.FillModelWithData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.sun.xml.internal.ws.api.pipe.Engine;
 
@@ -17,6 +19,8 @@ import io.vertx.core.json.JsonObject;
  * @author Pierrik Lassalas
  */
 public class OcrVerticle extends ActionVerticle {
+
+	private static final Logger logger = LoggerFactory.getLogger(OcrVerticle.class);
 
 	public static final String ACTION = "ocr";
 	public static final String NEW_IMAGE_PROCESSED = "app.ocr.newimage.processed";
@@ -52,15 +56,15 @@ public class OcrVerticle extends ActionVerticle {
 
 		switch (result) {
 			case FillModelWithData.NEW_FILE:
-				System.out.println("New image (processed)" + imagePath);
+				logger.debug("New image (processed)" + imagePath);
 				future.complete(NEW_IMAGE_PROCESSED);
 				break;
 			case FillModelWithData.KNOWN_FILE:
-				System.out.println("Known image (passed)" + imagePath);
+				logger.debug("Known image (passed)" + imagePath);
 				future.complete(KNOWN_IMAGE_PASSED);
 				break;
 			case FillModelWithData.KNOWN_FILE_UPDATED_FILTERS:
-				System.out.println("Known image (updated)" + imagePath);
+				logger.debug("Known image (updated)" + imagePath);
 				future.complete(KNOWN_IMAGE_PROCESSED);
 				break;
 			default:

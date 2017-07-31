@@ -2,6 +2,8 @@ package org.genericsystem.watch;
 
 import org.genericsystem.common.GSVertx;
 import org.genericsystem.common.Root;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
@@ -14,6 +16,8 @@ import io.vertx.core.Verticle;
  * @author Pierrik Lassalas
  */
 public class VerticleDeployerFromWatchApp extends AbstractVerticle {
+
+	private static final Logger logger = LoggerFactory.getLogger(VerticleDeployerFromWatchApp.class);
 
 	private static final DeploymentOptions OPTIONS_NORMAL = new DeploymentOptions();
 	private static final DeploymentOptions OPTIONS_WORKER = new DeploymentOptions().setWorker(true).setMaxWorkerExecuteTime(Long.MAX_VALUE);
@@ -50,7 +54,7 @@ public class VerticleDeployerFromWatchApp extends AbstractVerticle {
 			if (res.failed())
 				throw new IllegalStateException("Deployment of main verticle (" + deploymentID() + ") failed.", res.cause());
 			else
-				System.out.println("Main verticle (" + deploymentID() + ") deployed");
+				logger.info("Main verticle (" + deploymentID() + ") deployed");
 		});
 	}
 
@@ -59,7 +63,7 @@ public class VerticleDeployerFromWatchApp extends AbstractVerticle {
 			if (res.failed())
 				throw new IllegalStateException("Deployment of verticle failed.", res.cause());
 			else
-				System.out.println("Verticle deployed");
+				logger.info("Verticle deployed: " + verticle.getClass().getName());
 		});
 	}
 

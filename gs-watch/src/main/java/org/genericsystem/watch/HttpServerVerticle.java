@@ -4,11 +4,16 @@ import java.net.BindException;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 
 public class HttpServerVerticle extends AbstractVerticle {
+
+	private static final Logger logger = LoggerFactory.getLogger(HttpServerVerticle.class);
 
 	public static void main(String[] args) throws UnknownHostException, SocketException {
 		Vertx.vertx().deployVerticle(new HttpServerVerticle());
@@ -19,12 +24,12 @@ public class HttpServerVerticle extends AbstractVerticle {
 		vertx.createHttpServer().requestHandler(req -> {
 			String fileName = req.path();
 			String path = DistributedVerticle.BASE_PATH + fileName;
-			System.out.println("Will send :" + path + " on thread " + Thread.currentThread());
+			logger.debug("Will send :" + path + " on thread " + Thread.currentThread());
 			req.response().sendFile(path);
 		}).listen(8084, ar -> {
 			if (ar.failed()) {
 				if (ar.cause() instanceof BindException) {
-					System.out.println("BindException ignored, HttpServer already started.");
+					logger.warn("BindException ignored, HttpServer already started.");
 					future.complete();
 				} else
 					future.fail(ar.cause());

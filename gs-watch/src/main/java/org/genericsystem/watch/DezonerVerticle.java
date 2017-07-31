@@ -1,6 +1,8 @@
 package org.genericsystem.watch;
 
 import org.genericsystem.cv.Zones;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -13,6 +15,7 @@ import io.vertx.core.json.JsonObject;
  */
 public class DezonerVerticle extends ActionVerticle {
 
+	private static final Logger logger = LoggerFactory.getLogger(DezonerVerticle.class);
 	public static final String ACTION = "dezoner";
 
 	@Override
@@ -38,6 +41,6 @@ public class DezonerVerticle extends ActionVerticle {
 		if (res.succeeded())
 			addTask(task.getString(DistributedVerticle.FILENAME), (String) res.result());
 		else
-			System.out.println("No zones defined for file " + task.getString(DistributedVerticle.FILENAME));
+			logger.info("No zones defined for file " + task.getString(DistributedVerticle.FILENAME));
 	}
 }

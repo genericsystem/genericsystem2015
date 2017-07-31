@@ -29,9 +29,12 @@ import org.opencv.features2d.FeatureDetector;
 import org.opencv.features2d.Features2d;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Classifier {
 
+	private static final Logger logger = LoggerFactory.getLogger(Classifier.class);
 	public final static int MATCHING_THRESHOLD = 150;
 	private static final String pngDirectoryPath = "png";
 	private static final String classesDirectoryPath = "classes";
@@ -75,7 +78,7 @@ public class Classifier {
 				CompareFeatureResult bestClass = Classifier.selectBestClass(classesDirectory, img.getSrc(), featureDetectors, descriptorExtractors)) {
 			Path matchingClassDir;
 			if (bestClass != null) {
-				System.out.println("bestClass != null, " + bestClass);
+				logger.debug("bestClass != null, " + bestClass);
 				matchingClassDir = Paths.get(".").resolveSibling(bestClass.getImgClass().getDirectory());
 				alignedImage = bestClass.getImg();
 			} else {
@@ -85,8 +88,7 @@ public class Classifier {
 					alignedImage = cropped.getSrc();
 				} catch (Exception e) {
 					matchingClassDir.toFile().delete();
-					System.out.println("Error while deskewing new image " + imgFile.toString() + " to create new class, new class not created.");
-					e.printStackTrace();
+					logger.error("Error while deskewing new image " + imgFile.toString() + " to create new class, new class not created.", e);
 					return null;
 					// TODO: Store the image somewhere else.
 				}
@@ -99,11 +101,11 @@ public class Classifier {
 						savedFile = File.createTempFile(fileNameParts[0] + "-", "." + fileNameParts[1], matchingClassDir.toFile()).toPath();
 					}
 				}
-				System.out.println("alignedImage : " + alignedImage + ", path : " + savedFile);
+				logger.debug("alignedImage : " + alignedImage + ", path : " + savedFile);
 				Imgcodecs.imwrite(savedFile.toString(), alignedImage);
 				return savedFile;
 			} catch (IOException e) {
-				e.printStackTrace();
+				logger.error("Error while saving image " + imgFile.getFileName() + " in class " + matchingClassDir.toString(), e);
 				return null;
 			}
 		} finally {
@@ -255,9 +257,9 @@ public class Classifier {
 				Imgproc.warpPerspective(img1, transformedImage, homography, new Size(img2.cols(), img2.rows()));
 				result = new CompareFeatureResult(transformedImage, goodMatches.size());
 				homography.release();
-				System.out.println("----------------- possible match found, threshold: " + matchingThreshold + ", goodMatches: " + goodMatches.size());
+				logger.debug("----------------- possible match found, threshold: " + matchingThreshold + ", goodMatches: " + goodMatches.size());
 			} else
-				System.out.println("----------------- not a match, threshold: " + matchingThreshold + ", goodMatches: " + goodMatches.size());
+				logger.debug("----------------- not a match, threshold: " + matchingThreshold + ", goodMatches: " + goodMatches.size());
 		}
 		keypoints2.release();
 		descriptors2.release();
