@@ -5,6 +5,7 @@ import java.util.Arrays;
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.EncryptionUtils;
 import org.genericsystem.reactor.Tag;
+import org.genericsystem.reactor.annotations.Attribute;
 import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
@@ -15,7 +16,11 @@ import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.context.ContextAction;
 import org.genericsystem.reactor.context.ContextAction.MODAL_DISPLAY_FLEX;
+import org.genericsystem.reactor.context.ContextAction.SET_ADMIN_MODE;
+import org.genericsystem.reactor.context.ContextAction.SET_NORMAL_MODE;
+import org.genericsystem.reactor.context.TagSwitcher.ADMIN_MODE_ONLY;
 import org.genericsystem.reactor.context.TagSwitcher.LOGGED_USER;
+import org.genericsystem.reactor.context.TagSwitcher.NORMAL_MODE_ONLY;
 import org.genericsystem.reactor.context.TagSwitcher.NO_LOGGED_USER;
 import org.genericsystem.reactor.context.TextBinding;
 import org.genericsystem.reactor.contextproperties.PasswordDefaults;
@@ -50,7 +55,9 @@ public class HomePageUserLogin extends FlexDiv {
 	@FlexDirectionStyle(FlexDirection.ROW)
 	@Children({ HtmlLabel.class, FlexDiv.class })
 	@Children(path = FlexDiv.class, value = { HtmlInputText.class, HtmlSpan.class })
-	@SetText(path = HtmlLabel.class, value = "Login: ")
+	@SetText(path = HtmlLabel.class, value = "Login")
+	@Style(path = HtmlLabel.class, name = "color", value = "white")
+	@Style(path = HtmlLabel.class, name = "font-weight", value = "bold")
 	@FlexDirectionStyle(path = FlexDiv.class, value = FlexDirection.COLUMN)
 	@SetText(path = { FlexDiv.class, HtmlSpan.class }, value = "Invalid username")
 	@Style(path = { FlexDiv.class, HtmlSpan.class }, name = "display", value = "none")
@@ -64,11 +71,14 @@ public class HomePageUserLogin extends FlexDiv {
 	@FlexDirectionStyle(FlexDirection.ROW)
 	@Children({ HtmlLabel.class, FlexDiv.class })
 	@Children(path = FlexDiv.class, value = { HtmlInputText.class, HtmlSpan.class })
-	@SetText(path = HtmlLabel.class, value = "Password: ")
+	@SetText(path = HtmlLabel.class, value = "Password")
+	@Style(path = HtmlLabel.class, name = "color", value = "white")
+	@Style(path = HtmlLabel.class, name = "font-weight", value = "bold")
 	@FlexDirectionStyle(path = FlexDiv.class, value = FlexDirection.COLUMN)
 	@SetText(path = { FlexDiv.class, HtmlSpan.class }, value = "Invalid password")
 	@Style(path = { FlexDiv.class, HtmlSpan.class }, name = "display", value = "none")
 	@Style(path = { FlexDiv.class, HtmlInputText.class }, name = "margin", value = "0.5em")
+	@Attribute(path = { FlexDiv.class, HtmlInputText.class }, name = "type", value = "password")
 	@StyleClass(path = HtmlLabel.class, value = "login")
 	@StyleClass(path = { FlexDiv.class, HtmlInputText.class }, value = { "glowing-border", "login" })
 	public static class InputTextPassword extends FlexDiv {
@@ -138,9 +148,18 @@ public class HomePageUserLogin extends FlexDiv {
 
 	}
 
-	@Children({ HtmlLabel.class, HtmlButton.class })
+	@Children({ HtmlLabel.class, HtmlButton.class, FlexDiv.class })
+	@Children(path = FlexDiv.class, value = { HtmlButton.class, HtmlButton.class })
+	@Style(path = FlexDiv.class, name = "flex", value = "0")
+	@SetText(path = { FlexDiv.class, HtmlButton.class }, pos = { 0, 0 }, value = "Switch to admin mode")
+	@SetText(path = { FlexDiv.class, HtmlButton.class }, pos = { 0, 1 }, value = "Switch to normal mode")
+	@BindAction(path = { FlexDiv.class, HtmlButton.class }, pos = { 0, 0 }, value = SET_ADMIN_MODE.class)
+	@BindAction(path = { FlexDiv.class, HtmlButton.class }, pos = { 0, 1 }, value = SET_NORMAL_MODE.class)
+	@Switch(path = { FlexDiv.class, HtmlButton.class }, pos = { 0, 0 }, value = { LOGGED_USER.class, NORMAL_MODE_ONLY.class })
+	@Switch(path = { FlexDiv.class, HtmlButton.class }, pos = { 0, 1 }, value = ADMIN_MODE_ONLY.class)
 	@FlexDirectionStyle(FlexDirection.COLUMN)
 	@SetText(path = HtmlButton.class, value = "Logout")
+	@Style(path = FlexDiv.class, name = "align-self", value = "center")
 	@BindText(path = HtmlLabel.class, value = TextBinding.LOGGED_USER.class)
 	@BindAction(path = HtmlButton.class, value = ContextAction.DISCONNECT.class)
 	public static class LoggedUserDiv extends FlexDiv {

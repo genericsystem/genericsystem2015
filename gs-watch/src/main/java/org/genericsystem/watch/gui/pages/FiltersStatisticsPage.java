@@ -11,9 +11,7 @@ import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.annotations.Switch;
-import org.genericsystem.reactor.gscomponents.AppHeader;
 import org.genericsystem.reactor.gscomponents.AppHeader.AppTitleDiv;
-import org.genericsystem.reactor.gscomponents.AppHeader.Logo;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.FlexDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
@@ -32,14 +30,11 @@ import org.genericsystem.watch.gui.utils.PageSwitcher.FILTERS_STATISTICS;
  * 
  * @author Pierrik Lassalas
  */
-// TODO: redesign the interface (smaller, add foreach loops)
 @Switch(FILTERS_STATISTICS.class)
 @Style(name = "background-color", value = "#ffffff")
-@Children({ AppHeader.class, FlexDiv.class })
+@Children({ Header.class, FlexDiv.class })
 @Children(path = FlexDiv.class, pos = 1, value = { GeneralButtonsDiv.class, DocClassStatisticsDiv.class })
-@Style(path = AppHeader.class, name = "background-color", value = "#00afeb")
-@Children(path = AppHeader.class, value = { Logo.class, AppTitleDiv.class })
-@SetText(path = { AppHeader.class, AppTitleDiv.class, HtmlH1.class }, value = "Global OCR accuracy per zone")
+@SetText(path = { Header.class, AppTitleDiv.class, HtmlH1.class }, value = "Global OCR accuracy per zone")
 public class FiltersStatisticsPage extends FlexDiv {
 
 	@FlexDirectionStyle(FlexDirection.ROW)
