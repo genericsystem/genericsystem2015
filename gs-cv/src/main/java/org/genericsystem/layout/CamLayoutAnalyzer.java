@@ -9,9 +9,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
-
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.Tools;
@@ -35,6 +32,9 @@ import org.opencv.features2d.DescriptorMatcher;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
 import org.opencv.videoio.VideoCapture;
+
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
 
 public class CamLayoutAnalyzer extends AbstractApp {
 
@@ -102,22 +102,22 @@ public class CamLayoutAnalyzer extends AbstractApp {
 						if (getLayout()[0] == null)
 							getLayout()[0] = stabilized.buildLayout();
 						// getLayout()[0].ocrTree(stabilized, 0);
-				getLayout()[0].draw(stabilizedCopy, new Scalar(0, 255, 0), 1);
-				getLayout()[0].drawPerspective(frameImg, homography[0].inv(), new Scalar(0, 0, 255), 2);
+						getLayout()[0].draw(stabilizedCopy, new Scalar(0, 255, 0), 1);
+						getLayout()[0].drawPerspective(frameImg, homography[0].inv(), new Scalar(0, 0, 255), 1);
 
-				src0.setImage(frameImg.toJfxImage());
-				src1.setImage(deskewed_.toJfxImage());
-				src2.setImage(deskiewedCopy.toJfxImage());
-				src3.setImage(stabilizedCopy.toJfxImage());
+						src0.setImage(frameImg.toJfxImage());
+						src1.setImage(deskewed_.toJfxImage());
+						src2.setImage(deskiewedCopy.toJfxImage());
+						src3.setImage(stabilizedCopy.toJfxImage());
+					}
+
+					this.getCount()[0]++;
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 
-			this.getCount()[0]++;
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-}, 0, 66, TimeUnit.MILLISECONDS);
+		}, 500, 66, TimeUnit.MILLISECONDS);
 	}
 
 	@Override
@@ -207,7 +207,7 @@ public class CamLayoutAnalyzer extends AbstractApp {
 		List<MatOfPoint> contours = new ArrayList<>();
 		Imgproc.findContours(dilated, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
 		double minArea = 100;
-		double crop = 0.15;
+		double crop = 0;
 		Predicate<RotatedRect> filter = rect -> rect.center.x > Double.valueOf(frame.width() * crop).intValue() && rect.center.y > Double.valueOf(frame.height() * crop).intValue() && rect.center.x < Double.valueOf(frame.width() * (1 - crop)).intValue()
 				&& rect.center.y < Double.valueOf(frame.height() * (1 - crop)).intValue();
 		List<RotatedRect> rotatedRects = contours.stream().filter(contour -> Imgproc.contourArea(contour) > minArea).map(contour -> Imgproc.minAreaRect(new MatOfPoint2f(contour.toArray()))).filter(filter).collect(Collectors.toList());
@@ -236,7 +236,7 @@ public class CamLayoutAnalyzer extends AbstractApp {
 			List<MatOfPoint> mof = Collections.singletonList(new MatOfPoint(new MatOfPoint(result)));
 			// Imgproc.drawContours(frame, mof, 0, new Scalar(0, 255, 0), 1);
 			// Imgproc.drawContours(dilated, mof, 0, new Scalar(255), 1);
-			});
+		});
 		return goodAverage;
 	}
 

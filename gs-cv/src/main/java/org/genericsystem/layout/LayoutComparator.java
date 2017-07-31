@@ -1,4 +1,4 @@
-package org.genericsystem.cv;
+package org.genericsystem.layout;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -7,14 +7,16 @@ import java.util.concurrent.TimeUnit;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 
-import org.genericsystem.layout.Layout;
+import org.genericsystem.cv.AbstractApp;
+import org.genericsystem.cv.Img;
+import org.genericsystem.cv.Tools;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
 
-public class AlgoViewer extends AbstractApp {
+public class LayoutComparator extends AbstractApp {
 
 	static {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
