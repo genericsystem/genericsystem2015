@@ -88,7 +88,7 @@ public class MotionDetector {
 				MatOfPoint2f contour2F = new MatOfPoint2f(contour.toArray());
 				Point[] result = new Point[4];
 				Imgproc.minAreaRect(contour2F).points(result);
-				Imgproc.drawContours(frame, Arrays.asList(new MatOfPoint(result)), 0, new Scalar(255, 0, 0), 2);
+				Imgproc.drawContours(frame, Arrays.asList(new MatOfPoint(result)), 0, new Scalar(255, 0, 0), 1);
 				rectangles.add(Imgproc.boundingRect(contour));
 				Imgproc.drawContours(frame, contours, i, new Scalar(0, 255, 0));
 			}

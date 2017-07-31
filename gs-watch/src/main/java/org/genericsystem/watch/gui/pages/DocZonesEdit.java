@@ -54,7 +54,7 @@ public class DocZonesEdit extends ModalEditor {
 	@Children({ FlexDiv.class, FlexDiv.class, FlexDiv.class })
 	@Children(path = FlexDiv.class, pos = 1, value = { FlexDiv.class, FlexDiv.class })
 	@Children(path = { FlexDiv.class, FlexDiv.class }, pos = { 1, 0 }, value = Image.class)
-	@Children(path = FlexDiv.class, pos = 2, value = { Validate.class, Cancel.class })
+	@Children(path = FlexDiv.class, pos = 2, value = { Validate.class, Reset.class, Cancel.class })
 	@Children(path = { FlexDiv.class, FlexDiv.class }, pos = { 1, 1 }, value = ZoneTextDiv.class)
 	@BindText(path = FlexDiv.class, pos = 0)
 	@StyleClass(path = FlexDiv.class, pos = 0, value = "doc-title")
@@ -71,6 +71,12 @@ public class DocZonesEdit extends ModalEditor {
 	@BindAction(value = SAVE.class)
 	public static class Validate extends HtmlButton {
 		// Persists the changes
+	}
+
+	@SetText("Reset")
+	@BindAction(value = RESET_SELECTION.class)
+	public static class Reset extends HtmlButton {
+		// Reset the changes
 	}
 
 	@SetText("Cancel")

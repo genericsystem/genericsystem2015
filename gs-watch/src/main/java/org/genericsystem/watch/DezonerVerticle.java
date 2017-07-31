@@ -20,10 +20,6 @@ public class DezonerVerticle extends ActionVerticle {
 		return ACTION;
 	}
 
-	public DezonerVerticle(String ip) {
-		super(ip);
-	}
-
 	@Override
 	protected void handle(Future<Object> future, JsonObject task) {
 		String imagePath = task.getString(DistributedVerticle.FILENAME);
@@ -40,7 +36,7 @@ public class DezonerVerticle extends ActionVerticle {
 	@Override
 	protected void handleResult(AsyncResult<Object> res, JsonObject task) {
 		if (res.succeeded())
-			addTask(task.getString(DistributedVerticle.FILENAME), getIp(), (String) res.result());
+			addTask(task.getString(DistributedVerticle.FILENAME), (String) res.result());
 		else
 			System.out.println("No zones defined for file " + task.getString(DistributedVerticle.FILENAME));
 	}

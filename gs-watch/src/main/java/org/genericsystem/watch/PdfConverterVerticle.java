@@ -17,10 +17,6 @@ import io.vertx.core.json.JsonObject;
  */
 public class PdfConverterVerticle extends ActionVerticle {
 
-	public PdfConverterVerticle(String ip) {
-		super(ip);
-	}
-
 	public static final String ACTION = "pdfToPng";
 
 	@Override
@@ -39,7 +35,7 @@ public class PdfConverterVerticle extends ActionVerticle {
 	protected void handleResult(AsyncResult<Object> res, JsonObject task) {
 		if (res.succeeded()) {
 			for (Path newPng : (List<Path>) res.result())
-				addTask(newPng.toString(), getIp(), ClassifierVerticle.ACTION);
+				addTask(newPng.toString(), ClassifierVerticle.ACTION);
 		}
 	}
 }

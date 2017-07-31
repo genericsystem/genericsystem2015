@@ -42,7 +42,6 @@ import io.vertx.core.logging.LoggerFactory;
 
 /**
  * @author Nicolas Feybesse
- *
  */
 
 public class ApplicationServer extends AbstractBackEnd {
@@ -242,6 +241,7 @@ public class ApplicationServer extends AbstractBackEnd {
 					indexHtml += "<meta charset=\"UTF-8\" name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">";
 					indexHtml += "<LINK rel=stylesheet type=\"text/css\" href=\"/reactor.css\"/>";
 					indexHtml += "<LINK rel=stylesheet type=\"text/css\" href=\"" + (appPath.isEmpty() ? "" : ("/" + appPath)) + "/" + application.getApplicationClass().getSimpleName().toLowerCase() + ".css\"/>";
+					indexHtml += "<LINK rel=stylesheet type=\"text/css\" href=\"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css\"/>";
 					indexHtml += "<script>";
 					indexHtml += "var serviceLocation = \"ws://\" + document.location.host + \"" + request.path() + "\";";
 					indexHtml += "</script>";

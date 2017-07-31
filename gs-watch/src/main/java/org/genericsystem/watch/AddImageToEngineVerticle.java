@@ -27,10 +27,8 @@ public class AddImageToEngineVerticle extends ActionVerticle {
 	 * Default constructor. A reference to the engine must be provided.
 	 * 
 	 * @param engine - the engine used to store the data
-	 * @param ip	 - the local IP address.
 	 */
-	public AddImageToEngineVerticle(String ip, Root engine) {
-		super(ip);
+	public AddImageToEngineVerticle(Root engine) {
 		this.engine = engine;
 	}
 
@@ -56,7 +54,7 @@ public class AddImageToEngineVerticle extends ActionVerticle {
 	@Override
 	protected void handleResult(AsyncResult<Object> res, JsonObject task) {
 		if (res.succeeded())
-			addTask((String) res.result(), getIp(), DezonerVerticle.ACTION);
+			addTask((String) res.result(), DezonerVerticle.ACTION);
 		else
 			throw new IllegalStateException("An error has occurred while saving file " + task.getString(DistributedVerticle.FILENAME));
 	}

@@ -12,10 +12,6 @@ import io.vertx.core.json.JsonObject;
 
 public class ClassifierVerticle extends ActionVerticle {
 
-	public ClassifierVerticle(String ip) {
-		super(ip);
-	}
-
 	public static final String ACTION = "classification";
 
 	@Override
@@ -39,7 +35,7 @@ public class ClassifierVerticle extends ActionVerticle {
 	@Override
 	protected void handleResult(AsyncResult<Object> res, JsonObject task) {
 		if (res.succeeded())
-			addTask((String) res.result(), getIp(), AddImageToEngineVerticle.ACTION);
+			addTask((String) res.result(), AddImageToEngineVerticle.ACTION);
 		else
 			throw new IllegalStateException("Error when classifying the image " + task.getString(DistributedVerticle.FILENAME), res.cause());
 	}

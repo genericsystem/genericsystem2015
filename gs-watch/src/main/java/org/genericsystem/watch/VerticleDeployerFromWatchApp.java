@@ -65,10 +65,9 @@ public class VerticleDeployerFromWatchApp extends AbstractVerticle {
 
 	@Override
 	public void start(Future<Void> startFuture) throws Exception {
-		String ip = LocalNet.getIpAddress();
 		deployVerticle(new Dispatcher(), true);
-		deployVerticle(new DistributedVerticle(ip), true);
-		deployVerticle(new OcrEngineHolderVerticle(ip, root), true);
+		deployVerticle(new DistributedVerticle(), true);
+		deployVerticle(new OcrEngineHolderVerticle(root), true);
 		startFuture.complete();
 	}
 }

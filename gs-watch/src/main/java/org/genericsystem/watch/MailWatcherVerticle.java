@@ -34,6 +34,8 @@ import io.vertx.core.json.JsonObject;
  */
 public class MailWatcherVerticle extends AbstractVerticle {
 
+	private final String ip = LocalNet.getIpAddress();
+
 	@Override
 	public void start() throws Exception {
 		vertx.executeBlocking(fut -> checkMail(fut), res -> {
@@ -113,7 +115,7 @@ public class MailWatcherVerticle extends AbstractVerticle {
 						Files.copy(attachment.getInputStream(), newFile);
 					}
 					JsonObject task = new JsonObject().put(Dispatcher.STATE, Dispatcher.TODO)
-							.put(DistributedVerticle.IP, LocalNet.getIpAddress())
+							.put(DistributedVerticle.IP, ip)
 							.put(DistributedVerticle.FILENAME, newFile.toString().replaceFirst(DistributedVerticle.BASE_PATH, ""))
 							.put(DistributedVerticle.TYPE, PdfConverterVerticle.ACTION);
 					vertx.eventBus().publish(Dispatcher.ADDRESS + ":add", task.encodePrettily());

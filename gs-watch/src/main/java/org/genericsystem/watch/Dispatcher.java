@@ -10,6 +10,7 @@ import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
+import io.vertx.core.eventbus.ReplyException;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.spi.cluster.ClusterManager;
 import io.vertx.spi.cluster.hazelcast.HazelcastClusterManager;
@@ -19,9 +20,6 @@ public class Dispatcher extends AbstractVerticle {
 	protected final Engine engine = new Engine(System.getenv("HOME") + "/genericsystem/tasks/", Task.class);
 	protected Cache cache = engine.newCache();
 	protected final Generic taskType = engine.find(Task.class);
-
-	public static final String OK = "OK";
-	public static final String KO = "KO";
 
 	public static final String ADDRESS = "org.genericsystem.repartitor";
 	protected static final String TASK = "task";
@@ -86,9 +84,19 @@ public class Dispatcher extends AbstractVerticle {
 					JsonObject json = new JsonObject((String) task.getValue());
 					if (TODO.equals(json.getString(STATE))) {
 						vertx.eventBus().send(json.getString(DistributedVerticle.TYPE), new JsonObject(json.encode()).put(STATE, RUNNING).encodePrettily(), reply -> {
-							if (reply.failed()) {
-								System.out.println("Failed: " + reply.cause());
-							} else if (OK.equals(reply.result().body()))
+							if (reply.failed())
+								switch (((ReplyException) reply.cause()).failureType()) {
+									case NO_HANDLERS:
+										System.out.println("No handler for task: " + json.encodePrettily());
+										break;
+									case TIMEOUT:
+										System.out.println("Sending of task " + json.encodePrettily() + " timed out: " + reply.cause().getMessage());
+										break;
+									case RECIPIENT_FAILURE:
+										System.out.println("Task: " + json.encodePrettily() + " rejected by recipient: " + reply.cause().getMessage());
+										break;
+								}
+							else
 								updateTaskState(json, RUNNING);
 						});
 					}

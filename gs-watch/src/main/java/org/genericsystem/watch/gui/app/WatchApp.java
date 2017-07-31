@@ -17,6 +17,9 @@ import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.gscomponents.RootTagImpl;
+import org.genericsystem.security.model.Role;
+import org.genericsystem.security.model.User;
+import org.genericsystem.security.model.UserRole;
 import org.genericsystem.watch.VerticleDeployerFromWatchApp;
 import org.genericsystem.watch.gui.pages.FiltersStatisticsPage;
 import org.genericsystem.watch.gui.pages.HomePage;
@@ -30,7 +33,8 @@ import org.genericsystem.watch.gui.utils.PageSwitcher;
  * @author Pierrik Lassalas
  */
 @SuppressWarnings("unused")
-@DependsOnModel({ Doc.class, RefreshTimestamp.class, DocTimestamp.class, DocFilename.class, DocClass.class, ZoneGeneric.class, ZoneText.class, ZoneTimestamp.class, ImgFilter.class, LevDistance.class, MeanLevenshtein.class, Score.class })
+@DependsOnModel({ Role.class, User.class, UserRole.class, Doc.class, RefreshTimestamp.class, DocTimestamp.class, DocFilename.class, DocClass.class, ZoneGeneric.class, ZoneText.class, ZoneTimestamp.class, ImgFilter.class, LevDistance.class,
+		MeanLevenshtein.class, Score.class })
 @Children({ HomePage.class, FiltersStatisticsPage.class })
 public class WatchApp extends RootTagImpl {
 

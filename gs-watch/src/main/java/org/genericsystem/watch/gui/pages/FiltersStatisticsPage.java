@@ -50,21 +50,23 @@ public class FiltersStatisticsPage extends FlexDiv {
 
 	}
 
-	@Children({ FlexDiv.class, FlexDiv.class })
-	@Children(path = FlexDiv.class, pos = 1, value = StatisticsTable.class)
-	@Children(path = FlexDiv.class, pos = 0, value = { FlexDiv.class, FlexDiv.class })
-	@Children(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 1 }, value = ButtonDiv.class)
-	@BindText(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 0 })
-	@FlexDirectionStyle(path = FlexDiv.class, pos = 0, value = FlexDirection.ROW)
-	@Style(path = FlexDiv.class, pos = 0, name = "justify-content", value = "center")
-	@Style(path = FlexDiv.class, pos = 0, name = "align-items", value = "center")
-	@Style(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 0 }, name = "flex", value = "1 1 auto")
-	@Style(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 1 }, name = "flex", value = "0 1 auto")
-	@StyleClass(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 0 }, value = "doc-class-title")
-	@Style(name = "width", value = "90%")
+	@Children(FlexDiv.class)
+	@Children(path = FlexDiv.class, value = { FlexDiv.class, FlexDiv.class })
+	@Children(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 0 }, value = { FlexDiv.class, FlexDiv.class })
+	@Children(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 1 }, value = StatisticsTable.class)
+	@Children(path = { FlexDiv.class, FlexDiv.class, FlexDiv.class }, pos = { 0, 0, 1 }, value = ButtonDiv.class)
+	@BindText(path = { FlexDiv.class, FlexDiv.class, FlexDiv.class }, pos = { 0, 0, 0 })
+	@FlexDirectionStyle(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 0 }, value = FlexDirection.ROW)
+	@Style(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 0 }, name = "justify-content", value = "center")
+	@Style(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 0 }, name = "align-items", value = "center")
+	@Style(path = { FlexDiv.class, FlexDiv.class, FlexDiv.class }, pos = { 0, 0, 0 }, name = "flex", value = "1 1 auto")
+	@Style(path = { FlexDiv.class, FlexDiv.class, FlexDiv.class }, pos = { 0, 0, 1 }, name = "flex", value = "0 1 auto")
+	@StyleClass(path = { FlexDiv.class, FlexDiv.class, FlexDiv.class }, pos = { 0, 0, 0 }, value = "doc-class-title")
+	@Style(name = "width", value = "95%")
 	@Style(name = "margin", value = "auto")
-	@Switch(SUPERVISION_AVAILABLE.class)
-	@ForEach(DOC_CLASS_SELECTOR.class)
+	@Style(path = FlexDiv.class, name = "margin", value = "0.5em 0")
+	@Switch(path = FlexDiv.class, value = SUPERVISION_AVAILABLE.class)
+	@ForEach(path = FlexDiv.class, value = DOC_CLASS_SELECTOR.class)
 	public static class DocClassStatisticsDiv extends FlexDiv {
 
 	}

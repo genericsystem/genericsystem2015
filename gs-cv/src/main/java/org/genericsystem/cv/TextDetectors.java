@@ -32,7 +32,7 @@ public class TextDetectors {
 
 			Zones.get(frameImg.sobel(), 400).draw(result, new Scalar(0, 255, 0), 1);
 			Zones.get(frameImg.mser(), 400).draw(result, new Scalar(255, 0, 0), 1);
-			Zones.get(frameImg.grad(), 400).draw(result, new Scalar(0, 0, 255), 1);
+			Zones.get(frameImg.grad(3, 3), 400).draw(result, new Scalar(0, 0, 255), 1);
 
 			vidpanel.setIcon(result.getImageIcon());
 			vidpanel.repaint();
@@ -42,7 +42,6 @@ public class TextDetectors {
 		}
 
 	}
-
 	// private static Scalar white = new Scalar(255, 255, 255);
 	// private static Scalar black = new Scalar(0, 0, 0);
 	// private static Scalar green = new Scalar(0, 255, 0);

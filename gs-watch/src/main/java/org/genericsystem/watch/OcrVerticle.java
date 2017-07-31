@@ -35,8 +35,7 @@ public class OcrVerticle extends ActionVerticle {
 	 * 
 	 * @param engine - the engine used to store the data
 	 */
-	public OcrVerticle(String ip, Root engine) {
-		super(ip);
+	public OcrVerticle(Root engine) {
 		this.engine = engine;
 	}
 
@@ -73,7 +72,7 @@ public class OcrVerticle extends ActionVerticle {
 	@Override
 	protected void handleResult(AsyncResult<Object> res, JsonObject task) {
 		if (res.succeeded())
-			addTask(task.getString(DistributedVerticle.FILENAME), getIp(), (String) res.result());
+			addTask(task.getString(DistributedVerticle.FILENAME), (String) res.result());
 		else
 			throw new IllegalStateException("Exception in OcrVerticle.", res.cause());
 	}
