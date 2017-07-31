@@ -31,6 +31,7 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlInputText;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlSpan;
+import org.genericsystem.reactor.gscomponents.InstancesTable.ButtonDiv;
 import org.genericsystem.reactor.gscomponents.Modal.ModalWithDisplay;
 import org.genericsystem.reactor.gscomponents.Monitor.MonitorLogin.UserCreation;
 import org.genericsystem.security.model.User;
@@ -38,8 +39,7 @@ import org.genericsystem.security.model.User.Password;
 import org.genericsystem.security.model.User.Salt;
 import org.genericsystem.watch.gui.pages.HomePageUserLogin.LoggedUserDiv;
 import org.genericsystem.watch.gui.pages.HomePageUserLogin.LoginDiv;
-
-import javafx.collections.ObservableMap;
+import org.genericsystem.watch.gui.utils.ContextActionCustom.CREATE_USER_CUSTOM;
 
 @Children({ LoginDiv.class, LoggedUserDiv.class })
 @Switch(path = LoginDiv.class, value = NO_LOGGED_USER.class)
@@ -61,6 +61,7 @@ public class HomePageUserLogin extends FlexDiv {
 	@FlexDirectionStyle(path = FlexDiv.class, value = FlexDirection.COLUMN)
 	@SetText(path = { FlexDiv.class, HtmlSpan.class }, value = "Invalid username")
 	@Style(path = { FlexDiv.class, HtmlSpan.class }, name = "display", value = "none")
+	@StyleClass(path = { FlexDiv.class, HtmlSpan.class }, value = "error-message-inv")
 	@Style(path = { FlexDiv.class, HtmlInputText.class }, name = "margin", value = "0.5em")
 	@StyleClass(path = HtmlLabel.class, value = "login")
 	@StyleClass(path = { FlexDiv.class, HtmlInputText.class }, value = { "glowing-border", "login" })
@@ -77,6 +78,7 @@ public class HomePageUserLogin extends FlexDiv {
 	@FlexDirectionStyle(path = FlexDiv.class, value = FlexDirection.COLUMN)
 	@SetText(path = { FlexDiv.class, HtmlSpan.class }, value = "Invalid password")
 	@Style(path = { FlexDiv.class, HtmlSpan.class }, name = "display", value = "none")
+	@StyleClass(path = { FlexDiv.class, HtmlSpan.class }, value = "error-message-inv")
 	@Style(path = { FlexDiv.class, HtmlInputText.class }, name = "margin", value = "0.5em")
 	@Attribute(path = { FlexDiv.class, HtmlInputText.class }, name = "type", value = "password")
 	@StyleClass(path = HtmlLabel.class, value = "login")
@@ -87,7 +89,7 @@ public class HomePageUserLogin extends FlexDiv {
 
 	@FlexDirectionStyle(FlexDirection.ROW)
 	@Children({ ModalWithDisplay.class, SignInButton.class, SignUpButton.class })
-	@Children(path = { ModalWithDisplay.class, FlexDiv.class }, value = UserCreation.class)
+	@Children(path = { ModalWithDisplay.class, FlexDiv.class }, value = CustomUserCreation.class)
 	public static class ButtonsDiv extends FlexDiv {
 
 	}
@@ -100,43 +102,64 @@ public class HomePageUserLogin extends FlexDiv {
 			createSaltProperty();
 			bindAction(context -> {
 				Tag ancestor = getParent().getParent();
-				HtmlInputText loginInput = ancestor.find(InputTextUsername.class).find(FlexDiv.class).find(HtmlInputText.class);
-				System.out.println("loginInput: " + loginInput);
-				HtmlInputText passwordInput = ancestor.find(InputTextPassword.class).find(FlexDiv.class).find(HtmlInputText.class);
-				System.out.println("loginInput: " + passwordInput);
-				HtmlSpan invalidLogin = ancestor.find(InputTextUsername.class).find(FlexDiv.class).find(HtmlSpan.class);
-				System.out.println("invalidLogin: " + invalidLogin);
-				HtmlSpan invalidPassword = ancestor.find(InputTextPassword.class).find(FlexDiv.class).find(HtmlSpan.class);
-				System.out.println("invalidPassword: " + invalidPassword);
-				User userClass = (User) context.find(User.class);
-				System.out.println("user: " + userClass);
-				String loginInputValue = loginInput.getDomNodeAttributes(context).get("value"); // XXX invalid login if null
-				System.out.println("value: " + loginInputValue);
-				printAttributes(loginInput.getDomNodeAttributes(context));
-				Generic user = userClass.getInstance(loginInputValue);
-				System.out.println("user: " + user.info());
-				if (user != null) {
-					Generic hashGeneric = context.find(Password.class).getInstance(user);
-					byte[] salt = (byte[]) context.find(Salt.class).getInstance(hashGeneric).getValue();
-					if (Arrays.equals((byte[]) hashGeneric.getValue(), EncryptionUtils.getEncryptedPassword(passwordInput.getDomNodeAttributes(context).get("value"), salt))) {
-						loginInput.getDomNodeAttributes(context).put("value", "");
-						passwordInput.getDomNodeAttributes(context).put("value", "");
-						invalidLogin.addStyle(context, "display", "none");
-						invalidPassword.addStyle(context, "display", "none");
-						getLoggedUserProperty(context).setValue(user);
-					} else {
-						invalidLogin.addStyle(context, "display", "none");
-						invalidPassword.addStyle(context, "display", "inline");
-					}
-				} else
-					invalidLogin.addStyle(context, "display", "inline");
-			});
-		}
 
-		private void printAttributes(ObservableMap<String, String> map) {
-			System.out.println("--- getDomNodeAttributes: ");
-			map.entrySet().forEach(entry -> System.out.println("key: " + entry.getKey() + ", value = " + entry.getValue()));
-			System.out.println("---");
+				HtmlInputText loginInput = ancestor.find(InputTextUsername.class).find(FlexDiv.class).find(HtmlInputText.class);
+				HtmlInputText passwordInput = ancestor.find(InputTextPassword.class).find(FlexDiv.class).find(HtmlInputText.class);
+				HtmlSpan invalidLogin = ancestor.find(InputTextUsername.class).find(FlexDiv.class).find(HtmlSpan.class);
+				HtmlSpan invalidPassword = ancestor.find(InputTextPassword.class).find(FlexDiv.class).find(HtmlSpan.class);
+
+				User userClass = (User) context.find(User.class);
+				Password passwordClass = (Password) context.find(Password.class);
+				Salt saltClass = (Salt) context.find(Salt.class);
+
+				String loginInputValue = loginInput.getDomNodeAttributes(context).get("value");
+				String passwordInputValue = passwordInput.getDomNodeAttributes(context).get("value");
+
+				if (loginInputValue != null) {
+					invalidLogin.addStyle(context, "display", "none");
+
+					if (passwordInputValue != null) {
+						invalidPassword.addStyle(context, "display", "none");
+
+						Generic user = userClass.getInstance(loginInputValue);
+						System.out.println("user: " + user);
+
+						if (user != null) {
+							Generic hashGeneric = passwordClass.getInstance(user);
+
+							if (hashGeneric != null) {
+								byte[] salt = (byte[]) saltClass.getInstance(hashGeneric).getValue();
+								if (Arrays.equals((byte[]) hashGeneric.getValue(), EncryptionUtils.getEncryptedPassword(passwordInputValue, salt))) {
+									loginInput.getDomNodeAttributes(context).put("value", "");
+									passwordInput.getDomNodeAttributes(context).put("value", "");
+									invalidLogin.addStyle(context, "display", "none");
+									invalidPassword.addStyle(context, "display", "none");
+									getLoggedUserProperty(context).setValue(user);
+								} else {
+									invalidLogin.addStyle(context, "display", "none");
+									invalidPassword.setText(context, "Invalid password");
+									invalidPassword.addStyle(context, "display", "inline");
+								}
+							} else {
+								System.out.println(">>> hashGeneric == null");
+								throw new IllegalStateException("Unable to get a valid password from the database");
+							}
+						} else { // Unknown username
+							invalidLogin.setText(context, "Unknown user");
+							invalidLogin.addStyle(context, "display", "inline");
+							invalidPassword.addStyle(context, "display", "none");
+						}
+					} else { // Empty password
+						invalidPassword.setText(context, "The password can not be empty");
+						invalidPassword.addStyle(context, "display", "inline");
+						invalidLogin.addStyle(context, "display", "none");
+					}
+				} else { // Empty username
+					invalidLogin.setText(context, "The username can not be empty");
+					invalidLogin.addStyle(context, "display", "inline");
+					invalidPassword.addStyle(context, "display", "none");
+				}
+			});
 		}
 	}
 
@@ -145,6 +168,18 @@ public class HomePageUserLogin extends FlexDiv {
 	// @Switch(ADMIN_MODE_ONLY.class) // TODO: change the condition
 	@BindAction(MODAL_DISPLAY_FLEX.class)
 	public static class SignUpButton extends HtmlButton {
+
+	}
+
+	@SetText(path = HtmlLabel.class, pos = 0, value = "Username:")
+	@SetText(path = HtmlLabel.class, pos = 1, value = "Password:")
+	@SetText(path = HtmlLabel.class, pos = 2, value = "Confirm password:")
+	@SetText(path = HtmlSpan.class, pos = 0, value = "This username already exists!")
+	@SetText(path = HtmlSpan.class, pos = 1, value = "These passwords don’t match. Please try again.")
+	@StyleClass(path = HtmlSpan.class, value = "error-message")
+	@StyleClass(path = HtmlInputText.class, value = "glowing-border")
+	@BindAction(path = { ButtonDiv.class, HtmlButton.class }, pos = { 0, 0 }, value = CREATE_USER_CUSTOM.class)
+	public static class CustomUserCreation extends UserCreation {
 
 	}
 

@@ -2,6 +2,8 @@ package org.genericsystem.watch.gui.utils;
 
 import java.util.Arrays;
 
+import org.genericsystem.api.core.exceptions.RollbackException;
+import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
 import org.genericsystem.cv.comparator.ComputeBestTextPerZone;
 import org.genericsystem.cv.comparator.ComputeTrainedScores;
@@ -9,9 +11,15 @@ import org.genericsystem.cv.model.Doc.DocInstance;
 import org.genericsystem.cv.model.DocClass.DocClassInstance;
 import org.genericsystem.cv.model.ModelTools;
 import org.genericsystem.reactor.Context;
+import org.genericsystem.reactor.EncryptionUtils;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.context.ContextAction;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlInputText;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlSpan;
 import org.genericsystem.reactor.gscomponents.Modal.ModalWithDisplay;
+import org.genericsystem.security.model.User;
+import org.genericsystem.security.model.User.Password;
+import org.genericsystem.security.model.User.Salt;
 import org.genericsystem.watch.VerticleDeployerFromWatchApp;
 
 import io.vertx.core.Verticle;
@@ -142,4 +150,72 @@ public class ContextActionCustom {
 		VerticleDeployerFromWatchApp.deployWorkerVerticle(worker, "Failed to execute the task");
 	}
 
+	/*
+	 * === LOGIN ===
+	 */
+
+	public static class CREATE_USER_CUSTOM implements ContextAction {
+		@Override
+		public void accept(Context context, Tag tag) {
+			context.mount();
+
+			HtmlInputText userNameInput = tag.getParent().getParent().find(HtmlInputText.class);
+			HtmlInputText passwordInput = tag.getParent().getParent().find(HtmlInputText.class, 1);
+			HtmlInputText confirmPassword = tag.getParent().getParent().find(HtmlInputText.class, 2);
+			HtmlSpan invalidUsername = tag.getParent().getParent().find(HtmlSpan.class);
+			HtmlSpan invalidConfirmPassword = tag.getParent().getParent().find(HtmlSpan.class, 1);
+
+			String userName = userNameInput.getDomNodeAttributes(context).get("value");
+			String psw1 = passwordInput.getDomNodeAttributes(context).get("value");
+			String psw2 = confirmPassword.getDomNodeAttributes(context).get("value");
+			Generic user;
+
+			if (userName != null) {
+				try {
+					user = context.find(User.class).addInstance(userName);
+				} catch (RollbackException e) {
+					invalidUsername.setText(context, "This username already exists");
+					invalidUsername.addStyle(context, "display", "inline");
+					invalidConfirmPassword.addStyle(context, "display", "none");
+					return;
+				}
+				if (psw1 != null) {
+					if (!psw1.isEmpty()) {
+						invalidConfirmPassword.setText(context, "Password can not be empty");
+						invalidUsername.addStyle(context, "display", "none");
+						invalidConfirmPassword.addStyle(context, "display", "inline");
+					} else {
+						if (psw1.equals(psw2)) {
+							invalidUsername.addStyle(context, "display", "none");
+							invalidConfirmPassword.addStyle(context, "display", "none");
+							byte[] salt = EncryptionUtils.generateSalt();
+							byte[] hash = EncryptionUtils.getEncryptedPassword(psw1, salt);
+							Generic hashGeneric = user.setHolder(context.find(Password.class), hash);
+							hashGeneric.setHolder(context.find(Salt.class), salt);
+							tag.getDisplayProperty(context).setValue("none");
+							userNameInput.getDomNodeAttributes(context).put("value", "");
+							passwordInput.getDomNodeAttributes(context).put("value", "");
+							confirmPassword.getDomNodeAttributes(context).put("value", "");
+							context.flush();
+							context.unmount();
+							context.flush();
+						} else { // Non-matching passwords
+							invalidConfirmPassword.setText(context, "The passwords do not match");
+							invalidUsername.addStyle(context, "display", "none");
+							invalidConfirmPassword.addStyle(context, "display", "inline");
+							context.unmount();
+						}
+					}
+				} else { // Empty password
+					invalidConfirmPassword.setText(context, "Password can not be empty");
+					invalidUsername.addStyle(context, "display", "none");
+					invalidConfirmPassword.addStyle(context, "display", "inline");
+				}
+			} else { // Empty username
+				invalidUsername.setText(context, "Username can not be empty");
+				invalidUsername.addStyle(context, "display", "inline");
+				invalidConfirmPassword.addStyle(context, "display", "none");
+			}
+		}
+	}
 }
