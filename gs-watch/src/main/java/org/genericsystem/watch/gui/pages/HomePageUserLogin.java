@@ -148,20 +148,21 @@ public class HomePageUserLogin extends FlexDiv {
 
 	}
 
-	@Children({ HtmlLabel.class, HtmlButton.class, FlexDiv.class })
-	@Children(path = FlexDiv.class, value = { HtmlButton.class, HtmlButton.class })
-	@Style(path = FlexDiv.class, name = "flex", value = "0")
-	@SetText(path = { FlexDiv.class, HtmlButton.class }, pos = { 0, 0 }, value = "Switch to admin mode")
-	@SetText(path = { FlexDiv.class, HtmlButton.class }, pos = { 0, 1 }, value = "Switch to normal mode")
-	@BindAction(path = { FlexDiv.class, HtmlButton.class }, pos = { 0, 0 }, value = SET_ADMIN_MODE.class)
-	@BindAction(path = { FlexDiv.class, HtmlButton.class }, pos = { 0, 1 }, value = SET_NORMAL_MODE.class)
-	@Switch(path = { FlexDiv.class, HtmlButton.class }, pos = { 0, 0 }, value = { LOGGED_USER.class, NORMAL_MODE_ONLY.class })
-	@Switch(path = { FlexDiv.class, HtmlButton.class }, pos = { 0, 1 }, value = ADMIN_MODE_ONLY.class)
+	@Children({ FlexDiv.class, FlexDiv.class })
+	@Children(path = FlexDiv.class, pos = 0, value = HtmlLabel.class)
+	@Children(path = FlexDiv.class, pos = 1, value = { HtmlButton.class, HtmlButton.class, HtmlButton.class })
 	@FlexDirectionStyle(FlexDirection.COLUMN)
-	@SetText(path = HtmlButton.class, value = "Logout")
+	@BindText(path = { FlexDiv.class, HtmlLabel.class }, pos = { 0, 0 }, value = TextBinding.LOGGED_USER.class)
+	@SetText(path = { FlexDiv.class, HtmlButton.class }, pos = { 1, 0 }, value = "Logout")
+	@SetText(path = { FlexDiv.class, HtmlButton.class }, pos = { 1, 1 }, value = "Switch to admin mode")
+	@SetText(path = { FlexDiv.class, HtmlButton.class }, pos = { 1, 2 }, value = "Switch to normal mode")
+	@BindAction(path = { FlexDiv.class, HtmlButton.class }, pos = { 1, 0 }, value = ContextAction.DISCONNECT.class)
+	@BindAction(path = { FlexDiv.class, HtmlButton.class }, pos = { 1, 1 }, value = SET_ADMIN_MODE.class)
+	@BindAction(path = { FlexDiv.class, HtmlButton.class }, pos = { 1, 2 }, value = SET_NORMAL_MODE.class)
+	@Switch(path = { FlexDiv.class, HtmlButton.class }, pos = { 1, 1 }, value = { LOGGED_USER.class, NORMAL_MODE_ONLY.class })
+	@Switch(path = { FlexDiv.class, HtmlButton.class }, pos = { 1, 2 }, value = ADMIN_MODE_ONLY.class)
+	@Style(path = FlexDiv.class, name = "flex", value = "0")
 	@Style(path = FlexDiv.class, name = "align-self", value = "center")
-	@BindText(path = HtmlLabel.class, value = TextBinding.LOGGED_USER.class)
-	@BindAction(path = HtmlButton.class, value = ContextAction.DISCONNECT.class)
 	public static class LoggedUserDiv extends FlexDiv {
 
 	}
