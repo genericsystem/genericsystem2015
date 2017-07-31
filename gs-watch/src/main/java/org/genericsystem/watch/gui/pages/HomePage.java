@@ -17,7 +17,7 @@ import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.FlexDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlH1;
-import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlH2;
 import org.genericsystem.reactor.gscomponents.Monitor;
 import org.genericsystem.watch.gui.pages.HomePage.DocClassDiv;
 import org.genericsystem.watch.gui.pages.HomePage.GeneralActionsButtonsDiv;
@@ -33,8 +33,8 @@ import org.genericsystem.watch.gui.utils.TextBindingCustom.DOC_CLASS_LABEL;
 @Switch(path = FlexDiv.class, pos = 2, value = LOGGED_USER.class)
 @Children(path = FlexDiv.class, pos = 2, value = { GeneralActionsButtonsDiv.class, DocClassDiv.class })
 @Switch(path = FlexDiv.class, pos = 3, value = NO_LOGGED_USER.class)
-@Children(path = FlexDiv.class, pos = 3, value = HtmlLabel.class)
-@SetText(path = FlexDiv.class, pos = 3, value = "You must be identified in order to access this page.")
+@Children(path = FlexDiv.class, pos = 3, value = HtmlH2.class)
+@SetText(path = { FlexDiv.class, HtmlH2.class }, pos = { 3, 0 }, value = "You must be identified in order to access this page.")
 @SetText(path = { Header.class, AppTitleDiv.class, HtmlH1.class }, value = "GS-Watch interface")
 public class HomePage extends FlexDiv {
 
