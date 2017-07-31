@@ -10,7 +10,9 @@ import java.util.function.Function;
 
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.Ocr;
+import org.opencv.core.Core;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
@@ -64,7 +66,27 @@ public class Layout {
 				Imgproc.rectangle(roi.getSrc(), new Point(0, 0), new Point(roi.width() - 1, roi.height() - 1), color, thickness);
 			// else
 			// Imgproc.rectangle(roi.getSrc(), new Point(0, 0), new Point(roi.width() - 1, roi.height() - 1), new Scalar(0, 0, 255), thickness);
-		});
+			});
+	}
+
+	public void drawPerspective(Img img, Mat homography, Scalar color, int thickness) {
+		traverse(
+				getRoi(img),
+				(roi, shard) -> {
+					if (shard.getChildren().isEmpty()) {
+						MatOfPoint2f results = new MatOfPoint2f();
+						Rect rect = shard.getRect(img);
+						List<Point> points = Arrays.asList(new Point(rect.tl().x, rect.tl().y), new Point(rect.tl().x + roi.width() - 1, rect.tl().y), new Point(rect.tl().x + roi.width() - 1, rect.tl().y + roi.height() - 1),
+								new Point(rect.tl().x, rect.tl().y + roi.height() - 1));
+						Mat pts = Converters.vector_Point2f_to_Mat(points);
+						Core.perspectiveTransform(pts, results, homography);
+						Point[] targets = results.toArray();
+						Imgproc.line(img.getSrc(), targets[0], targets[1], color, thickness);
+						Imgproc.line(img.getSrc(), targets[1], targets[2], color, thickness);
+						Imgproc.line(img.getSrc(), targets[2], targets[3], color, thickness);
+						Imgproc.line(img.getSrc(), targets[3], targets[0], color, thickness);
+					}
+				});
 	}
 
 	public void ocrTree(Img rootImg, int delta) {
@@ -72,8 +94,13 @@ public class Layout {
 			if (layout.getChildren().isEmpty()) {
 				String ocr = Ocr.doWork(new Mat(rootImg.getSrc(), layout.getLargeRect(rootImg, delta)));
 				if (!"".equals(ocr)) {
-					Integer count = labels.get(ocr);
+					Integer count = layout.getLabels().get(ocr);
 					layout.getLabels().put(ocr, 1 + (count != null ? count : 0));
+					int all = layout.getLabels().values().stream().reduce(0, (i, j) -> i + j);
+					layout.getLabels().entrySet().forEach(entry -> {
+						if (entry.getValue() > all / 3)
+							layout.draw(rootImg, new Scalar(0, 0, 255), 3);
+					});
 					System.out.println(layout.getLabels());
 				}
 			}
@@ -315,13 +342,13 @@ public class Layout {
 			if (!result[i] && result[i + 1])
 				start = i + 1;
 			else if (result[i] && !result[i + 1]) {
-				shards.add(vertical ? new Layout(this, 0, 1, Integer.valueOf(start).doubleValue() / result.length, (Integer.valueOf(i).doubleValue() + 1) / result.length)
-						: new Layout(this, Integer.valueOf(start).doubleValue() / result.length, (Integer.valueOf(i).doubleValue() + 1) / result.length, 0, 1));
+				shards.add(vertical ? new Layout(this, 0, 1, Integer.valueOf(start).doubleValue() / result.length, (Integer.valueOf(i).doubleValue() + 1) / result.length) : new Layout(this, Integer.valueOf(start).doubleValue() / result.length, (Integer
+						.valueOf(i).doubleValue() + 1) / result.length, 0, 1));
 				start = null;
 			}
 		if (result[result.length - 1]) {
-			shards.add(vertical ? new Layout(this, 0, 1, Integer.valueOf(start).doubleValue() / result.length, Integer.valueOf(result.length).doubleValue() / result.length)
-					: new Layout(this, Integer.valueOf(start).doubleValue() / result.length, Integer.valueOf(result.length).doubleValue() / result.length, 0, 1));
+			shards.add(vertical ? new Layout(this, 0, 1, Integer.valueOf(start).doubleValue() / result.length, Integer.valueOf(result.length).doubleValue() / result.length) : new Layout(this, Integer.valueOf(start).doubleValue() / result.length, Integer
+					.valueOf(result.length).doubleValue() / result.length, 0, 1));
 			start = null;
 		}
 		return shards;
