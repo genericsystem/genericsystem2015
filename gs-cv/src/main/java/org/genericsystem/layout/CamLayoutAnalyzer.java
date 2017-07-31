@@ -9,6 +9,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
+
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.Tools;
@@ -32,9 +35,6 @@ import org.opencv.features2d.DescriptorMatcher;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
 import org.opencv.videoio.VideoCapture;
-
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
 
 public class CamLayoutAnalyzer extends AbstractApp {
 
@@ -80,42 +80,44 @@ public class CamLayoutAnalyzer extends AbstractApp {
 		Mat stabilizedMat = new Mat();
 		setLayout(new Layout[] { null });
 		timer.scheduleAtFixedRate(() -> {
-
+			Img frameImg = new Img(frame, false);
 			synchronized (this) {
 				setNewKeypoints(null);
 				setNewDescriptors(null);
 				try {
-					capture.read(frame);
+					Mat[] homography = new Mat[1];
 					double[] angle = new double[1];
-					Img frameImg = new Img(frame);
-					src0.setImage(frameImg.toJfxImage());
+					capture.read(frame);
 					Img deskewed_ = deskew(frame, angle);
-					src1.setImage(deskewed_.toJfxImage());
 					setNewKeypoints(detect(deskewed_.getSrc()));
 					setNewDescriptors(new Mat());
 					extractor.compute(deskewed_.getSrc(), getNewKeypoints(), getNewDescriptors());
 
 					Img deskiewedCopy = new Img(deskewed_.getSrc(), true);
 					deskewed_.buildLayout().draw(deskiewedCopy, new Scalar(0, 255, 0), 1);
-					src2.setImage(deskiewedCopy.toJfxImage());
 
-					Img stabilized = stabilize(frame, stabilizedMat, matcher, getOldKeypoints()[0], getNewKeypoints(), getOldDescriptors()[0], getNewDescriptors(), angle[0]);
+					Img stabilized = stabilize(frame, stabilizedMat, matcher, getOldKeypoints()[0], getNewKeypoints(), getOldDescriptors()[0], getNewDescriptors(), angle[0], homography);
 					if (stabilized != null) {
 						Img stabilizedCopy = new Img(stabilized.getSrc(), true);
 						if (getLayout()[0] == null)
 							getLayout()[0] = stabilized.buildLayout();
-						getLayout()[0].ocrTree(stabilized, 0);
-						getLayout()[0].draw(stabilizedCopy, new Scalar(0, 255, 0), 1);
-						src3.setImage(stabilizedCopy.toJfxImage());
-					}
+						// getLayout()[0].ocrTree(stabilized, 0);
+				getLayout()[0].draw(stabilizedCopy, new Scalar(0, 255, 0), 1);
+				getLayout()[0].drawPerspective(frameImg, homography[0].inv(), new Scalar(0, 0, 255), 2);
 
-					this.getCount()[0]++;
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+				src0.setImage(frameImg.toJfxImage());
+				src1.setImage(deskewed_.toJfxImage());
+				src2.setImage(deskiewedCopy.toJfxImage());
+				src3.setImage(stabilizedCopy.toJfxImage());
 			}
 
-		}, 0, 66, TimeUnit.MILLISECONDS);
+			this.getCount()[0]++;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+}, 0, 66, TimeUnit.MILLISECONDS);
 	}
 
 	@Override
@@ -129,7 +131,7 @@ public class CamLayoutAnalyzer extends AbstractApp {
 		// }
 	}
 
-	private Img stabilize(Mat frame, Mat stabilized, DescriptorMatcher matcher, MatOfKeyPoint oldKeypoints, MatOfKeyPoint newKeypoints, Mat oldDescriptors, Mat newDescriptors, double angle) {
+	private Img stabilize(Mat frame, Mat stabilized, DescriptorMatcher matcher, MatOfKeyPoint oldKeypoints, MatOfKeyPoint newKeypoints, Mat oldDescriptors, Mat newDescriptors, double angle, Mat[] homography) {
 		MatOfDMatch matches = new MatOfDMatch();
 		if (!oldDescriptors.empty() && (!newDescriptors.empty())) {
 			matcher.match(oldDescriptors, newDescriptors, matches);
@@ -154,12 +156,12 @@ public class CamLayoutAnalyzer extends AbstractApp {
 				Mat goodNewPoints = Converters.vector_Point2f_to_Mat(goodNewKeypoints);
 				MatOfPoint2f originalNewPoints = new MatOfPoint2f();
 				Core.transform(goodNewPoints, originalNewPoints, Imgproc.getRotationMatrix2D(new Point(frame.size().width / 2, frame.size().height / 2), -angle, 1));
-				Mat homography = Calib3d.findHomography(originalNewPoints, new MatOfPoint2f(goodOldKeypoints.stream().toArray(Point[]::new)), Calib3d.RANSAC, 10);
+				homography[0] = Calib3d.findHomography(originalNewPoints, new MatOfPoint2f(goodOldKeypoints.stream().toArray(Point[]::new)), Calib3d.RANSAC, 10);
 				Mat mask = new Mat(frame.size(), CvType.CV_8UC1, new Scalar(255));
 				Mat maskWarpped = new Mat();
-				Imgproc.warpPerspective(mask, maskWarpped, homography, frame.size());
+				Imgproc.warpPerspective(mask, maskWarpped, homography[0], frame.size());
 				Mat tmp = new Mat();
-				Imgproc.warpPerspective(frame, tmp, homography, frame.size(), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(255));
+				Imgproc.warpPerspective(frame, tmp, homography[0], frame.size(), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(255));
 				tmp.copyTo(stabilized, maskWarpped);
 				return new Img(stabilized, false);
 			}
@@ -234,7 +236,7 @@ public class CamLayoutAnalyzer extends AbstractApp {
 			List<MatOfPoint> mof = Collections.singletonList(new MatOfPoint(new MatOfPoint(result)));
 			// Imgproc.drawContours(frame, mof, 0, new Scalar(0, 255, 0), 1);
 			// Imgproc.drawContours(dilated, mof, 0, new Scalar(255), 1);
-		});
+			});
 		return goodAverage;
 	}
 

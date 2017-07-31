@@ -14,6 +14,9 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+
 import javax.swing.ImageIcon;
 
 import org.genericsystem.layout.Layout;
@@ -40,9 +43,6 @@ import org.opencv.utils.Converters;
 import org.opencv.ximgproc.Ximgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 
 public class Img implements AutoCloseable {
 
@@ -81,7 +81,7 @@ public class Img implements AutoCloseable {
 	public Img morphologyEx(int morphOp, int morph, Size size) {
 		Mat result = new Mat();
 		Imgproc.morphologyEx(src, result, morphOp, Imgproc.getStructuringElement(morph, size));
-		//// Imgproc.morphologyEx(src, result, morphOp, Imgproc.getStructuringElement(morph, size), new Point(-1, -1), 1, Core.BORDER_CONSTANT, new Scalar(255));
+		// // Imgproc.morphologyEx(src, result, morphOp, Imgproc.getStructuringElement(morph, size), new Point(-1, -1), 1, Core.BORDER_CONSTANT, new Scalar(255));
 		return new Img(result, false);
 	}
 
@@ -420,10 +420,11 @@ public class Img implements AutoCloseable {
 		return result_;
 	}
 
-	public Img grad() {
-		Img gray = bgr2Gray();
-		Img grad = gray.morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_RECT, new Size(3, 3));
-		return grad.thresHold(0.0, 255.0, Imgproc.THRESH_OTSU + Imgproc.THRESH_BINARY);
+	public Img grad(int k1, int k2) {
+		// Img gray = bgr2Gray();
+		Img grad = morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_RECT, new Size(k1, k2));
+		return grad;
+		// return grad.thresHold(0.0, 255.0, Imgproc.THRESH_OTSU + Imgproc.THRESH_BINARY);
 		// return threshold.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(17, 3));
 	}
 
@@ -437,9 +438,9 @@ public class Img implements AutoCloseable {
 
 	public Img sobel() {
 		Img gray = bgr2Gray();
-		Img sobel = gray.sobel(CvType.CV_8UC1, 1, 0, 3, 1, 0, Core.BORDER_DEFAULT);
-		Img threshold = sobel.thresHold(0, 255, Imgproc.THRESH_BINARY + Imgproc.THRESH_OTSU);
-		return threshold;
+		Img sobel = gray.sobel(CvType.CV_8UC1, 1, 1, 5, 1, 0, Core.BORDER_DEFAULT);
+		// Img threshold = sobel.thresHold(0, 255, Imgproc.THRESH_BINARY + Imgproc.THRESH_OTSU);
+		return sobel;
 	}
 
 	public Img bernsen() {
@@ -505,19 +506,19 @@ public class Img implements AutoCloseable {
 	}
 
 	public Img niblackThreshold() {
-		return niblackThreshold(11, 2);
+		return niblackThreshold(17, 0.1);
 	}
 
 	public Img sauvolaThreshold() {
-		return sauvolaThreshold(11, 2);
+		return sauvolaThreshold(17, 0.3);
 	}
 
 	public Img nickThreshold() {
-		return nickThreshold(11, 2);
+		return nickThreshold(11, 0.1);
 	}
 
 	public Img wolfThreshold() {
-		return wolfThreshold(11, 2);
+		return wolfThreshold(11, 0.3);
 	}
 
 	// Equalize histograms using a Contrast Limited Adaptive Histogram
@@ -631,7 +632,7 @@ public class Img implements AutoCloseable {
 
 	public Img sauvolaThreshold(int blockSize, double k) {
 		Mat result = new Mat();
-		Ximgproc.niBlackThreshold(bgr2Gray().getSrc(), result, 255, Imgproc.THRESH_BINARY, blockSize, k, Ximgproc.BINARIZATION_SAUVOLA);
+		Ximgproc.niBlackThreshold(bgr2Gray().getSrc(), result, 255, Imgproc.THRESH_BINARY_INV, blockSize, k, Ximgproc.BINARIZATION_SAUVOLA);
 		return new Img(result, false);
 	}
 
@@ -643,7 +644,7 @@ public class Img implements AutoCloseable {
 
 	public Img wolfThreshold(int blockSize, double k) {
 		Mat result = new Mat();
-		Ximgproc.niBlackThreshold(bgr2Gray().getSrc(), result, 255, Imgproc.THRESH_BINARY, blockSize, k, Ximgproc.BINARIZATION_WOLF);
+		Ximgproc.niBlackThreshold(bgr2Gray().getSrc(), result, 255, Imgproc.THRESH_BINARY_INV, blockSize, k, Ximgproc.BINARIZATION_WOLF);
 		return new Img(result, false);
 	}
 
@@ -884,8 +885,11 @@ public class Img implements AutoCloseable {
 
 	public Layout buildLayout() {
 		Img binary = bgr2Gray().adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 17, 15).cleanTables();
-		Layout root = new Layout(null, 0, 1, 0, 1);
-		return root.recursivSplit(new Size(0.04, 0.008), 7, 0.008f, root.getRoi(this), root.getRoi(binary));
+		return buildLayout(binary);
+	}
+
+	public Layout buildLayout(Img binary) {
+		return buildLayout(new Size(0.04, 0.008), 7, 0.008f, binary);
 	}
 
 	public Layout buildLayout(Size morph, int level, float concentration, Img binary) {

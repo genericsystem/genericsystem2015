@@ -18,7 +18,7 @@ public class Ocr {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 	}
 
-	private final static OCRTesseract instance = OCRTesseract.create("/usr/share/tesseract-ocr/4.00/", "fra", "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM0123456789.-,<'", 1, 7);
+	private final static OCRTesseract instance = OCRTesseract.create("/usr/share/tesseract-ocr/4.00/", "fra", "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM0123456789.-,<'", 1, 13);
 
 	public static void main(String[] args) {
 		try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(Paths.get(".", "classes"), Files::isDirectory)) {

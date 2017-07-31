@@ -4,13 +4,15 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import org.opencv.core.Core;
-import org.opencv.core.Mat;
-import org.opencv.imgproc.Imgproc;
-import org.opencv.videoio.VideoCapture;
-
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
+
+import org.genericsystem.layout.Layout;
+import org.opencv.core.Core;
+import org.opencv.core.Mat;
+import org.opencv.core.Scalar;
+import org.opencv.imgproc.Imgproc;
+import org.opencv.videoio.VideoCapture;
 
 public class AlgoViewer extends AbstractApp {
 
@@ -22,8 +24,6 @@ public class AlgoViewer extends AbstractApp {
 		launch(args);
 	}
 
-	private final static String refPath = "classes/id-fr-front/image4-0.png";
-	private static Img ref = new Img(refPath);
 	private final VideoCapture capture = new VideoCapture(0);
 	private ScheduledExecutorService timer = Executors.newSingleThreadScheduledExecutor();
 
@@ -34,26 +34,40 @@ public class AlgoViewer extends AbstractApp {
 		ImageView src = new ImageView(Tools.mat2jfxImage(frame));
 		mainGrid.add(src, 0, 0);
 		ImageView src1 = new ImageView(Tools.mat2jfxImage(frame));
-		mainGrid.add(src1, 0, 1);
+		mainGrid.add(src1, 1, 0);
 		ImageView src2 = new ImageView(Tools.mat2jfxImage(frame));
-		mainGrid.add(src2, 1, 0);
+		mainGrid.add(src2, 0, 1);
 		ImageView src3 = new ImageView(Tools.mat2jfxImage(frame));
 		mainGrid.add(src3, 1, 1);
-		ImageView src4 = new ImageView(Tools.mat2jfxImage(frame));
-		mainGrid.add(src4, 2, 0);
-		ImageView src5 = new ImageView(Tools.mat2jfxImage(frame));
-		mainGrid.add(src5, 2, 1);
 
 		timer.scheduleAtFixedRate(() -> {
 			capture.read(frame);
 			Img frameImg = new Img(frame, false);
-			src.setImage(frameImg.toJfxImage());
-			src1.setImage(frameImg.bgr2Gray().adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 5, -2).toJfxImage());
-			src2.setImage(frameImg.canny(20, 80).toJfxImage());
-			src3.setImage(frameImg.sobel().toJfxImage());
-			src4.setImage(frameImg.otsu().toJfxImage());
-			src5.setImage(frameImg.grad().toJfxImage());
-		}, 0, 33, TimeUnit.MILLISECONDS);
+
+			Img img0 = frameImg.bgr2Gray().adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 17, 15);
+			Img img1 = frameImg.canny(60, 200).bitwise_not();
+			Img img2 = frameImg.bgr2Gray().grad(3, 3).thresHold(0, 255, Imgproc.THRESH_BINARY_INV + Imgproc.THRESH_OTSU);
+			Img img3 = frameImg.sauvolaThreshold().bitwise_not();
+
+			Layout layout = frameImg.buildLayout(img0);
+			Layout layout1 = frameImg.buildLayout(img1);
+			Layout layout2 = frameImg.buildLayout(img2);
+			Layout layout3 = frameImg.buildLayout(img3);
+
+			Img out = new Img(frame, true);
+			layout.draw(img0, new Scalar(0), 1);
+			Img out1 = new Img(frame, true);
+			layout1.draw(img1, new Scalar(0), 1);
+			Img out2 = new Img(frame, true);
+			layout2.draw(img2, new Scalar(0), 1);
+			Img out3 = new Img(frame, true);
+			layout3.draw(img3, new Scalar(0), 1);
+
+			src.setImage(img0.toJfxImage());
+			src1.setImage(img1.toJfxImage());
+			src2.setImage(img2.toJfxImage());
+			src3.setImage(img3.toJfxImage());
+		}, 400, 10, TimeUnit.MILLISECONDS);
 	}
 
 	@Override
