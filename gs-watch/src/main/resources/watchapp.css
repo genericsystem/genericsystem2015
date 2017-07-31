@@ -19,6 +19,16 @@ label.login {
 	flex: 1;
 }
 
+.error-message {
+	color: #d33f3f;
+	font-style: italic;
+}
+
+.error-message-inv {
+	color: #2cc0c0;
+	font-style: italic;
+}
+
 :not(label[name="title"] ) {
 	padding: 0.5em;
 	margin: 0.5em 0.1em;
