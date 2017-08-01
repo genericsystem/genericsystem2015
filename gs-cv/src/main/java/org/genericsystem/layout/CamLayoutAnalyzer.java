@@ -104,13 +104,13 @@ public class CamLayoutAnalyzer extends AbstractApp {
 						// getLayout()[0].ocrTree(stabilized, 0);
 						getLayout()[0].draw(stabilizedCopy, new Scalar(0, 255, 0), 1);
 						getLayout()[0].drawPerspective(frameImg, homography[0].inv(), new Scalar(0, 0, 255), 1);
-
+						double surface = getLayout()[0].getSurfaceInPercent(stabilized);
+						Imgproc.putText(stabilizedCopy.getSrc(), "Surface : " + surface, new Point(0.5 * stabilizedCopy.width(), 0.05 * stabilizedCopy.height()), Core.FONT_HERSHEY_PLAIN, 1, new Scalar(255, 0, 0), 1);
 						src0.setImage(frameImg.toJfxImage());
 						src1.setImage(deskewed_.toJfxImage());
 						src2.setImage(deskiewedCopy.toJfxImage());
 						src3.setImage(stabilizedCopy.toJfxImage());
 					}
-
 					this.getCount()[0]++;
 				} catch (Exception e) {
 					e.printStackTrace();
