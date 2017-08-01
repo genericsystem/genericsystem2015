@@ -1,6 +1,12 @@
 package org.genericsystem.watch;
 
+import java.nio.file.Paths;
+
+import org.genericsystem.cv.Img;
 import org.genericsystem.cv.Zones;
+import org.genericsystem.cv.comparator.FillModelWithData;
+import org.opencv.core.Scalar;
+import org.opencv.imgcodecs.Imgcodecs;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -14,6 +20,7 @@ import io.vertx.core.json.JsonObject;
 public class DezonerVerticle extends ActionVerticle {
 
 	public static final String ACTION = "dezoner";
+	private static final String RESOURCES_FOLDER = System.getProperty("user.dir") + "/../gs-watch/src/main/resources/";
 
 	@Override
 	public String getAction() {
@@ -24,7 +31,14 @@ public class DezonerVerticle extends ActionVerticle {
 	protected void handle(Future<Object> future, JsonObject task) {
 		String imagePath = task.getString(DistributedVerticle.FILENAME);
 		if (Zones.isZonesFilePresent(imagePath)) {
-			// The zones file was found, proceed trough OCR directly
+			final Zones zones = Zones.load(Paths.get(imagePath).getParent().toString());
+			Img imgCopy = new Img(imagePath);
+			zones.draw(imgCopy, new Scalar(0, 255, 0), 3);
+			zones.writeNum(imgCopy, new Scalar(0, 0, 255), 3);
+			// TODO implement a filter mechanism to avoid creating duplicates in a public folder
+			String filenameExt = FillModelWithData.generateFileName(Paths.get(imagePath));
+			Imgcodecs.imwrite(RESOURCES_FOLDER + filenameExt, imgCopy.getSrc());
+			imgCopy.close();
 			future.complete(OcrVerticle.ACTION);
 		} else {
 			// No zones file was found, need to define the zones manually
