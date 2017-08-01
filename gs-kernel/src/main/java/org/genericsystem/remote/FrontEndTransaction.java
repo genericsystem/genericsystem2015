@@ -17,6 +17,7 @@ import org.genericsystem.remote.ClientEngine.ClientEngineHandler;
 import javafx.beans.Observable;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.ObservableList;
 
 /**
  * @author Nicolas Feybesse
@@ -42,6 +43,11 @@ public class FrontEndTransaction extends CheckedContext implements IDifferential
 
 	@Override
 	public ObjectProperty<IDifferential<Generic>> getDifferentialProperty() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Map<Generic, ObservableList<Generic>> getDependenciesAsOservableListCacheMap() {
 		throw new UnsupportedOperationException();
 	}
 

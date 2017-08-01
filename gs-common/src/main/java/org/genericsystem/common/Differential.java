@@ -1,7 +1,6 @@
 package org.genericsystem.common;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -31,7 +30,6 @@ public class Differential implements IDifferential<Generic> {
 	private final IDifferential<Generic> subDifferential;
 	protected final PseudoConcurrentCollection<Generic> adds = new PseudoConcurrentCollection<>();
 	protected final PseudoConcurrentCollection<Generic> removes = new PseudoConcurrentCollection<>();
-	private Map<Generic, ObservableList<Generic>> dependenciesAsOservableListCacheMap = new HashMap<>();
 
 	public Differential(IDifferential<Generic> subDifferential) {
 		this.subDifferential = subDifferential;
@@ -62,6 +60,11 @@ public class Differential implements IDifferential<Generic> {
 	@Override
 	public ObjectProperty<IDifferential<Generic>> getDifferentialProperty() {
 		return subDifferential.getDifferentialProperty();
+	}
+
+	@Override
+	public Map<Generic, ObservableList<Generic>> getDependenciesAsOservableListCacheMap() {
+		return subDifferential.getDependenciesAsOservableListCacheMap();
 	}
 
 	void checkConstraints(Checker checker) throws RollbackException {
@@ -114,7 +117,7 @@ public class Differential implements IDifferential<Generic> {
 
 			@Override
 			public ObservableList<Generic> toObservableList() {
-				ObservableList<Generic> result = dependenciesAsOservableListCacheMap.get(generic);
+				ObservableList<Generic> result = getDependenciesAsOservableListCacheMap().get(generic);
 				if (result == null) {
 					@SuppressWarnings({ "unchecked", "rawtypes" })
 					ObjectProperty<Differential> differentialProperty = (ObjectProperty) getDifferentialProperty();
@@ -130,7 +133,7 @@ public class Differential implements IDifferential<Generic> {
 							return FXCollections.observableList(differentialProperty.getValue().getDependencies(generic).toList());
 						}
 					}));
-					dependenciesAsOservableListCacheMap.put(generic, result);
+					getDependenciesAsOservableListCacheMap().put(generic, result);
 				}
 				return result;
 			}
