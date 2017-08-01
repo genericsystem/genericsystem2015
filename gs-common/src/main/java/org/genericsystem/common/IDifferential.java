@@ -6,6 +6,7 @@ import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationEx
 import org.genericsystem.defaults.DefaultGeneric;
 
 import javafx.beans.Observable;
+import javafx.beans.property.ObjectProperty;
 
 /**
  * @author Nicolas Feybesse
@@ -17,9 +18,7 @@ public interface IDifferential<T extends DefaultGeneric<T>> {
 
 	Snapshot<T> getDependencies(T generic);
 
-	default Snapshot<T> getDependencies(T generic, AbstractCache cache) {
-		return getDependencies(generic);
-	}
+	ObjectProperty<IDifferential<T>> getDifferentialProperty();
 
 	void apply(Snapshot<T> removes, Snapshot<T> adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException;
 

@@ -17,7 +17,6 @@ import org.genericsystem.common.GenericBuilder.MergeBuilder;
 import org.genericsystem.common.GenericBuilder.SetBuilder;
 import org.genericsystem.common.GenericBuilder.UpdateBuilder;
 import org.genericsystem.defaults.DefaultCache;
-import org.genericsystem.defaults.tools.BindingsTools;
 
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
@@ -127,15 +126,11 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 
 	@Override
 	public Snapshot<Generic> getDependencies(Generic generic) {
-		return getDifferential().getDependencies(generic, this);
+		return getDifferential().getDependencies(generic);
 	}
 
 	protected Restructurator buildRestructurator() {
 		return new Restructurator(this);
-	}
-
-	public Observable getObservable(Generic generic) {
-		return BindingsTools.createTransitive(differentialProperty, diff -> new Observable[] { diff.getObservable(generic) });
 	}
 
 	protected void initialize() {
@@ -315,6 +310,11 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 		public void apply(Snapshot<Generic> removes, Snapshot<Generic> adds)
 				throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
 			getTransaction().apply(removes, adds);
+		}
+
+		@Override
+		public ObjectProperty<IDifferential<Generic>> getDifferentialProperty() {
+			return (ObjectProperty) AbstractCache.this.differentialProperty;
 		}
 
 		@Override

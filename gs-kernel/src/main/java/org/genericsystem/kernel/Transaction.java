@@ -17,6 +17,7 @@ import org.genericsystem.common.IDifferential;
 import org.genericsystem.kernel.AbstractServer.RootServerHandler;
 
 import javafx.beans.Observable;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
 /**
@@ -44,6 +45,11 @@ public class Transaction extends CheckedContext implements IDifferential<Generic
 	@Override
 	public long getTs() {
 		return ts;
+	}
+
+	@Override
+	public ObjectProperty<IDifferential<Generic>> getDifferentialProperty() {
+		throw new UnsupportedOperationException();
 	}
 
 	protected Generic plug(Generic generic) {

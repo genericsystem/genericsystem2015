@@ -15,6 +15,7 @@ import org.genericsystem.common.Vertex;
 import org.genericsystem.remote.ClientEngine.ClientEngineHandler;
 
 import javafx.beans.Observable;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
 /**
@@ -37,6 +38,11 @@ public class FrontEndTransaction extends CheckedContext implements IDifferential
 	@Override
 	public long getTs() {
 		return ts;
+	}
+
+	@Override
+	public ObjectProperty<IDifferential<Generic>> getDifferentialProperty() {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
