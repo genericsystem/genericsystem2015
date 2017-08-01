@@ -9,7 +9,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -17,11 +16,9 @@ import java.util.Arrays;
 import javax.xml.bind.DatatypeConverter;
 
 /**
- * This class contains only static methods, which can be used as general purpose
- * tools.
+ * This class contains only static methods, which can be used as general purpose tools.
  * 
  * @author Pierrik Lassalas
- *
  */
 public class ModelTools {
 
@@ -52,22 +49,12 @@ public class ModelTools {
 	}
 
 	/**
-	 * Generate a hash code from a file.
+	 * Generate a hash code from a file. Care must be taken to verify that the file exists before calling this method (otherwise an exception is thrown).
 	 * 
-	 * Care must be taken to verify that the file exists before calling this
-	 * method (otherwise an exception is thrown).
-	 * 
-	 * @param path
-	 *            - the {@link Path} of the file
-	 * @param algorithm
-	 *            - the desired algorithm used to generate the has code. Every
-	 *            implementation of the Java platform is required to support the
-	 *            following standard MessageDigest algorithms: MD5, SHA-1,
-	 *            SHA-256
+	 * @param path - the {@link Path} of the file
+	 * @param algorithm - the desired algorithm used to generate the has code. Every implementation of the Java platform is required to support the following standard MessageDigest algorithms: MD5, SHA-1, SHA-256
 	 * @return the computed {@code hash} as a hexadecimal String
-	 * @throws RuntimeException
-	 *             when the specified algorithm is not found, or when the file
-	 *             could not be read
+	 * @throws RuntimeException when the specified algorithm is not found, or when the file could not be read
 	 */
 	public static String getHashFromFile(Path path, String algorithm) throws RuntimeException {
 		MessageDigest md;
@@ -84,16 +71,11 @@ public class ModelTools {
 	}
 
 	/**
-	 * Generate a simple hash from a file.
+	 * Generate a simple hash from a file. Care must be taken to verify that the file exists before calling this method (otherwise an exception is thrown).
 	 * 
-	 * Care must be taken to verify that the file exists before calling this
-	 * method (otherwise an exception is thrown).
-	 * 
-	 * @param path
-	 *            - the {@link Path} of the file
+	 * @param path - the {@link Path} of the file
 	 * @return the computed {@code hash} as a hexadecimal String
-	 * @throws RuntimeException
-	 *             when the specified file could not be read
+	 * @throws RuntimeException when the specified file could not be read
 	 */
 	private static String hashCode(Path path) throws RuntimeException {
 		int hashCode;
@@ -116,11 +98,9 @@ public class ModelTools {
 	}
 
 	/**
-	 * Convert a {@code String} into a {@link LocalDateTime} using default
-	 * pattern.
+	 * Convert a {@code String} into a {@link LocalDateTime} using default pattern.
 	 * 
-	 * @param date
-	 *            the date in a {@code String} format
+	 * @param date the date in a {@code String} format
 	 * @return the corresponding date object
 	 */
 	public static LocalDateTime getCurrentDateFromString(String date) {
@@ -128,13 +108,10 @@ public class ModelTools {
 	}
 
 	/**
-	 * Convert a {@code String} into a {@link LocalDateTime} using a custom
-	 * pattern.
+	 * Convert a {@code String} into a {@link LocalDateTime} using a custom pattern.
 	 * 
-	 * @param date
-	 *            - the date in a {@code String} format
-	 * @param pattern
-	 *            - the pattern to be used for conversion
+	 * @param date - the date in a {@code String} format
+	 * @param pattern - the pattern to be used for conversion
 	 * @return the corresponding date object
 	 */
 	public static LocalDateTime getCurrentDateFromString(String date, String pattern) {
@@ -144,8 +121,7 @@ public class ModelTools {
 	/**
 	 * Format a {@link LocalDateTime} using the default pattern.
 	 * 
-	 * @param timestamp
-	 *            - the timestamp to convert
+	 * @param timestamp - the timestamp to convert
 	 * @return a {@code String} representation of the timestamp
 	 */
 	public static String formatDate(Long timestamp) {
@@ -155,10 +131,8 @@ public class ModelTools {
 	/**
 	 * Format a {@link LocalDateTime} using a custom pattern.
 	 * 
-	 * @param timestamp
-	 *            - the timestamp to convert
-	 * @param pattern
-	 *            - the pattern to be used for conversion
+	 * @param timestamp - the timestamp to convert
+	 * @param pattern - the pattern to be used for conversion
 	 * @return a {@code String} representation of the timestamp
 	 */
 	public static String formatDate(Long timestamp, String pattern) {
@@ -166,5 +140,16 @@ public class ModelTools {
 		return ldt.format(DateTimeFormatter.ofPattern(pattern));
 	}
 
+	/**
+	 * Get the ImgClass name of a given image.
+	 * 
+	 * @param imag ePath - the Path of the image
+	 * @return a String representing the ImgClass name
+	 */
+	public static String getImgClass(final Path imagePath) {
+		final Path imgClassDirectory = imagePath.getParent();
+		final String docType = imgClassDirectory.getName(imgClassDirectory.getNameCount() - 1).toString();
+		return docType;
+	}
 
 }

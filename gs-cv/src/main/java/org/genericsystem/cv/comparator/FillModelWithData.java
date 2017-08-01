@@ -154,7 +154,7 @@ public class FillModelWithData {
 			engine.newCache().start();
 		}
 		final Path imgClassDirectory = imagePath.getParent();
-		final String docType = imgClassDirectory.getName(imgClassDirectory.getNameCount() - 1).toString();
+		final String docType = ModelTools.getImgClass(imagePath);
 		int result = ERROR;
 
 		// Find and save the doc class
@@ -389,7 +389,7 @@ public class FillModelWithData {
 			engine.newCache().start();
 		}
 		final Path imgClassDirectory = imgPath.getParent();
-		final String docType = imgClassDirectory.getName(imgClassDirectory.getNameCount() - 1).toString();
+		final String docType = ModelTools.getImgClass(imgPath);
 
 		// Find and save the doc class
 		DocClass docClass = engine.find(DocClass.class);
