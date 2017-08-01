@@ -95,10 +95,8 @@ public class FillModelWithData {
 	/**
 	 * Check if a given file has already been processed by the system. This verification is conducted by comparing the SHA-256 hash code generated from the file and the one stored in Generic System. If there is a match, the file is assumed to be known.
 	 * 
-	 * @param engine
-	 *            - the engine used to store the data
-	 * @param file
-	 *            - the desired file
+	 * @param engine - the engine used to store the data
+	 * @param file - the desired file
 	 * @return - true if the file was not found in the engine, false if it has already been processed
 	 */
 	private static boolean isThisANewFile(Root engine, File file) {
@@ -108,12 +106,9 @@ public class FillModelWithData {
 	/**
 	 * Check if a given file has already been processed by the system. This verification is conducted by comparing the SHA-256 hash code generated from the file and the one stored in Generic System. If there is a match, the file is assumed to be known.
 	 * 
-	 * @param engine
-	 *            - the engine used to store the data
-	 * @param file
-	 *            - the desired file
-	 * @param docType
-	 *            - {@code String} representing the type of document (i.e., class)
+	 * @param engine - the engine used to store the data
+	 * @param file - the desired file
+	 * @param docType - {@code String} representing the type of document (i.e., class)
 	 * @return - true if the file was not found in the engine, false if it has already been processed
 	 */
 	private static boolean isThisANewFile(Root engine, File file, String docType) {
@@ -133,8 +128,7 @@ public class FillModelWithData {
 	/**
 	 * Process an image, and store all the informations in the engine of Generic System. When no Engine is provided, a default one is created.
 	 * 
-	 * @param imagePath
-	 *            - a {@link Path} object pointing to the image to be processed
+	 * @param imagePath - a {@link Path} object pointing to the image to be processed
 	 * @return an {@code int} representing {@link #KNOWN_FILE_UPDATED_FILTERS}, {@link #NEW_FILE} or {@link #KNOWN_FILE}
 	 */
 	public static int doImgOcr(Path imagePath) {
@@ -148,10 +142,8 @@ public class FillModelWithData {
 	/**
 	 * Process an image, and store all the informations in the engine of Generic System.
 	 * 
-	 * @param engine
-	 *            - the engine used to store the data
-	 * @param imagePath
-	 *            - a {@link Path} object pointing to the image to be processed
+	 * @param engine - the engine used to store the data
+	 * @param imagePath - a {@link Path} object pointing to the image to be processed
 	 * @return an {@code int} representing {@link #KNOWN_FILE_UPDATED_FILTERS}, {@link #NEW_FILE} or {@link #KNOWN_FILE}
 	 */
 	public static int doImgOcr(Root engine, Path imagePath) {
@@ -183,8 +175,7 @@ public class FillModelWithData {
 	/**
 	 * Process all the images in the specified folder, and store all the data in Generic System. The docType is set to the default value.
 	 * 
-	 * @param engine
-	 *            - the engine used to store the data
+	 * @param engine - the engine used to store the data
 	 */
 	public static void compute(Root engine) {
 		compute(engine, docType);
@@ -193,10 +184,8 @@ public class FillModelWithData {
 	/**
 	 * Process all the images in the specified folder, and store all the data in Generic System.
 	 * 
-	 * @param engine
-	 *            - the engine used to store the data
-	 * @param docType
-	 *            - {@code String} representing the type of document (i.e., class)
+	 * @param engine - the engine used to store the data
+	 * @param docType - {@code String} representing the type of document (i.e., class)
 	 */
 	public static void compute(Root engine, String docType) {
 		final String imgClassDirectory = "classes/" + docType;
@@ -219,12 +208,9 @@ public class FillModelWithData {
 	/**
 	 * Initialize the computation. The zones are added to the model only if they differ from the ones previously saved.
 	 * 
-	 * @param engine
-	 *            - the engine used to store the data
-	 * @param docType
-	 *            - the document type (i.e., class)
-	 * @param zones
-	 *            - a {@link Zones} object, representing all the zones detected for ocr
+	 * @param engine - the engine used to store the data
+	 * @param docType - the document type (i.e., class)
+	 * @param zones - a {@link Zones} object, representing all the zones detected for ocr
 	 */
 	// TODO: change method's name
 	private static void initComputation(Root engine, String docType, Zones zones) {
@@ -255,16 +241,11 @@ public class FillModelWithData {
 	/**
 	 * Process an image file. Each zone of each image is analyzed through OCR, and the results are stored in Generic System engine.
 	 * 
-	 * @param engine
-	 *            - the engine where the data will be stored
-	 * @param file
-	 *            - the file to be processed
-	 * @param docClassInstance
-	 *            - the instance of {@link DocClass} representing the current class of the file
-	 * @param zones
-	 *            - the list of zones for this image
-	 * @param imgFilters
-	 *            - a stream of {@link Entry} for a Map containing the filternames that will be applied to the original file, and the functions required to apply these filters
+	 * @param engine - the engine where the data will be stored
+	 * @param file - the file to be processed
+	 * @param docClassInstance - the instance of {@link DocClass} representing the current class of the file
+	 * @param zones - the list of zones for this image
+	 * @param imgFilters - a stream of {@link Entry} for a Map containing the filternames that will be applied to the original file, and the functions required to apply these filters
 	 * @return an {@code int} representing {@link #KNOWN_FILE_UPDATED_FILTERS}, {@link #NEW_FILE} or {@link #KNOWN_FILE}
 	 */
 	private static int processFile(Root engine, File file, DocClassInstance docClassInstance, Zones zones, Stream<Entry<String, Function<Img, Img>>> imgFilters) {
@@ -383,8 +364,7 @@ public class FillModelWithData {
 	/**
 	 * Save a new document in Generic System using the default Engine.
 	 * 
-	 * @param imgPath
-	 *            - the Path of the file
+	 * @param imgPath - the Path of the file
 	 * @return true if this was a success, false otherwise
 	 */
 	public static boolean registerNewFile(Path imgPath) {
@@ -398,8 +378,7 @@ public class FillModelWithData {
 	/**
 	 * Save a new document in Generic System.
 	 * 
-	 * @param imgPath
-	 *            - the Path of the file
+	 * @param imgPath - the Path of the file
 	 * @return true if this was a success, false otherwise
 	 */
 	public static boolean registerNewFile(Root engine, Path imgPath) {
@@ -442,7 +421,7 @@ public class FillModelWithData {
 		}
 	}
 
-	private static String generateFileName(Path filePath) {
+	public static String generateFileName(Path filePath) {
 		String filename;
 		try {
 			filename = ModelTools.getHashFromFile(filePath, "sha-256");
@@ -485,8 +464,7 @@ public class FillModelWithData {
 	/**
 	 * Remove all the data stored in the engine, except the real values used for training (e.g., for which imgFilter = "reality")
 	 * 
-	 * @param engine
-	 *            - the engine used to store the data
+	 * @param engine - the engine used to store the data
 	 */
 	@SuppressWarnings({ "unused", "unchecked", "rawtypes" })
 	private static void cleanModel(Root engine) {
