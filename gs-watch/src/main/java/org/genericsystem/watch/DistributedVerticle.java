@@ -11,6 +11,7 @@ import io.vertx.spi.cluster.hazelcast.HazelcastClusterManager;
 public class DistributedVerticle extends AbstractVerticle {
 	public static final String BASE_PATH = System.getenv("HOME") + "/git/genericsystem2015/gs-cv/";
 	protected static final String FILENAME = "filename";
+	protected static final String JSON_OBJECT = "jsonObject";
 	protected static final String TYPE = "type";
 	protected static final String IP = "IP";
 
