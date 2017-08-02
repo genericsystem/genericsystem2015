@@ -15,6 +15,8 @@ import java.util.Arrays;
 
 import javax.xml.bind.DatatypeConverter;
 
+import org.apache.commons.io.FilenameUtils;
+
 /**
  * This class contains only static methods, which can be used as general purpose tools.
  * 
@@ -150,6 +152,23 @@ public class ModelTools {
 		final Path imgClassDirectory = imagePath.getParent();
 		final String docType = imgClassDirectory.getName(imgClassDirectory.getNameCount() - 1).toString();
 		return docType;
+	}
+
+	/**
+	 * Generate a filename from a given file, using a SHA-256 string computed from the file's bytes.
+	 * 
+	 * @param filePath - the {@link Path} to the file
+	 * @return a String representing the SHA-256 hashcode + the file extension
+	 */
+	public static String generateFileName(Path filePath) {
+		String filename;
+		try {
+			filename = ModelTools.getHashFromFile(filePath, "sha-256");
+			String filenameExt = filename + "." + FilenameUtils.getExtension(filePath.getFileName().toString());
+			return filenameExt;
+		} catch (RuntimeException e) {
+			throw new RuntimeException("An error has occured during the generation of the hascode from file", e);
+		}
 	}
 
 }

@@ -10,7 +10,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import org.apache.commons.io.FilenameUtils;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
 import org.genericsystem.cv.Img;
@@ -124,7 +123,7 @@ public class FillModelWithData {
 		Generic doc = engine.find(Doc.class);
 		DocClass docClass = engine.find(DocClass.class);
 		DocClassInstance docClassInstance = docClass.getDocClass(docType);
-		String filenameExt = generateFileName(file.toPath());
+		String filenameExt = ModelTools.generateFileName(file.toPath());
 		if (null == filenameExt) {
 			log.error("An error has occured during the generation of the hascode from file (assuming new)");
 			return true;
@@ -159,7 +158,7 @@ public class FillModelWithData {
 
 		// Find and save the doc class and the doc instance
 		DocClassInstance docClassInstance = docClass.setDocClass(docType);
-		DocInstance docInstance = docClassInstance.setDoc(doc, FillModelWithData.generateFileName(imagePath));
+		DocInstance docInstance = docClassInstance.setDoc(doc, ModelTools.generateFileName(imagePath));
 		engine.getCurrentCache().flush();
 
 		// Get the filters and the predefined zones
@@ -214,7 +213,7 @@ public class FillModelWithData {
 
 		// Save the current file
 		log.info("\nProcessing file: {}", file.getName());
-		String filenameExt = FillModelWithData.generateFileName(file.toPath());
+		String filenameExt = ModelTools.generateFileName(file.toPath());
 		if (null == filenameExt)
 			throw new RuntimeException("An error has occured while saving the file! Aborted...");
 		final Path imgClassDirectory = file.toPath().getParent();
@@ -450,7 +449,7 @@ public class FillModelWithData {
 		ImgFilter imgFilter = engine.find(ImgFilter.class);
 
 		// Save the current file
-		String filenameExt = generateFileName(file.toPath());
+		String filenameExt = ModelTools.generateFileName(file.toPath());
 		if (null == filenameExt) {
 			log.error("An error has occured while saving the file! Aborted...");
 			return result;
@@ -594,7 +593,7 @@ public class FillModelWithData {
 			return true;
 		} else {
 			log.info("Adding a new image ({}) ", imgPath.getFileName());
-			String filenameExt = generateFileName(imgPath);
+			String filenameExt = ModelTools.generateFileName(imgPath);
 			Generic doc = engine.find(Doc.class);
 			DocInstance docInstance = docClassInstance.setDoc(doc, filenameExt);
 			if (null != docInstance) {
@@ -610,20 +609,6 @@ public class FillModelWithData {
 				log.error("An error has occured while saving file {}", filenameExt);
 				return false;
 			}
-		}
-	}
-
-	public static String generateFileName(Path filePath) {
-		String filename;
-		try {
-			filename = ModelTools.getHashFromFile(filePath, "sha-256");
-			String filenameExt = filename + "." + FilenameUtils.getExtension(filePath.getFileName().toString());
-			log.info("Hash generated for file {}: {}", filePath.getFileName().toString(), filenameExt);
-			return filenameExt;
-		} catch (RuntimeException e) {
-			log.error("An error has occured during the generation of the hascode from file");
-			log.debug("Stacktrace: ", e);
-			return null;
 		}
 	}
 

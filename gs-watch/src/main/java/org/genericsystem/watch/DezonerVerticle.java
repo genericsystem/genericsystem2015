@@ -4,7 +4,7 @@ import java.nio.file.Paths;
 
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.Zones;
-import org.genericsystem.cv.comparator.FillModelWithData;
+import org.genericsystem.cv.model.ModelTools;
 import org.opencv.core.Scalar;
 import org.opencv.imgcodecs.Imgcodecs;
 
@@ -36,7 +36,7 @@ public class DezonerVerticle extends ActionVerticle {
 			zones.draw(imgCopy, new Scalar(0, 255, 0), 3);
 			zones.writeNum(imgCopy, new Scalar(0, 0, 255), 3);
 			// TODO implement a filter mechanism to avoid creating duplicates in a public folder
-			String filenameExt = FillModelWithData.generateFileName(Paths.get(imagePath));
+			String filenameExt = ModelTools.generateFileName(Paths.get(imagePath));
 			Imgcodecs.imwrite(RESOURCES_FOLDER + filenameExt, imgCopy.getSrc());
 			imgCopy.close();
 			future.complete(OcrVerticle.ACTION);
