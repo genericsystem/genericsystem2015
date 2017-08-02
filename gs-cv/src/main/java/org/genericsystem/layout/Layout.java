@@ -79,6 +79,7 @@ public class Layout {
 			// else
 			// Imgproc.rectangle(roi.getSrc(), new Point(0, 0), new Point(roi.width() - 1, roi.height() - 1), new Scalar(0, 0, 255), thickness);
 		});
+
 	}
 
 	public void drawPerspective(Img img, Mat homography, Scalar color, int thickness) {
@@ -106,15 +107,28 @@ public class Layout {
 				if (!"".equals(ocr)) {
 					Integer count = layout.getLabels().get(ocr);
 					layout.getLabels().put(ocr, 1 + (count != null ? count : 0));
-					int all = layout.getLabels().values().stream().reduce(0, (i, j) -> i + j);
-					layout.getLabels().entrySet().forEach(entry -> {
-						if (entry.getValue() > all / 3)
-							layout.draw(rootImg, new Scalar(0, 0, 255), 3);
-					});
-					System.out.println(layout.getLabels());
+					// int all = layout.getLabels().values().stream().reduce(0, (i, j) -> i + j);
+					// layout.getLabels().entrySet().forEach(entry -> {
+					// if (entry.getValue() > all / 3)
+					// layout.draw(rootImg, new Scalar(0, 0, 255), 3);
+					// });
+					Imgproc.putText(rootImg.getSrc(), layout.getBestLabel(), layout.getRect(rootImg).tl(), Core.FONT_HERSHEY_PLAIN, 1, new Scalar(255, 0, 0), 1);
+					// System.out.println(layout.getBestLabel());
 				}
 			}
 		});
+	}
+
+	private String getBestLabel() {
+		String result = "";
+		int occurence = 0;
+		for (String key : getLabels().keySet()) {
+			if (getLabels().get(key) > occurence) {
+				result = key;
+				occurence = getLabels().get(key);
+			}
+		}
+		return result;
 	}
 
 	public void addChild(Layout child) {
