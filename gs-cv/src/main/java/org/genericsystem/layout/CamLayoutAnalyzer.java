@@ -101,7 +101,7 @@ public class CamLayoutAnalyzer extends AbstractApp {
 						Img stabilizedCopy = new Img(stabilized.getSrc(), true);
 						if (getLayout()[0] == null)
 							getLayout()[0] = stabilized.buildLayout();
-						// getLayout()[0].ocrTree(stabilized, 0);
+						getLayout()[0].ocrTree(stabilizedCopy, 0);
 						getLayout()[0].draw(stabilizedCopy, new Scalar(0, 255, 0), 1);
 						getLayout()[0].drawPerspective(frameImg, homography[0].inv(), new Scalar(0, 0, 255), 1);
 						double surface = getLayout()[0].getSurfaceInPercent(stabilized);
@@ -116,7 +116,6 @@ public class CamLayoutAnalyzer extends AbstractApp {
 					e.printStackTrace();
 				}
 			}
-
 		}, 500, 66, TimeUnit.MILLISECONDS);
 	}
 
