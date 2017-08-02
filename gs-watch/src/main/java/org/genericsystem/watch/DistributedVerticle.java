@@ -38,6 +38,7 @@ public class DistributedVerticle extends AbstractVerticle {
 	public void start() throws Exception {
 		vertx.deployVerticle(new PdfConverterVerticle());
 		vertx.deployVerticle(new ClassifierVerticle());
+		vertx.deployVerticle(new OcrWorkerVerticle());
 	}
 
 	public static void main(String[] args) {
