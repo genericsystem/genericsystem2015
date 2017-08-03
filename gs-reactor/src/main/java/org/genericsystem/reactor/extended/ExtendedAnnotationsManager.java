@@ -108,7 +108,7 @@ public class ExtendedAnnotationsManager extends AnnotationsManager {
 				throw new IllegalStateException(e);
 			}
 		} else
-			log.warn("Unable to find a generic processor on annotation : " + annotationClass.getSimpleName());
+			log.warn("Unable to find a generic processor for annotation: {}.", annotationClass.getSimpleName());
 	}
 
 	public static interface IGenericAnnotationProcessor {

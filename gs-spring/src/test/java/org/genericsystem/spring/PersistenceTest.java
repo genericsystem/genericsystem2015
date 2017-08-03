@@ -17,7 +17,7 @@ public class PersistenceTest extends AbstractTest {
 		Generic actualValue = count.getInstances().first();
 		Serializable previousValue = actualValue.getValue();
 		actualValue.updateValue((int) actualValue.getValue() + 1);
-		log.info("previousValue " + previousValue + " actualValue " + actualValue.getValue());
+		log.info("previousValue {}, actualValue {}.", previousValue, actualValue.getValue());
 		engine.getCurrentCache().flush();
 		engine.close();
 	}

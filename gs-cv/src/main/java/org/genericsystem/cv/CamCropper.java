@@ -1,5 +1,6 @@
 package org.genericsystem.cv;
 
+import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -21,11 +22,16 @@ import org.opencv.features2d.FeatureDetector;
 import org.opencv.features2d.Features2d;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 
 public class CamCropper extends AbstractApp {
+
+	private final static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
 	static {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 	}
@@ -87,7 +93,7 @@ public class CamCropper extends AbstractApp {
 				Core.subtract(newFrame.getSrc(), transformedImage, transformedImage);
 				src2.setImage(new Img(transformedImage).toJfxImage());
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.warn("Exception while looking for matches.", e);
 			}
 
 			oldFrame[0] = newFrame;

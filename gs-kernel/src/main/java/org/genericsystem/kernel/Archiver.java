@@ -76,7 +76,7 @@ public class Archiver {
 		this.root = root;
 		directory = prepareAndLockDirectory(directoryPath);
 		if (directory != null) {
-			log.info("Start archiver in repository : " + directory.getAbsolutePath());
+			log.info("Start archiver in repository: {}", directory.getAbsolutePath());
 			String snapshotPath = getSnapshotPath(directory);
 			if (snapshotPath != null) {
 				try {
@@ -91,13 +91,13 @@ public class Archiver {
 			@Override
 			public void run() {
 				if (directory != null)
-					log.info("Archiver in repository : " + directory.getAbsolutePath() + " is closing ...");
+					log.info("Archiver in repository: {} is closing ...", directory.getAbsolutePath() );
 				else
 					log.info("Archiver is closing without persistence");
 				close();
 				if (directory != null)
 					if (directory != null)
-						log.info("Archiver in repository : " + directory.getAbsolutePath() + " has closed");
+						log.info("Archiver in repository: {} has closed.", directory.getAbsolutePath());
 					else
 						log.info("Archiver has closed");
 
@@ -258,7 +258,6 @@ public class Archiver {
 			writeAncestorId(dependency, dependency.getMeta());
 			writeAncestorsId(dependency, dependency.getSupers());
 			writeAncestorsId(dependency, dependency.getComponents());
-			// log.info("write dependency : " + dependency.info() + " " + dependency.getTs() + " birthTs : " + dependency.getLifeManager().getBirthTs());
 		}
 
 		protected void writeOtherTs(Generic dependency) throws IOException {
@@ -321,8 +320,6 @@ public class Archiver {
 			List<Generic> supers = loadAncestors(ts, vertexMap);
 			List<Generic> components = loadAncestors(ts, vertexMap);
 			vertexMap.put(ts, new SetArchiverHandler(ts, context, meta, supers, value, components, otherTs).resolve());
-			// log.info("load dependency : " + vertexMap.get(ts).info() + " " + ts + " " + vertexMap.get(ts).getTs() + " birthTs : " + ((RootServerHandler) vertexMap.get(ts).getProxyHandler()).getLifeManager().getBirthTs());
-			// System.out.println("alive ? " + vertexMap.get(ts) + " : " + ((Transaction) context.getTransaction()).isAlive(vertexMap.get(ts)));
 			assert ((Transaction) context.getTransaction()).isAlive(vertexMap.get(ts)) : ((RootServerHandler) vertexMap.get(ts).getProxyHandler()).getLifeManager().getBirthTs() + " "
 					+ ((RootServerHandler) vertexMap.get(ts).getProxyHandler()).getLifeManager().getDeathTs() + " " + vertexMap.get(ts).info();
 		}

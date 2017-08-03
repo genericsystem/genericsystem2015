@@ -3,7 +3,9 @@ package org.genericsystem.common;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -17,7 +19,6 @@ import org.genericsystem.common.GenericBuilder.MergeBuilder;
 import org.genericsystem.common.GenericBuilder.SetBuilder;
 import org.genericsystem.common.GenericBuilder.UpdateBuilder;
 import org.genericsystem.defaults.DefaultCache;
-import org.genericsystem.defaults.tools.BindingsTools;
 
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
@@ -26,6 +27,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableIntegerValue;
 import javafx.beans.value.ObservableLongValue;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 
 /**
  * @author Nicolas Feybesse
@@ -70,6 +72,11 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 	private ObservableIntegerValue cacheLevel;
 	private ObservableLongValue ts;
 	private final ContextEventListener<Generic> listener;
+	private Map<Generic, ObservableList<Generic>> dependenciesAsOservableListCacheMap = new HashMap<>();
+
+	public Map<Generic, ObservableList<Generic>> getDependenciesAsOservableListCacheMap() {
+		return dependenciesAsOservableListCacheMap;
+	}
 
 	@Override
 	public long shiftTs() throws RollbackException {
@@ -127,15 +134,11 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 
 	@Override
 	public Snapshot<Generic> getDependencies(Generic generic) {
-		return getDifferential().getDependencies(generic, this);
+		return getDifferential().getDependencies(generic);
 	}
 
 	protected Restructurator buildRestructurator() {
 		return new Restructurator(this);
-	}
-
-	public Observable getObservable(Generic generic) {
-		return BindingsTools.createTransitive(differentialProperty, diff -> new Observable[] { diff.getObservable(generic) });
 	}
 
 	protected void initialize() {
@@ -315,6 +318,16 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 		public void apply(Snapshot<Generic> removes, Snapshot<Generic> adds)
 				throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
 			getTransaction().apply(removes, adds);
+		}
+
+		@Override
+		public ObjectProperty<IDifferential<Generic>> getDifferentialProperty() {
+			return (ObjectProperty) AbstractCache.this.differentialProperty;
+		}
+
+		@Override
+		public Map<Generic, ObservableList<Generic>> getDependenciesAsOservableListCacheMap() {
+			return AbstractCache.this.getDependenciesAsOservableListCacheMap();
 		}
 
 		@Override

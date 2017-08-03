@@ -1,12 +1,16 @@
 package org.genericsystem.common;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Handler;
-
+import java.lang.invoke.MethodHandles;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
 
 /**
  * @author Nicolas Feybesse
@@ -14,6 +18,8 @@ import java.util.concurrent.BlockingQueue;
  * @param <T>
  */
 public abstract class AbstractBackEnd {
+
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	protected Map<String, Root> roots = new HashMap<>();
 	protected AbstractWebSocketsServer webSocketsServer;
@@ -46,14 +52,14 @@ public abstract class AbstractBackEnd {
 			try {
 				blockingQueue.put(res);
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				logger.warn("Interrupted exception.", e);
 			}
 		});
 		AsyncResult<T> res = null;
 		try {
 			res = blockingQueue.take();
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.warn("Interrupted exception.", e);
 		}
 		if (res.failed())
 			throw new IllegalStateException(res.cause());

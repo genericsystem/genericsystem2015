@@ -32,7 +32,7 @@ public class StartupBean implements Extension {
 			if (clazz instanceof Class) {
 				Class<?> classToProvide = (Class<?>) clazz;
 				if (classToProvide.getAnnotation(SystemGeneric.class) != null) {
-					log.info("Generic System: providing " + classToProvide);
+					log.info("Generic System: providing {}", classToProvide);
 					userClasses.addUserClasse(classToProvide);
 				}
 			}

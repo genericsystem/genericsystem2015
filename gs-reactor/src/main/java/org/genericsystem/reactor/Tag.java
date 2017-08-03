@@ -328,7 +328,7 @@ public interface Tag extends TagNode, ActionDefaults, SelectionDefaults, Stepper
 				try {
 					observable.setValue(c.wasAdded() ? stringConverter.fromString(c.getValueAdded()) : null);
 				} catch (Exception ignore) {
-					log.warn("Conversion exception : " + ignore.getMessage());
+					log.info("Conversion exception: {}.", ignore.toString());
 				}
 			});
 			map.put(name, stringConverter.toString(observable.getValue()));

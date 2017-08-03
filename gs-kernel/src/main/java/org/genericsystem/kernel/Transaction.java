@@ -3,6 +3,7 @@ package org.genericsystem.kernel;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -17,7 +18,9 @@ import org.genericsystem.common.IDifferential;
 import org.genericsystem.kernel.AbstractServer.RootServerHandler;
 
 import javafx.beans.Observable;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.ObservableList;
 
 /**
  * @author Nicolas Feybesse
@@ -44,6 +47,16 @@ public class Transaction extends CheckedContext implements IDifferential<Generic
 	@Override
 	public long getTs() {
 		return ts;
+	}
+
+	@Override
+	public ObjectProperty<IDifferential<Generic>> getDifferentialProperty() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Map<Generic, ObservableList<Generic>> getDependenciesAsOservableListCacheMap() {
+		throw new UnsupportedOperationException();
 	}
 
 	protected Generic plug(Generic generic) {
