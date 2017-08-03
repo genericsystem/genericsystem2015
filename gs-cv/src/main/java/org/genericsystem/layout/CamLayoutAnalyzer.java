@@ -1,5 +1,6 @@
 package org.genericsystem.layout;
 
+import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -8,9 +9,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
 
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
@@ -35,9 +33,15 @@ import org.opencv.features2d.DescriptorMatcher;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
 import org.opencv.videoio.VideoCapture;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
 
 public class CamLayoutAnalyzer extends AbstractApp {
 
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 	private int[] count;
 	private MatOfKeyPoint[] oldKeypoints;
 	private MatOfKeyPoint newKeypoints;
@@ -111,7 +115,7 @@ public class CamLayoutAnalyzer extends AbstractApp {
 					}
 					this.getCount()[0]++;
 				} catch (Throwable e) {
-					e.printStackTrace();
+					logger.warn("Exception while computing layout.", e);
 				}
 			}
 		}, 500, 66, TimeUnit.MILLISECONDS);
@@ -229,7 +233,7 @@ public class CamLayoutAnalyzer extends AbstractApp {
 			List<MatOfPoint> mof = Collections.singletonList(new MatOfPoint(new MatOfPoint(result)));
 			// Imgproc.drawContours(frame, mof, 0, new Scalar(0, 255, 0), 1);
 			// Imgproc.drawContours(dilated, mof, 0, new Scalar(255), 1);
-			});
+		});
 		return goodAverage;
 	}
 
