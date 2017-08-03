@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.genericsystem.common.Generic;
@@ -82,24 +81,6 @@ public class FillModelWithData {
 
 	public static Root getEngine() {
 		return new Engine(gsPath, Doc.class, RefreshTimestamp.class, DocTimestamp.class, DocFilename.class, DocClass.class, ZoneGeneric.class, ZoneText.class, ZoneTimestamp.class, ImgFilter.class, LevDistance.class, MeanLevenshtein.class, Score.class);
-	}
-
-	/**
-	 * This Map will contain the names of the filters that will be applied to a specified {@link Img}.
-	 * 
-	 * @return - a Map containing the filter names as key, and a {@link Function} that will apply the specified algorithm to an Img.
-	 */
-	@Deprecated
-	public static Map<String, ImgFunction> getFiltersMap() {
-		final Map<String, ImgFunction> map = new ConcurrentHashMap<>();
-		map.put("original", i -> i);
-		map.put("reality", i -> i);
-		// map.put("bernsen",Img::bernsen);
-		map.put("equalizeHisto", i -> i.equalizeHisto());
-		map.put("equalizeHistoAdaptative", i -> i.equalizeHistoAdaptative());
-		map.put("otsuAfterGaussianBlur", i -> i.otsuAfterGaussianBlur());
-		map.put("adaptativeGaussianThreshold", i -> i.adaptativeGaussianThreshold());
-		return map;
 	}
 
 	/**
@@ -268,7 +249,6 @@ public class FillModelWithData {
 		updatedImgFilterList.forEach(entry -> {
 			String filtername = entry.getName();
 			ImgFunction function = entry.getLambda();
-
 			log.info("Applying algorithm {}...", filtername);
 			Img img = null;
 			if ("original".equals(filtername) || "reality".equals(filtername))
@@ -399,12 +379,12 @@ public class FillModelWithData {
 		engine.getCurrentCache().flush();
 
 		// Get the filters and the predefined zones
-		final Map<String, ImgFunction> imgFilters = getFiltersMap();
+		final List<ImgFilterFunction> imgFilterFunctions = getFilterFunctions();
 		final Zones zones = Zones.loadZones(imgClassDirectory.toString());
 
 		// Process the image file
 		initComputation(engine, docType, zones);
-		result = processFile(engine, imagePath.toFile(), docClassInstance, zones, imgFilters.entrySet().stream());
+		result = processFile(engine, imagePath.toFile(), docClassInstance, zones, imgFilterFunctions.stream());
 		return result;
 	}
 
@@ -430,12 +410,12 @@ public class FillModelWithData {
 		log.debug("imgClassDirectory = {} ", imgClassDirectory);
 		DocClass docClass = engine.find(DocClass.class);
 		DocClassInstance docClassInstance = docClass.setDocClass(docType);
-		final Map<String, ImgFunction> imgFilters = getFiltersMap();
+		final List<ImgFilterFunction> imgFilterFunctions = getFilterFunctions();
 		final Zones zones = Zones.loadZones(imgClassDirectory);
 
 		initComputation(engine, docType, zones);
 		Arrays.asList(new File(imgDirectory).listFiles((dir, name) -> name.endsWith(".png"))).forEach(file -> {
-			processFile(engine, file, docClassInstance, zones, imgFilters.entrySet().stream());
+			processFile(engine, file, docClassInstance, zones, imgFilterFunctions.stream());
 			engine.getCurrentCache().flush();
 		});
 		engine.getCurrentCache().flush();
@@ -484,7 +464,7 @@ public class FillModelWithData {
 	 * @param imgFilters - a stream of {@link Entry} for a Map containing the filternames that will be applied to the original file, and the functions required to apply these filters
 	 * @return an {@code int} representing {@link #KNOWN_FILE_UPDATED_FILTERS}, {@link #NEW_FILE} or {@link #KNOWN_FILE}
 	 */
-	private static int processFile(Root engine, File file, DocClassInstance docClassInstance, Zones zones, Stream<Entry<String, ImgFunction>> imgFilters) {
+	private static int processFile(Root engine, File file, DocClassInstance docClassInstance, Zones zones, Stream<ImgFilterFunction> imgFilterFunctions) {
 		final boolean newFile = isThisANewFile(engine, file);
 		int result = ERROR;
 		log.info("\nProcessing file: {}", file.getName());
@@ -505,26 +485,25 @@ public class FillModelWithData {
 		engine.getCurrentCache().flush();
 
 		// TODO: refactor the code (duplicates)
-		// Save the filternames if necessary
-		Map<String, ImgFunction> updatedImgFilters = new ConcurrentHashMap<>();
-		imgFilters.forEach(entry -> {
-			ImgFilterInstance filter = imgFilter.getImgFilter(entry.getKey());
+		final List<ImgFilterFunction> updatedImgFilterList = new ArrayList<>();
+		imgFilterFunctions.forEach(entry -> {
+			String filtername = entry.getName();
+			ImgFilterInstance filter = imgFilter.getImgFilter(filtername);
 			if (filter == null) {
-				log.info("Adding algorithm : {} ", entry.getKey());
-				imgFilter.setImgFilter(entry.getKey());
-				updatedImgFilters.put(entry.getKey(), entry.getValue());
+				log.info("Adding algorithm : {} ", filtername);
+				imgFilter.setImgFilter(filtername);
+				updatedImgFilterList.add(entry);
 			} else {
-				// TODO: add another criteria to verify if the filter has been
-				// applied on the image
+				// TODO: add another criteria to verify if the filter has been applied on the image
 				boolean containsNullZoneTextInstance = zones.getZones().stream().anyMatch(z -> {
 					ZoneTextInstance zti = zoneText.getZoneText(docInstance, docClassInstance.getZone(z.getNum()), filter);
 					return zti == null;
 				});
 				if (containsNullZoneTextInstance) {
-					imgFilter.setImgFilter(entry.getKey());
-					updatedImgFilters.put(entry.getKey(), entry.getValue());
+					imgFilter.setImgFilter(filtername);
+					updatedImgFilterList.add(entry);
 				} else {
-					log.debug("Algorithm {} already known", entry.getKey());
+					log.debug("Algorithm {} already known", filtername);
 				}
 			}
 		});
@@ -534,7 +513,7 @@ public class FillModelWithData {
 			log.info("Adding a new image ({}) ", file.getName());
 			result = NEW_FILE;
 		} else {
-			if (updatedImgFilters.isEmpty()) {
+			if (updatedImgFilterList.isEmpty()) {
 				log.info("The image {} has already been processed (pass)", file.getName());
 				result = KNOWN_FILE;
 				return result;
@@ -550,17 +529,19 @@ public class FillModelWithData {
 		// Create a map of Imgs
 		Map<String, Img> imgs = new ConcurrentHashMap<>();
 		Img originalImg = new Img(file.getPath());
-		updatedImgFilters.entrySet().forEach(entry -> {
-			log.info("Applying algorithm {}...", entry.getKey());
+		updatedImgFilterList.forEach(entry -> {
+			String filtername = entry.getName();
+			ImgFunction function = entry.getLambda();
+			log.info("Applying algorithm {}...", filtername);
 			Img img = null;
-			if ("original".equals(entry.getKey()) || "reality".equals(entry.getKey()))
+			if ("original".equals(filtername) || "reality".equals(filtername))
 				img = originalImg;
 			else
-				img = entry.getValue().apply(originalImg);
+				img = function.apply(originalImg);
 			if (null != img)
-				imgs.put(entry.getKey(), img);
+				imgs.put(filtername, img);
 			else
-				log.error("An error as occured for image {} and filter {}", filenameExt, entry.getKey());
+				log.error("An error as occured for image {} and filter {}", filenameExt, filtername);
 		});
 
 		// Draw the image's zones + numbers
