@@ -2,6 +2,7 @@ package org.genericsystem.cv.comparator;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -50,11 +51,6 @@ import io.vertx.core.json.JsonObject;
  */
 public class FillModelWithData {
 
-	static {
-		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-		System.out.println("OpenCV core library loaded");
-	}
-
 	public static final String ENCODED_FILENAME = "encodedFilename";
 	public static final String FILENAME = "filename";
 	public static final String CLASS_NAME = "docType";
@@ -70,6 +66,11 @@ public class FillModelWithData {
 	private static Logger log = LoggerFactory.getLogger(FillModelWithData.class);
 	private static final String gsPath = System.getenv("HOME") + "/genericsystem/gs-cv_model3/";
 	private static final String docType = "id-fr-front";
+
+	static {
+		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+		log.info("OpenCV core library loaded");
+	}
 
 	public static void main(String[] mainArgs) {
 		final Root engine = getEngine();
@@ -88,7 +89,7 @@ public class FillModelWithData {
 	 * 
 	 * @return - a Map containing the filter names as key, and a {@link Function} that will apply the specified algorithm to an Img.
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@Deprecated
 	public static Map<String, ImgFunction> getFiltersMap() {
 		final Map<String, ImgFunction> map = new ConcurrentHashMap<>();
 		map.put("original", i -> i);
@@ -99,6 +100,20 @@ public class FillModelWithData {
 		map.put("otsuAfterGaussianBlur", i -> i.otsuAfterGaussianBlur());
 		map.put("adaptativeGaussianThreshold", i -> i.adaptativeGaussianThreshold());
 		return map;
+	}
+
+	/**
+	 * This List contains all the functions defined in {@link ImgFilterFunction}.
+	 * 
+	 * @return a list of {@link ImgFilterFunction}
+	 */
+	public static List<ImgFilterFunction> getFilterFunctions() {
+		final List<ImgFilterFunction> filterSet = new ArrayList<>();
+		for (ImgFilterFunction iff : ImgFilterFunction.values()) {
+			log.info("Adding: {}", iff);
+			filterSet.add(iff);
+		}
+		return filterSet;
 	}
 
 	/**
@@ -163,17 +178,37 @@ public class FillModelWithData {
 		engine.getCurrentCache().flush();
 
 		// Get the filters and the predefined zones
-		final Map<String, ImgFunction> imgFilters = FillModelWithData.getFiltersMap();
+		final List<ImgFilterFunction> imgFilterFunctions = FillModelWithData.getFilterFunctions();
 		final Zones zones = Zones.load(imgClassDirectory.toString());
 
+		// Save the zones if necessary
+		zones.getZones().forEach(z -> {
+			ZoneInstance zoneInstance = docClassInstance.getZone(z.getNum());
+			if (zoneInstance != null) {
+				Zone zone = zoneInstance.getZoneObject();
+				// log.info("z : {} ; zone : {}", z, zone);
+				if (z.equals(zone)) {
+					log.info("Zone n°{} already known", z.getNum());
+				} else {
+					log.info("Adding zone n°{} ", z.getNum());
+					docClassInstance.setZone(z.getNum(), z.getRect().x, z.getRect().y, z.getRect().width, z.getRect().height);
+				}
+			} else {
+				log.info("Adding zone n°{} ", z.getNum());
+				docClassInstance.setZone(z.getNum(), z.getRect().x, z.getRect().y, z.getRect().width, z.getRect().height);
+			}
+		});
+		engine.getCurrentCache().flush();
+
 		// Save the filternames if necessary
-		Map<String, ImgFunction> updatedImgFilters = new ConcurrentHashMap<>();
-		imgFilters.entrySet().forEach(entry -> {
-			ImgFilterInstance filter = imgFilter.getImgFilter(entry.getKey());
+		final List<ImgFilterFunction> updatedImgFilterList = new ArrayList<>();
+		imgFilterFunctions.forEach(entry -> {
+			String filtername = entry.getName();
+			ImgFilterInstance filter = imgFilter.getImgFilter(filtername);
 			if (filter == null) {
-				log.info("Adding algorithm : {} ", entry.getKey());
-				imgFilter.setImgFilter(entry.getKey());
-				updatedImgFilters.put(entry.getKey(), entry.getValue());
+				log.info("Adding algorithm : {} ", filtername);
+				imgFilter.setImgFilter(filtername);
+				updatedImgFilterList.add(entry);
 			} else {
 				// TODO: add another criteria to verify if the filter has been applied on the image
 				boolean containsNullZoneTextInstance = zones.getZones().stream().anyMatch(z -> {
@@ -181,20 +216,20 @@ public class FillModelWithData {
 					return zti == null;
 				});
 				if (containsNullZoneTextInstance) {
-					imgFilter.setImgFilter(entry.getKey());
-					updatedImgFilters.put(entry.getKey(), entry.getValue());
+					imgFilter.setImgFilter(filtername);
+					updatedImgFilterList.add(entry);
 				} else {
-					log.debug("Algorithm {} already known", entry.getKey());
+					log.debug("Algorithm {} already known", filtername);
 				}
 			}
 		});
 
-		if (null == updatedImgFilters || updatedImgFilters.isEmpty()) {
+		if (null == updatedImgFilterList || updatedImgFilterList.isEmpty()) {
 			log.info("Nothing to add");
-			return null;
+			return new JsonObject();
 		} else {
 			// Return the parameters required to process this file as a JsonObject
-			OcrParameters params = new OcrParameters(imagePath.toFile(), zones, updatedImgFilters);
+			OcrParameters params = new OcrParameters(imagePath.toFile(), zones, updatedImgFilterList);
 			return params.toJson();
 		}
 	}
@@ -210,7 +245,7 @@ public class FillModelWithData {
 		OcrParameters ocrParameters = new OcrParameters(params);
 		File file = ocrParameters.getFile();
 		Zones zones = ocrParameters.getZones();
-		Map<String, ImgFunction> updatedImgFilters = ocrParameters.getImgFilters();
+		List<ImgFilterFunction> updatedImgFilterList = ocrParameters.getImgFilterFunctions();
 
 		// Save the current file
 		log.info("\nProcessing file: {}", file.getName());
@@ -230,17 +265,20 @@ public class FillModelWithData {
 		// Create a map of Imgs
 		Map<String, Img> imgs = new ConcurrentHashMap<>();
 		Img originalImg = new Img(file.getPath());
-		updatedImgFilters.entrySet().forEach(entry -> {
-			log.info("Applying algorithm {}...", entry.getKey());
+		updatedImgFilterList.forEach(entry -> {
+			String filtername = entry.getName();
+			ImgFunction function = entry.getLambda();
+
+			log.info("Applying algorithm {}...", filtername);
 			Img img = null;
-			if ("original".equals(entry.getKey()) || "reality".equals(entry.getKey()))
+			if ("original".equals(filtername) || "reality".equals(filtername))
 				img = originalImg;
 			else
-				img = entry.getValue().apply(originalImg);
+				img = function.apply(originalImg);
 			if (null != img)
-				imgs.put(entry.getKey(), img);
+				imgs.put(filtername, img);
 			else
-				log.error("An error as occured for image {} and filter {}", filenameExt, entry.getKey());
+				log.error("An error as occured for image {} and filter {}", filenameExt, filtername);
 		});
 
 		// Process each zone
@@ -271,9 +309,15 @@ public class FillModelWithData {
 	 * Save the OCR data into Generic System.
 	 * 
 	 * @param engine - the engine used to store the data
-	 * @param data - a {@link JsonObject} containing all the data
+	 * @param data - a {@link JsonObject} containing all the data (see {@link #getOcrParameters(Root, Path)}).
 	 */
 	public static void saveOcrDataInModel(Root engine, JsonObject data) {
+		try {
+			engine.getCurrentCache();
+		} catch (IllegalStateException e) {
+			log.error("Current cache could not be loaded. Starting a new one...");
+			engine.newCache().start();
+		}
 		// Parse the data
 		String docType = data.getString(CLASS_NAME);
 		String filename = data.getString(FILENAME);

@@ -48,9 +48,10 @@ public class OcrParametersVerticle extends ActionVerticle {
 
 	@Override
 	protected void handleResult(AsyncResult<Object> res, JsonObject task) {
-		if (res.succeeded())
-			addTask(task.getString(DistributedVerticle.FILENAME), (JsonObject) res.result(), OcrWorkerVerticle.ACTION);
-		else
+		if (res.succeeded()) {
+			if (!((JsonObject) res.result()).isEmpty())
+				addTask(task.getString(DistributedVerticle.FILENAME), (JsonObject) res.result(), OcrWorkerVerticle.ACTION);
+		} else
 			throw new IllegalStateException("Exception in OcrParametersVerticle.", res.cause());
 	}
 }
