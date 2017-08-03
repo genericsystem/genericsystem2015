@@ -27,10 +27,10 @@ public class DidjvuScript {
 	public static int runDidjvuScript(String parameter) {
 		try {
 			Process process = Runtime.getRuntime().exec(new String[] { shellScript, parameter });
-			System.out.println("Didjvu processing " + parameter);
+			log.debug("Didjvu processing {}.", parameter);
 			return process.waitFor();
 		} catch (IOException | InterruptedException e) {
-			log.warn("Shell script execution failed on " + parameter + ".");
+			log.warn("Shell script execution failed on {}.", parameter);
 			return 1;
 		}
 	}

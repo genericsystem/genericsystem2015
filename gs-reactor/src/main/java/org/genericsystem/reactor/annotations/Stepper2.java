@@ -49,7 +49,7 @@ public @interface Stepper2 {
 				Stepper2 stepperAnn = (Stepper2) annotation;
 				((StepperDefaults) tag).stepper(tag.find(stepperAnn.switchClass(), stepperAnn.switchClassPos()), tag.find(stepperAnn.headerClass(), stepperAnn.headerClassPos()));
 			} else
-				log.warn("Switch is applicable only to tags implementing SwitchDefaults.");
+				log.warn("Switch is applicable only to tags implementing SwitchDefaults. Applied to class: {}.", tag.getClass().getName());
 
 		}
 	}

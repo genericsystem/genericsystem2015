@@ -141,7 +141,7 @@ public class AdaptedVGG16 {
 
 		File modelFile = new File("AdaptedVGG16-" + System.currentTimeMillis() + ".zip");
 		ModelSerializer.writeModel(net, modelFile, true);
-		log.info("Model saved to " + modelFile);
+		log.info("Model saved to {}.", modelFile);
 	}
 
 	public static DataSetIterator getPresavedIterator(String name) {
@@ -166,14 +166,14 @@ public class AdaptedVGG16 {
 		}
 		String fileName = "images-" + featurizedLayer + "-" + name + "-" + iterNum + ".bin";
 		currentFeaturized.save(new File(fileFolder, fileName));
-		log.info("Saved " + name + "dataset #" + iterNum);
+		log.info("Saved {} dataset #{}", name, iterNum);
 	}
 
 	public static DataSetIterator getDataSetIterator(ImageRecordReader recordReader, InputSplit data, ImageTransform transform, int batchSize, int outputNum) {
 		try {
 			recordReader.initialize(data, transform);
 		} catch (IOException e) {
-			log.warn("Impossible to initialize recordReader", e);
+			log.warn("Impossible to initialize recordReader.", e);
 		}
 		DataSetIterator dataIter = new RecordReaderDataSetIterator(recordReader, batchSize, 1, outputNum);
 		DataNormalization scaler = new ImagePreProcessingScaler(-1, 1);

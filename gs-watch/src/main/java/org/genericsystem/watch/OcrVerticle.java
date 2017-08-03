@@ -1,5 +1,6 @@
 package org.genericsystem.watch;
 
+import java.lang.invoke.MethodHandles;
 import java.nio.file.Paths;
 
 import org.genericsystem.common.Root;
@@ -20,7 +21,7 @@ import io.vertx.core.json.JsonObject;
  */
 public class OcrVerticle extends ActionVerticle {
 
-	private static final Logger logger = LoggerFactory.getLogger(OcrVerticle.class);
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	public static final String ACTION = "ocr";
 	public static final String NEW_IMAGE_PROCESSED = "app.ocr.newimage.processed";
@@ -56,15 +57,15 @@ public class OcrVerticle extends ActionVerticle {
 
 		switch (result) {
 			case FillModelWithData.NEW_FILE:
-				logger.debug("New image (processed)" + imagePath);
+				logger.debug("New image (processed) {}.", imagePath);
 				future.complete(NEW_IMAGE_PROCESSED);
 				break;
 			case FillModelWithData.KNOWN_FILE:
-				logger.debug("Known image (passed)" + imagePath);
+				logger.debug("Known image (passed) {} ", imagePath);
 				future.complete(KNOWN_IMAGE_PASSED);
 				break;
 			case FillModelWithData.KNOWN_FILE_UPDATED_FILTERS:
-				logger.debug("Known image (updated)" + imagePath);
+				logger.debug("Known image (updated) {} ", imagePath);
 				future.complete(KNOWN_IMAGE_PROCESSED);
 				break;
 			default:

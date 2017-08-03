@@ -78,7 +78,7 @@ public class Classifier {
 				CompareFeatureResult bestClass = Classifier.selectBestClass(classesDirectory, img.getSrc(), featureDetectors, descriptorExtractors)) {
 			Path matchingClassDir;
 			if (bestClass != null) {
-				logger.debug("bestClass != null, " + bestClass);
+				logger.debug("bestClass != null, {}", bestClass);
 				matchingClassDir = Paths.get(".").resolveSibling(bestClass.getImgClass().getDirectory());
 				alignedImage = bestClass.getImg();
 			} else {
@@ -88,7 +88,7 @@ public class Classifier {
 					alignedImage = cropped.getSrc();
 				} catch (Exception e) {
 					matchingClassDir.toFile().delete();
-					logger.error("Error while deskewing new image " + imgFile.toString() + " to create new class, new class not created.", e);
+					logger.error("Error while deskewing new image {} to create new class, new class not created.", e, imgFile);
 					return null;
 					// TODO: Store the image somewhere else.
 				}
@@ -101,11 +101,10 @@ public class Classifier {
 						savedFile = File.createTempFile(fileNameParts[0] + "-", "." + fileNameParts[1], matchingClassDir.toFile()).toPath();
 					}
 				}
-				logger.debug("alignedImage : " + alignedImage + ", path : " + savedFile);
 				Imgcodecs.imwrite(savedFile.toString(), alignedImage);
 				return savedFile;
 			} catch (IOException e) {
-				logger.error("Error while saving image " + imgFile.getFileName() + " in class " + matchingClassDir.toString(), e);
+				logger.error("Error while saving image {} in class {}.", e, imgFile.getFileName(), matchingClassDir);
 				return null;
 			}
 		} finally {
@@ -257,9 +256,9 @@ public class Classifier {
 				Imgproc.warpPerspective(img1, transformedImage, homography, new Size(img2.cols(), img2.rows()));
 				result = new CompareFeatureResult(transformedImage, goodMatches.size());
 				homography.release();
-				logger.debug("----------------- possible match found, threshold: " + matchingThreshold + ", goodMatches: " + goodMatches.size());
+				logger.debug("----------------- possible match found, threshold: {}, goodMatches: {}.", matchingThreshold, goodMatches.size());
 			} else
-				logger.debug("----------------- not a match, threshold: " + matchingThreshold + ", goodMatches: " + goodMatches.size());
+				logger.debug("----------------- not a match, threshold: {}, goodMatches: {}.", matchingThreshold, goodMatches.size());
 		}
 		keypoints2.release();
 		descriptors2.release();

@@ -92,7 +92,7 @@ public interface RootTag extends Tag {
 		if (FlexDirectionDefaults.class.isAssignableFrom(tag.getClass()))
 			((FlexDirectionDefaults) tag).setDirection(context, flexDirection);
 		else
-			log.warn("Warning: FlexDirection is applicable only to classes implementing FlexDirectionDefaults.");
+			log.warn("Warning: FlexDirection is applicable only to classes implementing FlexDirectionDefaults. Applied to class: {}.", tag.getClass().getName());
 	}
 
 	default void processReverseFlexDirection(Tag tag) {
@@ -103,7 +103,7 @@ public interface RootTag extends Tag {
 		if (FlexDirectionDefaults.class.isAssignableFrom(tag.getClass()))
 			((FlexDirectionDefaults) tag).reverseDirection(context);
 		else
-			log.warn("Warning: ReverseFlexDirection is applicable only to classes implementing FlexDirectionDefaults.");
+			log.warn("Warning: ReverseFlexDirection is applicable only to classes implementing FlexDirectionDefaults. Applied to class: {}.", tag.getClass().getName());
 	}
 
 	default void processKeepFlexDirection(Tag tag) {
@@ -114,7 +114,7 @@ public interface RootTag extends Tag {
 		if (FlexDirectionDefaults.class.isAssignableFrom(tag.getClass()))
 			((FlexDirectionDefaults) tag).keepDirection(context);
 		else
-			log.warn("Warning: KeepFlexDirection is applicable only to classes implementing FlexDirectionDefaults.");
+			log.warn("Warning: KeepFlexDirection is applicable only to classes implementing FlexDirectionDefaults. Applied to class: {}.", tag.getClass().getName());
 	}
 
 	default void processStyleClass(Tag tag, String[] classes) {
@@ -167,7 +167,7 @@ public interface RootTag extends Tag {
 					}
 			});
 		else
-			log.warn("BindAction is applicable only to tags implementing ActionDefaults.");
+			log.warn("BindAction is applicable only to tags implementing ActionDefaults. Applied to class: {}.", tag.getClass().getName());
 	}
 
 	default void processSetStringExtractor(Tag tag, Class<? extends StringExtractor> value) {
@@ -251,7 +251,7 @@ public interface RootTag extends Tag {
 		if (SelectionDefaults.class.isAssignableFrom(tag.getClass()))
 			((SelectionDefaults) tag).bindSelection(tag.find(value, valuePos), context);
 		else
-			log.warn("BindSelection is applicable only to a class implementing SelectionDefaults.");
+			log.warn("BindSelection is applicable only to a class implementing SelectionDefaults. Applied to class: {}.", tag.getClass().getName());
 	}
 
 	default void processBindSelection(Tag tag, Class<? extends TagImpl> value, int valuePos) {

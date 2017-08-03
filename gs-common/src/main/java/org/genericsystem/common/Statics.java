@@ -57,7 +57,7 @@ public class Statics {
 
 	public static void logTimeIfCurrentThreadDebugged(String message) {
 		if (isCurrentThreadDebugged())
-			log.info(message + " : " + (System.currentTimeMillis() - threadDebugged.get()));
+			log.info("{} : {}", message, (System.currentTimeMillis() - threadDebugged.get()));
 	}
 
 	public static class Supers<T extends DefaultGeneric<T>> extends ArrayList<T> {

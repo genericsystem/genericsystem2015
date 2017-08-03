@@ -447,7 +447,7 @@ public class FillModelWithData {
 		try {
 			filename = ModelTools.getHashFromFile(filePath, "sha-256");
 			String filenameExt = filename + "." + FilenameUtils.getExtension(filePath.getFileName().toString());
-			log.info("Hash generated for file {}: {}", filePath.getFileName().toString(), filenameExt);
+			log.info("Hash generated for file {}: {}", filePath.getFileName(), filenameExt);
 			return filenameExt;
 		} catch (RuntimeException e) {
 			log.error("An error has occured during the generation of the hascode from file");

@@ -1,5 +1,7 @@
 package org.genericsystem.watch;
 
+import java.lang.invoke.MethodHandles;
+
 import org.genericsystem.common.Generic;
 import org.genericsystem.kernel.Cache;
 import org.genericsystem.kernel.Engine;
@@ -19,7 +21,7 @@ import io.vertx.spi.cluster.hazelcast.HazelcastClusterManager;
 
 public class Dispatcher extends AbstractVerticle {
 
-	private static final Logger logger = LoggerFactory.getLogger(Dispatcher.class);
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 	protected final Engine engine = new Engine(System.getenv("HOME") + "/genericsystem/tasks/", Task.class);
 	protected Cache cache = engine.newCache();
 	protected final Generic taskType = engine.find(Task.class);
@@ -90,13 +92,13 @@ public class Dispatcher extends AbstractVerticle {
 							if (reply.failed())
 								switch (((ReplyException) reply.cause()).failureType()) {
 									case NO_HANDLERS:
-										logger.warn("No handler for task: " + json.encodePrettily());
+										logger.warn("No handler for task: {}.", json.encodePrettily());
 										break;
 									case TIMEOUT:
-										logger.warn("Sending of task " + json.encodePrettily() + " timed out: " + reply.cause().getMessage());
+										logger.warn("Sending of task {} timed out.", reply.cause(), json.encodePrettily());
 										break;
 									case RECIPIENT_FAILURE:
-										logger.info("Task: " + json.encodePrettily() + " rejected by recipient: " + reply.cause().getMessage());
+										logger.info("Task {} rejected by recipient.", reply.cause(), json.encodePrettily());
 										break;
 								}
 							else
@@ -111,7 +113,7 @@ public class Dispatcher extends AbstractVerticle {
 	}
 
 	private void updateTaskState(JsonObject oldValue, String newState) {
-		logger.debug("Updating: " + oldValue.encodePrettily() + ", newState: " + newState);
+		logger.debug("Updating: {}, newState: {}.", oldValue.encodePrettily(), newState);
 		cache.safeConsum(unused -> {
 			Generic task = taskType.getInstances().filter(g -> oldValue.equals(new JsonObject((String) g.getValue()))).first();
 			JsonObject newValue = new JsonObject(oldValue.encode()).put(STATE, newState);

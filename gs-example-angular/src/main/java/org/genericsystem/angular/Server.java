@@ -21,8 +21,6 @@ import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.Session;
@@ -33,8 +31,6 @@ import io.vertx.ext.web.handler.StaticHandler;
 import io.vertx.ext.web.sstore.LocalSessionStore;
 
 public class Server extends AbstractVerticle {
-
-	private static final Logger log = LoggerFactory.getLogger(Server.class);
 
 	private static Engine engine = new Engine(System.getenv("HOME") + "/genericsytem/carsAngular", Car.class, Power.class);
 

@@ -3,6 +3,7 @@ package org.genericsystem.watch;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.invoke.MethodHandles;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -17,7 +18,7 @@ import io.vertx.core.json.JsonObject;
 
 public abstract class ActionVerticle extends AbstractVerticle {
 
-	private static final Logger logger = LoggerFactory.getLogger(ActionVerticle.class);
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 	private static final String ip = LocalNet.getIpAddress();
 
 	public String getAction() {
@@ -46,7 +47,7 @@ public abstract class ActionVerticle extends AbstractVerticle {
 					vertx.eventBus().send(Dispatcher.ADDRESS + ":updateState", new JsonObject().put(Dispatcher.TASK, task).put(Dispatcher.NEW_STATE, Dispatcher.FINISHED).encodePrettily());
 				else {
 					vertx.eventBus().send(Dispatcher.ADDRESS + ":updateState", new JsonObject().put(Dispatcher.TASK, task).put(Dispatcher.NEW_STATE, Dispatcher.ABORTED).encodePrettily());
-					logger.error("Task " + task + " aborted.", res.cause());
+					logger.error("Task {} aborted.", task, res.cause());
 				}
 				DistributedVerticle.decrementExecutions();
 			});
@@ -90,7 +91,7 @@ public abstract class ActionVerticle extends AbstractVerticle {
 				return;
 			}
 		} else {
-			logger.info("The file " + fileName + " has already been downloaded.");
+			logger.info("The file {} has already been downloaded.", fileName);
 		}
 	}
 

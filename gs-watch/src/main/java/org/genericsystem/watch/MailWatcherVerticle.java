@@ -1,6 +1,7 @@
 package org.genericsystem.watch;
 
 import java.io.File;
+import java.lang.invoke.MethodHandles;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -36,7 +37,7 @@ import io.vertx.core.json.JsonObject;
  */
 public class MailWatcherVerticle extends AbstractVerticle {
 
-	private static final Logger logger = LoggerFactory.getLogger(MailWatcherVerticle.class);
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	private final String ip = LocalNet.getIpAddress();
 
@@ -102,7 +103,7 @@ public class MailWatcherVerticle extends AbstractVerticle {
 	private void processMessage(MimeMessage msg) {
 		try {
 			MimeMessageParser parser = new MimeMessageParser(msg).parse();
-			logger.debug("> New email: " + parser.getSubject());
+			logger.debug("> New email: {}.", parser.getSubject());
 			for (DataSource attachment : parser.getAttachmentList()) {
 				String contentType = attachment.getContentType().toLowerCase();
 				if (contentType.contains("application/pdf") || contentType.contains("application/x-pdf")) {

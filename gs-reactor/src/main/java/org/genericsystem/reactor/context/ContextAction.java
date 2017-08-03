@@ -138,7 +138,7 @@ public interface ContextAction extends BiConsumer<Context, Tag> {
 			if (SelectionDefaults.class.isAssignableFrom(tag.getClass()))
 				((SelectionDefaults) tag).getSelectionProperty(context).setValue(context);
 			else
-				log.warn("The SET_SELECTION action can apply only to a tag class implementing SelectionDefaults.");
+				log.warn("The SET_SELECTION action can apply only to a tag class implementing SelectionDefaults. Applied to class: {}.", tag.getClass().getName());
 		}
 	}
 
@@ -148,7 +148,7 @@ public interface ContextAction extends BiConsumer<Context, Tag> {
 			if (SelectionDefaults.class.isAssignableFrom(tag.getClass()))
 				((SelectionDefaults) tag).getSelectionProperty(context).setValue(null);
 			else
-				log.warn("The RESET_SELECTION action can apply only to a tag class implementing SelectionDefaults.");
+				log.warn("The RESET_SELECTION action can apply only to a tag class implementing SelectionDefaults. Applied to class: {}.", tag.getClass().getName());
 		}
 	}
 
@@ -229,7 +229,7 @@ public interface ContextAction extends BiConsumer<Context, Tag> {
 					tag.getParent().getParent().find(Header.class).find(GSHolderBuilderDiv.class).find(HtmlSpan.class).addStyle(context, "display", "inline");
 				}
 			} else
-				log.warn("The CREATE_INSTANCE action can apply only to a tag class implementing GSBuilderDefaults.");
+				log.warn("The CREATE_INSTANCE action can apply only to a tag class implementing GSBuilderDefaults. Applied to class: {}.", tag.getClass().getName());
 		}
 
 		// Necessary because setInstance returns only instances without a super, whereas getInstance can return
@@ -247,7 +247,7 @@ public interface ContextAction extends BiConsumer<Context, Tag> {
 			if (StepperDefaults.class.isAssignableFrom(tag.getClass()))
 				((StepperDefaults) tag).prev(context);
 			else
-				log.warn("The PREVIOUS action is applicable only to a tag implementing StepperDefaults.");
+				log.warn("The PREVIOUS action is applicable only to a tag implementing StepperDefaults. Applied to class: {}.", tag.getClass().getName());
 		}
 	}
 
@@ -257,7 +257,7 @@ public interface ContextAction extends BiConsumer<Context, Tag> {
 			if (StepperDefaults.class.isAssignableFrom(tag.getClass()))
 				((StepperDefaults) tag).next(context);
 			else
-				log.warn("The NEXT action is applicable only to a tag implementing SwitchDefaults.");
+				log.warn("The NEXT action is applicable only to a tag implementing SwitchDefaults. Applied to class: {}.", tag.getClass().getName());
 		}
 	}
 
