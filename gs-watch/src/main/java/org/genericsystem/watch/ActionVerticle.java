@@ -95,10 +95,12 @@ public abstract class ActionVerticle extends AbstractVerticle {
 	}
 
 	public void addTask(String fileName, String type) {
-		JsonObject task = new JsonObject().put(Dispatcher.STATE, Dispatcher.TODO)
-				.put(DistributedVerticle.IP, ip)
-				.put(DistributedVerticle.FILENAME, fileName)
-				.put(DistributedVerticle.TYPE, type);
+		JsonObject task = new JsonObject().put(Dispatcher.STATE, Dispatcher.TODO).put(DistributedVerticle.IP, ip).put(DistributedVerticle.FILENAME, fileName).put(DistributedVerticle.TYPE, type);
+		vertx.eventBus().publish(Dispatcher.ADDRESS + ":add", task.encodePrettily());
+	}
+
+	public void addTask(String fileName, JsonObject jsonObject, String type) {
+		JsonObject task = new JsonObject().put(Dispatcher.STATE, Dispatcher.TODO).put(DistributedVerticle.IP, ip).put(DistributedVerticle.FILENAME, fileName).put(DistributedVerticle.JSON_OBJECT, jsonObject).put(DistributedVerticle.TYPE, type);
 		vertx.eventBus().publish(Dispatcher.ADDRESS + ":add", task.encodePrettily());
 	}
 }

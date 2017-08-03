@@ -50,7 +50,8 @@ public class OcrEngineHolderVerticle extends AbstractVerticle {
 				startFuture.fail(ar.cause());
 		};
 		vertx.deployVerticle(new AddImageToEngineVerticle(engine), completionHandler);
-		vertx.deployVerticle(new DezonerVerticle(), completionHandler);
-		vertx.deployVerticle(new OcrVerticle(engine), completionHandler);
+		vertx.deployVerticle(new DezonerVerticle(engine), completionHandler);
+		vertx.deployVerticle(new OcrParametersVerticle(engine), completionHandler);
+		vertx.deployVerticle(new OcrPersistenceVerticle(engine), completionHandler);
 	}
 }

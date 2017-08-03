@@ -10,7 +10,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import org.apache.commons.io.FilenameUtils;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
 import org.genericsystem.cv.Img;
@@ -42,6 +41,8 @@ import org.opencv.imgcodecs.Imgcodecs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.vertx.core.json.JsonObject;
+
 /**
  * The FillModelWithData class can analyze an image (or a batch of images) and store all the OCR text for each zone and each document in GS.
  * 
@@ -53,6 +54,13 @@ public class FillModelWithData {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 		System.out.println("OpenCV core library loaded");
 	}
+
+	public static final String ENCODED_FILENAME = "encodedFilename";
+	public static final String FILENAME = "filename";
+	public static final String CLASS_NAME = "docType";
+	public static final String DOC_TIMESTAMP = "docTimestamp";
+	public static final String ZONE = "zone";
+	public static final String ZONES = "zones";
 
 	public static final int ERROR = 0;
 	public static final int NEW_FILE = 1;
@@ -115,7 +123,7 @@ public class FillModelWithData {
 		Generic doc = engine.find(Doc.class);
 		DocClass docClass = engine.find(DocClass.class);
 		DocClassInstance docClassInstance = docClass.getDocClass(docType);
-		String filenameExt = generateFileName(file.toPath());
+		String filenameExt = ModelTools.generateFileName(file.toPath());
 		if (null == filenameExt) {
 			log.error("An error has occured during the generation of the hascode from file (assuming new)");
 			return true;
@@ -123,6 +131,189 @@ public class FillModelWithData {
 			DocInstance docInstance = docClassInstance.getDoc(doc, filenameExt);
 			return null == docInstance ? true : false;
 		}
+	}
+
+	/**
+	 * Collect all the informations required to process a given file through OCR.
+	 * 
+	 * @param engine - the engine used to store the data
+	 * @param imagePath - the {@link Path} of the image to proceed
+	 * @return a {@link JsonObject} containing all the informations required to process the file
+	 */
+	public static JsonObject getOcrParameters(Root engine, Path imagePath) {
+		try {
+			engine.getCurrentCache();
+		} catch (IllegalStateException e) {
+			log.error("Current cache could not be loaded. Starting a new one...");
+			engine.newCache().start();
+		}
+		final Path imgClassDirectory = imagePath.getParent();
+		final String docType = ModelTools.getImgClass(imagePath);
+
+		// Find the generics
+		DocClass docClass = engine.find(DocClass.class);
+		Doc doc = engine.find(Doc.class);
+		ZoneText zoneText = engine.find(ZoneText.class);
+		ImgFilter imgFilter = engine.find(ImgFilter.class);
+
+		// Find and save the doc class and the doc instance
+		DocClassInstance docClassInstance = docClass.setDocClass(docType);
+		DocInstance docInstance = docClassInstance.setDoc(doc, ModelTools.generateFileName(imagePath));
+		engine.getCurrentCache().flush();
+
+		// Get the filters and the predefined zones
+		final Map<String, Function<Img, Img>> imgFilters = FillModelWithData.getFiltersMap();
+		final Zones zones = Zones.load(imgClassDirectory.toString());
+
+		// Save the filternames if necessary
+		Map<String, Function<Img, Img>> updatedImgFilters = new ConcurrentHashMap<>();
+		imgFilters.entrySet().forEach(entry -> {
+			ImgFilterInstance filter = imgFilter.getImgFilter(entry.getKey());
+			if (filter == null) {
+				log.info("Adding algorithm : {} ", entry.getKey());
+				imgFilter.setImgFilter(entry.getKey());
+				updatedImgFilters.put(entry.getKey(), entry.getValue());
+			} else {
+				// TODO: add another criteria to verify if the filter has been applied on the image
+				boolean containsNullZoneTextInstance = zones.getZones().stream().anyMatch(z -> {
+					ZoneTextInstance zti = zoneText.getZoneText(docInstance, docClassInstance.getZone(z.getNum()), filter);
+					return zti == null;
+				});
+				if (containsNullZoneTextInstance) {
+					imgFilter.setImgFilter(entry.getKey());
+					updatedImgFilters.put(entry.getKey(), entry.getValue());
+				} else {
+					log.debug("Algorithm {} already known", entry.getKey());
+				}
+			}
+		});
+
+		if (null == updatedImgFilters || updatedImgFilters.isEmpty()) {
+			log.info("Nothing to add");
+			return null;
+		} else {
+			// Return the parameters required to process this file as a JsonObject
+			OcrParameters params = new OcrParameters(imagePath.toFile(), zones, updatedImgFilters);
+			return params.toJson();
+		}
+	}
+
+	/**
+	 * Process a given file through OCR. All the necessary parameters are retrieved from the {@code params} argument. The results are stored in a {@link JsonObject}.
+	 * 
+	 * @param params - the {@link OcrParameters} as a {@link JsonObject}
+	 * @return a {@link JsonObject} containing all the data from the OCR
+	 */
+	public static JsonObject processFile(JsonObject params) {
+		// Get all necessary parameters from the JsonObject
+		OcrParameters ocrParameters = new OcrParameters(params);
+		File file = ocrParameters.getFile();
+		Zones zones = ocrParameters.getZones();
+		Map<String, Function<Img, Img>> updatedImgFilters = ocrParameters.getImgFilters();
+
+		// Save the current file
+		log.info("\nProcessing file: {}", file.getName());
+		String filenameExt = ModelTools.generateFileName(file.toPath());
+		if (null == filenameExt)
+			throw new RuntimeException("An error has occured while saving the file! Aborted...");
+		final Path imgClassDirectory = file.toPath().getParent();
+		final String docType = imgClassDirectory.getName(imgClassDirectory.getNameCount() - 1).toString();
+
+		// Create a JsonObject for the answer
+		JsonObject jsonObject = new JsonObject();
+		jsonObject.put(CLASS_NAME, docType);
+		jsonObject.put(FILENAME, file.getName());
+		jsonObject.put(ENCODED_FILENAME, filenameExt);
+		jsonObject.put(DOC_TIMESTAMP, ModelTools.getCurrentDate());
+
+		// Create a map of Imgs
+		Map<String, Img> imgs = new ConcurrentHashMap<>();
+		Img originalImg = new Img(file.getPath());
+		updatedImgFilters.entrySet().forEach(entry -> {
+			log.info("Applying algorithm {}...", entry.getKey());
+			Img img = null;
+			if ("original".equals(entry.getKey()) || "reality".equals(entry.getKey()))
+				img = originalImg;
+			else
+				img = entry.getValue().apply(originalImg);
+			if (null != img)
+				imgs.put(entry.getKey(), img);
+			else
+				log.error("An error as occured for image {} and filter {}", filenameExt, entry.getKey());
+		});
+
+		// Process each zone
+		Map<String, Map<String, String>> result = new ConcurrentHashMap<>();
+		zones.getZones().forEach(z -> {
+			log.info("Zone n° {}", z.getNum());
+			Map<String, String> map = new ConcurrentHashMap<>();
+			imgs.entrySet().forEach(entry -> {
+				if ("reality".equals(entry.getKey()) || "best".equals(entry.getKey())) {
+					// Do nothing
+				} else {
+					String ocrText = z.ocr(entry.getValue());
+					map.put(entry.getKey(), ocrText);
+				}
+			});
+			result.put(String.valueOf(z.getNum()), map);
+		});
+		jsonObject.put(ZONES, result);
+
+		// Close the images to force freeing OpenCV's resources (native matrices)
+		originalImg.close();
+		imgs.entrySet().forEach(entry -> entry.getValue().close());
+
+		return jsonObject;
+	}
+
+	/**
+	 * Save the OCR data into Generic System.
+	 * 
+	 * @param engine - the engine used to store the data
+	 * @param data - a {@link JsonObject} containing all the data
+	 */
+	public static void saveOcrDataInModel(Root engine, JsonObject data) {
+		// Parse the data
+		String docType = data.getString(CLASS_NAME);
+		String filename = data.getString(FILENAME);
+		String filenameExt = data.getString(ENCODED_FILENAME);
+		Long timestamp = data.getLong(DOC_TIMESTAMP);
+		JsonObject zones = data.getJsonObject(ZONES);
+
+		// Get the generics
+		DocClass docClass = engine.find(DocClass.class);
+		Doc doc = engine.find(Doc.class);
+		ZoneText zoneText = engine.find(ZoneText.class);
+		ImgFilter imgFilter = engine.find(ImgFilter.class);
+
+		// Set the docClass, doc instance and timestamp
+		DocClassInstance docClassInstance = docClass.setDocClass(docType);
+		DocInstance docInstance = docClassInstance.setDoc(doc, filenameExt);
+		docInstance.setDocFilename(filename);
+		docInstance.setDocTimestamp(timestamp);
+		engine.getCurrentCache().flush();
+
+		zones.forEach(entry -> {
+			log.info("Current zone: {}", entry.getKey());
+			ZoneInstance zoneInstance = docClassInstance.getZone(Integer.parseInt(entry.getKey(), 10));
+			JsonObject currentZone = (JsonObject) entry.getValue();
+			if (!currentZone.isEmpty())
+				currentZone.put("reality", ""); // Add this filter only if there are other filters
+			currentZone.forEach(e -> {
+				log.debug("key: {};  value: {}", e.getKey(), e.getValue().toString());
+				if ("reality".equals(e.getKey()) || "best".equals(e.getKey())) {
+					// Do not proceed to OCR if the real values are known. By default, the "reality" and "best" filters are left empty
+					if (null == zoneText.getZoneText(docInstance, zoneInstance, imgFilter.getImgFilter(e.getKey())))
+						zoneText.setZoneText("", docInstance, zoneInstance, imgFilter.getImgFilter(e.getKey()));
+				} else {
+					String ocrText = (String) e.getValue();
+					ZoneTextInstance zti = zoneText.setZoneText(ocrText, docInstance, zoneInstance, imgFilter.getImgFilter(e.getKey()));
+					zti.setZoneTimestamp(ModelTools.getCurrentDate()); // TODO: concatenate with previous line?
+				}
+			});
+			engine.getCurrentCache().flush();
+		});
+		log.info("Data for {} successfully saved.", filenameExt);
 	}
 
 	/**
@@ -258,7 +449,7 @@ public class FillModelWithData {
 		ImgFilter imgFilter = engine.find(ImgFilter.class);
 
 		// Save the current file
-		String filenameExt = generateFileName(file.toPath());
+		String filenameExt = ModelTools.generateFileName(file.toPath());
 		if (null == filenameExt) {
 			log.error("An error has occured while saving the file! Aborted...");
 			return result;
@@ -402,7 +593,7 @@ public class FillModelWithData {
 			return true;
 		} else {
 			log.info("Adding a new image ({}) ", imgPath.getFileName());
-			String filenameExt = generateFileName(imgPath);
+			String filenameExt = ModelTools.generateFileName(imgPath);
 			Generic doc = engine.find(Doc.class);
 			DocInstance docInstance = docClassInstance.setDoc(doc, filenameExt);
 			if (null != docInstance) {
@@ -418,20 +609,6 @@ public class FillModelWithData {
 				log.error("An error has occured while saving file {}", filenameExt);
 				return false;
 			}
-		}
-	}
-
-	public static String generateFileName(Path filePath) {
-		String filename;
-		try {
-			filename = ModelTools.getHashFromFile(filePath, "sha-256");
-			String filenameExt = filename + "." + FilenameUtils.getExtension(filePath.getFileName().toString());
-			log.info("Hash generated for file {}: {}", filePath.getFileName().toString(), filenameExt);
-			return filenameExt;
-		} catch (RuntimeException e) {
-			log.error("An error has occured during the generation of the hascode from file");
-			log.debug("Stacktrace: ", e);
-			return null;
 		}
 	}
 
