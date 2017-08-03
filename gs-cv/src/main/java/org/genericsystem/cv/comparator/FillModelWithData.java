@@ -88,14 +88,15 @@ public class FillModelWithData {
 	 * 
 	 * @return - a Map containing the filter names as key, and a {@link Function} that will apply the specified algorithm to an Img.
 	 */
-	public static Map<String, Function<Img, Img>> getFiltersMap() {
-		final Map<String, Function<Img, Img>> map = new ConcurrentHashMap<>();
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public static Map<String, ImgFunction> getFiltersMap() {
+		final Map<String, ImgFunction> map = new ConcurrentHashMap<>();
 		map.put("original", i -> i);
 		map.put("reality", i -> i);
-		// map.put("bernsen", Img::bernsen);
-		map.put("equalizeHisto", Img::equalizeHisto);
-		map.put("equalizeHistoAdaptative", Img::equalizeHistoAdaptative);
-		map.put("otsuAfterGaussianBlur", Img::otsuAfterGaussianBlur);
+		// map.put("bernsen",Img::bernsen);
+		map.put("equalizeHisto", i -> i.equalizeHisto());
+		map.put("equalizeHistoAdaptative", i -> i.equalizeHistoAdaptative());
+		map.put("otsuAfterGaussianBlur", i -> i.otsuAfterGaussianBlur());
 		map.put("adaptativeGaussianThreshold", i -> i.adaptativeGaussianThreshold());
 		return map;
 	}
@@ -162,11 +163,11 @@ public class FillModelWithData {
 		engine.getCurrentCache().flush();
 
 		// Get the filters and the predefined zones
-		final Map<String, Function<Img, Img>> imgFilters = FillModelWithData.getFiltersMap();
+		final Map<String, ImgFunction> imgFilters = FillModelWithData.getFiltersMap();
 		final Zones zones = Zones.load(imgClassDirectory.toString());
 
 		// Save the filternames if necessary
-		Map<String, Function<Img, Img>> updatedImgFilters = new ConcurrentHashMap<>();
+		Map<String, ImgFunction> updatedImgFilters = new ConcurrentHashMap<>();
 		imgFilters.entrySet().forEach(entry -> {
 			ImgFilterInstance filter = imgFilter.getImgFilter(entry.getKey());
 			if (filter == null) {
@@ -209,7 +210,7 @@ public class FillModelWithData {
 		OcrParameters ocrParameters = new OcrParameters(params);
 		File file = ocrParameters.getFile();
 		Zones zones = ocrParameters.getZones();
-		Map<String, Function<Img, Img>> updatedImgFilters = ocrParameters.getImgFilters();
+		Map<String, ImgFunction> updatedImgFilters = ocrParameters.getImgFilters();
 
 		// Save the current file
 		log.info("\nProcessing file: {}", file.getName());
@@ -354,7 +355,7 @@ public class FillModelWithData {
 		engine.getCurrentCache().flush();
 
 		// Get the filters and the predefined zones
-		final Map<String, Function<Img, Img>> imgFilters = getFiltersMap();
+		final Map<String, ImgFunction> imgFilters = getFiltersMap();
 		final Zones zones = Zones.loadZones(imgClassDirectory.toString());
 
 		// Process the image file
@@ -385,7 +386,7 @@ public class FillModelWithData {
 		log.debug("imgClassDirectory = {} ", imgClassDirectory);
 		DocClass docClass = engine.find(DocClass.class);
 		DocClassInstance docClassInstance = docClass.setDocClass(docType);
-		final Map<String, Function<Img, Img>> imgFilters = getFiltersMap();
+		final Map<String, ImgFunction> imgFilters = getFiltersMap();
 		final Zones zones = Zones.loadZones(imgClassDirectory);
 
 		initComputation(engine, docType, zones);
@@ -439,7 +440,7 @@ public class FillModelWithData {
 	 * @param imgFilters - a stream of {@link Entry} for a Map containing the filternames that will be applied to the original file, and the functions required to apply these filters
 	 * @return an {@code int} representing {@link #KNOWN_FILE_UPDATED_FILTERS}, {@link #NEW_FILE} or {@link #KNOWN_FILE}
 	 */
-	private static int processFile(Root engine, File file, DocClassInstance docClassInstance, Zones zones, Stream<Entry<String, Function<Img, Img>>> imgFilters) {
+	private static int processFile(Root engine, File file, DocClassInstance docClassInstance, Zones zones, Stream<Entry<String, ImgFunction>> imgFilters) {
 		final boolean newFile = isThisANewFile(engine, file);
 		int result = ERROR;
 		log.info("\nProcessing file: {}", file.getName());
@@ -461,7 +462,7 @@ public class FillModelWithData {
 
 		// TODO: refactor the code (duplicates)
 		// Save the filternames if necessary
-		Map<String, Function<Img, Img>> updatedImgFilters = new ConcurrentHashMap<>();
+		Map<String, ImgFunction> updatedImgFilters = new ConcurrentHashMap<>();
 		imgFilters.forEach(entry -> {
 			ImgFilterInstance filter = imgFilter.getImgFilter(entry.getKey());
 			if (filter == null) {
@@ -612,8 +613,8 @@ public class FillModelWithData {
 	}
 
 	@SuppressWarnings("unused")
-	private static Map<String, Function<Img, Img>> filterOptimizationMap() {
-		final Map<String, Function<Img, Img>> imgFilters = new ConcurrentHashMap<>();
+	private static Map<String, ImgFunction> filterOptimizationMap() {
+		final Map<String, ImgFunction> imgFilters = new ConcurrentHashMap<>();
 		// Niblack
 		// List<Integer> blockSizes = Arrays.asList(new Integer[] { 7, 9, 11,
 		// 15, 17, 21, 27, 37 });
