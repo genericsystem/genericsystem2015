@@ -9,6 +9,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
+
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.Tools;
@@ -32,9 +35,6 @@ import org.opencv.features2d.DescriptorMatcher;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
 import org.opencv.videoio.VideoCapture;
-
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
 
 public class CamLayoutAnalyzer extends AbstractApp {
 
@@ -92,16 +92,14 @@ public class CamLayoutAnalyzer extends AbstractApp {
 					setNewKeypoints(detect(deskewed_.getSrc()));
 					setNewDescriptors(new Mat());
 					extractor.compute(deskewed_.getSrc(), getNewKeypoints(), getNewDescriptors());
-
 					Img deskiewedCopy = new Img(deskewed_.getSrc(), true);
 					deskewed_.buildLayout().draw(deskiewedCopy, new Scalar(0, 255, 0), 1);
-
 					Img stabilized = stabilize(frame, stabilizedMat, matcher, getOldKeypoints()[0], getNewKeypoints(), getOldDescriptors()[0], getNewDescriptors(), angle[0], homography);
 					if (stabilized != null) {
 						Img stabilizedCopy = new Img(stabilized.getSrc(), true);
 						if (getLayout()[0] == null)
 							getLayout()[0] = stabilized.buildLayout();
-						getLayout()[0].ocrTree(stabilizedCopy, 0);
+						getLayout()[0].ocrTree(stabilizedCopy, 3);
 						getLayout()[0].draw(stabilizedCopy, new Scalar(0, 255, 0), 1);
 						getLayout()[0].drawPerspective(frameImg, homography[0].inv(), new Scalar(0, 0, 255), 1);
 						double surface = getLayout()[0].getSurfaceInPercent(stabilized);
@@ -112,7 +110,7 @@ public class CamLayoutAnalyzer extends AbstractApp {
 						src3.setImage(stabilizedCopy.toJfxImage());
 					}
 					this.getCount()[0]++;
-				} catch (Exception e) {
+				} catch (Throwable e) {
 					e.printStackTrace();
 				}
 			}
@@ -121,13 +119,9 @@ public class CamLayoutAnalyzer extends AbstractApp {
 
 	@Override
 	protected synchronized void onSpace() {
-		// if ((getCount()[0] % 10) == 0) {
-
 		setOldKeypoints(new MatOfKeyPoint[] { getNewKeypoints() });
 		setOldDescriptors(new Mat[] { getNewDescriptors() });
 		setLayout(new Layout[] { null });
-
-		// }
 	}
 
 	private Img stabilize(Mat frame, Mat stabilized, DescriptorMatcher matcher, MatOfKeyPoint oldKeypoints, MatOfKeyPoint newKeypoints, Mat oldDescriptors, Mat newDescriptors, double angle, Mat[] homography) {
@@ -235,7 +229,7 @@ public class CamLayoutAnalyzer extends AbstractApp {
 			List<MatOfPoint> mof = Collections.singletonList(new MatOfPoint(new MatOfPoint(result)));
 			// Imgproc.drawContours(frame, mof, 0, new Scalar(0, 255, 0), 1);
 			// Imgproc.drawContours(dilated, mof, 0, new Scalar(255), 1);
-		});
+			});
 		return goodAverage;
 	}
 
