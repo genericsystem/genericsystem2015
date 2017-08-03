@@ -35,11 +35,11 @@ public abstract class ActionVerticle extends AbstractVerticle {
 			vertx.executeBlocking(future -> {
 				download(future, task);
 				if (!future.failed())
-					handle(future, task);
+					handle(future, new JsonObject(task.encode()));
 				else
 					throw new IllegalStateException("Impossible to download file " + task.getString(DistributedVerticle.FILENAME), future.cause());
 			}, res -> {
-				handleResult(res, task);
+				handleResult(res, new JsonObject(task.encode()));
 				if (res.succeeded())
 					vertx.eventBus().send(Dispatcher.ADDRESS + ":updateState", new JsonObject().put(Dispatcher.TASK, task).put(Dispatcher.NEW_STATE, Dispatcher.FINISHED).encodePrettily());
 				else {
