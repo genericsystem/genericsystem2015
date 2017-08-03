@@ -116,7 +116,7 @@ public class ApplicationServer extends AbstractBackEnd {
 				if (res.succeeded())
 					rootHtmlDomNode = (RootHtmlDomNode) res.result();
 				else
-					res.cause().printStackTrace();
+					log.error("Failed to build tag tree.", res.cause());
 			});
 		}
 

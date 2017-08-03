@@ -54,7 +54,7 @@ public abstract class AbstractWebSocketsServer {
 				String path = webSocket.path();
 				webSocket.handler(getHandler(path, webSocket));
 				webSocket.exceptionHandler(e -> {
-					e.printStackTrace();
+					log.error("Exception on websocket.", e);
 					throw new IllegalStateException(e);
 				});
 

@@ -1,5 +1,6 @@
 package org.genericsystem.layout;
 
+import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -32,12 +33,15 @@ import org.opencv.features2d.DescriptorMatcher;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
 import org.opencv.videoio.VideoCapture;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 
 public class CamLayoutAnalyzer extends AbstractApp {
 
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 	private int[] count;
 	private MatOfKeyPoint[] oldKeypoints;
 	private MatOfKeyPoint newKeypoints;
@@ -113,10 +117,9 @@ public class CamLayoutAnalyzer extends AbstractApp {
 					}
 					this.getCount()[0]++;
 				} catch (Exception e) {
-					e.printStackTrace();
+					logger.warn("Exception while computing layout.", e);
 				}
 			}
-
 		}, 500, 66, TimeUnit.MILLISECONDS);
 	}
 
