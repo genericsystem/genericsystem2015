@@ -20,9 +20,6 @@ import org.genericsystem.reactor.gscomponents.Modal.ModalWithDisplay;
 import org.genericsystem.security.model.User;
 import org.genericsystem.security.model.User.Password;
 import org.genericsystem.security.model.User.Salt;
-import org.genericsystem.watch.VerticleDeployerFromWatchApp;
-
-import io.vertx.core.Verticle;
 
 /**
  * This class contains all the {@link ContextAction} needed across the app.
@@ -103,7 +100,7 @@ public class ContextActionCustom {
 			DocInstance docInstance = (DocInstance) context.getGeneric();
 			String docType = docInstance.getDocClass().getValue().toString();
 			// System.out.println("Current thread (refresh): " + Thread.currentThread().getName());
-			Verticle worker = new WorkerVerticle(root) {
+			WorkerVerticle worker = new WorkerVerticle(root) {
 				@Override
 				public void start() throws Exception {
 					ComputeBestTextPerZone.computeOneFile(root, docInstance, docType);
@@ -112,7 +109,7 @@ public class ContextActionCustom {
 					System.out.println("Done!");
 				}
 			};
-			VerticleDeployerFromWatchApp.deployWorkerVerticle(worker, "Failed to execute the task");
+			worker.deployAsWorkerVerticle("Failed to execute the task");
 		}
 	}
 
@@ -140,14 +137,14 @@ public class ContextActionCustom {
 		DocClassInstance docClassInstance = (DocClassInstance) context.getGeneric();
 		Root root = docClassInstance.getRoot();
 		Arrays.asList(context.getGenerics()).forEach(g -> System.out.println(g.info()));
-		Verticle worker = new WorkerVerticle() {
+		WorkerVerticle worker = new WorkerVerticle() {
 			@Override
 			public void start() throws Exception {
 				ComputeTrainedScores.compute(root, docClassInstance.getValue().toString(), useStrict);
 				System.out.println("Done computing scores!");
 			}
 		};
-		VerticleDeployerFromWatchApp.deployWorkerVerticle(worker, "Failed to execute the task");
+		worker.deployAsWorkerVerticle("Failed to execute the task");
 	}
 
 	/*
