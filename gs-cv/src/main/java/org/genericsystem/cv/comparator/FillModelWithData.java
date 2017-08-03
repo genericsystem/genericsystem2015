@@ -579,7 +579,6 @@ public class FillModelWithData {
 			log.debug("Current cache could not be loaded. Starting a new one...");
 			engine.newCache().start();
 		}
-		final Path imgClassDirectory = imgPath.getParent();
 		final String docType = ModelTools.getImgClass(imgPath);
 
 		// Find and save the doc class
