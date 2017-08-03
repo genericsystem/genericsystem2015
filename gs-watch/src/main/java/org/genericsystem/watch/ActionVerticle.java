@@ -40,9 +40,9 @@ public abstract class ActionVerticle extends AbstractVerticle {
 			vertx.executeBlocking(future -> {
 				download(future, task);
 				if (!future.failed())
-					handle(future, task);
+					handle(future, new JsonObject(task.encode()));
 			}, res -> {
-				handleResult(res, task);
+				handleResult(res, new JsonObject(task.encode()));
 				if (res.succeeded())
 					vertx.eventBus().send(Dispatcher.ADDRESS + ":updateState", new JsonObject().put(Dispatcher.TASK, task).put(Dispatcher.NEW_STATE, Dispatcher.FINISHED).encodePrettily());
 				else {
@@ -96,10 +96,12 @@ public abstract class ActionVerticle extends AbstractVerticle {
 	}
 
 	public void addTask(String fileName, String type) {
-		JsonObject task = new JsonObject().put(Dispatcher.STATE, Dispatcher.TODO)
-				.put(DistributedVerticle.IP, ip)
-				.put(DistributedVerticle.FILENAME, fileName)
-				.put(DistributedVerticle.TYPE, type);
+		JsonObject task = new JsonObject().put(Dispatcher.STATE, Dispatcher.TODO).put(DistributedVerticle.IP, ip).put(DistributedVerticle.FILENAME, fileName).put(DistributedVerticle.TYPE, type);
+		vertx.eventBus().publish(Dispatcher.ADDRESS + ":add", task.encodePrettily());
+	}
+
+	public void addTask(String fileName, JsonObject jsonObject, String type) {
+		JsonObject task = new JsonObject().put(Dispatcher.STATE, Dispatcher.TODO).put(DistributedVerticle.IP, ip).put(DistributedVerticle.FILENAME, fileName).put(DistributedVerticle.JSON_OBJECT, jsonObject).put(DistributedVerticle.TYPE, type);
 		vertx.eventBus().publish(Dispatcher.ADDRESS + ":add", task.encodePrettily());
 	}
 }

@@ -43,6 +43,23 @@ public class OcrEngineHolderVerticle extends AbstractVerticle {
 		});
 	}
 
+	public void doDeploy() {
+		ClusterManager mgr = new HazelcastClusterManager();
+		VertxOptions vertxOptions = new VertxOptions().setClustered(true).setClusterManager(mgr);
+		vertxOptions.setEventBusOptions(new EventBusOptions()).setClustered(true);
+		vertxOptions.setClusterHost(LocalNet.getIpAddress());
+		vertxOptions.setMaxWorkerExecuteTime(Long.MAX_VALUE);
+		Vertx.clusteredVertx(vertxOptions, res -> {
+			if (res.failed())
+				throw new IllegalStateException(res.cause());
+			Vertx vertx = res.result();
+			vertx.deployVerticle(this, result -> {
+				if (result.failed())
+					throw new IllegalStateException("Deployment of OcrEngineHolderVerticle failed", result.cause());
+			});
+		});
+	}
+
 	@Override
 	public void start(Future<Void> startFuture) throws Exception {
 		Handler<AsyncResult<String>> completionHandler = ar -> {
@@ -50,7 +67,8 @@ public class OcrEngineHolderVerticle extends AbstractVerticle {
 				startFuture.fail(ar.cause());
 		};
 		vertx.deployVerticle(new AddImageToEngineVerticle(engine), completionHandler);
-		vertx.deployVerticle(new DezonerVerticle(), completionHandler);
-		vertx.deployVerticle(new OcrVerticle(engine), completionHandler);
+		vertx.deployVerticle(new DezonerVerticle(engine), completionHandler);
+		vertx.deployVerticle(new OcrParametersVerticle(engine), completionHandler);
+		vertx.deployVerticle(new OcrPersistenceVerticle(engine), completionHandler);
 	}
 }

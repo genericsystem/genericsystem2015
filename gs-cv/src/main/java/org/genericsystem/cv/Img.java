@@ -5,6 +5,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -13,9 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
-
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 
 import javax.swing.ImageIcon;
 
@@ -44,7 +42,10 @@ import org.opencv.ximgproc.Ximgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Img implements AutoCloseable {
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+
+public class Img implements AutoCloseable, Serializable {
 
 	private static Logger log = LoggerFactory.getLogger(Img.class);
 

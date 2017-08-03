@@ -1,5 +1,6 @@
 package org.genericsystem.cv;
 
+import java.io.Serializable;
 import java.util.Map.Entry;
 import java.util.stream.Stream;
 
@@ -11,7 +12,7 @@ import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
-public class Zone {
+public class Zone implements Serializable {
 	private Rect rect;
 	private int num;
 

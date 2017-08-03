@@ -28,6 +28,9 @@ import org.slf4j.LoggerFactory;
  */
 public class ComputeTrainedScores {
 
+	public static final Boolean BE_STRICT = true;
+	public static final Boolean BE_GENTLE = false;
+
 	private static final Logger log = LoggerFactory.getLogger(ComputeTrainedScores.class);
 	private static final String gsPath = System.getenv("HOME") + "/genericsystem/gs-cv_model3/";
 
@@ -56,7 +59,7 @@ public class ComputeTrainedScores {
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static void compute(Root engine, String docType, boolean useStrict) {
+	public static void compute(Root engine, String docType, Boolean useStrict) {
 		try {
 			engine.getCurrentCache();
 		} catch (IllegalStateException e) {
@@ -107,7 +110,7 @@ public class ComputeTrainedScores {
 							String text = (String) zti.getValue();
 							// TODO : manipulate the Strings before comparison?
 							int dist;
-							if (useStrict)
+							if (useStrict.equals(BE_STRICT))
 								dist = Levenshtein.distance(text.trim(), realText.trim());
 							else
 								dist = Levenshtein.distance(text.replaceAll("[\n ,.]", "").trim(), realText.replaceAll("[\n ,.]", "").trim());

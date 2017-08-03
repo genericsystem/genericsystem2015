@@ -69,7 +69,7 @@ public class ImgFiltersVisualComparator extends AbstractApp {
 //			columnIndex = 0;
 //		}
 
-		final Map<String, Function<Img, Img>> imgFilters = new HashMap<>();
+		final Map<String, ImgFunction> imgFilters = new HashMap<>();
 		imgFilters.put("original", Img::bgr2Gray);
 		imgFilters.put("niblack_37_m1.0", i -> i.niblackThreshold(37, -1.0));
 		imgFilters.put("niblack_21_m1.0", i -> i.niblackThreshold(21, -1.0));
@@ -90,7 +90,7 @@ public class ImgFiltersVisualComparator extends AbstractApp {
 
 		Map<String, Img> imgs = new HashMap<>();
 
-		for (Entry<String, Function<Img, Img>> entry : imgFilters.entrySet()) {
+		for (Entry<String, ImgFunction> entry : imgFilters.entrySet()) {
 			System.out.print("Processing filter : " + entry.getKey() + "...");
 			long start = System.currentTimeMillis();
 
