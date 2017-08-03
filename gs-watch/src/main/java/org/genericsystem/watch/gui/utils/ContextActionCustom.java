@@ -121,7 +121,7 @@ public class ContextActionCustom {
 		@Override
 		public void accept(Context context, Tag tag) {
 			System.out.println("Computing scores...");
-			computeStatistics(context, tag, false);
+			computeStatistics(context, tag, ComputeTrainedScores.BE_GENTLE);
 		}
 	}
 
@@ -129,7 +129,7 @@ public class ContextActionCustom {
 		@Override
 		public void accept(Context context, Tag tag) {
 			System.out.println("Computing scores (using strict mode)...");
-			computeStatistics(context, tag, true);
+			computeStatistics(context, tag, ComputeTrainedScores.BE_STRICT);
 		}
 	}
 
