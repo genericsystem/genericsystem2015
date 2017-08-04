@@ -1,5 +1,6 @@
 package org.genericsystem.watch;
 
+import java.lang.invoke.MethodHandles;
 import java.nio.file.Paths;
 
 import org.genericsystem.common.Root;
@@ -8,6 +9,8 @@ import org.genericsystem.cv.Zones;
 import org.genericsystem.cv.model.ModelTools;
 import org.opencv.core.Scalar;
 import org.opencv.imgcodecs.Imgcodecs;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.sun.xml.internal.ws.api.pipe.Engine;
 
@@ -22,6 +25,7 @@ import io.vertx.core.json.JsonObject;
  */
 public class DezonerVerticle extends ActionVerticle {
 
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 	public static final String ACTION = "dezoner";
 	private static final String RESOURCES_FOLDER = System.getProperty("user.dir") + "/../gs-watch/src/main/resources/";
 
@@ -66,6 +70,6 @@ public class DezonerVerticle extends ActionVerticle {
 		if (res.succeeded())
 			addTask(task.getString(DistributedVerticle.FILENAME), (String) res.result());
 		else
-			System.out.println("No zones defined for file " + task.getString(DistributedVerticle.FILENAME));
+			logger.info("No zones defined for file {}.", task.getString(DistributedVerticle.FILENAME));
 	}
 }

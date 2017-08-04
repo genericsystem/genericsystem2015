@@ -148,7 +148,7 @@ public class SimpleCNN {
 
 		File modelFile = new File("TrainedModel-" + System.currentTimeMillis() + ".zip");
 		ModelSerializer.writeModel(model, modelFile, true);
-		log.info("Model saved to " + modelFile);
+		log.info("Model saved to {}.", modelFile);
 	}
 
 	private static DataSetIterator getDataSetIterator(ImageRecordReader recordReader, InputSplit data, ImageTransform transform, int batchSize, int outputNum) {

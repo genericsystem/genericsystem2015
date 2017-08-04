@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Arrays;
@@ -17,6 +18,8 @@ import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.AxedPropertyClass;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.util.CharsetUtil;
@@ -29,6 +32,9 @@ import io.vertx.core.json.JsonObject;
  *
  */
 public class GSBuffer implements Buffer {
+
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
 	private int index = 0;
 	private final Buffer internal;
 
@@ -317,7 +323,7 @@ public class GSBuffer implements Buffer {
 			appendInt(result);
 		} catch (Throwable t) {
 			appendInt(0);
-			t.printStackTrace();
+			logger.warn("Exception while appending to buffer.", t);
 			appendGSSerializable(t);
 		}
 		return this;
@@ -330,7 +336,7 @@ public class GSBuffer implements Buffer {
 			appendLong(result);
 		} catch (Throwable t) {
 			appendInt(0);
-			t.printStackTrace();
+			logger.warn("Exception while appending to buffer.", t);
 			appendGSSerializable(t);
 		}
 		return this;
@@ -343,7 +349,7 @@ public class GSBuffer implements Buffer {
 			appendGSVertex(result);
 		} catch (Throwable t) {
 			appendInt(0);
-			t.printStackTrace();
+			logger.warn("Exception while appending to buffer.", t);
 			appendGSSerializable(t);
 		}
 		return this;
@@ -356,7 +362,7 @@ public class GSBuffer implements Buffer {
 			appendGSVertexArray(result);
 		} catch (Throwable t) {
 			appendInt(0);
-			t.printStackTrace();
+			logger.warn("Exception while appending to buffer.", t);
 			appendGSSerializable(t);
 		}
 		return this;
@@ -368,7 +374,7 @@ public class GSBuffer implements Buffer {
 			ObjectOutputStream oos = new ObjectOutputStream(bos);
 			oos.writeObject(serializable);
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error("Exception while writing object.", e);
 			throw new IllegalStateException(e);
 		}
 		appendGSBytes(bos.toByteArray());
@@ -382,7 +388,7 @@ public class GSBuffer implements Buffer {
 			ObjectInputStream ois = new ObjectInputStream(bis);
 			serializable = (Serializable) ois.readObject();
 		} catch (IOException | ClassNotFoundException e) {
-			e.printStackTrace();
+			logger.error("Exception while reading object.", e);
 			throw new IllegalStateException();
 		}
 		return serializable;

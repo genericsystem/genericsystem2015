@@ -12,9 +12,9 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.TransformationObservableList;
 import org.genericsystem.reactor.FilteredChildren.FilteredChildContexts;
 import org.genericsystem.reactor.context.RootContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableIntegerValue;

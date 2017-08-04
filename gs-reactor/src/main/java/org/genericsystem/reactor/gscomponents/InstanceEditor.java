@@ -1,6 +1,7 @@
 package org.genericsystem.reactor.gscomponents;
 
 import java.io.Serializable;
+import java.lang.invoke.MethodHandles;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -62,6 +63,8 @@ import org.genericsystem.reactor.gscomponents.InstancesTable.Holders;
 import org.genericsystem.reactor.gscomponents.InstancesTable.ValueComponents;
 import org.genericsystem.reactor.gscomponents.Modal.ModalWithDisplay;
 import org.genericsystem.security.model.User.Salt;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
@@ -89,6 +92,8 @@ import javafx.beans.value.ObservableValue;
 @Select(path = { InstanceName.class, ValueComponents.class }, pos = { 0, 0 }, value = TYPE_SELECTOR.class)
 @Select(path = { Composite.class, ValueComponents.class, Header.class }, pos = { -1, 0, -1 }, value = ObservableValueSelector.GENERIC_VALUE_DISPLAYER.class)
 public class InstanceEditor extends FlexDiv implements SelectionDefaults, StepperDefaults {
+
+	protected static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	public static class InstanceName extends Composite {
 	}
@@ -325,7 +330,7 @@ public class InstanceEditor extends FlexDiv implements SelectionDefaults, Steppe
 						try {
 							model.getGenerics()[1].setHolder(model.getGeneric(), null, selectedGenerics);
 						} catch (RollbackException e) {
-							e.printStackTrace();
+							logger.error("RollbackException, error occurred while trying to setHolder on {}." + model.getGenerics()[1], e);
 						}
 					}
 				};

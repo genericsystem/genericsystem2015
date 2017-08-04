@@ -44,7 +44,7 @@ public class StartupBean /* implements Extension */{
 				try {
 					Class c = Class.forName(metadataReader.getClassMetadata().getClassName());
 					if (c.getAnnotation(SystemGeneric.class) != null) {
-						log.info("Generic System: providing " + Class.forName(metadataReader.getClassMetadata().getClassName()));
+						log.info("Generic System: providing {}.", Class.forName(metadataReader.getClassMetadata().getClassName()));
 						resourcesClasses.add(Class.forName(metadataReader.getClassMetadata().getClassName()));
 					}
 				} catch (Throwable e) {

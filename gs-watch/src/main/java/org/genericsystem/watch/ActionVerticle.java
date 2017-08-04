@@ -3,8 +3,12 @@ package org.genericsystem.watch;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.invoke.MethodHandles;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.AsyncResult;
@@ -14,6 +18,7 @@ import io.vertx.core.json.JsonObject;
 
 public abstract class ActionVerticle extends AbstractVerticle {
 
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 	private static final String ip = LocalNet.getIpAddress();
 
 	public String getAction() {
@@ -35,16 +40,14 @@ public abstract class ActionVerticle extends AbstractVerticle {
 			vertx.executeBlocking(future -> {
 				download(future, task);
 				if (!future.failed())
-					handle(future, task);
-				else
-					throw new IllegalStateException("Impossible to download file " + task.getString(DistributedVerticle.FILENAME), future.cause());
+					handle(future, new JsonObject(task.encode()));
 			}, res -> {
-				handleResult(res, task);
+				handleResult(res, new JsonObject(task.encode()));
 				if (res.succeeded())
 					vertx.eventBus().send(Dispatcher.ADDRESS + ":updateState", new JsonObject().put(Dispatcher.TASK, task).put(Dispatcher.NEW_STATE, Dispatcher.FINISHED).encodePrettily());
 				else {
 					vertx.eventBus().send(Dispatcher.ADDRESS + ":updateState", new JsonObject().put(Dispatcher.TASK, task).put(Dispatcher.NEW_STATE, Dispatcher.ABORTED).encodePrettily());
-					System.out.println("Task aborted, cause: " + res.cause().getMessage());
+					logger.error("Task {} aborted.", task, res.cause());
 				}
 				DistributedVerticle.decrementExecutions();
 			});
@@ -73,7 +76,6 @@ public abstract class ActionVerticle extends AbstractVerticle {
 			try {
 				bytes = blockingQueue.take();
 			} catch (InterruptedException e) {
-				e.printStackTrace();
 				future.fail(e);
 				return;
 			}
@@ -85,12 +87,11 @@ public abstract class ActionVerticle extends AbstractVerticle {
 				fos.write(bytes);
 				fos.close();
 			} catch (IOException e) {
-				e.printStackTrace();
 				future.fail(e);
 				return;
 			}
 		} else {
-			System.out.println("File : " + fileName + " is already downloaded");
+			logger.info("The file {} has already been downloaded.", fileName);
 		}
 	}
 

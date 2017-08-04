@@ -1,6 +1,7 @@
 package org.genericsystem.watch;
 
 import java.io.File;
+import java.lang.invoke.MethodHandles;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -19,6 +20,8 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.search.FlagTerm;
 
 import org.apache.commons.mail.util.MimeMessageParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.sun.mail.imap.IMAPFolder;
 
@@ -33,6 +36,8 @@ import io.vertx.core.json.JsonObject;
  * @author middleware
  */
 public class MailWatcherVerticle extends AbstractVerticle {
+
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	private final String ip = LocalNet.getIpAddress();
 
@@ -98,7 +103,7 @@ public class MailWatcherVerticle extends AbstractVerticle {
 	private void processMessage(MimeMessage msg) {
 		try {
 			MimeMessageParser parser = new MimeMessageParser(msg).parse();
-			System.out.println("> New email: " + parser.getSubject());
+			logger.debug("> New email: {}.", parser.getSubject());
 			for (DataSource attachment : parser.getAttachmentList()) {
 				String contentType = attachment.getContentType().toLowerCase();
 				if (contentType.contains("application/pdf") || contentType.contains("application/x-pdf")) {
@@ -122,7 +127,7 @@ public class MailWatcherVerticle extends AbstractVerticle {
 				}
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("Error while processing mail.", e);
 		}
 	}
 }
