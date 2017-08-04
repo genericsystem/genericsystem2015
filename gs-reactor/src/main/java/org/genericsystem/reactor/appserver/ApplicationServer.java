@@ -22,6 +22,8 @@ import org.genericsystem.reactor.RootHtmlDomNode;
 import org.genericsystem.reactor.RootTag;
 import org.genericsystem.reactor.appserver.WebAppsConfig.SimpleWebAppConfig;
 import org.genericsystem.reactor.gscomponents.RootTagImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Context;
@@ -37,8 +39,6 @@ import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.impl.ConcurrentHashSet;
 import io.vertx.core.impl.EventLoopContext;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 
 /**
  * @author Nicolas Feybesse
@@ -50,11 +50,11 @@ public class ApplicationServer extends AbstractBackEnd {
 
 	public ApplicationServer(WebAppsConfig options) {
 		super(options.getHost(), options.getPort());
-		log.info("Load config : \n" + options.encodePrettily());
+		log.info("Load config : \n{}", options.encodePrettily());
 		for (String directoryPath : options.getPersistentDirectoryPaths()) {
 			String path = directoryPath != null ? directoryPath : "/";
 			Root root = buildRoot(directoryPath, options.getClasses(directoryPath), options.getEngineClass(directoryPath));
-			log.info("Starts " + root.getClass().getSimpleName() + " with path : " + path + " and persistence directory path : " + directoryPath);
+			log.info("Starts {} with path: {} and persistence directory path: {}.", root.getClass().getSimpleName(), path, directoryPath);
 			if (directoryPath == null)
 				directoryPath = "/";
 			roots.put(path, root);
@@ -116,7 +116,7 @@ public class ApplicationServer extends AbstractBackEnd {
 				if (res.succeeded())
 					rootHtmlDomNode = (RootHtmlDomNode) res.result();
 				else
-					res.cause().printStackTrace();
+					log.error("Failed to build tag tree.", res.cause());
 			});
 		}
 
@@ -187,7 +187,6 @@ public class ApplicationServer extends AbstractBackEnd {
 			GSVertx.vertx().getVertx().deployVerticle(domNodeVerticle, new DeploymentOptions().setWorker(true));
 			caches.add(new CacheSocketContext(cache, webSocket, GSVertx.vertx().getVertx().getOrCreateContext()));
 			return buffer -> {
-				// log.info("Receive new message for socket : " + webSocket); // XXX comment
 				GSBuffer gsBuffer = new GSBuffer(buffer);
 				String message = gsBuffer.getString(0, gsBuffer.length());
 				JsonObject json = new JsonObject(message);
@@ -197,7 +196,7 @@ public class ApplicationServer extends AbstractBackEnd {
 					if (node != null) {
 						cache.safeConsum((x) -> node.handleMessage(json));
 					} else
-						log.info("Can't find node id : " + json.getString(ReactorStatics.ID));
+						log.info("Can't find node with id: {}.", json.getString(ReactorStatics.ID));
 				} else
 					log.info("The DOM node tree has not been fully built yet.");
 			};
@@ -216,24 +215,19 @@ public class ApplicationServer extends AbstractBackEnd {
 		@Override
 		public void addHttpHandler(HttpServer httpServer) {
 			httpServer.requestHandler(request -> {
-				// log.info("Request received with path : " + request.path());
 				String[] items = request.path().substring(1).split("/");
-				// log.info("Request received with splited items : " + Arrays.toString(items));
 				String appPath = items.length == 0 ? "" : items[0];
 				if (appPath.endsWith(".js") || appPath.endsWith(".css") || appPath.endsWith(".ico") || appPath.endsWith(".jpg") || appPath.endsWith(".png"))
 					appPath = "";
-				// log.info("Request received with application path : " + appPath);
 				PersistentApplication application = apps.get("/" + appPath);
 				if (application == null) {
 					request.response().end("No application is configured with path : /" + appPath);
-					log.info("No application is configured with path : /" + appPath);
+					log.error("No application is configured with path : /{}.", appPath);
 					return;
 				}
-				// log.info("Request detected for application : " + application.getApplicationClass().getName());
 				int shift = appPath.isEmpty() ? 0 : 1;
 				shift += items.length > shift ? 1 : 0;
 				String resourceToServe = request.path().substring(appPath.length() + shift);
-				// log.info("Resource to serve : " + resourceToServe);
 				if ("".equals(resourceToServe)) {
 					String indexHtml = "<!DOCTYPE html>";
 					indexHtml += "<html>";
@@ -257,16 +251,16 @@ public class ApplicationServer extends AbstractBackEnd {
 					InputStream input = application.getApplicationClass().getResourceAsStream("/" + resourceToServe);
 					if (input == null) {
 						if (resourceToServe.endsWith(".css")) {
-							log.warn("Unable to find resource : /" + resourceToServe + ", get the reactor standard reactor.css instead");
+							log.warn("Unable to find resource : /{}, get the reactor standard reactor.css instead", resourceToServe);
 							input = ApplicationServer.class.getResourceAsStream("/reactor.css");
 						} else if (resourceToServe.endsWith(".js")) {
-							log.warn("Unable to find resource : /" + resourceToServe + ", get the reactor standard script.js instead");
+							log.warn("Unable to find resource : /{}, get the reactor standard script.js instead", resourceToServe);
 							input = ApplicationServer.class.getResourceAsStream("/script.js");
 						} else if (resourceToServe.endsWith("favicon.ico")) {
-							log.warn("Unable to find resource : /" + resourceToServe + ", get the reactor standard favicon.ico instead");
+							log.warn("Unable to find resource : /{}, get the reactor standard favicon.ico instead", resourceToServe);
 							input = ApplicationServer.class.getResourceAsStream("/favicon.ico");
 						} else if (resourceToServe.endsWith(".ico") || resourceToServe.endsWith(".jpg") || resourceToServe.endsWith(".png")) {
-							log.warn("Unable to find resource : /" + resourceToServe + ", get nothing instead");
+							log.warn("Unable to find resource : /{}, get nothing instead.", resourceToServe);
 							request.response().end();
 							return;
 						} else

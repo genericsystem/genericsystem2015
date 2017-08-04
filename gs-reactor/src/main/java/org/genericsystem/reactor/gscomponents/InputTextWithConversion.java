@@ -11,9 +11,9 @@ import org.genericsystem.reactor.contextproperties.ConvertedValueDefaults;
 import org.genericsystem.reactor.contextproperties.PasswordDefaults;
 import org.genericsystem.reactor.contextproperties.SelectionDefaults;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlInputText;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
@@ -50,7 +50,7 @@ public class InputTextWithConversion<T extends Serializable> extends HtmlInputTe
 			try {
 				getContextProperty(propertyName, model).setValue(getConverter(model).fromString(getDomNodeAttributes(model).get(attributeName)));
 			} catch (Exception ignore) {
-				log.warn("Conversion exception: " + ignore.getMessage());
+				log.info("Conversion exception: {}.", ignore.toString());
 			}
 		});
 		addPrefixBinding(model -> {

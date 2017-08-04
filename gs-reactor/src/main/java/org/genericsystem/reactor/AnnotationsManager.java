@@ -97,7 +97,7 @@ public class AnnotationsManager {
 				throw new IllegalStateException(e);
 			}
 		} else
-			log.warn("Unable to find a processor on annotation : " + annotationClass.getSimpleName());
+			log.warn("Unable to find a processor on annotation: {}.", annotationClass.getSimpleName());
 	}
 
 	public void processAnnotations(Tag tag) {

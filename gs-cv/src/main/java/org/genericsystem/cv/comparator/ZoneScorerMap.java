@@ -2,6 +2,7 @@ package org.genericsystem.cv.comparator;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.invoke.MethodHandles;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Stream;
@@ -9,8 +10,12 @@ import java.util.stream.Stream;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.Scores;
 import org.genericsystem.cv.Zone;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ZoneScorerMap {
+
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	private boolean supervised;
 	private FileWriter writer;
@@ -57,7 +62,7 @@ public class ZoneScorerMap {
 			writer.flush();
 			writer.close();
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.warn("IOException while computing scores.", e);
 		}
 	}
 
@@ -74,7 +79,7 @@ public class ZoneScorerMap {
 			try {
 				writer.append(Integer.toString(zone.getNum())).append(delimiter).append(entry.getKey()).append(delimiter).append(entry.getValue().toString()).append("\n");
 			} catch (IOException e) {
-				e.printStackTrace();
+				logger.warn("IOException while logging scores.", e);
 			}
 		});
 	}

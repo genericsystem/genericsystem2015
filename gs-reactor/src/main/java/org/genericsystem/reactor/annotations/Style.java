@@ -128,7 +128,7 @@ public @interface Style {
 				if (FlexDirectionDefaults.class.isAssignableFrom(tag.getClass()))
 					((FlexDirectionDefaults) tag).setDirection(context, null);
 				else
-					log.warn("Warning: FlexDirection is applicable only to classes implementing FlexDirectionDefaults.");
+					log.warn("Warning: FlexDirection is applicable only to classes implementing FlexDirectionDefaults. Applied to class: {}.", tag.getClass().getName());
 			}
 
 			@Override

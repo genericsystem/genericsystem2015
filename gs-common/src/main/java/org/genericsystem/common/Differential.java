@@ -1,7 +1,6 @@
 package org.genericsystem.common;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -17,6 +16,7 @@ import org.genericsystem.defaults.tools.BindingsTools;
 import javafx.beans.Observable;
 import javafx.beans.binding.ListBinding;
 import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -30,7 +30,6 @@ public class Differential implements IDifferential<Generic> {
 	private final IDifferential<Generic> subDifferential;
 	protected final PseudoConcurrentCollection<Generic> adds = new PseudoConcurrentCollection<>();
 	protected final PseudoConcurrentCollection<Generic> removes = new PseudoConcurrentCollection<>();
-	private Map<Generic, ObservableList<Generic>> dependenciesAsOservableListCacheMap = new HashMap<>();
 
 	public Differential(IDifferential<Generic> subDifferential) {
 		this.subDifferential = subDifferential;
@@ -58,6 +57,16 @@ public class Differential implements IDifferential<Generic> {
 		return subDifferential instanceof Differential ? new SimpleIntegerProperty(((Differential) subDifferential).getCacheLevel() + 1) : new SimpleIntegerProperty(0);
 	}
 
+	@Override
+	public ObjectProperty<IDifferential<Generic>> getDifferentialProperty() {
+		return subDifferential.getDifferentialProperty();
+	}
+
+	@Override
+	public Map<Generic, ObservableList<Generic>> getDependenciesAsOservableListCacheMap() {
+		return subDifferential.getDependenciesAsOservableListCacheMap();
+	}
+
 	void checkConstraints(Checker checker) throws RollbackException {
 		adds.forEach(x -> checker.checkAfterBuild(true, true, x));
 		removes.forEach(x -> checker.checkAfterBuild(false, true, x));
@@ -78,23 +87,18 @@ public class Differential implements IDifferential<Generic> {
 
 	@Override
 	public Snapshot<Generic> getDependencies(Generic generic) {
-		return getDependencies(generic, null);
-	}
-
-	@Override
-	public Snapshot<Generic> getDependencies(Generic generic, AbstractCache cache) {
 		return new Snapshot<Generic>() {
 			@Override
 			public Generic get(Object o) {
 				Generic result = adds.get(o);
 				if (result != null)
 					return generic.isDirectAncestorOf(result) ? result : null;
-				return !removes.contains(o) ? subDifferential.getDependencies(generic, cache).get(o) : null;
+				return !removes.contains(o) ? subDifferential.getDependencies(generic).get(o) : null;
 			}
 
 			@Override
 			public Stream<Generic> unfilteredStream() {
-				return Stream.concat(adds.contains(generic) ? Stream.empty() : subDifferential.getDependencies(generic, cache).filter(new IndexFilter(FiltersBuilder.NOT_CONTAINED_IN_PARAM, new ArrayList<>(removes.toList()))).stream(),
+				return Stream.concat(adds.contains(generic) ? Stream.empty() : subDifferential.getDependencies(generic).filter(new IndexFilter(FiltersBuilder.NOT_CONTAINED_IN_PARAM, new ArrayList<>(removes.toList()))).stream(),
 						adds.filter(new IndexFilter(FiltersBuilder.IS_DIRECT_DEPENDENCY_OF, generic)).stream());
 			}
 
@@ -106,17 +110,19 @@ public class Differential implements IDifferential<Generic> {
 					public Stream<Generic> unfilteredStream() {
 						List<IndexFilter> filters_ = new ArrayList<>(filters);
 						filters_.add(new IndexFilter(FiltersBuilder.NOT_CONTAINED_IN_PARAM, new ArrayList<>(removes.toList())));
-						return Stream.concat(adds.contains(generic) ? Stream.empty() : subDifferential.getDependencies(generic, cache).filter(filters_).stream(), adds.filter(filters).stream().filter(x -> generic.isDirectAncestorOf(x)));
+						return Stream.concat(adds.contains(generic) ? Stream.empty() : subDifferential.getDependencies(generic).filter(filters_).stream(), adds.filter(filters).stream().filter(x -> generic.isDirectAncestorOf(x)));
 					}
 				};
 			}
 
 			@Override
 			public ObservableList<Generic> toObservableList() {
-				ObservableList<Generic> result = dependenciesAsOservableListCacheMap.get(generic);
+				ObservableList<Generic> result = getDependenciesAsOservableListCacheMap().get(generic);
 				if (result == null) {
+					@SuppressWarnings({ "unchecked", "rawtypes" })
+					ObjectProperty<Differential> differentialProperty = (ObjectProperty) getDifferentialProperty();
 					result = BindingsTools.createMinimalUnitaryChangesBinding(BindingsTools.transmitSuccessiveInvalidations(new ListBinding<Generic>() {
-						private final Observable invalidator = cache != null ? cache.getObservable(generic) : getObservable(generic);
+						private final Observable invalidator = BindingsTools.createTransitive(differentialProperty, diff -> new Observable[] { diff.getObservable(generic) });
 						{
 							bind(invalidator);
 							invalidate();
@@ -124,10 +130,10 @@ public class Differential implements IDifferential<Generic> {
 
 						@Override
 						protected ObservableList<Generic> computeValue() {
-							return FXCollections.observableList(cache != null ? cache.getDependencies(generic).toList() : Differential.this.getDependencies(generic).toList());
+							return FXCollections.observableList(differentialProperty.getValue().getDependencies(generic).toList());
 						}
 					}));
-					dependenciesAsOservableListCacheMap.put(generic, result);
+					getDependenciesAsOservableListCacheMap().put(generic, result);
 				}
 				return result;
 			}

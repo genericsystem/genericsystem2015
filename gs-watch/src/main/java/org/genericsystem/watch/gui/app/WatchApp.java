@@ -20,7 +20,7 @@ import org.genericsystem.reactor.gscomponents.RootTagImpl;
 import org.genericsystem.security.model.Role;
 import org.genericsystem.security.model.User;
 import org.genericsystem.security.model.UserRole;
-import org.genericsystem.watch.VerticleDeployerFromWatchApp;
+import org.genericsystem.watch.OcrEngineHolderVerticle;
 import org.genericsystem.watch.gui.pages.FiltersStatisticsPage;
 import org.genericsystem.watch.gui.pages.HomePage;
 import org.genericsystem.watch.gui.utils.PageSwitcher;
@@ -52,7 +52,7 @@ public class WatchApp extends RootTagImpl {
 	}
 
 	private static void deployVerticles(Root root) {
-		VerticleDeployerFromWatchApp deployer = new VerticleDeployerFromWatchApp(root);
+		OcrEngineHolderVerticle deployer = new OcrEngineHolderVerticle(root);
 		deployer.doDeploy();
 	}
 }

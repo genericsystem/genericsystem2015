@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <variable name="msgPattern" value="%d [%thread] %-5level %logger{36} - %msg%n" />
+
+    <!-- Print messages with a level of TRACE, DEBUG or INFO to stdout. -->
+    <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>WARN</level>
+            <onMatch>DENY</onMatch>
+        </filter>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>DENY</onMatch>
+        </filter>
+        <target>System.out</target>
+        <encoder>
+            <pattern>${msgPattern}</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Print messages with a level of WARN or ERROR to stderr. -->
+    <appender name="stderr" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>WARN</level>
+        </filter>
+        <target>System.err</target>
+        <encoder>
+            <pattern>${msgPattern}</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="org.genericsystem" level="DEBUG" />
+
+    <root level="INFO">
+        <appender-ref ref="stdout" />
+        <appender-ref ref="stderr" />
+    </root>
+</configuration>

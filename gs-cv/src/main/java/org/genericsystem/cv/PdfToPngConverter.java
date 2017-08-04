@@ -12,9 +12,12 @@ import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.rendering.ImageType;
 import org.apache.pdfbox.rendering.PDFRenderer;
 import org.apache.pdfbox.tools.imageio.ImageIOUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PdfToPngConverter {
 
+	private final static Logger logger = LoggerFactory.getLogger(PdfToPngConverter.class);
 	private final static String pdfDirectoryPath = "pdf";
 	private final static String pngDirectoryPath = "png";
 
@@ -40,7 +43,7 @@ public class PdfToPngConverter {
 
 			int pageCounter = 0;
 			for (PDPage page : document.getPages()) {
-				System.out.println("Extracting an image from file " + pdfFile);
+				logger.debug("Extracting an image from file {}.", pdfFile);
 				BufferedImage bim = pdfRenderer.renderImageWithDPI(pageCounter, 300, ImageType.RGB);
 				Path newFile = destinationDirectory.toPath().resolve(fileName + "-" + pageCounter++ + ".png");
 				ImageIOUtil.writeImage(bim, newFile.toString(), 300);

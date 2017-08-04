@@ -2,6 +2,7 @@ package org.genericsystem.geography.app;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.lang.invoke.MethodHandles;
 import java.util.Collections;
 import java.util.HashMap;
 
@@ -31,6 +32,8 @@ import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
 import org.genericsystem.reactor.gscomponents.Monitor;
 import org.genericsystem.reactor.gscomponents.Responsive;
 import org.genericsystem.reactor.gscomponents.RootTagImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RunScript(GeoScript.class)
 @DependsOnModel({ AdministrativeTerritory.class, Country.class, Place.class, City.class, Building.class })
@@ -42,6 +45,7 @@ import org.genericsystem.reactor.gscomponents.RootTagImpl;
 		Adm3.class, City.class })
 public class GeoStore extends RootTagImpl {
 
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 	public static void main(String[] mainArgs) {
 		ApplicationServer.startSimpleGenericApp(mainArgs, GeoStore.class, "/GeoApp");
 	}
@@ -55,7 +59,7 @@ public class GeoStore extends RootTagImpl {
 				readLine(line, engine, returnType, n);
 			reader.close();
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.warn("Exception while reading file {}.", filename, e);
 		}
 		engine.getCurrentCache().flush();
 	}

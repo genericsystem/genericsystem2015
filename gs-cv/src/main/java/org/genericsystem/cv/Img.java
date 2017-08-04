@@ -15,6 +15,9 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+
 import javax.swing.ImageIcon;
 
 import org.genericsystem.layout.Layout;
@@ -41,9 +44,6 @@ import org.opencv.utils.Converters;
 import org.opencv.ximgproc.Ximgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 
 public class Img implements AutoCloseable, Serializable {
 
@@ -899,9 +899,15 @@ public class Img implements AutoCloseable, Serializable {
 	}
 
 	public Img cleanTables() {
-		Img hImg = this.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(20, 1));
-		Img vImg = this.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(1, 20));
+		Img hImg = this.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(50, 1));
+		Img vImg = this.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(1, 50));
 		return new Img(this.bitwise_xor(hImg.bitwise_and(vImg).bitwise_not()).getSrc());
 	}
 
+	public Img cleanFaces() {
+		Img result = new Img(getSrc());
+		Rect[] faces = FaceDetector.detect(result.getSrc());
+		Arrays.stream(faces).forEach(face -> new Zone(0, face).adjustRect(65, 115, result.getSrc().width(), result.getSrc().height()).draw(result, Scalar.all(255), -1));
+		return result;
+	}
 }
