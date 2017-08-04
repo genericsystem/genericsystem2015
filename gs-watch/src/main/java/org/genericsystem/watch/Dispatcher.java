@@ -62,7 +62,7 @@ public class Dispatcher extends AbstractVerticle {
 			watchMail();
 		});
 		vertx.eventBus().consumer(ADDRESS + ":updateState", message -> {
-			JsonObject json = new JsonObject((String) message.body());
+			JsonObject json = (JsonObject) message.body();
 			updateTaskState(json.getJsonObject(TASK), json.getString(NEW_STATE));
 		});
 		vertx.eventBus().consumer(ADDRESS + ":add", message -> {
