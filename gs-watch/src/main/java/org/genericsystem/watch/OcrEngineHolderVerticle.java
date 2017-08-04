@@ -7,11 +7,6 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
-import io.vertx.core.VertxOptions;
-import io.vertx.core.eventbus.EventBusOptions;
-import io.vertx.core.spi.cluster.ClusterManager;
-import io.vertx.spi.cluster.hazelcast.HazelcastClusterManager;
 
 public class OcrEngineHolderVerticle extends AbstractVerticle {
 
@@ -22,16 +17,7 @@ public class OcrEngineHolderVerticle extends AbstractVerticle {
 	}
 
 	public static void main(String[] args) {
-		ClusterManager mgr = new HazelcastClusterManager();
-
-		VertxOptions vertxOptions = new VertxOptions().setClustered(true).setClusterManager(mgr);
-		vertxOptions.setEventBusOptions(new EventBusOptions()).setClustered(true);
-		vertxOptions.setClusterHost(LocalNet.getIpAddress());
-		vertxOptions.setMaxWorkerExecuteTime(Long.MAX_VALUE);
-		Vertx.clusteredVertx(vertxOptions, res -> {
-			if (res.failed())
-				throw new IllegalStateException(res.cause());
-			Vertx vertx = res.result();
+		Tools.deployOnCluster(vertx -> {
 			vertx.deployVerticle(new HttpServerVerticle(), complete -> {
 				if (complete.failed())
 					throw new IllegalStateException(complete.cause());
@@ -44,15 +30,7 @@ public class OcrEngineHolderVerticle extends AbstractVerticle {
 	}
 
 	public void doDeploy() {
-		ClusterManager mgr = new HazelcastClusterManager();
-		VertxOptions vertxOptions = new VertxOptions().setClustered(true).setClusterManager(mgr);
-		vertxOptions.setEventBusOptions(new EventBusOptions()).setClustered(true);
-		vertxOptions.setClusterHost(LocalNet.getIpAddress());
-		vertxOptions.setMaxWorkerExecuteTime(Long.MAX_VALUE);
-		Vertx.clusteredVertx(vertxOptions, res -> {
-			if (res.failed())
-				throw new IllegalStateException(res.cause());
-			Vertx vertx = res.result();
+		Tools.deployOnCluster(vertx -> {
 			vertx.deployVerticle(this, result -> {
 				if (result.failed())
 					throw new IllegalStateException("Deployment of OcrEngineHolderVerticle failed", result.cause());

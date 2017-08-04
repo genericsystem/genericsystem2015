@@ -12,12 +12,8 @@ import org.slf4j.LoggerFactory;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
-import io.vertx.core.Vertx;
-import io.vertx.core.VertxOptions;
 import io.vertx.core.eventbus.ReplyException;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.spi.cluster.ClusterManager;
-import io.vertx.spi.cluster.hazelcast.HazelcastClusterManager;
 
 public class Dispatcher extends AbstractVerticle {
 
@@ -37,19 +33,11 @@ public class Dispatcher extends AbstractVerticle {
 	private static final long MESSAGE_SEND_PERIODICITY = 5000;
 
 	public static void main(String[] args) {
-		ClusterManager mgr = new HazelcastClusterManager();
-
-		VertxOptions vertxOptions = new VertxOptions().setClustered(true).setClusterManager(mgr);
-		vertxOptions.setClusterHost(LocalNet.getIpAddress());
-		vertxOptions.setMaxWorkerExecuteTime(Long.MAX_VALUE);
-		Vertx.clusteredVertx(vertxOptions, res -> {
-			if (res.failed())
-				throw new IllegalStateException(res.cause());
-			Vertx vertx = res.result();
+		Tools.deployOnCluster(vertx -> {
 			vertx.deployVerticle(new Dispatcher(), res_ -> {
 				if (res_.failed())
 					throw new IllegalStateException(res_.cause());
-			});
+			});	
 		});
 	}
 

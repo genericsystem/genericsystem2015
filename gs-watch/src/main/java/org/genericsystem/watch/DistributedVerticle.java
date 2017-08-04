@@ -3,10 +3,6 @@ package org.genericsystem.watch;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import io.vertx.core.AbstractVerticle;
-import io.vertx.core.Vertx;
-import io.vertx.core.VertxOptions;
-import io.vertx.core.spi.cluster.ClusterManager;
-import io.vertx.spi.cluster.hazelcast.HazelcastClusterManager;
 
 public class DistributedVerticle extends AbstractVerticle {
 	public static final String BASE_PATH = System.getenv("HOME") + "/git/genericsystem2015/gs-cv/";
@@ -42,15 +38,7 @@ public class DistributedVerticle extends AbstractVerticle {
 	}
 
 	public static void main(String[] args) {
-		ClusterManager mgr = new HazelcastClusterManager();
-
-		VertxOptions vertxOptions = new VertxOptions().setClustered(true).setClusterManager(mgr);
-		vertxOptions.setClusterHost(LocalNet.getIpAddress());
-		vertxOptions.setMaxWorkerExecuteTime(Long.MAX_VALUE);
-		Vertx.clusteredVertx(vertxOptions, res -> {
-			if (res.failed())
-				throw new IllegalStateException(res.cause());
-			Vertx vertx = res.result();
+		Tools.deployOnCluster(vertx -> {
 			vertx.deployVerticle(new HttpServerVerticle(), complete -> {
 				if (complete.failed())
 					throw new IllegalStateException(complete.cause());
