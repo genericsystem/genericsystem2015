@@ -1,14 +1,13 @@
 package org.genericsystem.layout;
 
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
+
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
 import org.opencv.core.Core;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
-import org.opencv.imgproc.Imgproc;
-
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
 
 public class LayoutAnalyzer extends AbstractApp {
 	static {
@@ -25,19 +24,18 @@ public class LayoutAnalyzer extends AbstractApp {
 		int rowIndex = 0;
 		rowIndex = 0;
 		columnIndex++;
-		Img img = new Img("resources/14342661748973931.jpg");
+		Img img = new Img("classes/id-fr-front/image-4.png");
 		mainGrid.add(new ImageView(img.toJfxImage()), columnIndex, rowIndex++);
-		Img binary = img.bgr2Gray().adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 17, 15).cleanTables();
-		Layout layout = img.buildLayout(new Size(0.04, 0.008), 8, 0.008f, binary);
+		Img binary = img.cleanFaces().bilateralFilter().adaptativeGaussianThreshold(17, 15).cleanTables();
+		Layout layout = img.buildLayout(new Size(0.04, 0.008), 8, 0, binary);
 		layout.draw(img, new Scalar(0, 255, 0), 1);
 		mainGrid.add(new ImageView(img.toJfxImage()), columnIndex, rowIndex++);
 		mainGrid.add(new ImageView(binary.toJfxImage()), columnIndex, rowIndex++);
 
-		Img total = new Img("resources/14342661748973931.jpg");
-		layout.ocrTree(total, 2);
+		Img total = new Img("classes/id-fr-front/image-4.png");
+		layout.ocrTree(total, 10);
+		mainGrid.add(new ImageView(total.toJfxImage()), columnIndex, rowIndex++);
 		System.out.println(layout.recursivToString());
-		System.out.println("################################################################");
-		// /layout.ocrTree(total, 4);
 
 	}
 }
