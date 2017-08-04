@@ -303,7 +303,8 @@ public class Img implements AutoCloseable, Serializable {
 			BufferedReader stdInput = new BufferedReader(new InputStreamReader(process.getInputStream()));
 			return Integer.valueOf(stdInput.readLine());
 		} catch (IOException | InterruptedException e) {
-			log.warn("Impossible to detect file orientation, returning 0.", e);
+			log.warn("Impossible to detect file orientation, returning 0.");
+			e.printStackTrace();
 			return 0;
 		}
 	}
@@ -898,8 +899,8 @@ public class Img implements AutoCloseable, Serializable {
 	}
 
 	public Img cleanTables() {
-		Img hImg = this.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(20, 1));
-		Img vImg = this.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(1, 20));
+		Img hImg = this.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(50, 1));
+		Img vImg = this.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(1, 50));
 		return new Img(this.bitwise_xor(hImg.bitwise_and(vImg).bitwise_not()).getSrc());
 	}
 

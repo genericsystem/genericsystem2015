@@ -77,9 +77,9 @@ public class Layout {
 		traverse(getRoi(img), (roi, shard) -> {
 			if (shard.getChildren().isEmpty())
 				Imgproc.rectangle(roi.getSrc(), new Point(0, 0), new Point(roi.width() - 1, roi.height() - 1), color, thickness);
-			// else
-			// Imgproc.rectangle(roi.getSrc(), new Point(0, 0), new Point(roi.width() - 1, roi.height() - 1), new Scalar(0, 0, 255), thickness);
-			});
+			else
+				Imgproc.rectangle(roi.getSrc(), new Point(0, 0), new Point(roi.width() - 1, roi.height() - 1), new Scalar(0, 0, 255), thickness);
+		});
 
 	}
 
@@ -105,7 +105,7 @@ public class Layout {
 
 	public void ocrTree(Img rootImg, int delta) {
 		traverse(rootImg, (root, layout) -> {
-			if (layout.getChildren().isEmpty()) {
+			// if (layout.getChildren().isEmpty()) {
 				String ocr = Ocr.doWork(new Mat(rootImg.getSrc(), layout.getLargeRect(rootImg, delta)));
 				if (!"".equals(ocr)) {
 					Integer count = layout.getLabels().get(ocr);
@@ -117,9 +117,9 @@ public class Layout {
 					});
 					// Imgproc.putText(rootImg.getSrc(), layout.getBestLabel(), layout.getRect(rootImg).tl(), Core.FONT_HERSHEY_PLAIN, 1, new Scalar(255, 0, 0), 1);
 					// System.out.println(layout.getBestLabel());
+				// }
 			}
-		}
-	}	);
+		});
 	}
 
 	private String getBestLabel() {
@@ -201,11 +201,7 @@ public class Layout {
 	}
 
 	public boolean hasChildren() {
-
-		if (children != null && children.size() >= 1)
-			return true;
-
-		return false;
+		return !getChildren().isEmpty();
 	}
 
 	public String recursivToString() {
@@ -218,12 +214,9 @@ public class Layout {
 	private void recursivToString(Layout shard, StringBuilder sb, int depth) {
 		sb.append("depth : " + depth + " : ");
 		sb.append("((" + shard.x1 + "-" + shard.y1 + "),(" + shard.x2 + "-" + shard.y2 + "))".toString());
-		if (shard.getChildren().isEmpty())
-			sb.append(" : Label : ");
-		for (String label : shard.labels.keySet())
-			sb.append("/" + label);
-
-		if (shard.hasChildren()) {
+		if (!shard.hasChildren())
+			sb.append(" : Label : " + shard.labels);
+		else {
 			depth++;
 			for (Layout s : shard.getChildren()) {
 				sb.append("\n");
@@ -308,7 +301,7 @@ public class Layout {
 		float max = (1 - concentration) * 255;
 		for (int i = 0; i < histo.size(); i++) {
 			float value = histo.get(i);
-			if (histo.size() > 32)
+			if (histo.size() > 180)
 				if (value <= min || value >= max) {
 					histo.set(i, 255f);
 					// System.out.println("mask black " + (vertical ? "line" : "column") + " " + i);
