@@ -3,6 +3,8 @@ package org.genericsystem.watch;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
 
 public class DistributedVerticle extends AbstractVerticle {
 	public static final String BASE_PATH = System.getenv("HOME") + "/git/genericsystem2015/gs-cv/";
@@ -38,26 +40,19 @@ public class DistributedVerticle extends AbstractVerticle {
 	}
 
 	public static void main(String[] args) {
+		Handler<AsyncResult<String>> completionHandler = ar -> {
+			if (ar.failed())
+				throw new IllegalStateException(ar.cause());
+		};
+
 		Tools.deployOnCluster(vertx -> {
 			vertx.deployVerticle(new HttpServerVerticle(), complete -> {
 				if (complete.failed())
 					throw new IllegalStateException(complete.cause());
-				vertx.deployVerticle(new DistributedVerticle(), result -> {
-					if (result.failed())
-						throw new IllegalStateException(result.cause());
-				});
-				vertx.deployVerticle(new DistributedVerticle(), result -> {
-					if (result.failed())
-						throw new IllegalStateException(result.cause());
-				});
-				vertx.deployVerticle(new DistributedVerticle(), result -> {
-					if (result.failed())
-						throw new IllegalStateException(result.cause());
-				});
-				vertx.deployVerticle(new DistributedVerticle(), result -> {
-					if (result.failed())
-						throw new IllegalStateException(result.cause());
-				});
+				vertx.deployVerticle(new DistributedVerticle(), completionHandler);
+				vertx.deployVerticle(new DistributedVerticle(), completionHandler);
+				vertx.deployVerticle(new DistributedVerticle(), completionHandler);
+				vertx.deployVerticle(new DistributedVerticle(), completionHandler);
 			});
 		});
 	}
