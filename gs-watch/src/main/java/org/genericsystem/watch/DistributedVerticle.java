@@ -49,10 +49,9 @@ public class DistributedVerticle extends AbstractVerticle {
 			vertx.deployVerticle(new HttpServerVerticle(), complete -> {
 				if (complete.failed())
 					throw new IllegalStateException(complete.cause());
-				vertx.deployVerticle(new DistributedVerticle(), completionHandler);
-				vertx.deployVerticle(new DistributedVerticle(), completionHandler);
-				vertx.deployVerticle(new DistributedVerticle(), completionHandler);
-				vertx.deployVerticle(new DistributedVerticle(), completionHandler);
+				for (int i = 0; i < getMaxExecutions(); ++i) {
+					vertx.deployVerticle(new DistributedVerticle(), completionHandler);
+				}
 			});
 		});
 	}
