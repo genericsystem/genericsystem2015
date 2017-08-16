@@ -14,19 +14,21 @@ Check the example below :
 -------------------------
 
 ### First example
-    // Create a persistent engine named myDataBase
-	Engine engine = new Engine("myDataBase", System.getenv("HOME") + "/my_directory_path");
-	
-    // Create a Vehicle with a Power
-	Generic vehicle = engine.addInstance("Vehicle");
-	Generic power = vehicle.addAttribute("Power");
-	
-    // Instantiate a Vehicle with a Power 233
-    Generic myVehicle = vehicle.addInstance("myVehicle");
-    myVehicle.addHolder(power, 233);
-    
-    // Persist changes
-    engine.getCurrentCache().flush();
+```java
+// Create a persistent engine named myDataBase
+Engine engine = new Engine("myDataBase", System.getenv("HOME") + "/my_directory_path");
+
+// Create a Vehicle with a Power
+Generic vehicle = engine.addInstance("Vehicle");
+Generic power = vehicle.addAttribute("Power");
+
+// Instantiate a Vehicle with a Power 233
+Generic myVehicle = vehicle.addInstance("myVehicle");
+myVehicle.addHolder(power, 233);
+
+// Persist changes
+engine.getCurrentCache().flush();
+```
 
 More examples are available here: [Example project](https://github.com/genericsystem/genericsystem2014/tree/master/gs-example).
 
@@ -57,25 +59,29 @@ To operate generic system, it is essential to observe the instructions detailed 
 *  Install Java 8 (JRE)
 
 * Set in the pom.xml of your project, the Generic Repository System:
-<pre>
-    &lt;repository&gt;
-    	&lt;id&gt;middlewarefactory&lt;/id&gt;
-    	&lt;url&gt;http://genericsystem.org/repository&lt;/url&gt;
-    	&lt;releases&gt;
-    		&lt;enabled&gt;true&lt;/enabled&gt;
-    		&lt;updatePolicy&gt;daily&lt;/updatePolicy&gt;
-    	&lt;/releases&gt;
-    &lt;/repository&gt;
-</pre>
+```xml
+<repository>
+    <id>middlewarefactory</id>
+    <url>http://middlewarefactory.com/repository</url>
+    <releases>
+        <enabled>true</enabled>
+        <updatePolicy>daily</updatePolicy>
+    </releases>
+    <snapshots>
+        <enabled>true</enabled>
+        <updatePolicy>daily</updatePolicy>
+    </snapshots>
+</repository>
+```
 
 * Add dependency to Generic System in the pom.xml of your project:
-<pre>
-    &lt;dependency&gt;
-    	&lt;groupId&gt;org.genericsystem&lt;/groupId&gt;
-    	&lt;artifactId&gt;gs-mutability&lt;/artifactId&gt;
-    	&lt;version&gt;4.0-SNAPSHOT&lt;/version&gt;
-    &lt;/dependency&gt;
-</pre>
+```xml
+<dependency>
+    <groupId>org.genericsystem</groupId>
+    <artifactId>gs-kernel</artifactId>
+    <version>4.0-SNAPSHOT</version>
+</dependency>
+```
 
 License
 -------
