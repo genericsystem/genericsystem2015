@@ -63,7 +63,7 @@ public class ContextActionCustom {
 		@Override
 		public void accept(Context context, Tag tag) {
 			context.remove();
-			context.flush();
+			// context.flush();
 		}
 	}
 
