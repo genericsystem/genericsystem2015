@@ -1,9 +1,7 @@
 Generic System
 ==============
 
-[![Join the chat at https://gitter.im/genericsystem/GenericSystem](https://badges.gitter.im/genericsystem/GenericSystem.svg)](https://gitter.im/genericsystem/GenericSystem?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
-[![Build Status](http://www.middlewarefactory.com/jenkins/buildStatus/icon?job=Generic System V4)](http://www.middlewarefactory.com/jenkins/job/Generic System V4)
+[![Join the chat at https://gitter.im/genericsystem/GenericSystem](https://badges.gitter.im/genericsystem/GenericSystem.svg)](https://gitter.im/genericsystem/GenericSystem?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Build Status](http://www.middlewarefactory.com/jenkins/buildStatus/icon?job=Generic%20System%20V4)](http://www.middlewarefactory.com/jenkins/job/Generic%20System%20V4)
 
 What is Generic System ?
 ------------------------
