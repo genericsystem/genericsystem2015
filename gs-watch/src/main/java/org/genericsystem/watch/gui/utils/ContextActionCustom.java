@@ -178,10 +178,6 @@ public class ContextActionCustom {
 				}
 				if (psw1 != null) {
 					if (!psw1.isEmpty()) {
-						invalidConfirmPassword.setText(context, "Password can not be empty");
-						invalidUsername.addStyle(context, "display", "none");
-						invalidConfirmPassword.addStyle(context, "display", "inline");
-					} else {
 						if (psw1.equals(psw2)) {
 							invalidUsername.addStyle(context, "display", "none");
 							invalidConfirmPassword.addStyle(context, "display", "none");
@@ -202,6 +198,10 @@ public class ContextActionCustom {
 							invalidConfirmPassword.addStyle(context, "display", "inline");
 							context.unmount();
 						}
+					} else { // Password not null, but empty
+						invalidConfirmPassword.setText(context, "Password can not be empty");
+						invalidUsername.addStyle(context, "display", "none");
+						invalidConfirmPassword.addStyle(context, "display", "inline");
 					}
 				} else { // Empty password
 					invalidConfirmPassword.setText(context, "Password can not be empty");
