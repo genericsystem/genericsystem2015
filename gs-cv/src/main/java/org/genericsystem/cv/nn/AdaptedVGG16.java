@@ -134,10 +134,8 @@ public class AdaptedVGG16 {
 		EarlyStoppingGraphFeaturizedTrainer trainer = new EarlyStoppingGraphFeaturizedTrainer(esConf, transferLearningHelper, getPresavedIterator("train"));
 		trainer.fit();
 
-		log.info("Model evaluation:");
-
 		Evaluation eval = graph.evaluate(getPresavedIterator("test"), labels);
-		log.info(eval.stats(true));
+		log.info("Model evaluation:\n{}", eval.stats(true));
 
 		File modelFile = new File("AdaptedVGG16-" + System.currentTimeMillis() + ".zip");
 		ModelSerializer.writeModel(net, modelFile, true);

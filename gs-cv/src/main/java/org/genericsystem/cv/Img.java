@@ -303,8 +303,7 @@ public class Img implements AutoCloseable, Serializable {
 			BufferedReader stdInput = new BufferedReader(new InputStreamReader(process.getInputStream()));
 			return Integer.valueOf(stdInput.readLine());
 		} catch (IOException | InterruptedException e) {
-			log.warn("Impossible to detect file orientation, returning 0.");
-			e.printStackTrace();
+			log.warn("Impossible to detect file orientation, returning 0.", e);
 			return 0;
 		}
 	}

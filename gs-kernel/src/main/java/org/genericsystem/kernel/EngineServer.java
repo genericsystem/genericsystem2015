@@ -1,5 +1,6 @@
 package org.genericsystem.kernel;
 
+import java.lang.invoke.MethodHandles;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -12,6 +13,8 @@ import org.genericsystem.common.EnginesDeploymentConfig;
 import org.genericsystem.common.EnginesDeploymentConfig.DefaultPathSingleEngineDeployment;
 import org.genericsystem.common.GSBuffer;
 import org.genericsystem.common.Protocol;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
@@ -24,6 +27,7 @@ import io.vertx.core.http.ServerWebSocket;
  */
 public class EngineServer extends AbstractBackEnd {
 
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 	private Set<AbstractCache> caches = Collections.newSetFromMap(new ConcurrentHashMap<AbstractCache, Boolean>());
 
 	public static void main(String[] args) {
@@ -32,16 +36,16 @@ public class EngineServer extends AbstractBackEnd {
 
 	public EngineServer(EnginesDeploymentConfig options) {
 		super(options.getHost(), options.getPort());
-		System.out.println("Load config : \n" + options.encodePrettily());
+		logger.info("Load config : \n{}", options.encodePrettily());
 		if (options.getEnginePaths().isEmpty()) {
 			AbstractServer defaultRoot = buildRoot(null, Collections.emptyList());
 			roots.put("/", defaultRoot);
-			System.out.println("Starts engine with path : / and persistence repository path : null");
+			logger.info("Starts engine with path : / and persistence repository path : null");
 		} else
 			for (String path : options.getEnginePaths()) {
 				AbstractServer root = buildRoot(options.getPersistentDirectoryPath(path), options.getClasses(path));
 				roots.put(path, root);
-				System.out.println("Starts engine with path : " + path + " and persistence repository path : " + options.getPersistentDirectoryPath(path));
+				logger.info("Starts engine with path: {} and persistence repository path: {}.", path, options.getPersistentDirectoryPath(path));
 			}
 	}
 
@@ -51,23 +55,23 @@ public class EngineServer extends AbstractBackEnd {
 
 	protected Buffer getReplyBuffer(int methodId, int op, AbstractServer root, GSBuffer gsBuffer) {
 		GSBuffer replyBuffer = new GSBuffer().appendInt(op);
-		// System.out.println("REPLY BUFFER : " + methodId + " " + op);
+		// logger.debug("REPLY BUFFER : {} {}", methodId, op);
 		switch (methodId) {
-		case Protocol.PICK_NEW_TS:
-			return replyBuffer.appendLongThrowException(() -> root.pickNewTs());
-		case Protocol.GET_DEPENDENCIES:
-			return replyBuffer.appendGSVertexArrayThrowException(() -> root.getDependencies(gsBuffer.getLong(), gsBuffer.getLong()));
-		case Protocol.GET_VERTEX:
-			return replyBuffer.appendGSVertexThrowException(() -> root.getVertex(gsBuffer.getLong()));
-		case Protocol.APPLY:
-			return replyBuffer.appendLongThrowException(() -> {
-				root.apply(gsBuffer.getLong(), gsBuffer.getGSLongArray(), gsBuffer.getGSVertexArray());
-				return 0L;
-			});
-		default:
-			return replyBuffer.appendLongThrowException(() -> {
-				throw new IllegalStateException("unable to find method:" + methodId + " ");
-			});
+			case Protocol.PICK_NEW_TS:
+				return replyBuffer.appendLongThrowException(() -> root.pickNewTs());
+			case Protocol.GET_DEPENDENCIES:
+				return replyBuffer.appendGSVertexArrayThrowException(() -> root.getDependencies(gsBuffer.getLong(), gsBuffer.getLong()));
+			case Protocol.GET_VERTEX:
+				return replyBuffer.appendGSVertexThrowException(() -> root.getVertex(gsBuffer.getLong()));
+			case Protocol.APPLY:
+				return replyBuffer.appendLongThrowException(() -> {
+					root.apply(gsBuffer.getLong(), gsBuffer.getGSLongArray(), gsBuffer.getGSVertexArray());
+					return 0L;
+				});
+			default:
+				return replyBuffer.appendLongThrowException(() -> {
+					throw new IllegalStateException("unable to find method:" + methodId + " ");
+				});
 		}
 	}
 
@@ -100,7 +104,7 @@ public class EngineServer extends AbstractBackEnd {
 
 		@Override
 		public Handler<Void> getCloseHandler(ServerWebSocket socket) {
-			return (v) -> System.out.println("Close socket");
+			return (v) -> logger.info("Close socket");
 		}
 	}
 

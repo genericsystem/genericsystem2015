@@ -1,7 +1,11 @@
 package org.genericsystem.defaults.tools;
 
+import java.lang.invoke.MethodHandles;
 import java.lang.ref.WeakReference;
 import java.util.function.Function;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javafx.beans.WeakListener;
 import javafx.beans.property.Property;
@@ -10,6 +14,7 @@ import javafx.beans.value.ObservableValue;
 
 public class BidirectionalBinding<S, T> implements ChangeListener<Object>, WeakListener {
 
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 	private final WeakReference<Property<S>> stringPropertyRef;
 	private final WeakReference<Property<T>> otherPropertyRef;
 	private boolean updating;
@@ -67,14 +72,14 @@ public class BidirectionalBinding<S, T> implements ChangeListener<Object>, WeakL
 						try {
 							property2.setValue(fromString(property1.getValue()));
 						} catch (Exception e) {
-							System.out.println("Exception while parsing String in bidirectional binding : " + e);
+							logger.warn("Exception while parsing String in bidirectional binding.", e);
 							property2.setValue(null);
 						}
 					} else {
 						try {
 							property1.setValue(toString(property2.getValue()));
 						} catch (Exception e) {
-							System.out.println("Exception while converting Object to String in bidirectional binding" + e);
+							logger.warn("Exception while converting Object to String in bidirectional binding.", e);
 							property1.setValue(null);
 						}
 					}
