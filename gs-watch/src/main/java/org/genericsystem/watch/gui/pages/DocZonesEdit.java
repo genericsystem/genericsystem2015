@@ -74,7 +74,7 @@ public class DocZonesEdit extends ModalEditor {
 	}
 
 	@SetText("Reset")
-	@BindAction(value = RESET_SELECTION.class)
+	@BindAction(value = CANCEL.class)
 	public static class Reset extends HtmlButton {
 		// Reset the changes
 	}
