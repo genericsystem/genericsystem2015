@@ -222,7 +222,9 @@ public class PseudoConcurrentCollection<T extends IGeneric<?>> implements Snapsh
 		}
 		if (lastAdded != null)
 			addProperty.set(lastAdded);
-		if (lastRemoved != null)
+		else if (lastRemoved != null)
+			// addAll is called on the removes of one Diff with the adds of the same Diff as its second argument,
+			// so it’s not necessary to send update events to both collections.
 			removeFrom.updateRemoveProperty(lastRemoved);
 	}
 
