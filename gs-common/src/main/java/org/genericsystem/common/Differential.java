@@ -1,6 +1,7 @@
 package org.genericsystem.common;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -75,14 +76,16 @@ public class Differential implements IDifferential<Generic> {
 	protected Generic plug(Generic generic) {
 		// assert generic.getOtherTs()[0] == Long.MAX_VALUE;
 		adds.add(generic);
-		// System.out.println("Add : " + generic.info() + System.identityHashCode(generic));
 		return generic;
 	}
 
 	protected void unplug(Generic generic) {
 		if (!adds.remove(generic))
 			removes.add(generic);
-		// System.out.println("Remove : " + generic.info() + System.identityHashCode(generic));
+	}
+
+	protected void unplugAll(Collection<Generic> generics, Checker checker) {
+		removes.addAll(generics, adds, checker);
 	}
 
 	@Override

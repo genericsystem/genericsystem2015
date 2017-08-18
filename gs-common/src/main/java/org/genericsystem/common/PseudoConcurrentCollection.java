@@ -1,6 +1,7 @@
 package org.genericsystem.common;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -26,6 +27,7 @@ import javafx.beans.value.WeakChangeListener;
  * @param <T>
  */
 public class PseudoConcurrentCollection<T extends IGeneric<?>> implements Snapshot<T> {
+
 	private static interface Index<T> {
 		public boolean add(T generic);
 
@@ -200,8 +202,36 @@ public class PseudoConcurrentCollection<T extends IGeneric<?>> implements Snapsh
 
 	public boolean remove(T element) {
 		boolean result = indexesTree.remove(element);
-		removeProperty.set(element);
+		if (result)
+			removeProperty.set(element);
 		return result;
+	}
+
+	public void addAll(Collection<T> elements, PseudoConcurrentCollection<T> removeFrom, Checker checker) {
+		T lastAdded = null;
+		T lastRemoved = null;
+		for (T element : elements) {
+			checker.checkAfterBuild(false, false, (Generic) element);
+			boolean removed = removeFrom.removeNoEvent(element);
+			if (removed)
+				lastRemoved = element;
+			else {
+				indexesTree.add(element);
+				lastAdded = element;
+			}
+		}
+		if (lastAdded != null)
+			addProperty.set(lastAdded);
+		if (lastRemoved != null)
+			removeFrom.updateRemoveProperty(lastRemoved);
+	}
+
+	private boolean removeNoEvent(T element) {
+		return indexesTree.remove(element);
+	}
+
+	private void updateRemoveProperty(T element) {
+		removeProperty.set(element);
 	}
 
 	@Override
