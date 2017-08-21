@@ -7,8 +7,8 @@ import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.defaults.DefaultGeneric;
 
-import javafx.beans.Observable;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
 /**
@@ -25,7 +25,7 @@ public interface IDifferential<T extends DefaultGeneric<T>> {
 
 	void apply(Snapshot<T> removes, Snapshot<T> adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException;
 
-	public Observable getObservable(Generic generic);
+	public ObservableValue<?> getObservable(Generic generic);
 
 	Map<Generic, ObservableList<Generic>> getDependenciesAsOservableListCacheMap();
 

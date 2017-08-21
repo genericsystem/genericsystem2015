@@ -17,9 +17,9 @@ import org.genericsystem.common.IDependencies;
 import org.genericsystem.common.IDifferential;
 import org.genericsystem.kernel.AbstractServer.RootServerHandler;
 
-import javafx.beans.Observable;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
 /**
@@ -186,7 +186,7 @@ public class Transaction extends CheckedContext implements IDifferential<Generic
 	}
 
 	@Override
-	public Observable getObservable(Generic generic) {
+	public ObservableValue<?> getObservable(Generic generic) {
 		return new SimpleObjectProperty<Snapshot<Generic>>();
 	}
 

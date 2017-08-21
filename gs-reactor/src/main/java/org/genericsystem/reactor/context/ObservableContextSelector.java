@@ -3,7 +3,6 @@ package org.genericsystem.reactor.context;
 import java.util.function.BiFunction;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.defaults.tools.BindingsTools;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.contextproperties.SelectionDefaults;
@@ -28,8 +27,8 @@ public interface ObservableContextSelector extends BiFunction<Context, Tag, Obse
 		@Override
 		public ObservableValue<Context> apply(Context context, Tag tag) {
 			ObservableList<Generic> holders = ObservableListExtractor.HOLDERS.apply(context.getParent().getGenerics());
-			return BindingsTools.transmitSuccessiveInvalidations(Bindings
-					.createObjectBinding(() -> (!context.getParent().getGeneric().isRequiredConstraintEnabled(context.getGeneric().getComponents().indexOf(context.getGenerics()[2])) && holders.size() == 1) || holders.size() > 1 ? context : null, holders));
+			return Bindings
+					.createObjectBinding(() -> (!context.getParent().getGeneric().isRequiredConstraintEnabled(context.getGeneric().getComponents().indexOf(context.getGenerics()[2])) && holders.size() == 1) || holders.size() > 1 ? context : null, holders);
 		}
 	}
 
@@ -39,8 +38,8 @@ public interface ObservableContextSelector extends BiFunction<Context, Tag, Obse
 			ObservableList<Generic> holders = ObservableListExtractor.HOLDERS.apply(context.getGenerics());
 			return Bindings.createObjectBinding(() -> holders.isEmpty()
 					|| (!(context.getGeneric().getComponents().size() == 1 && context.getGeneric().isPropertyConstraintEnabled()) && !context.getGeneric().isSingularConstraintEnabled(context.getGeneric().getComponents().indexOf(context.getGenerics()[2])))
-							? context : null,
-					holders);
+					? context : null,
+							holders);
 		}
 	}
 }

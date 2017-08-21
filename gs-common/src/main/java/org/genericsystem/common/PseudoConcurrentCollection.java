@@ -16,9 +16,9 @@ import org.genericsystem.api.core.IGeneric;
 import org.genericsystem.api.core.IndexFilter;
 import org.genericsystem.api.core.Snapshot;
 
-import javafx.beans.Observable;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.beans.value.WeakChangeListener;
 
 /**
@@ -262,7 +262,7 @@ public class PseudoConcurrentCollection<T extends IGeneric<?>> implements Snapsh
 
 	private boolean fireInvalidations = true;
 
-	public Observable getFilteredInvalidator(T generic, Predicate<T> predicate) {
+	public ObservableValue<?> getFilteredInvalidator(Predicate<T> predicate) {
 		return new FilteredInvalidator(predicate);
 	}
 

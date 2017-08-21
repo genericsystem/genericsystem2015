@@ -14,11 +14,11 @@ import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationEx
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.defaults.tools.BindingsTools;
 
-import javafx.beans.Observable;
 import javafx.beans.binding.ListBinding;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -124,8 +124,8 @@ public class Differential implements IDifferential<Generic> {
 				if (result == null) {
 					@SuppressWarnings({ "unchecked", "rawtypes" })
 					ObjectProperty<Differential> differentialProperty = (ObjectProperty) getDifferentialProperty();
-					result = BindingsTools.createMinimalUnitaryChangesBinding(BindingsTools.transmitSuccessiveInvalidations(new ListBinding<Generic>() {
-						private final Observable invalidator = BindingsTools.createTransitive(differentialProperty, diff -> new Observable[] { diff.getObservable(generic) });
+					result = BindingsTools.createMinimalUnitaryChangesBinding(new ListBinding<Generic>() {
+						private final ObservableValue<?> invalidator = BindingsTools.createTransitive(differentialProperty, diff -> new ObservableValue[] { diff.getObservable(generic) });
 						{
 							bind(invalidator);
 							invalidate();
@@ -135,7 +135,7 @@ public class Differential implements IDifferential<Generic> {
 						protected ObservableList<Generic> computeValue() {
 							return FXCollections.observableList(differentialProperty.getValue().getDependencies(generic).toList());
 						}
-					}));
+					});
 					getDependenciesAsOservableListCacheMap().put(generic, result);
 				}
 				return result;
@@ -165,8 +165,7 @@ public class Differential implements IDifferential<Generic> {
 	}
 
 	@Override
-	public final Observable getObservable(Generic generic) {
-		return BindingsTools.create(getSubDifferential().getObservable(generic), adds.getFilteredInvalidator(generic, generic::isDirectAncestorOf), removes.getFilteredInvalidator(generic, generic::isDirectAncestorOf));
-		// return ObservableBase.createObservable(getSubDifferential().getObservable(generic), adds.getFilteredInvalidator(generic, generic::isDirectAncestorOf), removes.getFilteredInvalidator(generic, generic::isDirectAncestorOf));
+	public final ObservableValue<?> getObservable(Generic generic) {
+		return BindingsTools.create(getSubDifferential().getObservable(generic), adds.getFilteredInvalidator(generic::isDirectAncestorOf), removes.getFilteredInvalidator(generic::isDirectAncestorOf));
 	}
 }

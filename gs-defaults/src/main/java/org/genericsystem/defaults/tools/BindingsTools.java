@@ -1,18 +1,19 @@
 package org.genericsystem.defaults.tools;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
-import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
-import javafx.beans.WeakInvalidationListener;
-import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ListBinding;
 import javafx.beans.binding.ObjectBinding;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.beans.value.WeakChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -23,37 +24,39 @@ import javafx.collections.WeakListChangeListener;
  *
  */
 public class BindingsTools {
-	public static <U extends Binding<V>, V> U transmitSuccessiveInvalidations(U binding) {
-		binding.addListener((o, v, nv) -> {
-		});
-		return binding;
+
+	public static ObservableValue<?> create(ObservableValue<?>... observables) {
+		return Bindings.createObjectBinding(() -> "", observables);
 	}
 
-	public static <T> Observable create(Observable... observables) {
-		return transmitSuccessiveInvalidations(Bindings.createObjectBinding(() -> "", observables));
-	}
-
-	public static <T> Observable createTransitive(ObservableValue<T> master, Function<T, Observable[]> slavesFromValue) {
-		return transmitSuccessiveInvalidations(new ObjectBinding<Object>() {
-			private Observable[] slaves;
-			private InvalidationListener onMasterInvalidion = (c) -> onMasterInvalidation();
+	public static <T> ObservableValue<?> createTransitive(ObservableValue<T> master, Function<T, ObservableValue<?>[]> slavesFromValue) {
+		ObservableValue<?> result = new ObjectBinding<Object>() {
+			private ObservableValue<?>[] slaves;
+			private ChangeListener<T> onMasterValueChange = (o, v, nv) -> onMasterValueChange();
 
 			{
-				master.addListener(new WeakInvalidationListener(onMasterInvalidion));
-				onMasterInvalidation();
+				master.addListener(new WeakChangeListener<T>(onMasterValueChange));
+				onMasterValueChange();
 			}
 
-			private void onMasterInvalidation() {
+			private void onMasterValueChange() {
 				unbind(slaves);
 				invalidate();
 				bind(slaves = slavesFromValue.apply(master.getValue()));
 			}
 
 			@Override
-			protected Object computeValue() {
-				return "";
+			protected void onInvalidating() {
+				// Force reevaluation of the binding so that the event is transmitted to Observables listening on its changes.
+				getValue();
 			}
-		});
+
+			@Override
+			protected Object computeValue() {
+				return Stream.concat(Stream.of(master.getValue()), Arrays.asList(slaves).stream().map(o -> o.getValue())).toArray(Object[]::new);
+			}
+		};
+		return result;
 	}
 
 	public static <E> ObservableList<E> createMinimalUnitaryChangesBinding(ObservableList<E> source) {
