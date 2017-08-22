@@ -115,14 +115,14 @@ public class HomePageUserLogin extends FlexDiv {
 				String loginInputValue = loginInput.getDomNodeAttributes(context).get("value");
 				String passwordInputValue = passwordInput.getDomNodeAttributes(context).get("value");
 
-				if (loginInputValue != null) {
+				if (loginInputValue != null && !loginInputValue.isEmpty()) {
 					invalidLogin.addStyle(context, "display", "none");
 
-					if (passwordInputValue != null) {
+					if (passwordInputValue != null && !passwordInputValue.isEmpty()) {
 						invalidPassword.addStyle(context, "display", "none");
 
 						Generic user = userClass.getInstance(loginInputValue);
-						System.out.println("user: " + user);
+						System.out.println("user: " + user == null ? "null" : loginInputValue.isEmpty() ? "empty field" : user);
 
 						if (user != null) {
 							Generic hashGeneric = passwordClass.getInstance(user);
