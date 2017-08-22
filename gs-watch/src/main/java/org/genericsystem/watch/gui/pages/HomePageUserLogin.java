@@ -1,6 +1,8 @@
 package org.genericsystem.watch.gui.pages;
 
 import java.util.Arrays;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.EncryptionUtils;
@@ -97,6 +99,9 @@ public class HomePageUserLogin extends FlexDiv {
 	@SetText("Sign in")
 	@Style(name = "flex", value = "1")
 	public static class SignInButton extends HtmlButton implements PasswordDefaults, UserRoleDefaults {
+		Locale currentLocale = Locale.getDefault();
+		ResourceBundle loginMessages = ResourceBundle.getBundle("UserLogin", currentLocale);
+
 		@Override
 		public void init() {
 			createSaltProperty();
@@ -137,7 +142,7 @@ public class HomePageUserLogin extends FlexDiv {
 									getLoggedUserProperty(context).setValue(user);
 								} else {
 									invalidLogin.addStyle(context, "display", "none");
-									invalidPassword.setText(context, "Invalid password");
+									invalidPassword.setText(context, loginMessages.getString("password.invalid"));
 									invalidPassword.addStyle(context, "display", "inline");
 								}
 							} else {
@@ -145,17 +150,17 @@ public class HomePageUserLogin extends FlexDiv {
 								throw new IllegalStateException("Unable to get a valid password from the database");
 							}
 						} else { // Unknown username
-							invalidLogin.setText(context, "Unknown user");
+							invalidLogin.setText(context, loginMessages.getString("user.unknown"));
 							invalidLogin.addStyle(context, "display", "inline");
 							invalidPassword.addStyle(context, "display", "none");
 						}
 					} else { // Empty password
-						invalidPassword.setText(context, "The password can not be empty");
+						invalidPassword.setText(context, loginMessages.getString("password.empty"));
 						invalidPassword.addStyle(context, "display", "inline");
 						invalidLogin.addStyle(context, "display", "none");
 					}
 				} else { // Empty username
-					invalidLogin.setText(context, "The username can not be empty");
+					invalidLogin.setText(context, loginMessages.getString("user.empty"));
 					invalidLogin.addStyle(context, "display", "inline");
 					invalidPassword.addStyle(context, "display", "none");
 				}
