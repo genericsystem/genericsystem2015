@@ -1,13 +1,13 @@
-package org.genericsystem.ir.gui.pages;
+package org.genericsystem.ir.app.gui.pages;
 
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.ir.gui.pages.HomePageUserLogin.LoggedUserDiv;
-import org.genericsystem.ir.gui.pages.HomePageUserLogin.LoginDiv;
-import org.genericsystem.ir.gui.utils.ContextActionCustom.CREATE_USER_CUSTOM;
+import org.genericsystem.ir.app.gui.pages.HomePageUserLogin.LoggedUserDiv;
+import org.genericsystem.ir.app.gui.pages.HomePageUserLogin.LoginDiv;
+import org.genericsystem.ir.app.gui.utils.ContextActionCustom.CREATE_USER_CUSTOM;
 import org.genericsystem.reactor.EncryptionUtils;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.Attribute;

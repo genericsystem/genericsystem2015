@@ -1,13 +1,13 @@
-package org.genericsystem.ir.gui.pages;
+package org.genericsystem.ir.app.gui.pages;
 
-import org.genericsystem.ir.gui.pages.StatisticsTable.ContentRow;
-import org.genericsystem.ir.gui.pages.StatisticsTable.HeaderRow;
-import org.genericsystem.ir.gui.utils.ObservableListExtractorCustom.SCORE_SELECTOR;
-import org.genericsystem.ir.gui.utils.ObservableListExtractorCustom.ZONE_SELECTOR;
-import org.genericsystem.ir.gui.utils.TextBindingCustom.IMG_FILTER_LABEL;
-import org.genericsystem.ir.gui.utils.TextBindingCustom.MEAN_LEV_LABEL;
-import org.genericsystem.ir.gui.utils.TextBindingCustom.SCORE_LABEL;
-import org.genericsystem.ir.gui.utils.TextBindingCustom.ZONE_LABEL2;
+import org.genericsystem.ir.app.gui.pages.StatisticsTable.ContentRow;
+import org.genericsystem.ir.app.gui.pages.StatisticsTable.HeaderRow;
+import org.genericsystem.ir.app.gui.utils.ObservableListExtractorCustom.SCORE_SELECTOR;
+import org.genericsystem.ir.app.gui.utils.ObservableListExtractorCustom.ZONE_SELECTOR;
+import org.genericsystem.ir.app.gui.utils.TextBindingCustom.IMG_FILTER_LABEL;
+import org.genericsystem.ir.app.gui.utils.TextBindingCustom.MEAN_LEV_LABEL;
+import org.genericsystem.ir.app.gui.utils.TextBindingCustom.SCORE_LABEL;
+import org.genericsystem.ir.app.gui.utils.TextBindingCustom.ZONE_LABEL2;
 import org.genericsystem.reactor.annotations.Attribute;
 import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;

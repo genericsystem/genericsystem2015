@@ -1,13 +1,13 @@
-package org.genericsystem.ir.gui.pages;
+package org.genericsystem.ir.app.gui.pages;
 
-import org.genericsystem.ir.gui.pages.HomePage.DocClassDiv;
-import org.genericsystem.ir.gui.pages.HomePage.GeneralActionsButtonsDiv;
-import org.genericsystem.ir.gui.utils.ContextActionCustom.CALL_STATISTICS_PAGE;
-import org.genericsystem.ir.gui.utils.ContextActionCustom.TEST;
-import org.genericsystem.ir.gui.utils.DocPropertiesSwitcher.DOC_CLASS_NOT_EMPTY;
-import org.genericsystem.ir.gui.utils.ObservableListExtractorCustom.DOC_CLASS_SELECTOR;
-import org.genericsystem.ir.gui.utils.PageSwitcher.HOME_PAGE;
-import org.genericsystem.ir.gui.utils.TextBindingCustom.DOC_CLASS_LABEL;
+import org.genericsystem.ir.app.gui.pages.HomePage.DocClassDiv;
+import org.genericsystem.ir.app.gui.pages.HomePage.GeneralActionsButtonsDiv;
+import org.genericsystem.ir.app.gui.utils.ContextActionCustom.CALL_STATISTICS_PAGE;
+import org.genericsystem.ir.app.gui.utils.ContextActionCustom.TEST;
+import org.genericsystem.ir.app.gui.utils.DocPropertiesSwitcher.DOC_CLASS_NOT_EMPTY;
+import org.genericsystem.ir.app.gui.utils.ObservableListExtractorCustom.DOC_CLASS_SELECTOR;
+import org.genericsystem.ir.app.gui.utils.PageSwitcher.HOME_PAGE;
+import org.genericsystem.ir.app.gui.utils.TextBindingCustom.DOC_CLASS_LABEL;
 import org.genericsystem.reactor.annotations.Attribute;
 import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.BindText;

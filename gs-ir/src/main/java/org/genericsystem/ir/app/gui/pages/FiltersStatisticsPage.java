@@ -1,15 +1,15 @@
-package org.genericsystem.ir.gui.pages;
+package org.genericsystem.ir.app.gui.pages;
 
 import org.genericsystem.cv.model.MeanLevenshtein;
 import org.genericsystem.cv.model.Score;
-import org.genericsystem.ir.gui.pages.FiltersStatisticsPage.DocClassStatisticsDiv;
-import org.genericsystem.ir.gui.pages.FiltersStatisticsPage.GeneralButtonsDiv;
-import org.genericsystem.ir.gui.utils.ContextActionCustom.CALL_HOME_PAGE;
-import org.genericsystem.ir.gui.utils.ContextActionCustom.COMPUTE_STATS;
-import org.genericsystem.ir.gui.utils.ContextActionCustom.COMPUTE_STATS_STRICT;
-import org.genericsystem.ir.gui.utils.DocPropertiesSwitcher.SUPERVISION_AVAILABLE;
-import org.genericsystem.ir.gui.utils.ObservableListExtractorCustom.DOC_CLASS_SELECTOR;
-import org.genericsystem.ir.gui.utils.PageSwitcher.FILTERS_STATISTICS;
+import org.genericsystem.ir.app.gui.pages.FiltersStatisticsPage.DocClassStatisticsDiv;
+import org.genericsystem.ir.app.gui.pages.FiltersStatisticsPage.GeneralButtonsDiv;
+import org.genericsystem.ir.app.gui.utils.ContextActionCustom.CALL_HOME_PAGE;
+import org.genericsystem.ir.app.gui.utils.ContextActionCustom.COMPUTE_STATS;
+import org.genericsystem.ir.app.gui.utils.ContextActionCustom.COMPUTE_STATS_STRICT;
+import org.genericsystem.ir.app.gui.utils.DocPropertiesSwitcher.SUPERVISION_AVAILABLE;
+import org.genericsystem.ir.app.gui.utils.ObservableListExtractorCustom.DOC_CLASS_SELECTOR;
+import org.genericsystem.ir.app.gui.utils.PageSwitcher.FILTERS_STATISTICS;
 import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;

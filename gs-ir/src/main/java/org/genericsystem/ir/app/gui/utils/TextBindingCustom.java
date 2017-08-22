@@ -1,4 +1,4 @@
-package org.genericsystem.ir.gui.utils;
+package org.genericsystem.ir.app.gui.utils;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.genericsystem.common.Generic;

@@ -1,4 +1,4 @@
-package org.genericsystem.ir.gui.pages;
+package org.genericsystem.ir.app.gui.pages;
 
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.Style;

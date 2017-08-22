@@ -1,4 +1,4 @@
-package org.genericsystem.ir.gui.app;
+package org.genericsystem.ir.app;
 
 import org.genericsystem.common.Root;
 import org.genericsystem.cv.model.Doc;
@@ -14,9 +14,9 @@ import org.genericsystem.cv.model.ZoneGeneric;
 import org.genericsystem.cv.model.ZoneText;
 import org.genericsystem.cv.model.ZoneText.ZoneTimestamp;
 import org.genericsystem.ir.OcrEngineHolderVerticle;
-import org.genericsystem.ir.gui.pages.FiltersStatisticsPage;
-import org.genericsystem.ir.gui.pages.HomePage;
-import org.genericsystem.ir.gui.utils.PageSwitcher;
+import org.genericsystem.ir.app.gui.pages.FiltersStatisticsPage;
+import org.genericsystem.ir.app.gui.pages.HomePage;
+import org.genericsystem.ir.app.gui.utils.PageSwitcher;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.appserver.ApplicationServer;

@@ -1,4 +1,4 @@
-package org.genericsystem.ir.gui.utils;
+package org.genericsystem.ir.app.gui.utils;
 
 import org.genericsystem.common.GSVertx;
 import org.genericsystem.common.Root;

@@ -1,8 +1,8 @@
-package org.genericsystem.ir.gui.pages;
+package org.genericsystem.ir.app.gui.pages;
 
-import org.genericsystem.ir.gui.pages.DocZonesShowDetails.FiltersDiv;
-import org.genericsystem.ir.gui.utils.ObservableListExtractorCustom.OCR_SELECTOR;
-import org.genericsystem.ir.gui.utils.TextBindingCustom.OCR_TEXT;
+import org.genericsystem.ir.app.gui.pages.DocZonesShowDetails.FiltersDiv;
+import org.genericsystem.ir.app.gui.utils.ObservableListExtractorCustom.OCR_SELECTOR;
+import org.genericsystem.ir.app.gui.utils.TextBindingCustom.OCR_TEXT;
 import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.ForEach;

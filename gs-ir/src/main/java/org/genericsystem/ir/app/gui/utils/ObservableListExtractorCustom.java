@@ -1,4 +1,4 @@
-package org.genericsystem.ir.gui.utils;
+package org.genericsystem.ir.app.gui.utils;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

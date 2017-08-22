@@ -1,4 +1,4 @@
-package org.genericsystem.ir.gui.utils;
+package org.genericsystem.ir.app.gui.utils;
 
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
