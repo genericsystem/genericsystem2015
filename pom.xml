@@ -64,7 +64,7 @@
 				<module>gs-quiz</module>
 				<module>gs-events</module>
 				<module>gs-cv</module>
-				<module>gs-watch</module>
+				<module>gs-ir</module>
 			</modules>
 		</profile>
 		<profile>
