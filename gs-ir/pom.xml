@@ -8,8 +8,8 @@
 		<artifactId>genericsystem2015</artifactId>
 		<version>4.0-SNAPSHOT</version>
 	</parent>
-	<artifactId>gs-watch</artifactId>
-	<name>gs-watch</name>
+	<artifactId>gs-ir</artifactId>
+	<name>Generic System Information Retriever</name>
 	<url>http://maven.apache.org</url>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
