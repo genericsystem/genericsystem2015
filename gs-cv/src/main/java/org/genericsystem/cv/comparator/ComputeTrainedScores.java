@@ -29,7 +29,13 @@ import org.slf4j.LoggerFactory;
  */
 public class ComputeTrainedScores {
 
+	/**
+	 * Used for a "strict" string comparison. The {@link Levenshtein} distance is zero only if two strings are identical.
+	 */
 	public static final Boolean BE_STRICT = true;
+	/**
+	 * Allow some variations during the string comparison. For example, spaces and periods are removed before the {@link Levenshtein} distance is computed.
+	 */
 	public static final Boolean BE_GENTLE = false;
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());

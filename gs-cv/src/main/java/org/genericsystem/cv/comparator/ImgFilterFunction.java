@@ -1,7 +1,9 @@
 package org.genericsystem.cv.comparator;
 
+import org.genericsystem.cv.Img;
+
 /**
- * This enum provides a list of filters that will be applied to the Img before going through OCR.
+ * This <code>enum</code> provides a list of filters that will be applied to the {@link Img} before going through OCR.
  * 
  * @author Pierrik Lassalas
  */

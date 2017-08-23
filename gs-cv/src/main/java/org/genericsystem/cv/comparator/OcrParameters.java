@@ -21,22 +21,35 @@ import io.vertx.core.json.JsonObject;
  * @author Pierrik Lassalas
  */
 public class OcrParameters {
+
+	private static Logger log = LoggerFactory.getLogger(OcrParameters.class);
+
 	public static final String P_FILE = "file";
 	public static final String P_ZONES = "zones";
 	public static final String P_IMG_FILTERS = "imgFilters";
-
-	private static Logger log = LoggerFactory.getLogger(OcrParameters.class);
 
 	private File file;
 	private Zones zones;
 	private List<ImgFilterFunction> imgFilterFunctions;
 
+	/**
+	 * Build an OcrParameters object from an existing file, known zones and a specific set of {@link ImgFilterFunction}.
+	 * 
+	 * @param file - the file for which the parameters need to be computed
+	 * @param zones - the {@link Zones} of the file's class
+	 * @param imgFilterFunctions - a list of filters that will be applied to the file
+	 */
 	public OcrParameters(File file, Zones zones, List<ImgFilterFunction> imgFilterFunctions) {
 		this.file = file;
 		this.zones = zones;
 		this.imgFilterFunctions = imgFilterFunctions;
 	}
 
+	/**
+	 * Build an OcrParameters object from a {@link JsonObject}. All the parameters are extracted from the JSON, then converted as needed, and stored in the private fields. The variables can then be accessed from the getters.
+	 * 
+	 * @param jsonObject - a JSON representation of the parameters
+	 */
 	public OcrParameters(JsonObject jsonObject) {
 		String filename = jsonObject.getString(P_FILE);
 		JsonArray zoneArray = jsonObject.getJsonArray(P_ZONES);
@@ -69,6 +82,11 @@ public class OcrParameters {
 		this.imgFilterFunctions = imgFilterFunctions;
 	}
 
+	/**
+	 * Converts the object to a JSON object.
+	 * 
+	 * @return - a {@link JsonObject} containing all the parameters needed to process the file remotely
+	 */
 	public JsonObject toJson() {
 		JsonObject jsonObject = new JsonObject();
 		jsonObject.put(P_FILE, file.getAbsolutePath());
