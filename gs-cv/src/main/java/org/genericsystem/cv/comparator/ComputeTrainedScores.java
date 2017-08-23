@@ -147,6 +147,7 @@ public class ComputeTrainedScores {
 
 	}
 
+	// Untested yet!
 	public static void clearStatistics(Root engine, String docType) {
 		try {
 			engine.getCurrentCache();
@@ -156,14 +157,16 @@ public class ComputeTrainedScores {
 		}
 		Generic currentDocClass = engine.find(DocClass.class).getInstance(docType);
 		ImgFilter imgFilter = engine.find(ImgFilter.class);
-		ZoneText zoneText = engine.find(ZoneText.class);
 		Score score = engine.find(Score.class);
-		MeanLevenshtein meanLevenshtein = engine.find(MeanLevenshtein.class);
 
-		logger.info("Current doc class : {} ", currentDocClass);
+		logger.info("Current doc class: {} ", currentDocClass);
 
-		List<DocInstance> docInstances = (List) currentDocClass.getHolders(engine.find(Doc.class)).toList();
 		List<ZoneInstance> zoneInstances = (List) currentDocClass.getHolders(engine.find(ZoneGeneric.class)).toList();
 		List<ImgFilterInstance> imgFilterInstances = (List) imgFilter.getInstances().filter(f -> !"reality".equals(f.getValue()) && !"best".equals(f.getValue())).toList();
+		for (ZoneInstance zone : zoneInstances) {
+			for (ImgFilterInstance ifi : imgFilterInstances) {
+				score.getScore(zone, ifi).remove();
+			}
+		}
 	}
 }
