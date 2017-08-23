@@ -1,19 +1,31 @@
 package org.genericsystem.ir;
 
+import java.lang.invoke.MethodHandles;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 
 public class DistributedVerticle extends AbstractVerticle {
+
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
 	public static final String BASE_PATH = System.getenv("HOME") + "/git/genericsystem2015/gs-cv/";
 	protected static final String FILENAME = "filename";
 	protected static final String JSON_OBJECT = "jsonObject";
 	protected static final String TYPE = "type";
 	protected static final String IP = "IP";
 
+	private static final int availProc = Runtime.getRuntime().availableProcessors();
 	private static AtomicInteger currentExecutions = new AtomicInteger();
+
+	static {
+		logger.debug("Available processors: {}", availProc);
+	}
 
 	public static void incrementExecutions() {
 		currentExecutions.incrementAndGet();
@@ -29,7 +41,7 @@ public class DistributedVerticle extends AbstractVerticle {
 
 	public static int getMaxExecutions() {
 		// TODO: Add some logic here…
-		return 4;
+		return availProc;
 	}
 
 	@Override
