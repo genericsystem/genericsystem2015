@@ -1,6 +1,7 @@
 package org.genericsystem.cv.comparator;
 
 import java.io.File;
+import java.lang.invoke.MethodHandles;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -54,13 +55,13 @@ public class FillModelWithData {
 	public static final String DOC_TIMESTAMP = "docTimestamp";
 	public static final String ZONES = "zones";
 
-	private static Logger log = LoggerFactory.getLogger(FillModelWithData.class);
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 	private static final String gsPath = System.getenv("HOME") + "/genericsystem/gs-cv_model3/";
 	private static final String docType = "id-fr-front";
 
 	static {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-		log.info("OpenCV core library loaded");
+		logger.info("OpenCV core library loaded");
 	}
 
 	public static void main(String[] mainArgs) {
@@ -83,7 +84,7 @@ public class FillModelWithData {
 	public static List<ImgFilterFunction> getFilterFunctions() {
 		final List<ImgFilterFunction> filterSet = new ArrayList<>();
 		for (ImgFilterFunction iff : ImgFilterFunction.values()) {
-			log.info("Adding: {}", iff);
+			logger.info("Adding: {}", iff);
 			filterSet.add(iff);
 		}
 		return filterSet;
@@ -114,7 +115,7 @@ public class FillModelWithData {
 		DocClassInstance docClassInstance = docClass.getDocClass(docType);
 		String filenameExt = ModelTools.generateFileName(file.toPath());
 		if (null == filenameExt) {
-			log.error("An error has occured during the generation of the hascode from file (assuming new)");
+			logger.error("An error has occured during the generation of the hascode from file (assuming new)");
 			return true;
 		} else {
 			DocInstance docInstance = docClassInstance.getDoc(doc, filenameExt);
@@ -133,7 +134,7 @@ public class FillModelWithData {
 		try {
 			engine.getCurrentCache();
 		} catch (IllegalStateException e) {
-			log.error("Current cache could not be loaded. Starting a new one...");
+			logger.error("Current cache could not be loaded. Starting a new one...");
 			engine.newCache().start();
 		}
 		final Path imgClassDirectory = imagePath.getParent();
@@ -159,15 +160,15 @@ public class FillModelWithData {
 			ZoneInstance zoneInstance = docClassInstance.getZone(z.getNum());
 			if (zoneInstance != null) {
 				Zone zone = zoneInstance.getZoneObject();
-				// log.info("z : {} ; zone : {}", z, zone);
+				// logger.info("z : {} ; zone : {}", z, zone);
 				if (z.equals(zone)) {
-					log.info("Zone n°{} already known", z.getNum());
+					logger.info("Zone n°{} already known", z.getNum());
 				} else {
-					log.info("Adding zone n°{} ", z.getNum());
+					logger.info("Adding zone n°{} ", z.getNum());
 					docClassInstance.setZone(z.getNum(), z.getRect().x, z.getRect().y, z.getRect().width, z.getRect().height);
 				}
 			} else {
-				log.info("Adding zone n°{} ", z.getNum());
+				logger.info("Adding zone n°{} ", z.getNum());
 				docClassInstance.setZone(z.getNum(), z.getRect().x, z.getRect().y, z.getRect().width, z.getRect().height);
 			}
 		});
@@ -179,7 +180,7 @@ public class FillModelWithData {
 			String filtername = entry.getName();
 			ImgFilterInstance filter = imgFilter.getImgFilter(filtername);
 			if (filter == null) {
-				log.info("Adding algorithm : {} ", filtername);
+				logger.info("Adding algorithm : {} ", filtername);
 				imgFilter.setImgFilter(filtername);
 				updatedImgFilterList.add(entry);
 			} else {
@@ -192,13 +193,13 @@ public class FillModelWithData {
 					imgFilter.setImgFilter(filtername);
 					updatedImgFilterList.add(entry);
 				} else {
-					log.debug("Algorithm {} already known", filtername);
+					logger.debug("Algorithm {} already known", filtername);
 				}
 			}
 		});
 
 		if (null == updatedImgFilterList || updatedImgFilterList.isEmpty()) {
-			log.info("Nothing to add");
+			logger.info("Nothing to add");
 			return new JsonObject();
 		} else {
 			// Return the parameters required to process this file as a JsonObject
@@ -221,7 +222,7 @@ public class FillModelWithData {
 		List<ImgFilterFunction> updatedImgFilterList = ocrParameters.getImgFilterFunctions();
 
 		// Save the current file
-		log.info("\nProcessing file: {}", file.getName());
+		logger.info("\nProcessing file: {}", file.getName());
 		String filenameExt = ModelTools.generateFileName(file.toPath());
 		if (null == filenameExt)
 			throw new RuntimeException("An error has occured while saving the file! Aborted...");
@@ -241,7 +242,7 @@ public class FillModelWithData {
 		updatedImgFilterList.forEach(entry -> {
 			String filtername = entry.getName();
 			ImgFunction function = entry.getLambda();
-			log.info("Applying algorithm {}...", filtername);
+			logger.info("Applying algorithm {}...", filtername);
 			Img img = null;
 			if ("original".equals(filtername) || "reality".equals(filtername))
 				img = originalImg;
@@ -250,13 +251,13 @@ public class FillModelWithData {
 			if (null != img)
 				imgs.put(filtername, img);
 			else
-				log.error("An error as occured for image {} and filter {}", filenameExt, filtername);
+				logger.error("An error as occured for image {} and filter {}", filenameExt, filtername);
 		});
 
 		// Process each zone
 		Map<String, Map<String, String>> result = new ConcurrentHashMap<>();
 		zones.getZones().forEach(z -> {
-			log.info("Zone n° {}", z.getNum());
+			logger.info("Zone n° {}", z.getNum());
 			Map<String, String> map = new ConcurrentHashMap<>();
 			imgs.entrySet().forEach(entry -> {
 				if ("reality".equals(entry.getKey()) || "best".equals(entry.getKey())) {
@@ -287,7 +288,7 @@ public class FillModelWithData {
 		try {
 			engine.getCurrentCache();
 		} catch (IllegalStateException e) {
-			log.error("Current cache could not be loaded. Starting a new one...");
+			logger.error("Current cache could not be loaded. Starting a new one...");
 			engine.newCache().start();
 		}
 		// Parse the data
@@ -311,13 +312,13 @@ public class FillModelWithData {
 		engine.getCurrentCache().flush();
 
 		zones.forEach(entry -> {
-			log.info("Current zone: {}", entry.getKey());
+			logger.info("Current zone: {}", entry.getKey());
 			ZoneInstance zoneInstance = docClassInstance.getZone(Integer.parseInt(entry.getKey(), 10));
 			JsonObject currentZone = (JsonObject) entry.getValue();
 			if (!currentZone.isEmpty())
 				currentZone.put("reality", ""); // Add this filter only if there are other filters
 			currentZone.forEach(e -> {
-				log.debug("key: {};  value: {}", e.getKey(), e.getValue().toString());
+				logger.debug("key: {};  value: {}", e.getKey(), e.getValue().toString());
 				if ("reality".equals(e.getKey()) || "best".equals(e.getKey())) {
 					// Do not proceed to OCR if the real values are known. By default, the "reality" and "best" filters are left empty
 					if (null == zoneText.getZoneText(docInstance, zoneInstance, imgFilter.getImgFilter(e.getKey())))
@@ -330,7 +331,7 @@ public class FillModelWithData {
 			});
 			engine.getCurrentCache().flush();
 		});
-		log.info("Data for {} successfully saved.", filenameExt);
+		logger.info("Data for {} successfully saved.", filenameExt);
 	}
 
 	/**
@@ -357,7 +358,7 @@ public class FillModelWithData {
 		try {
 			engine.getCurrentCache();
 		} catch (IllegalStateException e) {
-			log.error("Current cache could not be loaded. Starting a new one...");
+			logger.error("Current cache could not be loaded. Starting a new one...");
 			engine.newCache().start();
 		}
 		final String docType = ModelTools.getImgClass(imagePath);
@@ -392,7 +393,7 @@ public class FillModelWithData {
 		final String imgClassDirectory = "classes/" + docType;
 		// TODO: remove the following line (only present in development)
 		final String imgDirectory = imgClassDirectory + "/ref2/";
-		log.debug("imgClassDirectory = {} ", imgClassDirectory);
+		logger.debug("imgClassDirectory = {} ", imgClassDirectory);
 		DocClass docClass = engine.find(DocClass.class);
 		DocClassInstance docClassInstance = docClass.setDocClass(docType);
 
@@ -428,7 +429,7 @@ public class FillModelWithData {
 		try {
 			engine.getCurrentCache();
 		} catch (IllegalStateException e) {
-			log.debug("Current cache could not be loaded. Starting a new one...");
+			logger.debug("Current cache could not be loaded. Starting a new one...");
 			engine.newCache().start();
 		}
 		final String docType = ModelTools.getImgClass(imgPath);
@@ -440,10 +441,10 @@ public class FillModelWithData {
 
 		final boolean newFile = isThisANewFile(engine, imgPath.toFile(), docType);
 		if (!newFile) {
-			log.info("Image {} is already known", imgPath.getFileName());
+			logger.info("Image {} is already known", imgPath.getFileName());
 			return true;
 		} else {
-			log.info("Adding a new image ({}) ", imgPath.getFileName());
+			logger.info("Adding a new image ({}) ", imgPath.getFileName());
 			String filenameExt = ModelTools.generateFileName(imgPath);
 			Generic doc = engine.find(Doc.class);
 			DocInstance docInstance = docClassInstance.setDoc(doc, filenameExt);
@@ -452,12 +453,12 @@ public class FillModelWithData {
 				docInstance.setDocTimestamp(ModelTools.getCurrentDate());
 				engine.getCurrentCache().flush();
 				try (Img img = new Img(imgPath.toString())) {
-					log.info("Copying {} to resources folder", filenameExt);
+					logger.info("Copying {} to resources folder", filenameExt);
 					Imgcodecs.imwrite(System.getProperty("user.dir") + "/../gs-watch/src/main/resources/" + filenameExt, img.getSrc());
 				}
 				return true;
 			} else {
-				log.error("An error has occured while saving file {}", filenameExt);
+				logger.error("An error has occured while saving file {}", filenameExt);
 				return false;
 			}
 		}

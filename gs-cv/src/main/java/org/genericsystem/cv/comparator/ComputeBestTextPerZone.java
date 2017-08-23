@@ -1,5 +1,6 @@
 package org.genericsystem.cv.comparator;
 
+import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +30,7 @@ import org.slf4j.LoggerFactory;
 public class ComputeBestTextPerZone {
 
 	private final static String gsPath = System.getenv("HOME") + "/genericsystem/gs-cv_model3/";
-	private static Logger log = LoggerFactory.getLogger(ComputeTrainedScores.class);
+	private static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	public static void main(String[] mainArgs) {
 		final Engine engine = new Engine(gsPath, Doc.class, ImgFilter.class, ZoneGeneric.class, ZoneText.class, ZoneTimestamp.class, Score.class, MeanLevenshtein.class);
@@ -81,7 +82,7 @@ public class ComputeBestTextPerZone {
 		try {
 			engine.getCurrentCache();
 		} catch (IllegalStateException e) {
-			log.error("Current cache could not be loaded. Starting a new one...");
+			logger.error("Current cache could not be loaded. Starting a new one...");
 			engine.newCache().start();
 		}
 		Generic currentDocClass = engine.find(DocClass.class).getInstance(docType);
@@ -94,10 +95,10 @@ public class ComputeBestTextPerZone {
 		ImgFilterInstance realityInstance = imgFilter.getImgFilter("reality");
 		ImgFilterInstance bestInstance = imgFilter.setImgFilter("best");
 
-		log.debug("Processing doc: {}", docInstance.getValue());
+		logger.debug("Processing doc: {}", docInstance.getValue());
 
 		for (ZoneInstance zoneInstance : zoneInstances) {
-			log.debug("Zone n°{}", zoneInstance.getValue());
+			logger.debug("Zone n°{}", zoneInstance.getValue());
 
 			ZoneTextInstance realTextInstance = zoneText.getZoneText(docInstance, zoneInstance, realityInstance);
 
@@ -113,7 +114,7 @@ public class ComputeBestTextPerZone {
 					if (zti == null) {
 						// TODO case where zti doesn't exist == filter has
 						// not been applied
-						log.error("No text found for {} => zone n°{}, {}", docInstance.getValue(), zoneInstance.getValue(), imgFilterInstance.getValue());
+						logger.error("No text found for {} => zone n°{}, {}", docInstance.getValue(), zoneInstance.getValue(), imgFilterInstance.getValue());
 					} else {
 						String text = zti.getValue().toString();
 						List<String> filters = ocrResults.get(text);
@@ -136,7 +137,7 @@ public class ComputeBestTextPerZone {
 					for (String filter : entry.getValue()) {
 						ScoreInstance scoreInstance = score.getScore(zoneInstance, imgFilter.getImgFilter(filter));
 						if (scoreInstance == null) {
-							log.error("No score found for zone n°{} and filter {}", zoneInstance.getValue(), filter);
+							logger.error("No score found for zone n°{} and filter {}", zoneInstance.getValue(), filter);
 						} else {
 							ocrWeight += (Float) scoreInstance.getValue();
 						}
