@@ -18,6 +18,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.WeakListChangeListener;
+import javafx.util.Callback;
 
 /**
  * @author Nicolas Feybesse
@@ -76,29 +77,17 @@ public class BindingsTools {
 		};
 	}
 
-	public static <E> ObservableList<E> createMinimalUnitaryChangesBinding(ObservableList<E> source, Supplier<List<E>> subElements, Function<E, Observable> slaveSupplier) {
+	public static <E> ObservableList<E> createMinimalUnitaryChangesBinding(ObservableList<E> source, Supplier<List<E>> subElements, Callback<E, Observable[]> extractor) {
 		return createMinimalUnitaryChangesBinding(new ListBinding<E>() {
-			private List<Observable> slaveInvalidators = new ArrayList<>();
-			private ListChangeListener<E> onSrcInvalidation = (c) -> onSrcInvalidation();
+			private Observable invalidator = new ObservableListWrapper<E>(source, extractor);
 			{
-				source.addListener(new WeakListChangeListener<>(onSrcInvalidation));
-				onSrcInvalidation();
+				bind(invalidator);
 			}
 
 			@Override
 			protected ObservableList<E> computeValue() {
 				return FXCollections.observableList(subElements.get());
-			}
-
-			void onSrcInvalidation() {
-				slaveInvalidators.forEach(this::unbind);
-				slaveInvalidators.clear();
-				invalidate();
-				source.forEach(e -> slaveInvalidators.add(slaveSupplier.apply(e)));
-				slaveInvalidators.forEach(this::bind);
-			}
-
+			};
 		});
 	}
-
 }
