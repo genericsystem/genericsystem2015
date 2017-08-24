@@ -128,11 +128,12 @@ public class Differential implements IDifferential<Generic> {
 						private final ObservableValue<?> invalidator = BindingsTools.createTransitive(differentialProperty, diff -> new ObservableValue[] { diff.getObservable(generic) });
 						{
 							bind(invalidator);
-							invalidate();
 						}
 
 						@Override
 						protected ObservableList<Generic> computeValue() {
+							// Force reevaluation of the invalidator so that the binding works correctly.
+							invalidator.getValue();
 							return FXCollections.observableList(differentialProperty.getValue().getDependencies(generic).toList());
 						}
 					});
