@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Spliterators;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -72,13 +73,20 @@ public class PseudoConcurrentCollection<T extends IGeneric<?>> implements Snapsh
 		public void add(T generic) {
 			if (index.add(generic))
 				children.values().forEach(childNode -> childNode.add(generic));
+			cleanUp();
 		}
 
 		public boolean remove(T generic) {
 			boolean result = index.remove(generic);
 			if (result)
 				children.values().forEach(childNode -> childNode.remove(generic));
+			cleanUp();
 			return result;
+		}
+
+		private void cleanUp() {
+			List<IndexFilter> removes = new ArrayList<>(children.keySet()).stream().filter(key -> !key.isAlive()).collect(Collectors.toList());
+			removes.forEach(key -> children.remove(key));
 		}
 	}
 
