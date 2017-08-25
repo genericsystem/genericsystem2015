@@ -14,6 +14,7 @@ import org.genericsystem.common.IDifferential;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.remote.ClientEngine.ClientEngineHandler;
 
+import io.reactivex.Observable;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
@@ -43,6 +44,11 @@ public class FrontEndTransaction extends CheckedContext implements IDifferential
 
 	@Override
 	public ObjectProperty<IDifferential<Generic>> getDifferentialProperty() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Observable<IDifferential<Generic>> getDifferentialObservable() {
 		throw new UnsupportedOperationException();
 	}
 
@@ -111,5 +117,15 @@ public class FrontEndTransaction extends CheckedContext implements IDifferential
 	@Override
 	public ObservableValue<?> getObservable(Generic generic) {
 		return new SimpleObjectProperty<Snapshot<Generic>>();
+	}
+
+	@Override
+	public Observable<Generic> getAddsObservable(Generic generic) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Observable<Generic> getRemovesObservable(Generic generic) {
+		throw new UnsupportedOperationException();
 	}
 }

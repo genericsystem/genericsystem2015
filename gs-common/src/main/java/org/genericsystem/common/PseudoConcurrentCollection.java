@@ -17,6 +17,8 @@ import org.genericsystem.api.core.IGeneric;
 import org.genericsystem.api.core.IndexFilter;
 import org.genericsystem.api.core.Snapshot;
 
+import io.reactivex.Observable;
+import io.reactivex.rxjavafx.observables.JavaFxObservable;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -215,25 +217,33 @@ public class PseudoConcurrentCollection<T extends IGeneric<?>> implements Snapsh
 		return result;
 	}
 
-	public void addAll(Collection<T> elements, PseudoConcurrentCollection<T> removeFrom, Checker checker) {
-		T lastAdded = null;
-		T lastRemoved = null;
+	static long addAll = 0;
+
+	protected void addAll(Collection<T> elements, PseudoConcurrentCollection<T> removeFrom, Checker checker) {
+		//		T lastAdded = null;
+		//		T lastRemoved = null;
 		for (T element : elements) {
 			checker.checkAfterBuild(false, false, (Generic) element);
 			boolean removed = removeFrom.removeNoEvent(element);
-			if (removed)
-				lastRemoved = element;
-			else {
+			if (removed) {
+				//				lastRemoved = element;
+				removeFrom.updateRemoveProperty(element);
+			} else {
 				indexesTree.add(element);
-				lastAdded = element;
+				//				lastAdded = element;
+				addProperty.setValue(element);
 			}
 		}
-		if (lastAdded != null)
-			addProperty.set(lastAdded);
-		else if (lastRemoved != null)
-			// addAll is called on the removes of one Diff with the adds of the same Diff as its second argument,
-			// so it’s not necessary to send update events to both collections.
-			removeFrom.updateRemoveProperty(lastRemoved);
+		long start = System.nanoTime();
+		//		if (lastAdded != null)
+		//			addProperty.set(lastAdded);
+		//		else if (lastRemoved != null)
+		// addAll is called on the removes of one Diff with the adds of the same Diff as its second argument,
+		// so it’s not necessary to send update events to both collections.
+		//			removeFrom.updateRemoveProperty(lastRemoved);
+		long time = (System.nanoTime() - start) / 1000000;
+		addAll += time;
+		//		logger.debug("AddAll elements: {}, time: {}, totalTime: {} ms.", elements, time, addAll);
 	}
 
 	private boolean removeNoEvent(T element) {
@@ -251,6 +261,17 @@ public class PseudoConcurrentCollection<T extends IGeneric<?>> implements Snapsh
 
 	private SimpleObjectProperty<T> addProperty = new SimpleObjectProperty<T>();
 	private SimpleObjectProperty<T> removeProperty = new SimpleObjectProperty<T>();
+
+	private Observable<T> adds = JavaFxObservable.valuesOf(addProperty);
+	private Observable<T> removes = JavaFxObservable.valuesOf(removeProperty);
+
+	public Observable<T> getFilteredAdds(Predicate<T> predicate) {
+		return adds.filter(x -> fireInvalidations && predicate.test(x));
+	}
+
+	public Observable<T> getFilteredRemoves(Predicate<T> predicate) {
+		return removes.filter(x -> fireInvalidations && predicate.test(x));
+	}
 
 	private class FilteredInvalidator extends SimpleObjectProperty<T> {
 		private Predicate<T> predicate;

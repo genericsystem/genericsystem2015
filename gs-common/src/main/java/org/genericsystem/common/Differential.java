@@ -1,5 +1,6 @@
 package org.genericsystem.common;
 
+import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -13,10 +14,11 @@ import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.defaults.tools.BindingsTools;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javafx.beans.binding.ListBinding;
+import io.reactivex.Observable;
 import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -28,6 +30,7 @@ import javafx.collections.ObservableList;
  */
 public class Differential implements IDifferential<Generic> {
 
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 	private final IDifferential<Generic> subDifferential;
 	protected final PseudoConcurrentCollection<Generic> adds = new PseudoConcurrentCollection<>();
 	protected final PseudoConcurrentCollection<Generic> removes = new PseudoConcurrentCollection<>();
@@ -59,8 +62,13 @@ public class Differential implements IDifferential<Generic> {
 	}
 
 	@Override
-	public ObjectProperty<IDifferential<Generic>> getDifferentialProperty() {
+	public ObservableValue<IDifferential<Generic>> getDifferentialProperty() {
 		return subDifferential.getDifferentialProperty();
+	}
+
+	@Override
+	public Observable<Differential> getDifferentialObservable() {
+		return (Observable<Differential>) subDifferential.getDifferentialObservable();
 	}
 
 	@Override
@@ -122,21 +130,19 @@ public class Differential implements IDifferential<Generic> {
 			public ObservableList<Generic> toObservableList() {
 				ObservableList<Generic> result = getDependenciesAsOservableListCacheMap().get(generic);
 				if (result == null) {
-					@SuppressWarnings({ "unchecked", "rawtypes" })
-					ObjectProperty<Differential> differentialProperty = (ObjectProperty) getDifferentialProperty();
-					result = BindingsTools.createMinimalUnitaryChangesBinding(new ListBinding<Generic>() {
-						private final ObservableValue<?> invalidator = BindingsTools.createTransitive(differentialProperty, diff -> new ObservableValue[] { diff.getObservable(generic) });
-						{
-							bind(invalidator);
-						}
-
-						@Override
-						protected ObservableList<Generic> computeValue() {
-							// Force reevaluation of the invalidator so that the binding works correctly.
-							invalidator.getValue();
-							return FXCollections.observableList(differentialProperty.getValue().getDependencies(generic).toList());
-						}
-					});
+					final ObservableList<Generic> result_ = FXCollections.observableArrayList(getDifferentialProperty().getValue().getDependencies(generic).toList());
+					Observable<Differential> differentialObs = getDifferentialObservable();
+					Observable<Generic> adds = differentialObs.flatMap(diff -> diff.getAddsObservable(generic));
+					Observable<Generic> removes = differentialObs.flatMap(diff -> diff.getRemovesObservable(generic));
+					adds.subscribe(g -> {
+						logger.debug("Generic added, {}", g);
+						result_.add(g);
+					}, e -> logger.error("Exception while computing observable list.", e));
+					removes.subscribe(g -> {
+						logger.debug("Generic removed, {}", g);
+						result_.remove(g);
+					}, e -> logger.error("Exception while computing observable list.", e));
+					result = result_;
 					getDependenciesAsOservableListCacheMap().put(generic, result);
 				}
 				return result;
@@ -168,5 +174,19 @@ public class Differential implements IDifferential<Generic> {
 	@Override
 	public final ObservableValue<?> getObservable(Generic generic) {
 		return BindingsTools.create(getSubDifferential().getObservable(generic), adds.getFilteredInvalidator(generic::isDirectAncestorOf), removes.getFilteredInvalidator(generic::isDirectAncestorOf));
+	}
+
+	@Override
+	public Observable<Generic> getAddsObservable(Generic generic) {
+		return Observable.merge(getSubDifferential().getAddsObservable(generic),
+				adds.getFilteredAdds(generic::isDirectAncestorOf),
+				removes.getFilteredRemoves(generic::isDirectAncestorOf));
+	}
+
+	@Override
+	public Observable<Generic> getRemovesObservable(Generic generic) {
+		return Observable.merge(getSubDifferential().getRemovesObservable(generic),
+				removes.getFilteredAdds(generic::isDirectAncestorOf),
+				adds.getFilteredRemoves(generic::isDirectAncestorOf));
 	}
 }

@@ -21,6 +21,8 @@ import org.genericsystem.common.GenericBuilder.SetBuilder;
 import org.genericsystem.common.GenericBuilder.UpdateBuilder;
 import org.genericsystem.defaults.DefaultCache;
 
+import io.reactivex.Observable;
+import io.reactivex.rxjavafx.observables.JavaFxObservable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -68,7 +70,8 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 
 	private final Restructurator restructurator;
 	protected final ObjectProperty<IDifferential<Generic>> transactionProperty;
-	protected final ObjectProperty<Differential> differentialProperty = new SimpleObjectProperty<>();;
+	protected final ObjectProperty<Differential> differentialProperty = new SimpleObjectProperty<>();
+	protected final Observable<Differential> differentialObservable = JavaFxObservable.valuesOf(differentialProperty).distinctUntilChanged();
 	private ObservableIntegerValue cacheLevel;
 	private ObservableLongValue ts;
 	private final ContextEventListener<Generic> listener;
@@ -330,6 +333,11 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 		}
 
 		@Override
+		public Observable<IDifferential<Generic>> getDifferentialObservable() {
+			return (Observable) AbstractCache.this.differentialObservable;
+		}
+
+		@Override
 		public Map<Generic, ObservableList<Generic>> getDependenciesAsOservableListCacheMap() {
 			return AbstractCache.this.getDependenciesAsOservableListCacheMap();
 		}
@@ -347,6 +355,16 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 		@Override
 		public final ObservableValue<IDifferential<Generic>> getObservable(Generic generic) {
 			return transactionProperty;
+		}
+
+		@Override
+		public Observable<Generic> getAddsObservable(Generic generic) {
+			return Observable.never();
+		}
+
+		@Override
+		public Observable<Generic> getRemovesObservable(Generic generic) {
+			return Observable.never();
 		}
 	}
 

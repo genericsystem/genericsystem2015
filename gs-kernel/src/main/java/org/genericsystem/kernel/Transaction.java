@@ -17,6 +17,7 @@ import org.genericsystem.common.IDependencies;
 import org.genericsystem.common.IDifferential;
 import org.genericsystem.kernel.AbstractServer.RootServerHandler;
 
+import io.reactivex.Observable;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
@@ -51,6 +52,11 @@ public class Transaction extends CheckedContext implements IDifferential<Generic
 
 	@Override
 	public ObjectProperty<IDifferential<Generic>> getDifferentialProperty() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Observable<IDifferential<Generic>> getDifferentialObservable() {
 		throw new UnsupportedOperationException();
 	}
 
@@ -190,8 +196,13 @@ public class Transaction extends CheckedContext implements IDifferential<Generic
 		return new SimpleObjectProperty<Snapshot<Generic>>();
 	}
 
-	// @Override
-	// public CompletableFuture<Snapshot<Generic>> getDependenciesPromise(Generic generic) {
-	// throw new UnsupportedOperationException();
-	// }
+	@Override
+	public Observable<Generic> getAddsObservable(Generic generic) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Observable<Generic> getRemovesObservable(Generic generic) {
+		throw new UnsupportedOperationException();
+	}
 }
