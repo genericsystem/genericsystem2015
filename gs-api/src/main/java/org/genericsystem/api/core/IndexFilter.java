@@ -1,5 +1,6 @@
 package org.genericsystem.api.core;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 import org.genericsystem.api.core.FiltersBuilder.FilterGetter;
@@ -28,5 +29,9 @@ public class IndexFilter {
 			return false;
 		IndexFilter other = (IndexFilter) obj;
 		return getFilter == other.getFilter && Objects.deepEquals(params, other.params);
+	}
+
+	public boolean isAlive() {
+		return Arrays.asList(params).stream().allMatch(param -> !(param instanceof IGeneric) || ((IGeneric<?>) param).isAlive());
 	}
 }

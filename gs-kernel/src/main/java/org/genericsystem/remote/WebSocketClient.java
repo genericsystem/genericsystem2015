@@ -1,19 +1,23 @@
 package org.genericsystem.remote;
 
+import java.lang.invoke.MethodHandles;
+import java.util.concurrent.CompletableFuture;
+
+import org.genericsystem.common.GSVertx;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.WebSocket;
-
-import java.util.concurrent.CompletableFuture;
-
-import org.genericsystem.common.GSVertx;
 
 /**
  * @author Nicolas Feybesse
  *
  */
 class WebSocketClient {
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 	private final HttpClient httpClient;
 	private CompletableFuture<WebSocket> webSocketPromise = new CompletableFuture<>();
 
@@ -41,12 +45,12 @@ class WebSocketClient {
 	public void close() {
 		try {
 			webSocketPromise.thenAccept(webSocket -> webSocket.close());
-			System.out.println("Close socket");
+			logger.info("Close socket");
 		} catch (Exception ignore) {
 		}
 		try {
 			httpClient.close();
-			System.out.println("Close httpClient");
+			logger.info("Close httpClient");
 		} catch (Exception ignore) {
 		}
 	}

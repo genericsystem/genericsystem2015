@@ -22,7 +22,7 @@ public class Restructurator {
 	}
 
 	Generic rebuildAll(Generic toRebuild, Supplier<Generic> rebuilder, NavigableSet<Generic> dependenciesToRebuild) {
-		dependenciesToRebuild.descendingSet().forEach(context::unplug);
+		context.unplugAll(dependenciesToRebuild.descendingSet());
 		if (rebuilder != null) {
 			ConvertMap convertMap = new ConvertMap();
 			Generic build = rebuilder.get();

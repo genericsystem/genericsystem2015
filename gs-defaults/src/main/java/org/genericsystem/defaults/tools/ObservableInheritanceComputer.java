@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.genericsystem.api.core.FiltersBuilder;
+import org.genericsystem.api.core.IndexFilter;
 import org.genericsystem.defaults.DefaultGeneric;
 
 import javafx.beans.Observable;
@@ -43,7 +45,7 @@ public class ObservableInheritanceComputer<T extends DefaultGeneric<T>> extends 
 				return new Inheritings(superVertex) {
 					@Override
 					protected Stream<T> compositesByMeta(T holder) {
-						ObservableList<T> filtered = localBase.getComposites().toObservableList().filtered(x -> !x.equals(holder) && x.getMeta().equals(holder));
+						ObservableList<T> filtered = localBase.getComposites().filter(new IndexFilter(FiltersBuilder.HAS_META, holder)).toObservableList();
 						newInvalidators.add(filtered);
 						bind(filtered);
 						return super.compositesByMeta(holder);
@@ -51,7 +53,7 @@ public class ObservableInheritanceComputer<T extends DefaultGeneric<T>> extends 
 
 					@Override
 					protected Stream<T> compositesBySuper(T holder) {
-						ObservableList<T> filtered = localBase.getComposites().toObservableList().filtered(x -> x.getSupers().contains(holder));
+						ObservableList<T> filtered = localBase.getComposites().filter(new IndexFilter(FiltersBuilder.HAS_SUPER, holder)).toObservableList();
 						newInvalidators.add(filtered);
 						bind(filtered);
 						return super.compositesBySuper(holder);

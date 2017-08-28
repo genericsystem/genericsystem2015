@@ -11,7 +11,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.defaults.tools.BindingsTools;
 import org.genericsystem.reactor.context.ObservableListExtractor;
 import org.genericsystem.reactor.context.TagSwitcher;
 import org.genericsystem.reactor.contextproperties.ActionDefaults;
@@ -121,7 +120,7 @@ public interface Tag extends TagNode, ActionDefaults, SelectionDefaults, Stepper
 
 	default void select__(Function<Context, ObservableValue<Context>> applyOnModelContext) {
 		// fix probable issues with transmitSuccessiveInvalidations
-		select_(context -> BindingsTools.transmitSuccessiveInvalidations(new ListBinding<Context>() {
+		select_(context -> new ListBinding<Context>() {
 			ObservableValue<Context> ov = applyOnModelContext.apply(context);
 			{
 				bind(ov);
@@ -132,7 +131,7 @@ public interface Tag extends TagNode, ActionDefaults, SelectionDefaults, Stepper
 				Context context_ = ov.getValue();
 				return context_ != null ? FXCollections.singletonObservableList(context_) : FXCollections.emptyObservableList();
 			}
-		}));
+		});
 	}
 
 	default void select(Class<?> genericClass) {

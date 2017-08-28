@@ -15,6 +15,7 @@ import org.genericsystem.api.core.IndexFilter;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.defaults.tools.BindingsTools;
 
+import javafx.beans.Observable;
 import javafx.collections.ObservableList;
 
 /**
@@ -124,7 +125,7 @@ public interface DefaultDependencies<T extends DefaultGeneric<T>> extends IGener
 
 			@Override
 			public ObservableList<T> toObservableList() {
-				return BindingsTools.createMinimalUnitaryChangesBinding(getInheritings().toObservableList(), () -> getSubInheritings().toList(), g -> g.getSubInheritings().toObservableList());
+				return BindingsTools.createMinimalUnitaryChangesBinding(getInheritings().toObservableList(), () -> getSubInheritings().toList(), g -> new Observable[] { g.getSubInheritings().toObservableList() });
 			}
 		};
 	}
@@ -140,7 +141,7 @@ public interface DefaultDependencies<T extends DefaultGeneric<T>> extends IGener
 
 			@Override
 			public ObservableList<T> toObservableList() {
-				return BindingsTools.createMinimalUnitaryChangesBinding(getSubInheritings().toObservableList(), () -> getSubInstances().toList(), g -> g.getInstances().toObservableList());
+				return BindingsTools.createMinimalUnitaryChangesBinding(getSubInheritings().toObservableList(), () -> getSubInstances().toList(), g -> new Observable[] { g.getInstances().toObservableList() });
 			}
 		};
 	}

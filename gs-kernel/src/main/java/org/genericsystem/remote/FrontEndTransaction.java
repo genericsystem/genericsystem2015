@@ -14,9 +14,9 @@ import org.genericsystem.common.IDifferential;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.remote.ClientEngine.ClientEngineHandler;
 
-import javafx.beans.Observable;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
 /**
@@ -109,7 +109,7 @@ public class FrontEndTransaction extends CheckedContext implements IDifferential
 	// }
 
 	@Override
-	public Observable getObservable(Generic generic) {
+	public ObservableValue<?> getObservable(Generic generic) {
 		return new SimpleObjectProperty<Snapshot<Generic>>();
 	}
 }
