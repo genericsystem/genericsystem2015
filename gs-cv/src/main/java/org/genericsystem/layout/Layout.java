@@ -1,5 +1,6 @@
 package org.genericsystem.layout;
 
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -48,13 +49,13 @@ public class Layout {
 		return new Rect(new Point(parentRect.tl().x + parentRect.width * getX1(), parentRect.tl().y + parentRect.height * getY1()), new Point(parentRect.tl().x + parentRect.width * getX2(), parentRect.tl().y + parentRect.height * getY2()));
 	}
 
-	public double getSurfaceInPercent(Img imgRoot) {
+	public double area(Img imgRoot) {
 		double result = 0;
 		if (this.getChildren().isEmpty()) {
 			result += getRect(imgRoot).area() / (imgRoot.height() * imgRoot.width());
 		} else {
 			for (Layout child : getChildren()) {
-				result += child.getSurfaceInPercent(imgRoot);
+				result += child.area(imgRoot);
 			}
 		}
 		return result;
@@ -62,8 +63,8 @@ public class Layout {
 
 	public Rect getLargeRect(Img imgRoot, int delta) {
 		Rect rect = getRect(imgRoot);
-		return new Rect(new Point(rect.tl().x - delta >= 0 ? rect.tl().x : 0, rect.tl().y - delta >= 0 ? rect.tl().y : 0),
-				new Point(rect.br().x + delta <= imgRoot.width() ? rect.br().x + delta : imgRoot.width(), rect.br().y + delta <= imgRoot.height() ? rect.br().y + delta : imgRoot.height()));
+		return new Rect(new Point(rect.tl().x - delta >= 0 ? rect.tl().x : 0, rect.tl().y - delta >= 0 ? rect.tl().y : 0), new Point(rect.br().x + delta <= imgRoot.width() ? rect.br().x + delta : imgRoot.width(),
+				rect.br().y + delta <= imgRoot.height() ? rect.br().y + delta : imgRoot.height()));
 	}
 
 	public Layout traverse(Img img, BiConsumer<Img, Layout> visitor) {
@@ -84,40 +85,42 @@ public class Layout {
 	}
 
 	public void drawPerspective(Img img, Mat homography, Scalar color, int thickness) {
-		traverse(getRoi(img), (roi, shard) -> {
-			if (shard.getChildren().isEmpty()) {
-				MatOfPoint2f results = new MatOfPoint2f();
-				Rect rect = shard.getRect(img);
-				List<Point> points = Arrays.asList(new Point(rect.tl().x, rect.tl().y), new Point(rect.tl().x + roi.width() - 1, rect.tl().y), new Point(rect.tl().x + roi.width() - 1, rect.tl().y + roi.height() - 1),
-						new Point(rect.tl().x, rect.tl().y + roi.height() - 1));
-				Mat pts = Converters.vector_Point2f_to_Mat(points);
-				Core.perspectiveTransform(pts, results, homography);
-				Point[] targets = results.toArray();
-				Imgproc.line(img.getSrc(), targets[0], targets[1], color, thickness);
-				Imgproc.line(img.getSrc(), targets[1], targets[2], color, thickness);
-				Imgproc.line(img.getSrc(), targets[2], targets[3], color, thickness);
-				Imgproc.line(img.getSrc(), targets[3], targets[0], color, thickness);
-			}
-		});
+		traverse(
+				getRoi(img),
+				(roi, shard) -> {
+					if (shard.getChildren().isEmpty()) {
+						MatOfPoint2f results = new MatOfPoint2f();
+						Rect rect = shard.getRect(img);
+						List<Point> points = Arrays.asList(new Point(rect.tl().x, rect.tl().y), new Point(rect.tl().x + roi.width() - 1, rect.tl().y), new Point(rect.tl().x + roi.width() - 1, rect.tl().y + roi.height() - 1),
+								new Point(rect.tl().x, rect.tl().y + roi.height() - 1));
+						Mat pts = Converters.vector_Point2f_to_Mat(points);
+						Core.perspectiveTransform(pts, results, homography);
+						Point[] targets = results.toArray();
+						Imgproc.line(img.getSrc(), targets[0], targets[1], color, thickness);
+						Imgproc.line(img.getSrc(), targets[1], targets[2], color, thickness);
+						Imgproc.line(img.getSrc(), targets[2], targets[3], color, thickness);
+						Imgproc.line(img.getSrc(), targets[3], targets[0], color, thickness);
+					}
+				});
 	}
 
 	public void ocrTree(Img rootImg, int delta) {
 		traverse(rootImg, (root, layout) -> {
-			// if (layout.getChildren().isEmpty()) {
-			String ocr = Ocr.doWork(new Mat(rootImg.getSrc(), layout.getLargeRect(rootImg, delta)));
-			if (!"".equals(ocr)) {
-				Integer count = layout.getLabels().get(ocr);
-				layout.getLabels().put(ocr, 1 + (count != null ? count : 0));
-				// int all = layout.getLabels().values().stream().reduce(0, (i, j) -> i + j);
-				// layout.getLabels().entrySet().forEach(entry -> {
-				// if (entry.getValue() > all / 10)
-				// Imgproc.putText(rootImg.getSrc(), entry.getKey(), layout.getRect(rootImg).tl(), Core.FONT_HERSHEY_PLAIN, 1, new Scalar(255, 0, 0), 1);
-				// });
-				// Imgproc.putText(rootImg.getSrc(), layout.getBestLabel(), layout.getRect(rootImg).tl(), Core.FONT_HERSHEY_PLAIN, 1, new Scalar(255, 0, 0), 1);
-				// System.out.println(layout.getBestLabel());
-				// }
+			if (layout.getChildren().isEmpty()) {
+				String ocr = Ocr.doWork(new Mat(rootImg.getSrc(), layout.getLargeRect(rootImg, delta)));
+				if (!"".equals(ocr)) {
+					Integer count = layout.getLabels().get(ocr);
+					layout.getLabels().put(ocr, 1 + (count != null ? count : 0));
+					int all = layout.getLabels().values().stream().reduce(0, (i, j) -> i + j);
+					layout.getLabels().entrySet().forEach(entry -> {
+						if (entry.getValue() > all / 10)
+							Imgproc.putText(rootImg.getSrc(), Normalizer.normalize(entry.getKey(), Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", ""), layout.getRect(rootImg).tl(), Core.FONT_HERSHEY_PLAIN, 1, new Scalar(255, 0, 0), 1);
+					});
+					// Imgproc.putText(rootImg.getSrc(), layout.getBestLabel(), layout.getRect(rootImg).tl(), Core.FONT_HERSHEY_PLAIN, 1, new Scalar(255, 0, 0), 1);
+					// System.out.println(layout.getBestLabel());
 			}
-		});
+		}
+	}	);
 	}
 
 	private String getBestLabel() {
@@ -211,9 +214,9 @@ public class Layout {
 
 	private void recursivToString(Layout shard, StringBuilder sb, int depth) {
 		sb.append("depth : " + depth + " : ");
-		sb.append("((" + shard.x1 + "-" + shard.y1 + "),(" + shard.x2 + "-" + shard.y2 + "))".toString());
+		sb.append("[(" + shard.x1 + "," + shard.x2 + "),(" + shard.y1 + "," + shard.y2 + ")]".toString());
 		if (!shard.hasChildren())
-			sb.append(" : Label : " + shard.labels);
+			sb.append(" : Labels : " + shard.labels);
 		else {
 			depth++;
 			for (Layout s : shard.getChildren()) {
@@ -231,32 +234,13 @@ public class Layout {
 	}
 
 	public Layout tighten(Img binary) {
-
-		List<Float> Vhist = new ArrayList<>();
-		List<Float> Hhist = new ArrayList<>();
-
-		Converters.Mat_to_vector_float(binary.projectVertically().getSrc(), Vhist);
-		Converters.Mat_to_vector_float(binary.projectHorizontally().transpose().getSrc(), Hhist);
-
-		for (int i = 0; i < binary.getSrc().rows(); i++) {
-			for (int j = 0; j < binary.getSrc().cols(); j++) {
-				double value = binary.getSrc().get(i, j)[0];
-				if (value > 255.0)
-					System.out.println(value);
-			}
-		}
-		// Vhist = smoothHisto(concentration, Vhist, true, binary);
-		// Hhist = smoothHisto(concentration, Hhist, false, binary);
-
-		double[] x = getHistoLimits(Hhist);
-		double[] y = getHistoLimits(Vhist);
-
+		double[] x = getHistoLimits(binary.projectHorizontally());
+		double[] y = getHistoLimits(binary.projectVertically());
 		if (x[0] <= x[1] || y[0] <= y[1]) {
 			return new Layout(this.getParent(), getX1() + x[0] * (getX2() - getX1()), getX1() + x[1] * (getX2() - getX1()), getY1() + y[0] * (getY2() - getY1()), getY1() + y[1] * (getY2() - getY1()));
 		} else {
 			return new Layout(this.getParent(), 0, 0, 0, 0);
 		}
-
 	}
 
 	public static double[] getHistoLimits(List<Float> hist) {
@@ -270,44 +254,12 @@ public class Layout {
 	}
 
 	public List<Layout> split(Size morph, Img binary) {
-		List<Float> histoVertical = new ArrayList<>();
-		List<Float> histoHorizontal = new ArrayList<>();
-
-		Converters.Mat_to_vector_float(binary.projectVertically().getSrc(), histoVertical);
-		Converters.Mat_to_vector_float((binary.projectHorizontally().transpose()).getSrc(), histoHorizontal);
-
-		// histoVertical = smoothHisto(concentration, histoVertical, true, binary);
-		// histoHorizontal = smoothHisto(concentration, histoHorizontal, false, binary);
-
-		int kV = new Double(Math.floor(morph.height * histoVertical.size())).intValue();
-		int kH = new Double(Math.floor(morph.width * histoHorizontal.size())).intValue();
-		boolean[] closedV = getClosedFromHisto(kV, histoVertical);
-		boolean[] closedH = getClosedFromHisto(kH, histoHorizontal);
-		return extractZones(closedV, closedH, binary);
+		return extractZones(close(new Double(Math.floor(morph.height * binary.height())).intValue(), binary.projectVertically()), close(new Double(Math.floor(morph.width * binary.width())).intValue(), binary.projectHorizontally()), binary);
 	}
 
-	// private static List<Float> smoothHisto(float concentration, List<Float> histo, boolean vertical, Img binary) {
-	// float min = concentration * 255;
-	// float max = (1 - concentration) * 255;
-	// for (int i = 0; i < histo.size(); i++) {
-	// float value = histo.get(i);
-	// if (histo.size() > 180)
-	// if (value <= min || value >= max) {
-	// histo.set(i, 255f);
-	// // System.out.println("mask black " + (vertical ? "line" : "column") + " " + i);
-	// if (vertical)
-	// Imgproc.line(binary.getSrc(), new Point(0, i), new Point(binary.getSrc().width() - 1, i), new Scalar(255));
-	// else
-	// Imgproc.line(binary.getSrc(), new Point(i, 0), new Point(i, binary.getSrc().rows() - 1), new Scalar(255));
-	// }
-	// }
-	// return histo;
-	// }
-
-	private static boolean[] getClosedFromHisto(int k, List<Float> histo) {
-
+	private static boolean[] close(int k, List<Float> histo) {
 		boolean[] closed = new boolean[histo.size()];
-		Function<Integer, Boolean> isWhite = i -> histo.get(i) == 255;
+		Function<Integer, Boolean> isWhite = i -> histo.get(i) >= 255;
 		for (int i = 0; i < histo.size() - 1; i++)
 			if (!isWhite.apply(i) && isWhite.apply(i + 1)) {
 				for (int j = k + 1; j > 0; j--)
@@ -330,11 +282,14 @@ public class Layout {
 
 		List<Layout> shardsV = getShards(resultV, true);
 		List<Layout> shardsH = getShards(resultH, false);
+		// System.out.println("Binary size : " + binary.size());
+		// System.out.println("Size spit : " + shardsV.size() + " " + shardsH.size());
 		List<Layout> shards = new ArrayList<>();
 		for (Layout shardv : shardsV)
 			for (Layout shardh : shardsH) {
 				Layout target = new Layout(this, shardh.x1, shardh.x2, shardv.y1, shardv.y2);
 				Img roi = target.getRoi(binary);
+				// System.out.println("roi : rows :" + roi.rows() + " , cols :" + roi.cols());
 				if (roi.rows() != 0 && roi.cols() != 0)
 					shards.add(target.tighten(roi));
 			}
@@ -349,31 +304,38 @@ public class Layout {
 			if (!result[i] && result[i + 1])
 				start = i + 1;
 			else if (result[i] && !result[i + 1]) {
-				shards.add(vertical ? new Layout(this, 0, 1, Integer.valueOf(start).doubleValue() / result.length, (Integer.valueOf(i).doubleValue() + 1) / result.length)
-						: new Layout(this, Integer.valueOf(start).doubleValue() / result.length, (Integer.valueOf(i).doubleValue() + 1) / result.length, 0, 1));
+				shards.add(vertical ? new Layout(this, 0, 1, Integer.valueOf(start).doubleValue() / result.length, (Integer.valueOf(i).doubleValue() + 1) / result.length) : new Layout(this, Integer.valueOf(start).doubleValue() / result.length, (Integer
+						.valueOf(i).doubleValue() + 1) / result.length, 0, 1));
 				start = null;
 			}
 		if (result[result.length - 1]) {
-			shards.add(vertical ? new Layout(this, 0, 1, Integer.valueOf(start).doubleValue() / result.length, Integer.valueOf(result.length).doubleValue() / result.length)
-					: new Layout(this, Integer.valueOf(start).doubleValue() / result.length, Integer.valueOf(result.length).doubleValue() / result.length, 0, 1));
+			shards.add(vertical ? new Layout(this, 0, 1, Integer.valueOf(start).doubleValue() / result.length, Integer.valueOf(result.length).doubleValue() / result.length) : new Layout(this, Integer.valueOf(start).doubleValue() / result.length, Integer
+					.valueOf(result.length).doubleValue() / result.length, 0, 1));
 			start = null;
 		}
 		return shards;
 	}
 
 	public Layout recursivSplit(Size morph, int level, Img img, Img binary) {
+		// System.out.println("level : " + level);
+		// System.out.println("Layout : " + this);
 		assert img.size().equals(binary.size());
-		if (level <= 0)
+		if (img.size().height == 0 || img.size().width == 0)
 			return this;
 
+		if (level <= 0) {
+			// Imgproc.rectangle(img.getSrc(), new Point(0, 0), new Point(img.width(), img.height()), new Scalar(255, 0, 0), -1);
+			return this;
+		}
 		List<Layout> shards = split(morph, binary);
 		shards.removeIf(shard -> ((shard.getY2() - shard.getY1()) * img.size().height) < 4 || ((shard.getX2() - shard.getX1()) * img.size().width) < 4);
-		if (shards.isEmpty())
+		if (shards.isEmpty()) {
+			// Imgproc.rectangle(img.getSrc(), new Point(0, 0), new Point(img.width(), img.height()), new Scalar(0, 0, 255), -1);
 			return this;
-
-		if (shards.size() == 1)
+		}
+		if (shards.size() == 1) {
 			return this;
-
+		}
 		for (Layout shard : shards) {
 			shard.recursivSplit(morph, level - 1, shard.getRoi(img), shard.getRoi(binary));
 			this.addChild(shard);
