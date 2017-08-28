@@ -15,6 +15,9 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+
 import javax.swing.ImageIcon;
 
 import org.genericsystem.layout.Layout;
@@ -41,9 +44,6 @@ import org.opencv.utils.Converters;
 import org.opencv.ximgproc.Ximgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 
 public class Img implements AutoCloseable, Serializable {
 
@@ -303,8 +303,7 @@ public class Img implements AutoCloseable, Serializable {
 			BufferedReader stdInput = new BufferedReader(new InputStreamReader(process.getInputStream()));
 			return Integer.valueOf(stdInput.readLine());
 		} catch (IOException | InterruptedException e) {
-			log.warn("Impossible to detect file orientation, returning 0.");
-			e.printStackTrace();
+			log.warn("Impossible to detect file orientation, returning 0.", e);
 			return 0;
 		}
 	}
@@ -625,6 +624,10 @@ public class Img implements AutoCloseable, Serializable {
 		return bgr2Gray().adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY, blockSize, C);
 	}
 
+	public Img adaptativeGaussianInvThreshold(int blockSize, double C) {
+		return bgr2Gray().adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY_INV, blockSize, C);
+	}
+
 	public Img niblackThreshold(int blockSize, double k) {
 		Mat result = new Mat();
 		Ximgproc.niBlackThreshold(bgr2Gray().getSrc(), result, 255, Imgproc.THRESH_BINARY, blockSize, k, Ximgproc.BINARIZATION_NIBLACK);
@@ -661,10 +664,14 @@ public class Img implements AutoCloseable, Serializable {
 		return new Img(result, false);
 	}
 
-	public Img bilateralFilter() {
+	public Img bilateralFilter(int d, double sigmaColor, double sigmaSpace) {
 		Mat result = new Mat();
-		Imgproc.bilateralFilter(src, result, 30, 80, 80);
+		Imgproc.bilateralFilter(src, result, d, sigmaColor, sigmaSpace);
 		return new Img(result, false);
+	}
+
+	public Img bilateralFilter() {
+		return bilateralFilter(30, 80, 80);
 	}
 
 	public Img distanceTransform() {
@@ -713,37 +720,6 @@ public class Img implements AutoCloseable, Serializable {
 		Photo.fastNlMeansDenoising(src, result);
 		return new Img(result, false);
 	}
-
-	// private List<Rect> getRects() {
-	// List<Rect> boundRects = new ArrayList<>();
-	// List<Mat> channels = new ArrayList<>();
-	//
-	// Text.computeNMChannels(src, channels);
-	//
-	// System.out.println("Extracting Class Specific Extremal Regions from " +
-	// channels.size() + " channels ...");
-	//
-	// ERFilter erc1 =
-	// Text.createERFilterNM1(getClass().getResource("trained_classifierNM1.xml").getPath(),
-	// 16, 0.00015f, 0.13f, 0.2f, true, 0.1f);
-	// ERFilter erc2 =
-	// Text.createERFilterNM2(getClass().getResource("trained_classifierNM2.xml").getPath(),
-	// 0.5f);
-	//
-	// for (Mat channel : channels) {
-	// List<MatOfPoint> regions = new ArrayList<>();
-	// Text.detectRegions(channel, erc1, erc2, regions); // **Java fails here
-	// with Exception Type: EXC_BAD_ACCESS (SIGABRT)**
-	// MatOfRect mor = new MatOfRect();
-	// Text.erGrouping(src, channel, regions, mor);
-	//
-	// for (Rect r : mor.toArray()) {
-	// boundRects.add(r);
-	// }
-	// }
-	//
-	// return boundRects;
-	// }
 
 	public int findBestHisto(List<Img> imgs) {
 
@@ -809,16 +785,21 @@ public class Img implements AutoCloseable, Serializable {
 
 	}
 
-	public Img projectVertically() {
+	public List<Float> projectVertically() {
 		Mat result = new Mat();
 		Core.reduce(getSrc(), result, 1, Core.REDUCE_AVG, CvType.CV_32F);
-		return new Img(result, false);
+		List<Float> histoVertical = new ArrayList<>();
+		Converters.Mat_to_vector_float(result, histoVertical);
+		return histoVertical;
 	}
 
-	public Img projectHorizontally() {
+	public List<Float> projectHorizontally() {
 		Mat result = new Mat();
 		Core.reduce(getSrc(), result, 0, Core.REDUCE_AVG, CvType.CV_32F);
-		return new Img(result, false);
+		Core.transpose(result, result);
+		List<Float> histoHorizontal = new ArrayList<>();
+		Converters.Mat_to_vector_float(result, histoHorizontal);
+		return histoHorizontal;
 	}
 
 	private Img range(Scalar scalar, Scalar scalar2) {
@@ -879,18 +860,22 @@ public class Img implements AutoCloseable, Serializable {
 		return Tools.mat2jfxImage(src);
 	}
 
+	public ImageView toJfxImageView() {
+		return new ImageView(toJfxImage());
+	}
+
 	@Override
 	public void close() {
 		src.release();
 	}
 
 	public Layout buildLayout() {
-		Img binary = bgr2Gray().adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 17, 15).cleanTables();
+		Img binary = cleanFaces(0.1, 0.26).adaptativeGaussianThreshold(17, 7).cleanTables(0.05);
 		return buildLayout(binary);
 	}
 
 	public Layout buildLayout(Img binary) {
-		return buildLayout(new Size(0.04, 0.008), 7, binary);
+		return buildLayout(new Size(0.04, 0.008), 5, binary);
 	}
 
 	public Layout buildLayout(Size morph, int level, Img binary) {
@@ -898,16 +883,62 @@ public class Img implements AutoCloseable, Serializable {
 		return root.recursivSplit(morph, level, root.getRoi(this), root.getRoi(binary));
 	}
 
-	public Img cleanTables() {
-		Img hImg = this.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(50, 1));
-		Img vImg = this.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(1, 50));
-		return new Img(this.bitwise_xor(hImg.bitwise_and(vImg).bitwise_not()).getSrc());
+	private static boolean[] close(List<Boolean> histo, int k) {
+		boolean[] closed = new boolean[histo.size()];
+		for (int i = 0; i < histo.size() - 1; i++)
+			if (histo.get(i) && !histo.get(i + 1)) {
+				for (int j = k + 1; j > 0; j--)
+					if (i + j < histo.size()) {
+						if (histo.get(i + j)) {
+							Arrays.fill(closed, i, i + j + 1, true);
+							i += j - 1;
+							break;
+						}
+						closed[i] = histo.get(i);
+					}
+			} else
+				closed[i] = histo.get(i);
+		if (!closed[histo.size() - 1])
+			closed[histo.size() - 1] = histo.get(histo.size() - 1);
+		return closed;
 	}
 
-	public Img cleanFaces() {
+	private List<Boolean> getRow(int row) {
+		List<Boolean> result = new ArrayList<>(src.cols());
+		for (int col = 0; col < src.cols(); col++)
+			result.add(src.get(row, col)[0] >= 255.0);
+		return result;
+	};
+
+	public List<Boolean> getCol(int col) {
+		List<Boolean> result = new ArrayList<>(src.rows());
+		for (int row = 0; row < src.rows(); row++)
+			result.add(src.get(row, col)[0] >= 255.0);
+		return result;
+	};
+
+	public Img cleanTables(double close) {
+		Mat result = new Mat(src.size(), CvType.CV_8U, new Scalar(255));
+		boolean[][] hHistos = new boolean[src.cols()][src.rows()];
+		for (int col = 0; col < src.cols(); col++)
+			hHistos[col] = close(getCol(col), Long.valueOf(Math.round(close * src.rows())).intValue());
+		boolean[][] vHistos = new boolean[src.rows()][src.cols()];
+		for (int row = 0; row < src.rows(); row++)
+			vHistos[row] = close(getRow(row), Long.valueOf(Math.round(close * src.cols())).intValue());
+		for (int col = 0; col < src.cols(); col++)
+			for (int row = 0; row < src.rows(); row++)
+				result.put(row, col, (src.get(row, col)[0] >= 255.0) ^ !(hHistos[col][row] && vHistos[row][col]) ? 255.0 : 0.0);
+		return new Img(result, false);
+
+		// Img hImg = this.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(close * getSrc().width(), 1));
+		// Img vImg = this.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(1, close * getSrc().height()));
+		// return new Img(this.bitwise_xor(hImg.bitwise_and(vImg).bitwise_not()).getSrc());
+	}
+
+	public Img cleanFaces(double px, double py) {
 		Img result = new Img(getSrc());
 		Rect[] faces = FaceDetector.detect(result.getSrc());
-		Arrays.stream(faces).forEach(face -> new Zone(0, face).adjustRect(65, 115, result.getSrc().width(), result.getSrc().height()).draw(result, Scalar.all(255), -1));
+		Arrays.stream(faces).forEach(face -> new Zone(0, face).adjustRect(result.getSrc().width() * px / 2, result.getSrc().height() * py / 2, result.getSrc().width(), result.getSrc().height()).draw(result, Scalar.all(0), -1));
 		return result;
 	}
 }
