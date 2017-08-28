@@ -3,7 +3,6 @@ package org.genericsystem.reactor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.function.Function;
 
-import org.genericsystem.defaults.tools.BindingsTools;
 import org.genericsystem.reactor.HtmlDomNode.HtmlDomNodeAction;
 import org.genericsystem.reactor.HtmlDomNode.HtmlDomNodeCheckbox;
 import org.genericsystem.reactor.HtmlDomNode.HtmlDomNodeInputText;
@@ -275,7 +274,7 @@ public interface RootTag extends Tag {
 					subSteps = controller.addStep(tag, Bindings.size(ol), next, prevText, nextText);
 				Property<Boolean> activeProperty = controller.getActiveProperty();
 				SimpleIntegerProperty indexProperty = subSteps.getIndexProperty();
-				return BindingsTools.transmitSuccessiveInvalidations(new ListBinding() {
+				return new ListBinding() {
 					{
 						bind(indexProperty, activeProperty);
 					}
@@ -286,7 +285,7 @@ public interface RootTag extends Tag {
 							return ol;
 						return (indexProperty.get() >= 0) && (indexProperty.get() < ol.size()) ? FXCollections.singletonObservableList(ol.get(indexProperty.get())) : FXCollections.emptyObservableList();
 					}
-				});
+				};
 			});
 		}
 		tag.getRootTag().processSwitch(tag, new Class[] { MainSwitcher.class });

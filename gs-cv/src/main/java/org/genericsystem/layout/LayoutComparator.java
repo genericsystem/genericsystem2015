@@ -45,30 +45,34 @@ public class LayoutComparator extends AbstractApp {
 		timer.scheduleAtFixedRate(() -> {
 			capture.read(frame);
 			Img frameImg = new Img(frame, false);
+			try {
+				Img img0 = frameImg.bilateralFilter(30, 80, 80).bgr2Gray().adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY, 17, 15);
 
-			Img img0 = frameImg.bgr2Gray().adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 17, 15);
-			Img img1 = frameImg.canny(60, 200).bitwise_not();
-			Img img2 = frameImg.bgr2Gray().grad(3, 3).thresHold(0, 255, Imgproc.THRESH_BINARY_INV + Imgproc.THRESH_OTSU);
-			Img img3 = frameImg.sauvolaThreshold().bitwise_not();
+				Img img1 = frameImg.canny(60, 200).bitwise_not();
+				Img img2 = frameImg.bgr2Gray().grad(3, 3).thresHold(0, 255, Imgproc.THRESH_BINARY_INV + Imgproc.THRESH_OTSU);
+				Img img3 = frameImg.sauvolaThreshold().bitwise_not();
 
-			Layout layout = frameImg.buildLayout(img0);
-			Layout layout1 = frameImg.buildLayout(img1);
-			Layout layout2 = frameImg.buildLayout(img2);
-			Layout layout3 = frameImg.buildLayout(img3);
+				// Layout layout = frameImg.buildLayout(img0);
+				Layout layout1 = frameImg.buildLayout(img1);
+				Layout layout2 = frameImg.buildLayout(img2);
+				Layout layout3 = frameImg.buildLayout(img3);
 
-			Img out = new Img(frame, true);
-			layout.draw(img0, new Scalar(0), 1);
-			Img out1 = new Img(frame, true);
-			layout1.draw(img1, new Scalar(0), 1);
-			Img out2 = new Img(frame, true);
-			layout2.draw(img2, new Scalar(0), 1);
-			Img out3 = new Img(frame, true);
-			layout3.draw(img3, new Scalar(0), 1);
+				Img out = new Img(frame, true);
+				// layout.draw(img0, new Scalar(0), 1);
+				Img out1 = new Img(frame, true);
+				layout1.draw(img1, new Scalar(0), 1);
+				Img out2 = new Img(frame, true);
+				layout2.draw(img2, new Scalar(0), 1);
+				Img out3 = new Img(frame, true);
+				layout3.draw(img3, new Scalar(0), 1);
 
-			src.setImage(img0.toJfxImage());
-			src1.setImage(img1.toJfxImage());
-			src2.setImage(img2.toJfxImage());
-			src3.setImage(img3.toJfxImage());
+				src.setImage(img0.toJfxImage());
+				src1.setImage(img1.toJfxImage());
+				src2.setImage(img2.toJfxImage());
+				src3.setImage(img3.toJfxImage());
+			} catch (Throwable t) {
+				t.printStackTrace();
+			}
 		}, 400, 10, TimeUnit.MILLISECONDS);
 	}
 

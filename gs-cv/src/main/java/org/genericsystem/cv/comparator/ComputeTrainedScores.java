@@ -1,5 +1,6 @@
 package org.genericsystem.cv.comparator;
 
+import java.lang.invoke.MethodHandles;
 import java.util.List;
 
 import org.genericsystem.common.Generic;
@@ -28,10 +29,16 @@ import org.slf4j.LoggerFactory;
  */
 public class ComputeTrainedScores {
 
+	/**
+	 * Used for a "strict" string comparison. The {@link Levenshtein} distance is zero only if two strings are identical.
+	 */
 	public static final Boolean BE_STRICT = true;
+	/**
+	 * Allow some variations during the string comparison. For example, spaces and periods are removed before the {@link Levenshtein} distance is computed.
+	 */
 	public static final Boolean BE_GENTLE = false;
 
-	private static final Logger log = LoggerFactory.getLogger(ComputeTrainedScores.class);
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 	private static final String gsPath = System.getenv("HOME") + "/genericsystem/gs-cv_model3/";
 
 	public static void main(String[] mainArgs) {
@@ -63,7 +70,7 @@ public class ComputeTrainedScores {
 		try {
 			engine.getCurrentCache();
 		} catch (IllegalStateException e) {
-			log.error("Current cache could not be loaded. Starting a new one...");
+			logger.error("Current cache could not be loaded. Starting a new one...");
 			engine.newCache().start();
 		}
 
@@ -73,7 +80,7 @@ public class ComputeTrainedScores {
 		Score score = engine.find(Score.class);
 		MeanLevenshtein meanLevenshtein = engine.find(MeanLevenshtein.class);
 
-		log.info("Current doc class : {} ", currentDocClass);
+		logger.info("Current doc class : {} ", currentDocClass);
 
 		List<DocInstance> docInstances = (List) currentDocClass.getHolders(engine.find(Doc.class)).toList();
 		List<ZoneInstance> zoneInstances = (List) currentDocClass.getHolders(engine.find(ZoneGeneric.class)).toList();
@@ -81,7 +88,7 @@ public class ComputeTrainedScores {
 		ImgFilterInstance realityInstance = imgFilter.getImgFilter("reality");
 
 		for (ZoneInstance zoneInstance : zoneInstances) {
-			// log.info("=> Zone {}", zoneInstance);
+			// logger.info("=> Zone {}", zoneInstance);
 			// List<Float> meanLevDistances = new ArrayList<>();
 			// List<Float> probabilities = new ArrayList<>();
 			for (ImgFilterInstance imgFilterInstance : imgFilterInstances) {
@@ -94,7 +101,7 @@ public class ComputeTrainedScores {
 					ZoneTextInstance realZti = zoneText.getZoneText(docInstance, zoneInstance, realityInstance);
 					// Do not attempt the computation if the document was not supervised
 					if (realZti == null) {
-						log.debug("Document {} on zone {} was not supervised (passed)", docInstance.getValue(), zoneInstance.getValue());
+						logger.debug("Document {} on zone {} was not supervised (passed)", docInstance.getValue(), zoneInstance.getValue());
 						// Decrement the total size, since this value will not be accounted for in the statistics
 						totalDocs--;
 					} else {
@@ -103,7 +110,7 @@ public class ComputeTrainedScores {
 						// Do not proceed if the zoneText does not exists (i.e.,
 						// the algorithm was not applied to this image)
 						if (zti == null) {
-							log.debug("No text found for {} => zone n°{}, {}", docInstance.getValue(), zoneInstance.getValue(), imgFilterInstance.getValue());
+							logger.debug("No text found for {} => zone n°{}, {}", docInstance.getValue(), zoneInstance.getValue(), imgFilterInstance.getValue());
 							// Decrement the total size, since this value will not be accounted for in the statistics
 							totalDocs--;
 						} else {
@@ -129,34 +136,37 @@ public class ComputeTrainedScores {
 					// meanLevDistances.add(meanDistance);
 					// probabilities.add(probability);
 				} else {
-					log.error("An error has occured while processing the score computation of zone n°{} (class: {})", zoneInstance.getValue(), docType);
+					logger.error("An error has occured while processing the score computation of zone n°{} (class: {})", zoneInstance.getValue(), docType);
 				}
 			}
 			engine.getCurrentCache().flush();
 			// for (int i = 0; i < imgFilterInstances.size(); i++) {
-			// log.info("{}: {} (meanLev: {})", imgFilterInstances.get(i), probabilities.get(i), meanLevDistances.get(i));
+			// logger.info("{}: {} (meanLev: {})", imgFilterInstances.get(i), probabilities.get(i), meanLevDistances.get(i));
 			// }
 		}
 
 	}
 
+	// Untested yet!
 	public static void clearStatistics(Root engine, String docType) {
 		try {
 			engine.getCurrentCache();
 		} catch (IllegalStateException e) {
-			log.error("Current cache could not be loaded. Starting a new one...");
+			logger.error("Current cache could not be loaded. Starting a new one...");
 			engine.newCache().start();
 		}
 		Generic currentDocClass = engine.find(DocClass.class).getInstance(docType);
 		ImgFilter imgFilter = engine.find(ImgFilter.class);
-		ZoneText zoneText = engine.find(ZoneText.class);
 		Score score = engine.find(Score.class);
-		MeanLevenshtein meanLevenshtein = engine.find(MeanLevenshtein.class);
 
-		log.info("Current doc class : {} ", currentDocClass);
+		logger.info("Current doc class: {} ", currentDocClass);
 
-		List<DocInstance> docInstances = (List) currentDocClass.getHolders(engine.find(Doc.class)).toList();
 		List<ZoneInstance> zoneInstances = (List) currentDocClass.getHolders(engine.find(ZoneGeneric.class)).toList();
 		List<ImgFilterInstance> imgFilterInstances = (List) imgFilter.getInstances().filter(f -> !"reality".equals(f.getValue()) && !"best".equals(f.getValue())).toList();
+		for (ZoneInstance zone : zoneInstances) {
+			for (ImgFilterInstance ifi : imgFilterInstances) {
+				score.getScore(zone, ifi).remove();
+			}
+		}
 	}
 }

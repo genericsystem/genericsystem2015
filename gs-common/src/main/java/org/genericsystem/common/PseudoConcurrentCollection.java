@@ -1,12 +1,14 @@
 package org.genericsystem.common;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Spliterators;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -15,9 +17,9 @@ import org.genericsystem.api.core.IGeneric;
 import org.genericsystem.api.core.IndexFilter;
 import org.genericsystem.api.core.Snapshot;
 
-import javafx.beans.Observable;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.beans.value.WeakChangeListener;
 
 /**
@@ -26,6 +28,7 @@ import javafx.beans.value.WeakChangeListener;
  * @param <T>
  */
 public class PseudoConcurrentCollection<T extends IGeneric<?>> implements Snapshot<T> {
+
 	private static interface Index<T> {
 		public boolean add(T generic);
 
@@ -70,13 +73,20 @@ public class PseudoConcurrentCollection<T extends IGeneric<?>> implements Snapsh
 		public void add(T generic) {
 			if (index.add(generic))
 				children.values().forEach(childNode -> childNode.add(generic));
+			cleanUp();
 		}
 
 		public boolean remove(T generic) {
 			boolean result = index.remove(generic);
 			if (result)
 				children.values().forEach(childNode -> childNode.remove(generic));
+			cleanUp();
 			return result;
+		}
+
+		private void cleanUp() {
+			List<IndexFilter> removes = new ArrayList<>(children.keySet()).stream().filter(key -> !key.isAlive()).collect(Collectors.toList());
+			removes.forEach(key -> children.remove(key));
 		}
 	}
 
@@ -200,8 +210,38 @@ public class PseudoConcurrentCollection<T extends IGeneric<?>> implements Snapsh
 
 	public boolean remove(T element) {
 		boolean result = indexesTree.remove(element);
-		removeProperty.set(element);
+		if (result)
+			removeProperty.set(element);
 		return result;
+	}
+
+	public void addAll(Collection<T> elements, PseudoConcurrentCollection<T> removeFrom, Checker checker) {
+		T lastAdded = null;
+		T lastRemoved = null;
+		for (T element : elements) {
+			checker.checkAfterBuild(false, false, (Generic) element);
+			boolean removed = removeFrom.removeNoEvent(element);
+			if (removed)
+				lastRemoved = element;
+			else {
+				indexesTree.add(element);
+				lastAdded = element;
+			}
+		}
+		if (lastAdded != null)
+			addProperty.set(lastAdded);
+		else if (lastRemoved != null)
+			// addAll is called on the removes of one Diff with the adds of the same Diff as its second argument,
+			// so it’s not necessary to send update events to both collections.
+			removeFrom.updateRemoveProperty(lastRemoved);
+	}
+
+	private boolean removeNoEvent(T element) {
+		return indexesTree.remove(element);
+	}
+
+	private void updateRemoveProperty(T element) {
+		removeProperty.set(element);
 	}
 
 	@Override
@@ -230,7 +270,7 @@ public class PseudoConcurrentCollection<T extends IGeneric<?>> implements Snapsh
 
 	private boolean fireInvalidations = true;
 
-	public Observable getFilteredInvalidator(T generic, Predicate<T> predicate) {
+	public ObservableValue<?> getFilteredInvalidator(Predicate<T> predicate) {
 		return new FilteredInvalidator(predicate);
 	}
 

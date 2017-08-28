@@ -2,6 +2,7 @@ package org.genericsystem.common;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -20,7 +21,6 @@ import org.genericsystem.common.GenericBuilder.SetBuilder;
 import org.genericsystem.common.GenericBuilder.UpdateBuilder;
 import org.genericsystem.defaults.DefaultCache;
 
-import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -257,6 +257,10 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 		getDifferential().unplug(generic);
 	}
 
+	protected void unplugAll(Collection<Generic> generics) {
+		getDifferential().unplugAll(generics, getChecker());
+	}
+
 	protected void checkConstraints() throws RollbackException {
 		getDifferential().checkConstraints(getChecker());
 	}
@@ -341,7 +345,7 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 		}
 
 		@Override
-		public final Observable getObservable(Generic generic) {
+		public final ObservableValue<IDifferential<Generic>> getObservable(Generic generic) {
 			return transactionProperty;
 		}
 	}

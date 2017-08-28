@@ -38,7 +38,7 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 
 	@SuppressWarnings("unchecked")
 	default ObservableValue<T> getObservableAttribute(Serializable value, T... targets) {
-		return BindingsTools.transmitSuccessiveInvalidations(Bindings.valueAt(getAttributes(value, targets).toObservableList(), 0));
+		return Bindings.valueAt(getAttributes(value, targets).toObservableList(), 0);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -49,7 +49,7 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 
 	@SuppressWarnings("unchecked")
 	default ObservableValue<T> getObservableAttribute(T... targets) {
-		return BindingsTools.transmitSuccessiveInvalidations(Bindings.valueAt(getAttributes(targets).toObservableList(), 0));
+		return Bindings.valueAt(getAttributes(targets).toObservableList(), 0);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -82,19 +82,19 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 		if (nonHeritableProperty == null || attribute.inheritsFrom(nonHeritableProperty) || attribute.isInheritanceEnabled())
 			return new Snapshot<T>() {
 
-				@Override
-				public Stream<T> unfilteredStream() {
-					return new InheritanceComputer<>((T) DefaultCompositesInheritance.this, attribute, ApiStatics.STRUCTURAL).inheritanceStream();
-				}
+			@Override
+			public Stream<T> unfilteredStream() {
+				return new InheritanceComputer<>((T) DefaultCompositesInheritance.this, attribute, ApiStatics.STRUCTURAL).inheritanceStream();
+			}
 
-				@Override
-				public ObservableList<T> toObservableList() {
-					T nonHeritableProperty = getKey(NonHeritableProperty.class, ApiStatics.NO_POSITION);
-					if (nonHeritableProperty == null || attribute.inheritsFrom(nonHeritableProperty) || attribute.isInheritanceEnabled())
-						return BindingsTools.createMinimalUnitaryChangesBinding(new ObservableInheritanceComputer<>((T) DefaultCompositesInheritance.this, attribute, ApiStatics.STRUCTURAL));
-					return getComposites().toObservableList().filtered(holder -> holder.isSpecializationOf(attribute) && holder.getLevel() == ApiStatics.STRUCTURAL);
-				}
-			};
+			@Override
+			public ObservableList<T> toObservableList() {
+				T nonHeritableProperty = getKey(NonHeritableProperty.class, ApiStatics.NO_POSITION);
+				if (nonHeritableProperty == null || attribute.inheritsFrom(nonHeritableProperty) || attribute.isInheritanceEnabled())
+					return BindingsTools.createMinimalUnitaryChangesBinding(new ObservableInheritanceComputer<>((T) DefaultCompositesInheritance.this, attribute, ApiStatics.STRUCTURAL));
+				return getComposites().toObservableList().filtered(holder -> holder.isSpecializationOf(attribute) && holder.getLevel() == ApiStatics.STRUCTURAL);
+			}
+		};
 		return getComposites().filter(new IndexFilter(FiltersBuilder.IS_SPECIALIZATION_OF, attribute)).filter(new IndexFilter(FiltersBuilder.HAS_LEVEL, ApiStatics.STRUCTURAL));
 	}
 
@@ -106,7 +106,7 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 
 	@SuppressWarnings("unchecked")
 	default ObservableValue<T> getObservableHolder(T attribute, Serializable value, T... targets) {
-		return BindingsTools.transmitSuccessiveInvalidations(Bindings.valueAt(getHolders(attribute, value, targets).toObservableList(), 0));
+		return Bindings.valueAt(getHolders(attribute, value, targets).toObservableList(), 0);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -117,7 +117,7 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 
 	@SuppressWarnings("unchecked")
 	default ObservableValue<T> getObservableHolder(T attribute, T... targets) {
-		return BindingsTools.transmitSuccessiveInvalidations(Bindings.valueAt(getHolders(attribute, targets).toObservableList(), 0));
+		return Bindings.valueAt(getHolders(attribute, targets).toObservableList(), 0);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -144,19 +144,19 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 		if (nonHeritableProperty == null || attribute.inheritsFrom(nonHeritableProperty) || attribute.isInheritanceEnabled())
 			return new Snapshot<T>() {
 
-				@Override
-				public Stream<T> unfilteredStream() {
-					return new InheritanceComputer<>((T) DefaultCompositesInheritance.this, attribute, ApiStatics.CONCRETE).inheritanceStream();
-				}
+			@Override
+			public Stream<T> unfilteredStream() {
+				return new InheritanceComputer<>((T) DefaultCompositesInheritance.this, attribute, ApiStatics.CONCRETE).inheritanceStream();
+			}
 
-				@Override
-				public ObservableList<T> toObservableList() {
-					T nonHeritableProperty = getKey(NonHeritableProperty.class, ApiStatics.NO_POSITION);
-					if (nonHeritableProperty == null || attribute.inheritsFrom(nonHeritableProperty) || attribute.isInheritanceEnabled())
-						return BindingsTools.createMinimalUnitaryChangesBinding(new ObservableInheritanceComputer<>((T) DefaultCompositesInheritance.this, attribute, ApiStatics.CONCRETE));
-					return getComposites().toObservableList().filtered(holder -> holder.isSpecializationOf(attribute) && holder.getLevel() == ApiStatics.CONCRETE);
-				}
-			};
+			@Override
+			public ObservableList<T> toObservableList() {
+				T nonHeritableProperty = getKey(NonHeritableProperty.class, ApiStatics.NO_POSITION);
+				if (nonHeritableProperty == null || attribute.inheritsFrom(nonHeritableProperty) || attribute.isInheritanceEnabled())
+					return BindingsTools.createMinimalUnitaryChangesBinding(new ObservableInheritanceComputer<>((T) DefaultCompositesInheritance.this, attribute, ApiStatics.CONCRETE));
+				return getComposites().toObservableList().filtered(holder -> holder.isSpecializationOf(attribute) && holder.getLevel() == ApiStatics.CONCRETE);
+			}
+		};
 		return DefaultCompositesInheritance.this.getComposites().filter(new IndexFilter(FiltersBuilder.IS_SPECIALIZATION_OF, attribute)).filter(new IndexFilter(FiltersBuilder.HAS_LEVEL, ApiStatics.CONCRETE));
 	}
 
@@ -168,7 +168,7 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 
 	@SuppressWarnings("unchecked")
 	default ObservableValue<T> getObservableRelation(Serializable value, T... targets) {
-		return BindingsTools.transmitSuccessiveInvalidations(Bindings.valueAt(getRelations(value, targets).toObservableList(), 0));
+		return Bindings.valueAt(getRelations(value, targets).toObservableList(), 0);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -179,7 +179,7 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 
 	@SuppressWarnings("unchecked")
 	default ObservableValue<T> getObservableRelation(T... targets) {
-		return BindingsTools.transmitSuccessiveInvalidations(Bindings.valueAt(getRelations(targets).toObservableList(), 0));
+		return Bindings.valueAt(getRelations(targets).toObservableList(), 0);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -214,7 +214,7 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 
 	@SuppressWarnings("unchecked")
 	default ObservableValue<T> getObservableLink(T relation, Serializable value, T... targets) {
-		return BindingsTools.transmitSuccessiveInvalidations(Bindings.valueAt(getLinks(relation, value, targets).toObservableList(), 0));
+		return Bindings.valueAt(getLinks(relation, value, targets).toObservableList(), 0);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -225,7 +225,7 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 
 	@SuppressWarnings("unchecked")
 	default ObservableValue<T> getObservableLink(T relation, T... targets) {
-		return BindingsTools.transmitSuccessiveInvalidations(Bindings.valueAt(getLinks(relation, targets).toObservableList(), 0));
+		return Bindings.valueAt(getLinks(relation, targets).toObservableList(), 0);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -260,10 +260,10 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 
 	@SuppressWarnings("unchecked")
 	default ObservableValue<Serializable> getObservableValue(T attribute, Serializable value, T... targets) {
-		return BindingsTools.transmitSuccessiveInvalidations(Bindings.createObjectBinding(() -> {
+		return Bindings.createObjectBinding(() -> {
 			ObservableValue<T> holder = getObservableHolder(attribute, value, targets);
 			return holder.getValue() != null ? holder.getValue().getValue() : null;
-		}, getObservableHolder(attribute, value, targets)));
+		}, getObservableHolder(attribute, value, targets));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -275,10 +275,10 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 
 	@SuppressWarnings("unchecked")
 	default ObservableValue<Serializable> getObservableValue(T attribute, T... targets) {
-		return BindingsTools.transmitSuccessiveInvalidations(Bindings.createObjectBinding(() -> {
+		return Bindings.createObjectBinding(() -> {
 			ObservableValue<T> holder = getObservableHolder(attribute, targets);
 			return holder.getValue() != null ? holder.getValue().getValue() : null;
-		}, getObservableHolder(attribute, targets)));
+		}, getObservableHolder(attribute, targets));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -293,7 +293,7 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 
 			@Override
 			public ObservableList<Serializable> toObservableList() {
-				return BindingsTools.transmitSuccessiveInvalidations(new ListBinding<Serializable>() {
+				return new ListBinding<Serializable>() {
 					private final ObservableList<T> links = getLinks(attribute, value, targets).toObservableList();
 					{
 						bind(links);
@@ -303,7 +303,7 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 					protected ObservableList<Serializable> computeValue() {
 						return FXCollections.unmodifiableObservableList(FXCollections.observableList(links.stream().map(x -> x.getValue()).collect(Collectors.toList())));
 					}
-				});
+				};
 			}
 		};
 	}
@@ -320,7 +320,7 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 
 			@Override
 			public ObservableList<Serializable> toObservableList() {
-				return BindingsTools.transmitSuccessiveInvalidations(new ListBinding<Serializable>() {
+				return new ListBinding<Serializable>() {
 					private final ObservableList<T> links = getLinks(attribute, targets).toObservableList();
 					{
 						bind(links);
@@ -330,7 +330,7 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 					protected ObservableList<Serializable> computeValue() {
 						return FXCollections.unmodifiableObservableList(FXCollections.observableList(links.stream().map(x -> x.getValue()).collect(Collectors.toList())));
 					}
-				});
+				};
 			}
 		};
 	}
@@ -346,7 +346,7 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 
 			@Override
 			public ObservableList<Serializable> toObservableList() {
-				return BindingsTools.transmitSuccessiveInvalidations(new ListBinding<Serializable>() {
+				return new ListBinding<Serializable>() {
 					private final ObservableList<T> holders = getHolders(attribute, pos).toObservableList();
 					{
 						bind(holders);
@@ -357,7 +357,7 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 						return FXCollections.unmodifiableObservableList(FXCollections.observableList(holders.stream().map(x -> x.getValue()).collect(Collectors.toList())));
 
 					}
-				});
+				};
 			}
 		};
 	}
@@ -387,10 +387,10 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 
 	@SuppressWarnings("unchecked")
 	default ObservableValue<T> getObservableLinkTargetComponent(T relation, T... targets) {
-		return BindingsTools.transmitSuccessiveInvalidations(Bindings.createObjectBinding(() -> {
+		return Bindings.createObjectBinding(() -> {
 			ObservableValue<T> link = getObservableLink(relation, targets);
 			return link.getValue() != null ? link.getValue().getTargetComponent() : null;
-		}, getObservableLink(relation, targets)));
+		}, getObservableLink(relation, targets));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -401,9 +401,9 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 
 	@SuppressWarnings("unchecked")
 	default ObservableValue<T> getObservablecLinkTargetComponent(T relation, Serializable value, T... targets) {
-		return BindingsTools.transmitSuccessiveInvalidations(Bindings.createObjectBinding(() -> {
+		return Bindings.createObjectBinding(() -> {
 			ObservableValue<T> link = getObservableLink(relation, value, targets);
 			return link.getValue() != null ? link.getValue().getTargetComponent() : null;
-		}, getObservableLink(relation, value, targets)));
+		}, getObservableLink(relation, value, targets));
 	}
 }

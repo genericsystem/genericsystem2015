@@ -1,6 +1,7 @@
 package org.genericsystem.common;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -13,11 +14,11 @@ import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationEx
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.defaults.tools.BindingsTools;
 
-import javafx.beans.Observable;
 import javafx.beans.binding.ListBinding;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -75,14 +76,16 @@ public class Differential implements IDifferential<Generic> {
 	protected Generic plug(Generic generic) {
 		// assert generic.getOtherTs()[0] == Long.MAX_VALUE;
 		adds.add(generic);
-		// System.out.println("Add : " + generic.info() + System.identityHashCode(generic));
 		return generic;
 	}
 
 	protected void unplug(Generic generic) {
 		if (!adds.remove(generic))
 			removes.add(generic);
-		// System.out.println("Remove : " + generic.info() + System.identityHashCode(generic));
+	}
+
+	protected void unplugAll(Collection<Generic> generics, Checker checker) {
+		removes.addAll(generics, adds, checker);
 	}
 
 	@Override
@@ -121,18 +124,19 @@ public class Differential implements IDifferential<Generic> {
 				if (result == null) {
 					@SuppressWarnings({ "unchecked", "rawtypes" })
 					ObjectProperty<Differential> differentialProperty = (ObjectProperty) getDifferentialProperty();
-					result = BindingsTools.createMinimalUnitaryChangesBinding(BindingsTools.transmitSuccessiveInvalidations(new ListBinding<Generic>() {
-						private final Observable invalidator = BindingsTools.createTransitive(differentialProperty, diff -> new Observable[] { diff.getObservable(generic) });
+					result = BindingsTools.createMinimalUnitaryChangesBinding(new ListBinding<Generic>() {
+						private final ObservableValue<?> invalidator = BindingsTools.createTransitive(differentialProperty, diff -> new ObservableValue[] { diff.getObservable(generic) });
 						{
 							bind(invalidator);
-							invalidate();
 						}
 
 						@Override
 						protected ObservableList<Generic> computeValue() {
+							// Force reevaluation of the invalidator so that the binding works correctly.
+							invalidator.getValue();
 							return FXCollections.observableList(differentialProperty.getValue().getDependencies(generic).toList());
 						}
-					}));
+					});
 					getDependenciesAsOservableListCacheMap().put(generic, result);
 				}
 				return result;
@@ -162,8 +166,7 @@ public class Differential implements IDifferential<Generic> {
 	}
 
 	@Override
-	public final Observable getObservable(Generic generic) {
-		return BindingsTools.create(getSubDifferential().getObservable(generic), adds.getFilteredInvalidator(generic, generic::isDirectAncestorOf), removes.getFilteredInvalidator(generic, generic::isDirectAncestorOf));
-		// return ObservableBase.createObservable(getSubDifferential().getObservable(generic), adds.getFilteredInvalidator(generic, generic::isDirectAncestorOf), removes.getFilteredInvalidator(generic, generic::isDirectAncestorOf));
+	public final ObservableValue<?> getObservable(Generic generic) {
+		return BindingsTools.create(getSubDifferential().getObservable(generic), adds.getFilteredInvalidator(generic::isDirectAncestorOf), removes.getFilteredInvalidator(generic::isDirectAncestorOf));
 	}
 }
