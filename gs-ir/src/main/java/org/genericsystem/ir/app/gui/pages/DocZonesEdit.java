@@ -6,6 +6,7 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.ir.app.gui.pages.DocZonesEdit.TextDiv;
 import org.genericsystem.ir.app.gui.utils.ContextActionCustom.MODAL_DISPLAY_FLEX_CUSTOM;
 import org.genericsystem.ir.app.gui.utils.ContextActionCustom.SAVE;
+import org.genericsystem.ir.app.gui.utils.DocumentImage;
 import org.genericsystem.ir.app.gui.utils.ObservableListExtractorCustom.DATALIST_SELECTOR;
 import org.genericsystem.ir.app.gui.utils.ObservableListExtractorCustom.ZONE_SELECTOR_REALITY;
 import org.genericsystem.ir.app.gui.utils.TextBindingCustom.ZONE_LABEL;
@@ -32,14 +33,11 @@ import org.genericsystem.reactor.gscomponents.FlexDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlDatalist;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlHyperLink;
-import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlImg;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlOption;
 import org.genericsystem.reactor.gscomponents.InputTextWithConversion.InputTextEditorWithConversionForDatalist;
 import org.genericsystem.reactor.gscomponents.InputWithDatalist;
 import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
-
-import javafx.beans.property.SimpleStringProperty;
 
 @Children(FlexDiv.class)
 @Children(path = FlexDiv.class, value = { HtmlHyperLink.class, TextDiv.class })
@@ -53,7 +51,7 @@ public class DocZonesEdit extends ModalEditor {
 	@FlexDirectionStyle(path = FlexDiv.class, value = FlexDirection.ROW)
 	@Children({ FlexDiv.class, FlexDiv.class, FlexDiv.class })
 	@Children(path = FlexDiv.class, pos = 1, value = { FlexDiv.class, FlexDiv.class })
-	@Children(path = { FlexDiv.class, FlexDiv.class }, pos = { 1, 0 }, value = Image.class)
+	@Children(path = { FlexDiv.class, FlexDiv.class }, pos = { 1, 0 }, value = DocumentImage.class)
 	@Children(path = FlexDiv.class, pos = 2, value = { Validate.class, Reset.class, Cancel.class })
 	@Children(path = { FlexDiv.class, FlexDiv.class }, pos = { 1, 1 }, value = ZoneTextDiv.class)
 	@BindText(path = FlexDiv.class, pos = 0)
@@ -83,17 +81,6 @@ public class DocZonesEdit extends ModalEditor {
 	@BindAction(value = { CANCEL.class, RESET_SELECTION.class })
 	public static class Cancel extends HtmlButton {
 		// Cancel the changes
-	}
-
-	@Style(name = "margin", value = "0.5em")
-	@Style(name = "flex", value = "0 0 auto")
-	@Style(name = "justify-content", value = "center")
-	@Style(name = "align-items", value = "center")
-	public static class Image extends HtmlImg {
-		@Override
-		public void init() {
-			bindAttribute("src", "imgadr", context -> new SimpleStringProperty((String) context.getGeneric().getValue()));
-		}
 	}
 
 	@FlexDirectionStyle(FlexDirection.COLUMN)
