@@ -38,7 +38,6 @@ public class ObservableInheritanceComputer<T extends DefaultGeneric<T>> extends 
 		invalidators.forEach(ObservableInheritanceComputer.this::unbind);
 		List<Observable> newInvalidators = new ArrayList<>();
 		List<T> internal = new InheritanceComputer<T>(base, origin, level) {
-			private static final long serialVersionUID = 4269874133078234506L;
 
 			@Override
 			protected Inheritings buildInheritings(T superVertex) {

@@ -20,8 +20,6 @@ import org.genericsystem.defaults.DefaultGeneric;
  */
 public class InheritanceComputer<T extends DefaultGeneric<T>> {
 
-	private static final long serialVersionUID = 1877502935577170921L;
-
 	private final Map<T, Collection<T>> inheritingsCache = new HashMap<>();
 	private final Set<T> overridden = new HashSet<>();
 
