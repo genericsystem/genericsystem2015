@@ -314,7 +314,7 @@ public class Layout {
 		return shards;
 	}
 
-	public Layout recursivSplit(Size morph, int level, Img img, Img binary) {
+	public Layout recursiveSplit(Size morph, int level, Img img, Img binary) {
 		// System.out.println("level : " + level);
 		// System.out.println("Layout : " + this);
 		assert img.size().equals(binary.size());
@@ -335,7 +335,7 @@ public class Layout {
 			return this;
 		}
 		for (Layout shard : shards) {
-			shard.recursivSplit(morph, level - 1, shard.getRoi(img), shard.getRoi(binary));
+			shard.recursiveSplit(morph, level - 1, shard.getRoi(img), shard.getRoi(binary));
 			this.addChild(shard);
 		}
 		return this;
