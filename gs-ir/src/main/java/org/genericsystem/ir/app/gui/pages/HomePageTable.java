@@ -9,6 +9,7 @@ import org.genericsystem.ir.app.gui.utils.DocPropertiesSwitcher.DOC_NOT_OCRD;
 import org.genericsystem.ir.app.gui.utils.DocPropertiesSwitcher.DOC_NOT_SUPERVISED;
 import org.genericsystem.ir.app.gui.utils.DocPropertiesSwitcher.DOC_OCRD;
 import org.genericsystem.ir.app.gui.utils.DocPropertiesSwitcher.DOC_SUPERVISED;
+import org.genericsystem.ir.app.gui.utils.DocumentImage;
 import org.genericsystem.ir.app.gui.utils.ObservableListExtractorCustom.DOC_SELECTOR;
 import org.genericsystem.ir.app.gui.utils.TextBindingCustom.LAST_DOC_UPDATE_LABEL;
 import org.genericsystem.reactor.annotations.Attribute;
@@ -101,11 +102,15 @@ public class HomePageTable extends FlexDiv {
 
 	}
 
-	@BindText
-	@FlexDirectionStyle(FlexDirection.COLUMN)
+	@Children({ DocumentImage.class, FlexDiv.class })
+	@BindText(path = FlexDiv.class)
+	@FlexDirectionStyle(FlexDirection.ROW)
 	@Style(name = "justify-content", value = "center")
 	@Style(name = "align-items", value = "center")
 	@Style(name = "flex", value = "3")
+	@Style(path = FlexDiv.class, name = "flex", value = "1")
+	@Style(path = DocumentImage.class, name = "width", value = "auto")
+	@Style(path = DocumentImage.class, name = "height", value = "5ex")
 	public static class DocumentName extends FlexDiv {
 
 	}
@@ -131,7 +136,8 @@ public class HomePageTable extends FlexDiv {
 	@Children(FlexDiv.class)
 	@Children(path = FlexDiv.class, value = { HtmlHyperLink.class, FlexDiv.class })
 	@InheritStyle("background-color")
-	@Style(path = FlexDiv.class, name = "max-height", value = "90%")
+	@Style(path = FlexDiv.class, name = "max-height", value = "fit-content")
+	@Style(path = FlexDiv.class, name = "min-height", value = "fit-content")
 	@Style(path = FlexDiv.class, name = "width", value = "auto")
 	@BindAction(path = { FlexDiv.class, HtmlHyperLink.class }, value = RESET_SELECTION.class)
 	@Children(path = { FlexDiv.class, FlexDiv.class }, value = FlexDiv.class)

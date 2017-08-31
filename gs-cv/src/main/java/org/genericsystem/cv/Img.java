@@ -880,7 +880,7 @@ public class Img implements AutoCloseable, Serializable {
 
 	public Layout buildLayout(Size morph, int level, Img binary) {
 		Layout root = new Layout(null, 0, 1, 0, 1).tighten(binary);
-		return root.recursivSplit(morph, level, root.getRoi(this), root.getRoi(binary));
+		return root.recursiveSplit(morph, level, root.getRoi(this), root.getRoi(binary));
 	}
 
 	private static boolean[] close(List<Boolean> histo, int k) {
