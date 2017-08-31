@@ -12,7 +12,7 @@
 	<name>Generic System Computer Vision</name>
 
 	<properties>
-		<deeplearning4j.version>0.8.1-SNAPSHOT</deeplearning4j.version>
+		<deeplearning4j.version>0.9.1</deeplearning4j.version>
 	</properties>
 
 	<build>
