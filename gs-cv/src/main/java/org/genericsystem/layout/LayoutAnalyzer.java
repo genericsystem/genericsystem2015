@@ -39,6 +39,10 @@ public class LayoutAnalyzer extends AbstractApp {
 		// mainGrid.add(new ImageView(binary2.toJfxImage()), columnIndex, rowIndex++);
 		System.out.println(layout.recursiveToString());
 
+		// Close the images
+		img.close();
+		binary.close();
+		img2.close();
 	}
 
 }
