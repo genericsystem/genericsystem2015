@@ -9,9 +9,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
-
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.Tools;
@@ -36,6 +33,9 @@ import org.opencv.utils.Converters;
 import org.opencv.videoio.VideoCapture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
 
 public class CamLayoutAnalyzer extends AbstractApp {
 
@@ -89,27 +89,30 @@ public class CamLayoutAnalyzer extends AbstractApp {
 					newDescriptors = new Mat();
 					extractor.compute(deskewed_.getSrc(), newKeypoints, newDescriptors);
 					Img deskiewedCopy = new Img(deskewed_.getSrc(), true);
-					deskewed_.buildLayout().draw(deskiewedCopy, new Scalar(0, 255, 0), 1);
+					Img binary = deskewed_.cleanFaces(0.1, 0.26).adaptativeGaussianThreshold(17, 7).cleanTables(0.05);
+					binary.buildLayout().draw(deskiewedCopy, new Scalar(0, 255, 0), 1);
 					Img stabilized = stabilize(frame, stabilizedMat, matcher, angle[0], homography);
 					if (stabilized != null) {
 						Img stabilizedCopy = new Img(stabilized.getSrc(), true);
-						if (layout == null)
-							layout = stabilized.buildLayout();
+						if (layout == null) {
+							Img binary2 = stabilized.cleanFaces(0.1, 0.26).adaptativeGaussianThreshold(17, 7).cleanTables(0.05);
+							layout = binary2.buildLayout();
+						}
 						// layout.ocrTree(stabilizedCopy, 3);
-				layout.draw(stabilizedCopy, new Scalar(0, 255, 0), 1);
-				layout.drawPerspective(frameImg, homography[0].inv(), new Scalar(0, 0, 255), 1);
-				double area = layout.area(stabilized);
-				Imgproc.putText(stabilizedCopy.getSrc(), "Surface : " + area, new Point(0.5 * stabilizedCopy.width(), 0.05 * stabilizedCopy.height()), Core.FONT_HERSHEY_PLAIN, 1, new Scalar(255, 0, 0), 1);
-				src0.setImage(frameImg.toJfxImage());
-				src1.setImage(deskewed_.toJfxImage());
-				src2.setImage(deskiewedCopy.toJfxImage());
-				src3.setImage(stabilizedCopy.toJfxImage());
+						layout.draw(stabilizedCopy, new Scalar(0, 255, 0), 1);
+						layout.drawPerspective(frameImg, homography[0].inv(), new Scalar(0, 0, 255), 1);
+						double area = layout.area(stabilized);
+						Imgproc.putText(stabilizedCopy.getSrc(), "Surface : " + area, new Point(0.5 * stabilizedCopy.width(), 0.05 * stabilizedCopy.height()), Core.FONT_HERSHEY_PLAIN, 1, new Scalar(255, 0, 0), 1);
+						src0.setImage(frameImg.toJfxImage());
+						src1.setImage(deskewed_.toJfxImage());
+						src2.setImage(deskiewedCopy.toJfxImage());
+						src3.setImage(stabilizedCopy.toJfxImage());
+					}
+				} catch (Throwable e) {
+					logger.warn("Exception while computing layout.", e);
+				}
 			}
-		} catch (Throwable e) {
-			logger.warn("Exception while computing layout.", e);
-		}
-	}
-}, 500, 66, TimeUnit.MILLISECONDS);
+		}, 500, 66, TimeUnit.MILLISECONDS);
 	}
 
 	@Override

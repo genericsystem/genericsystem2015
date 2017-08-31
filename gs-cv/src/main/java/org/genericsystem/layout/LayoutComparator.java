@@ -4,9 +4,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
-
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.Tools;
@@ -15,6 +12,9 @@ import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
+
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
 
 public class LayoutComparator extends AbstractApp {
 
@@ -53,9 +53,9 @@ public class LayoutComparator extends AbstractApp {
 				Img img3 = frameImg.sauvolaThreshold().bitwise_not();
 
 				// Layout layout = frameImg.buildLayout(img0);
-				Layout layout1 = frameImg.buildLayout(img1);
-				Layout layout2 = frameImg.buildLayout(img2);
-				Layout layout3 = frameImg.buildLayout(img3);
+				Layout layout1 = frameImg.buildLayout();
+				Layout layout2 = frameImg.buildLayout();
+				Layout layout3 = frameImg.buildLayout();
 
 				Img out = new Img(frame, true);
 				// layout.draw(img0, new Scalar(0), 1);

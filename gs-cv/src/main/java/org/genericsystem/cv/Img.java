@@ -15,9 +15,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-
 import javax.swing.ImageIcon;
 
 import org.genericsystem.layout.Layout;
@@ -44,6 +41,9 @@ import org.opencv.utils.Converters;
 import org.opencv.ximgproc.Ximgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 
 public class Img implements AutoCloseable, Serializable {
 
@@ -870,17 +870,12 @@ public class Img implements AutoCloseable, Serializable {
 	}
 
 	public Layout buildLayout() {
-		Img binary = cleanFaces(0.1, 0.26).adaptativeGaussianThreshold(17, 7).cleanTables(0.05);
-		return buildLayout(binary);
+		return this.buildLayout(new Size(0.04, 0.008), 5);
 	}
 
-	public Layout buildLayout(Img binary) {
-		return buildLayout(new Size(0.04, 0.008), 5, binary);
-	}
-
-	public Layout buildLayout(Size morph, int level, Img binary) {
-		Layout root = new Layout(null, 0, 1, 0, 1).tighten(binary);
-		return root.recursiveSplit(morph, level, root.getRoi(this), root.getRoi(binary));
+	public Layout buildLayout(Size morph, int level) {
+		Layout root = new Layout(null, 0, 1, 0, 1).tighten(this);
+		return root.recursiveSplit(morph, level, root.getRoi(this));
 	}
 
 	private static boolean[] close(List<Boolean> histo, int k) {
