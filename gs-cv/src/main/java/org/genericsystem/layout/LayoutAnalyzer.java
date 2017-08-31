@@ -37,7 +37,8 @@ public class LayoutAnalyzer extends AbstractApp {
 		layout.ocrTree(img2, 6);
 		mainGrid.add(new ImageView(img2.toJfxImage()), columnIndex, rowIndex++);
 		// mainGrid.add(new ImageView(binary2.toJfxImage()), columnIndex, rowIndex++);
-		System.out.println(layout.recursivToString());
+		System.out.println(layout.recursiveToString());
 
 	}
+
 }

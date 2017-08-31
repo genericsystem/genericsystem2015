@@ -203,7 +203,7 @@ public class Layout {
 		return !getChildren().isEmpty();
 	}
 
-	public String recursivToString() {
+	public String recursiveToString() {
 		StringBuilder sb = new StringBuilder();
 		recursivToString(this, sb, 0);
 		sb.append("\n");
