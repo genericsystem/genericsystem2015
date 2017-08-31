@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.genericsystem.api.core.FiltersBuilder;
@@ -38,11 +37,11 @@ public class InheritanceComputer<T extends DefaultGeneric<T>> extends HashSet<T>
 	}
 
 	private Stream<T> getInheringsStream(T superVertex) {
-		Collection<T> result = inheritingsCache.get(superVertex);
-		if (result == null)
-			inheritingsCache.put(superVertex, result = buildInheritings(superVertex).inheritanceStream().collect(Collectors.toList()));
-		return result.stream();
-		// return new Inheritings(superVertex).inheritanceStream();
+		// Collection<T> result = inheritingsCache.get(superVertex);
+		// if (result == null)
+		// inheritingsCache.put(superVertex, result = buildInheritings(superVertex).inheritanceStream().collect(Collectors.toList()));
+		// return result.stream();
+		return new Inheritings(superVertex).inheritanceStream();
 	}
 
 	protected Inheritings buildInheritings(T superVertex) {
