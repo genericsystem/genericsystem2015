@@ -278,13 +278,13 @@ public class Layout {
 
 	private List<Layout> extractZones(boolean[] resultV, boolean[] resultH, Img binary) {
 
-		List<Double[]> shardsV = getShards(resultV, true);
-		List<Double[]> shardsH = getShards(resultH, false);
+		List<double[]> shardsV = getShards(resultV, true);
+		List<double[]> shardsH = getShards(resultH, false);
 		// System.out.println("Binary size : " + binary.size());
 		// System.out.println("Size spit : " + shardsV.size() + " " + shardsH.size());
 		List<Layout> shards = new ArrayList<>();
-		for (Double[] shardv : shardsV)
-			for (Double[] shardh : shardsH) {
+		for (double[] shardv : shardsV)
+			for (double[] shardh : shardsH) {
 				Layout target = new Layout(this, shardh[0], shardh[1], shardv[0], shardv[1]);
 				Img roi = target.getRoi(binary);
 				// System.out.println("roi : rows :" + roi.rows() + " , cols :" + roi.cols());
@@ -294,21 +294,21 @@ public class Layout {
 		return shards;
 	}
 
-	private List<Double[]> getShards(boolean[] result, boolean vertical) {
-		List<Double[]> shards = new ArrayList<>();
+	private List<double[]> getShards(boolean[] result, boolean vertical) {
+		List<double[]> shards = new ArrayList<>();
 		Integer start = result[0] ? 0 : null;
 		assert result.length >= 1;
 		for (int i = 0; i < result.length - 1; i++)
 			if (!result[i] && result[i + 1])
 				start = i + 1;
 			else if (result[i] && !result[i + 1]) {
-				shards.add(vertical ? new Double[] { Integer.valueOf(start).doubleValue() / result.length, (Integer.valueOf(i).doubleValue() + 1) / result.length }
-						: new Double[] { Integer.valueOf(start).doubleValue() / result.length, (Integer.valueOf(i).doubleValue() + 1) / result.length });
+				shards.add(vertical ? new double[] { Integer.valueOf(start).doubleValue() / result.length, (Integer.valueOf(i).doubleValue() + 1) / result.length }
+						: new double[] { Integer.valueOf(start).doubleValue() / result.length, (Integer.valueOf(i).doubleValue() + 1) / result.length });
 				start = null;
 			}
 		if (result[result.length - 1]) {
-			shards.add(vertical ? new Double[] { Integer.valueOf(start).doubleValue() / result.length, Integer.valueOf(result.length).doubleValue() / result.length }
-					: new Double[] { Integer.valueOf(start).doubleValue() / result.length, Integer.valueOf(result.length).doubleValue() / result.length });
+			shards.add(vertical ? new double[] { Integer.valueOf(start).doubleValue() / result.length, Integer.valueOf(result.length).doubleValue() / result.length }
+					: new double[] { Integer.valueOf(start).doubleValue() / result.length, Integer.valueOf(result.length).doubleValue() / result.length });
 			start = null;
 		}
 		return shards;
