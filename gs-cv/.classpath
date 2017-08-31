@@ -22,7 +22,7 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Opencv-3.2.0">
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Opencv-3.3.0">
 		<attributes>
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="/home/middleware/opencv/build/lib"/>
 		</attributes>
