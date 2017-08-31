@@ -253,9 +253,10 @@ public class Layout {
 
 	public List<Layout> split(Size morph, Img binary) {
 		// Adjust the percentage according to equation: m / (alpha + beta * x)
+		Double multiplier = Double.valueOf(10);
 		Double alpha = Double.valueOf(0);
 		Double beta = Double.valueOf(1);
-		Double adjustMorph = 1_000 / (alpha + beta * binary.width());
+		Double adjustMorph = 100 * multiplier / (alpha + beta * binary.width());
 
 		System.out.println(String.format("width: %dpx; adj: %.2f", binary.width(), adjustMorph));
 

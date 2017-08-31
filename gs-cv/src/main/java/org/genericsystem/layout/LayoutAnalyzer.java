@@ -24,8 +24,8 @@ public class LayoutAnalyzer extends AbstractApp {
 		int rowIndex = 0;
 		rowIndex = 0;
 		columnIndex++;
-		final String filename = "classes/id-fr-front/image-4.png";
-		// final String filename = "resources/14342661748973931.jpg";
+		// final String filename = "classes/id-fr-front/image-4.png";
+		final String filename = "resources/14342661748973931.jpg";
 		Img img = new Img(filename);
 		mainGrid.add(new ImageView(img.toJfxImage()), columnIndex, rowIndex++);
 		Img binary = img.cleanFaces(0.1, 0.26).bilateralFilter(10, 80, 80).adaptativeGaussianThreshold(17, 15).cleanTables(0.05);
