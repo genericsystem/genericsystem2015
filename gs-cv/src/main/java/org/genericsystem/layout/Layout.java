@@ -326,7 +326,7 @@ public class Layout {
 			return this;
 		}
 		List<Layout> shards = split(morph, binary);
-		shards.removeIf(shard -> ((shard.getY2() - shard.getY1()) * img.size().height) < 4 || ((shard.getX2() - shard.getX1()) * img.size().width) < 4);
+		shards.removeIf(shard -> ((shard.getY2() - shard.getY1()) * binary.size().height) < 1 || ((shard.getX2() - shard.getX1()) * binary.size().width) < 1);
 		if (shards.isEmpty()) {
 			// Imgproc.rectangle(img.getSrc(), new Point(0, 0), new Point(img.width(), img.height()), new Scalar(0, 0, 255), -1);
 			return this;
