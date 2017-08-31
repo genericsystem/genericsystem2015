@@ -22,6 +22,8 @@ import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
 
 public class Layout {
+	// Golden ratio
+	private static final Double gold = (1 + Math.sqrt(5)) / 2;
 
 	private double x1;
 	private double x2;
@@ -203,7 +205,7 @@ public class Layout {
 		return !getChildren().isEmpty();
 	}
 
-	public String recursivToString() {
+	public String recursiveToString() {
 		StringBuilder sb = new StringBuilder();
 		recursivToString(this, sb, 0);
 		sb.append("\n");
@@ -252,7 +254,17 @@ public class Layout {
 	}
 
 	public List<Layout> split(Size morph, Img binary) {
-		return extractZones(close(new Double(Math.floor(morph.height * binary.height())).intValue(), binary.projectVertically()), close(new Double(Math.floor(morph.width * binary.width())).intValue(), binary.projectHorizontally()), binary);
+		Double adjustMorph = (Math.log10(binary.width()) - gold) / 100;
+		// System.out.println(String.format("width: %dpx; adjust: %.3f", binary.width(), adjustMorph * 100));
+
+		Double morphW = adjustMorph <= 0 ? morph.width : morph.width - adjustMorph;
+		Double morphH = morph.height;
+
+		Double verticalParam = Math.floor(morphH * binary.height());
+		Double horizontalParam = Math.floor(morphW * binary.width());
+
+		// System.out.printf("width: %dpx; a: %.2f\n", binary.width(), morphW * 100);
+		return extractZones(close(verticalParam.intValue(), binary.projectVertically()), close(horizontalParam.intValue(), binary.projectHorizontally()), binary);
 	}
 
 	private static boolean[] close(int k, List<Float> histo) {
@@ -326,7 +338,7 @@ public class Layout {
 			return this;
 		}
 		List<Layout> shards = split(morph, binary);
-		shards.removeIf(shard -> ((shard.getY2() - shard.getY1()) * img.size().height) < 4 || ((shard.getX2() - shard.getX1()) * img.size().width) < 4);
+		// shards.removeIf(shard -> ((shard.getY2() - shard.getY1()) * binary.size().height) < 2 || ((shard.getX2() - shard.getX1()) * binary.size().width) < 2);
 		if (shards.isEmpty()) {
 			// Imgproc.rectangle(img.getSrc(), new Point(0, 0), new Point(img.width(), img.height()), new Scalar(0, 0, 255), -1);
 			return this;
