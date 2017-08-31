@@ -22,8 +22,6 @@ import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
 
 public class Layout {
-	// Golden ratio
-	private static final Double gold = (1 + Math.sqrt(5)) / 2;
 
 	private double x1;
 	private double x2;
@@ -254,10 +252,15 @@ public class Layout {
 	}
 
 	public List<Layout> split(Size morph, Img binary) {
-		Double adjustMorph = (Math.log10(binary.width()) - gold) / 100;
-		// System.out.println(String.format("width: %dpx; adjust: %.3f", binary.width(), adjustMorph * 100));
+		// Adjust the percentage according to equation: m / (alpha + beta * x)
+		Double alpha = Double.valueOf(0);
+		Double beta = Double.valueOf(1);
+		Double adjustMorph = 1_000 / (alpha + beta * binary.width());
 
-		Double morphW = adjustMorph <= 0 ? morph.width : morph.width - adjustMorph;
+		System.out.println(String.format("width: %dpx; adj: %.2f", binary.width(), adjustMorph));
+
+		// Replaced the morph.width parameter with the computed one
+		Double morphW = morph.width * adjustMorph;
 		Double morphH = morph.height;
 
 		Double verticalParam = Math.floor(morphH * binary.height());
