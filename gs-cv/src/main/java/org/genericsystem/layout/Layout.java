@@ -23,7 +23,7 @@ import org.opencv.utils.Converters;
 
 public class Layout {
 	// Golden ratio
-	private static final Double gold = (1 + Math.sqrt(5)) / 2;
+	// private static final Double gold = (1 + Math.sqrt(5)) / 2;
 
 	private double x1;
 	private double x2;
@@ -207,14 +207,14 @@ public class Layout {
 
 	public String recursiveToString() {
 		StringBuilder sb = new StringBuilder();
-		recursivToString(this, sb, 0);
+		recursiveToString(this, sb, 0);
 		sb.append("\n");
 		return sb.toString();
 	}
 
-	private void recursivToString(Layout shard, StringBuilder sb, int depth) {
+	private void recursiveToString(Layout shard, StringBuilder sb, int depth) {
 		sb.append("depth : " + depth + " : ");
-		sb.append("[(" + shard.x1 + "," + shard.x2 + "),(" + shard.y1 + "," + shard.y2 + ")]".toString());
+		sb.append("[(" + shard.x1 + "," + shard.y1 + "),(" + shard.x2 + "," + shard.y2 + ")]".toString());
 		if (!shard.hasChildren())
 			sb.append(" : Labels : " + shard.labels);
 		else {
@@ -223,7 +223,7 @@ public class Layout {
 				sb.append("\n");
 				for (int i = 0; i < depth; i++)
 					sb.append("    ");
-				recursivToString(s, sb, depth);
+				recursiveToString(s, sb, depth);
 			}
 		}
 	}
@@ -254,14 +254,9 @@ public class Layout {
 	}
 
 	public List<Layout> split(Size morph, Img binary) {
-		Double adjustMorph = (Math.log10(binary.width()) - gold) / 100;
-		// System.out.println(String.format("width: %dpx; adjust: %.3f", binary.width(), adjustMorph * 100));
 
-		Double morphW = adjustMorph <= 0 ? morph.width : morph.width - adjustMorph;
-		Double morphH = morph.height;
-
-		Double verticalParam = Math.floor(morphH * binary.height());
-		Double horizontalParam = Math.floor(morphW * binary.width());
+		Double verticalParam = Math.floor(morph.height * binary.height());
+		Double horizontalParam = Math.floor(morph.width * binary.width());
 
 		// System.out.printf("width: %dpx; a: %.2f\n", binary.width(), morphW * 100);
 		return extractZones(close(verticalParam.intValue(), binary.projectVertically()), close(horizontalParam.intValue(), binary.projectHorizontally()), binary);
@@ -338,7 +333,7 @@ public class Layout {
 			return this;
 		}
 		List<Layout> shards = split(morph, binary);
-		// shards.removeIf(shard -> ((shard.getY2() - shard.getY1()) * binary.size().height) < 2 || ((shard.getX2() - shard.getX1()) * binary.size().width) < 2);
+		shards.removeIf(shard -> ((shard.getY2() - shard.getY1()) * binary.size().height) < 2 || ((shard.getX2() - shard.getX1()) * binary.size().width) < 2);
 		if (shards.isEmpty()) {
 			// Imgproc.rectangle(img.getSrc(), new Point(0, 0), new Point(img.width(), img.height()), new Scalar(0, 0, 255), -1);
 			return this;
