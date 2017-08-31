@@ -30,7 +30,7 @@ import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
 @Children(FlexDiv.class)
 @Children(path = FlexDiv.class, value = { HtmlHyperLink.class, TextDiv.class })
 @InheritStyle("background-color")
-@Style(path = FlexDiv.class, name = "max-height", value = "90%")
+@Style(path = FlexDiv.class, name = "max-height", value = "fit-content")
 @Style(path = FlexDiv.class, name = "width", value = "inherit")
 @BindAction(path = { FlexDiv.class, HtmlHyperLink.class }, value = RESET_SELECTION.class)
 public class DocZonesShow extends ModalEditor {
