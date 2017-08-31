@@ -5,6 +5,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.genericsystem.api.core.FiltersBuilder;
@@ -16,11 +18,12 @@ import org.genericsystem.defaults.DefaultGeneric;
  *
  * @param <T>
  */
-public class InheritanceComputer<T extends DefaultGeneric<T>> extends HashSet<T> {
+public class InheritanceComputer<T extends DefaultGeneric<T>> {
 
 	private static final long serialVersionUID = 1877502935577170921L;
 
 	private final Map<T, Collection<T>> inheritingsCache = new HashMap<>();
+	private final Set<T> overridden = new HashSet<>();
 
 	private final T base;
 	private final T origin;
@@ -33,15 +36,15 @@ public class InheritanceComputer<T extends DefaultGeneric<T>> extends HashSet<T>
 	}
 
 	public Stream<T> inheritanceStream() {
-		return getInheringsStream(base).filter(holder -> !contains(holder) && !holder.equals(origin) && holder.getLevel() == level);
+		return getInheringsStream(base).filter(holder -> !overridden.contains(holder) && !holder.equals(origin) && holder.getLevel() == level);
 	}
 
 	private Stream<T> getInheringsStream(T superVertex) {
-		// Collection<T> result = inheritingsCache.get(superVertex);
-		// if (result == null)
-		// inheritingsCache.put(superVertex, result = buildInheritings(superVertex).inheritanceStream().collect(Collectors.toList()));
-		// return result.stream();
-		return new Inheritings(superVertex).inheritanceStream();
+		Collection<T> result = inheritingsCache.get(superVertex);
+		if (result == null)
+			inheritingsCache.put(superVertex, result = buildInheritings(superVertex).inheritanceStream().collect(Collectors.toList()));
+		return result.stream();
+		//		return new Inheritings(superVertex).inheritanceStream();
 	}
 
 	protected Inheritings buildInheritings(T superVertex) {
@@ -74,7 +77,7 @@ public class InheritanceComputer<T extends DefaultGeneric<T>> extends HashSet<T>
 
 		private Stream<T> getStream(final T holder) {
 			if (compositesBySuper(holder).count() != 0)
-				add(holder);
+				overridden.add(holder);
 			Stream<T> indexStream = Stream.concat(holder.getLevel() < level ? compositesByMeta(holder) : Stream.empty(), compositesBySuper(holder));
 			return Stream.concat(Stream.of(holder), indexStream.flatMap(x -> getStream(x)).distinct());
 		}
