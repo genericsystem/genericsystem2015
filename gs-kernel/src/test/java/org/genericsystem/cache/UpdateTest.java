@@ -3,7 +3,6 @@ package org.genericsystem.cache;
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.exceptions.MetaRuleConstraintViolationException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.defaults.tools.ObservableInheritanceComputer;
 import org.genericsystem.kernel.Engine;
 import org.testng.annotations.Test;
 
@@ -145,7 +144,7 @@ public class UpdateTest extends AbstractTest {
 		Generic red = color.addInstance("Red");
 		Generic green = color.addInstance("Green");
 		Generic audiRed = audi.addLink(carColor, "audiRed", red);
-		ObservableList<Generic> greenCars = new ObservableInheritanceComputer<>(green, carColor, ApiStatics.CONCRETE);
+		ObservableList<Generic> greenCars = green.getHolders(carColor).toObservableList();
 		assert greenCars.isEmpty();
 		System.gc();
 		// Generic audiGreen = audiRed.updateComponent(green, ApiStatics.TARGET_POSITION);

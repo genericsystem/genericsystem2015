@@ -1,5 +1,6 @@
 package org.genericsystem.api.core;
 
+import java.lang.invoke.MethodHandles;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -8,6 +9,10 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.reactivex.Observable;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -153,6 +158,17 @@ public interface Snapshot<T> extends Iterable<T> {
 			}
 
 			@Override
+			public Observable<T> getAddsObservable() {
+				return getParent().getAddsObservable().filter(g -> predicate.test(g));
+			}
+
+			@Override
+			public Observable<T> getRemovesObservable() {
+				return getParent().getRemovesObservable().filter(g -> predicate.test(g));
+			}
+
+
+			@Override
 			public T get(Object o) {
 				T result = Snapshot.this.get(o);
 				return result != null && predicate.test(result) ? result : null;
@@ -173,6 +189,16 @@ public interface Snapshot<T> extends Iterable<T> {
 			}
 
 			@Override
+			public Observable<T> getAddsObservable() {
+				return getParent().getAddsObservable().filter(g -> filter.test((IGeneric<?>) g));
+			}
+
+			@Override
+			public Observable<T> getRemovesObservable() {
+				return getParent().getRemovesObservable().filter(g -> filter.test((IGeneric<?>) g));
+			}
+
+			@Override
 			public Stream<T> unfilteredStream() {
 				throw new UnsupportedOperationException("unfilteredStream() should be called only on unfiltered snapshots.");
 			}
@@ -188,6 +214,17 @@ public interface Snapshot<T> extends Iterable<T> {
 			}
 
 			@Override
+			public Observable<T> getAddsObservable() {
+				return Snapshot.this.getAddsObservable().filter(g -> filters.stream().allMatch(filter -> filter.test((IGeneric<?>) g)));
+			}
+
+			@Override
+			public Observable<T> getRemovesObservable() {
+				return Snapshot.this.getRemovesObservable().filter(g -> filters.stream().allMatch(filter -> filter.test((IGeneric<?>) g)));
+			}
+
+
+			@Override
 			public T get(Object o) {
 				T result = Snapshot.this.get(o);
 				return result != null && filters.stream().allMatch(filter -> filter.test((IGeneric<?>) result)) ? result : null;
@@ -199,9 +236,27 @@ public interface Snapshot<T> extends Iterable<T> {
 		return stream().collect(Collectors.toList());
 	}
 
+	default Observable<T> getAddsObservable() {
+		return Observable.never();
+	}
+
+	default Observable<T> getRemovesObservable() {
+		return Observable.never();
+	}
+
 	default ObservableList<T> toObservableList() {
-		if (getParent() != null)
-			return getParent().toObservableList().filtered(g -> getFilter().test((IGeneric<?>) g));
-		return FXCollections.observableArrayList(toList());
+		Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+		ObservableList<T> result = FXCollections.observableArrayList(toList());
+		getAddsObservable().subscribe(g -> {
+			if (!result.contains(g)) {
+				logger.debug("Snapshot {}, generic added, {}", System.identityHashCode(this), g);
+				result.add(g);
+			}
+		}, e -> logger.error("Exception while computing observable list.", e));
+		getRemovesObservable().subscribe(g -> {
+			logger.debug("Snapshot {}, generic removed, {}", System.identityHashCode(this), g);
+			result.remove(g);
+		}, e -> logger.error("Exception while computing observable list.", e));
+		return result;
 	}
 }

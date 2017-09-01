@@ -3,10 +3,10 @@ package org.genericsystem.common;
 import java.util.stream.Stream;
 
 import org.genericsystem.api.core.Snapshot;
+import org.genericsystem.defaults.tools.RxJavaHelpers;
 
+import io.reactivex.Observable;
 import javafx.collections.FXCollections;
-import javafx.collections.MapChangeListener;
-import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 
 /**
@@ -31,14 +31,12 @@ public class Container implements Snapshot<Generic> {
 	}
 
 	@Override
-	public ObservableList<Generic> toObservableList() {
-		ObservableList<Generic> result = FXCollections.observableArrayList();
-		container.addListener((MapChangeListener<Generic, Generic>) c -> {
-			if (c.wasAdded() && !c.wasRemoved())
-				result.add(c.getKey());
-			if (c.wasRemoved() && !c.wasAdded())
-				result.remove(c.getKey());
-		});
-		return result;
+	public Observable<Generic> getAddsObservable() {
+		return RxJavaHelpers.additionsOf(container).map(entry -> entry.getKey());
+	}
+
+	@Override
+	public Observable<Generic> getRemovesObservable() {
+		return RxJavaHelpers.removalsOf(container).map(entry -> entry.getKey());
 	}
 }

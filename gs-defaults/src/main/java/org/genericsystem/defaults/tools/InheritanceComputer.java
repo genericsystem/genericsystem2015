@@ -6,12 +6,16 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.genericsystem.api.core.FiltersBuilder;
 import org.genericsystem.api.core.IndexFilter;
+import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.defaults.DefaultGeneric;
+
+import io.reactivex.Observable;
 
 /**
  * @author Nicolas Feybesse
@@ -21,28 +25,54 @@ import org.genericsystem.defaults.DefaultGeneric;
 public class InheritanceComputer<T extends DefaultGeneric<T>> {
 
 	private final Map<T, Collection<T>> inheritingsCache = new HashMap<>();
+	private final Map<T, Observable<T>> addsCache = new HashMap<>();
+	private final Map<T, Observable<T>> removesCache = new HashMap<>();
 	private final Set<T> overridden = new HashSet<>();
 
 	private final T base;
 	private final T origin;
 	private final int level;
+	private final Predicate<T> inheritingsFilter;
 
 	public InheritanceComputer(T base, T origin, int level) {
 		this.base = base;
 		this.origin = origin;
 		this.level = level;
+		inheritingsFilter =  holder -> !overridden.contains(holder) && !holder.equals(origin) && holder.getLevel() == level;
 	}
 
 	public Stream<T> inheritanceStream() {
-		return getInheringsStream(base).filter(holder -> !overridden.contains(holder) && !holder.equals(origin) && holder.getLevel() == level);
+		return getInheritingsStream(base).filter(holder -> inheritingsFilter.test(holder));
 	}
 
-	private Stream<T> getInheringsStream(T superVertex) {
+	public Observable<T> getAddsObservable() {
+		return getAddsObservable(base).filter(holder -> inheritingsFilter.test(holder));
+	}
+
+	public Observable<T> getRemovesObservable() {
+		return getRemovesObservable(base).filter(holder -> inheritingsFilter.test(holder));
+	}
+
+	private Stream<T> getInheritingsStream(T superVertex) {
 		Collection<T> result = inheritingsCache.get(superVertex);
 		if (result == null)
 			inheritingsCache.put(superVertex, result = buildInheritings(superVertex).inheritanceStream().collect(Collectors.toList()));
 		return result.stream();
-		//		return new Inheritings(superVertex).inheritanceStream();
+		// return new Inheritings(superVertex).inheritanceStream();
+	}
+
+	private Observable<T> getAddsObservable(T superVertex) {
+		Observable<T> result = addsCache.get(superVertex);
+		if (result == null)
+			addsCache.put(superVertex, result = buildInheritings(superVertex).inheritanceStreamAdds());
+		return result;
+	}
+
+	private Observable<T> getRemovesObservable(T superVertex) {
+		Observable<T> result = removesCache.get(superVertex);
+		if (result == null)
+			removesCache.put(superVertex, result = buildInheritings(superVertex).inheritanceStreamRemoves());
+		return result;
 	}
 
 	protected Inheritings buildInheritings(T superVertex) {
@@ -57,10 +87,6 @@ public class InheritanceComputer<T extends DefaultGeneric<T>> {
 			this.localBase = localBase;
 		}
 
-		private Stream<T> inheritanceStream() {
-			return fromAboveStream().flatMap(holder -> getStream(holder)).distinct();
-		}
-
 		private boolean hasIntermediateSuperOrIsMeta() {
 			return localBase.isMeta() || localBase.getSupers().stream().filter(next -> localBase.getMeta().equals(next.getMeta())).count() != 0;
 		}
@@ -69,25 +95,71 @@ public class InheritanceComputer<T extends DefaultGeneric<T>> {
 			return Stream.concat(hasIntermediateSuperOrIsMeta() ? Stream.empty() : Stream.of(localBase.getMeta()), localBase.getSupers().stream()).distinct();
 		}
 
+		private Stream<T> inheritanceStream() {
+			return fromAboveStream().flatMap(holder -> getStream(holder)).distinct();
+		}
+
+		private Observable<T> inheritanceStreamAdds() {
+			return Observable.merge(fromAboveAdds().flatMap(holder -> getObservable(getStream(holder))).distinct(),
+					Observable.merge(fromAboveAdds(), getObservable(fromAboveStream())).flatMap(holder -> getStreamAdds(holder)).distinct()).distinct();
+		}
+
+		private Observable<T> inheritanceStreamRemoves() {
+			return Observable.merge(Observable.merge(fromAboveAdds(), getObservable(fromAboveStream())).flatMap(holder -> getStreamRemoves(holder)).distinct(),
+					fromAboveRemoves().flatMap(holder -> getObservable(getStream(holder))).distinct()).distinct();
+		}
+
 		private Stream<T> fromAboveStream() {
-			return localBase.isRoot() ? Stream.of(origin) : metaAndSupersStream().flatMap(InheritanceComputer.this::getInheringsStream).distinct();
+			return localBase.isRoot() ? Stream.of(origin) : metaAndSupersStream().flatMap(InheritanceComputer.this::getInheritingsStream).distinct();
+		}
+
+		private Observable<T> fromAboveAdds() {
+			return localBase.isRoot() ? Observable.never() : getObservable(metaAndSupersStream()).flatMap(InheritanceComputer.this::getAddsObservable).distinct();
+		}
+
+		private Observable<T> fromAboveRemoves() {
+			return localBase.isRoot() ? Observable.never() : getObservable(metaAndSupersStream()).flatMap(InheritanceComputer.this::getRemovesObservable).distinct();
+		}
+
+		private Stream<T> getIndexStream(T holder) {
+			return Stream.concat(holder.getLevel() < level ? compositesByMeta(holder).stream() : Stream.empty(), compositesBySuper(holder).stream());
+		}
+
+		private Observable<T> getIndexStreamAdds(T holder) {
+			return Observable.merge(holder.getLevel() < level ? compositesByMeta(holder).getAddsObservable() : Observable.never(), compositesBySuper(holder).getAddsObservable());
+		}
+
+		private Observable<T> getIndexStreamRemoves(T holder) {
+			return Observable.merge(holder.getLevel() < level ? compositesByMeta(holder).getRemovesObservable() : Observable.never(), compositesBySuper(holder).getRemovesObservable());
 		}
 
 		private Stream<T> getStream(final T holder) {
-			if (compositesBySuper(holder).count() != 0)
+			if (compositesBySuper(holder).stream().count() != 0)
 				overridden.add(holder);
-			Stream<T> indexStream = Stream.concat(holder.getLevel() < level ? compositesByMeta(holder) : Stream.empty(), compositesBySuper(holder));
-			return Stream.concat(Stream.of(holder), indexStream.flatMap(x -> getStream(x)).distinct());
+			return Stream.concat(Stream.of(holder), getIndexStream(holder).flatMap(x -> getStream(x)).distinct());
 		}
 
-		protected Stream<T> compositesByMeta(T holder) {
-			return localBase.getDependencies().filter(Arrays.asList(new IndexFilter(FiltersBuilder.COMPOSITES, localBase), new IndexFilter(FiltersBuilder.HAS_META, holder))).stream();
+		private Observable<T> getStreamAdds(T holder) {
+			Observable<T> indexAdds = getIndexStreamAdds(holder);
+			return Observable.merge(Observable.merge(getObservable(getIndexStream(holder)), indexAdds).flatMap(x -> getStreamAdds(x)).distinct(),
+					indexAdds.flatMap(x -> getObservable(getStream(x))).distinct()).distinct();
 		}
 
-		protected Stream<T> compositesBySuper(T holder) {
-			return localBase.getDependencies().filter(Arrays.asList(new IndexFilter(FiltersBuilder.COMPOSITES, localBase), new IndexFilter(FiltersBuilder.HAS_SUPER, holder))).stream();
+		private Observable<T> getStreamRemoves(T holder) {
+			return Observable.merge(getIndexStreamRemoves(holder).flatMap(x -> getObservable(getStream(x))).distinct(),
+					Observable.merge(getObservable(getIndexStream(holder)), getIndexStreamAdds(holder)).flatMap(x -> getStreamRemoves(x)).distinct()).distinct();
 		}
 
+		private Snapshot<T> compositesByMeta(T holder) {
+			return localBase.getDependencies().filter(Arrays.asList(new IndexFilter(FiltersBuilder.COMPOSITES, localBase), new IndexFilter(FiltersBuilder.HAS_META, holder)));
+		}
+
+		private Snapshot<T> compositesBySuper(T holder) {
+			return localBase.getDependencies().filter(Arrays.asList(new IndexFilter(FiltersBuilder.COMPOSITES, localBase), new IndexFilter(FiltersBuilder.HAS_SUPER, holder)));
+		}
+
+		private Observable<T> getObservable(Stream<T> stream) {
+			return Observable.fromIterable(stream.collect(Collectors.toList()));
+		}
 	}
-
 }

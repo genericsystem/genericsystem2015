@@ -20,7 +20,6 @@ import io.reactivex.Observable;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 /**
@@ -107,40 +106,21 @@ public class Differential implements IDifferential<Generic> {
 				return Stream.concat(adds.contains(generic) ? Stream.empty() : subDifferential.getDependencies(generic).filter(new IndexFilter(FiltersBuilder.NOT_CONTAINED_IN_PARAM, new ArrayList<>(removes.toList()))).stream(),
 						adds.filter(new IndexFilter(FiltersBuilder.IS_DIRECT_DEPENDENCY_OF, generic)).stream());
 			}
-
 			@Override
 			public Snapshot<Generic> filter(List<IndexFilter> filters) {
-				return new Snapshot<Generic>() {
-
-					@Override
-					public Stream<Generic> unfilteredStream() {
-						List<IndexFilter> filters_ = new ArrayList<>(filters);
-						filters_.add(new IndexFilter(FiltersBuilder.NOT_CONTAINED_IN_PARAM, new ArrayList<>(removes.toList())));
-						return Stream.concat(adds.contains(generic) ? Stream.empty() : subDifferential.getDependencies(generic).filter(filters_).stream(), adds.filter(filters).stream().filter(x -> generic.isDirectAncestorOf(x)));
-					}
-				};
+				List<IndexFilter> filters_ = new ArrayList<>(filters);
+				filters_.add(new IndexFilter(FiltersBuilder.NOT_CONTAINED_IN_PARAM, new ArrayList<>(removes.toList())));
+				return Snapshot.super.filter(filters_);
 			}
 
 			@Override
-			public ObservableList<Generic> toObservableList() {
-				ObservableList<Generic> result = getDependenciesAsOservableListCacheMap().get(generic);
-				if (result == null) {
-					final ObservableList<Generic> result_ = FXCollections.observableArrayList(getDifferentialProperty().getValue().getDependencies(generic).toList());
-					Observable<Differential> differentialObs = getDifferentialObservable();
-					Observable<Generic> adds = differentialObs.flatMap(diff -> diff.getAddsObservable(generic));
-					Observable<Generic> removes = differentialObs.flatMap(diff -> diff.getRemovesObservable(generic));
-					adds.subscribe(g -> {
-						logger.debug("Generic added, {}", g);
-						result_.add(g);
-					}, e -> logger.error("Exception while computing observable list.", e));
-					removes.subscribe(g -> {
-						logger.debug("Generic removed, {}", g);
-						result_.remove(g);
-					}, e -> logger.error("Exception while computing observable list.", e));
-					result = result_;
-					getDependenciesAsOservableListCacheMap().put(generic, result);
-				}
-				return result;
+			public Observable<Generic> getAddsObservable() {
+				return getDifferentialObservable().flatMap(diff -> diff.getAddsObservable(generic));
+			}
+
+			@Override
+			public Observable<Generic> getRemovesObservable() {
+				return getDifferentialObservable().flatMap(diff -> diff.getRemovesObservable(generic));
 			}
 		};
 	}

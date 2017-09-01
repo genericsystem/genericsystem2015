@@ -13,10 +13,9 @@ import org.genericsystem.api.core.FiltersBuilder;
 import org.genericsystem.api.core.IGeneric;
 import org.genericsystem.api.core.IndexFilter;
 import org.genericsystem.api.core.Snapshot;
-import org.genericsystem.defaults.tools.BindingsTools;
+import org.genericsystem.defaults.tools.RxJavaHelpers;
 
-import javafx.beans.Observable;
-import javafx.collections.ObservableList;
+import io.reactivex.Observable;
 
 /**
  * @author Nicolas Feybesse
@@ -124,8 +123,17 @@ public interface DefaultDependencies<T extends DefaultGeneric<T>> extends IGener
 			}
 
 			@Override
-			public ObservableList<T> toObservableList() {
-				return BindingsTools.createMinimalUnitaryChangesBinding(getInheritings().toObservableList(), () -> getSubInheritings().toList(), g -> new Observable[] { g.getSubInheritings().toObservableList() });
+			public Observable<T> getAddsObservable() {
+				return Observable.merge(getInheritings().getAddsObservable(),
+						Observable.fromIterable(getInheritings()).flatMap(g -> g.getSubInheritings().getAddsObservable()),
+						RxJavaHelpers.additionsOf(getInheritings().toObservableList()).flatMap(g -> g.getSubInheritings().getAddsObservable())).distinct();
+			}
+
+			@Override
+			public Observable<T> getRemovesObservable() {
+				return Observable.merge(getInheritings().getRemovesObservable(),
+						Observable.fromIterable(getInheritings()).flatMap(g -> g.getSubInheritings().getRemovesObservable()),
+						RxJavaHelpers.additionsOf(getInheritings().toObservableList()).flatMap(g -> g.getSubInheritings().getRemovesObservable())).distinct();
 			}
 		};
 	}
@@ -140,8 +148,15 @@ public interface DefaultDependencies<T extends DefaultGeneric<T>> extends IGener
 			}
 
 			@Override
-			public ObservableList<T> toObservableList() {
-				return BindingsTools.createMinimalUnitaryChangesBinding(getSubInheritings().toObservableList(), () -> getSubInstances().toList(), g -> new Observable[] { g.getInstances().toObservableList() });
+			public Observable<T> getAddsObservable() {
+				return Observable.merge(Observable.fromIterable(getSubInheritings()).flatMap(g -> g.getInstances().getAddsObservable()),
+						RxJavaHelpers.additionsOf(getSubInheritings().toObservableList()).flatMap(g -> g.getInstances().getAddsObservable()));
+			}
+
+			@Override
+			public Observable<T> getRemovesObservable() {
+				return Observable.merge(Observable.fromIterable(getSubInheritings()).flatMap(g -> g.getInstances().getRemovesObservable()),
+						RxJavaHelpers.additionsOf(getSubInheritings().toObservableList()).flatMap(g -> g.getInstances().getRemovesObservable()));
 			}
 		};
 	}

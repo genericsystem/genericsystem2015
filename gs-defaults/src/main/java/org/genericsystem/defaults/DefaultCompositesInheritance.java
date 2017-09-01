@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.genericsystem.api.core.ApiStatics;
@@ -13,15 +12,11 @@ import org.genericsystem.api.core.IGeneric;
 import org.genericsystem.api.core.IndexFilter;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.defaults.DefaultConfig.NonHeritableProperty;
-import org.genericsystem.defaults.tools.BindingsTools;
 import org.genericsystem.defaults.tools.InheritanceComputer;
-import org.genericsystem.defaults.tools.ObservableInheritanceComputer;
 
+import io.reactivex.Observable;
 import javafx.beans.binding.Bindings;
-import javafx.beans.binding.ListBinding;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 
 /**
  * @author Nicolas Feybesse
@@ -82,17 +77,21 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 		if (nonHeritableProperty == null || attribute.inheritsFrom(nonHeritableProperty) || attribute.isInheritanceEnabled())
 			return new Snapshot<T>() {
 
+			InheritanceComputer<T> inheritanceComputer = new InheritanceComputer<>((T) DefaultCompositesInheritance.this, attribute, ApiStatics.STRUCTURAL);
+
 			@Override
 			public Stream<T> unfilteredStream() {
-				return new InheritanceComputer<>((T) DefaultCompositesInheritance.this, attribute, ApiStatics.STRUCTURAL).inheritanceStream();
+				return inheritanceComputer.inheritanceStream();
 			}
 
 			@Override
-			public ObservableList<T> toObservableList() {
-				T nonHeritableProperty = getKey(NonHeritableProperty.class, ApiStatics.NO_POSITION);
-				if (nonHeritableProperty == null || attribute.inheritsFrom(nonHeritableProperty) || attribute.isInheritanceEnabled())
-					return BindingsTools.createMinimalUnitaryChangesBinding(new ObservableInheritanceComputer<>((T) DefaultCompositesInheritance.this, attribute, ApiStatics.STRUCTURAL));
-				return getComposites().toObservableList().filtered(holder -> holder.isSpecializationOf(attribute) && holder.getLevel() == ApiStatics.STRUCTURAL);
+			public Observable<T> getAddsObservable() {
+				return inheritanceComputer.getAddsObservable();
+			}
+
+			@Override
+			public Observable<T> getRemovesObservable() {
+				return inheritanceComputer.getRemovesObservable();
 			}
 		};
 		return getComposites().filter(new IndexFilter(FiltersBuilder.IS_SPECIALIZATION_OF, attribute)).filter(new IndexFilter(FiltersBuilder.HAS_LEVEL, ApiStatics.STRUCTURAL));
@@ -144,17 +143,21 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 		if (nonHeritableProperty == null || attribute.inheritsFrom(nonHeritableProperty) || attribute.isInheritanceEnabled())
 			return new Snapshot<T>() {
 
+			InheritanceComputer<T> inheritanceComputer = new InheritanceComputer<>((T) DefaultCompositesInheritance.this, attribute, ApiStatics.CONCRETE);
+
 			@Override
 			public Stream<T> unfilteredStream() {
-				return new InheritanceComputer<>((T) DefaultCompositesInheritance.this, attribute, ApiStatics.CONCRETE).inheritanceStream();
+				return inheritanceComputer.inheritanceStream();
 			}
 
 			@Override
-			public ObservableList<T> toObservableList() {
-				T nonHeritableProperty = getKey(NonHeritableProperty.class, ApiStatics.NO_POSITION);
-				if (nonHeritableProperty == null || attribute.inheritsFrom(nonHeritableProperty) || attribute.isInheritanceEnabled())
-					return BindingsTools.createMinimalUnitaryChangesBinding(new ObservableInheritanceComputer<>((T) DefaultCompositesInheritance.this, attribute, ApiStatics.CONCRETE));
-				return getComposites().toObservableList().filtered(holder -> holder.isSpecializationOf(attribute) && holder.getLevel() == ApiStatics.CONCRETE);
+			public Observable<T> getAddsObservable() {
+				return inheritanceComputer.getAddsObservable();
+			}
+
+			@Override
+			public Observable<T> getRemovesObservable() {
+				return inheritanceComputer.getRemovesObservable();
 			}
 		};
 		return DefaultCompositesInheritance.this.getComposites().filter(new IndexFilter(FiltersBuilder.IS_SPECIALIZATION_OF, attribute)).filter(new IndexFilter(FiltersBuilder.HAS_LEVEL, ApiStatics.CONCRETE));
@@ -292,18 +295,13 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 			}
 
 			@Override
-			public ObservableList<Serializable> toObservableList() {
-				return new ListBinding<Serializable>() {
-					private final ObservableList<T> links = getLinks(attribute, value, targets).toObservableList();
-					{
-						bind(links);
-					}
+			public Observable<Serializable> getAddsObservable() {
+				return getLinks(attribute, value, targets).getAddsObservable().map(h -> h.getValue());
+			}
 
-					@Override
-					protected ObservableList<Serializable> computeValue() {
-						return FXCollections.unmodifiableObservableList(FXCollections.observableList(links.stream().map(x -> x.getValue()).collect(Collectors.toList())));
-					}
-				};
+			@Override
+			public Observable<Serializable> getRemovesObservable() {
+				return getLinks(attribute, value, targets).getRemovesObservable().map(h -> h.getValue());
 			}
 		};
 	}
@@ -319,18 +317,13 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 			}
 
 			@Override
-			public ObservableList<Serializable> toObservableList() {
-				return new ListBinding<Serializable>() {
-					private final ObservableList<T> links = getLinks(attribute, targets).toObservableList();
-					{
-						bind(links);
-					}
+			public Observable<Serializable> getAddsObservable() {
+				return getLinks(attribute, targets).getAddsObservable().map(h -> h.getValue());
+			}
 
-					@Override
-					protected ObservableList<Serializable> computeValue() {
-						return FXCollections.unmodifiableObservableList(FXCollections.observableList(links.stream().map(x -> x.getValue()).collect(Collectors.toList())));
-					}
-				};
+			@Override
+			public Observable<Serializable> getRemovesObservable() {
+				return getLinks(attribute, targets).getRemovesObservable().map(h -> h.getValue());
 			}
 		};
 	}
@@ -345,19 +338,13 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 			}
 
 			@Override
-			public ObservableList<Serializable> toObservableList() {
-				return new ListBinding<Serializable>() {
-					private final ObservableList<T> holders = getHolders(attribute, pos).toObservableList();
-					{
-						bind(holders);
-					}
+			public Observable<Serializable> getAddsObservable() {
+				return getHolders(attribute, pos).getAddsObservable().map(h -> h.getValue());
+			}
 
-					@Override
-					protected ObservableList<Serializable> computeValue() {
-						return FXCollections.unmodifiableObservableList(FXCollections.observableList(holders.stream().map(x -> x.getValue()).collect(Collectors.toList())));
-
-					}
-				};
+			@Override
+			public Observable<Serializable> getRemovesObservable() {
+				return getHolders(attribute, pos).getRemovesObservable().map(h -> h.getValue());
 			}
 		};
 	}
