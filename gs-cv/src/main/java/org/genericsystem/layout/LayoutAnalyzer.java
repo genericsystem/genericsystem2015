@@ -35,7 +35,7 @@ public class LayoutAnalyzer extends AbstractApp {
 		mainGrid.add(new ImageView(binary.toJfxImage()), columnIndex, rowIndex++);
 
 		Img img2 = new Img(filename).bilateralFilter(20, 80, 80);
-		layout.ocrTree(img2, 6);
+		layout.ocrTree(img2, 6.0, 6.0);
 		mainGrid.add(new ImageView(img2.toJfxImage()), columnIndex, rowIndex++);
 		// mainGrid.add(new ImageView(binary2.toJfxImage()), columnIndex, rowIndex++);
 		System.out.println(layout.recursiveToString());
