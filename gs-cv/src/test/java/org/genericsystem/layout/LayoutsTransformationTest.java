@@ -21,25 +21,30 @@ public class LayoutsTransformationTest {
 	}
 
 	public void testScale() {
-		Img binary = new Img(new Mat(new Size(800, 600), CvType.CV_8U, new Scalar(255)), false);
-		new Zone(0, new Rect(new Point(200, 200), new Point(300, 300))).draw(binary, new Scalar(0), -1);
-		new Zone(0, new Rect(new Point(400, 400), new Point(500, 500))).draw(binary, new Scalar(0), -1);
+		Img binary1 = new Img(new Mat(new Size(800, 600), CvType.CV_8U, new Scalar(255)), false);
+		new Zone(0, new Rect(new Point(200, 200), new Point(300, 300))).draw(binary1, new Scalar(0), -1);
+		new Zone(0, new Rect(new Point(400, 400), new Point(500, 500))).draw(binary1, new Scalar(0), -1);
 
-		Layout layout = binary.buildLayout(new Size(0.04, 0.008), 8);
-		System.out.println(layout.recursiveToString());
+		Layout layout1 = binary1.buildLayout(new Size(0.04, 0.008), 8);
+		System.out.println(layout1.recursiveToString());
 
-		binary = new Img(new Mat(new Size(800, 600), CvType.CV_8U, new Scalar(255)), false);
-		new Zone(0, new Rect(new Point(250, 200), new Point(350, 300))).draw(binary, new Scalar(0), -1);
-		new Zone(0, new Rect(new Point(450, 400), new Point(550, 500))).draw(binary, new Scalar(0), -1);
+		Img binary2 = new Img(new Mat(new Size(800, 600), CvType.CV_8U, new Scalar(255)), false);
+		new Zone(0, new Rect(new Point(250, 200), new Point(350, 300))).draw(binary2, new Scalar(0), -1);
+		new Zone(0, new Rect(new Point(450, 400), new Point(550, 500))).draw(binary2, new Scalar(0), -1);
 
-		layout = binary.buildLayout(new Size(0.04, 0.008), 8);
-		System.out.println(layout.recursiveToString());
+		Layout layout2 = binary2.buildLayout(new Size(0.04, 0.008), 8);
+		System.out.println(layout2.recursiveToString());
 
-		binary = new Img(new Mat(new Size(160, 120), CvType.CV_8U, new Scalar(255)), false);
-		new Zone(0, new Rect(new Point(40, 40), new Point(60, 60))).draw(binary, new Scalar(0), -1);
-		new Zone(0, new Rect(new Point(80, 80), new Point(100, 100))).draw(binary, new Scalar(0), -1);
+		Img binary3 = new Img(new Mat(new Size(800, 600), CvType.CV_8U, new Scalar(255)), false);
+		new Zone(0, new Rect(new Point(40, 40), new Point(60, 60))).draw(binary3, new Scalar(0), -1);
+		new Zone(0, new Rect(new Point(80, 80), new Point(100, 100))).draw(binary3, new Scalar(0), -1);
 
-		layout = binary.buildLayout(new Size(0.04, 0.008), 8);
-		System.out.println(layout.recursiveToString());
+		Layout layout3 = binary2.buildLayout(new Size(0.04, 0.008), 8);
+		System.out.println(layout3.recursiveToString());
+
+		// Close the images
+		binary1.close();
+		binary2.close();
+		binary3.close();
 	}
 }
