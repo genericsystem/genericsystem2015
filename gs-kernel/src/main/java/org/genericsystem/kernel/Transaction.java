@@ -19,8 +19,6 @@ import org.genericsystem.kernel.AbstractServer.RootServerHandler;
 
 import io.reactivex.Observable;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
 /**
@@ -189,11 +187,6 @@ public class Transaction extends CheckedContext implements IDifferential<Generic
 				lifeManager.writeUnlock();
 			lockedLifeManagers = new HashSet<>();
 		}
-	}
-
-	@Override
-	public ObservableValue<?> getObservable(Generic generic) {
-		return new SimpleObjectProperty<Snapshot<Generic>>();
 	}
 
 	@Override

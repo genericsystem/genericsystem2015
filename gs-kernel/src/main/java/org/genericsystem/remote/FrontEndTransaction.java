@@ -16,8 +16,6 @@ import org.genericsystem.remote.ClientEngine.ClientEngineHandler;
 
 import io.reactivex.Observable;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
 /**
@@ -113,11 +111,6 @@ public class FrontEndTransaction extends CheckedContext implements IDifferential
 	// }
 	// return dependenciesPromise;
 	// }
-
-	@Override
-	public ObservableValue<?> getObservable(Generic generic) {
-		return new SimpleObjectProperty<Snapshot<Generic>>();
-	}
 
 	@Override
 	public Observable<Generic> getAddsObservable(Generic generic) {

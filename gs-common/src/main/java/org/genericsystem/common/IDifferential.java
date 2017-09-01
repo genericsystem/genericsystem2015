@@ -27,8 +27,6 @@ public interface IDifferential<T extends DefaultGeneric<T>> {
 
 	void apply(Snapshot<T> removes, Snapshot<T> adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException;
 
-	public ObservableValue<?> getObservable(Generic generic);
-
 	Observable<Generic> getAddsObservable(Generic generic);
 
 	Observable<Generic> getRemovesObservable(Generic generic);

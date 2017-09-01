@@ -12,7 +12,6 @@ import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.api.core.exceptions.RollbackException;
-import org.genericsystem.defaults.tools.BindingsTools;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -144,11 +143,6 @@ public class Differential implements IDifferential<Generic> {
 	@Override
 	public long getTs() {
 		return getSubDifferential().getTs();
-	}
-
-	@Override
-	public final ObservableValue<?> getObservable(Generic generic) {
-		return BindingsTools.create(getSubDifferential().getObservable(generic), adds.getFilteredInvalidator(generic::isDirectAncestorOf), removes.getFilteredInvalidator(generic::isDirectAncestorOf));
 	}
 
 	@Override

@@ -348,11 +348,6 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 		}
 
 		@Override
-		public final ObservableValue<IDifferential<Generic>> getObservable(Generic generic) {
-			return transactionProperty;
-		}
-
-		@Override
 		public Observable<Generic> getAddsObservable(Generic generic) {
 			// TODO
 			return Observable.never();
