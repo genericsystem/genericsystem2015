@@ -61,10 +61,22 @@ public class Layout {
 		return result;
 	}
 
-	public Rect getLargeRect(Img imgRoot, int delta) {
+	public Rect getLargeRect(Img imgRoot, double deltaW, double deltaH) {
 		Rect rect = getRect(imgRoot);
-		return new Rect(new Point(rect.tl().x - delta >= 0 ? rect.tl().x : 0, rect.tl().y - delta >= 0 ? rect.tl().y : 0),
-				new Point(rect.br().x + delta <= imgRoot.width() ? rect.br().x + delta : imgRoot.width(), rect.br().y + delta <= imgRoot.height() ? rect.br().y + delta : imgRoot.height()));
+
+		// System.out.println(String.format("rect.width: %d; rect.height: %d", rect.width, rect.height));
+
+		int adjustW = 3 + Double.valueOf(Math.floor(rect.width * deltaW)).intValue();
+		int adjustH = 3 + Double.valueOf(Math.floor(rect.height * deltaH)).intValue();
+
+		System.out.println(String.format("adjustW: %d; adjustH: %d", adjustW, adjustH));
+
+		Point tl = new Point(rect.tl().x - adjustW > 0 ? rect.tl().x - adjustW : 0, rect.tl().y - adjustH > 0 ? rect.tl().y - adjustH : 0);
+		Point br = new Point(rect.br().x + adjustW > imgRoot.width() ? imgRoot.width() : rect.br().x + adjustW, rect.br().y + adjustH > imgRoot.height() ? imgRoot.height() : rect.br().y + adjustH);
+
+		// System.out.println(String.format("tl: %s | rect.tl: %s", tl, rect.tl()));
+		// System.out.println(String.format("br: %s | rect.br: %s", br, rect.br()));
+		return new Rect(tl, br);
 	}
 
 	public Layout traverse(Img img, BiConsumer<Img, Layout> visitor) {
@@ -102,10 +114,10 @@ public class Layout {
 		});
 	}
 
-	public void ocrTree(Img rootImg, int delta) {
+	public void ocrTree(Img rootImg, double deltaW, double deltaH) {
 		traverse(rootImg, (root, layout) -> {
 			if (layout.getChildren().isEmpty()) {
-				String ocr = Ocr.doWork(new Mat(rootImg.getSrc(), layout.getLargeRect(rootImg, delta)));
+				String ocr = Ocr.doWork(new Mat(rootImg.getSrc(), layout.getLargeRect(rootImg, deltaW, deltaH)));
 				if (!"".equals(ocr)) {
 					Integer count = layout.getLabels().get(ocr);
 					layout.getLabels().put(ocr, 1 + (count != null ? count : 0));
@@ -345,7 +357,7 @@ public class Layout {
 			return this;
 		}
 		List<Layout> shards = split(morph, binary);
-		// shards.removeIf(shard -> ((shard.getY2() - shard.getY1()) * binary.size().height) < 2 || ((shard.getX2() - shard.getX1()) * binary.size().width) < 2);
+		shards.removeIf(shard -> ((shard.getY2() - shard.getY1()) * binary.size().height) < 2 || ((shard.getX2() - shard.getX1()) * binary.size().width) < 2);
 		if (shards.isEmpty()) {
 			// Imgproc.rectangle(img.getSrc(), new Point(0, 0), new Point(img.width(), img.height()), new Scalar(0, 0, 255), -1);
 			return this;
