@@ -1,7 +1,6 @@
 package org.genericsystem.common;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -215,43 +214,6 @@ public class PseudoConcurrentCollection<T extends IGeneric<?>> implements Snapsh
 		if (result)
 			removeProperty.set(element);
 		return result;
-	}
-
-	static long addAll = 0;
-
-	protected void addAll(Collection<T> elements, PseudoConcurrentCollection<T> removeFrom, Checker checker) {
-		//		T lastAdded = null;
-		//		T lastRemoved = null;
-		for (T element : elements) {
-			checker.checkAfterBuild(false, false, (Generic) element);
-			boolean removed = removeFrom.removeNoEvent(element);
-			if (removed) {
-				//				lastRemoved = element;
-				removeFrom.updateRemoveProperty(element);
-			} else {
-				indexesTree.add(element);
-				//				lastAdded = element;
-				addProperty.setValue(element);
-			}
-		}
-		long start = System.nanoTime();
-		//		if (lastAdded != null)
-		//			addProperty.set(lastAdded);
-		//		else if (lastRemoved != null)
-		// addAll is called on the removes of one Diff with the adds of the same Diff as its second argument,
-		// so it’s not necessary to send update events to both collections.
-		//			removeFrom.updateRemoveProperty(lastRemoved);
-		long time = (System.nanoTime() - start) / 1000000;
-		addAll += time;
-		//		logger.debug("AddAll elements: {}, time: {}, totalTime: {} ms.", elements, time, addAll);
-	}
-
-	private boolean removeNoEvent(T element) {
-		return indexesTree.remove(element);
-	}
-
-	private void updateRemoveProperty(T element) {
-		removeProperty.set(element);
 	}
 
 	@Override

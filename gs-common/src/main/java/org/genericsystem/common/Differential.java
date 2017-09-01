@@ -2,7 +2,6 @@ package org.genericsystem.common;
 
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -90,10 +89,6 @@ public class Differential implements IDifferential<Generic> {
 	protected void unplug(Generic generic) {
 		if (!adds.remove(generic))
 			removes.add(generic);
-	}
-
-	protected void unplugAll(Collection<Generic> generics, Checker checker) {
-		removes.addAll(generics, adds, checker);
 	}
 
 	@Override

@@ -2,7 +2,6 @@ package org.genericsystem.common;
 
 import java.io.Serializable;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -258,10 +257,6 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 	protected void unplug(Generic generic) {
 		getChecker().checkAfterBuild(false, false, generic);
 		getDifferential().unplug(generic);
-	}
-
-	protected void unplugAll(Collection<Generic> generics) {
-		getDifferential().unplugAll(generics, getChecker());
 	}
 
 	protected void checkConstraints() throws RollbackException {
