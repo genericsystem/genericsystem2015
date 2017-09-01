@@ -63,8 +63,19 @@ public class Layout {
 
 	public Rect getLargeRect(Img imgRoot, double deltaW, double deltaH) {
 		Rect rect = getRect(imgRoot);
-		Point tl = new Point(rect.tl().x - deltaW >= 0 ? rect.tl().x - deltaW : 0, rect.tl().y - deltaH >= 0 ? rect.tl().y - deltaH : 0);
-		Point br = new Point(rect.br().x + deltaW >= imgRoot.width() ? imgRoot.width() : rect.br().x + deltaW, rect.br().y + deltaH >= imgRoot.height() ? imgRoot.height() : rect.br().y + deltaH);
+
+		// System.out.println(String.format("rect.width: %d; rect.height: %d", rect.width, rect.height));
+
+		int adjustW = 3 + Double.valueOf(Math.floor(rect.width * deltaW)).intValue();
+		int adjustH = 3 + Double.valueOf(Math.floor(rect.height * deltaH)).intValue();
+
+		System.out.println(String.format("adjustW: %d; adjustH: %d", adjustW, adjustH));
+
+		Point tl = new Point(rect.tl().x - adjustW > 0 ? rect.tl().x - adjustW : 0, rect.tl().y - adjustH > 0 ? rect.tl().y - adjustH : 0);
+		Point br = new Point(rect.br().x + adjustW > imgRoot.width() ? imgRoot.width() : rect.br().x + adjustW, rect.br().y + adjustH > imgRoot.height() ? imgRoot.height() : rect.br().y + adjustH);
+
+		// System.out.println(String.format("tl: %s | rect.tl: %s", tl, rect.tl()));
+		// System.out.println(String.format("br: %s | rect.br: %s", br, rect.br()));
 		return new Rect(tl, br);
 	}
 
