@@ -147,7 +147,9 @@ public class ObservableDefaultTest extends AbstractTest {
 		Generic myThirdCar = car.addInstance("myThirdCar");
 		car.addInstance("myFourthCar");
 
-		Iterator<Generic> iterator = myCars.iterator();
+		// TODO: Make modification possible again ?
+		// Iterator<Generic> iterator = myCars.iterator();
+		Iterator<Generic> iterator = car.getInstances().iterator();
 		int cpt = 0;
 		myThirdCar.remove();
 		Thread.sleep(100);
