@@ -252,23 +252,26 @@ public class Layout {
 	}
 
 	public List<Layout> split(Size morph, Img binary) {
-		// Adjust the percentage according to equation: m / (alpha + beta * x)
-		Double multiplier = Double.valueOf(10);
-		Double alpha = Double.valueOf(0);
-		Double beta = Double.valueOf(1);
-		Double adjustMorph = 100 * multiplier / (alpha + beta * binary.width());
+		// TODO: refactor parameters to array?
+		// Morphology adjustment upon Img size: c / (b + d * x)
+		// width
+		double cw = Double.valueOf(2);
+		double bw = Double.valueOf(0);
+		double dw = Double.valueOf(1);
+		double adjustMorphW = cw / (bw + dw * binary.width());
+		// height
+		double ch = Double.valueOf(0.4);
+		double bh = Double.valueOf(0);
+		double dh = Double.valueOf(1);
+		double adjustMorphH = ch / (bh + dh * binary.height());
 
-		System.out.println(String.format("width: %dpx; adj: %.2f", binary.width(), adjustMorph));
+		// Adjust the morphology for both height and width
+		double morphW = morph.width + adjustMorphW;
+		double morphH = morph.height + adjustMorphH;
 
-		// Replaced the morph.width parameter with the computed one
-		Double morphW = morph.width * adjustMorph;
-		Double morphH = morph.height;
-
-		Double verticalParam = Math.floor(morphH * binary.height());
-		Double horizontalParam = Math.floor(morphW * binary.width());
-
-		// System.out.printf("width: %dpx; a: %.2f\n", binary.width(), morphW * 100);
-		return extractZones(close(verticalParam.intValue(), binary.projectVertically()), close(horizontalParam.intValue(), binary.projectHorizontally()), binary);
+		int verticalParam = Double.valueOf(Math.floor(morphH * binary.height())).intValue();
+		int horizontalParam = Double.valueOf(Math.floor(morphW * binary.width())).intValue();
+		return extractZones(close(verticalParam, binary.projectVertically()), close(horizontalParam, binary.projectHorizontally()), binary);
 	}
 
 	private static boolean[] close(int k, List<Float> histo) {
