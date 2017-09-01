@@ -13,10 +13,41 @@
 
 	<properties>
 		<deeplearning4j.version>0.9.1</deeplearning4j.version>
+		<eclipse-opencv-libname>Opencv-3.3.0</eclipse-opencv-libname>
+		<opencv-libraries>/home/middleware/opencv/build/lib</opencv-libraries>
 	</properties>
 
 	<build>
 		<finalName>${project.artifactId}</finalName>
+		<plugins>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-eclipse-plugin</artifactId>
+				<configuration>
+					<!-- In eclipse we use the opencv JNI jar via a user library, which 
+						will include the native shared libraries. -->
+					<excludes>
+						<exclude>org.opencv:opencv-java-api</exclude>
+					</excludes>
+					<classpathContainers>
+						<classpathContainer>
+							org.eclipse.jdt.launching.JRE_CONTAINER
+						</classpathContainer>
+						<classpathContainer>
+							org.eclipse.jdt.USER_LIBRARY/${eclipse-opencv-libname}
+						</classpathContainer>
+					</classpathContainers>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<argLine>-Djava.library.path=${opencv-libraries}</argLine>
+				</configuration>
+			</plugin>
+		</plugins>
 	</build>
 
 	<dependencies>
@@ -55,5 +86,11 @@
 			<artifactId>deeplearning4j-zoo</artifactId>
 			<version>${deeplearning4j.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.testng</groupId>
+			<artifactId>testng</artifactId>
+			<scope>test</scope>
+		</dependency>
+
 	</dependencies>
 </project>
