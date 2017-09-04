@@ -70,7 +70,7 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 	private final Restructurator restructurator;
 	protected final ObjectProperty<IDifferential<Generic>> transactionProperty;
 	protected final ObjectProperty<Differential> differentialProperty = new SimpleObjectProperty<>();
-	protected final Observable<Differential> differentialObservable = JavaFxObservable.valuesOf(differentialProperty).distinctUntilChanged();
+	protected final Observable<Differential> differentialObservable = JavaFxObservable.valuesOf(differentialProperty);
 	private ObservableIntegerValue cacheLevel;
 	private ObservableLongValue ts;
 	private final ContextEventListener<Generic> listener;
