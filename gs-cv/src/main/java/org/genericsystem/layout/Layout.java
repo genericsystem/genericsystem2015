@@ -253,7 +253,7 @@ public class Layout {
 		}
 	}
 
-	public static double[] getHistoLimits(List<Float> hist) {
+	public static double[] getHistoLimits(List<Double> hist) {
 		int start = 0;
 		int end = hist.size() - 1;
 		while (start < hist.size() && hist.get(start) >= 255.0)
@@ -286,7 +286,8 @@ public class Layout {
 		return extractZones(close(verticalParam, binary.projectVertically()), close(horizontalParam, binary.projectHorizontally()), binary);
 	}
 
-	private static boolean[] close(int k, List<Float> histo) {
+	private static boolean[] close(int k, List<Double> histo) {
+		// System.out.println(Arrays.asList(histo));
 		boolean[] closed = new boolean[histo.size()];
 		Function<Integer, Boolean> isWhite = i -> histo.get(i) >= 255;
 		for (int i = 0; i < histo.size() - 1; i++)

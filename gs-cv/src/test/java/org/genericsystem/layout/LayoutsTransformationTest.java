@@ -37,16 +37,16 @@ public class LayoutsTransformationTest {
 		Layout layout2 = binary2.buildLayout(new Size(0.04, 0.008), 8);
 		System.out.println(layout2.recursiveToString());
 
-		Img binary3 = new Img(new Mat(new Size(800, 600), CvType.CV_8U, new Scalar(255)), false);
+		Img binary3 = new Img(new Mat(new Size(160, 120), CvType.CV_8U, new Scalar(255)), false);
 		new Zone(0, new Rect(new Point(40, 40), new Point(60, 60))).draw(binary3, new Scalar(0), -1);
 		new Zone(0, new Rect(new Point(80, 80), new Point(100, 100))).draw(binary3, new Scalar(0), -1);
 
-		Layout layout3 = binary3.buildLayout(new Size(0.04, 0.008), 8);
+		Layout layout3 = binary3.buildLayout(new Size(0.04, 0.02), 8);
 		System.out.println(layout3.recursiveToString());
 
-		// Close the images
-		binary1.close();
-		binary2.close();
-		binary3.close();
+		// // Close the images
+		// binary1.close();
+		// binary2.close();
+		// binary3.close();
 	}
 }
