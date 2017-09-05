@@ -1,35 +1,33 @@
 package org.genericsystem.layout;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.genericsystem.cv.AbstractApp;
+import org.genericsystem.cv.Img;
+import org.opencv.core.Core;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 
-import org.testng.annotations.Test;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
 
-public class LayoutComparisonTest {
-	@Test
-	public void testNodeComparison() {
-		double x11 = 0.1 + Math.random() * 0.8;
-		double x21 = 0.1 + Math.random() * 0.8;
-		double y11 = 0.1 + Math.random() * 0.8;
-		double y21 = 0.1 + Math.random() * 0.8;
+public class LayoutComparisonTestFigure2 extends AbstractApp {
 
-		double x12 = x11 + 0.01 * (x21 - x11);
-		double x22 = x21 + 0.01 * (x21 - x11);
-		double y12 = y11 + 0.01 * (y21 - y11);
-		double y22 = y21 + 0.01 * (y21 - y11);
-
-		Layout l1 = new Layout(null, x11, x21, y11, y21);
-		Layout l2 = new Layout(null, x12, x22, y12, y22);
-
-		assert l1.nodeIsEqual(l2, 0.011);
-		assert !l1.nodeIsEqual(l2, 0.009);
+	static {
+		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 	}
 
-	@Test
-	public void testChildrenCounterparts() {
+	public static void main(String[] args) {
+		launch(args);
+	}
+
+	@Override
+	protected void fillGrid(GridPane mainGrid) {
+
+		Img binary = new Img(new Mat(new Size(800, 800), CvType.CV_8UC3, new Scalar(255, 255, 255)), false);
 
 		// Containing Layout A
-		Layout layoutA = new Layout(null, Math.random(), Math.random(), Math.random(), Math.random());
+		Layout layoutA = new Layout(null, 0.05, 0.7, 0.3, 0.95);
 
 		// 1st child
 		double x1A1 = 0.1;
@@ -74,7 +72,7 @@ public class LayoutComparisonTest {
 		Layout childA42 = new Layout(childA4, x1A42, x2A42, y1A42, y2A42);
 
 		// Contained Layout B
-		Layout layoutB = new Layout(null, Math.random(), Math.random(), Math.random(), Math.random());
+		Layout layoutB = new Layout(null, 0.05, 0.25, 0.05, 0.25);
 
 		// 1st child similar (or not) to the 1st child of the containing layout A
 		double x1B1 = x1A1 + 0.01 * (x2A1 - x1A1);
@@ -97,19 +95,16 @@ public class LayoutComparisonTest {
 		double y2B21 = y2A42 + 0.01 * (y2A42 - y1A42);
 		Layout childB21 = new Layout(childB2, x1B21, x2B21, y1B21, y2B21);
 
-		assert !layoutB.belongsToRoot(layoutA, 0.0097);
-		assert layoutB.belongsToRoot(layoutA, 0.0103);
-
-		// adding A2 a child similar to Layout B
+		// adding child A2 a child similar to Layout B
 		Layout childA21 = new Layout(childA2, 0.1, 0.9, 0.1, 0.9);
 		Layout childA211 = new Layout(childA21, x1B1, x2B1, y1B1, y2B1);
 		Layout childA212 = new Layout(childA21, x1B2, x2B2, y1B2, y2B2);
 		Layout childA2121 = new Layout(childA212, x1B21, x2B21, y1B21, y2B21);
 
-		List<Layout> containingDesc = layoutB.belongsToDesc(layoutA, 0.011, new ArrayList<Layout>());
-		assert containingDesc.get(0) == layoutA;
-		assert containingDesc.get(1) == childA21;
+		layoutA.draw(binary, new Scalar(0, 255, 0), 2);
+		layoutB.draw(binary, new Scalar(255, 0, 0), 2);
+
+		mainGrid.add(new ImageView(binary.toJfxImage()), 0, 0);
 
 	}
-
 }

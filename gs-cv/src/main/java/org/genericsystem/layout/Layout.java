@@ -47,8 +47,13 @@ public class Layout {
 	}
 
 	public Rect getRect(Img imgRoot) {
-		Rect parentRect = getParent() != null ? getParent().getRect(imgRoot) : new Rect(0, 0, imgRoot.width(), imgRoot.height());
-		return new Rect(new Point(parentRect.tl().x + parentRect.width * getX1(), parentRect.tl().y + parentRect.height * getY1()), new Point(parentRect.tl().x + parentRect.width * getX2(), parentRect.tl().y + parentRect.height * getY2()));
+		Rect parentRect = getParent() != null ? getParent().getRect(imgRoot)
+				: new Rect(0, 0, imgRoot.width(), imgRoot.height());
+		return new Rect(
+				new Point(parentRect.tl().x + parentRect.width * getX1(),
+						parentRect.tl().y + parentRect.height * getY1()),
+				new Point(parentRect.tl().x + parentRect.width * getX2(),
+						parentRect.tl().y + parentRect.height * getY2()));
 	}
 
 	public double area(Img imgRoot) {
@@ -73,8 +78,10 @@ public class Layout {
 
 		System.out.println(String.format("adjustW: %d; adjustH: %d", adjustW, adjustH));
 
-		Point tl = new Point(rect.tl().x - adjustW > 0 ? rect.tl().x - adjustW : 0, rect.tl().y - adjustH > 0 ? rect.tl().y - adjustH : 0);
-		Point br = new Point(rect.br().x + adjustW > imgRoot.width() ? imgRoot.width() : rect.br().x + adjustW, rect.br().y + adjustH > imgRoot.height() ? imgRoot.height() : rect.br().y + adjustH);
+		Point tl = new Point(rect.tl().x - adjustW > 0 ? rect.tl().x - adjustW : 0,
+				rect.tl().y - adjustH > 0 ? rect.tl().y - adjustH : 0);
+		Point br = new Point(rect.br().x + adjustW > imgRoot.width() ? imgRoot.width() : rect.br().x + adjustW,
+				rect.br().y + adjustH > imgRoot.height() ? imgRoot.height() : rect.br().y + adjustH);
 
 		// System.out.println(String.format("tl: %s | rect.tl: %s", tl, rect.tl()));
 		// System.out.println(String.format("br: %s | rect.br: %s", br, rect.br()));
@@ -91,9 +98,11 @@ public class Layout {
 	public void draw(Img img, Scalar color, int thickness) {
 		traverse(getRoi(img), (roi, shard) -> {
 			if (shard.getChildren().isEmpty())
-				Imgproc.rectangle(roi.getSrc(), new Point(0, 0), new Point(roi.width() - 1, roi.height() - 1), color, thickness);
+				Imgproc.rectangle(roi.getSrc(), new Point(0, 0), new Point(roi.width() - 1, roi.height() - 1), color,
+						thickness);
 			else
-				Imgproc.rectangle(roi.getSrc(), new Point(0, 0), new Point(roi.width() - 1, roi.height() - 1), new Scalar(0, 0, 255), thickness);
+				Imgproc.rectangle(roi.getSrc(), new Point(0, 0), new Point(roi.width() - 1, roi.height() - 1),
+						new Scalar(0, 0, 255), thickness);
 		});
 
 	}
@@ -103,7 +112,9 @@ public class Layout {
 			if (shard.getChildren().isEmpty()) {
 				MatOfPoint2f results = new MatOfPoint2f();
 				Rect rect = shard.getRect(img);
-				List<Point> points = Arrays.asList(new Point(rect.tl().x, rect.tl().y), new Point(rect.tl().x + roi.width() - 1, rect.tl().y), new Point(rect.tl().x + roi.width() - 1, rect.tl().y + roi.height() - 1),
+				List<Point> points = Arrays.asList(new Point(rect.tl().x, rect.tl().y),
+						new Point(rect.tl().x + roi.width() - 1, rect.tl().y),
+						new Point(rect.tl().x + roi.width() - 1, rect.tl().y + roi.height() - 1),
 						new Point(rect.tl().x, rect.tl().y + roi.height() - 1));
 				Mat pts = Converters.vector_Point2f_to_Mat(points);
 				Core.perspectiveTransform(pts, results, homography);
@@ -126,9 +137,13 @@ public class Layout {
 					int all = layout.getLabels().values().stream().reduce(0, (i, j) -> i + j);
 					layout.getLabels().entrySet().forEach(entry -> {
 						if (entry.getValue() > all / 10)
-							Imgproc.putText(rootImg.getSrc(), Normalizer.normalize(entry.getKey(), Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", ""), layout.getRect(rootImg).tl(), Core.FONT_HERSHEY_PLAIN, 1, new Scalar(255, 0, 0), 1);
+							Imgproc.putText(rootImg.getSrc(),
+									Normalizer.normalize(entry.getKey(), Normalizer.Form.NFD)
+											.replaceAll("[^\\p{ASCII}]", ""),
+									layout.getRect(rootImg).tl(), Core.FONT_HERSHEY_PLAIN, 1, new Scalar(255, 0, 0), 1);
 					});
-					// Imgproc.putText(rootImg.getSrc(), layout.getBestLabel(), layout.getRect(rootImg).tl(), Core.FONT_HERSHEY_PLAIN, 1, new Scalar(255, 0, 0), 1);
+					// Imgproc.putText(rootImg.getSrc(), layout.getBestLabel(), layout.getRect(rootImg).tl(),
+					// Core.FONT_HERSHEY_PLAIN, 1, new Scalar(255, 0, 0), 1);
 					// System.out.println(layout.getBestLabel());
 				}
 			}
@@ -151,28 +166,36 @@ public class Layout {
 		return false;
 	}
 
-	public List<Layout> childrenCounterparts(Layout otherLayout, double accuracy) {
+	public boolean belongsToRoot(Layout otherLayout, double accuracy) {
+		// returns true if this is contained in otherLayout, fixed root
 		List<Layout> counterparts = new ArrayList<>();
-		if (!otherLayout.hasChildren())
-			return counterparts;
-		else {
-			if (this.hasChildren()) {
+		if (this.hasChildren()) {
+			for (Layout child : this.children) {
+				boolean hasCounterpart = false;
 				for (Layout node : otherLayout.getChildren()) {
-					boolean hasCounterpart = false;
-					for (Layout child : this.children) {
-						if (!counterparts.contains(child) && child.nodeIsEqual(node, accuracy)) {
-							counterparts.add(child);
-							hasCounterpart = true;
-							break;
-						}
+					if (!counterparts.contains(node) && child.nodeIsEqual(node, accuracy)) {
+						counterparts.add(node);
+						if (!child.belongsToRoot(node, accuracy))
+							return false;
+						hasCounterpart = true;
+						break;
 					}
-					if (!hasCounterpart)
-						return null;
 				}
-			} else
-				return null;
+				if (!hasCounterpart)
+					return false;
+			}
 		}
-		return counterparts;
+		return true;
+	}
+
+	public List<Layout> belongsToDesc(Layout otherLayout, double accuracy, List<Layout> previous) {
+		// returns the list of descendants of otherLayout (including itself) which contain this
+		List<Layout> containingDescendants = previous;
+		if (this.belongsToRoot(otherLayout, accuracy))
+			containingDescendants.add(otherLayout);
+		for (Layout child : otherLayout.getChildren())
+			containingDescendants = belongsToDesc(child, accuracy, containingDescendants);
+		return containingDescendants;
 	}
 
 	private String getBestLabel() {
@@ -199,7 +222,8 @@ public class Layout {
 
 	public boolean equiv(Layout s, double xTolerance, double yTolerance) {
 
-		if (Math.abs(s.x1 - x1) <= xTolerance && Math.abs(s.x2 - x2) <= xTolerance && Math.abs(s.y1 - y1) <= yTolerance && Math.abs(s.y2 - y2) <= yTolerance)
+		if (Math.abs(s.x1 - x1) <= xTolerance && Math.abs(s.x2 - x2) <= xTolerance && Math.abs(s.y1 - y1) <= yTolerance
+				&& Math.abs(s.y2 - y2) <= yTolerance)
 			return true;
 
 		return false;
@@ -285,7 +309,9 @@ public class Layout {
 		double[] x = getHistoLimits(binary.projectHorizontally());
 		double[] y = getHistoLimits(binary.projectVertically());
 		if (x[0] <= x[1] || y[0] <= y[1]) {
-			return new Layout(this.getParent(), getX1() + x[0] * (getX2() - getX1()), getX1() + x[1] * (getX2() - getX1()), getY1() + y[0] * (getY2() - getY1()), getY1() + y[1] * (getY2() - getY1()));
+			return new Layout(this.getParent(), getX1() + x[0] * (getX2() - getX1()),
+					getX1() + x[1] * (getX2() - getX1()), getY1() + y[0] * (getY2() - getY1()),
+					getY1() + y[1] * (getY2() - getY1()));
 		} else {
 			return new Layout(this.getParent(), 0, 0, 0, 0);
 		}
@@ -298,7 +324,8 @@ public class Layout {
 			start++;
 		while (end >= 0 && hist.get(end) >= 255.0)
 			end--;
-		return new double[] { Integer.valueOf(start).doubleValue() / hist.size(), Integer.valueOf(end + 1).doubleValue() / hist.size() };
+		return new double[] { Integer.valueOf(start).doubleValue() / hist.size(),
+				Integer.valueOf(end + 1).doubleValue() / hist.size() };
 	}
 
 	public List<Layout> split(Size morph, Img binary) {
@@ -373,13 +400,19 @@ public class Layout {
 			if (!result[i] && result[i + 1])
 				start = i + 1;
 			else if (result[i] && !result[i + 1]) {
-				shards.add(vertical ? new double[] { Integer.valueOf(start).doubleValue() / result.length, (Integer.valueOf(i).doubleValue() + 1) / result.length }
-						: new double[] { Integer.valueOf(start).doubleValue() / result.length, (Integer.valueOf(i).doubleValue() + 1) / result.length });
+				shards.add(vertical
+						? new double[] { Integer.valueOf(start).doubleValue() / result.length,
+								(Integer.valueOf(i).doubleValue() + 1) / result.length }
+						: new double[] { Integer.valueOf(start).doubleValue() / result.length,
+								(Integer.valueOf(i).doubleValue() + 1) / result.length });
 				start = null;
 			}
 		if (result[result.length - 1]) {
-			shards.add(vertical ? new double[] { Integer.valueOf(start).doubleValue() / result.length, Integer.valueOf(result.length).doubleValue() / result.length }
-					: new double[] { Integer.valueOf(start).doubleValue() / result.length, Integer.valueOf(result.length).doubleValue() / result.length });
+			shards.add(vertical
+					? new double[] { Integer.valueOf(start).doubleValue() / result.length,
+							Integer.valueOf(result.length).doubleValue() / result.length }
+					: new double[] { Integer.valueOf(start).doubleValue() / result.length,
+							Integer.valueOf(result.length).doubleValue() / result.length });
 			start = null;
 		}
 		return shards;
@@ -393,13 +426,16 @@ public class Layout {
 			return this;
 
 		if (level <= 0) {
-			// Imgproc.rectangle(img.getSrc(), new Point(0, 0), new Point(img.width(), img.height()), new Scalar(255, 0, 0), -1);
+			// Imgproc.rectangle(img.getSrc(), new Point(0, 0), new Point(img.width(), img.height()), new Scalar(255, 0,
+			// 0), -1);
 			return this;
 		}
 		List<Layout> shards = split(morph, binary);
-		shards.removeIf(shard -> ((shard.getY2() - shard.getY1()) * binary.size().height) < 2 || ((shard.getX2() - shard.getX1()) * binary.size().width) < 2);
+		shards.removeIf(shard -> ((shard.getY2() - shard.getY1()) * binary.size().height) < 2
+				|| ((shard.getX2() - shard.getX1()) * binary.size().width) < 2);
 		if (shards.isEmpty()) {
-			// Imgproc.rectangle(img.getSrc(), new Point(0, 0), new Point(img.width(), img.height()), new Scalar(0, 0, 255), -1);
+			// Imgproc.rectangle(img.getSrc(), new Point(0, 0), new Point(img.width(), img.height()), new Scalar(0, 0,
+			// 255), -1);
 			return this;
 		}
 		if (shards.size() == 1) {
