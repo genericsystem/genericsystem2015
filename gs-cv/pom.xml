@@ -13,84 +13,194 @@
 
 	<properties>
 		<deeplearning4j.version>0.9.1</deeplearning4j.version>
+		<maven-install-plugin.version>2.5.2</maven-install-plugin.version>
+		<opencv.version>3.3.0</opencv.version>
 		<eclipse-opencv-libname>Opencv-3.3.0</eclipse-opencv-libname>
-		<opencv-libraries>${HOME}/opencv/build/lib</opencv-libraries>
+		<opencv-libraries>/usr/local/share/OpenCV/java/</opencv-libraries>
+		<opencv-jar>${HOME}/opencv/build/bin/opencv-330.jar</opencv-jar>
+		<opencv-native-library>${opencv-libraries}/libopencv_java330.so</opencv-native-library>
 	</properties>
 
 	<build>
 		<finalName>${project.artifactId}</finalName>
-		<plugins>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-eclipse-plugin</artifactId>
+					<configuration>
+						<!-- In eclipse we use the opencv JNI jar via a user library, which 
+							will include the native shared libraries. -->
+						<excludes>
+							<exclude>org.opencv:opencv-java-api</exclude>
+						</excludes>
+						<classpathContainers>
+							<classpathContainer>
+								org.eclipse.jdt.launching.JRE_CONTAINER
+							</classpathContainer>
+							<classpathContainer>
+								org.eclipse.jdt.USER_LIBRARY/${eclipse-opencv-libname}
+							</classpathContainer>
+						</classpathContainers>
+					</configuration>
+				</plugin>
 
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-eclipse-plugin</artifactId>
-				<configuration>
-					<!-- In eclipse we use the opencv JNI jar via a user library, which 
-						will include the native shared libraries. -->
-					<excludes>
-						<exclude>org.opencv:opencv-java-api</exclude>
-					</excludes>
-					<classpathContainers>
-						<classpathContainer>
-							org.eclipse.jdt.launching.JRE_CONTAINER
-						</classpathContainer>
-						<classpathContainer>
-							org.eclipse.jdt.USER_LIBRARY/${eclipse-opencv-libname}
-						</classpathContainer>
-					</classpathContainers>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<configuration>
-					<argLine>-Djava.library.path=${opencv-libraries}</argLine>
-				</configuration>
-			</plugin>
-		</plugins>
+				<!-- This plugin was added to copy the java wrapper archive (jar) from 
+					compiled OpenCV to the local maven repository -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-install-plugin</artifactId>
+					<version>${maven-install-plugin.version}</version>
+					<executions>
+						<execution>
+							<id>install-opencv-jar</id>
+							<phase>validate</phase>
+							<goals>
+								<goal>install-file</goal>
+							</goals>
+							<configuration>
+								<file>${opencv-jar}</file>
+								<groupId>org.opencv</groupId>
+								<artifactId>opencv-java-bindings</artifactId>
+								<version>${opencv.version}</version>
+								<packaging>jar</packaging>
+								<generatePom>true</generatePom>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<configuration>
+						<systemPropertyVariables>
+							<propertyName>java.library.path</propertyName>
+							<buildDirectory>${opencv-libraries}</buildDirectory>
+						</systemPropertyVariables>
+						<argLine>-Djava.library.path=${opencv-libraries}</argLine>
+					</configuration>
+				</plugin>
+
+				<!-- This plugin is used to launch a class programmatically after a maven 
+					command -->
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>exec-maven-plugin</artifactId>
+					<version>1.6.0</version>
+					<executions>
+						<execution>
+							<goals>
+								<goal>java</goal>
+							</goals>
+						</execution>
+					</executions>
+					<configuration>
+						<arguments>
+							<argument>-Djava.library.path=${opencv-libraries}</argument>
+						</arguments>
+						<systemProperties>
+							<systemProperty>
+								<key>java.library.path</key>
+								<value>${opencv-libraries}</value>
+							</systemProperty>
+						</systemProperties>
+					</configuration>
+				</plugin>
+
+				<!--This plugin's configuration is used to store Eclipse m2e settings 
+					only. It has no influence on the Maven build itself. -->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.apache.maven.plugins
+										</groupId>
+										<artifactId>
+											maven-install-plugin
+										</artifactId>
+										<versionRange>
+											[2.5.2,)
+										</versionRange>
+										<goals>
+											<goal>install-file</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+
 	</build>
 
 	<dependencies>
+		<dependency>
+			<!-- If an error occur with this dependency, please run 'mvn clean validate' 
+				on this project -->
+			<groupId>org.opencv</groupId>
+			<artifactId>opencv-java-bindings</artifactId>
+			<version>${opencv.version}</version>
+			<type>jar</type>
+		</dependency>
+
 		<dependency>
 			<groupId>org.apache.pdfbox</groupId>
 			<artifactId>pdfbox</artifactId>
 			<version>2.0.5</version>
 		</dependency>
+
 		<dependency>
 			<groupId>org.apache.pdfbox</groupId>
 			<artifactId>pdfbox-tools</artifactId>
 			<version>2.0.5</version>
 		</dependency>
+
 		<dependency>
 			<groupId>org.apache.pdfbox</groupId>
 			<artifactId>fontbox</artifactId>
 			<version>2.0.5</version>
 		</dependency>
+
 		<dependency>
 			<groupId>org.genericsystem</groupId>
 			<artifactId>gs-reactor</artifactId>
 			<version>4.0-SNAPSHOT</version>
 		</dependency>
+
 		<dependency>
 			<groupId>org.deeplearning4j</groupId>
 			<artifactId>deeplearning4j-core</artifactId>
 			<version>${deeplearning4j.version}</version>
 		</dependency>
+
 		<dependency>
 			<groupId>org.nd4j</groupId>
 			<artifactId>nd4j-cuda-8.0-platform</artifactId>
 			<version>${deeplearning4j.version}</version>
 		</dependency>
+
 		<dependency>
 			<groupId>org.deeplearning4j</groupId>
 			<artifactId>deeplearning4j-zoo</artifactId>
 			<version>${deeplearning4j.version}</version>
 		</dependency>
+
 		<dependency>
 			<groupId>org.testng</groupId>
 			<artifactId>testng</artifactId>
 			<scope>test</scope>
 		</dependency>
-
 	</dependencies>
 </project>
