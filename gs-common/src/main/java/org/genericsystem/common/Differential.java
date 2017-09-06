@@ -140,6 +140,11 @@ public class Differential implements IDifferential<Generic> {
 		this.adds.enableInvalidations();
 	}
 
+	public void unApply() {
+		adds.forEach(add -> adds.remove(add));
+		removes.forEach(rem -> removes.remove(rem));
+	}
+
 	@Override
 	public long getTs() {
 		return getSubDifferential().getTs();

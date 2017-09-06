@@ -217,6 +217,7 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 
 	@Override
 	public void clear() {
+		getDifferential().unApply();
 		initialize();
 		listener.triggersClearEvent();
 		listener.triggersRefreshEvent();
