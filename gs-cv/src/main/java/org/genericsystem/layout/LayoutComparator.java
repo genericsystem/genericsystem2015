@@ -52,13 +52,13 @@ public class LayoutComparator extends AbstractApp {
 				Img img2 = frameImg.bgr2Gray().grad(3, 3).thresHold(0, 255, Imgproc.THRESH_BINARY_INV + Imgproc.THRESH_OTSU);
 				Img img3 = frameImg.sauvolaThreshold().bitwise_not();
 
-				// Layout layout = frameImg.buildLayout(img0);
-				Layout layout1 = frameImg.buildLayout();
-				Layout layout2 = frameImg.buildLayout();
-				Layout layout3 = frameImg.buildLayout();
+				Layout layout = img0.buildLayout();
+				Layout layout1 = img1.buildLayout();
+				Layout layout2 = img2.buildLayout();
+				Layout layout3 = img3.buildLayout();
 
 				Img out = new Img(frame, true);
-				// layout.draw(img0, new Scalar(0), 1);
+				layout.draw(img0, new Scalar(0), 1);
 				Img out1 = new Img(frame, true);
 				layout1.draw(img1, new Scalar(0), 1);
 				Img out2 = new Img(frame, true);

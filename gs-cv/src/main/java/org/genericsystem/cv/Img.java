@@ -785,20 +785,20 @@ public class Img implements AutoCloseable, Serializable {
 
 	}
 
-	public List<Float> projectVertically() {
+	public List<Double> projectVertically() {
 		Mat result = new Mat();
-		Core.reduce(getSrc(), result, 1, Core.REDUCE_AVG, CvType.CV_32F);
-		List<Float> histoVertical = new ArrayList<>();
-		Converters.Mat_to_vector_float(result, histoVertical);
+		Core.reduce(getSrc(), result, 1, Core.REDUCE_AVG, CvType.CV_64F);
+		List<Double> histoVertical = new ArrayList<>();
+		Converters.Mat_to_vector_double(result, histoVertical);
 		return histoVertical;
 	}
 
-	public List<Float> projectHorizontally() {
+	public List<Double> projectHorizontally() {
 		Mat result = new Mat();
-		Core.reduce(getSrc(), result, 0, Core.REDUCE_AVG, CvType.CV_32F);
+		Core.reduce(getSrc(), result, 0, Core.REDUCE_AVG, CvType.CV_64F);
 		Core.transpose(result, result);
-		List<Float> histoHorizontal = new ArrayList<>();
-		Converters.Mat_to_vector_float(result, histoHorizontal);
+		List<Double> histoHorizontal = new ArrayList<>();
+		Converters.Mat_to_vector_double(result, histoHorizontal);
 		return histoHorizontal;
 	}
 
