@@ -17,7 +17,7 @@
 		<opencv.version>3.3.0</opencv.version>
 		<eclipse-opencv-libname>Opencv-3.3.0</eclipse-opencv-libname>
 		<opencv-libraries>/usr/local/share/OpenCV/java/</opencv-libraries>
-		<opencv-jar>${HOME}/opencv/build/bin/opencv-330.jar</opencv-jar>
+		<opencv-jar>${opencv-libraries}/opencv-330.jar</opencv-jar>
 		<opencv-native-library>${opencv-libraries}/libopencv_java330.so</opencv-native-library>
 	</properties>
 
