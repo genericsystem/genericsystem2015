@@ -57,6 +57,11 @@ public class LayoutComparisonTestFigure2 extends AbstractApp {
 		double y2A4 = 0.9;
 		Layout childA4 = new Layout(layoutA, x1A4, x2A4, y1A4, y2A4);
 
+		layoutA.addChild(childA1);
+		layoutA.addChild(childA2);
+		layoutA.addChild(childA3);
+		layoutA.addChild(childA4);
+
 		// 1st child of the 4th child
 		double x1A41 = 0.1;
 		double x2A41 = 0.5;
@@ -70,6 +75,9 @@ public class LayoutComparisonTestFigure2 extends AbstractApp {
 		double y1A42 = 0.1;
 		double y2A42 = 0.9;
 		Layout childA42 = new Layout(childA4, x1A42, x2A42, y1A42, y2A42);
+
+		childA4.addChild(childA41);
+		childA4.addChild(childA42);
 
 		// Contained Layout B
 		Layout layoutB = new Layout(null, 0.05, 0.25, 0.05, 0.25);
@@ -88,6 +96,9 @@ public class LayoutComparisonTestFigure2 extends AbstractApp {
 		double y2B2 = y2A4 + 0.01 * (y2A4 - y1A4);
 		Layout childB2 = new Layout(layoutB, x1B2, x2B2, y1B2, y2B2);
 
+		layoutB.addChild(childB1);
+		layoutB.addChild(childB2);
+
 		// child of the 2nd child similar (or not) to the 2nd child of the 4th child of the containing layout A
 		double x1B21 = x1A42 + 0.01 * (x2A42 - x1A42);
 		double x2B21 = x2A42 + 0.01 * (x2A42 - x1A42);
@@ -95,11 +106,18 @@ public class LayoutComparisonTestFigure2 extends AbstractApp {
 		double y2B21 = y2A42 + 0.01 * (y2A42 - y1A42);
 		Layout childB21 = new Layout(childB2, x1B21, x2B21, y1B21, y2B21);
 
+		childB2.addChild(childB21);
+
 		// adding child A2 a child similar to Layout B
 		Layout childA21 = new Layout(childA2, 0.1, 0.9, 0.1, 0.9);
 		Layout childA211 = new Layout(childA21, x1B1, x2B1, y1B1, y2B1);
 		Layout childA212 = new Layout(childA21, x1B2, x2B2, y1B2, y2B2);
 		Layout childA2121 = new Layout(childA212, x1B21, x2B21, y1B21, y2B21);
+
+		childA2.addChild(childA21);
+		childA21.addChild(childA211);
+		childA21.addChild(childA212);
+		childA212.addChild(childA2121);
 
 		layoutA.draw(binary, new Scalar(0, 255, 0), 2);
 		layoutB.draw(binary, new Scalar(255, 0, 0), 2);
