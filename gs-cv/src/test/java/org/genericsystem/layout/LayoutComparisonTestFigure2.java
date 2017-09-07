@@ -2,7 +2,7 @@ package org.genericsystem.layout;
 
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
-import org.opencv.core.Core;
+import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
@@ -14,7 +14,7 @@ import javafx.scene.layout.GridPane;
 public class LayoutComparisonTestFigure2 extends AbstractApp {
 
 	static {
-		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+		NativeLibraryLoader.load();
 	}
 
 	public static void main(String[] args) {

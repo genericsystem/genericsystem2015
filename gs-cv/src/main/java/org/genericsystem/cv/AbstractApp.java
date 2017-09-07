@@ -2,7 +2,7 @@ package org.genericsystem.cv;
 
 import java.io.ByteArrayInputStream;
 
-import org.opencv.core.Core;
+import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
@@ -25,7 +25,7 @@ import javafx.stage.WindowEvent;
 
 public abstract class AbstractApp extends Application {
 	static {
-		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+		NativeLibraryLoader.load();
 	}
 
 	public final static double displayWidth = 400d;

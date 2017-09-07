@@ -4,9 +4,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
-
+import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfDouble;
@@ -17,10 +15,13 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
 
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
+
 public class LinesDetector extends AbstractApp {
 
 	static {
-		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+		NativeLibraryLoader.load();
 	}
 
 	public static void main(String[] args) {
@@ -86,8 +87,8 @@ public class LinesDetector extends AbstractApp {
 			Mat rotated = new Mat();
 			Imgproc.warpAffine(frame, rotated, matrix, new Size(frame.size().width, frame.size().height));
 			double crop = 0.20;
-			Img croppedImg = new Img(new Mat(rotated, new Rect(Double.valueOf(rotated.width() * crop).intValue(), Double.valueOf(rotated.height() * crop).intValue(), Double.valueOf(rotated.width() * (1 - 2 * crop)).intValue(), Double.valueOf(
-					rotated.height() * (1 - 2 * crop)).intValue())));
+			Img croppedImg = new Img(new Mat(rotated, new Rect(Double.valueOf(rotated.width() * crop).intValue(), Double.valueOf(rotated.height() * crop).intValue(), Double.valueOf(rotated.width() * (1 - 2 * crop)).intValue(),
+					Double.valueOf(rotated.height() * (1 - 2 * crop)).intValue())));
 
 			canny.setImage(Tools.mat2jfxImage(edges.getSrc()));
 			src.setImage(Tools.mat2jfxImage(frame));

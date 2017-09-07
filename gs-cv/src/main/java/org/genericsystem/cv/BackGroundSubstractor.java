@@ -4,6 +4,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 
+import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.video.BackgroundSubtractorMOG2;
@@ -13,7 +14,7 @@ import org.opencv.videoio.VideoCapture;
 public class BackGroundSubstractor {
 
 	static {
-		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+		NativeLibraryLoader.load();
 	}
 
 	private static VideoCapture camera = new VideoCapture(0);

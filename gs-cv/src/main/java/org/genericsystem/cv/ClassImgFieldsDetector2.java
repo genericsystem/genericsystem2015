@@ -1,12 +1,12 @@
 package org.genericsystem.cv;
 
-import org.opencv.core.Core;
+import org.genericsystem.cv.utils.NativeLibraryLoader;
 
 import javafx.scene.layout.GridPane;
 
 public class ClassImgFieldsDetector2 extends AbstractApp {
 	static {
-		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+		NativeLibraryLoader.load();
 	}
 
 	private final static String classImgRepertory = "classes/id-fr-front";

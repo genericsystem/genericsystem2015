@@ -14,8 +14,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.opencv.calib3d.Calib3d;
-import org.opencv.core.Core;
 import org.opencv.core.DMatch;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfDMatch;
@@ -42,7 +42,7 @@ public class Classifier {
 	private static final DescriptorExtractor[] descriptorExtractors;
 
 	static {
-		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+		NativeLibraryLoader.load();
 		featureDetectors = new FeatureDetector[] { FeatureDetector.create(FeatureDetector.BRISK) };
 		descriptorExtractors = new DescriptorExtractor[] { DescriptorExtractor.create(DescriptorExtractor.OPPONENT_ORB) };
 	}
@@ -74,8 +74,7 @@ public class Classifier {
 	// Returns the path to the stored image (the file name can have been changed to avoid duplicate names).
 	public static Path classify(Path classesDirectory, Path imgFile, FeatureDetector[] featureDetectors, DescriptorExtractor[] descriptorExtractors) {
 		Mat alignedImage = null;
-		try (Img img = new Img(imgFile.toString());
-				CompareFeatureResult bestClass = Classifier.selectBestClass(classesDirectory, img.getSrc(), featureDetectors, descriptorExtractors)) {
+		try (Img img = new Img(imgFile.toString()); CompareFeatureResult bestClass = Classifier.selectBestClass(classesDirectory, img.getSrc(), featureDetectors, descriptorExtractors)) {
 			Path matchingClassDir;
 			if (bestClass != null) {
 				logger.debug("bestClass != null, {}", bestClass);
@@ -162,7 +161,7 @@ public class Classifier {
 					if (classResult != null)
 						if (result == null)
 							result = classResult;
-						else if	(classResult.compareTo(result) < 0) {
+						else if (classResult.compareTo(result) < 0) {
 							result.close();
 							result = classResult;
 						} else

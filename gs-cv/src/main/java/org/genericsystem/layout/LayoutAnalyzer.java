@@ -2,7 +2,7 @@ package org.genericsystem.layout;
 
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
-import org.opencv.core.Core;
+import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 
@@ -11,7 +11,7 @@ import javafx.scene.layout.GridPane;
 
 public class LayoutAnalyzer extends AbstractApp {
 	static {
-		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+		NativeLibraryLoader.load();
 	}
 
 	public static void main(String[] args) {
