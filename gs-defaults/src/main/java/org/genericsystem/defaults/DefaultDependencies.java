@@ -126,14 +126,14 @@ public interface DefaultDependencies<T extends DefaultGeneric<T>> extends IGener
 			public Observable<T> getAddsObservable() {
 				return Observable.merge(getInheritings().getAddsObservable(),
 						Observable.fromIterable(getInheritings()).flatMap(g -> g.getSubInheritings().getAddsObservable()),
-						RxJavaHelpers.additionsOf(getInheritings().toObservableList()).flatMap(g -> g.getSubInheritings().getAddsObservable())).distinct();
+						RxJavaHelpers.additionsOf(getInheritings().toObservableList()).flatMap(g -> g.getSubInheritings().getAddsObservable()));
 			}
 
 			@Override
 			public Observable<T> getRemovesObservable() {
 				return Observable.merge(getInheritings().getRemovesObservable(),
 						Observable.fromIterable(getInheritings()).flatMap(g -> g.getSubInheritings().getRemovesObservable()),
-						RxJavaHelpers.additionsOf(getInheritings().toObservableList()).flatMap(g -> g.getSubInheritings().getRemovesObservable())).distinct();
+						RxJavaHelpers.additionsOf(getInheritings().toObservableList()).flatMap(g -> g.getSubInheritings().getRemovesObservable()));
 			}
 		};
 	}
