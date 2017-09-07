@@ -15,12 +15,12 @@ import org.datavec.image.transform.ImageTransform;
 import org.deeplearning4j.datasets.datavec.RecordReaderDataSetIterator;
 import org.deeplearning4j.datasets.iterator.AsyncDataSetIterator;
 import org.deeplearning4j.earlystopping.EarlyStoppingConfiguration;
+import org.deeplearning4j.earlystopping.saver.LocalFileGraphSaver;
 import org.deeplearning4j.earlystopping.scorecalc.DataSetLossCalculatorCG;
 import org.deeplearning4j.earlystopping.termination.MaxEpochsTerminationCondition;
 import org.deeplearning4j.earlystopping.termination.ScoreImprovementEpochTerminationCondition;
 import org.deeplearning4j.eval.Evaluation;
 import org.deeplearning4j.nn.conf.GradientNormalization;
-import org.deeplearning4j.nn.conf.layers.DenseLayer;
 import org.deeplearning4j.nn.conf.layers.OutputLayer;
 import org.deeplearning4j.nn.graph.ComputationGraph;
 import org.deeplearning4j.nn.transferlearning.FineTuneConfiguration;
@@ -33,7 +33,6 @@ import org.deeplearning4j.zoo.PretrainedType;
 import org.deeplearning4j.zoo.ZooModel;
 import org.deeplearning4j.zoo.model.VGG16;
 import org.nd4j.jita.conf.CudaEnvironment;
-import org.nd4j.linalg.activations.impl.ActivationLReLU;
 import org.nd4j.linalg.activations.impl.ActivationSoftmax;
 import org.nd4j.linalg.dataset.ExistingMiniBatchDataSetIterator;
 import org.nd4j.linalg.dataset.api.DataSet;
@@ -50,7 +49,7 @@ public class AdaptedVGG16 {
 	private static String featurizedLayer = "block5_pool";
 
 	public static void main(String[] args) throws Exception {
-		System.setProperty("org.bytedeco.javacpp.maxphysicalbytes", "10G");
+		System.setProperty("org.bytedeco.javacpp.maxphysicalbytes", "8G");
 
 		CudaEnvironment.getInstance().getConfiguration()
 		.setMaximumDeviceCacheableLength(1024 * 1024 * 1024L)
@@ -93,17 +92,18 @@ public class AdaptedVGG16 {
 		FineTuneConfiguration fineTuneConfig = new FineTuneConfiguration.Builder()
 				.gradientNormalization(GradientNormalization.RenormalizeL2PerLayer)
 				.learningRate(learningRate)
+				.regularization(true)
 				.build();
 
 		ComputationGraph net = new TransferLearning.GraphBuilder(vgg16)
 				.fineTuneConfiguration(fineTuneConfig)
 				.setFeatureExtractor(featurizedLayer)
 				.removeVertexKeepConnections("predictions")
-				.addLayer("fc3", new DenseLayer.Builder()
-						.activation(new ActivationLReLU(0.33))
-						.weightInit(WeightInit.RELU)
-						.dropOut(0.5)
-						.nIn(4096).nOut(2048).build(), "fc2")
+				//				.addLayer("fc3", new DenseLayer.Builder()
+				//						.activation(new ActivationLReLU(0.33))
+				//						.weightInit(WeightInit.RELU)
+				//						.dropOut(0.5)
+				//						.nIn(4096).nOut(2048).build(), "fc2")
 				.addLayer("predictions", 
 						new OutputLayer.Builder(LossFunctions.LossFunction.MCXENT)
 						.nIn(2048).nOut(outputNum)
@@ -129,6 +129,7 @@ public class AdaptedVGG16 {
 				.evaluateEveryNEpochs(1)
 				.epochTerminationConditions(new ScoreImprovementEpochTerminationCondition(20), new MaxEpochsTerminationCondition(nEpochs))
 				.scoreCalculator(new DataSetLossCalculatorCG(getPresavedIterator("validation"), true))
+				.modelSaver(new LocalFileGraphSaver("/tmp"))
 				.build();
 
 		EarlyStoppingGraphFeaturizedTrainer trainer = new EarlyStoppingGraphFeaturizedTrainer(esConf, transferLearningHelper, getPresavedIterator("train"));
@@ -142,7 +143,7 @@ public class AdaptedVGG16 {
 		log.info("Model saved to {}.", modelFile);
 	}
 
-	public static DataSetIterator getPresavedIterator(String name) {
+	private static DataSetIterator getPresavedIterator(String name) {
 		DataSetIterator existingTestData = new ExistingMiniBatchDataSetIterator(new File(name + "Folder"), "images-" + featurizedLayer + "-" + name + "-%d.bin");
 		DataSetIterator asyncTestIter = new AsyncDataSetIterator(existingTestData);
 		return asyncTestIter;
@@ -157,7 +158,7 @@ public class AdaptedVGG16 {
 		}
 	}
 
-	public static void saveToDisk(DataSet currentFeaturized, int iterNum, String name) {
+	private static void saveToDisk(DataSet currentFeaturized, int iterNum, String name) {
 		File fileFolder = new File(name + "Folder");
 		if (iterNum == 0) {
 			fileFolder.mkdirs();
@@ -167,16 +168,17 @@ public class AdaptedVGG16 {
 		log.info("Saved {} dataset #{}", name, iterNum);
 	}
 
-	public static DataSetIterator getDataSetIterator(ImageRecordReader recordReader, InputSplit data, ImageTransform transform, int batchSize, int outputNum) {
+	protected static DataSetIterator getDataSetIterator(ImageRecordReader recordReader, InputSplit data, ImageTransform transform, int batchSize, int outputNum) {
 		try {
 			recordReader.initialize(data, transform);
 		} catch (IOException e) {
-			log.warn("Impossible to initialize recordReader.", e);
+			log.error("Impossible to initialize recordReader.", e);
 		}
 		DataSetIterator dataIter = new RecordReaderDataSetIterator(recordReader, batchSize, 1, outputNum);
 		DataNormalization scaler = new ImagePreProcessingScaler(-1, 1);
 		scaler.fit(dataIter);
 		dataIter.setPreProcessor(scaler);
+		dataIter.reset();
 		return dataIter;
 	}
 }
