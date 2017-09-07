@@ -89,6 +89,9 @@
 				<module>gs-geography</module>
 				<module>gs-quiz</module>
 				<module>gs-events</module>
+			<!-- beta-testing -->
+				<module>gs-cv</module>
+				<module>gs-ir</module>
 			</modules>
 		</profile>
 	</profiles>
