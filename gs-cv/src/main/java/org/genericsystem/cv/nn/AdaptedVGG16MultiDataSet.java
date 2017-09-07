@@ -2,18 +2,20 @@ package org.genericsystem.cv.nn;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
 import org.datavec.api.io.filters.BalancedPathFilter;
 import org.datavec.api.io.labels.ParentPathLabelGenerator;
+import org.datavec.api.records.reader.RecordReader;
 import org.datavec.api.split.FileSplit;
 import org.datavec.api.split.InputSplit;
 import org.datavec.image.loader.BaseImageLoader;
+import org.datavec.image.recordreader.BaseImageRecordReader;
 import org.datavec.image.recordreader.ImageRecordReader;
-import org.datavec.image.transform.ImageTransform;
-import org.deeplearning4j.datasets.datavec.RecordReaderDataSetIterator;
-import org.deeplearning4j.datasets.iterator.AsyncDataSetIterator;
+import org.deeplearning4j.datasets.datavec.RecordReaderMultiDataSetIterator;
+import org.deeplearning4j.datasets.iterator.AsyncMultiDataSetIterator;
 import org.deeplearning4j.earlystopping.EarlyStoppingConfiguration;
 import org.deeplearning4j.earlystopping.saver.LocalFileGraphSaver;
 import org.deeplearning4j.earlystopping.scorecalc.DataSetLossCalculatorCG;
@@ -21,30 +23,32 @@ import org.deeplearning4j.earlystopping.termination.MaxEpochsTerminationConditio
 import org.deeplearning4j.earlystopping.termination.ScoreImprovementEpochTerminationCondition;
 import org.deeplearning4j.eval.Evaluation;
 import org.deeplearning4j.nn.conf.GradientNormalization;
+import org.deeplearning4j.nn.conf.layers.DenseLayer;
 import org.deeplearning4j.nn.conf.layers.OutputLayer;
 import org.deeplearning4j.nn.graph.ComputationGraph;
 import org.deeplearning4j.nn.transferlearning.FineTuneConfiguration;
 import org.deeplearning4j.nn.transferlearning.TransferLearning;
 import org.deeplearning4j.nn.transferlearning.TransferLearningHelper;
 import org.deeplearning4j.nn.weights.WeightInit;
-import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
 import org.deeplearning4j.util.ModelSerializer;
 import org.deeplearning4j.zoo.PretrainedType;
 import org.deeplearning4j.zoo.ZooModel;
 import org.deeplearning4j.zoo.model.VGG16;
 import org.nd4j.jita.conf.CudaEnvironment;
+import org.nd4j.linalg.activations.impl.ActivationLReLU;
 import org.nd4j.linalg.activations.impl.ActivationSoftmax;
-import org.nd4j.linalg.dataset.ExistingMiniBatchDataSetIterator;
-import org.nd4j.linalg.dataset.api.DataSet;
-import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
-import org.nd4j.linalg.dataset.api.preprocessor.DataNormalization;
-import org.nd4j.linalg.dataset.api.preprocessor.ImagePreProcessingScaler;
+import org.nd4j.linalg.dataset.MultiDataSet;
+import org.nd4j.linalg.dataset.api.iterator.MultiDataSetIterator;
+import org.nd4j.linalg.dataset.api.preprocessor.MultiNormalizerMinMaxScaler;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AdaptedVGG16 {
-	private static final Logger log = LoggerFactory.getLogger(AdaptedVGG16.class);
+public class AdaptedVGG16MultiDataSet {
+	private static final Logger log = LoggerFactory.getLogger(AdaptedVGG16MultiDataSet.class);
+	private static int height = 224;
+	private static int width = 224;
+	private static int channels = 3;
 
 	private static String featurizedLayer = "block5_pool";
 
@@ -60,27 +64,30 @@ public class AdaptedVGG16 {
 		double learningRate = 0.005;
 		int batchSize = 4;
 		int nEpochs = 100;
-		int height = 224;
-		int width = 224;
-		int channels = 3;
 		int seed = 123;
 		String[] allowedExtensions = BaseImageLoader.ALLOWED_FORMATS;
 		Random randNumGen = new Random(seed);
 
-		File parentDir = new File(System.getProperty("user.dir"), "training");
+		File parentDir = new File(System.getProperty("user.dir"), "training-grouped-augmented2");
 		FileSplit filesInDir = new FileSplit(parentDir, allowedExtensions, randNumGen);
 		ParentPathLabelGenerator labelMaker = new ParentPathLabelGenerator();
-		BalancedPathFilter pathFilter = new BalancedPathFilter(randNumGen, allowedExtensions, labelMaker, 0, 0, 100, 0);
+		BalancedPathFilter pathFilter = new BalancedPathFilter(randNumGen, allowedExtensions, null, 0, 0, 1000, 0);
 
 		InputSplit[] filesInDirSplit = filesInDir.sample(pathFilter, .70, .15, .15);
 		InputSplit trainData = filesInDirSplit[0];
 		InputSplit validData = filesInDirSplit[1];
 		InputSplit testData = filesInDirSplit[2];
 
-		ImageRecordReader recordReader = new ImageRecordReader(height, width, channels, labelMaker);
-		recordReader.initialize(trainData, null);
-		List<String> labels = recordReader.getLabels();
-		int outputNum = recordReader.numLabels();
+		log.debug("trainData: {}, validData: {}, testData: {}", trainData.length(), validData.length(), testData.length());
+
+		ImageRecordReader recordReader = new ImageRecordReader(height, width, channels);
+
+		RecordReader featuresReader = new ImageFeaturesRecordReader(height, width, channels, null, null);
+
+		BaseImageRecordReader outputReader = new ImageClassRecordReader(height, width, channels, labelMaker);
+		outputReader.initialize(trainData);
+		List<String> labels = outputReader.getLabels();
+		int outputNum = outputReader.numLabels();
 
 		// Until version 0.8.0 of deeplearning4j
 		//		TrainedModelHelper modelImportHelper = new TrainedModelHelper(TrainedModels.VGG16);
@@ -97,19 +104,21 @@ public class AdaptedVGG16 {
 
 		ComputationGraph net = new TransferLearning.GraphBuilder(vgg16)
 				.fineTuneConfiguration(fineTuneConfig)
+				.addInputs("features")
 				.setFeatureExtractor(featurizedLayer)
 				.removeVertexKeepConnections("predictions")
-				//				.addLayer("fc3", new DenseLayer.Builder()
-				//						.activation(new ActivationLReLU(0.33))
-				//						.weightInit(WeightInit.RELU)
-				//						.dropOut(0.5)
-				//						.nIn(4096).nOut(2048).build(), "fc2")
+				.addLayer("fc3", new DenseLayer.Builder()
+						.activation(new ActivationLReLU(0.33))
+						.weightInit(WeightInit.RELU)
+						.dropOut(0.5)
+						.nIn(4096 + 7744).nOut(2048).build(), "fc2", "features")
 				.addLayer("predictions", 
 						new OutputLayer.Builder(LossFunctions.LossFunction.MCXENT)
 						.nIn(2048).nOut(outputNum)
 						.weightInit(WeightInit.RELU)
 						.dropOut(0.5)
 						.activation(new ActivationSoftmax()).build(), "fc3")
+				.setOutputs("predictions")
 				.build();
 
 		TransferLearningHelper transferLearningHelper = new TransferLearningHelper(net, featurizedLayer);
@@ -119,23 +128,25 @@ public class AdaptedVGG16 {
 		//		UIServer uiServer = UIServer.getInstance();
 		//		StatsStorage statsStorage = new InMemoryStatsStorage();
 		//		uiServer.attach(statsStorage);
-		graph.setListeners(/*new StatsListener(statsStorage), */new ScoreIterationListener(10));
+		//		graph.setListeners(/*new StatsListener(statsStorage), */new ScoreIterationListener(10));
 
-		saveFeaturized(getDataSetIterator(recordReader, trainData, null, batchSize, outputNum), transferLearningHelper, "train");
-		saveFeaturized(getDataSetIterator(recordReader, validData, null, batchSize, outputNum), transferLearningHelper, "validation");
-		saveFeaturized(getDataSetIterator(recordReader, testData, null, batchSize, outputNum), transferLearningHelper, "test");
+		List<RecordReader> readers = Arrays.asList(recordReader, featuresReader, outputReader);
+		List<String> names = Arrays.asList("image", "features", "output");
+		saveFeaturized(getMultiDataSetIterator(readers, names, trainData, batchSize, outputNum), transferLearningHelper, "train");
+		saveFeaturized(getMultiDataSetIterator(readers, names, validData, batchSize, outputNum), transferLearningHelper, "validation");
+		saveFeaturized(getMultiDataSetIterator(readers, names, testData, batchSize, outputNum), transferLearningHelper, "test");
 
 		EarlyStoppingConfiguration<ComputationGraph> esConf = new EarlyStoppingConfiguration.Builder<ComputationGraph>()
-				.evaluateEveryNEpochs(1)
 				.epochTerminationConditions(new ScoreImprovementEpochTerminationCondition(20), new MaxEpochsTerminationCondition(nEpochs))
-				.scoreCalculator(new DataSetLossCalculatorCG(getPresavedIterator("validation"), true))
+				.scoreCalculator(new DataSetLossCalculatorCG(getPresavedMultiIterator("validation"), true))
 				.modelSaver(new LocalFileGraphSaver("/tmp"))
+				.evaluateEveryNEpochs(1)
 				.build();
 
-		EarlyStoppingGraphFeaturizedTrainer trainer = new EarlyStoppingGraphFeaturizedTrainer(esConf, transferLearningHelper, getPresavedIterator("train"));
+		EarlyStoppingGraphFeaturizedTrainer trainer = new EarlyStoppingGraphFeaturizedTrainer(esConf, transferLearningHelper, getPresavedMultiIterator("train"));
 		trainer.fit();
 
-		Evaluation eval = graph.evaluate(getPresavedIterator("test"), labels);
+		Evaluation eval = graph.evaluate(getPresavedMultiIterator("test"), labels);
 		log.info("Model evaluation:\n{}", eval.stats(true));
 
 		File modelFile = new File("AdaptedVGG16-" + System.currentTimeMillis() + ".zip");
@@ -143,42 +154,63 @@ public class AdaptedVGG16 {
 		log.info("Model saved to {}.", modelFile);
 	}
 
-	private static DataSetIterator getPresavedIterator(String name) {
-		DataSetIterator existingTestData = new ExistingMiniBatchDataSetIterator(new File(name + "Folder"), "images-" + featurizedLayer + "-" + name + "-%d.bin");
-		DataSetIterator asyncTestIter = new AsyncDataSetIterator(existingTestData);
+	private static MultiDataSetIterator getPresavedMultiIterator(String name) {
+		MultiDataSetIterator existingTestData = new ExistingMiniBatchMultiDataSetIterator(new File(name + "Folder"), "images-" + featurizedLayer + "-" + name + "-%d.bin");
+		MultiDataSetIterator asyncTestIter = new AsyncMultiDataSetIterator(existingTestData);
 		return asyncTestIter;
 	}
 
-	private static void saveFeaturized(DataSetIterator dataIter, TransferLearningHelper transferLearningHelper, String name) {
-		int dataSaved = 0;
-		while(dataIter.hasNext()) {
-			DataSet currentFeaturized = transferLearningHelper.featurize(dataIter.next());
-			saveToDisk(currentFeaturized, dataSaved, name);
-			dataSaved++;
-		}
+	private static void saveFeaturized(MultiDataSetIterator dataIter, TransferLearningHelper transferLearningHelper, String name) {
+		int[] dataSaved = new int[]{ 0 };
+		dataIter.forEachRemaining(mds -> {
+			MultiDataSet currentFeaturized = transferLearningHelper.featurize((org.nd4j.linalg.dataset.MultiDataSet) mds);
+			saveToDisk(currentFeaturized, dataSaved[0], name);
+			dataSaved[0] = dataSaved[0] + 1;
+		});
+		dataIter.reset();
 	}
 
-	private static void saveToDisk(DataSet currentFeaturized, int iterNum, String name) {
+	private static void saveToDisk(MultiDataSet currentFeaturized, int iterNum, String name) {
 		File fileFolder = new File(name + "Folder");
 		if (iterNum == 0) {
 			fileFolder.mkdirs();
 		}
 		String fileName = "images-" + featurizedLayer + "-" + name + "-" + iterNum + ".bin";
-		currentFeaturized.save(new File(fileFolder, fileName));
+		try {
+			currentFeaturized.save(new File(fileFolder, fileName));
+		} catch (IOException e) {
+			log.error("Exception while saving file {}.", e, fileName);
+		}
 		log.info("Saved {} dataset #{}", name, iterNum);
 	}
 
-	protected static DataSetIterator getDataSetIterator(ImageRecordReader recordReader, InputSplit data, ImageTransform transform, int batchSize, int outputNum) {
+	public static MultiDataSetIterator getMultiDataSetIterator(List<RecordReader> recordReaders, List<String> names, InputSplit data, int batchSize, int outputNum) {
+		if (recordReaders.size() != names.size())
+			throw new IllegalArgumentException("The lists of recordReaders and of names must have the same size. "
+					+ (recordReaders.size() + 1) + " recordReader(s), " + (names.size() + 1) + " names given.");
+		RecordReaderMultiDataSetIterator.Builder builder = new RecordReaderMultiDataSetIterator.Builder(batchSize);
 		try {
-			recordReader.initialize(data, transform);
+			for (int i = 0; i < recordReaders.size(); i++) {
+				recordReaders.get(i).initialize(data);
+				String name = names.get(i);
+				RecordReader reader = recordReaders.get(i);
+				builder.addReader(name, reader);
+				if (reader instanceof ImageClassRecordReader)
+					builder.addOutputOneHot(name, 0, outputNum);
+				else
+					builder.addInput(name);
+			}
 		} catch (IOException e) {
 			log.error("Impossible to initialize recordReader.", e);
+		} catch (InterruptedException e) {
+			log.error("Initialization of recordReader interrupted.", e);
 		}
-		DataSetIterator dataIter = new RecordReaderDataSetIterator(recordReader, batchSize, 1, outputNum);
-		DataNormalization scaler = new ImagePreProcessingScaler(-1, 1);
-		scaler.fit(dataIter);
-		dataIter.setPreProcessor(scaler);
-		dataIter.reset();
-		return dataIter;
+		MultiDataSetIterator iterator = builder.build();
+		MultiNormalizerMinMaxScaler scaler = new MultiNormalizerMinMaxScaler(-1, 1);
+		scaler.fit(iterator);
+		log.debug("Scaler fit");
+		iterator.setPreProcessor(scaler);
+		iterator.reset();
+		return iterator;
 	}
 }
