@@ -15,9 +15,9 @@ import org.genericsystem.api.core.FiltersBuilder;
 import org.genericsystem.api.core.IGeneric;
 import org.genericsystem.api.core.IndexFilter;
 import org.genericsystem.api.core.Snapshot;
+import org.genericsystem.defaults.tools.RxJavaHelpers;
 
 import io.reactivex.Observable;
-import io.reactivex.rxjavafx.observables.JavaFxObservable;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -224,8 +224,8 @@ public class PseudoConcurrentCollection<T extends IGeneric<?>> implements Snapsh
 	private SimpleObjectProperty<T> addProperty = new SimpleObjectProperty<T>();
 	private SimpleObjectProperty<T> removeProperty = new SimpleObjectProperty<T>();
 
-	private Observable<T> adds = JavaFxObservable.valuesOf(addProperty);
-	private Observable<T> removes = JavaFxObservable.valuesOf(removeProperty);
+	private Observable<T> adds = RxJavaHelpers.valuesOf(addProperty);
+	private Observable<T> removes = RxJavaHelpers.valuesOf(removeProperty);
 
 	public Observable<T> getFilteredAdds(Predicate<T> predicate) {
 		return adds.filter(x -> fireInvalidations && predicate.test(x));
