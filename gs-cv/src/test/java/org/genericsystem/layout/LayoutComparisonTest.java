@@ -59,6 +59,11 @@ public class LayoutComparisonTest {
 		double y2A4 = 0.9;
 		Layout childA4 = new Layout(layoutA, x1A4, x2A4, y1A4, y2A4);
 
+		layoutA.addChild(childA1);
+		layoutA.addChild(childA2);
+		layoutA.addChild(childA3);
+		layoutA.addChild(childA4);
+
 		// 1st child of the 4th child
 		double x1A41 = 0.1;
 		double x2A41 = 0.5;
@@ -72,6 +77,9 @@ public class LayoutComparisonTest {
 		double y1A42 = 0.1;
 		double y2A42 = 0.9;
 		Layout childA42 = new Layout(childA4, x1A42, x2A42, y1A42, y2A42);
+
+		childA4.addChild(childA41);
+		childA4.addChild(childA42);
 
 		// Contained Layout B
 		Layout layoutB = new Layout(null, Math.random(), Math.random(), Math.random(), Math.random());
@@ -97,6 +105,10 @@ public class LayoutComparisonTest {
 		double y2B21 = y2A42 + 0.01 * (y2A42 - y1A42);
 		Layout childB21 = new Layout(childB2, x1B21, x2B21, y1B21, y2B21);
 
+		layoutB.addChild(childB1);
+		layoutB.addChild(childB2);
+		childB2.addChild(childB21);
+
 		assert !layoutB.belongsToRoot(layoutA, 0.0097);
 		assert layoutB.belongsToRoot(layoutA, 0.0103);
 
@@ -105,6 +117,11 @@ public class LayoutComparisonTest {
 		Layout childA211 = new Layout(childA21, x1B1, x2B1, y1B1, y2B1);
 		Layout childA212 = new Layout(childA21, x1B2, x2B2, y1B2, y2B2);
 		Layout childA2121 = new Layout(childA212, x1B21, x2B21, y1B21, y2B21);
+
+		childA2.addChild(childA21);
+		childA21.addChild(childA211);
+		childA21.addChild(childA212);
+		childA212.addChild(childA2121);
 
 		List<Layout> containingDesc = layoutB.belongsToDesc(layoutA, 0.011, new ArrayList<Layout>());
 		assert containingDesc.get(0) == layoutA;
