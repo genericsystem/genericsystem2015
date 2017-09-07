@@ -7,6 +7,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.opencv.calib3d.Calib3d;
 import org.opencv.core.Core;
 import org.opencv.core.DMatch;
@@ -33,7 +34,7 @@ public class CamCropper extends AbstractApp {
 	private final static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	static {
-		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+		NativeLibraryLoader.load();
 	}
 
 	private final VideoCapture camera = new VideoCapture(0);

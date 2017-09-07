@@ -2,7 +2,7 @@ package org.genericsystem.cv;
 
 import java.io.File;
 
-import org.opencv.core.Core;
+import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 
@@ -10,7 +10,7 @@ import javafx.scene.layout.GridPane;
 
 public class ClassImgFieldsDetector extends AbstractApp {
 	static {
-		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+		NativeLibraryLoader.load();
 	}
 
 	private final static String imgClassDirectory = "classes/id-fr-front";

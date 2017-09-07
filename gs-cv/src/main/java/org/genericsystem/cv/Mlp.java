@@ -3,7 +3,7 @@ package org.genericsystem.cv;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import org.opencv.core.Core;
+import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfFloat;
@@ -14,7 +14,7 @@ import org.opencv.ml.Ml;
 
 public class Mlp {
 	static {
-		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+		NativeLibraryLoader.load();
 	}
 	final int MAX_DATA = 1000;
 	ANN_MLP mlp;

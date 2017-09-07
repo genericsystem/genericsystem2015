@@ -5,10 +5,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
-
-import org.opencv.core.Core;
+import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;
 import org.opencv.core.Rect;
@@ -19,12 +16,15 @@ import org.opencv.objdetect.CascadeClassifier;
 import org.opencv.objdetect.Objdetect;
 import org.opencv.videoio.VideoCapture;
 
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
+
 public class FaceDetector extends AbstractApp {
 
 	private static CascadeClassifier faceCascade;
 
 	static {
-		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+		NativeLibraryLoader.load();
 		faceCascade = new CascadeClassifier();
 		faceCascade.load("resources/haarcascade_frontalface_alt2.xml");
 	}

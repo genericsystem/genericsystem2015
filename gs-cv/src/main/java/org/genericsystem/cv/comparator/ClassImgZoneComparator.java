@@ -20,17 +20,15 @@ import org.genericsystem.cv.model.ZoneGeneric;
 import org.genericsystem.cv.model.ZoneGeneric.ZoneInstance;
 import org.genericsystem.cv.model.ZoneText;
 import org.genericsystem.cv.model.ZoneText.ZoneTextInstance;
+import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.genericsystem.kernel.Engine;
-import org.opencv.core.Core;
 import org.opencv.core.Size;
 
 /**
- * Get the OCR text for all specified documents using pre-treated images.
- * 
- * A score gets computed based on trained data, and stored in csv files. It is recommended to use {@link FillModelWithData}, {@link SetRealValues} and {@link ComputeTrainedScores} instead.
+ * Get the OCR text for all specified documents using pre-treated images. A score gets computed based on trained data, and stored in csv files. It is recommended to use {@link FillModelWithData}, {@link SetRealValues} and {@link ComputeTrainedScores}
+ * instead.
  * 
  * @author Pierrik Lassalas
- *
  */
 @Deprecated
 public class ClassImgZoneComparator {
@@ -39,7 +37,7 @@ public class ClassImgZoneComparator {
 	private final static Engine engine = new Engine(System.getenv("HOME") + "/genericsystem/gs-cv_model/", Doc.class, DocClass.class, ZoneGeneric.class, ZoneText.class, ImgFilter.class);
 
 	static {
-		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+		NativeLibraryLoader.load();
 	}
 
 	public static void main(String[] args) {

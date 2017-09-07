@@ -8,12 +8,12 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opencv.core.Core;
+import org.genericsystem.cv.utils.NativeLibraryLoader;
 
 public class HistogramComparator {
 
 	static {
-		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+		NativeLibraryLoader.load();
 	}
 
 	private final static String classImgRepertory = "png";

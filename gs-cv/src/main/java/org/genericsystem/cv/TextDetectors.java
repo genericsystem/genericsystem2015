@@ -3,7 +3,7 @@ package org.genericsystem.cv;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 
-import org.opencv.core.Core;
+import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
 import org.opencv.videoio.VideoCapture;
@@ -11,7 +11,7 @@ import org.opencv.videoio.VideoCapture;
 public class TextDetectors {
 
 	static {
-		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+		NativeLibraryLoader.load();
 	}
 
 	public static void main(String[] args) {

@@ -33,8 +33,8 @@ import org.genericsystem.cv.model.ZoneGeneric.ZoneInstance;
 import org.genericsystem.cv.model.ZoneText;
 import org.genericsystem.cv.model.ZoneText.ZoneTextInstance;
 import org.genericsystem.cv.model.ZoneText.ZoneTimestamp;
+import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.genericsystem.kernel.Engine;
-import org.opencv.core.Core;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +60,7 @@ public class FillModelWithData {
 	private static final String docType = "id-fr-front";
 
 	static {
-		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+		NativeLibraryLoader.load();
 		logger.info("OpenCV core library loaded");
 	}
 
