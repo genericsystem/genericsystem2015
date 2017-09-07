@@ -3,7 +3,7 @@ package org.genericsystem.cv;
 import java.util.Arrays;
 import java.util.List;
 
-import org.opencv.core.Core;
+import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
@@ -16,7 +16,7 @@ import org.opencv.utils.Converters;
 
 public class Booster {
 	static {
-		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+		NativeLibraryLoader.load();
 	}
 
 	public static void main(String[] args) {
