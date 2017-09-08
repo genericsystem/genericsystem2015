@@ -10,7 +10,9 @@ import org.genericsystem.ir.app.gui.utils.DocPropertiesSwitcher.DOC_NOT_SUPERVIS
 import org.genericsystem.ir.app.gui.utils.DocPropertiesSwitcher.DOC_OCRD;
 import org.genericsystem.ir.app.gui.utils.DocPropertiesSwitcher.DOC_SUPERVISED;
 import org.genericsystem.ir.app.gui.utils.DocumentImage;
+import org.genericsystem.ir.app.gui.utils.ObservableListExtractorCustom.DOC_CLASS_SELECTOR;
 import org.genericsystem.ir.app.gui.utils.ObservableListExtractorCustom.DOC_SELECTOR;
+import org.genericsystem.ir.app.gui.utils.RadioButtonWithValue.RadioButtonEditor;
 import org.genericsystem.ir.app.gui.utils.TextBindingCustom.LAST_DOC_UPDATE_LABEL;
 import org.genericsystem.reactor.annotations.Attribute;
 import org.genericsystem.reactor.annotations.BindAction;
@@ -21,6 +23,7 @@ import org.genericsystem.reactor.annotations.InheritStyle;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
+import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection;
 import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.context.ContextAction.CANCEL;
@@ -102,17 +105,44 @@ public class HomePageTable extends FlexDiv {
 
 	}
 
-	@Children({ DocumentImage.class, FlexDiv.class })
-	@BindText(path = FlexDiv.class)
+	@Children({ DocumentImage.class, FlexDiv.class, DocumentClassModifierButton.class })
+	@BindText(path = FlexDiv.class, pos = 0)
 	@FlexDirectionStyle(FlexDirection.ROW)
 	@Style(name = "justify-content", value = "center")
 	@Style(name = "align-items", value = "center")
 	@Style(name = "flex", value = "3")
-	@Style(path = FlexDiv.class, name = "flex", value = "1")
+	@Style(path = FlexDiv.class, pos = 0, name = "flex", value = "1")
 	@Style(path = DocumentImage.class, name = "width", value = "auto")
 	@Style(path = DocumentImage.class, name = "height", value = "5ex")
 	public static class DocumentName extends FlexDiv {
 
+	}
+
+	@Children({ DocClassModifierDiv.class, HtmlHyperLink.class })
+	@Children(path = { HtmlHyperLink.class }, value = HtmlSpan.class)
+	@StyleClass(path = { HtmlHyperLink.class, HtmlSpan.class }, value = { "fa", "fa-exchange" /* , "fa-2x" */ })
+	@Style(path = { HtmlHyperLink.class, HtmlSpan.class }, name = "color", value = "#676767")
+	@BindAction(path = { HtmlHyperLink.class }, value = SET_SELECTION.class)
+	public static class DocumentClassModifierButton extends FlexDiv {
+		// Button to change the document's current docClass
+	}
+
+	@Children(FlexDiv.class)
+	@Children(path = FlexDiv.class, value = { HtmlHyperLink.class, FlexDiv.class })
+	@InheritStyle("background-color")
+	@Style(path = FlexDiv.class, name = "max-height", value = "fit-content")
+	@Style(path = FlexDiv.class, name = "min-height", value = "fit-content")
+	@Style(path = FlexDiv.class, name = "width", value = "auto")
+	@BindAction(path = { FlexDiv.class, HtmlHyperLink.class }, value = RESET_SELECTION.class)
+	@Children(path = { FlexDiv.class, FlexDiv.class }, value = { RadioButtonEditor.class, HtmlLabel.class })
+	@ForEach(path = { FlexDiv.class, FlexDiv.class }, value = DOC_CLASS_SELECTOR.class)
+	@BindText(path = { FlexDiv.class, FlexDiv.class, HtmlLabel.class })
+	@FlexDirectionStyle(FlexDirection.ROW)
+	@ReverseFlexDirection(path = { FlexDiv.class, FlexDiv.class })
+	@Style(path = { FlexDiv.class, FlexDiv.class, HtmlLabel.class }, name = "flex", value = "1")
+	@Style(path = { FlexDiv.class, FlexDiv.class, HtmlLabel.class }, name = "flex", value = "0")
+	public static class DocClassModifierDiv extends ModalEditor {
+		// Modal window that will allow modification of the document's docClass
 	}
 
 	@FlexDirectionStyle(FlexDirection.COLUMN)
