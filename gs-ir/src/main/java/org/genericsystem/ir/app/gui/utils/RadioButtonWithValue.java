@@ -1,9 +1,9 @@
 package org.genericsystem.ir.app.gui.utils;
 
-import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.Generic;
 import org.genericsystem.cv.model.Doc.DocInstance;
 import org.genericsystem.cv.model.DocClass.DocClassInstance;
+import org.genericsystem.ir.app.gui.pages.HomePageTable;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.annotations.TagName;
 import org.genericsystem.reactor.contextproperties.ConvertedValueDefaults;
@@ -27,6 +27,7 @@ public class RadioButtonWithValue extends TagImpl implements ConvertedValueDefau
 				// Get the docClass from the document
 				Generic currentDocClass = context.getGenerics()[2];
 				// If there is a match, that means the current item is also the current docClass
+				System.out.println(String.format("%s\n--- item: %s\n--- currentDocClass: %s\n--- boolean: %s\n", context.getGenerics()[1], currentItem, currentDocClass, currentItem == currentDocClass));
 				return currentItem == currentDocClass;
 			});
 
@@ -38,19 +39,15 @@ public class RadioButtonWithValue extends TagImpl implements ConvertedValueDefau
 				DocInstance currentDoc = (DocInstance) context.getGenerics()[1];
 				DocClassInstance currentDocClass = (DocClassInstance) context.getGenerics()[2];
 
+				getContextProperty(HomePageTable.DOCCLASS_CONTEXT_PROPERTY, context).setValue(currentItem);
+
 				System.out.println(String.format("currentitem: %s\ncurrentDoc: %s\ncurrentDocClass: %s", currentItem, currentDoc, currentDocClass));
-				System.out.println(String.format("nva = %s", nva));
-
-				System.out.println("before: " + currentDoc.info());
-				currentDoc = (DocInstance) currentDoc.updateComponent(currentItem, ApiStatics.BASE_POSITION);
-				System.out.println("after: " + currentDoc.info());
-
 				System.out.println("----");
 			});
 
 			// Fix the "name" attribute with the name of the document
 			addPrefixBinding(context -> {
-				// getParent().find(HtmlLabel.class);
+				// Arrays.asList(context.getGenerics()).forEach(g -> System.out.println(g.info()));
 				getDomNodeAttributes(context).put("name", context.getGenerics()[1].getValue().toString());
 
 			});

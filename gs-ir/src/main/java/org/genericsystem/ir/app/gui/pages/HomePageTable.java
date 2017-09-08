@@ -3,6 +3,7 @@ package org.genericsystem.ir.app.gui.pages;
 import org.genericsystem.ir.app.gui.pages.HomePageTable.DocumentsList;
 import org.genericsystem.ir.app.gui.pages.HomePageTable.HeaderRow;
 import org.genericsystem.ir.app.gui.utils.ContextActionCustom.REMOVE_CUSTOM;
+import org.genericsystem.ir.app.gui.utils.ContextActionCustom.UPDATE_DOCCLASS;
 import org.genericsystem.ir.app.gui.utils.DocPropertiesSwitcher.DOC_DEZONED;
 import org.genericsystem.ir.app.gui.utils.DocPropertiesSwitcher.DOC_NOT_DEZONED;
 import org.genericsystem.ir.app.gui.utils.DocPropertiesSwitcher.DOC_NOT_OCRD;
@@ -20,6 +21,7 @@ import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.InheritStyle;
+import org.genericsystem.reactor.annotations.SelectContext;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
@@ -27,8 +29,12 @@ import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection;
 import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.context.ContextAction.CANCEL;
+import org.genericsystem.reactor.context.ContextAction.FLUSH;
+import org.genericsystem.reactor.context.ContextAction.MOUNT;
 import org.genericsystem.reactor.context.ContextAction.RESET_SELECTION;
 import org.genericsystem.reactor.context.ContextAction.SET_SELECTION;
+import org.genericsystem.reactor.context.ContextAction.UNMOUNT;
+import org.genericsystem.reactor.context.ObservableContextSelector.SELECTION_SELECTOR;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.FlexDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
@@ -42,6 +48,8 @@ import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
 @ForEach(path = FlexDiv.class, pos = 1, value = DOC_SELECTOR.class)
 @StyleClass(path = FlexDiv.class, pos = 1, value = "alternate-rows")
 public class HomePageTable extends FlexDiv {
+
+	public static final String DOCCLASS_CONTEXT_PROPERTY = "docClassContextAttribute";
 
 	@Children({ HtmlLabel.class, HtmlLabel.class, HtmlLabel.class, HtmlLabel.class, HtmlLabel.class, HtmlLabel.class })
 	@FlexDirectionStyle(FlexDirection.ROW)
@@ -122,25 +130,36 @@ public class HomePageTable extends FlexDiv {
 	@Children(path = { HtmlHyperLink.class }, value = HtmlSpan.class)
 	@StyleClass(path = { HtmlHyperLink.class, HtmlSpan.class }, value = { "fa", "fa-exchange" /* , "fa-2x" */ })
 	@Style(path = { HtmlHyperLink.class, HtmlSpan.class }, name = "color", value = "#676767")
-	@BindAction(path = { HtmlHyperLink.class }, value = SET_SELECTION.class)
+	@BindAction(path = { HtmlHyperLink.class }, value = { MOUNT.class, SET_SELECTION.class })
 	public static class DocumentClassModifierButton extends FlexDiv {
+		@Override
+		public void init() {
+			createSelectionProperty();
+			createNewContextProperty(DOCCLASS_CONTEXT_PROPERTY);
+		}
 		// Button to change the document's current docClass
 	}
 
 	@Children(FlexDiv.class)
-	@Children(path = FlexDiv.class, value = { HtmlHyperLink.class, FlexDiv.class })
+	@Children(path = FlexDiv.class, value = { HtmlHyperLink.class, FlexDiv.class, FlexDiv.class })
+	@Children(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 0 }, value = { RadioButtonEditor.class, HtmlLabel.class })
+	@Children(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 1 }, value = { HtmlButton.class, HtmlButton.class })
+	@FlexDirectionStyle(FlexDirection.ROW)
+	@ReverseFlexDirection(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 0 })
+	@ForEach(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 0 }, value = DOC_CLASS_SELECTOR.class)
 	@InheritStyle("background-color")
 	@Style(path = FlexDiv.class, name = "max-height", value = "fit-content")
 	@Style(path = FlexDiv.class, name = "min-height", value = "fit-content")
 	@Style(path = FlexDiv.class, name = "width", value = "auto")
-	@BindAction(path = { FlexDiv.class, HtmlHyperLink.class }, value = RESET_SELECTION.class)
-	@Children(path = { FlexDiv.class, FlexDiv.class }, value = { RadioButtonEditor.class, HtmlLabel.class })
-	@ForEach(path = { FlexDiv.class, FlexDiv.class }, value = DOC_CLASS_SELECTOR.class)
-	@BindText(path = { FlexDiv.class, FlexDiv.class, HtmlLabel.class })
-	@FlexDirectionStyle(FlexDirection.ROW)
-	@ReverseFlexDirection(path = { FlexDiv.class, FlexDiv.class })
-	@Style(path = { FlexDiv.class, FlexDiv.class, HtmlLabel.class }, name = "flex", value = "1")
-	@Style(path = { FlexDiv.class, FlexDiv.class, HtmlLabel.class }, name = "flex", value = "0")
+	@Style(path = { FlexDiv.class, FlexDiv.class, HtmlLabel.class }, pos = { 0, 0, 0 }, name = "flex", value = "1")
+	@Style(path = { FlexDiv.class, FlexDiv.class, HtmlLabel.class }, pos = { 0, 0, 0 }, name = "flex", value = "0")
+	@BindText(path = { FlexDiv.class, FlexDiv.class, HtmlLabel.class }, pos = { 0, 0, 0 })
+	@SetText(path = { FlexDiv.class, FlexDiv.class, HtmlButton.class }, pos = { 0, 1, 0 }, value = "Confirm")
+	@SetText(path = { FlexDiv.class, FlexDiv.class, HtmlButton.class }, pos = { 0, 1, 1 }, value = "Cancel")
+	@BindAction(path = { FlexDiv.class, FlexDiv.class, HtmlButton.class }, pos = { 0, 1, 0 }, value = { UPDATE_DOCCLASS.class, FLUSH.class, UNMOUNT.class, RESET_SELECTION.class })
+	@BindAction(path = { FlexDiv.class, FlexDiv.class, HtmlButton.class }, pos = { 0, 1, 1 }, value = { CANCEL.class, UNMOUNT.class, RESET_SELECTION.class })
+	@BindAction(path = { FlexDiv.class, HtmlHyperLink.class }, value = { CANCEL.class, UNMOUNT.class, RESET_SELECTION.class })
+	@SelectContext(path = FlexDiv.class, value = SELECTION_SELECTOR.class)
 	public static class DocClassModifierDiv extends ModalEditor {
 		// Modal window that will allow modification of the document's docClass
 	}
