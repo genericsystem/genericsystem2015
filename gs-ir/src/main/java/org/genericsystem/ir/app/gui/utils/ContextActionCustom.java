@@ -93,22 +93,15 @@ public class ContextActionCustom {
 	public static class UPDATE_DOCCLASS implements ContextAction {
 		@Override
 		public void accept(Context context, Tag tag) {
-			System.out.println("### update");
 			DocInstance currentDoc = (DocInstance) context.getGeneric();
 			DocClassInstance currentDocClass = (DocClassInstance) context.getGenerics()[1];
-
-			// Tag tag2 = tag.getParent().getParent().find(FlexDiv.class).find(RadioButtonEditor.class);
-
 			DocClassInstance newdocClass = (DocClassInstance) tag.getContextProperty(HomePageTable.DOCCLASS_CONTEXT_PROPERTY, context).getValue();
 
-			System.out.println(String.format("newDC: %s\ncurrentDC: %s", newdocClass, currentDocClass));
-
 			if (newdocClass != null && newdocClass != currentDocClass) {
-				System.out.println("updating...");
+				System.out.println("updating components...");
 				currentDoc = (DocInstance) currentDoc.updateComponent(newdocClass, ApiStatics.BASE_POSITION);
 				System.out.println("done!");
 			}
-			System.out.println("###");
 		}
 	}
 
