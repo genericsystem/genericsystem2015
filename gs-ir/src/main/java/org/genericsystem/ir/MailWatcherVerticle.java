@@ -108,7 +108,7 @@ public class MailWatcherVerticle extends AbstractVerticle {
 				String contentType = attachment.getContentType().toLowerCase();
 				if (contentType.contains("application/pdf") || contentType.contains("application/x-pdf")) {
 					String fileName = attachment.getName();
-					Path folder = Paths.get(DistributedVerticle.BASE_PATH + "pdf/");
+					Path folder = Paths.get(DistributedVerticle.BASE_PATH + "downloaded-pdf/");
 					folder.toFile().mkdirs();
 					Path newFile = folder.resolve(fileName);
 					synchronized (MailWatcherVerticle.class) {
