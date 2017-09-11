@@ -110,7 +110,13 @@ public class ApplicationServer extends AbstractBackEnd {
 						throw new IllegalStateException(ex);
 					}
 				}
-				RootHtmlDomNode result = cache.safeSupply(() -> application.init(s -> socket.writeFinalTextFrame(s), tagTree));
+				RootHtmlDomNode result = cache.safeSupply(() -> application.init(s -> {
+					try {
+						socket.writeFinalTextFrame(s);
+					} catch (IllegalStateException e) {
+						// Ignore (socket closed exception)
+					}
+				}, tagTree));
 				future.complete(result);
 			}, res -> {
 				if (res.succeeded())
@@ -126,14 +132,16 @@ public class ApplicationServer extends AbstractBackEnd {
 	}
 
 	private class CacheSocketContext {
-		private Cache cache;
-		private ServerWebSocket socket;
-		private Context context;
+		private final Cache cache;
+		private final ServerWebSocket socket;
+		private final Context context;
+		private final DomNodeVerticle domNodeVerticle;
 
-		public CacheSocketContext(Cache cache, ServerWebSocket socket, Context context) {
+		public CacheSocketContext(Cache cache, ServerWebSocket socket, Context context, DomNodeVerticle domNodeVerticle) {
 			this.cache = cache;
 			this.socket = socket;
 			this.context = context;
+			this.domNodeVerticle = domNodeVerticle;
 		}
 
 		public Cache getCache() {
@@ -146,6 +154,10 @@ public class ApplicationServer extends AbstractBackEnd {
 
 		public Context getContext() {
 			return context;
+		}
+
+		public DomNodeVerticle getDomNodeVerticle() {
+			return domNodeVerticle;
 		}
 	}
 
@@ -177,7 +189,6 @@ public class ApplicationServer extends AbstractBackEnd {
 
 		@Override
 		public Handler<Buffer> getHandler(String path, ServerWebSocket webSocket) {
-
 			PersistentApplication application = apps.get(path);
 			if (application == null) {
 				throw new IllegalStateException("Unable to load an application with path : " + path);
@@ -185,7 +196,7 @@ public class ApplicationServer extends AbstractBackEnd {
 			Cache cache = (Cache) application.getEngine().newCache();
 			DomNodeVerticle domNodeVerticle = new DomNodeVerticle(cache, webSocket, application);
 			GSVertx.vertx().getVertx().deployVerticle(domNodeVerticle, new DeploymentOptions().setWorker(true));
-			caches.add(new CacheSocketContext(cache, webSocket, GSVertx.vertx().getVertx().getOrCreateContext()));
+			caches.add(new CacheSocketContext(cache, webSocket, GSVertx.vertx().getVertx().getOrCreateContext(), domNodeVerticle));
 			return buffer -> {
 				GSBuffer gsBuffer = new GSBuffer(buffer);
 				String message = gsBuffer.getString(0, gsBuffer.length());
@@ -205,10 +216,11 @@ public class ApplicationServer extends AbstractBackEnd {
 		@Override
 		public Handler<Void> getCloseHandler(ServerWebSocket socket) {
 			return (v) -> {
-				for (CacheSocketContext cacheSocketContext : caches) {
-					if (socket.equals(cacheSocketContext.getSocket()))
+				for (CacheSocketContext cacheSocketContext : caches)
+					if (socket.equals(cacheSocketContext.getSocket())) {
+						cacheSocketContext.getDomNodeVerticle().getRootHtmlDomNode().getModelContext().destroy();
 						caches.remove(cacheSocketContext);
-				}
+					}
 			};
 		}
 
