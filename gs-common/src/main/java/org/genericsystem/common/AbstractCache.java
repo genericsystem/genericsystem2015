@@ -19,9 +19,9 @@ import org.genericsystem.common.GenericBuilder.MergeBuilder;
 import org.genericsystem.common.GenericBuilder.SetBuilder;
 import org.genericsystem.common.GenericBuilder.UpdateBuilder;
 import org.genericsystem.defaults.DefaultCache;
+import org.genericsystem.defaults.tools.RxJavaHelpers;
 
 import io.reactivex.Observable;
-import io.reactivex.rxjavafx.observables.JavaFxObservable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -70,7 +70,7 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 	private final Restructurator restructurator;
 	protected final ObjectProperty<IDifferential<Generic>> transactionProperty;
 	protected final ObjectProperty<Differential> differentialProperty = new SimpleObjectProperty<>();
-	protected final Observable<Differential> differentialObservable = JavaFxObservable.valuesOf(differentialProperty);
+	protected final Observable<Differential> differentialObservable = RxJavaHelpers.valuesOf(differentialProperty);
 	private ObservableIntegerValue cacheLevel;
 	private ObservableLongValue ts;
 	private final ContextEventListener<Generic> listener;

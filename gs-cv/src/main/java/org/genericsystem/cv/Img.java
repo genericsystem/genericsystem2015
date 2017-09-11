@@ -36,6 +36,7 @@ import org.opencv.features2d.FeatureDetector;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.CLAHE;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.objdetect.HOGDescriptor;
 import org.opencv.photo.Photo;
 import org.opencv.utils.Converters;
 import org.opencv.ximgproc.Ximgproc;
@@ -862,6 +863,13 @@ public class Img implements AutoCloseable, Serializable {
 
 	public ImageView toJfxImageView() {
 		return new ImageView(toJfxImage());
+	}
+
+	public MatOfFloat getHogDescriptor() {
+		MatOfFloat imgDescriptor = new MatOfFloat();
+		HOGDescriptor hog = new HOGDescriptor(new Size(64, 64), new Size(16, 16), new Size(16, 16), new Size(16, 16), 4);
+		hog.compute(src, imgDescriptor);
+		return imgDescriptor;
 	}
 
 	@Override

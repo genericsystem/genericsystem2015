@@ -17,7 +17,7 @@ function onMessageReceived(evt) {
 	case 'A':
 		var parent = document.getElementById(message.parentId);
 		if (parent == null) {
-			console.log("Unreached parent on add. parent id  : "+message.parentId+" for element : "+message.nodeId);
+			console.error("Unreached parent on add. parent id  : "+message.parentId+" for element : "+message.nodeId);
 			break;
 		}
 		elt = document.createElement(message.tagHtml);
