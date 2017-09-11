@@ -159,12 +159,12 @@ public interface Snapshot<T> extends Iterable<T> {
 
 			@Override
 			public Observable<T> getAddsObservable() {
-				return getParent().getAddsObservable().filter(g -> predicate.test(g));
+				return getParent().getAddsObservable().filter(g -> predicate.test(g)).replay().refCount();
 			}
 
 			@Override
 			public Observable<T> getRemovesObservable() {
-				return getParent().getRemovesObservable().filter(g -> predicate.test(g));
+				return getParent().getRemovesObservable().filter(g -> predicate.test(g)).replay().refCount();
 			}
 
 
@@ -190,12 +190,12 @@ public interface Snapshot<T> extends Iterable<T> {
 
 			@Override
 			public Observable<T> getAddsObservable() {
-				return getParent().getAddsObservable().filter(g -> filter.test((IGeneric<?>) g));
+				return getParent().getAddsObservable().filter(g -> filter.test((IGeneric<?>) g)).replay().refCount();
 			}
 
 			@Override
 			public Observable<T> getRemovesObservable() {
-				return getParent().getRemovesObservable().filter(g -> filter.test((IGeneric<?>) g));
+				return getParent().getRemovesObservable().filter(g -> filter.test((IGeneric<?>) g)).replay().refCount();
 			}
 
 			@Override
@@ -215,12 +215,12 @@ public interface Snapshot<T> extends Iterable<T> {
 
 			@Override
 			public Observable<T> getAddsObservable() {
-				return Snapshot.this.getAddsObservable().filter(g -> filters.stream().allMatch(filter -> filter.test((IGeneric<?>) g)));
+				return Snapshot.this.getAddsObservable().filter(g -> filters.stream().allMatch(filter -> filter.test((IGeneric<?>) g))).replay().refCount();
 			}
 
 			@Override
 			public Observable<T> getRemovesObservable() {
-				return Snapshot.this.getRemovesObservable().filter(g -> filters.stream().allMatch(filter -> filter.test((IGeneric<?>) g)));
+				return Snapshot.this.getRemovesObservable().filter(g -> filters.stream().allMatch(filter -> filter.test((IGeneric<?>) g))).replay().refCount();
 			}
 
 

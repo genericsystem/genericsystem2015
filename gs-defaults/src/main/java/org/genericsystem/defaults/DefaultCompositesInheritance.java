@@ -296,12 +296,12 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 
 			@Override
 			public Observable<Serializable> getAddsObservable() {
-				return getLinks(attribute, value, targets).getAddsObservable().map(h -> h.getValue());
+				return getLinks(attribute, value, targets).getAddsObservable().map(h -> h.getValue()).replay().refCount();
 			}
 
 			@Override
 			public Observable<Serializable> getRemovesObservable() {
-				return getLinks(attribute, value, targets).getRemovesObservable().map(h -> h.getValue());
+				return getLinks(attribute, value, targets).getRemovesObservable().map(h -> h.getValue()).replay().refCount();
 			}
 		};
 	}
@@ -318,12 +318,12 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 
 			@Override
 			public Observable<Serializable> getAddsObservable() {
-				return getLinks(attribute, targets).getAddsObservable().map(h -> h.getValue());
+				return getLinks(attribute, targets).getAddsObservable().map(h -> h.getValue()).replay().refCount();
 			}
 
 			@Override
 			public Observable<Serializable> getRemovesObservable() {
-				return getLinks(attribute, targets).getRemovesObservable().map(h -> h.getValue());
+				return getLinks(attribute, targets).getRemovesObservable().map(h -> h.getValue()).replay().refCount();
 			}
 		};
 	}
@@ -339,12 +339,12 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 
 			@Override
 			public Observable<Serializable> getAddsObservable() {
-				return getHolders(attribute, pos).getAddsObservable().map(h -> h.getValue());
+				return getHolders(attribute, pos).getAddsObservable().map(h -> h.getValue()).replay().refCount();
 			}
 
 			@Override
 			public Observable<Serializable> getRemovesObservable() {
-				return getHolders(attribute, pos).getRemovesObservable().map(h -> h.getValue());
+				return getHolders(attribute, pos).getRemovesObservable().map(h -> h.getValue()).replay().refCount();
 			}
 		};
 	}

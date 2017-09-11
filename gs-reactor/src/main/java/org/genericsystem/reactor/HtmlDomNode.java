@@ -89,7 +89,8 @@ public class HtmlDomNode {
 		tag.getDomNodeAttributes(context).removeListener(attributesListener);
 		tag.getDomNodeStyleClasses(context).removeListener(styleClassesListener);
 		getRootHtmlDomNode().remove(getId());
-		parent.decrementSize(tag);
+		if (parent != null)
+			parent.decrementSize(tag);
 	}
 
 	public static interface Sender {
