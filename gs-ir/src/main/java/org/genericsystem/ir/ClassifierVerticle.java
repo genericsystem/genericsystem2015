@@ -29,7 +29,7 @@ public class ClassifierVerticle extends ActionVerticle {
 		logger.info("Starting classification for {}", file.getAbsolutePath());
 		Path savedFile;
 		synchronized (ClassifierVerticle.class) {
-			savedFile = Classifier.classify(Paths.get("../gs-cv/classes/"), file.toPath());
+			savedFile = Classifier.classify(Paths.get(DistributedVerticle.BASE_PATH + "classes/"), file.toPath());
 		}
 		if (savedFile != null)
 			future.complete(savedFile.toString());
