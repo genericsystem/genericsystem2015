@@ -46,11 +46,11 @@ public class InheritanceComputer<T extends DefaultGeneric<T>> {
 	}
 
 	public Observable<T> getAddsObservable() {
-		return getAddsObservable(base).filter(holder -> inheritingsFilter.test(holder));
+		return getAddsObservable(base).filter(holder -> inheritingsFilter.test(holder)).replay().refCount();
 	}
 
 	public Observable<T> getRemovesObservable() {
-		return getRemovesObservable(base).filter(holder -> inheritingsFilter.test(holder));
+		return getRemovesObservable(base).filter(holder -> inheritingsFilter.test(holder)).replay().refCount();
 	}
 
 	private Stream<T> getInheritingsStream(T superVertex) {
@@ -101,12 +101,12 @@ public class InheritanceComputer<T extends DefaultGeneric<T>> {
 
 		private Observable<T> inheritanceStreamAdds() {
 			return Observable.merge(fromAboveAdds().flatMap(holder -> getObservable(getStream(holder))),
-					Observable.merge(fromAboveAdds(), getObservable(fromAboveStream())).flatMap(holder -> getStreamAdds(holder)));
+					Observable.merge(fromAboveAdds(), getObservable(fromAboveStream())).flatMap(holder -> getStreamAdds(holder))).replay().refCount();
 		}
 
 		private Observable<T> inheritanceStreamRemoves() {
 			return Observable.merge(Observable.merge(fromAboveAdds(), getObservable(fromAboveStream())).flatMap(holder -> getStreamRemoves(holder)),
-					fromAboveRemoves().flatMap(holder -> getObservable(getStream(holder))));
+					fromAboveRemoves().flatMap(holder -> getObservable(getStream(holder)))).replay().refCount();
 		}
 
 		private Stream<T> fromAboveStream() {
@@ -114,11 +114,11 @@ public class InheritanceComputer<T extends DefaultGeneric<T>> {
 		}
 
 		private Observable<T> fromAboveAdds() {
-			return localBase.isRoot() ? Observable.never() : getObservable(metaAndSupersStream()).flatMap(InheritanceComputer.this::getAddsObservable);
+			return localBase.isRoot() ? Observable.never() : getObservable(metaAndSupersStream()).flatMap(InheritanceComputer.this::getAddsObservable).replay().refCount();
 		}
 
 		private Observable<T> fromAboveRemoves() {
-			return localBase.isRoot() ? Observable.never() : getObservable(metaAndSupersStream()).flatMap(InheritanceComputer.this::getRemovesObservable);
+			return localBase.isRoot() ? Observable.never() : getObservable(metaAndSupersStream()).flatMap(InheritanceComputer.this::getRemovesObservable).replay().refCount();
 		}
 
 		private Stream<T> getIndexStream(T holder) {
@@ -126,11 +126,11 @@ public class InheritanceComputer<T extends DefaultGeneric<T>> {
 		}
 
 		private Observable<T> getIndexStreamAdds(T holder) {
-			return Observable.merge(holder.getLevel() < level ? compositesByMeta(holder).getAddsObservable() : Observable.never(), compositesBySuper(holder).getAddsObservable());
+			return Observable.merge(holder.getLevel() < level ? compositesByMeta(holder).getAddsObservable() : Observable.never(), compositesBySuper(holder).getAddsObservable()).replay().refCount();
 		}
 
 		private Observable<T> getIndexStreamRemoves(T holder) {
-			return Observable.merge(holder.getLevel() < level ? compositesByMeta(holder).getRemovesObservable() : Observable.never(), compositesBySuper(holder).getRemovesObservable());
+			return Observable.merge(holder.getLevel() < level ? compositesByMeta(holder).getRemovesObservable() : Observable.never(), compositesBySuper(holder).getRemovesObservable()).replay().refCount();
 		}
 
 		private Stream<T> getStream(final T holder) {
@@ -142,12 +142,12 @@ public class InheritanceComputer<T extends DefaultGeneric<T>> {
 		private Observable<T> getStreamAdds(T holder) {
 			Observable<T> indexAdds = getIndexStreamAdds(holder);
 			return Observable.merge(Observable.merge(getObservable(getIndexStream(holder)), indexAdds).flatMap(x -> getStreamAdds(x)),
-					indexAdds.flatMap(x -> getObservable(getStream(x))));
+					indexAdds.flatMap(x -> getObservable(getStream(x)))).replay().refCount();
 		}
 
 		private Observable<T> getStreamRemoves(T holder) {
 			return Observable.merge(getIndexStreamRemoves(holder).flatMap(x -> getObservable(getStream(x))),
-					Observable.merge(getObservable(getIndexStream(holder)), getIndexStreamAdds(holder)).flatMap(x -> getStreamRemoves(x)));
+					Observable.merge(getObservable(getIndexStream(holder)), getIndexStreamAdds(holder)).flatMap(x -> getStreamRemoves(x))).replay().refCount();
 		}
 
 		private Snapshot<T> compositesByMeta(T holder) {
@@ -159,7 +159,7 @@ public class InheritanceComputer<T extends DefaultGeneric<T>> {
 		}
 
 		private Observable<T> getObservable(Stream<T> stream) {
-			return Observable.fromIterable(stream.collect(Collectors.toList()));
+			return Observable.fromIterable(stream.collect(Collectors.toList())).replay().refCount();
 		}
 	}
 }
