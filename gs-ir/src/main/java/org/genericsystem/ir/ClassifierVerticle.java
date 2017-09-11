@@ -25,7 +25,7 @@ public class ClassifierVerticle extends ActionVerticle {
 
 	@Override
 	protected void handle(Future<Object> future, JsonObject task) {
-		File file = new File(DistributedVerticle.BASE_PATH + task.getString(DistributedVerticle.FILENAME));
+		File file = new File(task.getString(DistributedVerticle.FILENAME));
 		logger.info("Starting classification for {}", file.getAbsolutePath());
 		Path savedFile;
 		synchronized (ClassifierVerticle.class) {
