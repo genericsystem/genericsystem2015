@@ -53,7 +53,7 @@ public class TextBindingCustom {
 			DocTimestamp docTimestamp = root.find(DocTimestamp.class);
 			SimpleObjectProperty<Generic> timeStamp = new SimpleObjectProperty<>(docTimestamp.getDocTimestamp(currentDoc));
 			return Bindings.createStringBinding(() -> {
-				return null == timeStamp ? "n/a" : ModelTools.formatDate((Long) timeStamp.get().getValue());
+				return null == timeStamp || null == timeStamp.get() ? "n/a" : ModelTools.formatDate((Long) timeStamp.get().getValue());
 			}, timeStamp);
 		}
 	}
