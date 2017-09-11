@@ -2,6 +2,7 @@ package org.genericsystem.ir.app.gui.utils;
 
 import java.util.Arrays;
 
+import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
@@ -10,6 +11,7 @@ import org.genericsystem.cv.comparator.ComputeTrainedScores;
 import org.genericsystem.cv.model.Doc.DocInstance;
 import org.genericsystem.cv.model.DocClass.DocClassInstance;
 import org.genericsystem.cv.model.ModelTools;
+import org.genericsystem.ir.app.gui.pages.HomePageTable;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.EncryptionUtils;
 import org.genericsystem.reactor.Tag;
@@ -85,6 +87,21 @@ public class ContextActionCustom {
 		public void accept(Context context, Tag tag) {
 			Tag ancestor = tag.getParent().getParent(); // ZoneTextDiv
 			ancestor.find(ModalWithDisplay.class).getDisplayProperty(context).setValue("flex");
+		}
+	}
+
+	public static class UPDATE_DOCCLASS implements ContextAction {
+		@Override
+		public void accept(Context context, Tag tag) {
+			DocInstance currentDoc = (DocInstance) context.getGeneric();
+			DocClassInstance currentDocClass = (DocClassInstance) context.getGenerics()[1];
+			DocClassInstance newdocClass = (DocClassInstance) tag.getContextProperty(HomePageTable.DOCCLASS_CONTEXT_PROPERTY, context).getValue();
+
+			if (newdocClass != null && newdocClass != currentDocClass) {
+				System.out.println("updating components...");
+				currentDoc = (DocInstance) currentDoc.updateComponent(newdocClass, ApiStatics.BASE_POSITION);
+				System.out.println("done!");
+			}
 		}
 	}
 
