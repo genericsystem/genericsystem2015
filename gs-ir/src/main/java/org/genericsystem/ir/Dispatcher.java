@@ -22,7 +22,7 @@ public class Dispatcher extends AbstractVerticle {
 	protected Cache cache = engine.newCache();
 	protected final Generic taskType = engine.find(Task.class);
 
-	private static final String EMAIL_SETTINGS = System.getProperty("user.dir") + "/src/main/conf/MailWatcherVerticle.json";
+	private static final String EMAIL_SETTINGS = System.getenv("HOME") + "/genericsystem/.gs-ir/conf/MailWatcherVerticle.json";
 
 	public static final String ADDRESS = "org.genericsystem.repartitor";
 	protected static final String TASK = "task";
