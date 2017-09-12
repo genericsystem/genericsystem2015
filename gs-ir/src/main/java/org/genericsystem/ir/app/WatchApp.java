@@ -37,7 +37,7 @@ import org.genericsystem.security.model.UserRole;
 @Children({ HomePage.class, FiltersStatisticsPage.class })
 public class WatchApp extends RootTagImpl {
 
-	private static final String gsPath = "/gs-cv_model3";
+	private static final String gsPath = "/gs-cv_model";
 
 	@Override
 	public void init() {
