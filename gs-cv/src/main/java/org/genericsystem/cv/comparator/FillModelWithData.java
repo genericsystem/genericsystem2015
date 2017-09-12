@@ -61,7 +61,6 @@ public class FillModelWithData {
 
 	static {
 		NativeLibraryLoader.load();
-		logger.info("OpenCV core library loaded");
 	}
 
 	public static void main(String[] mainArgs) {
@@ -72,7 +71,22 @@ public class FillModelWithData {
 		engine.close();
 	}
 
+	/**
+	 * Get an Engine using the default path.
+	 * 
+	 * @return the created Root
+	 */
 	public static Root getEngine() {
+		return getEngine(gsPath);
+	}
+
+	/**
+	 * Get an Engine using a custom path.
+	 * 
+	 * @param gsPath - the persistence path
+	 * @return the created Root
+	 */
+	public static Root getEngine(String gsPath) {
 		return new Engine(gsPath, Doc.class, RefreshTimestamp.class, DocTimestamp.class, DocFilename.class, DocClass.class, ZoneGeneric.class, ZoneText.class, ZoneTimestamp.class, ImgFilter.class, LevDistance.class, MeanLevenshtein.class, Score.class);
 	}
 
@@ -88,17 +102,6 @@ public class FillModelWithData {
 			filterSet.add(iff);
 		}
 		return filterSet;
-	}
-
-	/**
-	 * Check if a given file has already been processed by the system. This verification is conducted by comparing the SHA-256 hash code generated from the file and the one stored in Generic System. If there is a match, the file is assumed to be known.
-	 * 
-	 * @param engine - the engine used to store the data
-	 * @param file - the desired file
-	 * @return - true if the file was not found in the engine, false if it has already been processed
-	 */
-	private static boolean isThisANewFile(Root engine, File file) {
-		return isThisANewFile(engine, file, docType);
 	}
 
 	/**
@@ -190,6 +193,7 @@ public class FillModelWithData {
 					return zti == null;
 				});
 				if (containsNullZoneTextInstance) {
+					logger.debug("Detected new algorithm ({}) for {}", entry.getName(), docInstance);
 					imgFilter.setImgFilter(filtername);
 					updatedImgFilterList.add(entry);
 				} else {
@@ -318,7 +322,7 @@ public class FillModelWithData {
 			if (!currentZone.isEmpty())
 				currentZone.put("reality", ""); // Add this filter only if there are other filters
 			currentZone.forEach(e -> {
-				logger.debug("key: {};  value: {}", e.getKey(), e.getValue().toString());
+				// logger.debug("key: {}; value: {}", e.getKey(), e.getValue());
 				if ("reality".equals(e.getKey()) || "best".equals(e.getKey())) {
 					// Do not proceed to OCR if the real values are known. By default, the "reality" and "best" filters are left empty
 					if (null == zoneText.getZoneText(docInstance, zoneInstance, imgFilter.getImgFilter(e.getKey())))
@@ -365,7 +369,7 @@ public class FillModelWithData {
 
 		// Find and save the doc class
 		DocClass docClass = engine.find(DocClass.class);
-		DocClassInstance docClassInstance = docClass.setDocClass(docType);
+		docClass.setDocClass(docType);
 		engine.getCurrentCache().flush();
 
 		// Process the image file
@@ -391,13 +395,11 @@ public class FillModelWithData {
 	 */
 	public static void compute(Root engine, String docType) {
 		final String imgClassDirectory = "classes/" + docType;
-		// TODO: remove the following line (only present in development)
-		final String imgDirectory = imgClassDirectory + "/ref2/";
 		logger.debug("imgClassDirectory = {} ", imgClassDirectory);
 		DocClass docClass = engine.find(DocClass.class);
-		DocClassInstance docClassInstance = docClass.setDocClass(docType);
+		docClass.setDocClass(docType);
 
-		Arrays.asList(new File(imgDirectory).listFiles((dir, name) -> name.endsWith(".png"))).forEach(file -> {
+		Arrays.asList(new File(imgClassDirectory).listFiles((dir, name) -> name.endsWith(".png"))).forEach(file -> {
 			JsonObject params = getOcrParameters(engine, file.toPath());
 			JsonObject ocrData = processFile(params);
 			saveOcrDataInModel(engine, ocrData);
