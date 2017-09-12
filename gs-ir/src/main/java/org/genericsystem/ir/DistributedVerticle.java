@@ -41,7 +41,8 @@ public class DistributedVerticle extends AbstractVerticle {
 
 	public static int getMaxExecutions() {
 		// TODO: Add some logic here…
-		return availProc;
+		int instances = availProc / 2;
+		return instances < 1 ? 1 : instances;
 	}
 
 	@Override
