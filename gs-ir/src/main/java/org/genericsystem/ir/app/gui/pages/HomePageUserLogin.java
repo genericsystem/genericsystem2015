@@ -90,7 +90,7 @@ public class HomePageUserLogin extends FlexDiv {
 	}
 
 	@FlexDirectionStyle(FlexDirection.ROW)
-	@Children({ ModalWithDisplay.class, SignInButton.class, SignUpButton.class })
+	@Children({ ModalWithDisplay.class, SignInButton.class /* , SignUpButton.class */ })
 	@Children(path = { ModalWithDisplay.class, FlexDiv.class }, value = CustomUserCreation.class)
 	public static class ButtonsDiv extends FlexDiv {
 
