@@ -32,27 +32,26 @@ import org.genericsystem.security.model.UserRole;
  * 
  * @author Pierrik Lassalas
  */
-@SuppressWarnings("unused")
 @DependsOnModel({ Role.class, User.class, UserRole.class, Doc.class, RefreshTimestamp.class, DocTimestamp.class, DocFilename.class, DocClass.class, ZoneGeneric.class, ZoneText.class, ZoneTimestamp.class, ImgFilter.class, LevDistance.class,
 		MeanLevenshtein.class, Score.class })
 @Children({ HomePage.class, FiltersStatisticsPage.class })
 public class WatchApp extends RootTagImpl {
 
-	private static final String gsPath = "/gs-cv_model3";
-
-	public static void main(String[] mainArgs) {
-		ApplicationServer server = ApplicationServer.startSimpleGenericApp(mainArgs, WatchApp.class, gsPath);
-		Root root = server.getRoots().get(System.getenv("HOME") + "/genericsystem/" + gsPath);
-		// deployVerticles(root);
-	}
+	private static final String gsPath = "/gs-cv_model";
 
 	@Override
 	public void init() {
 		createNewInitializedProperty(PageSwitcher.PAGE, c -> PageSwitcher.HOME_PAGE);
 	}
 
+	public static void main(String[] mainArgs) {
+		ApplicationServer server = ApplicationServer.startSimpleGenericApp(mainArgs, WatchApp.class, gsPath);
+		Root root = server.getRoots().get(System.getenv("HOME") + "/genericsystem/" + gsPath);
+		deployVerticles(root);
+	}
+
 	private static void deployVerticles(Root root) {
-		OcrEngineHolderVerticle deployer = new OcrEngineHolderVerticle(root);
-		deployer.doDeploy();
+		OcrEngineHolderVerticle ocrEngineHolderVerticle = new OcrEngineHolderVerticle(root);
+		ocrEngineHolderVerticle.doDeploy();
 	}
 }

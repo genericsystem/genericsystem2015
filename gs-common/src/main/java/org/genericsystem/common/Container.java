@@ -32,11 +32,11 @@ public class Container implements Snapshot<Generic> {
 
 	@Override
 	public Observable<Generic> getAddsObservable() {
-		return RxJavaHelpers.additionsOf(container).map(entry -> entry.getKey());
+		return RxJavaHelpers.additionsOf(container).map(entry -> entry.getKey()).replay().refCount();
 	}
 
 	@Override
 	public Observable<Generic> getRemovesObservable() {
-		return RxJavaHelpers.removalsOf(container).map(entry -> entry.getKey());
+		return RxJavaHelpers.removalsOf(container).map(entry -> entry.getKey()).replay().refCount();
 	}
 }

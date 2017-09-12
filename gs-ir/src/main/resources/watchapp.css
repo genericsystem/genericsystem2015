@@ -1,6 +1,6 @@
 @CHARSET "UTF-8";
 
-.input-like, input:not(.login) {
+.input-like, input[type="text"]:not(.login), input[type="password"]:not(.login) {
 	padding: 0.5em;
 	margin: 0.5em 0.1em;
 	min-width: 30em;

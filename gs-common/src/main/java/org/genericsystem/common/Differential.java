@@ -114,12 +114,12 @@ public class Differential implements IDifferential<Generic> {
 
 			@Override
 			public Observable<Generic> getAddsObservable() {
-				return getDifferentialObservable().flatMap(diff -> diff.getAddsObservable(generic));
+				return getDifferentialObservable().flatMap(diff -> diff.getAddsObservable(generic)).replay().refCount();
 			}
 
 			@Override
 			public Observable<Generic> getRemovesObservable() {
-				return getDifferentialObservable().flatMap(diff -> diff.getRemovesObservable(generic));
+				return getDifferentialObservable().flatMap(diff -> diff.getRemovesObservable(generic)).replay().refCount();
 			}
 		};
 	}
@@ -154,13 +154,13 @@ public class Differential implements IDifferential<Generic> {
 	public Observable<Generic> getAddsObservable(Generic generic) {
 		return Observable.merge(getSubDifferential().getAddsObservable(generic),
 				adds.getFilteredAdds(generic::isDirectAncestorOf),
-				removes.getFilteredRemoves(generic::isDirectAncestorOf));
+				removes.getFilteredRemoves(generic::isDirectAncestorOf)).replay().refCount();
 	}
 
 	@Override
 	public Observable<Generic> getRemovesObservable(Generic generic) {
 		return Observable.merge(getSubDifferential().getRemovesObservable(generic),
 				removes.getFilteredAdds(generic::isDirectAncestorOf),
-				adds.getFilteredRemoves(generic::isDirectAncestorOf));
+				adds.getFilteredRemoves(generic::isDirectAncestorOf)).replay().refCount();
 	}
 }

@@ -26,7 +26,7 @@ public class DezonerVerticle extends ActionVerticle {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 	public static final String ACTION = "dezoner";
-	private static final String RESOURCES_FOLDER = System.getProperty("user.dir") + "/../gs-watch/src/main/resources/";
+	private static final String RESOURCES_FOLDER = System.getProperty("user.dir") + "/../gs-ir/src/main/resources/";
 
 	private Root engine;
 

@@ -157,6 +157,7 @@ function onMessageReceived(evt) {
 				}
 				break;
 			case "checkbox":
+			case "radio":
 				elt.onchange = function() {
 					wsocket.send(JSON.stringify({
 						msgType : "U",
@@ -168,7 +169,7 @@ function onMessageReceived(evt) {
 				elt.checked = message.checked;
 				break;
 
-			case "radio":
+			/*case "radio":
 				elt.name = document.getElementById(message.parentId).parentNode.id;
 				elt.onclick = function() {
 					wsocket.send(JSON.stringify({
@@ -178,7 +179,7 @@ function onMessageReceived(evt) {
 						selectedIndex : selectIndex(this.name)
 					}));
 				};
-				break;
+				break;*/
 			}
 			break;
 		default:

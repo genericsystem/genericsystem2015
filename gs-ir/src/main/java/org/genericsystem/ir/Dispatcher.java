@@ -22,6 +22,8 @@ public class Dispatcher extends AbstractVerticle {
 	protected Cache cache = engine.newCache();
 	protected final Generic taskType = engine.find(Task.class);
 
+	private static final String EMAIL_SETTINGS = System.getenv("HOME") + "/genericsystem/gs-ir-files/.conf/MailWatcherVerticle.json";
+
 	public static final String ADDRESS = "org.genericsystem.repartitor";
 	protected static final String TASK = "task";
 	protected static final String NEW_STATE = "newState";
@@ -33,11 +35,20 @@ public class Dispatcher extends AbstractVerticle {
 	private static final long MESSAGE_SEND_PERIODICITY = 5000;
 
 	public static void main(String[] args) {
+		Dispatcher dispatcher = new Dispatcher();
+		dispatcher.doDeploy();
+	}
+
+	public void doDeploy() {
 		Tools.deployOnCluster(vertx -> {
-			vertx.deployVerticle(new Dispatcher(), res_ -> {
-				if (res_.failed())
-					throw new IllegalStateException(res_.cause());
-			});	
+			vertx.deployVerticle(new HttpServerVerticle(), complete -> {
+				if (complete.failed())
+					throw new IllegalStateException(complete.cause());
+			});
+			vertx.deployVerticle(this, res -> {
+				if (res.failed())
+					throw new IllegalStateException(res.cause());
+			});
 		});
 	}
 
@@ -79,15 +90,15 @@ public class Dispatcher extends AbstractVerticle {
 						vertx.eventBus().send(json.getString(DistributedVerticle.TYPE), new JsonObject(json.encode()).put(STATE, RUNNING).encodePrettily(), reply -> {
 							if (reply.failed())
 								switch (((ReplyException) reply.cause()).failureType()) {
-									case NO_HANDLERS:
-										logger.warn("No handler for task: {}.", json.encodePrettily());
-										break;
-									case TIMEOUT:
-										logger.warn("Sending of task {} timed out.", reply.cause(), json.encodePrettily());
-										break;
-									case RECIPIENT_FAILURE:
-										logger.info("Task {} rejected by recipient.", reply.cause(), json.encodePrettily());
-										break;
+								case NO_HANDLERS:
+									logger.warn("No handler for task: {}.", json.encodePrettily());
+									break;
+								case TIMEOUT:
+									logger.warn("Sending of task {} timed out.", reply.cause(), json.encodePrettily());
+									break;
+								case RECIPIENT_FAILURE:
+									logger.info("Task {} rejected by recipient.", reply.cause(), json.encodePrettily());
+									break;
 								}
 							else
 								updateTaskState(json, RUNNING);
@@ -111,7 +122,7 @@ public class Dispatcher extends AbstractVerticle {
 	}
 
 	private void watchMail() {
-		vertx.fileSystem().readFile("src/main/conf/MailWatcherVerticle.json", ar -> {
+		vertx.fileSystem().readFile(EMAIL_SETTINGS, ar -> {
 			if (ar.failed())
 				throw new IllegalStateException("Impossible to load configuration for MailWatcherVerticle.", ar.cause());
 			else {
@@ -119,7 +130,7 @@ public class Dispatcher extends AbstractVerticle {
 				vertx.deployVerticle(new MailWatcherVerticle(), new DeploymentOptions().setConfig(config), res -> {
 					if (res.failed())
 						throw new IllegalStateException("Unable to deploy MailWatcherVerticle", res.cause());
-				});				
+				});
 			}
 		});
 	}

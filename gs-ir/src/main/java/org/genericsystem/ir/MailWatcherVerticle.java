@@ -30,8 +30,8 @@ import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 
 /**
- * The MailWatcherVerticle connects to an email account. For each unread mail each new mail received afterwards, the PDF attachments are extracted and stored locally. A message is then sent to the event bus to the
- * {@link PdfConverterVerticle} to extract each page of these files as PNG files.
+ * The MailWatcherVerticle connects to an email account. For each unread mail each new mail received afterwards, the PDF attachments are extracted and stored locally. A message is then sent to the event bus to the {@link PdfConverterVerticle} to extract
+ * each page of these files as PNG files.
  * 
  * @author middleware
  */
@@ -88,7 +88,7 @@ public class MailWatcherVerticle extends AbstractVerticle {
 						processMessage((MimeMessage) msg);
 				}
 			});
-			for(;;)
+			for (;;)
 				inbox.idle();
 		} catch (Exception e) {
 			future.fail(e);
@@ -96,7 +96,7 @@ public class MailWatcherVerticle extends AbstractVerticle {
 	}
 
 	/**
-	 * Process a message. Any pdf attachment is extracted in the folder specified in {@link #DistributedVerticle.BASE_PATH + "pdf/"} ({@value #DistributedVerticle.BASE_PATH + "pdf/"}), and a message is published to the event bus.
+	 * Process a message. Any pdf attachment is extracted in the folder specified in {@link #DistributedVerticle.BASE_PATH} + "downloaded-pdf/" ({@value #DistributedVerticle.BASE_PATH + "pdf/"}), and a message is published to the event bus.
 	 * 
 	 * @param msg - the message to process
 	 */
@@ -108,7 +108,7 @@ public class MailWatcherVerticle extends AbstractVerticle {
 				String contentType = attachment.getContentType().toLowerCase();
 				if (contentType.contains("application/pdf") || contentType.contains("application/x-pdf")) {
 					String fileName = attachment.getName();
-					Path folder = Paths.get(DistributedVerticle.BASE_PATH + "pdf/");
+					Path folder = Paths.get(DistributedVerticle.BASE_PATH + "downloaded-pdf/");
 					folder.toFile().mkdirs();
 					Path newFile = folder.resolve(fileName);
 					synchronized (MailWatcherVerticle.class) {
@@ -119,9 +119,7 @@ public class MailWatcherVerticle extends AbstractVerticle {
 						}
 						Files.copy(attachment.getInputStream(), newFile);
 					}
-					JsonObject task = new JsonObject().put(Dispatcher.STATE, Dispatcher.TODO)
-							.put(DistributedVerticle.IP, ip)
-							.put(DistributedVerticle.FILENAME, newFile.toString().replaceFirst(DistributedVerticle.BASE_PATH, ""))
+					JsonObject task = new JsonObject().put(Dispatcher.STATE, Dispatcher.TODO).put(DistributedVerticle.IP, ip).put(DistributedVerticle.FILENAME, newFile.toString().replaceFirst(DistributedVerticle.BASE_PATH, ""))
 							.put(DistributedVerticle.TYPE, PdfConverterVerticle.ACTION);
 					vertx.eventBus().publish(Dispatcher.ADDRESS + ":add", task.encodePrettily());
 				}
