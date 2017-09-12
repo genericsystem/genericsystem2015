@@ -416,7 +416,7 @@ public class FillModelWithData {
 	public static boolean registerNewFile(Path imgPath) {
 		final Root engine = getEngine();
 		engine.newCache().start();
-		boolean result = registerNewFile(engine, imgPath);
+		boolean result = registerNewFile(engine, imgPath, System.getProperty("user.dir") + "/../gs-ir/src/main/resources/");
 		engine.close();
 		return result;
 	}
@@ -427,7 +427,7 @@ public class FillModelWithData {
 	 * @param imgPath - the Path of the file
 	 * @return true if this was a success, false otherwise
 	 */
-	public static boolean registerNewFile(Root engine, Path imgPath) {
+	public static boolean registerNewFile(Root engine, Path imgPath, String resourcesFolder) {
 		try {
 			engine.getCurrentCache();
 		} catch (IllegalStateException e) {
@@ -456,7 +456,7 @@ public class FillModelWithData {
 				engine.getCurrentCache().flush();
 				try (Img img = new Img(imgPath.toString())) {
 					logger.info("Copying {} to resources folder", filenameExt);
-					Imgcodecs.imwrite(System.getProperty("user.dir") + "/../gs-watch/src/main/resources/" + filenameExt, img.getSrc());
+					Imgcodecs.imwrite(resourcesFolder + filenameExt, img.getSrc());
 				}
 				return true;
 			} else {
