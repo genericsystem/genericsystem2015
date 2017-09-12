@@ -51,7 +51,7 @@ public class WatchApp extends RootTagImpl {
 	}
 
 	private static void deployVerticles(Root root) {
-		OcrEngineHolderVerticle deployer = new OcrEngineHolderVerticle(root);
-		deployer.doDeploy();
+		OcrEngineHolderVerticle ocrEngineHolderVerticle = new OcrEngineHolderVerticle(root);
+		ocrEngineHolderVerticle.doDeploy();
 	}
 }

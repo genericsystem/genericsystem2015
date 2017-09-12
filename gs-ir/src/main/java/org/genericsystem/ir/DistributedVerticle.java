@@ -52,6 +52,11 @@ public class DistributedVerticle extends AbstractVerticle {
 	}
 
 	public static void main(String[] args) {
+		DistributedVerticle verticle = new DistributedVerticle();
+		verticle.doDeploy();
+	}
+
+	public void doDeploy() {
 		Handler<AsyncResult<String>> completionHandler = ar -> {
 			if (ar.failed())
 				throw new IllegalStateException(ar.cause());
@@ -61,9 +66,12 @@ public class DistributedVerticle extends AbstractVerticle {
 			vertx.deployVerticle(new HttpServerVerticle(), complete -> {
 				if (complete.failed())
 					throw new IllegalStateException(complete.cause());
-				for (int i = 0; i < getMaxExecutions(); ++i) {
+				// Deploy the current verticle, and additional ones if there are enough resources
+				vertx.deployVerticle(this, completionHandler);
+				for (int i = 0; i < getMaxExecutions() - 1; ++i) {
 					vertx.deployVerticle(new DistributedVerticle(), completionHandler);
 				}
+				logger.debug("Deployed {} DistributedVerticle", getMaxExecutions() < 1 ? 1 : getMaxExecutions());
 			});
 		});
 	}

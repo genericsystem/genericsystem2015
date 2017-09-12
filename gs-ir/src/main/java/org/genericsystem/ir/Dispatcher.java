@@ -35,10 +35,19 @@ public class Dispatcher extends AbstractVerticle {
 	private static final long MESSAGE_SEND_PERIODICITY = 5000;
 
 	public static void main(String[] args) {
+		Dispatcher dispatcher = new Dispatcher();
+		dispatcher.doDeploy();
+	}
+
+	public void doDeploy() {
 		Tools.deployOnCluster(vertx -> {
-			vertx.deployVerticle(new Dispatcher(), res_ -> {
-				if (res_.failed())
-					throw new IllegalStateException(res_.cause());
+			vertx.deployVerticle(new HttpServerVerticle(), complete -> {
+				if (complete.failed())
+					throw new IllegalStateException(complete.cause());
+			});
+			vertx.deployVerticle(this, res -> {
+				if (res.failed())
+					throw new IllegalStateException(res.cause());
 			});
 		});
 	}

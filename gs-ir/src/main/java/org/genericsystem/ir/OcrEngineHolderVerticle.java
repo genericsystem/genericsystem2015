@@ -17,20 +17,16 @@ public class OcrEngineHolderVerticle extends AbstractVerticle {
 	}
 
 	public static void main(String[] args) {
+		OcrEngineHolderVerticle verticle = new OcrEngineHolderVerticle(FillModelWithData.getEngine());
+		verticle.doDeploy();
+	}
+
+	public void doDeploy() {
 		Tools.deployOnCluster(vertx -> {
 			vertx.deployVerticle(new HttpServerVerticle(), complete -> {
 				if (complete.failed())
 					throw new IllegalStateException(complete.cause());
 			});
-			vertx.deployVerticle(new OcrEngineHolderVerticle(FillModelWithData.getEngine()), result -> {
-				if (result.failed())
-					throw new IllegalStateException(result.cause());
-			});
-		});
-	}
-
-	public void doDeploy() {
-		Tools.deployOnCluster(vertx -> {
 			vertx.deployVerticle(this, result -> {
 				if (result.failed())
 					throw new IllegalStateException("Deployment of OcrEngineHolderVerticle failed", result.cause());
