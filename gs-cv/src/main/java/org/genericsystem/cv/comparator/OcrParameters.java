@@ -1,6 +1,7 @@
 package org.genericsystem.cv.comparator;
 
 import java.io.File;
+import java.lang.invoke.MethodHandles;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -22,7 +23,7 @@ import io.vertx.core.json.JsonObject;
  */
 public class OcrParameters {
 
-	private static Logger log = LoggerFactory.getLogger(OcrParameters.class);
+	private static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	public static final String P_FILE = "file";
 	public static final String P_ZONES = "zones";
@@ -61,7 +62,7 @@ public class OcrParameters {
 				try {
 					zonesList.add((Zone) zone);
 				} catch (Exception e) {
-					log.debug("Unable to cast {} as Zone. Using Json.decodeValue instead", zone.toString());
+					logger.debug("Unable to cast {} as Zone. Using Json.decodeValue instead", zone.toString());
 					Zone z = Json.decodeValue(((JsonObject) zone).encode(), Zone.class);
 					zonesList.add(z);
 				}
@@ -70,7 +71,7 @@ public class OcrParameters {
 				try {
 					imgFilterFunctions.add((ImgFilterFunction) filter);
 				} catch (Exception e) {
-					log.debug("Unable to cast {} as ImgFilterFunction. Using Json.decodeValue instead", filter);
+					logger.debug("Unable to cast {} as ImgFilterFunction. Using Json.decodeValue instead", filter);
 					imgFilterFunctions.add(ImgFilterFunction.valueOf((String) filter));
 				}
 			});
