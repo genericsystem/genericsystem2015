@@ -134,7 +134,7 @@ public class FillModelWithData {
 		try {
 			engine.getCurrentCache();
 		} catch (IllegalStateException e) {
-			logger.error("Current cache could not be loaded. Starting a new one...");
+			logger.debug("Current cache could not be loaded. Starting a new one...");
 			engine.newCache().start();
 		}
 		final Path imgClassDirectory = imagePath.getParent();
@@ -288,7 +288,7 @@ public class FillModelWithData {
 		try {
 			engine.getCurrentCache();
 		} catch (IllegalStateException e) {
-			logger.error("Current cache could not be loaded. Starting a new one...");
+			logger.debug("Current cache could not be loaded. Starting a new one...");
 			engine.newCache().start();
 		}
 		// Parse the data
@@ -358,7 +358,7 @@ public class FillModelWithData {
 		try {
 			engine.getCurrentCache();
 		} catch (IllegalStateException e) {
-			logger.error("Current cache could not be loaded. Starting a new one...");
+			logger.debug("Current cache could not be loaded. Starting a new one...");
 			engine.newCache().start();
 		}
 		final String docType = ModelTools.getImgClass(imagePath);
