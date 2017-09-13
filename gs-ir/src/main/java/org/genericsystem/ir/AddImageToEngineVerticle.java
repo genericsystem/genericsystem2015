@@ -41,7 +41,7 @@ public class AddImageToEngineVerticle extends ActionVerticle {
 		String imagePath = task.getString(DistributedVerticle.FILENAME);
 		boolean result;
 		if (null != engine)
-			result = FillModelWithData.registerNewFile(engine, Paths.get(imagePath));
+			result = FillModelWithData.registerNewFile(engine, Paths.get(imagePath), DistributedVerticle.RESOURCES_FOLDER);
 		else
 			result = FillModelWithData.registerNewFile(Paths.get(imagePath));
 		if (result)

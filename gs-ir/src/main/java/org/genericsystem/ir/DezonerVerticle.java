@@ -26,7 +26,6 @@ public class DezonerVerticle extends ActionVerticle {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 	public static final String ACTION = "dezoner";
-	private static final String RESOURCES_FOLDER = System.getProperty("user.dir") + "/../gs-ir/src/main/resources/";
 
 	private Root engine;
 
@@ -54,7 +53,7 @@ public class DezonerVerticle extends ActionVerticle {
 			zones.writeNum(imgCopy, new Scalar(0, 0, 255), 3);
 			// TODO implement a filter mechanism to avoid creating duplicates in a public folder
 			String filenameExt = ModelTools.generateFileName(Paths.get(imagePath));
-			Imgcodecs.imwrite(RESOURCES_FOLDER + filenameExt, imgCopy.getSrc());
+			Imgcodecs.imwrite(DistributedVerticle.RESOURCES_FOLDER + filenameExt, imgCopy.getSrc());
 			imgCopy.close();
 			future.complete(OcrParametersVerticle.ACTION);
 		} else {

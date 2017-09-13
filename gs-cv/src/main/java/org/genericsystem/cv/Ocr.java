@@ -6,17 +6,21 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.apache.commons.pool2.BasePooledObjectFactory;
+import org.apache.commons.pool2.PooledObject;
+import org.apache.commons.pool2.impl.DefaultPooledObject;
+import org.apache.commons.pool2.impl.GenericObjectPool;
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.opencv.core.Mat;
 import org.opencv.core.Size;
 import org.opencv.text.OCRTesseract;
 
 public class Ocr {
+
 	static {
 		NativeLibraryLoader.load();
 	}
-
-	private final static OCRTesseract instance = OCRTesseract.create("/usr/share/tesseract-ocr/4.00/", "fra", "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM0123456789.-,<'", 1, 13);
 
 	public static void main(String[] args) {
 		try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(Paths.get(".", "classes"), Files::isDirectory)) {
@@ -32,6 +36,25 @@ public class Ocr {
 		} catch (IOException e) {
 			throw new IllegalStateException(e);
 		}
+	}
+
+	/**
+	 * Internal factory class used to create a pool of {@link OCRTesseract} instances. Otherwise, segmentation fault can occur when the instance of tesseract is shared accross multiple threads.
+	 * 
+	 * @author Pierrik Lassalas
+	 */
+	public static class OCRTesseractInstanceFactory extends BasePooledObjectFactory<OCRTesseract> {
+
+		@Override
+		public OCRTesseract create() throws Exception {
+			return OCRTesseract.create("/usr/share/tesseract-ocr/4.00/", "fra", "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM0123456789.-,<'", 1, 13);
+		}
+
+		@Override
+		public PooledObject<OCRTesseract> wrap(OCRTesseract instance) {
+			return new DefaultPooledObject<>(instance);
+		}
+
 	}
 
 	@Deprecated
@@ -59,6 +82,28 @@ public class Ocr {
 	}
 
 	public static String doWork(Mat mat, int minConfidence) {
-		return instance.run(mat, 50, 1).replace("\n", "").trim();
+		// Get the OcrTesseract instance from the pool to prevent multi-threading problems
+		GenericObjectPool<OCRTesseract> pool = new GenericObjectPool<>(new OCRTesseractInstanceFactory(), Ocr.getPoolConfig());
+		OCRTesseract instance = null;
+		String ocrText = null;
+		try {
+			instance = pool.borrowObject();
+			ocrText = instance.run(mat, 50, 1).replace("\n", "").trim();
+		} catch (Exception e) {
+			throw new RuntimeException("An error has occured during the OCR", e);
+		} finally {
+			// If the instance was retrieved, return it to the pool
+			if (instance != null)
+				pool.returnObject(instance);
+		}
+		return ocrText;
+	}
+
+	private static GenericObjectPoolConfig getPoolConfig() {
+		GenericObjectPoolConfig config = new GenericObjectPoolConfig();
+		config.setMaxTotal(2);
+		config.setBlockWhenExhausted(true);
+		config.setMaxWaitMillis(30_000);
+		return config;
 	}
 }

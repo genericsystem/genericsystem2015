@@ -145,9 +145,13 @@ public class ComputeBestTextPerZone {
 					ocrElection.put(entry.getKey(), ocrWeight);
 				});
 
-				String bestText = ocrElection.entrySet().stream().max(Map.Entry.comparingByValue()).get().getKey();
-				ZoneTextInstance zti = zoneText.setZoneText(bestText, docInstance, zoneInstance, bestInstance);
-				zti.setZoneTimestamp(ModelTools.getCurrentDate()); // TODO: concatenate with previous line?
+				if (null != ocrElection && !ocrElection.isEmpty()) {
+					String bestText = ocrElection.entrySet().stream().max(Map.Entry.comparingByValue()).get().getKey();
+					ZoneTextInstance zti = zoneText.setZoneText(bestText, docInstance, zoneInstance, bestInstance);
+					zti.setZoneTimestamp(ModelTools.getCurrentDate()); // TODO: concatenate with previous line?
+				} else {
+					logger.debug("No OCR data found for {}", docInstance.getValue());
+				}
 
 			} else {
 				// If supervised, set the supervised text to best

@@ -15,6 +15,7 @@ public class DistributedVerticle extends AbstractVerticle {
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	public static final String BASE_PATH = System.getenv("HOME") + "/genericsystem/gs-ir-files/";
+	public static final String RESOURCES_FOLDER = System.getProperty("user.dir") + "/../gs-ir/src/main/resources/";
 	protected static final String FILENAME = "filename";
 	protected static final String JSON_OBJECT = "jsonObject";
 	protected static final String TYPE = "type";
