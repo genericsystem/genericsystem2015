@@ -20,53 +20,7 @@ function onMessageReceived(evt) {
 					+ message.parentId + " for element : " + message.nodeId);
 			break;
 		}
-		elt = document.createElement(message.tagHtml);
-		elt.id = message.nodeId;
-		switch (message.tagHtml) {
-		case "a":
-			elt.href = "#";
-			elt.onclick = function() {
-				wsocket.send(JSON.stringify({
-					msgType : "A",
-					nodeId : this.id
-				}));
-				return false;
-			};
-			break;
-		case "button":
-			elt.onclick = function() {
-				wsocket.send(JSON.stringify({
-					msgType : "A",
-					nodeId : this.id
-				}));
-			};
-			break;
-
-		case "select":
-			elt.onchange = function() {
-				wsocket.send(JSON.stringify({
-					msgType : "U",
-					nodeId : this.id,
-					selectedIndex : this.selectedIndex
-				}));
-			}
-
-			break;
-		case "section":
-			elt.classList.add("adding");
-			break;
-		case "div":
-			elt.classList.add("adding");
-			break;
-		case "header":
-			elt.classList.add("adding");
-			break;
-		case "footer":
-			elt.classList.add("adding");
-			break;
-		}
-		;
-		parent.insertBefore(elt, parent.children[message.nextId]);
+		onCaseA(message, elt, parent);
 		break;
 	case 'R':
 		elt.parentNode.removeChild(elt);
@@ -96,96 +50,7 @@ function onMessageReceived(evt) {
 		elt.style.removeProperty(message.styleProperty);
 		break;
 	case 'AA':
-		switch (message.attributeName) {
-		case "value":
-			if (elt.value !== message.attributeValue)
-				elt.value = message.attributeValue;
-			break;
-		case "checked":
-			elt.checked = true;
-			break;
-		case "disabled":
-			elt.disabled = true;
-			break;
-		case "list":
-			elt.setAttribute(message.attributeName, message.attributeValue);
-			elt.oninput = function(e) {
-				console.log("oninput");
-				var val = elt.value;
-				var opts = document.getElementById(elt.getAttribute("list")).childNodes;
-				for (var i = 0; i < opts.length; i++) {
-					if (opts[i].innerText === val) {
-						wsocket.send(JSON.stringify({
-							msgType : "U",
-							nodeId : this.id,
-							textContent : this.value
-						}));
-						wsocket.send(JSON.stringify({
-							msgType : "A",
-							nodeId : this.id
-						}));
-						break;
-					}
-				}
-			}
-			break;
-		case "type":
-			elt.setAttribute(message.attributeName, message.attributeValue);
-			switch (message.attributeValue) {
-			case "text":
-			case "password":
-				elt.onkeyup = function(e) {
-					var code = (e.keyCode ? e.keyCode : e.which)
-					if (code == 13) {
-						wsocket.send(JSON.stringify({
-							msgType : "A",
-							nodeId : this.id
-						}));
-					} else {
-						wsocket.send(JSON.stringify({
-							msgType : "U",
-							nodeId : this.id,
-							textContent : this.value
-						}));
-					}
-				};
-				elt.onblur = function(e) {
-					wsocket.send(JSON.stringify({
-						msgType : "A",
-						nodeId : this.id
-					}));
-				}
-				break;
-			case "checkbox":
-			case "radio":
-				elt.onchange = function() {
-					wsocket.send(JSON.stringify({
-						msgType : "U",
-						nodeId : this.id,
-						eltType : elt.type,
-						checked : this.checked
-					}));
-				};
-				elt.checked = message.checked;
-				break;
-
-			/*case "radio":
-				elt.name = document.getElementById(message.parentId).parentNode.id;
-				elt.onclick = function() {
-					wsocket.send(JSON.stringify({
-						msgType : "U",
-						nodeId : this.parentNode.parentNode.id,
-						eltType : elt.type,
-						selectedIndex : selectIndex(this.name)
-					}));
-				};
-				break;*/
-			}
-			break;
-		default:
-			elt.setAttribute(message.attributeName, message.attributeValue);
-			break;
-		}
+		onCaseAA(message, elt);
 		break;
 	case 'RA':
 		elt.removeAttribute(message.attributeName);
@@ -196,6 +61,144 @@ function onMessageReceived(evt) {
 		break;
 	default:
 		alert("Unknown message received");
+	}
+}
+
+function onCaseA(message, elt, parent) {
+	elt = document.createElement(message.tagHtml);
+	elt.id = message.nodeId;
+	switch (message.tagHtml) {
+	case "a":
+		elt.href = "#";
+		elt.onclick = function() {
+			wsocket.send(JSON.stringify({
+				msgType : "A",
+				nodeId : this.id
+			}));
+			return false;
+		};
+		break;
+	case "button":
+		elt.onclick = function() {
+			wsocket.send(JSON.stringify({
+				msgType : "A",
+				nodeId : this.id
+			}));
+		};
+		break;
+
+	case "select":
+		elt.onchange = function() {
+			wsocket.send(JSON.stringify({
+				msgType : "U",
+				nodeId : this.id,
+				selectedIndex : this.selectedIndex
+			}));
+		}
+
+		break;
+	case "section":
+		elt.classList.add("adding");
+		break;
+	case "div":
+		elt.classList.add("adding");
+		break;
+	case "header":
+		elt.classList.add("adding");
+		break;
+	case "footer":
+		elt.classList.add("adding");
+		break;
+	};
+	parent.insertBefore(elt, parent.children[message.nextId]);
+}
+
+function onCaseAA(message, elt) {
+	switch (message.attributeName) {
+	case "value":
+		if (elt.value !== message.attributeValue)
+			elt.value = message.attributeValue;
+		break;
+	case "checked":
+		elt.checked = true;
+		break;
+	case "disabled":
+		elt.disabled = true;
+		break;
+	case "list":
+		onCaseAAList(message, elt);
+		break;
+	case "type":
+		onCaseAAType(message, elt);
+		break;
+	default:
+		elt.setAttribute(message.attributeName, message.attributeValue);
+		break;
+	}
+}
+
+function onCaseAAList(message, elt) {
+	elt.setAttribute(message.attributeName, message.attributeValue);
+	elt.oninput = function(e) {
+		console.log("oninput");
+		var val = elt.value;
+		var opts = document.getElementById(elt.getAttribute("list")).childNodes;
+		for (var i = 0; i < opts.length; i++) {
+			if (opts[i].innerText === val) {
+				wsocket.send(JSON.stringify({
+					msgType : "U",
+					nodeId : this.id,
+					textContent : this.value
+				}));
+				wsocket.send(JSON.stringify({
+					msgType : "A",
+					nodeId : this.id
+				}));
+				break;
+			}
+		}
+	}
+}
+
+function onCaseAAType(message, elt) {
+	elt.setAttribute(message.attributeName, message.attributeValue);
+	switch (message.attributeValue) {
+	case "text":
+	case "password":
+		elt.onkeyup = function(e) {
+			var code = (e.keyCode ? e.keyCode : e.which)
+			if (code == 13) {
+				wsocket.send(JSON.stringify({
+					msgType : "A",
+					nodeId : this.id
+				}));
+			} else {
+				wsocket.send(JSON.stringify({
+					msgType : "U",
+					nodeId : this.id,
+					textContent : this.value
+				}));
+			}
+		};
+		elt.onblur = function(e) {
+			wsocket.send(JSON.stringify({
+				msgType : "A",
+				nodeId : this.id
+			}));
+		}
+		break;
+	case "checkbox":
+	case "radio":
+		elt.onchange = function() {
+			wsocket.send(JSON.stringify({
+				msgType : "U",
+				nodeId : this.id,
+				eltType : elt.type,
+				checked : this.checked
+			}));
+		};
+		elt.checked = message.checked;
+		break;
 	}
 }
 
