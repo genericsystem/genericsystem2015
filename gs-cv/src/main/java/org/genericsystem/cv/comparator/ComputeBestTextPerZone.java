@@ -82,7 +82,7 @@ public class ComputeBestTextPerZone {
 		try {
 			engine.getCurrentCache();
 		} catch (IllegalStateException e) {
-			logger.error("Current cache could not be loaded. Starting a new one...");
+			logger.debug("Current cache could not be loaded. Starting a new one...");
 			engine.newCache().start();
 		}
 		Generic currentDocClass = engine.find(DocClass.class).getInstance(docType);
