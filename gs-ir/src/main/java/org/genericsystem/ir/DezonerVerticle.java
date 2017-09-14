@@ -45,7 +45,7 @@ public class DezonerVerticle extends ActionVerticle {
 
 	@Override
 	protected void handle(Future<Object> future, JsonObject task) {
-		String imagePath = task.getString(DistributedVerticle.FILENAME);
+		String imagePath = DistributedVerticle.BASE_PATH + task.getString(DistributedVerticle.FILENAME);
 		if (Zones.isZonesFilePresent(imagePath)) {
 			final Zones zones = Zones.load(Paths.get(imagePath).getParent().toString());
 			Img imgCopy = new Img(imagePath);
@@ -55,7 +55,7 @@ public class DezonerVerticle extends ActionVerticle {
 			String filenameExt = ModelTools.generateFileName(Paths.get(imagePath));
 			Imgcodecs.imwrite(DistributedVerticle.RESOURCES_FOLDER + filenameExt, imgCopy.getSrc());
 			imgCopy.close();
-			future.complete(OcrParametersVerticle.ACTION);
+			future.complete();
 		} else {
 			// No zones file was found, need to define the zones manually
 			// TODO: replace the future.fail by a notification to the system that a zone needs to be defined for this file
@@ -66,7 +66,7 @@ public class DezonerVerticle extends ActionVerticle {
 	@Override
 	protected void handleResult(AsyncResult<Object> res, JsonObject task) {
 		if (res.succeeded())
-			addTask(task.getString(DistributedVerticle.FILENAME), (String) res.result());
+			addTask(task.getString(DistributedVerticle.FILENAME), OcrParametersVerticle.ACTION);
 		else
 			logger.info("No zones defined for file {}.", task.getString(DistributedVerticle.FILENAME));
 	}

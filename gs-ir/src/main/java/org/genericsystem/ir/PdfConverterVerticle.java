@@ -35,7 +35,7 @@ public class PdfConverterVerticle extends ActionVerticle {
 	protected void handleResult(AsyncResult<Object> res, JsonObject task) {
 		if (res.succeeded()) {
 			for (Path newPng : (List<Path>) res.result())
-				addTask(newPng.toString(), ClassifierVerticle.ACTION);
+				addTask(newPng.toString().replaceFirst(DistributedVerticle.BASE_PATH, ""), ClassifierVerticle.ACTION);
 		}
 	}
 }

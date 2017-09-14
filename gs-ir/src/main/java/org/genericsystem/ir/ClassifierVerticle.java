@@ -25,7 +25,7 @@ public class ClassifierVerticle extends ActionVerticle {
 
 	@Override
 	protected void handle(Future<Object> future, JsonObject task) {
-		File file = new File(task.getString(DistributedVerticle.FILENAME));
+		File file = new File(DistributedVerticle.BASE_PATH + task.getString(DistributedVerticle.FILENAME));
 		logger.info("Starting classification for {}", file.getAbsolutePath());
 		Path savedFile;
 		synchronized (ClassifierVerticle.class) {
@@ -40,7 +40,7 @@ public class ClassifierVerticle extends ActionVerticle {
 	@Override
 	protected void handleResult(AsyncResult<Object> res, JsonObject task) {
 		if (res.succeeded())
-			addTask((String) res.result(), AddImageToEngineVerticle.ACTION);
+			addTask(((String) res.result()).replaceFirst(DistributedVerticle.BASE_PATH, ""), AddImageToEngineVerticle.ACTION);
 		else
 			throw new IllegalStateException("Error when classifying the image " + task.getString(DistributedVerticle.FILENAME), res.cause());
 	}

@@ -38,7 +38,7 @@ public class AddImageToEngineVerticle extends ActionVerticle {
 
 	@Override
 	protected void handle(Future<Object> future, JsonObject task) {
-		String imagePath = task.getString(DistributedVerticle.FILENAME);
+		String imagePath = DistributedVerticle.BASE_PATH + task.getString(DistributedVerticle.FILENAME);
 		boolean result;
 		if (null != engine)
 			result = FillModelWithData.registerNewFile(engine, Paths.get(imagePath), DistributedVerticle.RESOURCES_FOLDER);
@@ -53,7 +53,7 @@ public class AddImageToEngineVerticle extends ActionVerticle {
 	@Override
 	protected void handleResult(AsyncResult<Object> res, JsonObject task) {
 		if (res.succeeded())
-			addTask((String) res.result(), DezonerVerticle.ACTION);
+			addTask(((String) res.result()).replaceFirst(DistributedVerticle.BASE_PATH, ""), DezonerVerticle.ACTION);
 		else
 			throw new IllegalStateException("An error has occurred while saving file " + task.getString(DistributedVerticle.FILENAME));
 	}
