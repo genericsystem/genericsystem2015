@@ -2,6 +2,7 @@ package org.genericsystem.ir;
 
 import org.genericsystem.common.Root;
 import org.genericsystem.cv.comparator.FillModelWithData;
+import org.genericsystem.kernel.Cache;
 import org.genericsystem.kernel.Engine;
 
 import io.vertx.core.AsyncResult;
@@ -18,6 +19,7 @@ public class OcrPersistenceVerticle extends ActionVerticle {
 	public static final String ACTION = "ocrPersist";
 
 	private Root engine;
+	private Cache cache;
 
 	/**
 	 * Default constructor. A reference to an {@link Engine} must be provided to be able to save the results.
@@ -26,6 +28,7 @@ public class OcrPersistenceVerticle extends ActionVerticle {
 	 */
 	public OcrPersistenceVerticle(Root engine) {
 		this.engine = engine;
+		this.cache = (Cache) engine.newCache();
 	}
 
 	@Override
@@ -36,7 +39,9 @@ public class OcrPersistenceVerticle extends ActionVerticle {
 	@Override
 	protected void handle(Future<Object> future, JsonObject task) {
 		JsonObject data = task.getJsonObject(DistributedVerticle.JSON_OBJECT);
-		FillModelWithData.saveOcrDataInModel(engine, data);
+		cache.safeConsum(unused -> {
+			FillModelWithData.saveOcrDataInModel(engine, data);
+		});
 		future.complete();
 	}
 

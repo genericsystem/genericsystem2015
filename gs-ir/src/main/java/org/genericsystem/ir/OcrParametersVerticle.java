@@ -4,6 +4,7 @@ import java.nio.file.Paths;
 
 import org.genericsystem.common.Root;
 import org.genericsystem.cv.comparator.FillModelWithData;
+import org.genericsystem.kernel.Cache;
 import org.genericsystem.kernel.Engine;
 
 import io.vertx.core.AsyncResult;
@@ -18,6 +19,7 @@ import io.vertx.core.json.JsonObject;
 public class OcrParametersVerticle extends ActionVerticle {
 
 	public static final String ACTION = "ocr";
+	private static final String RESULTS = "results";
 
 	@Override
 	public String getAction() {
@@ -25,6 +27,7 @@ public class OcrParametersVerticle extends ActionVerticle {
 	}
 
 	private Root engine;
+	private Cache cache;
 
 	/**
 	 * Default constructor. A reference to an {@link Engine} must be provided.
@@ -33,14 +36,19 @@ public class OcrParametersVerticle extends ActionVerticle {
 	 */
 	public OcrParametersVerticle(Root engine) {
 		this.engine = engine;
+		this.cache = (Cache) engine.newCache();
 	}
 
 	@Override
 	protected void handle(Future<Object> future, JsonObject task) {
 		String imagePath = DistributedVerticle.BASE_PATH + task.getString(DistributedVerticle.FILENAME);
-		JsonObject params = FillModelWithData.getOcrParameters(engine, Paths.get(imagePath));
-		if (null != params)
-			future.complete(params);
+		JsonObject results = new JsonObject();
+		cache.safeConsum(unused -> {
+			JsonObject params = FillModelWithData.getOcrParameters(engine, Paths.get(imagePath));
+			results.put(RESULTS, params);
+		});
+		if (null != results && null != results.getJsonObject(RESULTS))
+			future.complete(results.getJsonObject(RESULTS));
 		else
 			future.fail("Unable to get the OCR parameters");
 	}

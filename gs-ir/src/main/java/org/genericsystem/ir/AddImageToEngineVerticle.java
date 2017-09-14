@@ -4,6 +4,7 @@ import java.nio.file.Paths;
 
 import org.genericsystem.common.Root;
 import org.genericsystem.cv.comparator.FillModelWithData;
+import org.genericsystem.kernel.Cache;
 import org.genericsystem.kernel.Engine;
 
 import io.vertx.core.AsyncResult;
@@ -21,6 +22,7 @@ public class AddImageToEngineVerticle extends ActionVerticle {
 	public static final String ACTION = "newImage";
 
 	private Root engine;
+	private Cache cache;
 
 	/**
 	 * Default constructor. A reference to the engine must be provided.
@@ -29,6 +31,7 @@ public class AddImageToEngineVerticle extends ActionVerticle {
 	 */
 	public AddImageToEngineVerticle(Root engine) {
 		this.engine = engine;
+		this.cache = (Cache) engine.newCache();
 	}
 
 	@Override
@@ -39,13 +42,15 @@ public class AddImageToEngineVerticle extends ActionVerticle {
 	@Override
 	protected void handle(Future<Object> future, JsonObject task) {
 		String imagePath = DistributedVerticle.BASE_PATH + task.getString(DistributedVerticle.FILENAME);
-		boolean result;
-		if (null != engine)
-			result = FillModelWithData.registerNewFile(engine, Paths.get(imagePath), DistributedVerticle.RESOURCES_FOLDER);
-		else
-			result = FillModelWithData.registerNewFile(Paths.get(imagePath));
-		if (result)
-			future.complete(imagePath);
+		System.out.println("--- imagePath = " + imagePath);
+		boolean[] result = new boolean[1];
+
+		cache.safeConsum(unused -> {
+			result[0] = FillModelWithData.registerNewFile(engine, Paths.get(imagePath), DistributedVerticle.RESOURCES_FOLDER);
+		});
+
+		if (result[0])
+			future.complete();
 		else
 			future.fail("An error has occured while saving file " + imagePath);
 	}
@@ -53,8 +58,8 @@ public class AddImageToEngineVerticle extends ActionVerticle {
 	@Override
 	protected void handleResult(AsyncResult<Object> res, JsonObject task) {
 		if (res.succeeded())
-			addTask(((String) res.result()).replaceFirst(DistributedVerticle.BASE_PATH, ""), DezonerVerticle.ACTION);
+			addTask(task.getString(DistributedVerticle.FILENAME), DezonerVerticle.ACTION);
 		else
-			throw new IllegalStateException("An error has occurred while saving file " + task.getString(DistributedVerticle.FILENAME));
+			throw new IllegalStateException("An error has occurred while saving file " + task.getString(DistributedVerticle.FILENAME), res.cause());
 	}
 }

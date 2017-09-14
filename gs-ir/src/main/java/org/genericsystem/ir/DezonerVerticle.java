@@ -7,6 +7,7 @@ import org.genericsystem.common.Root;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.Zones;
 import org.genericsystem.cv.model.ModelTools;
+import org.genericsystem.kernel.Cache;
 import org.genericsystem.kernel.Engine;
 import org.opencv.core.Scalar;
 import org.opencv.imgcodecs.Imgcodecs;
@@ -28,6 +29,7 @@ public class DezonerVerticle extends ActionVerticle {
 	public static final String ACTION = "dezoner";
 
 	private Root engine;
+	private Cache cache;
 
 	/**
 	 * Default constructor. A reference to an {@link Engine} must be provided to be able to save the results.
@@ -36,6 +38,7 @@ public class DezonerVerticle extends ActionVerticle {
 	 */
 	public DezonerVerticle(Root engine) {
 		this.engine = engine;
+		this.cache = (Cache) engine.newCache();
 	}
 
 	@Override
@@ -46,28 +49,33 @@ public class DezonerVerticle extends ActionVerticle {
 	@Override
 	protected void handle(Future<Object> future, JsonObject task) {
 		String imagePath = DistributedVerticle.BASE_PATH + task.getString(DistributedVerticle.FILENAME);
-		if (Zones.isZonesFilePresent(imagePath)) {
-			final Zones zones = Zones.load(Paths.get(imagePath).getParent().toString());
-			Img imgCopy = new Img(imagePath);
-			zones.draw(imgCopy, new Scalar(0, 255, 0), 3);
-			zones.writeNum(imgCopy, new Scalar(0, 0, 255), 3);
-			// TODO implement a filter mechanism to avoid creating duplicates in a public folder
-			String filenameExt = ModelTools.generateFileName(Paths.get(imagePath));
-			Imgcodecs.imwrite(DistributedVerticle.RESOURCES_FOLDER + filenameExt, imgCopy.getSrc());
-			imgCopy.close();
-			future.complete();
-		} else {
-			// No zones file was found, need to define the zones manually
-			// TODO: replace the future.fail by a notification to the system that a zone needs to be defined for this file
-			future.fail("No accurate zones found for " + imagePath);
-		}
+		cache.safeConsum(unused -> {
+			if (Zones.isZonesFilePresent(imagePath)) {
+				final Zones zones = Zones.load(Paths.get(imagePath).getParent().toString());
+				Img imgCopy = new Img(imagePath);
+				zones.draw(imgCopy, new Scalar(0, 255, 0), 3);
+				zones.writeNum(imgCopy, new Scalar(0, 0, 255), 3);
+				// TODO implement a filter mechanism to avoid creating duplicates in a public folder
+				String filenameExt = ModelTools.generateFileName(Paths.get(imagePath));
+				Imgcodecs.imwrite(DistributedVerticle.RESOURCES_FOLDER + filenameExt, imgCopy.getSrc());
+				imgCopy.close();
+				future.complete();
+			} else {
+				// No zones file was found, need to define the zones manually
+				// TODO: replace the future.fail by a notification to the system that a zone needs to be defined for this file
+				future.fail("No accurate zones found for " + imagePath);
+			}
+		});
+
 	}
 
 	@Override
 	protected void handleResult(AsyncResult<Object> res, JsonObject task) {
 		if (res.succeeded())
 			addTask(task.getString(DistributedVerticle.FILENAME), OcrParametersVerticle.ACTION);
-		else
+		else {
 			logger.info("No zones defined for file {}.", task.getString(DistributedVerticle.FILENAME));
+			res.cause().printStackTrace();
+		}
 	}
 }
