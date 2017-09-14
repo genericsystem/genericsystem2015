@@ -111,18 +111,20 @@ public class ContextActionCustom {
 
 	public static class REFRESH_BEST_TEXT implements ContextAction {
 		@Override
-		public void accept(Context context, Tag tag) {
+		public void accept(Context gsContext, Tag tag) {
 			System.out.println("Refreshing best text...");
-			Root root = context.getGeneric().getRoot();
-			DocInstance docInstance = (DocInstance) context.getGeneric();
+			Root root = gsContext.getGeneric().getRoot();
+			DocInstance docInstance = (DocInstance) gsContext.getGeneric();
 			String docType = docInstance.getDocClass().getValue().toString();
 			// System.out.println("Current thread (refresh): " + Thread.currentThread().getName());
 			WorkerVerticle worker = new WorkerVerticle(root) {
 				@Override
 				public void start() throws Exception {
-					ComputeBestTextPerZone.computeOneFile(root, docInstance, docType);
-					docInstance.setRefreshTimestamp(ModelTools.getCurrentDate());
-					root.getCurrentCache().flush();
+					gsContext.getCache().safeConsum(unused -> {
+						ComputeBestTextPerZone.computeOneFile(root, docInstance, docType);
+						docInstance.setRefreshTimestamp(ModelTools.getCurrentDate());
+						root.getCurrentCache().flush();
+					});
 					System.out.println("Done!");
 				}
 			};
@@ -150,14 +152,16 @@ public class ContextActionCustom {
 		}
 	}
 
-	public static void computeStatistics(Context context, Tag tag, boolean useStrict) {
-		DocClassInstance docClassInstance = (DocClassInstance) context.getGeneric();
+	public static void computeStatistics(Context gsContext, Tag tag, boolean useStrict) {
+		DocClassInstance docClassInstance = (DocClassInstance) gsContext.getGeneric();
 		Root root = docClassInstance.getRoot();
-		Arrays.asList(context.getGenerics()).forEach(g -> System.out.println(g.info()));
+		Arrays.asList(gsContext.getGenerics()).forEach(g -> System.out.println(g.info()));
 		WorkerVerticle worker = new WorkerVerticle() {
 			@Override
 			public void start() throws Exception {
-				ComputeTrainedScores.compute(root, docClassInstance.getValue().toString(), useStrict);
+				gsContext.getCache().safeConsum(unused -> {
+					ComputeTrainedScores.compute(root, docClassInstance.getValue().toString(), useStrict);
+				});
 				System.out.println("Done computing scores!");
 			}
 		};

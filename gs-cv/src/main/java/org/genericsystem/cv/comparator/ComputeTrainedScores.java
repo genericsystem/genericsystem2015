@@ -67,13 +67,6 @@ public class ComputeTrainedScores {
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static void compute(Root engine, String docType, Boolean useStrict) {
-		try {
-			engine.getCurrentCache();
-		} catch (IllegalStateException e) {
-			logger.error("Current cache could not be loaded. Starting a new one...");
-			engine.newCache().start();
-		}
-
 		Generic currentDocClass = engine.find(DocClass.class).getInstance(docType);
 		ImgFilter imgFilter = engine.find(ImgFilter.class);
 		ZoneText zoneText = engine.find(ZoneText.class);
