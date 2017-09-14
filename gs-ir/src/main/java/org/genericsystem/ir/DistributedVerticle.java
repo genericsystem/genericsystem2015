@@ -15,7 +15,7 @@ public class DistributedVerticle extends AbstractVerticle {
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	public static final String BASE_PATH = System.getenv("HOME") + "/genericsystem/gs-ir-files/";
-	public static final String RESOURCES_FOLDER = System.getProperty("user.dir") + "/../gs-ir/src/main/resources/";
+	public static final String RESOURCES_FOLDER = System.getProperty("user.dir") + "/src/main/resources/";
 	protected static final String FILENAME = "filename";
 	protected static final String JSON_OBJECT = "jsonObject";
 	protected static final String TYPE = "type";
@@ -25,7 +25,7 @@ public class DistributedVerticle extends AbstractVerticle {
 	private static AtomicInteger currentExecutions = new AtomicInteger();
 
 	static {
-		logger.debug("Available processors: {}", availProc);
+		logger.debug("Available processors: {} | BASE_PATH: {} | RESOURCES_FOLDER: {}", availProc, BASE_PATH, RESOURCES_FOLDER);
 	}
 
 	public static void incrementExecutions() {
