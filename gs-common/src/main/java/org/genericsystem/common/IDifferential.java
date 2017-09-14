@@ -31,7 +31,7 @@ public interface IDifferential<T extends DefaultGeneric<T>> {
 
 	Observable<Generic> getRemovesObservable(Generic generic);
 
-	Map<Generic, ObservableList<Generic>> getDependenciesAsOservableListCacheMap();
+	Map<Generic, ObservableList<Generic>> getDependenciesAsObservableListCacheMap();
 
 	// CompletableFuture<Snapshot<Generic>> getDependenciesPromise(Generic generic);
 

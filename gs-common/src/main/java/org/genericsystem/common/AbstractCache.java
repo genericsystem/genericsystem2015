@@ -74,10 +74,10 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 	private ObservableIntegerValue cacheLevel;
 	private ObservableLongValue ts;
 	private final ContextEventListener<Generic> listener;
-	private Map<Generic, ObservableList<Generic>> dependenciesAsOservableListCacheMap = new HashMap<>();
+	private Map<Generic, ObservableList<Generic>> dependenciesAsObservableListCacheMap = new HashMap<>();
 
-	public Map<Generic, ObservableList<Generic>> getDependenciesAsOservableListCacheMap() {
-		return dependenciesAsOservableListCacheMap;
+	public Map<Generic, ObservableList<Generic>> getDependenciesAsObservableListCacheMap() {
+		return dependenciesAsObservableListCacheMap;
 	}
 
 	@Override
@@ -343,8 +343,8 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 		}
 
 		@Override
-		public Map<Generic, ObservableList<Generic>> getDependenciesAsOservableListCacheMap() {
-			return AbstractCache.this.getDependenciesAsOservableListCacheMap();
+		public Map<Generic, ObservableList<Generic>> getDependenciesAsObservableListCacheMap() {
+			return AbstractCache.this.getDependenciesAsObservableListCacheMap();
 		}
 
 		@Override

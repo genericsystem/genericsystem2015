@@ -59,7 +59,7 @@ public class Transaction extends CheckedContext implements IDifferential<Generic
 	}
 
 	@Override
-	public Map<Generic, ObservableList<Generic>> getDependenciesAsOservableListCacheMap() {
+	public Map<Generic, ObservableList<Generic>> getDependenciesAsObservableListCacheMap() {
 		throw new UnsupportedOperationException();
 	}
 
