@@ -139,6 +139,14 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 		return getDifferential().getDependencies(generic);
 	}
 
+	public void enableReactive() {
+		getRoot().addReactiveCache(this);
+	}
+
+	public void disableReactive() {
+		getRoot().removeReactiveCache(this);
+	}
+
 	protected Restructurator buildRestructurator() {
 		return new Restructurator(this);
 	}
@@ -163,6 +171,8 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 			checkConstraints();
 			doSynchronizedApplyInSubContext();
 			initialize();
+			if (getDifferential().getSubDifferential() instanceof TransactionDifferential)
+				getRoot().getReactiveCaches().stream().filter(cache -> cache != this).forEach(cache -> cache.safeConsum(unused -> cache.shiftTs()));
 			listener.triggersFlushEvent();
 		} catch (OptimisticLockConstraintViolationException exception) {
 			discardWithException(exception);
@@ -286,7 +296,6 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 
 	@Override
 	public Generic addInstance(Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
-
 		return new AddBuilder(this, meta, overrides, value, components).resolve();
 	}
 
@@ -348,16 +357,27 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 			return getTransaction().getTs();
 		}
 
+		@SuppressWarnings("unchecked")
+		private Observable<IDifferential<Generic>[]> prevTransactions() {
+			return RxJavaHelpers.valuesOf(transactionProperty).scan(new IDifferential[2], (oldTs, newT) -> {
+				oldTs[0] = oldTs[1];
+				oldTs[1] = newT;
+				return oldTs;
+			});
+		}
+
+		private Observable<Generic> getDependenciesExcluding(IDifferential<Generic> fromTransaction, IDifferential<Generic> notInTransaction, Generic generic) {
+			return Observable.fromIterable(fromTransaction.getDependencies(generic).filter(g -> !notInTransaction.getDependencies(generic).contains(g))).replay().refCount();
+		}
+
 		@Override
 		public Observable<Generic> getAddsObservable(Generic generic) {
-			// TODO
-			return Observable.never();
+			return prevTransactions().switchMap(ts -> ts[0] != null	? getDependenciesExcluding(ts[1], ts[0], generic) : Observable.never());
 		}
 
 		@Override
 		public Observable<Generic> getRemovesObservable(Generic generic) {
-			// TODO
-			return Observable.never();
+			return prevTransactions().switchMap(ts -> ts[0] != null ? getDependenciesExcluding(ts[0], ts[1], generic) : Observable.never());
 		}
 	}
 

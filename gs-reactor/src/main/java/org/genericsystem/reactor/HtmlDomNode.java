@@ -125,7 +125,7 @@ public class HtmlDomNode {
 				childTag.addContextAttribute("filteredContexts", context, subContexts);
 				context.setSubContexts(childTag, new TransformationObservableList<Context, Context>(subContexts.filteredSubContexts, (i, subContext) -> {
 					childTag.createNode(this, subContext).init(computeIndex(i, childTag));
-					if (subContext.isInCache())
+					if (context.isInCache())
 						childTag.addStyleClass(subContext, "opaque");
 					return subContext;
 				}, subContext -> subContext.removeTag(childTag)));

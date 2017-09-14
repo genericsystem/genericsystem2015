@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
+import org.genericsystem.kernel.Cache;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 
@@ -15,6 +16,8 @@ import javafx.collections.ObservableList;
  *
  */
 public class RootContext extends Context {
+
+	private final Cache cache;
 
 	private Map<Tag, ObservableList<Tag>> observableSubTags = new HashMap<Tag, ObservableList<Tag>>() {
 		@Override
@@ -35,13 +38,18 @@ public class RootContext extends Context {
 		return tag.getObservableChildren();
 	}
 
-	public RootContext(Root engine) {
+	public RootContext(Root engine, Cache cache) {
 		super(null, new Generic[] { engine });
+		this.cache = cache;
 	}
 
 	@Override
 	public RootContext getRootContext() {
 		return this;
+	}
+
+	public Cache getCache() {
+		return cache;
 	}
 
 	public ObservableList<Tag> getObservableChildren(Tag tag) {

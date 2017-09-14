@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 
 import org.genericsystem.common.AbstractCache;
 import org.genericsystem.common.Root;
+import org.genericsystem.kernel.Cache;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.HtmlDomNode.Sender;
 import org.genericsystem.reactor.RootHtmlDomNode;
@@ -65,9 +66,9 @@ public class PersistentApplication {
 		this.indexHtml = indexHtml;
 	}
 
-	public RootHtmlDomNode init(Sender send, RootTag tagTree) {
+	public RootHtmlDomNode init(Sender send, RootTag tagTree, Cache cache) {
 		try {
-			return tagTree.init(modelClass.getConstructor(Root.class).newInstance(engine), rootId, send);
+			return tagTree.init(modelClass.getConstructor(Root.class, Cache.class).newInstance(engine, cache), rootId, send);
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
 			throw new IllegalStateException(e);
 		}
