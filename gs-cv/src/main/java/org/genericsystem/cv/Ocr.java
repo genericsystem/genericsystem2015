@@ -22,6 +22,13 @@ public class Ocr {
 		NativeLibraryLoader.load();
 	}
 
+	private static final String TESSDATA_PATH = "/usr/share/tesseract-ocr/4.00/";
+	private static final String TESSDATA_ALT_PATH = System.getenv("HOME") + "/tessdata/";
+	private static final String TESSERACT_LANGUAGE = "fra";
+	private static final String TESSERACT_WHAR_WHITE_LIST = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM0123456789.-,<'";
+	private static final int TESSERACT_OEM = 1;
+	private static final int TESSERACT_PSMODE = 13;
+
 	public static void main(String[] args) {
 		try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(Paths.get(".", "classes"), Files::isDirectory)) {
 			for (Path directoryPath : directoryStream) {
@@ -44,17 +51,27 @@ public class Ocr {
 	 * @author Pierrik Lassalas
 	 */
 	public static class OCRTesseractInstanceFactory extends BasePooledObjectFactory<OCRTesseract> {
-
 		@Override
 		public OCRTesseract create() throws Exception {
-			return OCRTesseract.create("/usr/share/tesseract-ocr/4.00/", "fra", "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM0123456789.-,<'", 1, 13);
+			OCRTesseract instance = null;
+			try {
+				// Attempt to load tessdata from the default path (when installed from official repository)
+				instance = OCRTesseract.create(Ocr.TESSDATA_PATH, Ocr.TESSERACT_LANGUAGE, Ocr.TESSERACT_WHAR_WHITE_LIST, Ocr.TESSERACT_OEM, Ocr.TESSERACT_PSMODE);
+			} catch (Exception e) {
+				// If tessdata was not found, attempt to load from the alternate path
+				try {
+					instance = OCRTesseract.create(Ocr.TESSDATA_ALT_PATH, Ocr.TESSERACT_LANGUAGE, Ocr.TESSERACT_WHAR_WHITE_LIST, Ocr.TESSERACT_OEM, Ocr.TESSERACT_PSMODE);
+				} catch (Exception e1) {
+					throw new RuntimeException("Unable to load tesseract data. Please ensure that tesseract-ocr is installed and configured properly on your system.", e);
+				}
+			}
+			return instance;
 		}
 
 		@Override
 		public PooledObject<OCRTesseract> wrap(OCRTesseract instance) {
 			return new DefaultPooledObject<>(instance);
 		}
-
 	}
 
 	@Deprecated
