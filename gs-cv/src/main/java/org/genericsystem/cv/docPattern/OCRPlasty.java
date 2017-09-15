@@ -18,8 +18,8 @@ public class OCRPlasty {
 		labels.add(
 				"had I expressed tbe agony I frejuently felt he would have been taught to long for its alleviationq");
 		labels.add("had I expresset th agny I frequently feltu he wouald have ben taufht to lng fr its alevation");
-		// labels.add("coucou");
-		leastDifferent(labels);
+
+		System.out.println(similarity(labels));
 
 		System.out.println(ocrPlasty(labels));
 
@@ -57,7 +57,7 @@ public class OCRPlasty {
 		return leastDifferent(candidates); // if there's no candidate with at least 2 occurrences
 	}
 
-	private static List<String> interString(String string, char c) {
+	private static List<String> interString(String string, char c) { // string between 2 consecutive elements of the lcs
 		String inter = "";
 		int index = string.indexOf(c);
 		if (index > 0)
@@ -69,7 +69,7 @@ public class OCRPlasty {
 		return is;
 	}
 
-	private static List<String> endString(String string) {
+	private static List<String> endString(String string) { // string following the last element of the lcs
 		List<String> is = new ArrayList<>();
 		is.add("");
 		is.add(string);
@@ -110,6 +110,21 @@ public class OCRPlasty {
 				subsequence = lcs(subsequence, labels.get(i).trim());
 		}
 		return subsequence;
+	}
+
+	public static double similarity(List<String> strings) {
+		double sim = 0;
+		int n = strings.size();
+		if (n == 1)
+			return 1;
+		for (int i = 0; i < n; i++) {
+			for (int j = 0; j < n; j++) {
+				if (j > i) // each distance will be between 0 and 1
+					sim += Levenshtein.distance(strings.get(i), strings.get(j))
+							/ ((double) strings.get(i).length() + strings.get(j).length());
+			}
+		}
+		return 1 - 2 * sim / n / (n - 1); // divide by the total number of distances
 	}
 
 	public static String lcs(String X, String Y) { // lcs between 2 strings
