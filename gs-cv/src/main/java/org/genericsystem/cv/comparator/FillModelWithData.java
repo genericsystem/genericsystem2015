@@ -134,12 +134,6 @@ public class FillModelWithData {
 	 * @return a {@link JsonObject} containing all the informations required to process the file
 	 */
 	public static JsonObject getOcrParameters(Root engine, Path imagePath) {
-		try {
-			engine.getCurrentCache();
-		} catch (IllegalStateException e) {
-			logger.debug("Current cache could not be loaded. Starting a new one...");
-			engine.newCache().start();
-		}
 		final Path imgClassDirectory = imagePath.getParent();
 		final String docType = ModelTools.getImgClass(imagePath);
 
@@ -289,12 +283,6 @@ public class FillModelWithData {
 	 * @param data - a {@link JsonObject} containing all the data (see {@link #getOcrParameters(Root, Path)}).
 	 */
 	public static void saveOcrDataInModel(Root engine, JsonObject data) {
-		try {
-			engine.getCurrentCache();
-		} catch (IllegalStateException e) {
-			logger.debug("Current cache could not be loaded. Starting a new one...");
-			engine.newCache().start();
-		}
 		// Parse the data
 		String docType = data.getString(CLASS_NAME);
 		String filename = data.getString(FILENAME);
@@ -359,12 +347,6 @@ public class FillModelWithData {
 	 * @return an {@code int} representing {@link #KNOWN_FILE_UPDATED_FILTERS}, {@link #NEW_FILE} or {@link #KNOWN_FILE}
 	 */
 	public static void doImgOcr(Root engine, Path imagePath) {
-		try {
-			engine.getCurrentCache();
-		} catch (IllegalStateException e) {
-			logger.debug("Current cache could not be loaded. Starting a new one...");
-			engine.newCache().start();
-		}
 		final String docType = ModelTools.getImgClass(imagePath);
 
 		// Find and save the doc class
@@ -428,12 +410,6 @@ public class FillModelWithData {
 	 * @return true if this was a success, false otherwise
 	 */
 	public static boolean registerNewFile(Root engine, Path imgPath, String resourcesFolder) {
-		try {
-			engine.getCurrentCache();
-		} catch (IllegalStateException e) {
-			logger.debug("Current cache could not be loaded. Starting a new one...");
-			engine.newCache().start();
-		}
 		final String docType = ModelTools.getImgClass(imgPath);
 
 		// Find and save the doc class
@@ -499,9 +475,7 @@ public class FillModelWithData {
 	 */
 	@SuppressWarnings({ "unused", "unchecked", "rawtypes" })
 	private static void cleanModel(Root engine) {
-
 		System.out.println("Cleaning model...");
-
 		// Get the necessary classes from the engine
 		DocClass docClass = engine.find(DocClass.class);
 		Generic doc = engine.find(Doc.class);
