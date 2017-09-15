@@ -325,8 +325,13 @@ public class FillModelWithData {
 							zoneText.setZoneText("", docInstance, zoneInstance, imgFilter.getImgFilter(e.getKey()));
 					} else {
 						String ocrText = (String) e.getValue();
-						ZoneTextInstance zti = zoneText.setZoneText(ocrText, docInstance, zoneInstance, imgFilter.getImgFilter(e.getKey()));
-						zti.setZoneTimestamp(ModelTools.getCurrentDate()); // TODO: concatenate with previous line?
+						ImgFilterInstance imgFilterInstance = imgFilter.getImgFilter(e.getKey());
+						if (null != imgFilterInstance) {
+							ZoneTextInstance zti = zoneText.setZoneText(ocrText, docInstance, zoneInstance, imgFilterInstance);
+							zti.setZoneTimestamp(ModelTools.getCurrentDate()); // TODO: concatenate with previous line?
+						} else {
+							throw new NullPointerException("Cannot retrieve imgFilterInstance from the Engine");
+						}
 					}
 				});
 				engine.getCurrentCache().flush();
