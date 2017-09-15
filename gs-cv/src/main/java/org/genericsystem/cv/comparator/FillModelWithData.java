@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
 import org.genericsystem.cv.Img;
@@ -146,7 +147,6 @@ public class FillModelWithData {
 		// Find and save the doc class and the doc instance
 		DocClassInstance docClassInstance = docClass.setDocClass(docType);
 		DocInstance docInstance = docClassInstance.setDoc(doc, ModelTools.generateFileName(imagePath));
-		engine.getCurrentCache().flush();
 
 		// Get the filters and the predefined zones
 		final List<ImgFilterFunction> imgFilterFunctions = FillModelWithData.getFilterFunctions();
@@ -187,7 +187,7 @@ public class FillModelWithData {
 					return zti == null;
 				});
 				if (containsNullZoneTextInstance) {
-					logger.debug("Detected new algorithm ({}) for {}", entry.getName(), docInstance);
+					logger.debug("Detected new algorithm ({}) for {}", filtername, docInstance);
 					imgFilter.setImgFilter(filtername);
 					updatedImgFilterList.add(entry);
 				} else {
@@ -195,6 +195,7 @@ public class FillModelWithData {
 				}
 			}
 		});
+		engine.getCurrentCache().flush();
 
 		if (null == updatedImgFilterList || updatedImgFilterList.isEmpty()) {
 			logger.info("Nothing to add");
@@ -300,8 +301,14 @@ public class FillModelWithData {
 			// Set the docClass, doc instance and timestamp
 			DocClassInstance docClassInstance = docClass.setDocClass(docType);
 			DocInstance docInstance = docClassInstance.setDoc(doc, filenameExt);
-			docInstance.setDocFilename(filename);
-			docInstance.setDocTimestamp(timestamp);
+			try {
+				docInstance.setDocFilename(filename);
+				docInstance.setDocTimestamp(timestamp);
+			} catch (RollbackException e1) {
+				logger.debug("Filename or timestamp have already been set. Resuming task...");
+			} catch (Exception e1) {
+				throw new RuntimeException(e1);
+			}
 			engine.getCurrentCache().flush();
 
 			zones.forEach(entry -> {

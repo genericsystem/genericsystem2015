@@ -30,10 +30,10 @@ public class OcrPersistenceVerticle extends ActionPersistentVerticle {
 		JsonObject data = task.getJsonObject(DistributedVerticle.JSON_OBJECT);
 		try {
 			FillModelWithData.saveOcrDataInModel(engine, data);
+			future.complete();
 		} catch (RuntimeException e) {
 			future.fail(e);
 		}
-		future.complete();
 	}
 
 	@Override
