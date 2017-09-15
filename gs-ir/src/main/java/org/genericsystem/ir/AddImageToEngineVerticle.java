@@ -4,7 +4,6 @@ import java.nio.file.Paths;
 
 import org.genericsystem.common.Root;
 import org.genericsystem.cv.comparator.FillModelWithData;
-import org.genericsystem.kernel.Cache;
 import org.genericsystem.kernel.Engine;
 
 import io.vertx.core.AsyncResult;
@@ -17,21 +16,12 @@ import io.vertx.core.json.JsonObject;
  * 
  * @author Pierrik Lassalas
  */
-public class AddImageToEngineVerticle extends ActionVerticle {
+public class AddImageToEngineVerticle extends ActionPersistentVerticle {
 
 	public static final String ACTION = "newImage";
 
-	private Root engine;
-	private Cache cache;
-
-	/**
-	 * Default constructor. A reference to the engine must be provided.
-	 * 
-	 * @param engine - the engine used to store the data
-	 */
 	public AddImageToEngineVerticle(Root engine) {
-		this.engine = engine;
-		this.cache = (Cache) engine.newCache();
+		super(engine);
 	}
 
 	@Override
@@ -43,13 +33,8 @@ public class AddImageToEngineVerticle extends ActionVerticle {
 	protected void handle(Future<Object> future, JsonObject task) {
 		String imagePath = DistributedVerticle.BASE_PATH + task.getString(DistributedVerticle.FILENAME);
 		System.out.println("--- imagePath = " + imagePath);
-		boolean[] result = new boolean[1];
-
-		cache.safeConsum(unused -> {
-			result[0] = FillModelWithData.registerNewFile(engine, Paths.get(imagePath), DistributedVerticle.RESOURCES_FOLDER);
-		});
-
-		if (result[0])
+		boolean result = FillModelWithData.registerNewFile(engine, Paths.get(imagePath), DistributedVerticle.RESOURCES_FOLDER);
+		if (result)
 			future.complete();
 		else
 			future.fail("An error has occured while saving file " + imagePath);

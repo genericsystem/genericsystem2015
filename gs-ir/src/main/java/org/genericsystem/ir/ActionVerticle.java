@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
+import io.vertx.core.Handler;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.json.JsonObject;
 
@@ -37,11 +38,7 @@ public abstract class ActionVerticle extends AbstractVerticle {
 			DistributedVerticle.incrementExecutions();
 			message.reply(null);
 
-			vertx.executeBlocking(future -> {
-				download(future, task);
-				if (!future.failed())
-					handle(future, new JsonObject(task.encode()));
-			}, res -> {
+			vertx.executeBlocking(getExecuteBlockingHandler(task), res -> {
 				handleResult(res, new JsonObject(task.encode()));
 				if (res.succeeded())
 					vertx.eventBus().send(Dispatcher.ADDRESS + ":updateState", new JsonObject().put(Dispatcher.TASK, task).put(Dispatcher.NEW_STATE, Dispatcher.FINISHED));
@@ -52,6 +49,14 @@ public abstract class ActionVerticle extends AbstractVerticle {
 				DistributedVerticle.decrementExecutions();
 			});
 		});
+	}
+
+	protected Handler<Future<Object>> getExecuteBlockingHandler(JsonObject task) {
+		return future -> {
+			download(future, task);
+			if (!future.failed())
+				handle(future, new JsonObject(task.encode()));
+		};
 	}
 
 	protected abstract void handle(Future<Object> future, JsonObject task);
