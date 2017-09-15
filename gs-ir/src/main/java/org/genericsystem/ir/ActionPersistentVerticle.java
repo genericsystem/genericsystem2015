@@ -24,8 +24,12 @@ public abstract class ActionPersistentVerticle extends ActionVerticle {
 
 	@Override
 	protected Handler<Future<Object>> getExecuteBlockingHandler(JsonObject task) {
-		return future -> cache.safeConsum(unused -> {
-			super.getExecuteBlockingHandler(task).handle(future);
-		});
+		return future -> {
+			cache.shiftTs();
+			cache.safeConsum(unused -> {
+				System.out.println("--- inside executeBlocking (ActionPersistent) + " + Thread.currentThread().getName());
+				super.getExecuteBlockingHandler(task).handle(future);
+			});
+		};
 	}
 }
