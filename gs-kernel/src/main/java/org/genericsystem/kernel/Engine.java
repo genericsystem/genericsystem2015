@@ -29,8 +29,9 @@ public class Engine extends AbstractServer {
 						Collections.emptyList(), ApiStatics.TS_SYSTEM, ApiStatics.SYSTEM_TS));
 		startSystemCache(userClasses);
 		archiver = new Archiver(this, persistentDirectoryPath);
+		getCurrentCache().stop();
 		isInitialized = true;
-		newCache().start();
+		//		newCache().start();
 	}
 
 	@Override

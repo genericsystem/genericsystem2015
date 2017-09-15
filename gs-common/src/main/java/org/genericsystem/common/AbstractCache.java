@@ -1,6 +1,7 @@
 package org.genericsystem.common;
 
 import java.io.Serializable;
+import java.lang.invoke.MethodHandles;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -20,6 +21,8 @@ import org.genericsystem.common.GenericBuilder.SetBuilder;
 import org.genericsystem.common.GenericBuilder.UpdateBuilder;
 import org.genericsystem.defaults.DefaultCache;
 import org.genericsystem.defaults.tools.RxJavaHelpers;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.reactivex.Observable;
 import javafx.beans.binding.Bindings;
@@ -35,6 +38,8 @@ import javafx.collections.ObservableList;
  *
  */
 public abstract class AbstractCache extends CheckedContext implements DefaultCache<Generic> {
+
+	private final static Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	public Generic setMeta(int dim) {
 		return setInstance(null, Collections.emptyList(), getRoot().getValue(), Arrays.asList(rootComponents(dim)));
@@ -82,6 +87,7 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 
 	@Override
 	public long shiftTs() throws RollbackException {
+		log.debug("shiftTs on cache {}", System.identityHashCode(this));
 		transactionProperty.set(buildTransaction());
 		listener.triggersRefreshEvent();
 		return getTs();
@@ -165,14 +171,18 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 
 	@Override
 	public void tryFlush() throws ConcurrencyControlException {
+		log.debug("tryFlush on cache {}.", System.identityHashCode(this));
 		if (!equals(getRoot().getCurrentCache()))
 			discardWithException(new CacheNoStartedException("The Cache isn't started"));
 		try {
 			checkConstraints();
 			doSynchronizedApplyInSubContext();
 			initialize();
-			if (getDifferential().getSubDifferential() instanceof TransactionDifferential)
+			if (getDifferential().getSubDifferential() instanceof TransactionDifferential) {
+				stop();
 				getRoot().getReactiveCaches().stream().filter(cache -> cache != this).forEach(cache -> cache.safeConsum(unused -> cache.shiftTs()));
+				start();
+			}
 			listener.triggersFlushEvent();
 		} catch (OptimisticLockConstraintViolationException exception) {
 			discardWithException(exception);
@@ -359,7 +369,7 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 
 		@SuppressWarnings("unchecked")
 		private Observable<IDifferential<Generic>[]> prevTransactions() {
-			return RxJavaHelpers.valuesOf(transactionProperty).scan(new IDifferential[2], (oldTs, newT) -> {
+			return RxJavaHelpers.valuesOf(transactionProperty).scan(new IDifferential[] { null, getTransaction() }, (oldTs, newT) -> {
 				oldTs[0] = oldTs[1];
 				oldTs[1] = newT;
 				return oldTs;
@@ -370,14 +380,17 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 			return Observable.fromIterable(fromTransaction.getDependencies(generic).filter(g -> !notInTransaction.getDependencies(generic).contains(g))).replay().refCount();
 		}
 
+		// Transmit adds and removes only when the transaction changes, i.e. when shiftTs is called.
 		@Override
 		public Observable<Generic> getAddsObservable(Generic generic) {
-			return prevTransactions().switchMap(ts -> ts[0] != null	? getDependenciesExcluding(ts[1], ts[0], generic) : Observable.never());
+			return prevTransactions().switchMap(ts -> ts[0] != null ? ts[0].getAddsObservable(generic) : Observable.never());
+			// return prevTransactions().switchMap(ts -> ts[0] != null ? getDependenciesExcluding(ts[1], ts[0], generic) : Observable.never());
 		}
 
 		@Override
 		public Observable<Generic> getRemovesObservable(Generic generic) {
-			return prevTransactions().switchMap(ts -> ts[0] != null ? getDependenciesExcluding(ts[0], ts[1], generic) : Observable.never());
+			return prevTransactions().switchMap(ts -> ts[0] != null ? ts[0].getRemovesObservable(generic) : Observable.never());
+			// return prevTransactions().switchMap(ts -> ts[0] != null ? getDependenciesExcluding(ts[0], ts[1], generic) : Observable.never());
 		}
 	}
 
@@ -395,5 +408,4 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 		default void triggersFlushEvent() {
 		}
 	}
-
 }

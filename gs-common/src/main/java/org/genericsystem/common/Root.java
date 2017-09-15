@@ -1,6 +1,7 @@
 package org.genericsystem.common;
 
 import java.io.Serializable;
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -20,6 +21,8 @@ import org.genericsystem.defaults.DefaultConfig.Sequence;
 import org.genericsystem.defaults.DefaultConfig.SystemMap;
 import org.genericsystem.defaults.DefaultGeneric;
 import org.genericsystem.defaults.DefaultRoot;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.vertx.core.impl.ConcurrentHashSet;
 import javassist.util.proxy.MethodFilter;
@@ -32,6 +35,8 @@ import javassist.util.proxy.ProxyObject;
  *
  */
 public abstract class Root implements DefaultRoot<Generic>, ProxyObject, Generic {
+
+	private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	private final Map<Long, Generic> genericsById = new ConcurrentHashMap<>();
 	private final SystemCache systemCache = buildSystemCache(this);
@@ -270,13 +275,19 @@ public abstract class Root implements DefaultRoot<Generic>, ProxyObject, Generic
 	}
 
 	protected AbstractCache start(AbstractCache cache) {
+		if (cacheLocal.get() != null)
+			throw new IllegalStateException("Cache already defined");
 		if (cache == null)
 			throw new NullPointerException();
+		log.debug("Start cache {}.", System.identityHashCode(cache));
 		cacheLocal.set(cache);
 		return cache;
 	}
 
 	protected void stop(AbstractCache cache) {
+		if (cache != cacheLocal.get())
+			throw new IllegalStateException("Stopping cache different from started cache");
+		log.debug("Stop cache {}.", System.identityHashCode(cache));
 		cacheLocal.remove();
 	}
 

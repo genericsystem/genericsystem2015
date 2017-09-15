@@ -63,6 +63,7 @@ public class Differential implements IDifferential<Generic> {
 		return subDifferential.getDifferentialProperty();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Observable<Differential> getDifferentialObservable() {
 		return (Observable<Differential>) subDifferential.getDifferentialObservable();
