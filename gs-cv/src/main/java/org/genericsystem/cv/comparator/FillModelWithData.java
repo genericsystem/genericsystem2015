@@ -318,7 +318,7 @@ public class FillModelWithData {
 				if (!currentZone.isEmpty())
 					currentZone.put("reality", ""); // Add this filter only if there are other filters
 				currentZone.forEach(e -> {
-					// logger.debug("key: {}; value: {}", e.getKey(), e.getValue());
+					logger.trace("key: {}; value: {}", e.getKey(), e.getValue());
 					if ("reality".equals(e.getKey()) || "best".equals(e.getKey())) {
 						// Do not proceed to OCR if the real values are known. By default, the "reality" and "best" filters are left empty
 						if (null == zoneText.getZoneText(docInstance, zoneInstance, imgFilter.getImgFilter(e.getKey())))
@@ -326,12 +326,10 @@ public class FillModelWithData {
 					} else {
 						String ocrText = (String) e.getValue();
 						ImgFilterInstance imgFilterInstance = imgFilter.getImgFilter(e.getKey());
-						if (null != imgFilterInstance) {
-							ZoneTextInstance zti = zoneText.setZoneText(ocrText, docInstance, zoneInstance, imgFilterInstance);
-							zti.setZoneTimestamp(ModelTools.getCurrentDate()); // TODO: concatenate with previous line?
-						} else {
+						if (null != imgFilterInstance)
+							zoneText.setZoneText(ocrText, docInstance, zoneInstance, imgFilterInstance).setZoneTimestamp(ModelTools.getCurrentDate());
+						else
 							throw new NullPointerException("Cannot retrieve imgFilterInstance from the Engine");
-						}
 					}
 				});
 				engine.getCurrentCache().flush();
