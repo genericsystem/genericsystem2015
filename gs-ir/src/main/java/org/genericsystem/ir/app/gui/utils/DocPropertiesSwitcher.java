@@ -10,6 +10,7 @@ import org.genericsystem.cv.model.DocClass.DocClassInstance;
 import org.genericsystem.cv.model.ZoneGeneric;
 import org.genericsystem.cv.model.ZoneText;
 import org.genericsystem.cv.model.ZoneText.ZoneTextInstance;
+import org.genericsystem.ir.DistributedVerticle;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.context.TagSwitcher;
@@ -22,6 +23,8 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
 public class DocPropertiesSwitcher {
+
+	private static final String ZONES_FILE_BASE_PATH = DistributedVerticle.BASE_PATH + "/classes/";
 
 	public static class DOC_CLASS_EMPTY implements TagSwitcher {
 		@Override
@@ -105,21 +108,23 @@ public class DocPropertiesSwitcher {
 
 	public static ObservableValue<Boolean> isSupervisionAvailable(Context context, boolean reverse) {
 		DocClassInstance currentDocClass = (DocClassInstance) context.getGeneric();
-		ObjectProperty<File> file = new SimpleObjectProperty<>(new File(System.getProperty("user.dir") + "/../gs-cv/classes/" + currentDocClass.getValue().toString() + "/zones/zones.json"));
-		BooleanBinding binding = Bindings.createBooleanBinding(() -> {
-			return null != file.get() && file.get().exists();
-		}, file);
+		BooleanBinding binding = getBooleanBinding(currentDocClass.getValue().toString());
 		return reverse ? binding.not() : binding;
 	}
 
 	public static ObservableValue<Boolean> isClassZoneFilePresent(Context context, boolean reverse) {
 		DocInstance currentDoc = (DocInstance) context.getGeneric();
 		DocClassInstance docClassInstance = currentDoc.getDocClass();
-		ObjectProperty<File> file = new SimpleObjectProperty<>(new File(System.getProperty("user.dir") + "/../gs-cv/classes/" + docClassInstance.getValue().toString() + "/zones/zones.json"));
+		BooleanBinding binding = getBooleanBinding(docClassInstance.getValue().toString());
+		return reverse ? binding.not() : binding;
+	}
+
+	private static BooleanBinding getBooleanBinding(String docClass) {
+		ObjectProperty<File> file = new SimpleObjectProperty<>(new File(ZONES_FILE_BASE_PATH + docClass + "/zones/zones.json"));
 		BooleanBinding binding = Bindings.createBooleanBinding(() -> {
 			return null != file.get() && file.get().exists();
 		}, file);
-		return reverse ? binding.not() : binding;
+		return binding;
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
