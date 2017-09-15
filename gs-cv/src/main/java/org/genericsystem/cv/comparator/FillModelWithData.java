@@ -96,12 +96,12 @@ public class FillModelWithData {
 	 * @return a list of {@link ImgFilterFunction}
 	 */
 	public static List<ImgFilterFunction> getFilterFunctions() {
-		final List<ImgFilterFunction> filterSet = new ArrayList<>();
+		final List<ImgFilterFunction> filterList = new ArrayList<>();
 		for (ImgFilterFunction iff : ImgFilterFunction.values()) {
 			logger.info("Adding: {}", iff);
-			filterSet.add(iff);
+			filterList.add(iff);
 		}
-		return filterSet;
+		return filterList;
 	}
 
 	/**
