@@ -296,34 +296,38 @@ public class FillModelWithData {
 		ZoneText zoneText = engine.find(ZoneText.class);
 		ImgFilter imgFilter = engine.find(ImgFilter.class);
 
-		// Set the docClass, doc instance and timestamp
-		DocClassInstance docClassInstance = docClass.setDocClass(docType);
-		DocInstance docInstance = docClassInstance.setDoc(doc, filenameExt);
-		docInstance.setDocFilename(filename);
-		docInstance.setDocTimestamp(timestamp);
-		engine.getCurrentCache().flush();
-
-		zones.forEach(entry -> {
-			logger.info("Current zone: {}", entry.getKey());
-			ZoneInstance zoneInstance = docClassInstance.getZone(Integer.parseInt(entry.getKey(), 10));
-			JsonObject currentZone = (JsonObject) entry.getValue();
-			if (!currentZone.isEmpty())
-				currentZone.put("reality", ""); // Add this filter only if there are other filters
-			currentZone.forEach(e -> {
-				// logger.debug("key: {}; value: {}", e.getKey(), e.getValue());
-				if ("reality".equals(e.getKey()) || "best".equals(e.getKey())) {
-					// Do not proceed to OCR if the real values are known. By default, the "reality" and "best" filters are left empty
-					if (null == zoneText.getZoneText(docInstance, zoneInstance, imgFilter.getImgFilter(e.getKey())))
-						zoneText.setZoneText("", docInstance, zoneInstance, imgFilter.getImgFilter(e.getKey()));
-				} else {
-					String ocrText = (String) e.getValue();
-					ZoneTextInstance zti = zoneText.setZoneText(ocrText, docInstance, zoneInstance, imgFilter.getImgFilter(e.getKey()));
-					zti.setZoneTimestamp(ModelTools.getCurrentDate()); // TODO: concatenate with previous line?
-				}
-			});
+		try {
+			// Set the docClass, doc instance and timestamp
+			DocClassInstance docClassInstance = docClass.setDocClass(docType);
+			DocInstance docInstance = docClassInstance.setDoc(doc, filenameExt);
+			docInstance.setDocFilename(filename);
+			docInstance.setDocTimestamp(timestamp);
 			engine.getCurrentCache().flush();
-		});
-		logger.info("Data for {} successfully saved.", filenameExt);
+
+			zones.forEach(entry -> {
+				logger.info("Current zone: {}", entry.getKey());
+				ZoneInstance zoneInstance = docClassInstance.getZone(Integer.parseInt(entry.getKey(), 10));
+				JsonObject currentZone = (JsonObject) entry.getValue();
+				if (!currentZone.isEmpty())
+					currentZone.put("reality", ""); // Add this filter only if there are other filters
+				currentZone.forEach(e -> {
+					// logger.debug("key: {}; value: {}", e.getKey(), e.getValue());
+					if ("reality".equals(e.getKey()) || "best".equals(e.getKey())) {
+						// Do not proceed to OCR if the real values are known. By default, the "reality" and "best" filters are left empty
+						if (null == zoneText.getZoneText(docInstance, zoneInstance, imgFilter.getImgFilter(e.getKey())))
+							zoneText.setZoneText("", docInstance, zoneInstance, imgFilter.getImgFilter(e.getKey()));
+					} else {
+						String ocrText = (String) e.getValue();
+						ZoneTextInstance zti = zoneText.setZoneText(ocrText, docInstance, zoneInstance, imgFilter.getImgFilter(e.getKey()));
+						zti.setZoneTimestamp(ModelTools.getCurrentDate()); // TODO: concatenate with previous line?
+					}
+				});
+				engine.getCurrentCache().flush();
+			});
+			logger.info("Data for {} successfully saved.", filenameExt);
+		} catch (Exception e) {
+			throw new RuntimeException("An error has occured while saving the OCR data into the Engine", e);
+		}
 	}
 
 	/**
