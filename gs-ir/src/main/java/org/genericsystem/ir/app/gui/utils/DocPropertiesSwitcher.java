@@ -2,12 +2,17 @@ package org.genericsystem.ir.app.gui.utils;
 
 import java.io.File;
 
+import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
+import org.genericsystem.cv.comparator.ImgFilterFunction;
 import org.genericsystem.cv.model.Doc;
 import org.genericsystem.cv.model.Doc.DocInstance;
 import org.genericsystem.cv.model.DocClass.DocClassInstance;
+import org.genericsystem.cv.model.ImgFilter;
+import org.genericsystem.cv.model.ImgFilter.ImgFilterInstance;
 import org.genericsystem.cv.model.ZoneGeneric;
+import org.genericsystem.cv.model.ZoneGeneric.ZoneInstance;
 import org.genericsystem.cv.model.ZoneText;
 import org.genericsystem.cv.model.ZoneText.ZoneTextInstance;
 import org.genericsystem.ir.DistributedVerticle;
@@ -134,13 +139,20 @@ public class DocPropertiesSwitcher {
 		Root root = currentDoc.getRoot();
 		ZoneText zoneText = root.find(ZoneText.class);
 		ZoneGeneric zoneGeneric = root.find(ZoneGeneric.class);
-		// ObservableList<ZoneGeneric> zoneGenerics = (ObservableList) zoneGeneric.getInstances().toObservableList(); // XXX maybe just a list
+		// The original image should ALWAYS exist
+		ImgFilterInstance imgFilterInstance = ((ImgFilter) root.find(ImgFilter.class)).getImgFilter(ImgFilterFunction.ORIGINAL.getName());
 		ObservableList<ZoneTextInstance> zoneTextInstances = (ObservableList) currentDoc.getHolders(zoneText).toObservableList();
 		BooleanBinding binding = Bindings.createBooleanBinding(() -> {
-			// zoneGenerics.stream().allMatch(g -> {
-			// zoneTextInstances.filtered(zti -> zti.getZoneNum());
-			// });
-			return !zoneTextInstances.isEmpty();
+			Snapshot<ZoneInstance> zoneInstances = (Snapshot) zoneGeneric.getInstances();
+			// Consider the document as not OCR'd when the class was not de-zoned
+			if (zoneInstances.isEmpty())
+				return false;
+			else { // Otherwise, return true only when all the zones have been processed
+				return zoneInstances.stream().allMatch(zoneInstance -> {
+					ZoneTextInstance zti = zoneText.getZoneText(currentDoc, zoneInstance, imgFilterInstance);
+					return null != zti;
+				});
+			}
 		}, zoneTextInstances);
 		return reverse ? binding.not() : binding;
 	}
