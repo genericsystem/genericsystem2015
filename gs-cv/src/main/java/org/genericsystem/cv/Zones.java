@@ -126,9 +126,9 @@ public class Zones implements Iterable<Zone> {
 	}
 
 	public static boolean isZonesFilePresent(String imgPath) {
-		System.out.println("imgPath: " + imgPath);
+		// System.out.println("imgPath: " + imgPath);
 		Path classPath = Paths.get(imgPath).getParent();
-		System.out.println("classPath: " + classPath.toString());
+		// System.out.println("classPath: " + classPath.toString());
 		Path zonesPath = classPath.resolve("zones/zones.json");
 		return zonesPath.toFile().exists();
 	}
