@@ -32,7 +32,6 @@ public class AddImageToEngineVerticle extends ActionPersistentVerticle {
 	@Override
 	protected void handle(Future<Object> future, JsonObject task) {
 		String imagePath = DistributedVerticle.BASE_PATH + task.getString(DistributedVerticle.FILENAME);
-		System.out.println("--- imagePath = " + imagePath);
 		boolean result = FillModelWithData.registerNewFile(engine, Paths.get(imagePath), DistributedVerticle.RESOURCES_FOLDER);
 		if (result)
 			future.complete();

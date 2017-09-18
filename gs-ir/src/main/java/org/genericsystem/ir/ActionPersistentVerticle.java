@@ -27,8 +27,8 @@ public abstract class ActionPersistentVerticle extends ActionVerticle {
 		return future -> {
 			cache.shiftTs();
 			cache.safeConsum(unused -> {
-				System.out.println("--- inside executeBlocking (ActionPersistent) + " + Thread.currentThread().getName());
 				super.getExecuteBlockingHandler(task).handle(future);
+				cache.flush();
 			});
 		};
 	}

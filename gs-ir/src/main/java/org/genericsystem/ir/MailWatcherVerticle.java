@@ -103,7 +103,7 @@ public class MailWatcherVerticle extends AbstractVerticle {
 	private void processMessage(MimeMessage msg) {
 		try {
 			MimeMessageParser parser = new MimeMessageParser(msg).parse();
-			logger.debug("> New email: {}.", parser.getSubject());
+			logger.info("> New email: {}.", parser.getSubject());
 			for (DataSource attachment : parser.getAttachmentList()) {
 				String contentType = attachment.getContentType().toLowerCase();
 				if (contentType.contains("application/pdf") || contentType.contains("application/x-pdf")) {
@@ -121,6 +121,7 @@ public class MailWatcherVerticle extends AbstractVerticle {
 					}
 					JsonObject task = new JsonObject().put(Dispatcher.STATE, Dispatcher.TODO).put(DistributedVerticle.IP, ip).put(DistributedVerticle.FILENAME, newFile.toString().replaceFirst(DistributedVerticle.BASE_PATH, ""))
 							.put(DistributedVerticle.TYPE, PdfConverterVerticle.ACTION);
+					logger.info("Saved attachment: {}", task.getString(DistributedVerticle.FILENAME));
 					vertx.eventBus().publish(Dispatcher.ADDRESS + ":add", task.encodePrettily());
 				}
 			}
