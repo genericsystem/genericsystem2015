@@ -22,6 +22,9 @@ public class Ocr {
 		NativeLibraryLoader.load();
 	}
 
+	// Get the OcrTesseract instance from the tesseractInstancePool to prevent multi-threading problems
+	private static final GenericObjectPool<OCRTesseract> tesseractInstancePool = new GenericObjectPool<>(new OCRTesseractInstanceFactory(), Ocr.buildPoolConfig());
+
 	private static final String TESSDATA_PATH = "/usr/share/tesseract-ocr/4.00/";
 	private static final String TESSDATA_ALT_PATH = System.getenv("TESSDATA_PREFIX");
 	private static final String TESSERACT_LANGUAGE = "fra";
@@ -46,7 +49,7 @@ public class Ocr {
 	}
 
 	/**
-	 * Internal factory class used to create a pool of {@link OCRTesseract} instances. Otherwise, segmentation fault can occur when the instance of tesseract is shared accross multiple threads.
+	 * Internal factory class used to create a tesseractInstancePool of {@link OCRTesseract} instances. Otherwise, segmentation fault can occur when the instance of tesseract is shared accross multiple threads.
 	 * 
 	 * @author Pierrik Lassalas
 	 */
@@ -99,24 +102,22 @@ public class Ocr {
 	}
 
 	public static String doWork(Mat mat, int minConfidence) {
-		// Get the OcrTesseract instance from the pool to prevent multi-threading problems
-		GenericObjectPool<OCRTesseract> pool = new GenericObjectPool<>(new OCRTesseractInstanceFactory(), Ocr.getPoolConfig());
 		OCRTesseract instance = null;
 		String ocrText = null;
 		try {
-			instance = pool.borrowObject();
+			instance = tesseractInstancePool.borrowObject();
 			ocrText = instance.run(mat, 50, 1).replace("\n", "").trim();
 		} catch (Exception e) {
 			throw new RuntimeException("An error has occured during the OCR", e);
 		} finally {
-			// If the instance was retrieved, return it to the pool
+			// If the instance was retrieved, return it to the tesseractInstancePool
 			if (instance != null)
-				pool.returnObject(instance);
+				tesseractInstancePool.returnObject(instance);
 		}
 		return ocrText;
 	}
 
-	private static GenericObjectPoolConfig getPoolConfig() {
+	private static GenericObjectPoolConfig buildPoolConfig() {
 		GenericObjectPoolConfig config = new GenericObjectPoolConfig();
 		config.setMaxTotal(2);
 		config.setBlockWhenExhausted(true);
