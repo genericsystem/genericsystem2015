@@ -69,11 +69,11 @@ public class CamLayoutAnalyzer extends AbstractApp {
 		ImageView src0 = new ImageView(Tools.mat2jfxImage(frame));
 		// ImageView src1 = new ImageView(Tools.mat2jfxImage(frame));
 		// ImageView src2 = new ImageView(Tools.mat2jfxImage(frame));
-		ImageView src3 = new ImageView(Tools.mat2jfxImage(frame));
+		// ImageView src3 = new ImageView(Tools.mat2jfxImage(frame));
 		mainGrid.add(src0, 0, 0);
 		// mainGrid.add(src1, 0, 1);
 		// mainGrid.add(src2, 1, 0);
-		mainGrid.add(src3, 0, 1);
+		// mainGrid.add(src3, 0, 1);
 
 		oldKeypoints = new MatOfKeyPoint();
 		oldDescriptors = new Mat();
@@ -90,7 +90,7 @@ public class CamLayoutAnalyzer extends AbstractApp {
 					newDescriptors = new Mat();
 					extractor.compute(deskewed_.getSrc(), newKeypoints, newDescriptors);
 					// Img deskiewedCopy = new Img(deskewed_.getSrc(), true);
-					Img binary = deskewed_/* .cleanFaces(0.1, 0.26) */.adaptativeGaussianThreshold(17, 7).cleanTables(0.05);
+					// Img binary = deskewed_/* .cleanFaces(0.1, 0.26) */.adaptativeGaussianThreshold(17, 7).cleanTables(0.05);
 					// binary.buildLayout().draw(deskiewedCopy, new Scalar(0, 255, 0), 1);
 					Img stabilized = stabilize(frame, stabilizedMat, matcher, angle[0], homography);
 					if (stabilized != null) {
@@ -102,18 +102,18 @@ public class CamLayoutAnalyzer extends AbstractApp {
 						layout.ocrTree(stabilizedCopy, 0.03, 0.1);
 						layout.draw(stabilizedCopy, new Scalar(0, 255, 0), 1);
 						layout.drawPerspective(frameImg, homography[0].inv(), new Scalar(0, 0, 255), 1, 3, 3);
-						double area = layout.area(stabilized);
-						Imgproc.putText(stabilizedCopy.getSrc(), "Surface : " + area, new Point(0.5 * stabilizedCopy.width(), 0.05 * stabilizedCopy.height()), Core.FONT_HERSHEY_PLAIN, 1, new Scalar(255, 0, 0), 1);
+						// double area = layout.area(stabilized);
+						// Imgproc.putText(stabilizedCopy.getSrc(), "Surface : " + area, new Point(0.5 * stabilizedCopy.width(), 0.05 * stabilizedCopy.height()), Core.FONT_HERSHEY_PLAIN, 1, new Scalar(255, 0, 0), 1);
 						src0.setImage(frameImg.toJfxImage());
 						// src1.setImage(deskewed_.toJfxImage());
 						// src2.setImage(deskiewedCopy.toJfxImage());
-						src3.setImage(stabilizedCopy.toJfxImage());
+						// src3.setImage(stabilizedCopy.toJfxImage());
 					}
 				} catch (Throwable e) {
 					logger.warn("Exception while computing layout.", e);
 				}
 			}
-		}, 500, 66, TimeUnit.MILLISECONDS);
+		}, 500, 33, TimeUnit.MILLISECONDS);
 
 		timer.scheduleAtFixedRate(() -> onSpace(), 1000, 1000, TimeUnit.MILLISECONDS);
 		onSpace();

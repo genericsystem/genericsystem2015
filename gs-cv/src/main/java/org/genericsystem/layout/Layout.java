@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -113,19 +114,20 @@ public class Layout {
 	public void ocrTree(Img rootImg, double deltaW, double deltaH) {
 		traverse(rootImg, (root, layout) -> {
 			if (layout.getChildren().isEmpty()) {
-				String ocr = Ocr.doWork(new Mat(rootImg.getSrc(), layout.getLargeRect(rootImg, deltaW, deltaH)));
-				if (!"".equals(ocr)) {
-					System.out.println(ocr);
-					Integer count = layout.getLabels().get(ocr);
-					layout.getLabels().put(ocr, 1 + (count != null ? count : 0));
-					// int all = layout.getLabels().values().stream().reduce(0, (i, j) -> i + j);
-					// layout.getLabels().entrySet().forEach(entry -> {
-					// if (entry.getValue() > all / 10)
-					// Imgproc.putText(rootImg.getSrc(), Normalizer.normalize(entry.getKey(), Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", ""), layout.getRect(rootImg).tl(), Core.FONT_HERSHEY_PLAIN, 1, new Scalar(255, 0, 0), 1);
-					// });
-					// Imgproc.putText(rootImg.getSrc(), layout.getBestLabel(), layout.getRect(rootImg).tl(),
-					// Core.FONT_HERSHEY_PLAIN, 1, new Scalar(255, 0, 0), 1);
-					// System.out.println(layout.getBestLabel());
+				if (layout.needOcr()) {
+					String ocr = Ocr.doWork(new Mat(rootImg.getSrc(), layout.getLargeRect(rootImg, deltaW, deltaH)));
+					if (!"".equals(ocr)) {
+						Integer count = layout.getLabels().get(ocr);
+						layout.getLabels().put(ocr, 1 + (count != null ? count : 0));
+						// int all = layout.getLabels().values().stream().reduce(0, (i, j) -> i + j);
+						// layout.getLabels().entrySet().forEach(entry -> {
+						// if (entry.getValue() > all / 10)
+						// Imgproc.putText(rootImg.getSrc(), Normalizer.normalize(entry.getKey(), Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", ""), layout.getRect(rootImg).tl(), Core.FONT_HERSHEY_PLAIN, 1, new Scalar(255, 0, 0), 1);
+						// });
+						// Imgproc.putText(rootImg.getSrc(), layout.getBestLabel(), layout.getRect(rootImg).tl(),
+						// Core.FONT_HERSHEY_PLAIN, 1, new Scalar(255, 0, 0), 1);
+						// System.out.println(layout.getBestLabel());
+					}
 				}
 			}
 		});
@@ -255,6 +257,15 @@ public class Layout {
 
 	public Map<String, Integer> getLabels() {
 		return labels;
+	}
+
+	public boolean needOcr() {
+		int all = getLabels().values().stream().reduce(0, (i, j) -> i + j);
+		for (Entry<String, Integer> entry : getLabels().entrySet()) {
+			if (entry.getValue() > all / 3)
+				return false;
+		}
+		return true;
 	}
 
 	public boolean hasChildren() {
