@@ -24,9 +24,8 @@ public class HttpServerVerticle extends AbstractVerticle {
 	public void start(Future<Void> future) throws Exception {
 		vertx.createHttpServer().requestHandler(req -> {
 			String fileName = req.path();
-			String path = DistributedVerticle.BASE_PATH + fileName;
-			logger.debug("Will send file {}.", path);
-			req.response().sendFile(path);
+			logger.debug("Will send file {}.", fileName);
+			req.response().sendFile(fileName);
 		}).listen(8084, ar -> {
 			if (ar.failed()) {
 				if (ar.cause() instanceof BindException) {

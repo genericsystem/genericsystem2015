@@ -14,7 +14,8 @@ public class DistributedVerticle extends AbstractVerticle {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-	public static final String BASE_PATH = System.getenv("HOME") + "/git/genericsystem2015/gs-cv/";
+	public static final String BASE_PATH = System.getenv("HOME") + "/genericsystem/gs-ir-files/";
+	public static final String RESOURCES_FOLDER = System.getProperty("user.dir") + "/src/main/resources/";
 	protected static final String FILENAME = "filename";
 	protected static final String JSON_OBJECT = "jsonObject";
 	protected static final String TYPE = "type";
@@ -24,7 +25,7 @@ public class DistributedVerticle extends AbstractVerticle {
 	private static AtomicInteger currentExecutions = new AtomicInteger();
 
 	static {
-		logger.debug("Available processors: {}", availProc);
+		logger.debug("Available processors: {} | BASE_PATH: {} | RESOURCES_FOLDER: {}", availProc, BASE_PATH, RESOURCES_FOLDER);
 	}
 
 	public static void incrementExecutions() {
@@ -41,7 +42,10 @@ public class DistributedVerticle extends AbstractVerticle {
 
 	public static int getMaxExecutions() {
 		// TODO: Add some logic here…
-		return availProc;
+		return 1;
+		// int instances = availProc / 2;
+		// return instances < 1 ? 1 : instances;
+
 	}
 
 	@Override
@@ -52,6 +56,11 @@ public class DistributedVerticle extends AbstractVerticle {
 	}
 
 	public static void main(String[] args) {
+		DistributedVerticle verticle = new DistributedVerticle();
+		verticle.doDeploy();
+	}
+
+	public void doDeploy() {
 		Handler<AsyncResult<String>> completionHandler = ar -> {
 			if (ar.failed())
 				throw new IllegalStateException(ar.cause());
@@ -61,9 +70,12 @@ public class DistributedVerticle extends AbstractVerticle {
 			vertx.deployVerticle(new HttpServerVerticle(), complete -> {
 				if (complete.failed())
 					throw new IllegalStateException(complete.cause());
-				for (int i = 0; i < getMaxExecutions(); ++i) {
+				// Deploy the current verticle, and additional ones if there are enough resources
+				vertx.deployVerticle(this, completionHandler);
+				for (int i = 0; i < getMaxExecutions() - 1; ++i) {
 					vertx.deployVerticle(new DistributedVerticle(), completionHandler);
 				}
+				logger.debug("Deployed {} DistributedVerticle", getMaxExecutions() < 1 ? 1 : getMaxExecutions());
 			});
 		});
 	}

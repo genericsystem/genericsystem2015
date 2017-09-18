@@ -51,7 +51,7 @@ public class FrontEndTransaction extends CheckedContext implements IDifferential
 	}
 
 	@Override
-	public Map<Generic, ObservableList<Generic>> getDependenciesAsOservableListCacheMap() {
+	public Map<Generic, ObservableList<Generic>> getDependenciesAsObservableListCacheMap() {
 		throw new UnsupportedOperationException();
 	}
 

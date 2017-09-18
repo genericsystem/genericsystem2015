@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.TransformationObservableList;
+import org.genericsystem.kernel.Cache;
 import org.genericsystem.reactor.FilteredChildren.FilteredChildContexts;
 import org.genericsystem.reactor.context.RootContext;
 import org.slf4j.Logger;
@@ -209,38 +210,38 @@ public class Context {
 	}
 
 	public void flush() {
-		getGeneric().getCurrentCache().flush();
+		getCache().flush();
 		traverse();
 	}
 
 	public void cancel() {
-		getGeneric().getCurrentCache().clear();
+		getCache().clear();
 	}
 
 	public ObservableIntegerValue getCacheLevelObservableValue() {
-		return getGeneric().getCurrentCache().getCacheLevelObservableValue();
+		return getCache().getCacheLevelObservableValue();
 	}
 
 	public ObservableLongValue getTsObservableValue() {
-		return getGeneric().getCurrentCache().getTsObservableValue();
+		return getCache().getTsObservableValue();
 	}
 
 	public void mount() {
-		getGeneric().getCurrentCache().mount();
+		getCache().mount();
 	}
 
 	public void unmount() {
-		getGeneric().getCurrentCache().unmount();
+		getCache().unmount();
 		traverse();
 	}
 
 	public boolean isInCache() {
-		// System.out.println(getGeneric().info() + getGeneric().getCurrentCache().contains(getGeneric()));
-		return getGeneric().getCurrentCache().contains(getGeneric());
+		// System.out.println(getGeneric().info() + getCache().contains(getGeneric()));
+		return getCache().contains(getGeneric());
 	}
 
 	public long shiftTs() throws RollbackException {
-		return getGeneric().getCurrentCache().shiftTs();
+		return getCache().shiftTs();
 	}
 
 	public void traverse() {
@@ -258,5 +259,9 @@ public class Context {
 
 	public RootContext getRootContext() {
 		return getParent().getRootContext();
+	}
+
+	public Cache getCache() {
+		return getParent().getCache();
 	}
 }

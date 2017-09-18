@@ -27,7 +27,7 @@ public class PdfConverterVerticle extends ActionVerticle {
 	@Override
 	protected void handle(Future<Object> future, JsonObject task) {
 		File file = new File(DistributedVerticle.BASE_PATH + task.getString(DistributedVerticle.FILENAME));
-		List<Path> createdPngs = PdfToPngConverter.convertPdfToImages(file, new File("../gs-cv/png"));
+		List<Path> createdPngs = PdfToPngConverter.convertPdfToImages(file, new File(DistributedVerticle.BASE_PATH + "converted-png"));
 		future.complete(createdPngs);
 	}
 
@@ -35,7 +35,7 @@ public class PdfConverterVerticle extends ActionVerticle {
 	protected void handleResult(AsyncResult<Object> res, JsonObject task) {
 		if (res.succeeded()) {
 			for (Path newPng : (List<Path>) res.result())
-				addTask(newPng.toString(), ClassifierVerticle.ACTION);
+				addTask(newPng.toString().replaceFirst(DistributedVerticle.BASE_PATH, ""), ClassifierVerticle.ACTION);
 		}
 	}
 }

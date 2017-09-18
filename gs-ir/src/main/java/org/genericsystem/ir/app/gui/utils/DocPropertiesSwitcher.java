@@ -2,14 +2,20 @@ package org.genericsystem.ir.app.gui.utils;
 
 import java.io.File;
 
+import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
+import org.genericsystem.cv.comparator.ImgFilterFunction;
 import org.genericsystem.cv.model.Doc;
 import org.genericsystem.cv.model.Doc.DocInstance;
 import org.genericsystem.cv.model.DocClass.DocClassInstance;
+import org.genericsystem.cv.model.ImgFilter;
+import org.genericsystem.cv.model.ImgFilter.ImgFilterInstance;
 import org.genericsystem.cv.model.ZoneGeneric;
+import org.genericsystem.cv.model.ZoneGeneric.ZoneInstance;
 import org.genericsystem.cv.model.ZoneText;
 import org.genericsystem.cv.model.ZoneText.ZoneTextInstance;
+import org.genericsystem.ir.DistributedVerticle;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.context.TagSwitcher;
@@ -22,6 +28,8 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
 public class DocPropertiesSwitcher {
+
+	private static final String ZONES_FILE_BASE_PATH = DistributedVerticle.BASE_PATH + "/classes/";
 
 	public static class DOC_CLASS_EMPTY implements TagSwitcher {
 		@Override
@@ -105,21 +113,23 @@ public class DocPropertiesSwitcher {
 
 	public static ObservableValue<Boolean> isSupervisionAvailable(Context context, boolean reverse) {
 		DocClassInstance currentDocClass = (DocClassInstance) context.getGeneric();
-		ObjectProperty<File> file = new SimpleObjectProperty<>(new File(System.getProperty("user.dir") + "/../gs-cv/classes/" + currentDocClass.getValue().toString() + "/zones/zones.json"));
-		BooleanBinding binding = Bindings.createBooleanBinding(() -> {
-			return null != file.get() && file.get().exists();
-		}, file);
+		BooleanBinding binding = getBooleanBinding(currentDocClass.getValue().toString());
 		return reverse ? binding.not() : binding;
 	}
 
 	public static ObservableValue<Boolean> isClassZoneFilePresent(Context context, boolean reverse) {
 		DocInstance currentDoc = (DocInstance) context.getGeneric();
 		DocClassInstance docClassInstance = currentDoc.getDocClass();
-		ObjectProperty<File> file = new SimpleObjectProperty<>(new File(System.getProperty("user.dir") + "/../gs-cv/classes/" + docClassInstance.getValue().toString() + "/zones/zones.json"));
+		BooleanBinding binding = getBooleanBinding(docClassInstance.getValue().toString());
+		return reverse ? binding.not() : binding;
+	}
+
+	private static BooleanBinding getBooleanBinding(String docClass) {
+		ObjectProperty<File> file = new SimpleObjectProperty<>(new File(ZONES_FILE_BASE_PATH + docClass + "/zones/zones.json"));
 		BooleanBinding binding = Bindings.createBooleanBinding(() -> {
 			return null != file.get() && file.get().exists();
 		}, file);
-		return reverse ? binding.not() : binding;
+		return binding;
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -129,13 +139,20 @@ public class DocPropertiesSwitcher {
 		Root root = currentDoc.getRoot();
 		ZoneText zoneText = root.find(ZoneText.class);
 		ZoneGeneric zoneGeneric = root.find(ZoneGeneric.class);
-		// ObservableList<ZoneGeneric> zoneGenerics = (ObservableList) zoneGeneric.getInstances().toObservableList(); // XXX maybe just a list
+		// The original image should ALWAYS exist
+		ImgFilterInstance imgFilterInstance = ((ImgFilter) root.find(ImgFilter.class)).getImgFilter(ImgFilterFunction.ORIGINAL.getName());
 		ObservableList<ZoneTextInstance> zoneTextInstances = (ObservableList) currentDoc.getHolders(zoneText).toObservableList();
 		BooleanBinding binding = Bindings.createBooleanBinding(() -> {
-			// zoneGenerics.stream().allMatch(g -> {
-			// zoneTextInstances.filtered(zti -> zti.getZoneNum());
-			// });
-			return !zoneTextInstances.isEmpty();
+			Snapshot<ZoneInstance> zoneInstances = (Snapshot) zoneGeneric.getInstances();
+			// Consider the document as not OCR'd when the class was not de-zoned
+			if (zoneInstances.isEmpty())
+				return false;
+			else { // Otherwise, return true only when all the zones have been processed
+				return zoneInstances.stream().allMatch(zoneInstance -> {
+					ZoneTextInstance zti = zoneText.getZoneText(currentDoc, zoneInstance, imgFilterInstance);
+					return null != zti;
+				});
+			}
 		}, zoneTextInstances);
 		return reverse ? binding.not() : binding;
 	}

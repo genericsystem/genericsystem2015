@@ -26,18 +26,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.vertx.core.AbstractVerticle;
-import io.vertx.core.Context;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
-import io.vertx.core.Verticle;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.impl.ConcurrentHashSet;
-import io.vertx.core.impl.EventLoopContext;
 import io.vertx.core.json.JsonObject;
 
 /**
@@ -116,7 +113,7 @@ public class ApplicationServer extends AbstractBackEnd {
 					} catch (IllegalStateException e) {
 						// Ignore (socket closed exception)
 					}
-				}, tagTree));
+				}, tagTree, cache));
 				future.complete(result);
 			}, res -> {
 				if (res.succeeded())
@@ -131,16 +128,14 @@ public class ApplicationServer extends AbstractBackEnd {
 		}
 	}
 
-	private class CacheSocketContext {
+	private class CacheSocket {
 		private final Cache cache;
 		private final ServerWebSocket socket;
-		private final Context context;
 		private final DomNodeVerticle domNodeVerticle;
 
-		public CacheSocketContext(Cache cache, ServerWebSocket socket, Context context, DomNodeVerticle domNodeVerticle) {
+		public CacheSocket(Cache cache, ServerWebSocket socket, DomNodeVerticle domNodeVerticle) {
 			this.cache = cache;
 			this.socket = socket;
-			this.context = context;
 			this.domNodeVerticle = domNodeVerticle;
 		}
 
@@ -152,10 +147,6 @@ public class ApplicationServer extends AbstractBackEnd {
 			return socket;
 		}
 
-		public Context getContext() {
-			return context;
-		}
-
 		public DomNodeVerticle getDomNodeVerticle() {
 			return domNodeVerticle;
 		}
@@ -163,28 +154,10 @@ public class ApplicationServer extends AbstractBackEnd {
 
 	private class WebSocketsServer extends AbstractWebSocketsServer {
 
-		private Set<CacheSocketContext> caches = new ConcurrentHashSet<>();
+		private Set<CacheSocket> caches = new ConcurrentHashSet<>();
 
 		public WebSocketsServer(String host, int port) {
 			super(host, port);
-
-			Verticle verticle = new AbstractVerticle() {
-				@Override
-				public void start() throws Exception {
-					GSVertx.vertx().getVertx().setPeriodic(1000, event -> caches.forEach(cacheSocketContext -> {
-						((EventLoopContext) cacheSocketContext.getContext()).executeAsync(v -> {
-							Cache cache = cacheSocketContext.getCache();
-							if (caches.stream().anyMatch(csc -> cache.equals(csc.getCache())))
-								cache.safeConsum((f) -> cache.shiftTs());
-						});
-					}));
-				}
-			};
-			DeploymentOptions options = new DeploymentOptions().setWorker(true).setMaxWorkerExecuteTime(Long.MAX_VALUE).setWorkerPoolName("vert.x-web-socket-worker").setWorkerPoolSize(10);
-			GSVertx.vertx().getVertx().deployVerticle(verticle, options, res -> {
-				if (res.failed())
-					throw new IllegalStateException(res.cause());
-			});
 		}
 
 		@Override
@@ -194,9 +167,10 @@ public class ApplicationServer extends AbstractBackEnd {
 				throw new IllegalStateException("Unable to load an application with path : " + path);
 			}
 			Cache cache = (Cache) application.getEngine().newCache();
+			cache.enableReactive();
 			DomNodeVerticle domNodeVerticle = new DomNodeVerticle(cache, webSocket, application);
 			GSVertx.vertx().getVertx().deployVerticle(domNodeVerticle, new DeploymentOptions().setWorker(true));
-			caches.add(new CacheSocketContext(cache, webSocket, GSVertx.vertx().getVertx().getOrCreateContext(), domNodeVerticle));
+			caches.add(new CacheSocket(cache, webSocket, domNodeVerticle));
 			return buffer -> {
 				GSBuffer gsBuffer = new GSBuffer(buffer);
 				String message = gsBuffer.getString(0, gsBuffer.length());
@@ -216,9 +190,10 @@ public class ApplicationServer extends AbstractBackEnd {
 		@Override
 		public Handler<Void> getCloseHandler(ServerWebSocket socket) {
 			return (v) -> {
-				for (CacheSocketContext cacheSocketContext : caches)
+				for (CacheSocket cacheSocketContext : caches)
 					if (socket.equals(cacheSocketContext.getSocket())) {
 						cacheSocketContext.getDomNodeVerticle().getRootHtmlDomNode().getModelContext().destroy();
+						cacheSocketContext.getCache().disableReactive();
 						caches.remove(cacheSocketContext);
 					}
 			};

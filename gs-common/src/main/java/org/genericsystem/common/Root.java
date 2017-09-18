@@ -21,6 +21,7 @@ import org.genericsystem.defaults.DefaultConfig.SystemMap;
 import org.genericsystem.defaults.DefaultGeneric;
 import org.genericsystem.defaults.DefaultRoot;
 
+import io.vertx.core.impl.ConcurrentHashSet;
 import javassist.util.proxy.MethodFilter;
 import javassist.util.proxy.MethodHandler;
 import javassist.util.proxy.ProxyFactory;
@@ -36,12 +37,25 @@ public abstract class Root implements DefaultRoot<Generic>, ProxyObject, Generic
 	private final SystemCache systemCache = buildSystemCache(this);
 	protected boolean isInitialized = false;
 	private final ThreadLocal<AbstractCache> cacheLocal = new ThreadLocal<AbstractCache>();
+	private final Set<AbstractCache> reactiveCaches = new ConcurrentHashSet<>();
 
 	protected abstract SystemCache buildSystemCache(Root root);
 
 	@Override
 	public Root getRoot() {
 		return this;
+	}
+
+	public Set<AbstractCache> getReactiveCaches() {
+		return reactiveCaches;
+	}
+
+	public void addReactiveCache(AbstractCache cache) {
+		reactiveCaches.add(cache);
+	}
+
+	public void removeReactiveCache(AbstractCache cache) {
+		reactiveCaches.remove(cache);
 	}
 
 	protected void startSystemCache(Class<?>... userClasses) {

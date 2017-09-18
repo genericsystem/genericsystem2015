@@ -69,8 +69,8 @@ public class Differential implements IDifferential<Generic> {
 	}
 
 	@Override
-	public Map<Generic, ObservableList<Generic>> getDependenciesAsOservableListCacheMap() {
-		return subDifferential.getDependenciesAsOservableListCacheMap();
+	public Map<Generic, ObservableList<Generic>> getDependenciesAsObservableListCacheMap() {
+		return subDifferential.getDependenciesAsObservableListCacheMap();
 	}
 
 	void checkConstraints(Checker checker) throws RollbackException {
@@ -120,6 +120,16 @@ public class Differential implements IDifferential<Generic> {
 			@Override
 			public Observable<Generic> getRemovesObservable() {
 				return getDifferentialObservable().flatMap(diff -> diff.getRemovesObservable(generic)).replay().refCount();
+			}
+
+			@Override
+			public ObservableList<Generic> toObservableList() {
+				ObservableList<Generic> result = getDependenciesAsObservableListCacheMap().get(generic);
+				if (result == null) {
+					result = Snapshot.super.toObservableList();
+					getDependenciesAsObservableListCacheMap().put(generic, result);
+				}
+				return result;
 			}
 		};
 	}

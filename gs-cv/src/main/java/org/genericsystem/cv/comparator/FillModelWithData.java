@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
 import org.genericsystem.cv.Img;
@@ -61,7 +62,6 @@ public class FillModelWithData {
 
 	static {
 		NativeLibraryLoader.load();
-		logger.info("OpenCV core library loaded");
 	}
 
 	public static void main(String[] mainArgs) {
@@ -72,7 +72,22 @@ public class FillModelWithData {
 		engine.close();
 	}
 
+	/**
+	 * Get an Engine using the default path.
+	 * 
+	 * @return the created Root
+	 */
 	public static Root getEngine() {
+		return getEngine(gsPath);
+	}
+
+	/**
+	 * Get an Engine using a custom path.
+	 * 
+	 * @param gsPath - the persistence path
+	 * @return the created Root
+	 */
+	public static Root getEngine(String gsPath) {
 		return new Engine(gsPath, Doc.class, RefreshTimestamp.class, DocTimestamp.class, DocFilename.class, DocClass.class, ZoneGeneric.class, ZoneText.class, ZoneTimestamp.class, ImgFilter.class, LevDistance.class, MeanLevenshtein.class, Score.class);
 	}
 
@@ -82,23 +97,12 @@ public class FillModelWithData {
 	 * @return a list of {@link ImgFilterFunction}
 	 */
 	public static List<ImgFilterFunction> getFilterFunctions() {
-		final List<ImgFilterFunction> filterSet = new ArrayList<>();
+		final List<ImgFilterFunction> filterList = new ArrayList<>();
 		for (ImgFilterFunction iff : ImgFilterFunction.values()) {
 			logger.info("Adding: {}", iff);
-			filterSet.add(iff);
+			filterList.add(iff);
 		}
-		return filterSet;
-	}
-
-	/**
-	 * Check if a given file has already been processed by the system. This verification is conducted by comparing the SHA-256 hash code generated from the file and the one stored in Generic System. If there is a match, the file is assumed to be known.
-	 * 
-	 * @param engine - the engine used to store the data
-	 * @param file - the desired file
-	 * @return - true if the file was not found in the engine, false if it has already been processed
-	 */
-	private static boolean isThisANewFile(Root engine, File file) {
-		return isThisANewFile(engine, file, docType);
+		return filterList;
 	}
 
 	/**
@@ -131,12 +135,6 @@ public class FillModelWithData {
 	 * @return a {@link JsonObject} containing all the informations required to process the file
 	 */
 	public static JsonObject getOcrParameters(Root engine, Path imagePath) {
-		try {
-			engine.getCurrentCache();
-		} catch (IllegalStateException e) {
-			logger.error("Current cache could not be loaded. Starting a new one...");
-			engine.newCache().start();
-		}
 		final Path imgClassDirectory = imagePath.getParent();
 		final String docType = ModelTools.getImgClass(imagePath);
 
@@ -149,7 +147,6 @@ public class FillModelWithData {
 		// Find and save the doc class and the doc instance
 		DocClassInstance docClassInstance = docClass.setDocClass(docType);
 		DocInstance docInstance = docClassInstance.setDoc(doc, ModelTools.generateFileName(imagePath));
-		engine.getCurrentCache().flush();
 
 		// Get the filters and the predefined zones
 		final List<ImgFilterFunction> imgFilterFunctions = FillModelWithData.getFilterFunctions();
@@ -190,6 +187,7 @@ public class FillModelWithData {
 					return zti == null;
 				});
 				if (containsNullZoneTextInstance) {
+					logger.debug("Detected new algorithm ({}) for {}", filtername, docInstance);
 					imgFilter.setImgFilter(filtername);
 					updatedImgFilterList.add(entry);
 				} else {
@@ -197,6 +195,7 @@ public class FillModelWithData {
 				}
 			}
 		});
+		engine.getCurrentCache().flush();
 
 		if (null == updatedImgFilterList || updatedImgFilterList.isEmpty()) {
 			logger.info("Nothing to add");
@@ -285,12 +284,6 @@ public class FillModelWithData {
 	 * @param data - a {@link JsonObject} containing all the data (see {@link #getOcrParameters(Root, Path)}).
 	 */
 	public static void saveOcrDataInModel(Root engine, JsonObject data) {
-		try {
-			engine.getCurrentCache();
-		} catch (IllegalStateException e) {
-			logger.error("Current cache could not be loaded. Starting a new one...");
-			engine.newCache().start();
-		}
 		// Parse the data
 		String docType = data.getString(CLASS_NAME);
 		String filename = data.getString(FILENAME);
@@ -304,34 +297,47 @@ public class FillModelWithData {
 		ZoneText zoneText = engine.find(ZoneText.class);
 		ImgFilter imgFilter = engine.find(ImgFilter.class);
 
-		// Set the docClass, doc instance and timestamp
-		DocClassInstance docClassInstance = docClass.setDocClass(docType);
-		DocInstance docInstance = docClassInstance.setDoc(doc, filenameExt);
-		docInstance.setDocFilename(filename);
-		docInstance.setDocTimestamp(timestamp);
-		engine.getCurrentCache().flush();
-
-		zones.forEach(entry -> {
-			logger.info("Current zone: {}", entry.getKey());
-			ZoneInstance zoneInstance = docClassInstance.getZone(Integer.parseInt(entry.getKey(), 10));
-			JsonObject currentZone = (JsonObject) entry.getValue();
-			if (!currentZone.isEmpty())
-				currentZone.put("reality", ""); // Add this filter only if there are other filters
-			currentZone.forEach(e -> {
-				logger.debug("key: {};  value: {}", e.getKey(), e.getValue().toString());
-				if ("reality".equals(e.getKey()) || "best".equals(e.getKey())) {
-					// Do not proceed to OCR if the real values are known. By default, the "reality" and "best" filters are left empty
-					if (null == zoneText.getZoneText(docInstance, zoneInstance, imgFilter.getImgFilter(e.getKey())))
-						zoneText.setZoneText("", docInstance, zoneInstance, imgFilter.getImgFilter(e.getKey()));
-				} else {
-					String ocrText = (String) e.getValue();
-					ZoneTextInstance zti = zoneText.setZoneText(ocrText, docInstance, zoneInstance, imgFilter.getImgFilter(e.getKey()));
-					zti.setZoneTimestamp(ModelTools.getCurrentDate()); // TODO: concatenate with previous line?
-				}
-			});
+		try {
+			// Set the docClass, doc instance and timestamp
+			DocClassInstance docClassInstance = docClass.setDocClass(docType);
+			DocInstance docInstance = docClassInstance.setDoc(doc, filenameExt);
+			try {
+				docInstance.setDocFilename(filename);
+				docInstance.setDocTimestamp(timestamp);
+			} catch (RollbackException e1) {
+				logger.debug("Filename or timestamp have already been set. Resuming task...");
+			} catch (Exception e1) {
+				throw new RuntimeException(e1);
+			}
 			engine.getCurrentCache().flush();
-		});
-		logger.info("Data for {} successfully saved.", filenameExt);
+
+			zones.forEach(entry -> {
+				logger.info("Current zone: {}", entry.getKey());
+				ZoneInstance zoneInstance = docClassInstance.getZone(Integer.parseInt(entry.getKey(), 10));
+				JsonObject currentZone = (JsonObject) entry.getValue();
+				if (!currentZone.isEmpty())
+					currentZone.put("reality", ""); // Add this filter only if there are other filters
+				currentZone.forEach(e -> {
+					logger.trace("key: {}; value: {}", e.getKey(), e.getValue());
+					if ("reality".equals(e.getKey()) || "best".equals(e.getKey())) {
+						// Do not proceed to OCR if the real values are known. By default, the "reality" and "best" filters are left empty
+						if (null == zoneText.getZoneText(docInstance, zoneInstance, imgFilter.getImgFilter(e.getKey())))
+							zoneText.setZoneText("", docInstance, zoneInstance, imgFilter.getImgFilter(e.getKey()));
+					} else {
+						String ocrText = (String) e.getValue();
+						ImgFilterInstance imgFilterInstance = imgFilter.getImgFilter(e.getKey());
+						if (null != imgFilterInstance)
+							zoneText.setZoneText(ocrText, docInstance, zoneInstance, imgFilterInstance).setZoneTimestamp(ModelTools.getCurrentDate());
+						else
+							throw new NullPointerException("Cannot retrieve imgFilterInstance from the Engine");
+					}
+				});
+				engine.getCurrentCache().flush();
+			});
+			logger.info("Data for {} successfully saved.", filenameExt);
+		} catch (Exception e) {
+			throw new RuntimeException("An error has occured while saving the OCR data into the Engine", e);
+		}
 	}
 
 	/**
@@ -355,17 +361,11 @@ public class FillModelWithData {
 	 * @return an {@code int} representing {@link #KNOWN_FILE_UPDATED_FILTERS}, {@link #NEW_FILE} or {@link #KNOWN_FILE}
 	 */
 	public static void doImgOcr(Root engine, Path imagePath) {
-		try {
-			engine.getCurrentCache();
-		} catch (IllegalStateException e) {
-			logger.error("Current cache could not be loaded. Starting a new one...");
-			engine.newCache().start();
-		}
 		final String docType = ModelTools.getImgClass(imagePath);
 
 		// Find and save the doc class
 		DocClass docClass = engine.find(DocClass.class);
-		DocClassInstance docClassInstance = docClass.setDocClass(docType);
+		docClass.setDocClass(docType);
 		engine.getCurrentCache().flush();
 
 		// Process the image file
@@ -391,13 +391,11 @@ public class FillModelWithData {
 	 */
 	public static void compute(Root engine, String docType) {
 		final String imgClassDirectory = "classes/" + docType;
-		// TODO: remove the following line (only present in development)
-		final String imgDirectory = imgClassDirectory + "/ref2/";
 		logger.debug("imgClassDirectory = {} ", imgClassDirectory);
 		DocClass docClass = engine.find(DocClass.class);
-		DocClassInstance docClassInstance = docClass.setDocClass(docType);
+		docClass.setDocClass(docType);
 
-		Arrays.asList(new File(imgDirectory).listFiles((dir, name) -> name.endsWith(".png"))).forEach(file -> {
+		Arrays.asList(new File(imgClassDirectory).listFiles((dir, name) -> name.endsWith(".png"))).forEach(file -> {
 			JsonObject params = getOcrParameters(engine, file.toPath());
 			JsonObject ocrData = processFile(params);
 			saveOcrDataInModel(engine, ocrData);
@@ -414,7 +412,7 @@ public class FillModelWithData {
 	public static boolean registerNewFile(Path imgPath) {
 		final Root engine = getEngine();
 		engine.newCache().start();
-		boolean result = registerNewFile(engine, imgPath);
+		boolean result = registerNewFile(engine, imgPath, System.getProperty("user.dir") + "/../gs-ir/src/main/resources/");
 		engine.close();
 		return result;
 	}
@@ -425,13 +423,7 @@ public class FillModelWithData {
 	 * @param imgPath - the Path of the file
 	 * @return true if this was a success, false otherwise
 	 */
-	public static boolean registerNewFile(Root engine, Path imgPath) {
-		try {
-			engine.getCurrentCache();
-		} catch (IllegalStateException e) {
-			logger.debug("Current cache could not be loaded. Starting a new one...");
-			engine.newCache().start();
-		}
+	public static boolean registerNewFile(Root engine, Path imgPath, String resourcesFolder) {
 		final String docType = ModelTools.getImgClass(imgPath);
 
 		// Find and save the doc class
@@ -454,7 +446,7 @@ public class FillModelWithData {
 				engine.getCurrentCache().flush();
 				try (Img img = new Img(imgPath.toString())) {
 					logger.info("Copying {} to resources folder", filenameExt);
-					Imgcodecs.imwrite(System.getProperty("user.dir") + "/../gs-watch/src/main/resources/" + filenameExt, img.getSrc());
+					Imgcodecs.imwrite(resourcesFolder + filenameExt, img.getSrc());
 				}
 				return true;
 			} else {
@@ -497,9 +489,7 @@ public class FillModelWithData {
 	 */
 	@SuppressWarnings({ "unused", "unchecked", "rawtypes" })
 	private static void cleanModel(Root engine) {
-
 		System.out.println("Cleaning model...");
-
 		// Get the necessary classes from the engine
 		DocClass docClass = engine.find(DocClass.class);
 		Generic doc = engine.find(Doc.class);

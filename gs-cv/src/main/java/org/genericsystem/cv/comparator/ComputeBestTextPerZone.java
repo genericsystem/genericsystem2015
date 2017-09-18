@@ -79,12 +79,6 @@ public class ComputeBestTextPerZone {
 	// TODO: pass docClassInstance as a parameter instead of docType?
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static void computeOneFile(Root engine, DocInstance docInstance, String docType) {
-		try {
-			engine.getCurrentCache();
-		} catch (IllegalStateException e) {
-			logger.error("Current cache could not be loaded. Starting a new one...");
-			engine.newCache().start();
-		}
 		Generic currentDocClass = engine.find(DocClass.class).getInstance(docType);
 		ImgFilter imgFilter = engine.find(ImgFilter.class);
 		ZoneText zoneText = engine.find(ZoneText.class);
@@ -145,9 +139,13 @@ public class ComputeBestTextPerZone {
 					ocrElection.put(entry.getKey(), ocrWeight);
 				});
 
-				String bestText = ocrElection.entrySet().stream().max(Map.Entry.comparingByValue()).get().getKey();
-				ZoneTextInstance zti = zoneText.setZoneText(bestText, docInstance, zoneInstance, bestInstance);
-				zti.setZoneTimestamp(ModelTools.getCurrentDate()); // TODO: concatenate with previous line?
+				if (null != ocrElection && !ocrElection.isEmpty()) {
+					String bestText = ocrElection.entrySet().stream().max(Map.Entry.comparingByValue()).get().getKey();
+					ZoneTextInstance zti = zoneText.setZoneText(bestText, docInstance, zoneInstance, bestInstance);
+					zti.setZoneTimestamp(ModelTools.getCurrentDate()); // TODO: concatenate with previous line?
+				} else {
+					logger.debug("No OCR data found for {}", docInstance.getValue());
+				}
 
 			} else {
 				// If supervised, set the supervised text to best

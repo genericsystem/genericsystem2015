@@ -7,9 +7,9 @@ import java.util.List;
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.AbstractCache;
 import org.genericsystem.common.AbstractCache.ContextEventListener;
-import org.genericsystem.common.Root;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.GenericBuilder.SetSystemBuilder;
+import org.genericsystem.common.Root;
 import org.genericsystem.common.Statics;
 import org.genericsystem.common.SystemCache;
 
@@ -25,7 +25,7 @@ public class Engine extends AbstractServer {
 
 	public Engine(String persistentDirectoryPath, Class<?>... userClasses) {
 		init(this,
-				buildHandler(getClass(), (Generic) this, Collections.emptyList(), Statics.ENGINE_VALUE,
+				buildHandler(getClass(), this, Collections.emptyList(), Statics.ENGINE_VALUE,
 						Collections.emptyList(), ApiStatics.TS_SYSTEM, ApiStatics.SYSTEM_TS));
 		startSystemCache(userClasses);
 		archiver = new Archiver(this, persistentDirectoryPath);
@@ -40,7 +40,6 @@ public class Engine extends AbstractServer {
 			@Override
 			protected Generic getOrBuild(AbstractCache cache, Class<?> clazz, Generic meta, List<Generic> overrides,
 					Serializable value, List<Generic> components) {
-				// TODO Auto-generated method stub
 				return new SetSystemBuilder(cache, clazz, meta, overrides, value, components).resolve();
 			}
 		};

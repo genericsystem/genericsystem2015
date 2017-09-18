@@ -16,19 +16,12 @@ import io.vertx.core.json.JsonObject;
  * 
  * @author Pierrik Lassalas
  */
-public class AddImageToEngineVerticle extends ActionVerticle {
+public class AddImageToEngineVerticle extends ActionPersistentVerticle {
 
 	public static final String ACTION = "newImage";
 
-	private Root engine;
-
-	/**
-	 * Default constructor. A reference to the engine must be provided.
-	 * 
-	 * @param engine - the engine used to store the data
-	 */
 	public AddImageToEngineVerticle(Root engine) {
-		this.engine = engine;
+		super(engine);
 	}
 
 	@Override
@@ -38,14 +31,11 @@ public class AddImageToEngineVerticle extends ActionVerticle {
 
 	@Override
 	protected void handle(Future<Object> future, JsonObject task) {
-		String imagePath = task.getString(DistributedVerticle.FILENAME);
-		boolean result;
-		if (null != engine)
-			result = FillModelWithData.registerNewFile(engine, Paths.get(imagePath));
-		else
-			result = FillModelWithData.registerNewFile(Paths.get(imagePath));
+		String imagePath = DistributedVerticle.BASE_PATH + task.getString(DistributedVerticle.FILENAME);
+		System.out.println("--- imagePath = " + imagePath);
+		boolean result = FillModelWithData.registerNewFile(engine, Paths.get(imagePath), DistributedVerticle.RESOURCES_FOLDER);
 		if (result)
-			future.complete(imagePath);
+			future.complete();
 		else
 			future.fail("An error has occured while saving file " + imagePath);
 	}
@@ -53,8 +43,8 @@ public class AddImageToEngineVerticle extends ActionVerticle {
 	@Override
 	protected void handleResult(AsyncResult<Object> res, JsonObject task) {
 		if (res.succeeded())
-			addTask((String) res.result(), DezonerVerticle.ACTION);
+			addTask(task.getString(DistributedVerticle.FILENAME), DezonerVerticle.ACTION);
 		else
-			throw new IllegalStateException("An error has occurred while saving file " + task.getString(DistributedVerticle.FILENAME));
+			throw new IllegalStateException("An error has occurred while saving file " + task.getString(DistributedVerticle.FILENAME), res.cause());
 	}
 }
