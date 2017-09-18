@@ -143,13 +143,14 @@ public class DocPropertiesSwitcher {
 		ImgFilterInstance imgFilterInstance = ((ImgFilter) root.find(ImgFilter.class)).getImgFilter(ImgFilterFunction.ORIGINAL.getName());
 		ObservableList<ZoneTextInstance> zoneTextInstances = (ObservableList) currentDoc.getHolders(zoneText).toObservableList();
 		BooleanBinding binding = Bindings.createBooleanBinding(() -> {
-			Snapshot<ZoneInstance> zoneInstances = (Snapshot) zoneGeneric.getInstances();
+			Snapshot<ZoneInstance> zoneInstances = (Snapshot) currentDoc.getDocClass().getHolders(zoneGeneric);
 			// Consider the document as not OCR'd when the class was not de-zoned
 			if (zoneInstances.isEmpty())
 				return false;
 			else { // Otherwise, return true only when all the zones have been processed
 				return zoneInstances.stream().allMatch(zoneInstance -> {
 					ZoneTextInstance zti = zoneText.getZoneText(currentDoc, zoneInstance, imgFilterInstance);
+					// System.out.println(String.format("doc: %s | zone: %s | filter: %s | zti: %s", currentDoc, zoneInstance, imgFilterInstance, zti));
 					return null != zti;
 				});
 			}
