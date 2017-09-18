@@ -67,13 +67,13 @@ public class CamLayoutAnalyzer extends AbstractApp {
 		Mat frame = new Mat();
 		capture.read(frame);
 		ImageView src0 = new ImageView(Tools.mat2jfxImage(frame));
-		ImageView src1 = new ImageView(Tools.mat2jfxImage(frame));
-		ImageView src2 = new ImageView(Tools.mat2jfxImage(frame));
+		// ImageView src1 = new ImageView(Tools.mat2jfxImage(frame));
+		// ImageView src2 = new ImageView(Tools.mat2jfxImage(frame));
 		ImageView src3 = new ImageView(Tools.mat2jfxImage(frame));
 		mainGrid.add(src0, 0, 0);
-		mainGrid.add(src1, 0, 1);
-		mainGrid.add(src2, 1, 0);
-		mainGrid.add(src3, 1, 1);
+		// mainGrid.add(src1, 0, 1);
+		// mainGrid.add(src2, 1, 0);
+		mainGrid.add(src3, 0, 1);
 
 		oldKeypoints = new MatOfKeyPoint();
 		oldDescriptors = new Mat();
@@ -89,24 +89,24 @@ public class CamLayoutAnalyzer extends AbstractApp {
 					newKeypoints = detect(deskewed_);
 					newDescriptors = new Mat();
 					extractor.compute(deskewed_.getSrc(), newKeypoints, newDescriptors);
-					Img deskiewedCopy = new Img(deskewed_.getSrc(), true);
-					Img binary = deskewed_.cleanFaces(0.1, 0.26).adaptativeGaussianThreshold(17, 7).cleanTables(0.05);
-					binary.buildLayout().draw(deskiewedCopy, new Scalar(0, 255, 0), 1);
+					// Img deskiewedCopy = new Img(deskewed_.getSrc(), true);
+					Img binary = deskewed_/* .cleanFaces(0.1, 0.26) */.adaptativeGaussianThreshold(17, 7).cleanTables(0.05);
+					// binary.buildLayout().draw(deskiewedCopy, new Scalar(0, 255, 0), 1);
 					Img stabilized = stabilize(frame, stabilizedMat, matcher, angle[0], homography);
 					if (stabilized != null) {
 						Img stabilizedCopy = new Img(stabilized.getSrc(), true);
 						if (layout == null) {
-							Img binary2 = stabilized.cleanFaces(0.1, 0.26).adaptativeGaussianThreshold(17, 7).cleanTables(0.05);
+							Img binary2 = stabilized/* .cleanFaces(0.1, 0.26) */.adaptativeGaussianThreshold(17, 7).cleanTables(0.05);
 							layout = binary2.buildLayout();
 						}
-						// layout.ocrTree(stabilizedCopy, 3);
+						layout.ocrTree(stabilizedCopy, 0.03, 0.1);
 						layout.draw(stabilizedCopy, new Scalar(0, 255, 0), 1);
-						layout.drawPerspective(frameImg, homography[0].inv(), new Scalar(0, 0, 255), 1);
+						layout.drawPerspective(frameImg, homography[0].inv(), new Scalar(0, 0, 255), 1, 3, 3);
 						double area = layout.area(stabilized);
 						Imgproc.putText(stabilizedCopy.getSrc(), "Surface : " + area, new Point(0.5 * stabilizedCopy.width(), 0.05 * stabilizedCopy.height()), Core.FONT_HERSHEY_PLAIN, 1, new Scalar(255, 0, 0), 1);
 						src0.setImage(frameImg.toJfxImage());
-						src1.setImage(deskewed_.toJfxImage());
-						src2.setImage(deskiewedCopy.toJfxImage());
+						// src1.setImage(deskewed_.toJfxImage());
+						// src2.setImage(deskiewedCopy.toJfxImage());
 						src3.setImage(stabilizedCopy.toJfxImage());
 					}
 				} catch (Throwable e) {
@@ -114,6 +114,9 @@ public class CamLayoutAnalyzer extends AbstractApp {
 				}
 			}
 		}, 500, 66, TimeUnit.MILLISECONDS);
+
+		timer.scheduleAtFixedRate(() -> onSpace(), 1000, 1000, TimeUnit.MILLISECONDS);
+		onSpace();
 	}
 
 	@Override
@@ -125,7 +128,7 @@ public class CamLayoutAnalyzer extends AbstractApp {
 
 	private Img stabilize(Mat frame, Mat stabilized, DescriptorMatcher matcher, double angle, Mat[] homography) {
 		MatOfDMatch matches = new MatOfDMatch();
-		if (!oldDescriptors.empty() && (!newDescriptors.empty())) {
+		if (oldDescriptors != null && !oldDescriptors.empty() && (!newDescriptors.empty())) {
 			matcher.match(oldDescriptors, newDescriptors, matches);
 			List<DMatch> goodMatches = new ArrayList<>();
 			for (DMatch dMatch : matches.toArray()) {

@@ -15,8 +15,7 @@ public class OCRPlasty {
 		List<String> labels = new ArrayList<>();
 		labels.add("had I expressed the agony I frequentl felt he would have been taught to long for its alleviati");
 		labels.add("gad I sed the agony I fefjuently felt he would have been to long for its alleviafcion");
-		labels.add(
-				"had I expressed tbe agony I frejuently felt he would have been taught to long for its alleviationq");
+		labels.add("had I expressed tbe agony I frejuently felt he would have been taught to long for its alleviationq");
 		labels.add("had I expresset th agny I frequently feltu he wouald have ben taufht to lng fr its alevation");
 
 		System.out.println(similarity(labels));
@@ -31,8 +30,7 @@ public class OCRPlasty {
 		for (int i = 0; i < common.length() + 1; i++) {
 			List<String> candidates = new ArrayList();
 			for (int l = 0; l < labels.size(); l++) {
-				List<String> is = (i < common.length()) ? interString(labels.get(l), common.charAt(i))
-						: endString(labels.get(l));
+				List<String> is = (i < common.length()) ? interString(labels.get(l), common.charAt(i)) : endString(labels.get(l));
 				labels.set(l, is.get(0));
 				candidates.add(is.get(1));
 			}
@@ -120,8 +118,7 @@ public class OCRPlasty {
 		for (int i = 0; i < n; i++) {
 			for (int j = 0; j < n; j++) {
 				if (j > i) // each distance will be between 0 and 1
-					sim += Levenshtein.distance(strings.get(i), strings.get(j))
-							/ ((double) strings.get(i).length() + strings.get(j).length());
+					sim += Levenshtein.distance(strings.get(i), strings.get(j)) / ((double) strings.get(i).length() + strings.get(j).length());
 			}
 		}
 		return 1 - 2 * sim / n / (n - 1); // divide by the total number of distances
