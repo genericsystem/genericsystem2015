@@ -8,6 +8,7 @@ import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.StyleClass;
+import org.genericsystem.reactor.context.ContextAction.CANCEL;
 import org.genericsystem.reactor.context.ContextAction.DISPLAY_NONE;
 import org.genericsystem.reactor.context.ContextAction.FLUSH;
 import org.genericsystem.reactor.context.ContextAction.RESET_SELECTION;
@@ -46,7 +47,7 @@ public class Modal extends FlexDiv {
 	@FlexDirectionStyle(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 1 }, value = FlexDirection.ROW)
 	@SelectContext(path = { FlexDiv.class, TitledInstanceEditor.class }, value = SELECTION_SELECTOR.class)
 	@BindAction(path = { FlexDiv.class, FlexDiv.class, HtmlButton.class }, pos = { 0, 1, 0 }, value = { FLUSH.class, UNMOUNT.class, RESET_SELECTION.class })
-	@BindAction(path = { FlexDiv.class, FlexDiv.class, HtmlButton.class }, pos = { 0, 1, 1 }, value = { UNMOUNT.class, RESET_SELECTION.class })
+	@BindAction(path = { FlexDiv.class, FlexDiv.class, HtmlButton.class }, pos = { 0, 1, 1 }, value = { CANCEL.class, UNMOUNT.class, RESET_SELECTION.class })
 	public static class ModalEditor extends Modal implements SelectionDefaults {
 		@Override
 		public void init() {
