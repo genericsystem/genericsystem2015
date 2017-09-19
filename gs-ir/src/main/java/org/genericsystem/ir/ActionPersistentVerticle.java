@@ -26,7 +26,7 @@ public abstract class ActionPersistentVerticle extends ActionVerticle {
 	protected Handler<Future<Object>> getExecuteBlockingHandler(JsonObject task) {
 		return future -> {
 			cache.shiftTs();
-			cache.safeConsum(unused -> {
+			cache.safeExecute(() -> {
 				super.getExecuteBlockingHandler(task).handle(future);
 				cache.flush();
 			});

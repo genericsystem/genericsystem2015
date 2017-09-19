@@ -37,7 +37,7 @@ public class PersistentApplication {
 			} catch (InstantiationException | IllegalAccessException e) {
 				throw new IllegalStateException(e);
 			}
-			cache.safeConsum(unused -> runner.run(getEngine()));
+			cache.safeExecute(() -> runner.run(getEngine()));
 			log.info("Script has run");
 		}
 	}

@@ -63,7 +63,7 @@ public class HtmlDomNode {
 		if (parent != null)
 			insertChild(index);
 		for (Consumer<Context> binding : tag.getPreFixedBindings())
-			context.getCache().safeConsum(unused -> binding.accept(context));
+			context.getCache().safeExecute(() -> binding.accept(context));
 		assert (!context.containsAttribute(tag, "filteredChildren"));
 		FilteredTagChildren filteredChildren = new FilteredTagChildren(tag, context);
 		tag.addContextAttribute("filteredChildren", context, filteredChildren);
@@ -71,7 +71,7 @@ public class HtmlDomNode {
 			tagAdder.accept(childTag);
 		filteredChildren.filteredList.addListener(tagListener);
 		for (Consumer<Context> binding : tag.getPostFixedBindings())
-			context.getCache().safeConsum(unused -> binding.accept(context));
+			context.getCache().safeExecute(() -> binding.accept(context));
 	}
 
 	void destroy() {

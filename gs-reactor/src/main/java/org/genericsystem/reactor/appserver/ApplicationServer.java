@@ -180,7 +180,7 @@ public class ApplicationServer extends AbstractBackEnd {
 				if (rootHtmlDomNode != null) {
 					HtmlDomNode node = rootHtmlDomNode.getNodeById(json.getString(ReactorStatics.ID));
 					if (node != null) {
-						cache.safeConsum((x) -> node.handleMessage(json));
+						cache.safeExecute(() -> node.handleMessage(json));
 					} else
 						log.info("Can't find node with id: {}.", json.getString(ReactorStatics.ID));
 				} else

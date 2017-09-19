@@ -56,7 +56,7 @@ public class Dispatcher extends AbstractSingletonVerticle {
 
 	@Override
 	public void start(Future<Void> startFuture) throws Exception {
-		cache.safeConsum(nothing -> {
+		cache.safeExecute(() -> {
 			for (Generic task : taskType.getInstances()) {
 				JsonObject json = new JsonObject((String) task.getValue());
 				if (RUNNING.equals(json.getString(STATE)))
@@ -79,13 +79,13 @@ public class Dispatcher extends AbstractSingletonVerticle {
 			updateTaskState(json.getJsonObject(TASK), json.getString(NEW_STATE));
 		});
 		vertx.eventBus().consumer(ADDRESS + ":add", message -> {
-			cache.safeConsum(unused -> {
+			cache.safeExecute(() -> {
 				taskType.addInstance((String) message.body());
 				cache.flush();
 			});
 		});
 		vertx.setPeriodic(MESSAGE_SEND_PERIODICITY, h -> {
-			cache.safeConsum(unused -> {
+			cache.safeExecute(() -> {
 				for (Generic task : taskType.getInstances()) {
 					JsonObject json = new JsonObject((String) task.getValue());
 					if (TODO.equals(json.getString(STATE))) {
@@ -115,7 +115,7 @@ public class Dispatcher extends AbstractSingletonVerticle {
 
 	private void updateTaskState(JsonObject oldValue, String newState) {
 		logger.debug("Updating: {}, newState: {}.", oldValue.encodePrettily(), newState);
-		cache.safeConsum(unused -> {
+		cache.safeExecute(() -> {
 			Generic task = taskType.getInstances().filter(g -> oldValue.equals(new JsonObject((String) g.getValue()))).first();
 			JsonObject newValue = new JsonObject(oldValue.encode()).put(STATE, newState);
 			task.update(newValue.encodePrettily());

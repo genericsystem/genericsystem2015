@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import org.genericsystem.api.core.Snapshot;
@@ -52,11 +51,11 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 		}
 	}
 
-	public <U> void safeConsum(Consumer<U> safeExecution) {
+	public void safeExecute(Runnable safeExecution) {
 		AbstractCache localCache = getRoot().getLocalCache();
 		start();
 		try {
-			safeExecution.accept(null);
+			safeExecution.run();
 		} finally {
 			if (null != localCache)
 				localCache.start();
@@ -179,7 +178,7 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 			doSynchronizedApplyInSubContext();
 			initialize();
 			if (getDifferential().getSubDifferential() instanceof TransactionDifferential)
-				getRoot().getReactiveCaches().stream().filter(cache -> cache != this).forEach(cache -> cache.safeConsum(unused -> cache.shiftTs()));
+				getRoot().getReactiveCaches().stream().filter(cache -> cache != this).forEach(cache -> cache.safeExecute(() -> cache.shiftTs()));
 			listener.triggersFlushEvent();
 		} catch (OptimisticLockConstraintViolationException exception) {
 			discardWithException(exception);

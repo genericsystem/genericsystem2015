@@ -92,7 +92,7 @@ public class EngineServer extends AbstractBackEnd {
 				GSBuffer gsBuffer = new GSBuffer(buffer);
 				int methodId = gsBuffer.getInt();
 				int op = gsBuffer.getInt();
-				cache.safeConsum((x) -> socket.writeBinaryMessage(getReplyBuffer(methodId, op, root, gsBuffer)));
+				cache.safeExecute(() -> socket.writeBinaryMessage(getReplyBuffer(methodId, op, root, gsBuffer)));
 			};
 		}
 

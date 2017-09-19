@@ -120,7 +120,7 @@ public class ContextActionCustom {
 			WorkerVerticle worker = new WorkerVerticle(root) {
 				@Override
 				public void start() throws Exception {
-					gsContext.getCache().safeConsum(unused -> {
+					gsContext.getCache().safeExecute(() -> {
 						ComputeBestTextPerZone.computeOneFile(root, docInstance, docType);
 						docInstance.setRefreshTimestamp(ModelTools.getCurrentDate());
 						root.getCurrentCache().flush();
@@ -159,7 +159,7 @@ public class ContextActionCustom {
 		WorkerVerticle worker = new WorkerVerticle() {
 			@Override
 			public void start() throws Exception {
-				gsContext.getCache().safeConsum(unused -> {
+				gsContext.getCache().safeExecute(() -> {
 					ComputeTrainedScores.compute(root, docClassInstance.getValue().toString(), useStrict);
 				});
 				System.out.println("Done computing scores!");
