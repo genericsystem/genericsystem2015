@@ -106,7 +106,7 @@ public class Ocr {
 		String ocrText = null;
 		try {
 			instance = tesseractInstancePool.borrowObject();
-			ocrText = instance.run(mat, 50, 1).replace("\n", "").trim();
+			ocrText = instance.run(mat, minConfidence, 1).replace("\n", "").trim();
 		} catch (Exception e) {
 			throw new RuntimeException("An error has occured during the OCR", e);
 		} finally {
