@@ -13,7 +13,9 @@ public enum ImgFilterFunction {
 	EQUALIZE_HISTO("equalizeHisto", i -> i.equalizeHisto()),
 	EQUALIZE_HISTO_ADAPTATIVE("equalizeHistoAdaptative", i -> i.equalizeHistoAdaptative()),
 	OTSU_AFTER_GAUSSIAN_BLUR("otsuAfterGaussianBlur", i -> i.otsuAfterGaussianBlur()),
-	ADAPTATIVE_GAUSSIAN_THRESHOLD("adaptativeGaussianThreshold", i -> i.adaptativeGaussianThreshold());
+	ADAPTATIVE_GAUSSIAN_THRESHOLD("adaptativeGaussianThreshold", i -> i.adaptativeGaussianThreshold(17, 15)),
+	BILATERAL_FILTER("bilateralFilter", i -> i.bilateralFilter(30, 80, 80)),
+	BILATERAL_FILTER_AGTHRESHOLD("bilateralFilterAdaptGaussianThreshold", i -> i.bilateralFilter(30, 80, 80).adaptativeGaussianThreshold(17, 15));
 
 	/**
 	 * Name of the filter. This will be persisted.
