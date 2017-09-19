@@ -114,11 +114,11 @@ public class FrontEndTransaction extends CheckedContext implements IDifferential
 
 	@Override
 	public Observable<Generic> getAddsObservable(Generic generic) {
-		throw new UnsupportedOperationException();
+		return getDependencies(generic).getAddsObservable();
 	}
 
 	@Override
 	public Observable<Generic> getRemovesObservable(Generic generic) {
-		throw new UnsupportedOperationException();
+		return getDependencies(generic).getRemovesObservable();
 	}
 }

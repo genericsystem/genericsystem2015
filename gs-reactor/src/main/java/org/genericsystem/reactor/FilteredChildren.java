@@ -37,7 +37,7 @@ class FilteredChildren<T> {
 				if (child.getMetaBinding() != null)
 					return new ObservableValue[] {};
 				ObservableList<TagSwitcher> result = new ObservableListWrapper<>(child.getObservableSwitchers(), s -> {
-					ObservableValue<Boolean> selector = s.apply(context, child);
+					ObservableValue<Boolean> selector = context.getCache().safeSupply(() -> s.apply(context, child));
 					selectorsByChildAndSwitcher.get(child).put(s, selector);
 					return new ObservableValue[] { selector };
 				});
@@ -53,9 +53,9 @@ class FilteredChildren<T> {
 		final TransformationObservableList<BETWEEN, Context> transformationListSubContexts;
 
 		FilteredChildContexts(MetaBinding<BETWEEN> metaBinding, Tag childTag, Context context) {
-			transformationListSubContexts = new TransformationObservableList<>(metaBinding.buildBetweenChildren(context), (i, between) -> metaBinding.buildModel(context, between), Context::destroy, childContext -> {
+			transformationListSubContexts = new TransformationObservableList<>(context.getCache().safeSupply(() -> metaBinding.buildBetweenChildren(context)), (i, between) -> metaBinding.buildModel(context, between), Context::destroy, childContext -> {
 				ObservableList<TagSwitcher> result = new ObservableListWrapper<>(childTag.getObservableSwitchers(), s -> {
-					ObservableValue<Boolean> selector = s.apply(childContext, childTag);
+					ObservableValue<Boolean> selector = context.getCache().safeSupply(() -> s.apply(childContext, childTag));
 					selectorsByChildAndSwitcher.get(childContext).put(s, selector);
 					return new ObservableValue[] { selector };
 				});

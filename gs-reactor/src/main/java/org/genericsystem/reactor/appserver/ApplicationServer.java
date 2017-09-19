@@ -103,6 +103,7 @@ public class ApplicationServer extends AbstractBackEnd {
 						cache.start();
 						tagTree = application.getApplicationClass().getConstructor(Root.class).newInstance(application.getEngine());
 						cache.flush();
+						cache.stop();
 					} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | SecurityException | InvocationTargetException | NoSuchMethodException ex) {
 						throw new IllegalStateException(ex);
 					}

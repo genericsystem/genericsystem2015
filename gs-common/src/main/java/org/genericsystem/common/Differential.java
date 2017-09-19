@@ -50,6 +50,11 @@ public class Differential implements IDifferential<Generic> {
 		return subDifferential;
 	}
 
+	@Override
+	public AbstractCache getCache() {
+		return subDifferential.getCache();
+	}
+
 	public int getCacheLevel() {
 		return subDifferential instanceof Differential ? ((Differential) subDifferential).getCacheLevel() + 1 : 0;
 	}
@@ -63,6 +68,7 @@ public class Differential implements IDifferential<Generic> {
 		return subDifferential.getDifferentialProperty();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Observable<Differential> getDifferentialObservable() {
 		return (Observable<Differential>) subDifferential.getDifferentialObservable();
@@ -114,12 +120,14 @@ public class Differential implements IDifferential<Generic> {
 
 			@Override
 			public Observable<Generic> getAddsObservable() {
-				return getDifferentialObservable().flatMap(diff -> diff.getAddsObservable(generic)).replay().refCount();
+				return getDifferentialObservable().flatMap(diff -> diff.getAddsObservable(generic).filter(g -> getCache().isAlive(g)))
+						.replay().refCount();
 			}
 
 			@Override
 			public Observable<Generic> getRemovesObservable() {
-				return getDifferentialObservable().flatMap(diff -> diff.getRemovesObservable(generic)).replay().refCount();
+				return getDifferentialObservable().flatMap(diff -> diff.getRemovesObservable(generic).filter(g -> !getCache().isAlive(g)))
+						.replay().refCount();
 			}
 
 			@Override

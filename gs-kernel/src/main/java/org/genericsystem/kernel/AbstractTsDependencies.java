@@ -3,8 +3,10 @@ package org.genericsystem.kernel;
 import java.lang.ref.SoftReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Spliterators;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -16,11 +18,16 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.common.SoftValueHashMap;
 import org.genericsystem.kernel.AbstractServer.RootServerHandler;
 
+import io.reactivex.Observable;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+
 /**
  * @author Nicolas Feybesse
  *
  */
 abstract class AbstractTsDependencies {
+
 	private static interface Index {
 		public boolean add(Generic generic);
 
@@ -56,7 +63,7 @@ abstract class AbstractTsDependencies {
 				else
 					tail.next = newNode;
 				tail = newNode;
-				Generic result = map.put(generic, generic);
+				map.put(generic, generic);
 				return true;
 			}
 			return false;
@@ -134,7 +141,6 @@ abstract class AbstractTsDependencies {
 					Generic content = next.content;
 					if (content != null && ((RootServerHandler) content.getProxyHandler()).getLifeManager().isAlive(ts))
 						break;
-
 				}
 			}
 
@@ -143,10 +149,35 @@ abstract class AbstractTsDependencies {
 				return next.content;
 			}
 		}
-
 	}
 
-	private final ConcurrentHashMap<Generic, Generic> map = new ConcurrentHashMap<>();
+	private final Map<Generic, Generic> map = new ConcurrentHashMap<>();
+	private final ObservableList<Generic> adds = FXCollections.observableArrayList(new CopyOnWriteArrayList<>());
+	private final ObservableList<Generic> removals = FXCollections.observableArrayList(new CopyOnWriteArrayList<>());
+
+	public Stream<Generic> stream(long ts) {
+		return indexesTree.getIndex(new ArrayList<>(), ts).stream(ts);
+	}
+
+	public Observable<Generic> getAddsObservable(long ts) {
+		return Observable.fromIterable(adds)
+				.filter(g -> !((RootServerHandler) g.getProxyHandler()).getLifeManager().isAlive(ts))
+				.replay().refCount();
+	}
+
+	public Observable<Generic> getRemovesObservable(long ts) {
+		return Observable.fromIterable(removals)
+				.filter(g -> ((RootServerHandler) g.getProxyHandler()).getLifeManager().isAlive(ts))
+				.replay().refCount();
+	}
+
+	public void signalAdd(Generic generic) {
+		adds.add(generic);
+	}
+
+	public void signalRemoval(Generic generic) {
+		removals.add(generic);
+	}
 
 	public abstract LifeManager getLifeManager();
 
@@ -176,10 +207,6 @@ abstract class AbstractTsDependencies {
 				return indexesTree.getIndex(filters, ts).stream(ts);
 			}
 		};
-	}
-
-	public Stream<Generic> stream(long ts) {
-		return indexesTree.getIndex(new ArrayList<>(), ts).stream(ts);
 	}
 
 	private class IndexNode {

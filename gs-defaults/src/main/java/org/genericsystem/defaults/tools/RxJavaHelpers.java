@@ -95,6 +95,19 @@ public class RxJavaHelpers {
 		});
 	}
 
+	public static <T> Observable<T> prevFromObservableValue(final ObservableValue<T> fxObservable) {
+		return Observable.create((ObservableEmitter<T> emitter) -> {
+
+			final ChangeListener<T> listener = (observableValue, prev, current) -> {
+				if (prev != null)
+					emitter.onNext(prev);
+			};
+
+			fxObservable.addListener(listener);
+			emitter.setDisposable(Disposables.fromRunnable(() -> fxObservable.removeListener(listener)));
+		});
+	}
+
 	public static <T> Observable<Optional<T>> fromNullableObservableValue(final ObservableValue<T> fxObservable) {
 		return Observable.create((ObservableEmitter<Optional<T>> emitter) -> {
 			if (fxObservable.getValue() != null) {

@@ -40,11 +40,15 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 	}
 
 	public <U> U safeSupply(Supplier<U> safeExecution) {
+		AbstractCache localCache = getRoot().getLocalCache();
 		start();
 		try {
 			return safeExecution.get();
 		} finally {
-			stop();
+			if (localCache != null)
+				localCache.start();
+			else
+				stop();
 		}
 	}
 
@@ -331,6 +335,11 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 		}
 
 		@Override
+		public AbstractCache getCache() {
+			return AbstractCache.this;
+		}
+
+		@Override
 		public ObjectProperty<IDifferential<Generic>> getDifferentialProperty() {
 			return (ObjectProperty) AbstractCache.this.differentialProperty;
 		}
@@ -355,27 +364,15 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 			return getTransaction().getTs();
 		}
 
-		@SuppressWarnings("unchecked")
-		private Observable<IDifferential<Generic>[]> prevTransactions() {
-			return RxJavaHelpers.valuesOf(transactionProperty).scan(new IDifferential[2], (oldTs, newT) -> {
-				oldTs[0] = oldTs[1];
-				oldTs[1] = newT;
-				return oldTs;
-			});
-		}
-
-		private Observable<Generic> getDependenciesExcluding(IDifferential<Generic> fromTransaction, IDifferential<Generic> notInTransaction, Generic generic) {
-			return Observable.fromIterable(fromTransaction.getDependencies(generic).filter(g -> !notInTransaction.getDependencies(generic).contains(g))).replay().refCount();
-		}
-
+		// Transmit adds and removes only when the transaction changes, i.e. when shiftTs is called.
 		@Override
 		public Observable<Generic> getAddsObservable(Generic generic) {
-			return prevTransactions().switchMap(ts -> ts[0] != null ? getDependenciesExcluding(ts[1], ts[0], generic) : Observable.never());
+			return RxJavaHelpers.prevFromObservableValue(transactionProperty).switchMap(prevTransaction -> prevTransaction.getAddsObservable(generic));
 		}
 
 		@Override
 		public Observable<Generic> getRemovesObservable(Generic generic) {
-			return prevTransactions().switchMap(ts -> ts[0] != null ? getDependenciesExcluding(ts[0], ts[1], generic) : Observable.never());
+			return RxJavaHelpers.prevFromObservableValue(transactionProperty).switchMap(prevTransaction -> prevTransaction.getRemovesObservable(generic));
 		}
 	}
 
@@ -393,5 +390,4 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 		default void triggersFlushEvent() {
 		}
 	}
-
 }

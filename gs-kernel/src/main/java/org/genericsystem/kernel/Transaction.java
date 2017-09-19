@@ -71,7 +71,8 @@ public class Transaction extends CheckedContext implements IDifferential<Generic
 			set.add(generic.getMeta());
 		set.addAll(generic.getSupers());
 		set.addAll(generic.getComponents());
-		set.stream().forEach(ancestor -> ((IDependencies<Generic>) getDependencies(ancestor)).add(generic));
+		set.stream().forEach(ancestor -> getDependencies(ancestor).add(generic));
+		set.stream().forEach(ancestor -> ((RootServerHandler) ancestor.getProxyHandler()).getDependencies().signalAdd(generic));
 		// getChecker().checkAfterBuild(true, false, generic);
 		return generic;
 	}
@@ -82,26 +83,34 @@ public class Transaction extends CheckedContext implements IDifferential<Generic
 		getRoot().getGarbageCollector().add(generic);
 	}
 
-	protected void unplug(Generic generic) {
+	private void signalRemoval(Generic generic) {
 		// getChecker().checkAfterBuild(false, false, generic);
 		Set<Generic> set = new HashSet<>();
 		if (!generic.isMeta())
 			set.add(generic.getMeta());
 		set.addAll(generic.getSupers());
 		set.addAll(generic.getComponents());
-		set.stream().forEach(ancestor -> ((IDependencies<Generic>) getDependencies(ancestor)).remove(generic));
-		((RootServerHandler) generic.getProxyHandler()).getLifeManager().kill(getTs());
-		getRoot().getGarbageCollector().add(generic);
+		set.stream().forEach(ancestor -> ((RootServerHandler) ancestor.getProxyHandler()).getDependencies().signalRemoval(generic));
 	}
 
 	@Override
-	public Snapshot<Generic> getDependencies(Generic ancestor) {
+	public IDependencies<Generic> getDependencies(Generic ancestor) {
 		assert ancestor != null;
 		return new IDependencies<Generic>() {
 
 			@Override
 			public Stream<Generic> unfilteredStream() {
 				return ((RootServerHandler) ancestor.getProxyHandler()).getDependencies().stream(getTs());
+			}
+
+			@Override
+			public Observable<Generic> getAddsObservable() {
+				return ((RootServerHandler) ancestor.getProxyHandler()).getDependencies().getAddsObservable(getTs());
+			}
+
+			@Override
+			public Observable<Generic> getRemovesObservable() {
+				return ((RootServerHandler) ancestor.getProxyHandler()).getDependencies().getRemovesObservable(getTs());
 			}
 
 			@Override
@@ -134,7 +143,6 @@ public class Transaction extends CheckedContext implements IDifferential<Generic
 	// archiver acces
 	protected Generic buildAndPlug(Long ts, Class<?> clazz, Generic meta, List<Generic> supers, Serializable value, List<Generic> components, long[] otherTs) {
 		return plug(getRoot().build(ts, clazz, meta, supers, value, components, otherTs));
-
 	}
 
 	private class LockedLifeManager {
@@ -144,12 +152,12 @@ public class Transaction extends CheckedContext implements IDifferential<Generic
 		private void apply(Iterable<Generic> removes, Iterable<Generic> adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
 			try {
 				writeLockAllAndCheckMvcc(adds, removes);
-				for (Generic remove : removes)
+				for (Generic remove : removes) {
+					signalRemoval(remove);
 					kill(remove);
-				for (Generic add : adds) {
-					plug(add);
 				}
-
+				for (Generic add : adds)
+					plug(add);
 			} finally {
 				writeUnlockAll();
 			}
@@ -191,11 +199,11 @@ public class Transaction extends CheckedContext implements IDifferential<Generic
 
 	@Override
 	public Observable<Generic> getAddsObservable(Generic generic) {
-		throw new UnsupportedOperationException();
+		return getDependencies(generic).getAddsObservable();
 	}
 
 	@Override
 	public Observable<Generic> getRemovesObservable(Generic generic) {
-		throw new UnsupportedOperationException();
+		return getDependencies(generic).getRemovesObservable();
 	}
 }
