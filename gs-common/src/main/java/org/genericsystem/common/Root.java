@@ -261,6 +261,10 @@ public abstract class Root implements DefaultRoot<Generic>, ProxyObject, Generic
 
 	};
 
+	public AbstractCache getLocalCache() {
+		return cacheLocal.get();
+	}
+
 	@Override
 	public AbstractCache getCurrentCache() {
 		AbstractCache context = cacheLocal.get();
