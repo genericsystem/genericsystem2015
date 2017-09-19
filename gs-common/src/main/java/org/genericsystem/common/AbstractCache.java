@@ -32,7 +32,6 @@ import javafx.collections.ObservableList;
 
 /**
  * @author Nicolas Feybesse
- *
  */
 public abstract class AbstractCache extends CheckedContext implements DefaultCache<Generic> {
 
@@ -50,11 +49,15 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 	}
 
 	public <U> void safeConsum(Consumer<U> safeExecution) {
+		AbstractCache localCache = getRoot().getLocalCache();
 		start();
 		try {
 			safeExecution.accept(null);
 		} finally {
-			stop();
+			if (null != localCache)
+				localCache.start();
+			else
+				stop();
 		}
 	}
 
@@ -206,8 +209,7 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 		discardWithException(cause);
 	}
 
-	protected void doSynchronizedApplyInSubContext()
-			throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
+	protected void doSynchronizedApplyInSubContext() throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
 		Differential originalCacheElement = getDifferential();
 		// if (getDifferential().getSubDifferential() instanceof Differential)
 		// this.differentialProperty.set((Differential) getDifferential().getSubDifferential());
@@ -218,8 +220,7 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 		// }
 	}
 
-	private void synchronizedApply(Differential cacheElement)
-			throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
+	private void synchronizedApply(Differential cacheElement) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
 		synchronized (getRoot()) {
 			cacheElement.apply();
 		}
@@ -241,8 +242,7 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 	@Override
 	public void unmount() {
 		IDifferential<Generic> subCache = getDifferential().getSubDifferential();
-		differentialProperty
-				.set(subCache instanceof Differential ? (Differential) subCache : new Differential(subCache));
+		differentialProperty.set(subCache instanceof Differential ? (Differential) subCache : new Differential(subCache));
 		listener.triggersClearEvent();
 		listener.triggersRefreshEvent();
 	}
@@ -258,8 +258,7 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 	}
 
 	protected Generic plug(Generic generic) {
-		assert generic.getBirthTs() == Long.MAX_VALUE || generic.getBirthTs() == 0L : generic.info()
-				+ generic.getBirthTs();
+		assert generic.getBirthTs() == Long.MAX_VALUE || generic.getBirthTs() == 0L : generic.info() + generic.getBirthTs();
 		getDifferential().plug(generic);
 		getChecker().checkAfterBuild(true, false, generic);
 		return generic;
@@ -327,8 +326,7 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 	protected class TransactionDifferential implements IDifferential<Generic> {
 
 		@Override
-		public void apply(Snapshot<Generic> removes, Snapshot<Generic> adds)
-				throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
+		public void apply(Snapshot<Generic> removes, Snapshot<Generic> adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
 			getTransaction().apply(removes, adds);
 		}
 
@@ -372,7 +370,7 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 
 		@Override
 		public Observable<Generic> getAddsObservable(Generic generic) {
-			return prevTransactions().switchMap(ts -> ts[0] != null	? getDependenciesExcluding(ts[1], ts[0], generic) : Observable.never());
+			return prevTransactions().switchMap(ts -> ts[0] != null ? getDependenciesExcluding(ts[1], ts[0], generic) : Observable.never());
 		}
 
 		@Override
