@@ -3,26 +3,29 @@ package org.genericsystem.ir;
 import java.lang.invoke.MethodHandles;
 
 import org.genericsystem.common.Generic;
+import org.genericsystem.ir.AbstractMultitonVerticle.AbstractSingletonVerticle;
 import org.genericsystem.ir.Model.Task;
 import org.genericsystem.kernel.Cache;
 import org.genericsystem.kernel.Engine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
+import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.ReplyException;
 import io.vertx.core.json.JsonObject;
 
-public class Dispatcher extends AbstractVerticle {
+public class Dispatcher extends AbstractSingletonVerticle {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
+	private static final String COUNTER = Dispatcher.class.getName();
+	private static final String EMAIL_SETTINGS = DistributedVerticle.BASE_PATH + "/.conf/MailWatcherVerticle.json";
+
 	protected final Engine engine = new Engine(System.getenv("HOME") + "/genericsystem/tasks/", Task.class);
 	protected Cache cache = engine.newCache();
 	protected final Generic taskType = engine.find(Task.class);
-
-	private static final String EMAIL_SETTINGS = DistributedVerticle.BASE_PATH + "/.conf/MailWatcherVerticle.json";
 
 	public static final String ADDRESS = "org.genericsystem.repartitor";
 	protected static final String TASK = "task";
@@ -39,16 +42,15 @@ public class Dispatcher extends AbstractVerticle {
 		dispatcher.doDeploy();
 	}
 
-	public void doDeploy() {
-		Tools.deployOnCluster(vertx -> {
-			vertx.deployVerticle(new HttpServerVerticle(), complete -> {
-				if (complete.failed())
-					throw new IllegalStateException(complete.cause());
-			});
-			vertx.deployVerticle(this, res -> {
-				if (res.failed())
-					throw new IllegalStateException(res.cause());
-			});
+	@Override
+	protected void deployVerticle(Vertx vertx) {
+		vertx.deployVerticle(new HttpServerVerticle(), complete -> {
+			if (complete.failed())
+				throw new IllegalStateException(complete.cause());
+		});
+		vertx.deployVerticle(this, res -> {
+			if (res.failed())
+				throw new IllegalStateException(res.cause());
 		});
 	}
 
@@ -133,5 +135,10 @@ public class Dispatcher extends AbstractVerticle {
 				});
 			}
 		});
+	}
+
+	@Override
+	protected String getCounter() {
+		return COUNTER;
 	}
 }
