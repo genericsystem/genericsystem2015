@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.AsyncResult;
+import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Handler;
 
 public class DistributedVerticle extends AbstractVerticle {
@@ -70,11 +71,7 @@ public class DistributedVerticle extends AbstractVerticle {
 			vertx.deployVerticle(new HttpServerVerticle(), complete -> {
 				if (complete.failed())
 					throw new IllegalStateException(complete.cause());
-				// Deploy the current verticle, and additional ones if there are enough resources
-				vertx.deployVerticle(this, completionHandler);
-				for (int i = 0; i < getMaxExecutions() - 1; ++i) {
-					vertx.deployVerticle(new DistributedVerticle(), completionHandler);
-				}
+				vertx.deployVerticle(DistributedVerticle.class.getName(), new DeploymentOptions().setInstances(getMaxExecutions()), completionHandler);
 				logger.debug("Deployed {} DistributedVerticle", getMaxExecutions() < 1 ? 1 : getMaxExecutions());
 			});
 		});
