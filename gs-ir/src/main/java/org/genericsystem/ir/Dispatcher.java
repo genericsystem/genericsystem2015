@@ -76,7 +76,9 @@ public class Dispatcher extends AbstractSingletonVerticle {
 		});
 		vertx.eventBus().consumer(ADDRESS + ":updateState", message -> {
 			JsonObject json = (JsonObject) message.body();
-			updateTaskState(json.getJsonObject(TASK), json.getString(NEW_STATE));
+			cache.safeConsum(unused -> {
+				updateTaskState(json.getJsonObject(TASK), json.getString(NEW_STATE));
+			});
 		});
 		vertx.eventBus().consumer(ADDRESS + ":add", message -> {
 			cache.safeExecute(() -> {
