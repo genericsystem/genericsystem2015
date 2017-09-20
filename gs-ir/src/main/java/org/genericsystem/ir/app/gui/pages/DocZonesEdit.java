@@ -10,6 +10,7 @@ import org.genericsystem.ir.app.gui.utils.DocumentImage;
 import org.genericsystem.ir.app.gui.utils.ObservableListExtractorCustom.DATALIST_SELECTOR;
 import org.genericsystem.ir.app.gui.utils.ObservableListExtractorCustom.ZONE_SELECTOR_REALITY;
 import org.genericsystem.ir.app.gui.utils.TextBindingCustom.ZONE_LABEL;
+import org.genericsystem.ir.app.gui.utils.TextBindingCustom.ZONE_TEXT;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.annotations.Attribute;
 import org.genericsystem.reactor.annotations.BindAction;
@@ -114,6 +115,7 @@ public class DocZonesEdit extends ModalEditor {
 	@ForEach(path = { HtmlDatalist.class, HtmlOption.class }, value = DATALIST_SELECTOR.class)
 	@Children({ CustomInputDatalist.class, HtmlDatalist.class })
 	@StyleClass(path = CustomInputDatalist.class, value = "glowing-border")
+	@BindText(path = { HtmlDatalist.class, HtmlOption.class }, value = ZONE_TEXT.class)
 	public static class ZoneInput extends InputWithDatalist implements SelectionDefaults {
 		// Define the inputText
 		// TODO: add a remove button to empty the field
