@@ -15,6 +15,7 @@ import org.genericsystem.reactor.contextproperties.ActionDefaults;
 import org.genericsystem.reactor.contextproperties.SelectionDefaults;
 
 import io.vertx.core.json.JsonObject;
+import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.ListChangeListener;
@@ -62,6 +63,14 @@ public class HtmlDomNode {
 		context.register(this);
 		if (parent != null)
 			insertChild(index);
+
+		// Add the “opaque” class if the generic contained in the context is in the cache (unsaved).
+		if (parent != null) {
+			BooleanExpression parentInCache = parent.getModelContext().isInCache();
+			BooleanExpression inCache = context.isInCache();
+			tag.bindOptionalStyleClass("opaque", "isInCache", context, inCache.and(parentInCache.not()));
+		}
+
 		for (Consumer<Context> binding : tag.getPreFixedBindings())
 			context.getCache().safeExecute(() -> binding.accept(context));
 		assert (!context.containsAttribute(tag, "filteredChildren"));
@@ -125,8 +134,6 @@ public class HtmlDomNode {
 				childTag.addContextAttribute("filteredContexts", context, subContexts);
 				context.setSubContexts(childTag, new TransformationObservableList<Context, Context>(subContexts.filteredSubContexts, (i, subContext) -> {
 					childTag.createNode(this, subContext).init(computeIndex(i, childTag));
-					if (context.isInCache())
-						childTag.addStyleClass(subContext, "opaque");
 					return subContext;
 				}, subContext -> subContext.removeTag(childTag)));
 			}

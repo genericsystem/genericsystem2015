@@ -22,6 +22,7 @@ import org.genericsystem.defaults.tools.RxJavaHelpers;
 
 import io.reactivex.Observable;
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableIntegerValue;
@@ -96,6 +97,10 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 	@Override
 	public boolean contains(Generic generic) {
 		return differentialProperty.getValue().getAdds().contains(generic);
+	}
+
+	public BooleanBinding isInCache(Generic generic) {
+		return Bindings.createBooleanBinding(() -> differentialProperty.getValue().getAdds().contains(generic), differentialProperty);
 	}
 
 	protected abstract IDifferential<Generic> buildTransaction();

@@ -55,6 +55,13 @@ public class Dispatcher extends AbstractSingletonVerticle {
 	}
 
 	@Override
+	protected void undeployVerticle(Vertx vertx) {
+		if (engine != null)
+			engine.close();
+		super.undeployVerticle(vertx);
+	}
+
+	@Override
 	public void start(Future<Void> startFuture) throws Exception {
 		cache.safeExecute(() -> {
 			for (Generic task : taskType.getInstances()) {
@@ -76,7 +83,9 @@ public class Dispatcher extends AbstractSingletonVerticle {
 		});
 		vertx.eventBus().consumer(ADDRESS + ":updateState", message -> {
 			JsonObject json = (JsonObject) message.body();
-			updateTaskState(json.getJsonObject(TASK), json.getString(NEW_STATE));
+			cache.safeExecute(() -> {
+				updateTaskState(json.getJsonObject(TASK), json.getString(NEW_STATE));
+			});
 		});
 		vertx.eventBus().consumer(ADDRESS + ":add", message -> {
 			cache.safeExecute(() -> {

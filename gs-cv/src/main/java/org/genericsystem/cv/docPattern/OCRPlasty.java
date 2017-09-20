@@ -28,7 +28,7 @@ public class OCRPlasty {
 		String common = longestCommonSubsequence(labels);
 		String consensus = "";
 		for (int i = 0; i < common.length() + 1; i++) {
-			List<String> candidates = new ArrayList();
+			List<String> candidates = new ArrayList<>();
 			for (int l = 0; l < labels.size(); l++) {
 				List<String> is = (i < common.length()) ? interString(labels.get(l), common.charAt(i)) : endString(labels.get(l));
 				labels.set(l, is.get(0));

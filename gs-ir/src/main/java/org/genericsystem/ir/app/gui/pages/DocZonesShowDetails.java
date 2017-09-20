@@ -19,10 +19,11 @@ import org.genericsystem.reactor.gscomponents.Modal.ModalWithDisplay;
 @StyleClass(path = { FlexDiv.class, FiltersDiv.class }, value = "filter-results")
 @Style(path = FlexDiv.class, name = "display", value = "block")
 @Style(path = FlexDiv.class, name = "padding", value = "1.5em")
+@Style(path = FlexDiv.class, name = "max-height", value = "fit-content")
+@Style(path = FlexDiv.class, name = "width", value = "inherit")
 public class DocZonesShowDetails extends ModalWithDisplay {
 
 	@FlexDirectionStyle(FlexDirection.ROW)
-	@StyleClass("ocr-row")
 	@Children({ FilterNames.class, FiltersOcrText.class })
 	@ForEach(OCR_SELECTOR.class)
 	public static class FiltersDiv extends FlexDiv {
@@ -32,6 +33,7 @@ public class DocZonesShowDetails extends ModalWithDisplay {
 	@FlexDirectionStyle(FlexDirection.COLUMN)
 	@BindText
 	@StyleClass({ "ocr", "ocr-label" })
+	@Style(name = "flex", value = "1")
 	public static class FilterNames extends FlexDiv {
 		// Print the filtername
 	}
@@ -39,6 +41,7 @@ public class DocZonesShowDetails extends ModalWithDisplay {
 	@FlexDirectionStyle(FlexDirection.COLUMN)
 	@BindText(OCR_TEXT.class)
 	@StyleClass({ "ocr", "ocr-text" })
+	@Style(name = "flex", value = "1")
 	public static class FiltersOcrText extends FlexDiv {
 		// Print the ocr text for the corresponding filter
 	}

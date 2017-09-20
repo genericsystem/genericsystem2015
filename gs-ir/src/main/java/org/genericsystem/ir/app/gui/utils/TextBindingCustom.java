@@ -109,7 +109,7 @@ public class TextBindingCustom {
 			ZoneTextInstance zti = (ZoneTextInstance) context.getGenerics()[1];
 			DocInstance doc = zti.getDoc();
 			ZoneTextInstance text = zt.getZoneText(doc, zti.getZone(), ifi);
-			return new SimpleStringProperty(text == null ? "" : text.getValue().toString());
+			return new SimpleStringProperty(text == null ? "" : StringEscapeUtils.escapeHtml4(text.getValue().toString()));
 		}
 	}
 

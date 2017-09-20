@@ -234,6 +234,7 @@ public class ApplicationServer extends AbstractBackEnd {
 					indexHtml += "</body>";
 					indexHtml += "</html>";
 					application.setIndexHtml(indexHtml);
+					request.response().headers().add(HttpHeaders.CONTENT_TYPE, "text/html");
 					request.response().end(indexHtml);
 				} else {
 					InputStream input = application.getApplicationClass().getResourceAsStream("/" + resourceToServe);
@@ -271,6 +272,13 @@ public class ApplicationServer extends AbstractBackEnd {
 						request.response().end(buffer);
 					} else {
 						String result = new BufferedReader(new InputStreamReader(input)).lines().collect(Collectors.joining("\n"));
+						MultiMap headers = request.response().headers();
+						if (resourceToServe.endsWith(".css"))
+							headers.add(HttpHeaders.CONTENT_TYPE, "text/css");
+						else if (resourceToServe.endsWith(".js"))
+							headers.add(HttpHeaders.CONTENT_TYPE, "application/javascript");
+						else
+							headers.add(HttpHeaders.CONTENT_TYPE, "text/html");
 						request.response().end(result);
 					}
 				}

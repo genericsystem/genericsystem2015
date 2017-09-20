@@ -5,17 +5,17 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.genericsystem.api.core.exceptions.RollbackException;
+import org.genericsystem.common.AbstractCache;
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.TransformationObservableList;
-import org.genericsystem.kernel.Cache;
 import org.genericsystem.reactor.FilteredChildren.FilteredChildContexts;
 import org.genericsystem.reactor.context.RootContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableIntegerValue;
@@ -211,7 +211,6 @@ public class Context {
 
 	public void flush() {
 		getCache().flush();
-		traverse();
 	}
 
 	public void cancel() {
@@ -232,25 +231,14 @@ public class Context {
 
 	public void unmount() {
 		getCache().unmount();
-		traverse();
 	}
 
-	public boolean isInCache() {
-		// System.out.println(getGeneric().info() + getCache().contains(getGeneric()));
-		return getCache().contains(getGeneric());
+	public BooleanBinding isInCache() {
+		return getCache().isInCache(getGeneric());
 	}
 
 	public long shiftTs() throws RollbackException {
 		return getCache().shiftTs();
-	}
-
-	public void traverse() {
-		Stream<Tag> tagsWithDomNode = tagDataMap.entrySet().stream().filter(entry -> entry.getValue().getHtmlDomNode() != null).map(entry -> entry.getKey());
-		if (isInCache())
-			tagsWithDomNode.forEach(tag -> tag.addStyleClass(this, "opaque"));
-		else
-			tagsWithDomNode.forEach(tag -> tag.removeStyleClass(this, "opaque"));
-		getSubContexts().forEach(Context::traverse);
 	}
 
 	public boolean isDestroyed() {
@@ -261,7 +249,7 @@ public class Context {
 		return getParent().getRootContext();
 	}
 
-	public Cache getCache() {
+	public AbstractCache getCache() {
 		return getParent().getCache();
 	}
 }
