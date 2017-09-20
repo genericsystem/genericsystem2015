@@ -28,7 +28,7 @@ public class Ocr {
 	private static final String TESSDATA_PATH = "/usr/share/tesseract-ocr/4.00/";
 	private static final String TESSDATA_ALT_PATH = System.getenv("TESSDATA_PREFIX");
 	private static final String TESSERACT_LANGUAGE = "fra";
-	private static final String TESSERACT_WHAR_WHITE_LIST = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM0123456789.-,<'";
+	private static final String TESSERACT_CHAR_WHITE_LIST = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM0123456789.-,<'";
 	private static final int TESSERACT_OEM = 1;
 	private static final int TESSERACT_PSMODE = 13;
 
@@ -59,11 +59,11 @@ public class Ocr {
 			OCRTesseract instance = null;
 			try {
 				// Attempt to load tessdata from the default path (when installed from official repository)
-				instance = OCRTesseract.create(Ocr.TESSDATA_PATH, Ocr.TESSERACT_LANGUAGE, Ocr.TESSERACT_WHAR_WHITE_LIST, Ocr.TESSERACT_OEM, Ocr.TESSERACT_PSMODE);
+				instance = OCRTesseract.create(Ocr.TESSDATA_PATH, Ocr.TESSERACT_LANGUAGE, Ocr.TESSERACT_CHAR_WHITE_LIST, Ocr.TESSERACT_OEM, Ocr.TESSERACT_PSMODE);
 			} catch (Exception e) {
 				// If tessdata was not found, attempt to load from the alternate path
 				try {
-					instance = OCRTesseract.create(Ocr.TESSDATA_ALT_PATH, Ocr.TESSERACT_LANGUAGE, Ocr.TESSERACT_WHAR_WHITE_LIST, Ocr.TESSERACT_OEM, Ocr.TESSERACT_PSMODE);
+					instance = OCRTesseract.create(Ocr.TESSDATA_ALT_PATH, Ocr.TESSERACT_LANGUAGE, Ocr.TESSERACT_CHAR_WHITE_LIST, Ocr.TESSERACT_OEM, Ocr.TESSERACT_PSMODE);
 				} catch (Exception e1) {
 					throw new RuntimeException("Unable to load tesseract data. Please ensure that tesseract-ocr is installed and configured properly on your system.", e);
 				}
