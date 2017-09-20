@@ -672,7 +672,7 @@ public class Img implements AutoCloseable, Serializable {
 	}
 
 	public Img bilateralFilter() {
-		return bilateralFilter(30, 80, 80);
+		return bilateralFilter(5, 80, 80);
 	}
 
 	public Img distanceTransform() {

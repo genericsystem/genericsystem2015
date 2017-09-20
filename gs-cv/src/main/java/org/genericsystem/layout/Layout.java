@@ -98,7 +98,7 @@ public class Layout {
 
 	}
 
-	public void drawPerspective(Img rootImg, Mat homography, Scalar color, int thickness, double deltaW, double deltaH) {
+	public void drawOcrPerspectiveInverse(Img rootImg, Mat homography, Scalar color, int thickness) {
 		traverse(getRoi(rootImg), (roi, layout) -> {
 			if (layout.getChildren().isEmpty()) {
 				MatOfPoint2f results = new MatOfPoint2f();
@@ -124,12 +124,18 @@ public class Layout {
 						// if (entry.getValue() > all / 10)
 						// Imgproc.putText(rootImg.getSrc(), Normalizer.normalize(entry.getKey(), Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", ""), layout.getRect(rootImg).tl(), Core.FONT_HERSHEY_PLAIN, 1, new Scalar(255, 0, 0), 1);
 						// });
-						// Imgproc.putText(rootImg.getSrc(), layout.getBestLabel(), layout.getRect(rootImg).tl(),
-						// Core.FONT_HERSHEY_PLAIN, 1, new Scalar(255, 0, 0), 1);
+						// Imgproc.putText(rootImg.getSrc(), layout.getBestLabel(), layout.getRect(rootImg).tl(), Core.FONT_HERSHEY_PLAIN, 1, new Scalar(255, 0, 0), 1);
 						// System.out.println(layout.getBestLabel());
 					}
 				}
 			}
+		});
+	}
+
+	public void drawOcr(Img rootImg) {
+		traverse(rootImg, (root, layout) -> {
+			if (layout.getChildren().isEmpty())
+				Imgproc.putText(rootImg.getSrc(), Normalizer.normalize(layout.getBestLabel(), Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", ""), layout.getRect(rootImg).tl(), Core.FONT_HERSHEY_PLAIN, 1, new Scalar(255, 0, 0), 1);
 		});
 	}
 
