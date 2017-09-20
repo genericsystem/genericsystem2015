@@ -55,6 +55,13 @@ public class Dispatcher extends AbstractSingletonVerticle {
 	}
 
 	@Override
+	protected void undeployVerticle(Vertx vertx) {
+		if (engine != null)
+			engine.close();
+		super.undeployVerticle(vertx);
+	}
+
+	@Override
 	public void start(Future<Void> startFuture) throws Exception {
 		cache.safeExecute(() -> {
 			for (Generic task : taskType.getInstances()) {
