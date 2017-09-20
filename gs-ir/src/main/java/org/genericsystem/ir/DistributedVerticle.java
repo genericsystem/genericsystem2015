@@ -65,14 +65,19 @@ public class DistributedVerticle extends AbstractVerticle {
 		Handler<AsyncResult<String>> completionHandler = ar -> {
 			if (ar.failed())
 				throw new IllegalStateException(ar.cause());
+			logger.debug("Deployed {} DistributedVerticle", getMaxExecutions() < 1 ? 1 : getMaxExecutions());
 		};
 
 		Tools.deployOnCluster(vertx -> {
 			vertx.deployVerticle(new HttpServerVerticle(), complete -> {
 				if (complete.failed())
 					throw new IllegalStateException(complete.cause());
-				vertx.deployVerticle(DistributedVerticle.class.getName(), new DeploymentOptions().setInstances(getMaxExecutions()), completionHandler);
-				logger.debug("Deployed {} DistributedVerticle", getMaxExecutions() < 1 ? 1 : getMaxExecutions());
+			});
+			vertx.deployVerticle(this, complete -> {
+				if (complete.failed())
+					throw new IllegalStateException(complete.cause());
+				if (getMaxExecutions() > 1)
+					vertx.deployVerticle(DistributedVerticle.class.getName(), new DeploymentOptions().setInstances(getMaxExecutions() - 1), completionHandler);
 			});
 		});
 	}
