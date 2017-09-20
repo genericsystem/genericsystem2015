@@ -134,7 +134,6 @@ public class DocPropertiesSwitcher {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static ObservableValue<Boolean> isDocOcrd(Context context, boolean reverse) {
-		// TODO: modify the algorithm so each zone needs to be processed before returning true
 		DocInstance currentDoc = (DocInstance) context.getGeneric();
 		Root root = currentDoc.getRoot();
 		ZoneText zoneText = root.find(ZoneText.class);
