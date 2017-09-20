@@ -23,7 +23,7 @@ public class HttpServerVerticle extends AbstractVerticle {
 	@Override
 	public void start(Future<Void> future) throws Exception {
 		vertx.createHttpServer().requestHandler(req -> {
-			String fileName = req.path();
+			String fileName = DistributedVerticle.BASE_PATH + req.path();
 			logger.debug("Will send file {}.", fileName);
 			req.response().sendFile(fileName);
 		}).listen(8084, ar -> {
