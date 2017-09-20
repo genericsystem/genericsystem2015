@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
+import org.genericsystem.cv.docPattern.OCRPlasty;
 import org.genericsystem.cv.model.Doc;
 import org.genericsystem.cv.model.Doc.DocInstance;
 import org.genericsystem.cv.model.DocClass;
@@ -93,7 +94,7 @@ public class ComputeBestTextPerZone {
 			ZoneTextInstance realTextInstance = zoneText.getZoneText(docInstance, zoneInstance, realityInstance);
 			if (realTextInstance == null || realTextInstance.getValue().toString().isEmpty()) {
 				// If not supervised, compute the best text
-				String bestText = computeBestText(engine, docInstance, docType, zoneInstance);
+				String bestText = computeBestTextOcrPlasty(engine, docInstance, docType, zoneInstance);
 				if (null != bestText) {
 					zoneText.setZoneText(bestText, docInstance, zoneInstance, bestInstance).setZoneTimestamp(ModelTools.getCurrentDate());
 				} else {
@@ -105,6 +106,27 @@ public class ComputeBestTextPerZone {
 			}
 			engine.getCurrentCache().flush();
 		}
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private static String computeBestTextOcrPlasty(Root engine, DocInstance docInstance, String docType, ZoneInstance zoneInstance) {
+		ImgFilter imgFilter = engine.find(ImgFilter.class);
+		ZoneText zoneText = engine.find(ZoneText.class);
+		Snapshot<ImgFilterInstance> imgFilterInstances = (Snapshot) imgFilter.getInstances().filter(f -> !"reality".equals(f.getValue()) && !"best".equals(f.getValue()));
+
+		List<String> ocrTexts = new ArrayList<>();
+		imgFilterInstances.forEach(imgFilterInstance -> {
+			ZoneTextInstance zti = zoneText.getZoneText(docInstance, zoneInstance, imgFilterInstance);
+			if (zti == null) {
+				logger.debug("No text found for {} => zone n°{}, {}", docInstance.getValue(), zoneInstance.getValue(), imgFilterInstance.getValue());
+			} else {
+				String text = zti.getValue().toString();
+				ocrTexts.add(text);
+			}
+		});
+		String bestText = OCRPlasty.ocrPlasty(ocrTexts);
+		logger.debug("Best text: {}", bestText);
+		return bestText;
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
