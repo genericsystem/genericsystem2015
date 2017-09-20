@@ -76,23 +76,30 @@ public interface Tag extends TagNode, ActionDefaults, SelectionDefaults, Stepper
 	}
 
 	default void bindOptionalStyleClass(String styleClass, String propertyName) {
-		addPrefixBinding(modelContext -> {
-			ObservableValue<Boolean> optional = getContextObservableValue(propertyName, modelContext);
-			Set<String> styleClasses = getDomNodeStyleClasses(modelContext);
-			Consumer<Boolean> consumer = bool -> {
-				if (Boolean.TRUE.equals(bool))
-					styleClasses.add(styleClass);
-				else
-					styleClasses.remove(styleClass);
-			};
-			consumer.accept(optional.getValue());
-			optional.addListener((o, ov, nv) -> consumer.accept(nv));
-		});
+		addPrefixBinding(context -> bindOptionalStyleClass(styleClass, propertyName, context));
+	}
+
+	default void bindOptionalStyleClass(String styleClass, String propertyName, Context context) {
+		ObservableValue<Boolean> optional = getContextObservableValue(propertyName, context);
+		Set<String> styleClasses = getDomNodeStyleClasses(context);
+		Consumer<Boolean> consumer = bool -> {
+			if (Boolean.TRUE.equals(bool))
+				styleClasses.add(styleClass);
+			else
+				styleClasses.remove(styleClass);
+		};
+		consumer.accept(optional.getValue());
+		optional.addListener((o, ov, nv) -> consumer.accept(nv));
 	}
 
 	default void bindOptionalStyleClass(String styleClass, String modelPropertyName, Function<Context, ObservableValue<Boolean>> applyOnModel) {
 		addContextAttribute(modelPropertyName, applyOnModel);
 		bindOptionalStyleClass(styleClass, modelPropertyName);
+	}
+
+	default void bindOptionalStyleClass(String styleClass, String modelPropertyName, Context context, ObservableValue<Boolean> obs) {
+		context.addContextAttribute(this, modelPropertyName, obs);
+		bindOptionalStyleClass(styleClass, modelPropertyName, context);
 	}
 
 	default void forEach2(Function<Context, ObservableList<Generic>> applyOnModel) {
