@@ -67,6 +67,8 @@ public abstract class ActionVerticle extends AbstractVerticle {
 		String fileName = task.getString(DistributedVerticle.FILENAME);
 		File file = new File(DistributedVerticle.BASE_PATH + fileName);
 		if (!file.exists()) {
+			logger.info("Downloading file: {}", fileName);
+			logger.debug("Requesting {}:8084/{}", task.getString(DistributedVerticle.IP), fileName);
 			BlockingQueue<byte[]> blockingQueue = new ArrayBlockingQueue<>(1);
 			HttpClient httpClient = vertx.createHttpClient().getNow(8084, task.getString(DistributedVerticle.IP), fileName, resp -> resp.bodyHandler(body -> {
 				try {
@@ -77,6 +79,7 @@ public abstract class ActionVerticle extends AbstractVerticle {
 				}
 			}));
 			httpClient.close();
+
 			byte[] bytes;
 			try {
 				bytes = blockingQueue.take();
@@ -84,17 +87,15 @@ public abstract class ActionVerticle extends AbstractVerticle {
 				future.fail(e);
 				return;
 			}
-			FileOutputStream fos;
 
-			try {
+			try (FileOutputStream fos = new FileOutputStream(file)) {
 				file.getParentFile().mkdirs();
-				fos = new FileOutputStream(file);
 				fos.write(bytes);
-				fos.close();
 			} catch (IOException e) {
 				future.fail(e);
 				return;
 			}
+			logger.debug("{} successfully downloaded ({}) ", file.getName(), String.format("%,d", file.length()));
 		} else {
 			logger.info("The file {} has already been downloaded.", fileName);
 		}
