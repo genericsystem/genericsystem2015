@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.shareddata.Counter;
 import io.vertx.core.shareddata.SharedData;
@@ -19,6 +20,11 @@ public abstract class AbstractMultitonVerticle extends AbstractVerticle {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
+	protected final String className = this.getClass().getSimpleName();
+	protected final String startingErrorMsg = "An error has occured while deploying" + className;
+	protected final String stoppingErrorMsg = "An error has occured while stopping" + className;
+	protected boolean isDeployed;
+
 	/**
 	 * This method returns the name of the cluster-wide counter. This name should be unique.
 	 * 
@@ -27,7 +33,7 @@ public abstract class AbstractMultitonVerticle extends AbstractVerticle {
 	protected abstract String getCounter();
 
 	/**
-	 * This method returns the value of the cluster-wide counter. If represents the maximum number of instances for the Verticle extending this class.
+	 * This method returns the expected maximum value of the cluster-wide counter. If represents the maximum number of instances for the Verticle extending this class.
 	 * 
 	 * @return a String
 	 */
@@ -41,31 +47,34 @@ public abstract class AbstractMultitonVerticle extends AbstractVerticle {
 			SharedData sd = vertx.sharedData();
 			sd.getCounter(getCounter(), res -> {
 				if (!res.succeeded()) {
-					throw new IllegalStateException("An error has occured while deploying" + this.getClass().getSimpleName(), res.cause());
+					throw new IllegalStateException(startingErrorMsg, res.cause());
 				} else {
 					Counter counter = res.result();
 					logger.debug("Couter {} successfully acquired", getCounter());
 					counter.incrementAndGet(ar -> {
-						if (ar.succeeded()) {
+						if (!ar.succeeded())
+							throw new IllegalStateException(startingErrorMsg, res.cause());
+						else {
 							long value = ar.result();
 							logger.debug("Counter {} incremented to {} (previously {})", getCounter(), value, (value - 1));
 							if (value == getCounterOk()) {
 								logger.debug("Deploying verticle...");
 								deployVerticle(vertx);
+								this.isDeployed = true;
 								logger.debug("Verticle deployed!");
 							} else {
-								logger.warn("An instance of {} is already deployed on the cluster. Aborting...", this.getClass().getSimpleName());
+								logger.warn("An instance of {} is already deployed on the cluster. Aborting...", className);
 								counter.decrementAndGet(ar2 -> {
-									if (ar2.succeeded()) {
+									if (!ar2.succeeded())
+										throw new IllegalStateException(startingErrorMsg, res.cause());
+									else {
 										long newValue = ar2.result();
 										logger.debug("Counter {} decremented to {} (previously {})", getCounter(), newValue, (newValue + 1));
 										undeployVerticle(vertx);
-									} else
-										throw new IllegalStateException("An error has occured while deploying" + this.getClass().getSimpleName(), res.cause());
+									}
 								});
 							}
-						} else
-							throw new IllegalStateException("An error has occured while deploying" + this.getClass().getSimpleName(), res.cause());
+						}
 					});
 				}
 			});
@@ -92,6 +101,42 @@ public abstract class AbstractMultitonVerticle extends AbstractVerticle {
 			else
 				throw new IllegalStateException("An error has occured while shutting down the verticle", res.cause());
 		});
+	}
+
+	@Override
+	public void stop(Future<Void> stopFuture) throws Exception {
+		if (isDeployed) {
+			SharedData sd = vertx.sharedData();
+			sd.getCounter(getCounter(), res -> {
+				if (!res.succeeded()) {
+					throw new IllegalStateException(stoppingErrorMsg, res.cause());
+				} else {
+					Counter counter = res.result();
+					logger.debug("Couter {} successfully acquired", getCounter());
+					counter.get(ar -> {
+						if (!ar.succeeded())
+							throw new IllegalStateException(stoppingErrorMsg, res.cause());
+						else {
+							long value = ar.result();
+							logger.debug("Counter {} has value: {})", getCounter(), value);
+							if (value == getCounterOk())
+								throw new IllegalStateException(String.format("Unexpected value (%d) for counter %s", value, getCounter()));
+							else {
+								counter.decrementAndGet(ar2 -> {
+									if (!ar2.succeeded())
+										throw new IllegalStateException(stoppingErrorMsg, res.cause());
+									else {
+										long newValue = ar2.result();
+										logger.debug("Counter {} decremented to {} (previously {})", getCounter(), newValue, (newValue + 1));
+									}
+								});
+							}
+						}
+					});
+				}
+			});
+		}
+		super.stop(stopFuture);
 	}
 
 	/**
