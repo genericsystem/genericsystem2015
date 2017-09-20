@@ -28,7 +28,7 @@ public class Ocr {
 	private static final String TESSDATA_PATH = "/usr/share/tesseract-ocr/4.00/";
 	private static final String TESSDATA_ALT_PATH = System.getenv("TESSDATA_PREFIX");
 	private static final String TESSERACT_LANGUAGE = "fra";
-	private static final String TESSERACT_CHAR_WHITE_LIST = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM0123456789.-,<'";
+	private static final String TESSERACT_CHAR_WHITE_LIST = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM0123456789.-,<>!?;éèàçÉÈÀÇ€£$œ'";
 	private static final int TESSERACT_OEM = 1;
 	private static final int TESSERACT_PSMODE = 13;
 
