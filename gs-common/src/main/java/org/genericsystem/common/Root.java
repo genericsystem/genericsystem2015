@@ -29,14 +29,13 @@ import javassist.util.proxy.ProxyObject;
 
 /**
  * @author Nicolas Feybesse
- *
  */
 public abstract class Root implements DefaultRoot<Generic>, ProxyObject, Generic {
 
 	private final Map<Long, Generic> genericsById = new ConcurrentHashMap<>();
 	private final SystemCache systemCache = buildSystemCache(this);
 	protected boolean isInitialized = false;
-	private final ThreadLocal<AbstractCache> cacheLocal = new ThreadLocal<AbstractCache>();
+	private final ThreadLocal<AbstractCache> cacheLocal = new ThreadLocal<>();
 	private final Set<AbstractCache> reactiveCaches = new ConcurrentHashSet<>();
 
 	protected abstract SystemCache buildSystemCache(Root root);
@@ -67,7 +66,7 @@ public abstract class Root implements DefaultRoot<Generic>, ProxyObject, Generic
 	}
 
 	private void checkNames(Class<?>[] userClasses) {
-		Set<String> set = new HashSet<String>();
+		Set<String> set = new HashSet<>();
 		List<String> names = Arrays.stream(userClasses).map(Class::getName).filter(className -> !set.add(className)).collect(Collectors.toList());
 		if (!names.isEmpty())
 			throw new IllegalStateException("Class name clash detected  : " + names);
