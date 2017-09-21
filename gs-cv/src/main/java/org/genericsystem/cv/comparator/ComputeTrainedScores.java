@@ -108,7 +108,7 @@ public class ComputeTrainedScores {
 					logger.error("An error has occured while processing the score computation of zone n°{} (class: {})", zoneInstance.getValue(), docType);
 				}
 			}
-			engine.getCurrentCache().flush(); // XXX might be problematic when used in the reactor
+			// engine.getCurrentCache().flush(); // XXX might be problematic when used in the reactor
 		}
 	}
 

@@ -164,7 +164,10 @@ public class ContextActionCustom {
 			@Override
 			public void start() {
 				tag.addAttribute(gsContext, "disabled", "true");
-				gsContext.getCache().safeExecute(() -> ComputeTrainedScores.compute(root, docClassInstance.getValue().toString(), useStrict));
+				gsContext.getCache().safeExecute(() -> {
+					ComputeTrainedScores.compute(root, docClassInstance.getValue().toString(), useStrict);
+					gsContext.getCache().flush();
+				});
 				tag.addAttribute(gsContext, "disabled", "");
 				System.out.println("Done computing scores!");
 			}
