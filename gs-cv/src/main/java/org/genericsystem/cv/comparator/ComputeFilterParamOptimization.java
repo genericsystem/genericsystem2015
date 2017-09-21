@@ -14,7 +14,6 @@ import org.genericsystem.cv.model.DocClass;
 import org.genericsystem.cv.model.ImgFilter;
 import org.genericsystem.cv.model.ImgFilter.ImgFilterInstance;
 import org.genericsystem.cv.model.MeanLevenshtein;
-import org.genericsystem.cv.model.MeanLevenshtein.MeanLevenshteinInstance;
 import org.genericsystem.cv.model.Score;
 import org.genericsystem.cv.model.Score.ScoreInstance;
 import org.genericsystem.cv.model.ZoneGeneric;
@@ -99,8 +98,7 @@ public class ComputeFilterParamOptimization {
 				float probability = (float) count / (float) docInstances.size();
 				float meanDistance = (float) lev / (float) docInstances.size();
 
-				ScoreInstance scoreInstance = score.setScore(probability, zoneInstance, imgFilterInstance);
-				MeanLevenshteinInstance meanLevenshteinInstance = meanLevenshtein.setMeanLev(meanDistance, scoreInstance);
+				score.setScore(probability, zoneInstance, imgFilterInstance).setMeanLev(meanDistance);
 
 				meanLevDistances.add(meanDistance);
 				probabilities.add(probability);

@@ -14,7 +14,6 @@ import org.genericsystem.cv.model.ImgFilter;
 import org.genericsystem.cv.model.ImgFilter.ImgFilterInstance;
 import org.genericsystem.cv.model.MeanLevenshtein;
 import org.genericsystem.cv.model.Score;
-import org.genericsystem.cv.model.Score.ScoreInstance;
 import org.genericsystem.cv.model.ZoneGeneric;
 import org.genericsystem.cv.model.ZoneGeneric.ZoneInstance;
 import org.genericsystem.cv.model.ZoneText;
@@ -104,9 +103,7 @@ public class ComputeTrainedScores {
 				if (totalDocs > 0) {
 					float probability = (float) count / (float) totalDocs;
 					float meanDistance = (float) lev / (float) totalDocs;
-					ScoreInstance scoreInstance = score.setScore(probability, zoneInstance, imgFilterInstance);
-					meanLevenshtein.setMeanLev(meanDistance, scoreInstance);
-					engine.getCurrentCache().flush();
+					score.setScore(probability, zoneInstance, imgFilterInstance).setMeanLev(meanDistance);
 				} else {
 					logger.error("An error has occured while processing the score computation of zone n°{} (class: {})", zoneInstance.getValue(), docType);
 				}
