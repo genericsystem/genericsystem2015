@@ -63,12 +63,14 @@ public class ImgFiltersVisualComparator extends AbstractApp {
 		// }
 
 		final Map<String, ImgFunction> imgFilters = new HashMap<>();
-		imgFilters.put("original", Img::bgr2Gray);
-		imgFilters.put("niblack_37_m1.0", i -> i.niblackThreshold(37, -1.0));
-		imgFilters.put("niblack_21_m1.0", i -> i.niblackThreshold(21, -1.0));
-		imgFilters.put("niblack_21_m0.3", i -> i.niblackThreshold(21, -0.3));
-		imgFilters.put("niblack_27_m1.8", i -> i.niblackThreshold(27, -0.8));
-		imgFilters.put("niblack_7_m0.4", i -> i.niblackThreshold(7, -0.4));
+		imgFilters.put("original", i -> i);
+		// imgFilters.put("niblack_37_m1.0", i -> i.niblackThreshold(37, -1.0));
+		// imgFilters.put("niblack_21_m1.0", i -> i.niblackThreshold(21, -1.0));
+		// imgFilters.put("niblack_21_m0.3", i -> i.niblackThreshold(21, -0.3));
+		// imgFilters.put("niblack_27_m1.8", i -> i.niblackThreshold(27, -0.8));
+		// imgFilters.put("niblack_7_m0.4", i -> i.niblackThreshold(7, -0.4));
+		imgFilters.put("bilateralFilter", i -> i.bilateralFilter(20, 80, 80));
+		imgFilters.put("bilateralFilterAdaptGaussianThreshold", i -> i.bilateralFilter(30, 80, 80).adaptativeGaussianThreshold(17, 15));
 		// imgFilters.put("bernsen", i -> i.bernsen(15, 15));
 		// imgFilters.put("equalizeHisto", Img::equalizeHisto);
 		// imgFilters.put("equalizeHistoAdaptative", i -> i.equalizeHistoAdaptative(4.0, new Size(8, 8)));
@@ -89,7 +91,7 @@ public class ImgFiltersVisualComparator extends AbstractApp {
 
 			Img img2 = null;
 			if ("original".equals(entry.getKey()) || "reality".equals(entry.getKey())) {
-				img2 = img.bgr2Gray();
+				img2 = new Img(img.getSrc());
 			} else {
 				img2 = entry.getValue().apply(img);
 			}
@@ -104,7 +106,7 @@ public class ImgFiltersVisualComparator extends AbstractApp {
 
 		final Zones zones = Zones.load(imgClassDirectory);
 
-		Img model = img;
+		Img model = new Img(img.getSrc());
 		zones.draw(model, new Scalar(0, 255, 0), 3);
 		mainGrid.add(model.getImageView(), columnIndex, rowIndex++);
 
