@@ -15,13 +15,10 @@ import org.genericsystem.api.core.FiltersBuilder;
 import org.genericsystem.api.core.IGeneric;
 import org.genericsystem.api.core.IndexFilter;
 import org.genericsystem.api.core.Snapshot;
-import org.genericsystem.defaults.tools.RxJavaHelpers;
 
 import io.reactivex.Observable;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.beans.value.WeakChangeListener;
+import io.reactivex.subjects.PublishSubject;
+import io.reactivex.subjects.Subject;
 
 /**
  * @author Nicolas Feybesse
@@ -206,13 +203,13 @@ public class PseudoConcurrentCollection<T extends IGeneric<?>> implements Snapsh
 
 	public void add(T element) {
 		indexesTree.add(element);
-		addProperty.set(element);
+		adds.onNext(element);
 	}
 
 	public boolean remove(T element) {
 		boolean result = indexesTree.remove(element);
 		if (result)
-			removeProperty.set(element);
+			removes.onNext(element);
 		return result;
 	}
 
@@ -221,41 +218,18 @@ public class PseudoConcurrentCollection<T extends IGeneric<?>> implements Snapsh
 		return map.get(o);
 	}
 
-	private SimpleObjectProperty<T> addProperty = new SimpleObjectProperty<T>();
-	private SimpleObjectProperty<T> removeProperty = new SimpleObjectProperty<T>();
-
-	private Observable<T> adds = RxJavaHelpers.valuesOf(addProperty);
-	private Observable<T> removes = RxJavaHelpers.valuesOf(removeProperty);
+	private Subject<T> adds = PublishSubject.create();
+	private Subject<T> removes = PublishSubject.create();
 
 	public Observable<T> getFilteredAdds(Predicate<T> predicate) {
-		return adds.filter(x -> fireInvalidations && predicate.test(x));
+		return adds.filter(x -> fireInvalidations && predicate.test(x)).serialize();
 	}
 
 	public Observable<T> getFilteredRemoves(Predicate<T> predicate) {
-		return removes.filter(x -> fireInvalidations && predicate.test(x));
-	}
-
-	private class FilteredInvalidator extends SimpleObjectProperty<T> {
-		private Predicate<T> predicate;
-
-		private ChangeListener<T> listener = (o, oldT, newT) -> {
-			if (fireInvalidations && predicate.test(newT))
-				super.fireValueChangedEvent();
-		};
-
-		private FilteredInvalidator(Predicate<T> predicate) {
-			this.predicate = predicate;
-			addProperty.addListener(new WeakChangeListener<T>(listener));
-			removeProperty.addListener(new WeakChangeListener<T>(listener));
-		}
-
+		return removes.filter(x -> fireInvalidations && predicate.test(x)).serialize();
 	}
 
 	private boolean fireInvalidations = true;
-
-	public ObservableValue<?> getFilteredInvalidator(Predicate<T> predicate) {
-		return new FilteredInvalidator(predicate);
-	}
 
 	public void disableInvalidations() {
 		fireInvalidations = false;
