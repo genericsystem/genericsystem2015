@@ -105,7 +105,7 @@ public abstract class AbstractMultitonVerticle extends AbstractVerticle {
 
 	@Override
 	public void stop(Future<Void> stopFuture) throws Exception {
-		if (isDeployed) {
+		if (this.isDeployed) {
 			SharedData sd = vertx.sharedData();
 			sd.getCounter(getCounter(), res -> {
 				if (!res.succeeded()) {
@@ -128,6 +128,7 @@ public abstract class AbstractMultitonVerticle extends AbstractVerticle {
 									else {
 										long newValue = ar2.result();
 										logger.debug("Counter {} decremented to {} (previously {})", getCounter(), newValue, (newValue + 1));
+										this.isDeployed = false;
 									}
 								});
 							}
