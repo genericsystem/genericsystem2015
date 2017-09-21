@@ -24,18 +24,17 @@ import org.genericsystem.cv.model.ZoneGeneric;
 import org.genericsystem.cv.model.ZoneGeneric.ZoneInstance;
 import org.genericsystem.cv.model.ZoneText;
 import org.genericsystem.cv.model.ZoneText.ZoneTextInstance;
-import org.genericsystem.cv.model.ZoneText.ZoneTimestamp;
 import org.genericsystem.kernel.Engine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ComputeBestTextPerZone {
 
-	private final static String gsPath = System.getenv("HOME") + "/genericsystem/gs-cv_model3/";
-	private static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+	private static final String gsPath = System.getenv("HOME") + "/genericsystem/gs-cv_model3/";
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	public static void main(String[] mainArgs) {
-		final Engine engine = new Engine(gsPath, Doc.class, ImgFilter.class, ZoneGeneric.class, ZoneText.class, ZoneTimestamp.class, Score.class, MeanLevenshtein.class);
+		final Root engine = FillModelWithData.getEngine(gsPath);
 		engine.newCache().start();
 		compute(engine);
 		engine.close();
