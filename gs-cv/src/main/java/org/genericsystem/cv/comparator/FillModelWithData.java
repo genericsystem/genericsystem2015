@@ -28,7 +28,6 @@ import org.genericsystem.cv.model.LevDistance;
 import org.genericsystem.cv.model.MeanLevenshtein;
 import org.genericsystem.cv.model.ModelTools;
 import org.genericsystem.cv.model.Score;
-import org.genericsystem.cv.model.Score.ScoreInstance;
 import org.genericsystem.cv.model.ZoneGeneric;
 import org.genericsystem.cv.model.ZoneGeneric.ZoneInstance;
 import org.genericsystem.cv.model.ZoneText;
@@ -68,7 +67,6 @@ public class FillModelWithData {
 		final Root engine = getEngine();
 		engine.newCache().start();
 		compute(engine);
-		// cleanModel(engine);
 		engine.close();
 	}
 
@@ -482,77 +480,4 @@ public class FillModelWithData {
 		return imgFilters;
 	}
 
-	/**
-	 * Remove all the data stored in the engine, except the real values used for training (e.g., for which imgFilter = "reality")
-	 * 
-	 * @param engine - the engine used to store the data
-	 */
-	@SuppressWarnings({ "unused", "unchecked", "rawtypes" })
-	private static void cleanModel(Root engine) {
-		System.out.println("Cleaning model...");
-		// Get the necessary classes from the engine
-		DocClass docClass = engine.find(DocClass.class);
-		Generic doc = engine.find(Doc.class);
-		ZoneText zoneText = engine.find(ZoneText.class);
-		ImgFilter imgFilter = engine.find(ImgFilter.class);
-		Score score = engine.find(Score.class);
-		MeanLevenshtein ml = engine.find(MeanLevenshtein.class);
-
-		// Save the current document class
-		Generic currentDocClass = engine.find(DocClass.class).getInstance(docType);
-
-		List<ImgFilterInstance> imgFilterInstances = (List) imgFilter.getInstances().filter(f -> !"reality".equals(f.getValue())).toList();
-		List<ZoneInstance> zoneInstances = (List) currentDocClass.getHolders(engine.find(ZoneGeneric.class)).toList();
-		List<DocInstance> docInstances = (List) currentDocClass.getHolders(engine.find(Doc.class)).toList();
-
-		// Delete all ZoneTextInstances that are not "reality"
-		docInstances.forEach(currentDoc -> {
-			imgFilterInstances.forEach(i -> {
-				zoneInstances.forEach(z -> {
-					ZoneTextInstance zti = zoneText.getZoneText(currentDoc, z, i);
-					if (zti != null) {
-						zti.getHolders(engine.find(ZoneTimestamp.class)).forEach(g -> g.remove());
-						zti.remove();
-					}
-				});
-				engine.getCurrentCache().flush();
-			});
-		});
-
-		// Delete all filters that are not reality", and their attached scores
-		imgFilterInstances.forEach(i -> {
-			zoneInstances.forEach(z -> {
-				ScoreInstance scoreInst = score.getScore(z, i);
-				if (scoreInst != null) {
-					scoreInst.getHolder(ml).remove();
-					scoreInst.remove();
-				}
-			});
-			i.remove();
-			engine.getCurrentCache().flush();
-		});
-
-		// Finally delete all documents for which no ZoneTextInstances exist (i.e., not supervised)
-		docInstances.forEach(currentDoc -> {
-			zoneInstances.forEach(z -> {
-				boolean result = imgFilter.getInstances().stream().allMatch(i -> {
-					ZoneTextInstance zti = zoneText.getZoneText(currentDoc, z, (ImgFilterInstance) i);
-					return null == zti || zti.getValue().toString().isEmpty();
-				});
-				if (result) {
-					currentDoc.getDependencies().forEach(dependency -> {
-						currentDoc.getHolders(dependency).forEach(g -> g.remove());
-						dependency.remove();
-						engine.getCurrentCache().flush();
-					});
-					// FIXME unable to delete the currentDoc (AliveConstraint violation)
-					currentDoc.remove();
-					engine.getCurrentCache().flush();
-				}
-			});
-		});
-
-		engine.getCurrentCache().flush();
-		System.out.println("Done!");
-	}
 }
