@@ -1,7 +1,5 @@
 package org.genericsystem.ir.app.gui.utils;
 
-import java.util.Arrays;
-
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.common.Generic;
@@ -115,7 +113,6 @@ public class ContextActionCustom {
 			System.out.println("Refreshing best text...");
 			Root root = gsContext.getGeneric().getRoot();
 			DocInstance docInstance = (DocInstance) gsContext.getGeneric();
-			String docType = docInstance.getDocClass().getValue().toString();
 
 			WorkerVerticle worker = new WorkerVerticle(root) {
 				@Override
@@ -159,7 +156,7 @@ public class ContextActionCustom {
 	public static void computeStatistics(Context gsContext, Tag tag, boolean useStrict) {
 		DocClassInstance docClassInstance = (DocClassInstance) gsContext.getGeneric();
 		Root root = docClassInstance.getRoot();
-		Arrays.asList(gsContext.getGenerics()).forEach(g -> System.out.println(g.info()));
+
 		WorkerVerticle worker = new WorkerVerticle() {
 			@Override
 			public void start() {
