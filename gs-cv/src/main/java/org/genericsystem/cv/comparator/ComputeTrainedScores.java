@@ -3,6 +3,7 @@ package org.genericsystem.cv.comparator;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
 
+import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
 import org.genericsystem.cv.Levenshtein;
@@ -29,40 +30,25 @@ import org.slf4j.LoggerFactory;
  */
 public class ComputeTrainedScores {
 
-	/**
-	 * Used for a "strict" string comparison. The {@link Levenshtein} distance is zero only if two strings are identical.
-	 */
-	public static final Boolean BE_STRICT = true;
-	/**
-	 * Allow some variations during the string comparison. For example, spaces and periods are removed before the {@link Levenshtein} distance is computed.
-	 */
-	public static final Boolean BE_GENTLE = false;
-
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 	private static final String gsPath = System.getenv("HOME") + "/genericsystem/gs-cv_model3/";
 
+	/**
+	 * Used for a "strict" string comparison. The {@link Levenshtein} distance is zero only if two strings are identical.
+	 */
+	public static final Boolean BE_STRICT = Boolean.TRUE;
+	/**
+	 * Allow some variations during the string comparison. For example, spaces and periods are removed before the {@link Levenshtein} distance is computed.
+	 */
+	public static final Boolean BE_GENTLE = Boolean.FALSE;
+
 	public static void main(String[] mainArgs) {
 		final Engine engine = new Engine(gsPath, Doc.class, ImgFilter.class, ZoneGeneric.class, ZoneText.class, Score.class, MeanLevenshtein.class);
-
 		engine.newCache().start();
-		compute(engine);
+		final String docType = "id-fr-front";
+		final boolean useStrict = false;
+		compute(engine, docType, useStrict);
 		engine.close();
-	}
-
-	public static void compute(Root engine) {
-		final String docType = "id-fr-front";
-		final boolean useStrict = false;
-		compute(engine, docType, useStrict);
-	}
-
-	public static void compute(Root engine, String docType) {
-		final boolean useStrict = false;
-		compute(engine, docType, useStrict);
-	}
-
-	public static void compute(Root engine, boolean useStrict) {
-		final String docType = "id-fr-front";
-		compute(engine, docType, useStrict);
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -81,9 +67,7 @@ public class ComputeTrainedScores {
 		ImgFilterInstance realityInstance = imgFilter.getImgFilter("reality");
 
 		for (ZoneInstance zoneInstance : zoneInstances) {
-			// logger.info("=> Zone {}", zoneInstance);
-			// List<Float> meanLevDistances = new ArrayList<>();
-			// List<Float> probabilities = new ArrayList<>();
+			logger.debug("=> Zone {}", zoneInstance);
 			for (ImgFilterInstance imgFilterInstance : imgFilterInstances) {
 				int lev = 0; // contains the sum of all Levenshtein distances for a given zone
 				int count = 0; // contains the number of "perfect" matches
@@ -100,15 +84,13 @@ public class ComputeTrainedScores {
 					} else {
 						String realText = (String) realZti.getValue();
 						ZoneTextInstance zti = zoneText.getZoneText(docInstance, zoneInstance, imgFilterInstance);
-						// Do not proceed if the zoneText does not exists (i.e.,
-						// the algorithm was not applied to this image)
+						// Do not proceed if the zoneText does not exists (i.e., the algorithm was not applied to this image)
 						if (zti == null) {
 							logger.debug("No text found for {} => zone n°{}, {}", docInstance.getValue(), zoneInstance.getValue(), imgFilterInstance.getValue());
 							// Decrement the total size, since this value will not be accounted for in the statistics
 							totalDocs--;
 						} else {
 							String text = (String) zti.getValue();
-							// TODO : manipulate the Strings before comparison?
 							int dist;
 							if (useStrict.equals(BE_STRICT))
 								dist = Levenshtein.distance(text.trim(), realText.trim());
@@ -122,25 +104,19 @@ public class ComputeTrainedScores {
 				if (totalDocs > 0) {
 					float probability = (float) count / (float) totalDocs;
 					float meanDistance = (float) lev / (float) totalDocs;
-
 					ScoreInstance scoreInstance = score.setScore(probability, zoneInstance, imgFilterInstance);
 					meanLevenshtein.setMeanLev(meanDistance, scoreInstance);
 					engine.getCurrentCache().flush();
-					// meanLevDistances.add(meanDistance);
-					// probabilities.add(probability);
 				} else {
 					logger.error("An error has occured while processing the score computation of zone n°{} (class: {})", zoneInstance.getValue(), docType);
 				}
 			}
-			engine.getCurrentCache().flush();
-			// for (int i = 0; i < imgFilterInstances.size(); i++) {
-			// logger.info("{}: {} (meanLev: {})", imgFilterInstances.get(i), probabilities.get(i), meanLevDistances.get(i));
-			// }
+			engine.getCurrentCache().flush(); // XXX might be problematic when used in the reactor
 		}
-
 	}
 
 	// Untested yet!
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static void clearStatistics(Root engine, String docType) {
 		try {
 			engine.getCurrentCache();
@@ -151,15 +127,9 @@ public class ComputeTrainedScores {
 		Generic currentDocClass = engine.find(DocClass.class).getInstance(docType);
 		ImgFilter imgFilter = engine.find(ImgFilter.class);
 		Score score = engine.find(Score.class);
-
 		logger.info("Current doc class: {} ", currentDocClass);
-
-		List<ZoneInstance> zoneInstances = (List) currentDocClass.getHolders(engine.find(ZoneGeneric.class)).toList();
-		List<ImgFilterInstance> imgFilterInstances = (List) imgFilter.getInstances().filter(f -> !"reality".equals(f.getValue()) && !"best".equals(f.getValue())).toList();
-		for (ZoneInstance zone : zoneInstances) {
-			for (ImgFilterInstance ifi : imgFilterInstances) {
-				score.getScore(zone, ifi).remove();
-			}
-		}
+		Snapshot<ZoneInstance> zoneInstances = (Snapshot) currentDocClass.getHolders(engine.find(ZoneGeneric.class));
+		Snapshot<ImgFilterInstance> imgFilterInstances = (Snapshot) imgFilter.getInstances().filter(f -> !"reality".equals(f.getValue()) && !"best".equals(f.getValue()));
+		zoneInstances.forEach(zone -> imgFilterInstances.forEach(ifi -> score.getScore(zone, ifi).remove()));
 	}
 }
