@@ -66,7 +66,7 @@ public class FillModelWithData {
 	public static void main(String[] mainArgs) {
 		final Root engine = getEngine();
 		engine.newCache().start();
-		compute(engine);
+		compute(engine, docType);
 		engine.close();
 	}
 
@@ -307,7 +307,7 @@ public class FillModelWithData {
 			} catch (Exception e1) {
 				throw new RuntimeException(e1);
 			}
-			engine.getCurrentCache().flush();
+			// engine.getCurrentCache().flush();
 
 			zones.forEach(entry -> {
 				logger.info("Current zone: {}", entry.getKey());
@@ -317,20 +317,20 @@ public class FillModelWithData {
 					currentZone.put("reality", ""); // Add this filter only if there are other filters
 				currentZone.forEach(e -> {
 					logger.trace("key: {}; value: {}", e.getKey(), e.getValue());
+					ImgFilterInstance imgFilterInstance = imgFilter.getImgFilter(e.getKey());
+					if (null == imgFilterInstance)
+						throw new NullPointerException("Cannot retrieve imgFilterInstance from the Engine");
+
 					if ("reality".equals(e.getKey()) || "best".equals(e.getKey())) {
 						// Do not proceed to OCR if the real values are known. By default, the "reality" and "best" filters are left empty
-						if (null == zoneText.getZoneText(docInstance, zoneInstance, imgFilter.getImgFilter(e.getKey())))
-							zoneText.setZoneText("", docInstance, zoneInstance, imgFilter.getImgFilter(e.getKey()));
+						if (null == zoneText.getZoneText(docInstance, zoneInstance, imgFilterInstance))
+							zoneText.setZoneText("", docInstance, zoneInstance, imgFilterInstance);
 					} else {
 						String ocrText = (String) e.getValue();
-						ImgFilterInstance imgFilterInstance = imgFilter.getImgFilter(e.getKey());
-						if (null != imgFilterInstance)
-							zoneText.setZoneText(ocrText, docInstance, zoneInstance, imgFilterInstance).setZoneTimestamp(ModelTools.getCurrentDate());
-						else
-							throw new NullPointerException("Cannot retrieve imgFilterInstance from the Engine");
+						zoneText.setZoneText(ocrText, docInstance, zoneInstance, imgFilterInstance).setZoneTimestamp(ModelTools.getCurrentDate());
 					}
 				});
-				engine.getCurrentCache().flush();
+				// engine.getCurrentCache().flush();
 			});
 			logger.info("Data for {} successfully saved.", filenameExt);
 		} catch (Exception e) {
@@ -367,7 +367,7 @@ public class FillModelWithData {
 		engine.getCurrentCache().flush();
 
 		// Process the image file
-		JsonObject params = getOcrParameters(engine, imagePath);
+		JsonObject params = buildOcrParameters(engine, imagePath);
 		JsonObject ocrData = processFile(params);
 		saveOcrDataInModel(engine, ocrData);
 	}
@@ -397,6 +397,7 @@ public class FillModelWithData {
 			JsonObject params = buildOcrParameters(engine, file.toPath());
 			JsonObject ocrData = processFile(params);
 			saveOcrDataInModel(engine, ocrData);
+			engine.getCurrentCache().flush();
 		});
 		engine.getCurrentCache().flush();
 	}
