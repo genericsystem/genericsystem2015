@@ -47,6 +47,7 @@ public class ComputeTrainedScores {
 		final String docType = "id-fr-front";
 		final boolean useStrict = false;
 		compute(engine, docType, useStrict);
+		// engine.getCurrentCache().flush();
 		engine.close();
 	}
 
@@ -104,23 +105,18 @@ public class ComputeTrainedScores {
 					float probability = (float) count / (float) totalDocs;
 					float meanDistance = (float) lev / (float) totalDocs;
 					score.setScore(probability, zoneInstance, imgFilterInstance).setMeanLev(meanDistance);
+					// ScoreInstance scoreInstance = score.getScore(zoneInstance, imgFilterInstance);
+					// System.out.println(String.format("score: %f | ml: %f", scoreInstance.getValue(), meanLevenshtein.getMeanLev(scoreInstance).getValue()));
 				} else {
 					logger.error("An error has occured while processing the score computation of zone n°{} (class: {})", zoneInstance.getValue(), docType);
 				}
 			}
-			// engine.getCurrentCache().flush(); // XXX might be problematic when used in the reactor
 		}
 	}
 
 	// Untested yet!
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static void clearStatistics(Root engine, String docType) {
-		try {
-			engine.getCurrentCache();
-		} catch (IllegalStateException e) {
-			logger.error("Current cache could not be loaded. Starting a new one...");
-			engine.newCache().start();
-		}
 		Generic currentDocClass = engine.find(DocClass.class).getInstance(docType);
 		ImgFilter imgFilter = engine.find(ImgFilter.class);
 		Score score = engine.find(Score.class);
