@@ -127,7 +127,7 @@ public class ContextActionCustom {
 				}
 
 				private void compute() {
-					ComputeBestTextPerZone.computeOneFile(root, docInstance, docType);
+					ComputeBestTextPerZone.computeOneFile(root, docInstance);
 					docInstance.setRefreshTimestamp(ModelTools.getCurrentDate());
 					gsContext.getCache().flush();
 				}

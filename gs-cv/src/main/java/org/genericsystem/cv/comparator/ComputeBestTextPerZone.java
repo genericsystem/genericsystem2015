@@ -13,10 +13,8 @@ import org.genericsystem.cv.docPattern.OCRPlasty;
 import org.genericsystem.cv.model.Doc;
 import org.genericsystem.cv.model.Doc.DocInstance;
 import org.genericsystem.cv.model.DocClass;
-import org.genericsystem.cv.model.DocClass.DocClassInstance;
 import org.genericsystem.cv.model.ImgFilter;
 import org.genericsystem.cv.model.ImgFilter.ImgFilterInstance;
-import org.genericsystem.cv.model.MeanLevenshtein;
 import org.genericsystem.cv.model.ModelTools;
 import org.genericsystem.cv.model.Score;
 import org.genericsystem.cv.model.Score.ScoreInstance;
@@ -24,7 +22,6 @@ import org.genericsystem.cv.model.ZoneGeneric;
 import org.genericsystem.cv.model.ZoneGeneric.ZoneInstance;
 import org.genericsystem.cv.model.ZoneText;
 import org.genericsystem.cv.model.ZoneText.ZoneTextInstance;
-import org.genericsystem.kernel.Engine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,51 +32,24 @@ public class ComputeBestTextPerZone {
 
 	public static void main(String[] mainArgs) {
 		final Root engine = FillModelWithData.getEngine(gsPath);
-		engine.newCache().start();
-		compute(engine);
-		engine.close();
-	}
-
-	public static void compute(Root engine) {
 		final String docType = "id-fr-front";
+		engine.newCache().start();
 		compute(engine, docType);
+		engine.close();
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static void compute(Root engine, String docType) {
 		Generic currentDocClass = engine.find(DocClass.class).getInstance(docType);
-		List<DocInstance> docInstances = (List) currentDocClass.getHolders(engine.find(Doc.class)).toList();
+		Snapshot<DocInstance> docInstances = (Snapshot) currentDocClass.getHolders(engine.find(Doc.class));
 		for (DocInstance docInstance : docInstances) {
-			computeOneFile(engine, docInstance, docType);
+			computeOneFile(engine, docInstance);
 		}
 	}
 
-	public static void computeOneFile(String filename, String docType) {
-		final Engine engine = new Engine(gsPath, Doc.class, ImgFilter.class, ZoneGeneric.class, ZoneText.class, Score.class, MeanLevenshtein.class);
-		engine.newCache().start();
-		computeOneFile(engine, filename, docType);
-		engine.close();
-	}
-
-	public static void computeOneFile(String filename) {
-		final Engine engine = new Engine(gsPath, Doc.class, ImgFilter.class, ZoneGeneric.class, ZoneText.class, Score.class, MeanLevenshtein.class);
-		final String docType = "id-fr-front";
-		engine.newCache().start();
-		computeOneFile(engine, filename, docType);
-		engine.close();
-	}
-
-	public static void computeOneFile(Root engine, String filename, String docType) {
-		Doc doc = engine.find(Doc.class);
-		Generic currentDocClass = engine.find(DocClass.class).getInstance(docType);
-		DocInstance docInstance = doc.getDoc(filename, (DocClassInstance) currentDocClass);
-		computeOneFile(engine, docInstance, docType);
-	}
-
-	// TODO: pass docClassInstance as a parameter instead of docType?
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static void computeOneFile(Root engine, DocInstance docInstance, String docType) {
-		Generic currentDocClass = engine.find(DocClass.class).getInstance(docType);
+	public static void computeOneFile(Root engine, DocInstance docInstance) {
+		Generic currentDocClass = docInstance.getDocClass();
 		ImgFilter imgFilter = engine.find(ImgFilter.class);
 		ZoneText zoneText = engine.find(ZoneText.class);
 
@@ -93,7 +63,7 @@ public class ComputeBestTextPerZone {
 			ZoneTextInstance realTextInstance = zoneText.getZoneText(docInstance, zoneInstance, realityInstance);
 			if (realTextInstance == null || realTextInstance.getValue().toString().isEmpty()) {
 				// If not supervised, compute the best text
-				String bestText = computeBestTextOcrPlasty(engine, docInstance, docType, zoneInstance);
+				String bestText = computeBestTextOcrPlasty(engine, docInstance, zoneInstance);
 				if (null != bestText) {
 					zoneText.setZoneText(bestText, docInstance, zoneInstance, bestInstance).setZoneTimestamp(ModelTools.getCurrentDate());
 				} else {
@@ -109,7 +79,7 @@ public class ComputeBestTextPerZone {
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private static String computeBestTextOcrPlasty(Root engine, DocInstance docInstance, String docType, ZoneInstance zoneInstance) {
+	private static String computeBestTextOcrPlasty(Root engine, DocInstance docInstance, ZoneInstance zoneInstance) {
 		ImgFilter imgFilter = engine.find(ImgFilter.class);
 		ZoneText zoneText = engine.find(ZoneText.class);
 		Snapshot<ImgFilterInstance> imgFilterInstances = (Snapshot) imgFilter.getInstances().filter(f -> !"reality".equals(f.getValue()) && !"best".equals(f.getValue()));
@@ -130,7 +100,7 @@ public class ComputeBestTextPerZone {
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private static String computeBestText(Root engine, DocInstance docInstance, String docType, ZoneInstance zoneInstance) {
+	private static String computeBestText(Root engine, DocInstance docInstance, ZoneInstance zoneInstance) {
 		// TODO: deal with the case where a field must be left blank
 		ImgFilter imgFilter = engine.find(ImgFilter.class);
 		ZoneText zoneText = engine.find(ZoneText.class);
