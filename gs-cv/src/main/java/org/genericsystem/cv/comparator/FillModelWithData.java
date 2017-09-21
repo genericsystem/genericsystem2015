@@ -167,7 +167,6 @@ public class FillModelWithData {
 				docClassInstance.setZone(z.getNum(), z.getRect().x, z.getRect().y, z.getRect().width, z.getRect().height);
 			}
 		});
-		engine.getCurrentCache().flush();
 
 		// Save the filternames if necessary
 		final List<ImgFilterFunction> updatedImgFilterList = new ArrayList<>();
@@ -193,7 +192,8 @@ public class FillModelWithData {
 				}
 			}
 		});
-		engine.getCurrentCache().flush();
+
+		engine.getCurrentCache().flush(); // XXX move to somewhere else?
 
 		if (null == updatedImgFilterList || updatedImgFilterList.isEmpty()) {
 			logger.info("Nothing to add");
@@ -307,7 +307,6 @@ public class FillModelWithData {
 			} catch (Exception e1) {
 				throw new RuntimeException(e1);
 			}
-			// engine.getCurrentCache().flush();
 
 			zones.forEach(entry -> {
 				logger.info("Current zone: {}", entry.getKey());
@@ -330,55 +329,13 @@ public class FillModelWithData {
 						zoneText.setZoneText(ocrText, docInstance, zoneInstance, imgFilterInstance).setZoneTimestamp(ModelTools.getCurrentDate());
 					}
 				});
-				// engine.getCurrentCache().flush();
 			});
+
+			engine.getCurrentCache().flush();
 			logger.info("Data for {} successfully saved.", filenameExt);
 		} catch (Exception e) {
 			throw new RuntimeException("An error has occured while saving the OCR data into the Engine", e);
 		}
-	}
-
-	/**
-	 * Process an image, and store all the informations in the engine of Generic System. When no Engine is provided, a default one is created.
-	 * 
-	 * @param imagePath - a {@link Path} object pointing to the image to be processed
-	 * @return an {@code int} representing {@link #KNOWN_FILE_UPDATED_FILTERS}, {@link #NEW_FILE} or {@link #KNOWN_FILE}
-	 */
-	public static void doImgOcr(Path imagePath) {
-		final Root engine = getEngine();
-		engine.newCache().start();
-		doImgOcr(engine, imagePath);
-		engine.close();
-	}
-
-	/**
-	 * Process an image, and store all the informations in the engine of Generic System.
-	 * 
-	 * @param engine - the engine used to store the data
-	 * @param imagePath - a {@link Path} object pointing to the image to be processed
-	 * @return an {@code int} representing {@link #KNOWN_FILE_UPDATED_FILTERS}, {@link #NEW_FILE} or {@link #KNOWN_FILE}
-	 */
-	public static void doImgOcr(Root engine, Path imagePath) {
-		final String docType = ModelTools.getImgClass(imagePath);
-
-		// Find and save the doc class
-		DocClass docClass = engine.find(DocClass.class);
-		docClass.setDocClass(docType);
-		engine.getCurrentCache().flush();
-
-		// Process the image file
-		JsonObject params = buildOcrParameters(engine, imagePath);
-		JsonObject ocrData = processFile(params);
-		saveOcrDataInModel(engine, ocrData);
-	}
-
-	/**
-	 * Process all the images in the specified folder, and store all the data in Generic System. The docType is set to the default value.
-	 * 
-	 * @param engine - the engine used to store the data
-	 */
-	public static void compute(Root engine) {
-		compute(engine, docType);
 	}
 
 	/**
@@ -400,20 +357,6 @@ public class FillModelWithData {
 			engine.getCurrentCache().flush();
 		});
 		engine.getCurrentCache().flush();
-	}
-
-	/**
-	 * Save a new document in Generic System using the default Engine.
-	 * 
-	 * @param imgPath - the Path of the file
-	 * @return true if this was a success, false otherwise
-	 */
-	public static boolean registerNewFile(Path imgPath) {
-		final Root engine = getEngine();
-		engine.newCache().start();
-		boolean result = registerNewFile(engine, imgPath, System.getProperty("user.dir") + "/../gs-ir/src/main/resources/");
-		engine.close();
-		return result;
 	}
 
 	/**
@@ -446,8 +389,10 @@ public class FillModelWithData {
 				try (Img img = new Img(imgPath.toString())) {
 					logger.info("Copying {} to resources folder", filenameExt);
 					Imgcodecs.imwrite(resourcesFolder + filenameExt, img.getSrc());
+				} catch (Exception e) {
+					logger.error("An error has occured while saving file into resources folder " + filenameExt, e);
 				}
-				return true;
+				return true; // Even if the file was not copied to the resources folder, it has still been correctly processed
 			} else {
 				logger.error("An error has occured while saving file {}", filenameExt);
 				return false;
