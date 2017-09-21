@@ -120,13 +120,13 @@ public class Differential implements IDifferential<Generic> {
 
 			@Override
 			public Observable<Generic> getAddsObservable() {
-				return getDifferentialObservable().flatMap(diff -> diff.getAddsObservable(generic).filter(g -> getCache().isAlive(g)))
+				return getDifferentialObservable().switchMap(diff -> diff.getAddsObservable(generic).filter(g -> getCache().isAlive(g)))
 						.replay().refCount();
 			}
 
 			@Override
 			public Observable<Generic> getRemovesObservable() {
-				return getDifferentialObservable().flatMap(diff -> diff.getRemovesObservable(generic).filter(g -> !getCache().isAlive(g)))
+				return getDifferentialObservable().switchMap(diff -> diff.getRemovesObservable(generic).filter(g -> !getCache().isAlive(g)))
 						.replay().refCount();
 			}
 
