@@ -37,7 +37,7 @@ public class TextBindingCustom {
 	public static class DOC_CLASS_LABEL implements TextBinding {
 		@Override
 		public ObservableValue<String> apply(Context context, Tag tag) {
-			return new SimpleStringProperty("Doc class: " + context.getGeneric().getValue().toString());
+			return new SimpleStringProperty("Doc class: " + String.valueOf(context.getGeneric().getValue()));
 		}
 	}
 
@@ -86,14 +86,14 @@ public class TextBindingCustom {
 		@Override
 		public ObservableValue<String> apply(Context context, Tag tag) {
 			ScoreInstance score = (ScoreInstance) context.getGeneric();
-			return new SimpleStringProperty(score.getZone().getValue().toString());
+			return new SimpleStringProperty(String.valueOf(score.getZone().getValue()));
 		}
 	}
 
 	public static class ZONE_TEXT implements TextBinding {
 		@Override
 		public ObservableValue<String> apply(Context context, Tag tag) {
-			return new SimpleStringProperty(StringEscapeUtils.escapeHtml4(context.getGeneric().getValue().toString()));
+			return new SimpleStringProperty(StringEscapeUtils.escapeHtml4(String.valueOf(context.getGeneric().getValue())));
 		}
 	}
 
@@ -109,7 +109,7 @@ public class TextBindingCustom {
 			ZoneTextInstance zti = (ZoneTextInstance) context.getGenerics()[1];
 			DocInstance doc = zti.getDoc();
 			ZoneTextInstance text = zt.getZoneText(doc, zti.getZone(), ifi);
-			return new SimpleStringProperty(text == null ? "" : StringEscapeUtils.escapeHtml4(text.getValue().toString()));
+			return new SimpleStringProperty(text == null ? "" : StringEscapeUtils.escapeHtml4(String.valueOf(text.getValue())));
 		}
 	}
 
@@ -121,7 +121,7 @@ public class TextBindingCustom {
 		@Override
 		public ObservableValue<String> apply(Context context, Tag tag) {
 			ScoreInstance score = (ScoreInstance) context.getGeneric();
-			return new SimpleStringProperty(score.getValue().toString());
+			return new SimpleStringProperty(String.valueOf(score.getValue()));
 		}
 	}
 
@@ -131,7 +131,7 @@ public class TextBindingCustom {
 			ScoreInstance score = (ScoreInstance) context.getGeneric();
 			MeanLevenshtein meanLevenshtein = score.getRoot().find(MeanLevenshtein.class);
 			MeanLevenshteinInstance mlvInstance = meanLevenshtein.getMeanLev(score);
-			return new SimpleStringProperty(mlvInstance.getValue().toString());
+			return new SimpleStringProperty(String.valueOf(mlvInstance.getValue()));
 		}
 	}
 
@@ -144,7 +144,7 @@ public class TextBindingCustom {
 		public ObservableValue<String> apply(Context context, Tag tag) {
 			ScoreInstance score = (ScoreInstance) context.getGeneric();
 			ImgFilterInstance imgFilterInstance = score.getImgFilter();
-			return new SimpleStringProperty(imgFilterInstance.getValue().toString());
+			return new SimpleStringProperty(String.valueOf(imgFilterInstance.getValue()));
 		}
 	}
 
