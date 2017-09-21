@@ -13,11 +13,12 @@ import io.vertx.core.Future;
  * @author Pierrik Lassalas
  */
 @SuppressWarnings("unused")
-public class WorkerVerticle extends AbstractVerticle {
+public abstract class WorkerVerticle extends AbstractVerticle {
 
-	private final Root root;
 	private static final DeploymentOptions OPTIONS_NORMAL = new DeploymentOptions();
 	private static final DeploymentOptions OPTIONS_WORKER = new DeploymentOptions().setWorker(true).setMaxWorkerExecuteTime(Long.MAX_VALUE);
+
+	private final Root root;
 
 	public WorkerVerticle() {
 		this(null);
@@ -25,18 +26,6 @@ public class WorkerVerticle extends AbstractVerticle {
 
 	public WorkerVerticle(Root root) {
 		this.root = root;
-	}
-
-	@Override
-	public void start(Future<Void> startFuture) throws Exception {
-		System.out.println("Worker thread: " + Thread.currentThread().getName());
-		start();
-		startFuture.complete();
-	}
-
-	@Override
-	public void start() throws Exception {
-		throw new IllegalStateException("You need to implement the start() method of the worker verticle.");
 	}
 
 	/**
@@ -49,6 +38,30 @@ public class WorkerVerticle extends AbstractVerticle {
 		GSVertx.vertx().getVertx().deployVerticle(this, OPTIONS_WORKER, res -> {
 			if (res.failed())
 				throw new IllegalStateException(errorMessage != null ? errorMessage : "Deployment of worker verticle failed.", res.cause());
+			else {
+				undeployVerticle(res.result());
+			}
 		});
 	}
+
+	private void undeployVerticle(String deploymentId) {
+		vertx.undeploy(deploymentId, res -> {
+			if (res.failed())
+				throw new IllegalStateException("Failed to undeploy worker verticle", res.cause());
+		});
+	}
+
+	@Override
+	public void start(Future<Void> startFuture) throws Exception {
+		System.out.println("Worker thread: " + Thread.currentThread().getName());
+		start();
+		startFuture.complete();
+	}
+
+	/**
+	 * Defines the action(s) that need to be executed in a separate thread to prevent blocking.
+	 */
+	@Override
+	public abstract void start();
+
 }

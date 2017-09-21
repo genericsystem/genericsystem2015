@@ -116,16 +116,20 @@ public class ContextActionCustom {
 			Root root = gsContext.getGeneric().getRoot();
 			DocInstance docInstance = (DocInstance) gsContext.getGeneric();
 			String docType = docInstance.getDocClass().getValue().toString();
-			// System.out.println("Current thread (refresh): " + Thread.currentThread().getName());
+
 			WorkerVerticle worker = new WorkerVerticle(root) {
 				@Override
-				public void start() throws Exception {
-					gsContext.getCache().safeExecute(() -> {
-						ComputeBestTextPerZone.computeOneFile(root, docInstance, docType);
-						docInstance.setRefreshTimestamp(ModelTools.getCurrentDate());
-						root.getCurrentCache().flush();
-					});
+				public void start() {
+					tag.addAttribute(gsContext, "disabled", "true");
+					gsContext.getCache().safeExecute(() -> compute());
+					tag.addAttribute(gsContext, "disabled", "");
 					System.out.println("Done!");
+				}
+
+				private void compute() {
+					ComputeBestTextPerZone.computeOneFile(root, docInstance, docType);
+					docInstance.setRefreshTimestamp(ModelTools.getCurrentDate());
+					gsContext.getCache().flush();
 				}
 			};
 			worker.deployAsWorkerVerticle("Failed to execute the task");
@@ -158,10 +162,10 @@ public class ContextActionCustom {
 		Arrays.asList(gsContext.getGenerics()).forEach(g -> System.out.println(g.info()));
 		WorkerVerticle worker = new WorkerVerticle() {
 			@Override
-			public void start() throws Exception {
-				gsContext.getCache().safeExecute(() -> {
-					ComputeTrainedScores.compute(root, docClassInstance.getValue().toString(), useStrict);
-				});
+			public void start() {
+				tag.addAttribute(gsContext, "disabled", "true");
+				gsContext.getCache().safeExecute(() -> ComputeTrainedScores.compute(root, docClassInstance.getValue().toString(), useStrict));
+				tag.addAttribute(gsContext, "disabled", "");
 				System.out.println("Done computing scores!");
 			}
 		};

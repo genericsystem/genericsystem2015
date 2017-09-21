@@ -88,7 +88,7 @@ public class ComputeBestTextPerZone {
 		ImgFilterInstance bestInstance = imgFilter.setImgFilter("best");
 
 		logger.debug("Processing doc: {}", docInstance.getValue());
-		for (ZoneInstance zoneInstance : zoneInstances) {
+		zoneInstances.forEach(zoneInstance -> {
 			logger.debug("Zone n°{}", zoneInstance.getValue());
 			ZoneTextInstance realTextInstance = zoneText.getZoneText(docInstance, zoneInstance, realityInstance);
 			if (realTextInstance == null || realTextInstance.getValue().toString().isEmpty()) {
@@ -103,8 +103,9 @@ public class ComputeBestTextPerZone {
 				// If supervised, set the supervised text to best
 				zoneText.setZoneText(realTextInstance.getValue().toString(), docInstance, zoneInstance, bestInstance).setZoneTimestamp(ModelTools.getCurrentDate());
 			}
-			engine.getCurrentCache().flush();
-		}
+			// engine.getCurrentCache().flush(); // FIXME: timeout while flushing
+		});
+
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
