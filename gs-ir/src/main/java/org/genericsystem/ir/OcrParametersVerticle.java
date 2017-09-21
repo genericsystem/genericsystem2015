@@ -30,7 +30,7 @@ public class OcrParametersVerticle extends ActionPersistentVerticle {
 	@Override
 	protected void handle(Future<Object> future, JsonObject task) {
 		String imagePath = DistributedVerticle.BASE_PATH + task.getString(DistributedVerticle.FILENAME);
-		JsonObject params = FillModelWithData.getOcrParameters(engine, Paths.get(imagePath));
+		JsonObject params = FillModelWithData.buildOcrParameters(engine, Paths.get(imagePath));
 		if (null != params)
 			future.complete(params);
 		else

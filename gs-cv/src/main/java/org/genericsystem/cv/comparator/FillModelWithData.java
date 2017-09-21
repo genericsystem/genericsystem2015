@@ -132,7 +132,7 @@ public class FillModelWithData {
 	 * @param imagePath - the {@link Path} of the image to proceed
 	 * @return a {@link JsonObject} containing all the informations required to process the file
 	 */
-	public static JsonObject getOcrParameters(Root engine, Path imagePath) {
+	public static JsonObject buildOcrParameters(Root engine, Path imagePath) {
 		final Path imgClassDirectory = imagePath.getParent();
 		final String docType = ModelTools.getImgClass(imagePath);
 
@@ -279,7 +279,7 @@ public class FillModelWithData {
 	 * Save the OCR data into Generic System.
 	 * 
 	 * @param engine - the engine used to store the data
-	 * @param data - a {@link JsonObject} containing all the data (see {@link #getOcrParameters(Root, Path)}).
+	 * @param data - a {@link JsonObject} containing all the data (see {@link #buildOcrParameters(Root, Path)}).
 	 */
 	public static void saveOcrDataInModel(Root engine, JsonObject data) {
 		// Parse the data
@@ -394,7 +394,7 @@ public class FillModelWithData {
 		docClass.setDocClass(docType);
 
 		Arrays.asList(new File(imgClassDirectory).listFiles((dir, name) -> name.endsWith(".png"))).forEach(file -> {
-			JsonObject params = getOcrParameters(engine, file.toPath());
+			JsonObject params = buildOcrParameters(engine, file.toPath());
 			JsonObject ocrData = processFile(params);
 			saveOcrDataInModel(engine, ocrData);
 		});
