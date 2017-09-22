@@ -25,6 +25,8 @@ public class OCRPlasty {
 	}
 
 	public static String ocrPlasty(List<String> labels) {
+		if (labels == null || labels.isEmpty())
+			throw new IllegalStateException("Attempted to compute the longestCommonSubsequence on an empty list");
 		String common = longestCommonSubsequence(labels);
 		String consensus = "";
 		for (int i = 0; i < common.length() + 1; i++) {
@@ -102,8 +104,6 @@ public class OCRPlasty {
 	}
 
 	public static String longestCommonSubsequence(List<String> labels) { // lcs between n strings
-		if (labels == null || labels.isEmpty())
-			throw new IllegalStateException("Attempted to compute the longestCommonSubsequence on an empty list");
 		String subsequence = labels.get(0).trim();
 		for (int i = 1; i < labels.size(); i++) {
 			if (!(subsequence.isEmpty() || labels.get(i).trim().isEmpty()))
