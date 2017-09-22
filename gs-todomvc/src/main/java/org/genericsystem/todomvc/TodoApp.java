@@ -5,9 +5,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Predicate;
 
+import org.genericsystem.api.core.DisposableObservableList;
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.BidirectionalBinding;
 import org.genericsystem.defaults.tools.ObservableListWrapper;
+import org.genericsystem.defaults.tools.RxJavaHelpers;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.annotations.Children;
@@ -269,10 +271,10 @@ public class TodoApp extends RootTagImpl {
 
 							@Override
 							public void init() {
-								bindText(model -> Bindings.createStringBinding(() -> {
-									int size = getActiveTodos(model).size();
+								bindText(model -> RxJavaHelpers.changesOf(getActiveTodos(model)).map(list -> {
+									int size = list.size();
 									return size + " item" + (size > 1 ? "s" : "") + " left";
-								}, getActiveTodos(model)));
+								}));
 							}
 
 							private ObservableList<Generic> getActiveTodos(Context model) {
@@ -347,7 +349,7 @@ public class TodoApp extends RootTagImpl {
 						@Override
 						public void init() {
 							bindAction(model -> new ArrayList<>(getCompletedTodos(model)).forEach(Generic::remove));
-							bindText(model -> Bindings.createStringBinding(() -> "Clear completed (" + getCompletedTodos(model).size() + ")", getCompletedTodos(model)));
+							bindText(model -> RxJavaHelpers.changesOf(getCompletedTodos(model)).map(list -> "Clear completed (" + list.size() + ")"));
 							bindOptionalStyleClass("hide", "hasNoCompleted", model -> Bindings.createBooleanBinding(() -> getCompletedTodos(model).size() == 0 ? true : false, getCompletedTodos(model)));
 						}
 

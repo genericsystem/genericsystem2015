@@ -2,6 +2,7 @@ package org.gs.events;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
+import org.genericsystem.defaults.tools.RxJavaHelpers;
 import org.genericsystem.geography.components.InputSelectInstance;
 import org.genericsystem.geography.model.AdministrativeTerritory;
 import org.genericsystem.geography.model.City;
@@ -40,14 +41,13 @@ import org.gs.events.model.Date.Month;
 import org.gs.events.model.Date.Year;
 import org.gs.events.model.Event;
 
-import javafx.beans.binding.Bindings;
+import io.reactivex.Observable;
 import javafx.beans.property.Property;
-import javafx.beans.value.ObservableValue;
 
 @RunScript(InitTest.class)
 @DependsOnModel({ AdministrativeTerritory.class, Country.class, City.class, Date.class })
 @Children({ CityLabel.class, CityInput.class, DateLabel1.class, DateInput.class, DateLabel2.class, DateInput2.class,
-		Test.class })
+	Test.class })
 public class TestEvent extends RootTagImpl {
 
 	@SetText(value = "City")
@@ -120,11 +120,11 @@ public class TestEvent extends RootTagImpl {
 
 	public static class GENERIC_TEXT implements TextBinding {
 		@Override
-		public ObservableValue<String> apply(Context context, Tag tag) {
+		public Observable<String> apply(Context context, Tag tag) {
 			Tag inputTag = tag.getParent().find(InputDate.class, 1);
 			Context ctx = context.getSubContexts(inputTag).get(0);
 			Property<?> prop = inputTag.getContextProperty("selected", ctx);
-			return Bindings.createStringBinding(() -> prop.getValue() != null ? prop.getValue().toString() : "", prop);
+			return RxJavaHelpers.optionalValuesOf(prop).map(opt -> opt.isPresent() ? opt.get().toString() : "");
 		}
 	}
 

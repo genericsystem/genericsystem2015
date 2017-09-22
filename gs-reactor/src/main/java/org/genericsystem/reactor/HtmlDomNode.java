@@ -14,6 +14,7 @@ import org.genericsystem.reactor.FilteredChildren.FilteredTagChildren;
 import org.genericsystem.reactor.contextproperties.ActionDefaults;
 import org.genericsystem.reactor.contextproperties.SelectionDefaults;
 
+import io.reactivex.disposables.CompositeDisposable;
 import io.vertx.core.json.JsonObject;
 import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.Property;
@@ -31,6 +32,7 @@ public class HtmlDomNode {
 	private Context context;
 	private boolean destroyed = false;
 	final Consumer<Tag> tagAdder = tagAdder();
+	private final CompositeDisposable disposables = new CompositeDisposable();
 	private Map<Tag, Integer> sizeBySubTag = new IdentityHashMap<Tag, Integer>() {
 		private static final long serialVersionUID = 6725720602283055930L;
 
@@ -93,6 +95,7 @@ public class HtmlDomNode {
 			if (childTag.getMetaBinding() != null && context.getSubContexts(childTag) != null)
 				((FilteredChildContexts<?>) childTag.getContextAttribute("filteredContexts", context)).transformationListSubContexts.unbind();
 		}
+		disposables.dispose();
 		tag.getDomNodeTextProperty(context).removeListener(textListener);
 		tag.getDomNodeStyles(context).removeListener(stylesListener);
 		tag.getDomNodeAttributes(context).removeListener(attributesListener);
@@ -104,6 +107,10 @@ public class HtmlDomNode {
 
 	public static interface Sender {
 		public void send(String message);
+	}
+
+	public CompositeDisposable getDisposables() {
+		return disposables;
 	}
 
 	public List<HtmlDomNode> getChildren() {

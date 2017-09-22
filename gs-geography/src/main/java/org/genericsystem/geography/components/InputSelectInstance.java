@@ -23,10 +23,9 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlInputText;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLi;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlUl;
 
+import io.reactivex.Observable;
 import javafx.beans.binding.ListBinding;
 import javafx.beans.property.Property;
-import javafx.beans.property.ReadOnlyStringWrapper;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
@@ -70,8 +69,8 @@ public class InputSelectInstance extends HtmlDiv {
 
 	public static class GENERIC_TEXT implements TextBinding {
 		@Override
-		public ObservableValue<String> apply(Context context, Tag tag) {
-			return new ReadOnlyStringWrapper(((InputSelectInstance) tag.getParent().getParent().getParent()).displayInstance(context.getGeneric()));
+		public Observable<String> apply(Context context, Tag tag) {
+			return Observable.just(((InputSelectInstance) tag.getParent().getParent().getParent()).displayInstance(context.getGeneric()));
 		}
 	}
 
@@ -97,12 +96,12 @@ public class InputSelectInstance extends HtmlDiv {
 
 	public static class DEFAULT_TEXT implements TextBinding {
 		@Override
-		public ObservableValue<String> apply(Context context, Tag tag) {
+		public Observable<String> apply(Context context, Tag tag) {
 			String str = "";
 			if (tag.getContextProperty("selected", context).getValue() != null)
 				str = ((InputSelectInstance) tag.getParent())
-						.displayInstance((Generic) tag.getContextProperty("selected", context).getValue());
-			return new ReadOnlyStringWrapper(str);
+				.displayInstance((Generic) tag.getContextProperty("selected", context).getValue());
+			return Observable.just(str);
 		}
 	}
 

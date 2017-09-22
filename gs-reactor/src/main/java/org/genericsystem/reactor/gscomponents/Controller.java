@@ -2,12 +2,14 @@ package org.genericsystem.reactor.gscomponents;
 
 import java.util.Map.Entry;
 
+import org.genericsystem.defaults.tools.RxJavaHelpers;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.context.ContextAction;
 import org.genericsystem.reactor.context.TagSwitcher;
 import org.genericsystem.reactor.context.TextBinding;
 
+import io.reactivex.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -237,8 +239,8 @@ public class Controller {
 	public static class CountTextBinding implements TextBinding {
 
 		@Override
-		public ObservableValue<String> apply(Context context, Tag tag) {
-			return Controller.get(tag, context).countText(tag);
+		public Observable<String> apply(Context context, Tag tag) {
+			return RxJavaHelpers.valuesOf(Controller.get(tag, context).countText(tag));
 		}
 
 	}
@@ -246,8 +248,8 @@ public class Controller {
 	public static class PrevTextBinding implements TextBinding {
 
 		@Override
-		public ObservableValue<String> apply(Context context, Tag tag) {
-			return Controller.get(tag, context).prevText(tag);
+		public Observable<String> apply(Context context, Tag tag) {
+			return RxJavaHelpers.valuesOf(Controller.get(tag, context).prevText(tag));
 		}
 
 	}
@@ -255,8 +257,8 @@ public class Controller {
 	public static class NextTextBinding implements TextBinding {
 
 		@Override
-		public ObservableValue<String> apply(Context context, Tag tag) {
-			return Controller.get(tag, context).nextText(tag);
+		public Observable<String> apply(Context context, Tag tag) {
+			return RxJavaHelpers.valuesOf(Controller.get(tag, context).nextText(tag));
 		}
 
 	}

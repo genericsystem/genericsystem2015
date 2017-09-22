@@ -3,6 +3,7 @@ package org.gs.events.components;
 import java.util.Calendar;
 
 import org.genericsystem.common.Generic;
+import org.genericsystem.defaults.tools.RxJavaHelpers;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.Attribute;
@@ -21,10 +22,8 @@ import org.gs.events.model.Date.Day;
 import org.gs.events.model.Date.Month;
 import org.gs.events.model.Date.Year;
 
-import javafx.beans.binding.Bindings;
+import io.reactivex.Observable;
 import javafx.beans.property.Property;
-import javafx.beans.property.ReadOnlyStringWrapper;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.MapChangeListener;
 
 @Children(DivContainer.class)
@@ -92,7 +91,7 @@ public class InputDate extends HtmlDiv {
 						int mo = Integer.parseInt(mm);
 						if (mo < 1 || mo > 12) {
 							tag.getContextProperty("error", context)
-									.setValue("The month must be an integer between 1 and 12");
+							.setValue("The month must be an integer between 1 and 12");
 							return null;
 						} else {
 							Generic month = context.find(Month.class);
@@ -109,7 +108,7 @@ public class InputDate extends HtmlDiv {
 										return day.setInstance(da, m);
 									} else {
 										tag.getContextProperty("error", context)
-												.setValue("The day must be an integer between 1 and " + maxVal);
+										.setValue("The day must be an integer between 1 and " + maxVal);
 										return null;
 									}
 								} catch (Exception e) {
@@ -195,10 +194,10 @@ public class InputDate extends HtmlDiv {
 
 	public static class YEAR_TEXT implements TextBinding {
 		@Override
-		public ObservableValue<String> apply(Context context, Tag tag) {
+		public Observable<String> apply(Context context, Tag tag) {
 			Integer year = getYear(context.getGeneric(), context.find(Year.class), context.find(Month.class),
 					context.find(Day.class));
-			return new ReadOnlyStringWrapper(year != null ? String.valueOf(year) : "");
+			return Observable.just(year != null ? String.valueOf(year) : "");
 		}
 
 		public static Integer getYear(Generic g, Generic year, Generic month, Generic day) {
@@ -215,10 +214,10 @@ public class InputDate extends HtmlDiv {
 
 	public static class MONTH_TEXT implements TextBinding {
 		@Override
-		public ObservableValue<String> apply(Context context, Tag tag) {
+		public Observable<String> apply(Context context, Tag tag) {
 			Integer month = getMonth(context.getGeneric(), context.find(Year.class), context.find(Month.class),
 					context.find(Day.class));
-			return new ReadOnlyStringWrapper(month != null ? String.valueOf(month) : "");
+			return Observable.just(month != null ? String.valueOf(month) : "");
 		}
 
 		public static Integer getMonth(Generic g, Generic year, Generic month, Generic day) {
@@ -233,10 +232,10 @@ public class InputDate extends HtmlDiv {
 
 	public static class DAY_TEXT implements TextBinding {
 		@Override
-		public ObservableValue<String> apply(Context context, Tag tag) {
+		public Observable<String> apply(Context context, Tag tag) {
 			Integer day = getDay(context.getGeneric(), context.find(Year.class), context.find(Month.class),
 					context.find(Day.class));
-			return new ReadOnlyStringWrapper(day != null ? String.valueOf(day) : "");
+			return Observable.just(day != null ? String.valueOf(day) : "");
 		}
 
 		public static Integer getDay(Generic g, Generic year, Generic month, Generic day) {
@@ -249,9 +248,9 @@ public class InputDate extends HtmlDiv {
 
 	public static class GENERIC_TEXT implements TextBinding {
 		@Override
-		public ObservableValue<String> apply(Context context, Tag tag) {
+		public Observable<String> apply(Context context, Tag tag) {
 			Property<?> prop = tag.getContextProperty("error", context);
-			return Bindings.createStringBinding(() -> prop.getValue() != null ? prop.getValue().toString() : "", prop);
+			return RxJavaHelpers.optionalValuesOf(prop).map(opt -> opt.isPresent() ? opt.get().toString() : "");
 		}
 	}
 

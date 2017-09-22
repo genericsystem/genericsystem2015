@@ -6,7 +6,6 @@ import org.genericsystem.common.Root;
 import org.genericsystem.cv.model.Doc.DocInstance;
 import org.genericsystem.cv.model.Doc.DocTimestamp;
 import org.genericsystem.cv.model.Doc.RefreshTimestamp;
-import org.genericsystem.cv.model.Doc.RefreshTimestamp.RefreshTimestampInstance;
 import org.genericsystem.cv.model.ImgFilter.ImgFilterInstance;
 import org.genericsystem.cv.model.MeanLevenshtein;
 import org.genericsystem.cv.model.MeanLevenshtein.MeanLevenshteinInstance;
@@ -18,10 +17,8 @@ import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.context.TextBinding;
 
-import javafx.beans.binding.Bindings;
+import io.reactivex.Observable;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.value.ObservableValue;
 
 /**
  * This class contains all the {@link TextBinding} needed across the app.
@@ -36,8 +33,8 @@ public class TextBindingCustom {
 
 	public static class DOC_CLASS_LABEL implements TextBinding {
 		@Override
-		public ObservableValue<String> apply(Context context, Tag tag) {
-			return new SimpleStringProperty("Doc class: " + String.valueOf(context.getGeneric().getValue()));
+		public Observable<String> apply(Context context, Tag tag) {
+			return Observable.just("Doc class: " + String.valueOf(context.getGeneric().getValue()));
 		}
 	}
 
@@ -47,27 +44,27 @@ public class TextBindingCustom {
 
 	public static class LAST_DOC_UPDATE_LABEL implements TextBinding {
 		@Override
-		public ObservableValue<String> apply(Context context, Tag tag) {
+		public Observable<String> apply(Context context, Tag tag) {
 			DocInstance currentDoc = (DocInstance) context.getGeneric();
 			Root root = currentDoc.getRoot();
 			DocTimestamp docTimestamp = root.find(DocTimestamp.class);
 			SimpleObjectProperty<Generic> timeStamp = new SimpleObjectProperty<>(docTimestamp.getDocTimestamp(currentDoc));
-			return Bindings.createStringBinding(() -> {
-				return null == timeStamp || null == timeStamp.get() ? "n/a" : ModelTools.formatDate((Long) timeStamp.get().getValue());
-			}, timeStamp);
+			return Observable.just(null == timeStamp || null == timeStamp.get() ? "n/a" : ModelTools.formatDate((Long) timeStamp.get().getValue()));
 		}
 	}
 
 	public static class LAST_REFRESH_UPDATE_LABEL implements TextBinding {
 		@Override
-		public ObservableValue<String> apply(Context context, Tag tag) {
+		public Observable<String> apply(Context context, Tag tag) {
 			DocInstance currentDoc = (DocInstance) context.getGeneric();
 			Root root = currentDoc.getRoot();
 			RefreshTimestamp refreshTimestamp = root.find(RefreshTimestamp.class);
-			return Bindings.createStringBinding(() -> {
-				RefreshTimestampInstance timeStamp = refreshTimestamp.getRefreshTimestamp(currentDoc);
-				return timeStamp == null ? "Last update: none" : "Last update: " + ModelTools.formatDate((Long) timeStamp.getValue());
-			}, refreshTimestamp.getInstances().toObservableList());
+			return Observable.concat(Observable.just(formatTimeStamp(refreshTimestamp.getRefreshTimestamp(currentDoc))),
+					refreshTimestamp.getInstances(currentDoc).getAddsObservable().map(timeStamp -> formatTimeStamp(timeStamp)));
+		}
+
+		private String formatTimeStamp(Generic timeStamp) {
+			return timeStamp == null ? "Last update: none" : "Last update: " + ModelTools.formatDate((Long) timeStamp.getValue());
 		}
 	}
 
@@ -77,23 +74,23 @@ public class TextBindingCustom {
 
 	public static class ZONE_LABEL implements TextBinding {
 		@Override
-		public ObservableValue<String> apply(Context context, Tag tag) {
-			return new SimpleStringProperty("Zone " + ((ZoneTextInstance) context.getGeneric()).getZone());
+		public Observable<String> apply(Context context, Tag tag) {
+			return Observable.just("Zone " + ((ZoneTextInstance) context.getGeneric()).getZone());
 		}
 	}
 
 	public static class ZONE_LABEL2 implements TextBinding {
 		@Override
-		public ObservableValue<String> apply(Context context, Tag tag) {
+		public Observable<String> apply(Context context, Tag tag) {
 			ScoreInstance score = (ScoreInstance) context.getGeneric();
-			return new SimpleStringProperty(String.valueOf(score.getZone().getValue()));
+			return Observable.just(String.valueOf(score.getZone().getValue()));
 		}
 	}
 
 	public static class ZONE_TEXT implements TextBinding {
 		@Override
-		public ObservableValue<String> apply(Context context, Tag tag) {
-			return new SimpleStringProperty(StringEscapeUtils.escapeHtml4(String.valueOf(context.getGeneric().getValue())));
+		public Observable<String> apply(Context context, Tag tag) {
+			return Observable.just(StringEscapeUtils.escapeHtml4(String.valueOf(context.getGeneric().getValue())));
 		}
 	}
 
@@ -103,13 +100,13 @@ public class TextBindingCustom {
 
 	public static class OCR_TEXT implements TextBinding {
 		@Override
-		public ObservableValue<String> apply(Context context, Tag tag) {
+		public Observable<String> apply(Context context, Tag tag) {
 			ZoneText zt = (ZoneText) context.getGeneric().getRoot().find(ZoneText.class);
 			ImgFilterInstance ifi = (ImgFilterInstance) context.getGeneric();
 			ZoneTextInstance zti = (ZoneTextInstance) context.getGenerics()[1];
 			DocInstance doc = zti.getDoc();
 			ZoneTextInstance text = zt.getZoneText(doc, zti.getZone(), ifi);
-			return new SimpleStringProperty(text == null ? "" : StringEscapeUtils.escapeHtml4(String.valueOf(text.getValue())));
+			return Observable.just(text == null ? "" : StringEscapeUtils.escapeHtml4(String.valueOf(text.getValue())));
 		}
 	}
 
@@ -119,19 +116,19 @@ public class TextBindingCustom {
 
 	public static class SCORE_LABEL implements TextBinding {
 		@Override
-		public ObservableValue<String> apply(Context context, Tag tag) {
+		public Observable<String> apply(Context context, Tag tag) {
 			ScoreInstance score = (ScoreInstance) context.getGeneric();
-			return new SimpleStringProperty(String.valueOf(score.getValue()));
+			return Observable.just(String.valueOf(score.getValue()));
 		}
 	}
 
 	public static class MEAN_LEV_LABEL implements TextBinding {
 		@Override
-		public ObservableValue<String> apply(Context context, Tag tag) {
+		public Observable<String> apply(Context context, Tag tag) {
 			ScoreInstance score = (ScoreInstance) context.getGeneric();
 			MeanLevenshtein meanLevenshtein = score.getRoot().find(MeanLevenshtein.class);
 			MeanLevenshteinInstance mlvInstance = meanLevenshtein.getMeanLev(score);
-			return new SimpleStringProperty(String.valueOf(mlvInstance.getValue()));
+			return Observable.just(String.valueOf(mlvInstance.getValue()));
 		}
 	}
 
@@ -141,10 +138,10 @@ public class TextBindingCustom {
 
 	public static class IMG_FILTER_LABEL implements TextBinding {
 		@Override
-		public ObservableValue<String> apply(Context context, Tag tag) {
+		public Observable<String> apply(Context context, Tag tag) {
 			ScoreInstance score = (ScoreInstance) context.getGeneric();
 			ImgFilterInstance imgFilterInstance = score.getImgFilter();
-			return new SimpleStringProperty(String.valueOf(imgFilterInstance.getValue()));
+			return Observable.just(String.valueOf(imgFilterInstance.getValue()));
 		}
 	}
 

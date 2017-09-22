@@ -1,6 +1,7 @@
 package org.genericsystem.geography.app;
 
 import org.genericsystem.common.Generic;
+import org.genericsystem.defaults.tools.RxJavaHelpers;
 import org.genericsystem.geography.app.GeoSearchPerso.Input1;
 import org.genericsystem.geography.app.GeoSearchPerso.Input2;
 import org.genericsystem.geography.app.GeoSearchPerso.Test1;
@@ -22,9 +23,8 @@ import org.genericsystem.reactor.context.TextBinding;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlP;
 import org.genericsystem.reactor.gscomponents.RootTagImpl;
 
-import javafx.beans.binding.Bindings;
+import io.reactivex.Observable;
 import javafx.beans.property.Property;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.transformation.SortedList;
 
 @DependsOnModel({ AdministrativeTerritory.class, Country.class, City.class, Building.class })
@@ -66,21 +66,21 @@ public class GeoSearchPerso extends RootTagImpl {
 
 	public static class GENERIC_TEXT implements TextBinding {
 		@Override
-		public ObservableValue<String> apply(Context context, Tag tag) {
+		public Observable<String> apply(Context context, Tag tag) {
 			Tag inputTag = tag.getParent().find(Input1.class);
 			Context ctx = context.getSubContexts(inputTag).get(0);
 			Property<?> prop = inputTag.getContextProperty("selected", ctx);
-			return Bindings.createStringBinding(() -> prop.getValue() != null ? prop.getValue().toString() : "", prop);
+			return RxJavaHelpers.optionalValuesOf(prop).map(opt -> opt.isPresent() ? opt.get().toString() : "");
 		}
 	}
 
 	public static class GENERIC_TEXT2 implements TextBinding {
 		@Override
-		public ObservableValue<String> apply(Context context, Tag tag) {
+		public Observable<String> apply(Context context, Tag tag) {
 			Tag inputTag = tag.getParent().find(Input2.class);
 			Context ctx = context.getSubContexts(inputTag).get(0);
 			Property<?> prop = inputTag.getContextProperty("selected", ctx);
-			return Bindings.createStringBinding(() -> prop.getValue() != null ? prop.getValue().toString() : "", prop);
+			return RxJavaHelpers.optionalValuesOf(prop).map(opt -> opt.isPresent() ? opt.get().toString() : "");
 		}
 	}
 

@@ -1,6 +1,7 @@
 package org.genericsystem.defaults.tools;
 
 import java.util.AbstractMap.SimpleEntry;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -40,6 +41,17 @@ public class RxJavaHelpers {
 	public static <T> Observable<Optional<T>> optionalValuesOf(final ObservableValue<T> fxObservable) {
 		return fromNullableObservableValue(fxObservable);
 	}
+
+	/**
+	 * Creates an observable that emits the whole list every time it changes.
+	 *
+	 * @param source      The source ObservableList.
+	 * @return An Observable emitting the new list after each change.
+	 */
+	public static <T> Observable<List<T>> changesOf(final ObservableList<T> source) {
+		return fromObservableList(source);
+	}
+
 	/**
 	 * Creates an observable that emits all additions to an ObservableList.
 	 *
@@ -122,8 +134,9 @@ public class RxJavaHelpers {
 			emitter.setDisposable(Disposables.fromRunnable(() -> fxObservable.removeListener(listener)));
 		});
 	}
-	public static <T> Observable<ObservableList<T>> fromObservableList(final ObservableList<T> source) {
-		return Observable.create((ObservableOnSubscribe<ObservableList<T>>) subscriber -> {
+
+	private static <T> Observable<List<T>> fromObservableList(final ObservableList<T> source) {
+		return Observable.create((ObservableOnSubscribe<List<T>>) subscriber -> {
 			ListChangeListener<T> listener = c -> subscriber.onNext(source);
 			source.addListener(listener);
 			subscriber.setDisposable(Disposables.fromRunnable(() -> source.removeListener(listener)));

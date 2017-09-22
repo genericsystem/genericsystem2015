@@ -5,9 +5,9 @@ import java.util.function.Function;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 
+import io.reactivex.Observable;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.value.ObservableValue;
 
 public interface TextPropertyDefaults extends ContextProperty {
 
@@ -31,13 +31,12 @@ public interface TextPropertyDefaults extends ContextProperty {
 		addPrefixBinding(context -> setText(context, value));
 	}
 
-	default void bindText(Context context, ObservableValue<String> observableText) {
+	default void bindText(Context context, Observable<String> observableText) {
 		addContextAttribute(TEXT_BINDING, context, observableText);
-		getDomNodeTextProperty(context).bind(getContextObservableValue(TEXT_BINDING, context));
+		context.getHtmlDomNode((Tag) this).getDisposables().add(observableText.subscribe(newText -> getDomNodeTextProperty(context).setValue(newText)));
 	}
 
-	default void bindText(Function<Context, ObservableValue<String>> applyOnModel) {
-		addContextAttribute(TEXT_BINDING, applyOnModel);
-		addPrefixBinding(model -> getDomNodeTextProperty(model).bind(getContextObservableValue(TEXT_BINDING, model)));
+	default void bindText(Function<Context, Observable<String>> applyOnModel) {
+		addPrefixBinding(context -> bindText(context, applyOnModel.apply(context)));
 	}
 }
