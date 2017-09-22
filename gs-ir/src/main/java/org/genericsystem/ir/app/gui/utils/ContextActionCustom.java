@@ -118,7 +118,16 @@ public class ContextActionCustom {
 				@Override
 				public void start() {
 					tag.addAttribute(gsContext, "disabled", "true");
-					gsContext.getCache().safeExecute(() -> compute());
+					gsContext.getCache().safeExecute(() -> {
+						try {
+							compute();
+							gsContext.getCache().flush();
+						} catch (Exception e) {
+							System.err.println("An error has occured, rollling back...");
+							e.printStackTrace();
+							gsContext.getCache().clear();
+						}
+					});
 					tag.addAttribute(gsContext, "disabled", "");
 					System.out.println("Done!");
 				}
@@ -126,7 +135,6 @@ public class ContextActionCustom {
 				private void compute() {
 					ComputeBestTextPerZone.computeOneFile(root, docInstance);
 					docInstance.setRefreshTimestamp(ModelTools.getCurrentDate());
-					gsContext.getCache().flush();
 				}
 			};
 			worker.deployAsWorkerVerticle("Failed to execute the task");
@@ -162,10 +170,16 @@ public class ContextActionCustom {
 			public void start() {
 				tag.addAttribute(gsContext, "disabled", "true");
 				gsContext.getCache().safeExecute(() -> {
-					ComputeTrainedScores.compute(root, docClassInstance.getValue().toString(), useStrict);
-					gsContext.getCache().flush();
+					try {
+						ComputeTrainedScores.compute(root, docClassInstance.getValue().toString(), useStrict);
+						gsContext.getCache().flush();
+					} catch (Exception e) {
+						System.err.println("An error has occured, rollling back...");
+						e.printStackTrace();
+						gsContext.getCache().clear();
+					}
 				});
-				tag.addAttribute(gsContext, "disabled", "");
+				tag.addAttribute(gsContext, "disabled", null);
 				System.out.println("Done computing scores!");
 			}
 		};
