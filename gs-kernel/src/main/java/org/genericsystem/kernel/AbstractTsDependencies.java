@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Spliterators;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -19,8 +18,8 @@ import org.genericsystem.common.SoftValueHashMap;
 import org.genericsystem.kernel.AbstractServer.RootServerHandler;
 
 import io.reactivex.Observable;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import io.reactivex.subjects.ReplaySubject;
+import io.reactivex.subjects.Subject;
 
 /**
  * @author Nicolas Feybesse
@@ -152,31 +151,29 @@ abstract class AbstractTsDependencies {
 	}
 
 	private final Map<Generic, Generic> map = new ConcurrentHashMap<>();
-	private final ObservableList<Generic> adds = FXCollections.observableArrayList(new CopyOnWriteArrayList<>());
-	private final ObservableList<Generic> removals = FXCollections.observableArrayList(new CopyOnWriteArrayList<>());
+	private final Subject<Generic> adds = ReplaySubject.create();
+	private final Subject<Generic> removals = ReplaySubject.create();
 
 	public Stream<Generic> stream(long ts) {
 		return indexesTree.getIndex(new ArrayList<>(), ts).stream(ts);
 	}
 
 	public Observable<Generic> getAddsObservable(long ts) {
-		return Observable.fromIterable(adds)
-				.filter(g -> !((RootServerHandler) g.getProxyHandler()).getLifeManager().isAlive(ts))
+		return adds.filter(g -> !((RootServerHandler) g.getProxyHandler()).getLifeManager().isAlive(ts))
 				.replay().refCount();
 	}
 
 	public Observable<Generic> getRemovesObservable(long ts) {
-		return Observable.fromIterable(removals)
-				.filter(g -> ((RootServerHandler) g.getProxyHandler()).getLifeManager().isAlive(ts))
+		return removals.filter(g -> ((RootServerHandler) g.getProxyHandler()).getLifeManager().isAlive(ts))
 				.replay().refCount();
 	}
 
 	public void signalAdd(Generic generic) {
-		adds.add(generic);
+		adds.onNext(generic);
 	}
 
 	public void signalRemoval(Generic generic) {
-		removals.add(generic);
+		removals.onNext(generic);
 	}
 
 	public abstract LifeManager getLifeManager();
