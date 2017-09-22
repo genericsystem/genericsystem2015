@@ -2,6 +2,7 @@ package org.genericsystem.cv.model;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -16,6 +17,7 @@ import java.util.Arrays;
 import javax.xml.bind.DatatypeConverter;
 
 import org.apache.commons.io.FilenameUtils;
+import org.genericsystem.cv.Zone;
 
 /**
  * This class contains only static methods, which can be used as general purpose tools.
@@ -54,7 +56,7 @@ public class ModelTools {
 	 * Generate a hash code from a file. Care must be taken to verify that the file exists before calling this method (otherwise an exception is thrown).
 	 * 
 	 * @param path - the {@link Path} of the file
-	 * @param algorithm - the desired algorithm used to generate the has code. Every implementation of the Java platform is required to support the following standard MessageDigest algorithms: MD5, SHA-1, SHA-256
+	 * @param algorithm - the desired algorithm used to generate the hash code. Every implementation of the Java platform is required to support the following standard MessageDigest algorithms: MD5, SHA-1, SHA-256
 	 * @return the computed {@code hash} as a hexadecimal String
 	 * @throws RuntimeException when the specified algorithm is not found, or when the file could not be read
 	 */
@@ -67,6 +69,26 @@ public class ModelTools {
 			throw new RuntimeException("Unable to generate a hash code (no such algorithm)", e);
 		} catch (IOException e) {
 			throw new RuntimeException("Unable to generate a hash code (problem reading the file)", e);
+		}
+		byte[] hash = md.digest();
+		return DatatypeConverter.printHexBinary(hash);
+	}
+
+	/**
+	 * Generate a hash code from an array of bytes.
+	 * 
+	 * @param bytes - an array of bytes
+	 * @param algorithm - the desired algorithm used to generate the hash code. Every implementation of the Java platform is required to support the following standard MessageDigest algorithms: MD5, SHA-1, SHA-256
+	 * @return the computed {@code hash} as a hexadecimal String
+	 * @throws RuntimeException when the specified algorithm is not found
+	 */
+	public static String getHashFromBytes(byte[] bytes, String algorithm) {
+		MessageDigest md;
+		try {
+			md = MessageDigest.getInstance(algorithm);
+			md.update(bytes);
+		} catch (NoSuchAlgorithmException e) {
+			throw new RuntimeException("Unable to generate a hash code (no such algorithm)", e);
 		}
 		byte[] hash = md.digest();
 		return DatatypeConverter.printHexBinary(hash);
@@ -161,13 +183,28 @@ public class ModelTools {
 	 * @return a String representing the SHA-256 hashcode + the file extension
 	 */
 	public static String generateFileName(Path filePath) {
-		String filename;
 		try {
-			filename = ModelTools.getHashFromFile(filePath, "sha-256");
+			String filename = ModelTools.getHashFromFile(filePath, "sha-256");
 			String filenameExt = filename + "." + FilenameUtils.getExtension(filePath.getFileName().toString());
 			return filenameExt;
 		} catch (RuntimeException e) {
-			throw new RuntimeException("An error has occured during the generation of the hascode from file", e);
+			throw new RuntimeException("An error has occured during the generation of the hashcode from file", e);
+		}
+	}
+
+	/**
+	 * Generate a unique ID for a given {@link Zone}, using a SHA-256 string computed from the zone's rectangle. This hashcode is expected to be unique for a given {@link Zone}.
+	 * 
+	 * @param zone - the zone for which a label has to be generated
+	 * @return a String representing the zone's unique ID
+	 */
+	public static String generateZoneUID(Zone zone) {
+		try {
+			byte[] bytes = zone.getRect().toString().getBytes(Charset.forName("UTF8"));
+			String zoneUID = ModelTools.getHashFromBytes(bytes, "sha-256");
+			return zoneUID;
+		} catch (RuntimeException e) {
+			throw new RuntimeException("An error has occured during the generation of the hashcode from zone", e);
 		}
 	}
 

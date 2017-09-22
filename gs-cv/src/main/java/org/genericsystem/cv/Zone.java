@@ -2,6 +2,7 @@ package org.genericsystem.cv;
 
 import java.io.Serializable;
 
+import org.genericsystem.cv.model.ModelTools;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
@@ -13,7 +14,7 @@ public class Zone implements Serializable {
 	private Rect rect;
 	private int num;
 
-	private String label;
+	private String uid;
 
 	public Zone() {
 	}
@@ -21,6 +22,7 @@ public class Zone implements Serializable {
 	public Zone(int num, Rect rect) {
 		this.num = num;
 		this.rect = rect;
+		this.uid = ModelTools.generateZoneUID(this);
 	}
 
 	public Rect getRect() {
@@ -63,7 +65,7 @@ public class Zone implements Serializable {
 
 	@Override
 	public String toString() {
-		return "Zone [rect=" + rect + ", num=" + num + "]";
+		return "Zone [rect=" + rect + ", num=" + num + ", uid=" + uid + "]";
 	}
 
 	@Override
@@ -94,12 +96,8 @@ public class Zone implements Serializable {
 		return true;
 	}
 
-	public String getLabel() {
-		return label;
-	}
-
-	public void setLabel(String label) {
-		this.label = label;
+	public String getUid() {
+		return uid;
 	}
 
 }
