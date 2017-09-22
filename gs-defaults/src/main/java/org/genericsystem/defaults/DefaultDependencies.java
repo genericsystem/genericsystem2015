@@ -13,7 +13,6 @@ import org.genericsystem.api.core.FiltersBuilder;
 import org.genericsystem.api.core.IGeneric;
 import org.genericsystem.api.core.IndexFilter;
 import org.genericsystem.api.core.Snapshot;
-import org.genericsystem.defaults.tools.RxJavaHelpers;
 
 import io.reactivex.Observable;
 
@@ -126,14 +125,14 @@ public interface DefaultDependencies<T extends DefaultGeneric<T>> extends IGener
 			public Observable<T> getAddsObservable() {
 				return Observable.merge(getInheritings().getAddsObservable(),
 						Observable.fromIterable(getInheritings()).flatMap(g -> g.getSubInheritings().getAddsObservable()),
-						RxJavaHelpers.additionsOf(getInheritings().toObservableList()).flatMap(g -> g.getSubInheritings().getAddsObservable())).replay().refCount();
+						getInheritings().getAddsObservable().flatMap(g -> g.getSubInheritings().getAddsObservable())).replay().refCount();
 			}
 
 			@Override
 			public Observable<T> getRemovesObservable() {
 				return Observable.merge(getInheritings().getRemovesObservable(),
 						Observable.fromIterable(getInheritings()).flatMap(g -> g.getSubInheritings().getRemovesObservable()),
-						RxJavaHelpers.additionsOf(getInheritings().toObservableList()).flatMap(g -> g.getSubInheritings().getRemovesObservable())).replay().refCount();
+						getInheritings().getAddsObservable().flatMap(g -> g.getSubInheritings().getRemovesObservable())).replay().refCount();
 			}
 		};
 	}
@@ -150,13 +149,13 @@ public interface DefaultDependencies<T extends DefaultGeneric<T>> extends IGener
 			@Override
 			public Observable<T> getAddsObservable() {
 				return Observable.merge(Observable.fromIterable(getSubInheritings()).flatMap(g -> g.getInstances().getAddsObservable()),
-						RxJavaHelpers.additionsOf(getSubInheritings().toObservableList()).flatMap(g -> g.getInstances().getAddsObservable())).replay().refCount();
+						getSubInheritings().getAddsObservable().flatMap(g -> g.getInstances().getAddsObservable())).replay().refCount();
 			}
 
 			@Override
 			public Observable<T> getRemovesObservable() {
 				return Observable.merge(Observable.fromIterable(getSubInheritings()).flatMap(g -> g.getInstances().getRemovesObservable()),
-						RxJavaHelpers.additionsOf(getSubInheritings().toObservableList()).flatMap(g -> g.getInstances().getRemovesObservable())).replay().refCount();
+						getSubInheritings().getAddsObservable().flatMap(g -> g.getInstances().getRemovesObservable())).replay().refCount();
 			}
 		};
 	}
