@@ -92,7 +92,7 @@ public class RxJavaHelpers {
 		return fromObservableMapRemovals(source);
 	}
 
-	public static <T> Observable<T> fromObservableValue(final ObservableValue<T> fxObservable) {
+	private static <T> Observable<T> fromObservableValue(final ObservableValue<T> fxObservable) {
 		return Observable.create((ObservableEmitter<T> emitter) -> {
 			if (fxObservable.getValue() != null)
 				emitter.onNext(fxObservable.getValue());
@@ -120,7 +120,7 @@ public class RxJavaHelpers {
 		});
 	}
 
-	public static <T> Observable<Optional<T>> fromNullableObservableValue(final ObservableValue<T> fxObservable) {
+	private static <T> Observable<Optional<T>> fromNullableObservableValue(final ObservableValue<T> fxObservable) {
 		return Observable.create((ObservableEmitter<Optional<T>> emitter) -> {
 			if (fxObservable.getValue() != null) {
 				emitter.onNext(Optional.of(fxObservable.getValue()));
@@ -143,7 +143,7 @@ public class RxJavaHelpers {
 		}).startWith(source);
 	}
 
-	public static <T> Observable<T> fromObservableListAdds(final ObservableList<T> source) {
+	private static <T> Observable<T> fromObservableListAdds(final ObservableList<T> source) {
 
 		return Observable.create((ObservableOnSubscribe<T>) subscriber -> {
 
@@ -157,7 +157,7 @@ public class RxJavaHelpers {
 		});
 	}
 
-	public static <T> Observable<T> fromObservableListRemovals(final ObservableList<T> source) {
+	private static <T> Observable<T> fromObservableListRemovals(final ObservableList<T> source) {
 
 		return Observable.create((ObservableOnSubscribe<T>) subscriber -> {
 			ListChangeListener<T> listener = c -> {
@@ -170,7 +170,7 @@ public class RxJavaHelpers {
 		});
 	}
 
-	public static <K,T> Observable<Entry<K,T>> fromObservableMapAdds(final ObservableMap<K,T> source) {
+	private static <K,T> Observable<Entry<K,T>> fromObservableMapAdds(final ObservableMap<K,T> source) {
 
 		return Observable.create((ObservableOnSubscribe<Entry<K,T>>) subscriber -> {
 
@@ -183,7 +183,7 @@ public class RxJavaHelpers {
 		});
 	}
 
-	public static <K,T> Observable<Entry<K,T>> fromObservableMapRemovals(final ObservableMap<K,T> source) {
+	private static <K,T> Observable<Entry<K,T>> fromObservableMapRemovals(final ObservableMap<K,T> source) {
 
 		return Observable.create((ObservableOnSubscribe<Entry<K,T>>) subscriber -> {
 
