@@ -44,9 +44,18 @@ public class ComputeBestTextPerZone {
 		Snapshot<DocInstance> docInstances = (Snapshot) currentDocClass.getHolders(engine.find(Doc.class));
 		for (DocInstance docInstance : docInstances) {
 			computeOneFile(engine, docInstance);
+			// engine.getCurrentCache().flush();
 		}
 	}
 
+	/**
+	 * Computes the statistics for a given file.
+	 * <p>
+	 * <b>This function does not flush the cache!</b>
+	 * 
+	 * @param engine - the engine where the data should be saved
+	 * @param docInstance - the document that will be processed
+	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static void computeOneFile(Root engine, DocInstance docInstance) {
 		Generic currentDocClass = docInstance.getDocClass();
@@ -73,7 +82,6 @@ public class ComputeBestTextPerZone {
 				// If supervised, set the supervised text to best
 				zoneText.setZoneText(realTextInstance.getValue().toString(), docInstance, zoneInstance, bestInstance).setZoneTimestamp(ModelTools.getCurrentDate());
 			}
-			// engine.getCurrentCache().flush(); // FIXME: timeout while flushing
 		});
 
 	}
@@ -94,9 +102,14 @@ public class ComputeBestTextPerZone {
 				ocrTexts.add(text);
 			}
 		});
-		String bestText = OCRPlasty.ocrPlasty(ocrTexts);
-		logger.debug("Best text: {}", bestText);
-		return bestText;
+		if (null == ocrTexts || ocrTexts.isEmpty()) {
+			logger.debug("No text found for {} => zone n°{}", docInstance.getValue(), zoneInstance.getValue());
+			return null;
+		} else {
+			String bestText = OCRPlasty.ocrPlasty(ocrTexts);
+			logger.debug("Best text: {}", bestText);
+			return bestText;
+		}
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })

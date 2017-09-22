@@ -58,6 +58,9 @@ public class CamLayoutAnalyzer extends AbstractApp {
 	private final Fields fields = new Fields();
 	private boolean stabilizationHasChanged = true;
 	private static double minArea = 200;
+	Mat homography = null;
+	Mat frame = new Mat();
+	double angle = 0;
 
 	static {
 		NativeLibraryLoader.load();
@@ -75,7 +78,6 @@ public class CamLayoutAnalyzer extends AbstractApp {
 		// FeatureDetector detector = FeatureDetector.create(FeatureDetector.FAST);
 		DescriptorExtractor extractor = DescriptorExtractor.create(DescriptorExtractor.ORB);
 		DescriptorMatcher matcher = DescriptorMatcher.create(DescriptorMatcher.BRUTEFORCE_HAMMING);
-		Mat frame = new Mat();
 		capture.read(frame);
 		ImageView src0 = new ImageView(Tools.mat2jfxImage(frame));
 		// ImageView src1 = new ImageView(Tools.mat2jfxImage(frame));
@@ -85,18 +87,15 @@ public class CamLayoutAnalyzer extends AbstractApp {
 		// mainGrid.add(src1, 0, 1);
 		// mainGrid.add(src2, 1, 0);
 		mainGrid.add(src3, 0, 1);
-
 		oldKeypoints = new MatOfKeyPoint();
 		oldDescriptors = new Mat();
 		Mat stabilizedMat = new Mat();
 		timer.scheduleAtFixedRate(() -> {
 			synchronized (this) {
 				try {
-					Mat[] homography = new Mat[1];
-					double[] angle = new double[1];
 					capture.read(frame);
 					Img frameImg = new Img(frame, false).bilateralFilter();
-					Img deskewed_ = deskew(frameImg, angle);
+					Img deskewed_ = deskew(frameImg);
 					newKeypoints = detect(deskewed_);
 					newDescriptors = new Mat();
 					extractor.compute(deskewed_.getSrc(), newKeypoints, newDescriptors);
@@ -104,7 +103,7 @@ public class CamLayoutAnalyzer extends AbstractApp {
 					// Img binary = deskewed_/* .cleanFaces(0.1, 0.26) */.adaptativeGaussianThreshold(17, 7).cleanTables(0.05);
 					// binary.buildLayout().draw(deskiewedCopy, new Scalar(0, 255, 0), 1);
 
-					Img stabilized = stabilize(frame, stabilizedMat, matcher, angle[0], homography);
+					Img stabilized = stabilize(stabilizedMat, matcher);
 					if (stabilized != null) {
 						if (stabilizationHasChanged) {
 							// Img binary2 = stabilized/* .cleanFaces(0.1, 0.26) */.adaptativeGaussianThreshold(17, 7).cleanTables(0.05);
@@ -123,7 +122,7 @@ public class CamLayoutAnalyzer extends AbstractApp {
 
 						fields.consolidateOcr(stabilized);
 						fields.drawConsolidated(stabilizedDisplay);
-						fields.drawOcrPerspectiveInverse(display, homography[0].inv(), new Scalar(0, 0, 255), 1);
+						fields.drawOcrPerspectiveInverse(display, homography.inv(), new Scalar(0, 0, 255), 1);
 						// contours.stream().filter(contour -> Imgproc.contourArea(contour) > minArea).peek(c -> Imgproc.drawContours(stabilizedDisplay.getSrc(), Arrays.asList(c), 0, new Scalar(0, 255, 0), 1)).map(Imgproc::boundingRect)
 						// .forEach(rect -> Imgproc.rectangle(stabilizedDisplay.getSrc(), rect.tl(), rect.br(), new Scalar(0, 0, 255)));
 
@@ -143,11 +142,63 @@ public class CamLayoutAnalyzer extends AbstractApp {
 		timer.scheduleAtFixedRate(() -> onSpace(), 0, 1000, TimeUnit.MILLISECONDS);
 	}
 
+	@Override
+	protected synchronized void onSpace() {
+		if (homography != null) {
+			fields.storeLastHomography(homography.inv());
+			fields.storeLastRotation(Imgproc.getRotationMatrix2D(new Point(frame.width() / 2, frame.height() / 2), angle, 1));
+		}
+
+		oldKeypoints = newKeypoints;
+		oldDescriptors = newDescriptors;
+		stabilizationHasChanged = true;
+	}
+
 	public static class Fields {
 		private List<Field> fields = new ArrayList<>();
+		private Mat lastHomography;
+		private Mat lastRotation;
 
 		public void merge(Stream<MatOfPoint> contours) {
+			List<Field> oldFields = fields;
 			fields = contours.map(Field::new).collect(Collectors.toList());
+			if (lastHomography != null) {
+				List<Point> newPoints = restabilize(oldFields.stream().map(f -> f.center()).collect(Collectors.toList()));
+				for (int index = 0; index < oldFields.size(); index++)
+					if (oldFields.get(index).isConsolidated()) {
+						Field field = findNewField(newPoints.get(index));
+						if (field != null) {
+							field.merge(oldFields.get(index));
+							System.out.println("Merge : " + oldFields.get(index).getConsolidated());
+							System.out.println(newPoints.get(index) + " " + field.center());
+						} else
+							System.out.println("Can 't merge : " + oldFields.get(index).getConsolidated());
+					}
+			}
+		}
+
+		private Field findNewField(Point pt) {
+			for (Field field : fields) {
+				if (field.contains(pt))
+					return field;
+			}
+			return null;
+		}
+
+		private List<Point> restabilize(List<Point> originals) {
+			MatOfPoint2f results = new MatOfPoint2f();
+			Core.perspectiveTransform(Converters.vector_Point2f_to_Mat(originals), results, lastHomography);
+			MatOfPoint2f rotated = new MatOfPoint2f();
+			Core.transform(results, rotated, lastRotation);
+			return rotated.toList();
+		}
+
+		public void storeLastHomography(Mat homography) {
+			this.lastHomography = homography;
+		}
+
+		public void storeLastRotation(Mat rotation) {
+			this.lastRotation = rotation;
 		}
 
 		public void drawOcrPerspectiveInverse(Img display, Mat homography, Scalar color, int thickness) {
@@ -160,7 +211,7 @@ public class CamLayoutAnalyzer extends AbstractApp {
 		}
 
 		public void consolidateOcr(Img rootImg) {
-			fields.stream().filter(Field::needOcr).filter(f -> Math.random() < 0.1).forEach(f -> f.ocr(rootImg));
+			fields.stream().filter(Field::needOcr).filter(f -> Math.random() < 1).forEach(f -> f.ocr(rootImg));
 		}
 
 		public Stream<Field> consolidatedFieldStream() {
@@ -170,7 +221,7 @@ public class CamLayoutAnalyzer extends AbstractApp {
 
 	public static class Field {
 		private final Rect rect;
-		private final Map<String, Integer> labels = new HashMap<>();
+		private Map<String, Integer> labels = new HashMap<>();
 		private String consolidated;
 		private int attempts = 0;
 
@@ -178,9 +229,25 @@ public class CamLayoutAnalyzer extends AbstractApp {
 			rect = Imgproc.boundingRect(contour);
 		}
 
+		public void merge(Field field) {
+			labels = field.getLabels();
+		}
+
+		public Map<String, Integer> getLabels() {
+			return labels;
+		}
+
+		public boolean contains(Point pt) {
+			return rect.contains(pt);
+		}
+
+		public Point center() {
+			return new Point(rect.x + rect.width / 2, rect.y + rect.height / 2);
+		}
+
 		public void drawOcrPerspectiveInverse(Img display, Mat homography, Scalar color, int thickness) {
 			MatOfPoint2f results = new MatOfPoint2f();
-			Core.perspectiveTransform(Converters.vector_Point2f_to_Mat(Arrays.asList(new Point(rect.x + rect.width / 2, rect.y + rect.height / 2))), results, homography);
+			Core.perspectiveTransform(Converters.vector_Point2f_to_Mat(Arrays.asList(center())), results, homography);
 			Point[] targets = results.toArray();
 			Imgproc.line(display.getSrc(), targets[0], new Point(targets[0].x, targets[0].y - 30), color, thickness);
 			Imgproc.putText(display.getSrc(), Normalizer.normalize(consolidated, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", ""), new Point(targets[0].x - 10, targets[0].y - 30), Core.FONT_HERSHEY_PLAIN, 1, new Scalar(255, 0, 0), 1);
@@ -216,21 +283,17 @@ public class CamLayoutAnalyzer extends AbstractApp {
 			return consolidated != null;
 		}
 
+		public String getConsolidated() {
+			return consolidated;
+		}
+
 		public boolean needOcr() {
 			return !isConsolidated() && attempts < 10;
 		}
+
 	}
 
-	@Override
-	protected synchronized void onSpace() {
-		oldKeypoints = newKeypoints;
-		oldDescriptors = newDescriptors;
-		// layout = null;
-
-		stabilizationHasChanged = true;
-	}
-
-	private Img stabilize(Mat frame, Mat stabilized, DescriptorMatcher matcher, double angle, Mat[] homography) {
+	private Img stabilize(Mat stabilized, DescriptorMatcher matcher) {
 		MatOfDMatch matches = new MatOfDMatch();
 		if (oldDescriptors != null && !oldDescriptors.empty() && (!newDescriptors.empty())) {
 			matcher.match(oldDescriptors, newDescriptors, matches);
@@ -255,12 +318,12 @@ public class CamLayoutAnalyzer extends AbstractApp {
 				Mat goodNewPoints = Converters.vector_Point2f_to_Mat(goodNewKeypoints);
 				MatOfPoint2f originalNewPoints = new MatOfPoint2f();
 				Core.transform(goodNewPoints, originalNewPoints, Imgproc.getRotationMatrix2D(new Point(frame.size().width / 2, frame.size().height / 2), -angle, 1));
-				homography[0] = Calib3d.findHomography(originalNewPoints, new MatOfPoint2f(goodOldKeypoints.stream().toArray(Point[]::new)), Calib3d.RANSAC, 10);
+				homography = Calib3d.findHomography(originalNewPoints, new MatOfPoint2f(goodOldKeypoints.stream().toArray(Point[]::new)), Calib3d.RANSAC, 10);
 				Mat mask = new Mat(frame.size(), CvType.CV_8UC1, new Scalar(255));
 				Mat maskWarpped = new Mat();
-				Imgproc.warpPerspective(mask, maskWarpped, homography[0], frame.size());
+				Imgproc.warpPerspective(mask, maskWarpped, homography, frame.size());
 				Mat tmp = new Mat();
-				Imgproc.warpPerspective(frame, tmp, homography[0], frame.size(), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(255));
+				Imgproc.warpPerspective(frame, tmp, homography, frame.size(), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(255));
 				tmp.copyTo(stabilized, maskWarpped);
 				return new Img(stabilized, false);
 			}
@@ -285,10 +348,10 @@ public class CamLayoutAnalyzer extends AbstractApp {
 		return new MatOfKeyPoint(keyPoints.stream().toArray(KeyPoint[]::new));
 	}
 
-	private Img deskew(Img frame, double[] angle) {
+	private Img deskew(Img frame) {
 		Img closed = frame.adaptativeGaussianInvThreshold(17, 9).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(5, 5));
-		angle[0] = detection_contours(frame.getSrc(), closed.getSrc());
-		Mat matrix = Imgproc.getRotationMatrix2D(new Point(frame.width() / 2, frame.height() / 2), angle[0], 1);
+		angle = detection_contours(frame.getSrc(), closed.getSrc());
+		Mat matrix = Imgproc.getRotationMatrix2D(new Point(frame.width() / 2, frame.height() / 2), angle, 1);
 		Mat rotated = new Mat(frame.size(), CvType.CV_8UC3, new Scalar(255, 255, 255));
 		Imgproc.warpAffine(frame.getSrc(), rotated, matrix, frame.size());
 		return new Img(rotated);

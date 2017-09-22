@@ -7,9 +7,11 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import org.genericsystem.layout.Layout;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
@@ -69,6 +71,24 @@ public class Zones implements Iterable<Zone> {
 				// }
 			}
 		}
+	}
+
+	public Zones(Img img, Layout layout) {
+		this.zones = extractZonesFromLayout(img, layout);
+	}
+
+	private List<Zone> extractZonesFromLayout(Img img, Layout layout) {
+		System.out.println("Extracting zones");
+		List<Zone> zones = new ArrayList<>();
+		AtomicInteger count = new AtomicInteger(100);
+		layout.traverse(img, (roi, shard) -> {
+			if (shard.getChildren().isEmpty()) {
+				Zone zone = new Zone(count.getAndIncrement(), shard.getLargeRect(img, 0.02, 0.1));
+				System.out.println("Zone " + count.get() + " | " + zone.getRect());
+				zones.add(zone);
+			}
+		});
+		return zones;
 	}
 
 	public void draw(Img img, Scalar scalar, int thickness) {

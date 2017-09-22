@@ -8,11 +8,11 @@ import org.genericsystem.cv.model.Doc.DocTimestamp;
 import org.genericsystem.cv.model.Doc.RefreshTimestamp;
 import org.genericsystem.cv.model.ImgFilter.ImgFilterInstance;
 import org.genericsystem.cv.model.MeanLevenshtein;
-import org.genericsystem.cv.model.MeanLevenshtein.MeanLevenshteinInstance;
 import org.genericsystem.cv.model.ModelTools;
 import org.genericsystem.cv.model.Score.ScoreInstance;
 import org.genericsystem.cv.model.ZoneText;
 import org.genericsystem.cv.model.ZoneText.ZoneTextInstance;
+import org.genericsystem.defaults.tools.RxJavaHelpers;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.context.TextBinding;
@@ -118,7 +118,8 @@ public class TextBindingCustom {
 		@Override
 		public Observable<String> apply(Context context, Tag tag) {
 			ScoreInstance score = (ScoreInstance) context.getGeneric();
-			return Observable.just(String.valueOf(score.getValue()));
+			SimpleObjectProperty<Generic> scoreProperty = new SimpleObjectProperty<>(score);
+			return RxJavaHelpers.valuesOf(scoreProperty).map(scoreInstance -> String.valueOf(scoreInstance.getValue()));
 		}
 	}
 
@@ -127,8 +128,8 @@ public class TextBindingCustom {
 		public Observable<String> apply(Context context, Tag tag) {
 			ScoreInstance score = (ScoreInstance) context.getGeneric();
 			MeanLevenshtein meanLevenshtein = score.getRoot().find(MeanLevenshtein.class);
-			MeanLevenshteinInstance mlvInstance = meanLevenshtein.getMeanLev(score);
-			return Observable.just(String.valueOf(mlvInstance.getValue()));
+			SimpleObjectProperty<Generic> mlProperty = new SimpleObjectProperty<>(meanLevenshtein.getMeanLev(score));
+			return RxJavaHelpers.valuesOf(mlProperty).map(ml -> String.valueOf(ml.getValue()));
 		}
 	}
 
