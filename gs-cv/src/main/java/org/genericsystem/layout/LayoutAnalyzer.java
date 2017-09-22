@@ -34,10 +34,11 @@ public class LayoutAnalyzer extends AbstractApp {
 		mainGrid.add(new ImageView(img.toJfxImage()), columnIndex, rowIndex++);
 		mainGrid.add(new ImageView(binary.toJfxImage()), columnIndex, rowIndex++);
 
-		Img img2 = new Img(filename).bilateralFilter(20, 80, 80);
-		layout.ocrTree(img2, 0.03, 0.1);
-		layout.drawOcr(img2);
-		mainGrid.add(new ImageView(img2.toJfxImage()), columnIndex, rowIndex++);
+		Img img2 = new Img(filename);
+		Img img3 = img2.bilateralFilter(20, 80, 80);
+		layout.ocrTree(img3, 0.03, 0.1);
+		layout.drawOcr(img3);
+		mainGrid.add(new ImageView(img3.toJfxImage()), columnIndex, rowIndex++);
 		// mainGrid.add(new ImageView(binary2.toJfxImage()), columnIndex, rowIndex++);
 		System.out.println(layout.recursiveToString());
 
@@ -45,6 +46,7 @@ public class LayoutAnalyzer extends AbstractApp {
 		img.close();
 		binary.close();
 		img2.close();
+		img3.close();
 	}
 
 }
