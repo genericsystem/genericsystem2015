@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Predicate;
 
-import org.genericsystem.api.core.DisposableObservableList;
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.BidirectionalBinding;
 import org.genericsystem.defaults.tools.ObservableListWrapper;
