@@ -29,6 +29,7 @@ import org.genericsystem.cv.model.ModelTools;
 import org.genericsystem.cv.model.Score;
 import org.genericsystem.cv.model.ZoneGeneric;
 import org.genericsystem.cv.model.ZoneGeneric.ZoneInstance;
+import org.genericsystem.cv.model.ZoneGeneric.ZoneNum;
 import org.genericsystem.cv.model.ZoneText;
 import org.genericsystem.cv.model.ZoneText.ZoneTextInstance;
 import org.genericsystem.cv.model.ZoneText.ZoneTimestamp;
@@ -85,7 +86,8 @@ public class FillModelWithData {
 	 * @return the created Root
 	 */
 	public static Root getEngine(String gsPath) {
-		return new Engine(gsPath, Doc.class, RefreshTimestamp.class, DocTimestamp.class, DocFilename.class, DocClass.class, ZoneGeneric.class, ZoneText.class, ZoneTimestamp.class, ImgFilter.class, LevDistance.class, MeanLevenshtein.class, Score.class);
+		return new Engine(gsPath, Doc.class, RefreshTimestamp.class, DocTimestamp.class, DocFilename.class, DocClass.class, ZoneGeneric.class, ZoneNum.class, ZoneText.class, ZoneTimestamp.class, ImgFilter.class, LevDistance.class, MeanLevenshtein.class,
+				Score.class);
 	}
 
 	/**
