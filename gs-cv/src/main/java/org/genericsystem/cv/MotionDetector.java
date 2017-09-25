@@ -5,7 +5,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import javax.imageio.ImageIO;
@@ -43,18 +42,18 @@ public class MotionDetector {
 		camera.read(frame);
 		jframe.setSize(frame.width(), frame.height());
 		jframe.setVisible(true);
-		Mat prevAdjustedFrame = adjust(frame);
-		Mat average = prevAdjustedFrame;
+		// Mat prevAdjustedFrame = adjust(frame);
+		Mat average = adjust(frame);
 		double n = 20;
 		while (camera.read(frame)) {
 			Mat currentAdjustedFrame = adjust(frame);
 			Core.addWeighted(average, (n - 1) / n, currentAdjustedFrame, 10d / n, 0, average);
 			Mat diffFrame = computeDiffFrame(currentAdjustedFrame, average);
-			prevAdjustedFrame = currentAdjustedFrame;
+			// prevAdjustedFrame = currentAdjustedFrame;
 			for (Rect rect : detection_contours(frame, diffFrame))
 				Imgproc.rectangle(frame, rect.br(), rect.tl(), new Scalar(0, 0, 255), 1);
 
-			ImageIcon image = new ImageIcon(mat2bufferedImage(frame));
+			ImageIcon image = new ImageIcon(mat2bufferedImage(diffFrame));
 			vidpanel.setIcon(image);
 			vidpanel.repaint();
 		}
@@ -80,7 +79,7 @@ public class MotionDetector {
 		// Imgproc.drawContours(frame, contours, 0, new Scalar(0, 255, 0));
 		// }
 
-		Collections.sort(contours, (c1, c2) -> Double.compare(Imgproc.contourArea(c2), Imgproc.contourArea(c1)));
+		// Collections.sort(contours, (c1, c2) -> Double.compare(Imgproc.contourArea(c2), Imgproc.contourArea(c1)));
 		for (int i = 0; i < contours.size(); i++) {
 			MatOfPoint contour = contours.get(i);
 			double contourarea = Imgproc.contourArea(contour);

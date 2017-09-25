@@ -15,6 +15,9 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
+
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.Ocr;
@@ -42,9 +45,6 @@ import org.opencv.utils.Converters;
 import org.opencv.videoio.VideoCapture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
 
 public class CamLayoutAnalyzer extends AbstractApp {
 
@@ -80,19 +80,24 @@ public class CamLayoutAnalyzer extends AbstractApp {
 		DescriptorMatcher matcher = DescriptorMatcher.create(DescriptorMatcher.BRUTEFORCE_HAMMING);
 		capture.read(frame);
 		ImageView src0 = new ImageView(Tools.mat2jfxImage(frame));
-		// ImageView src1 = new ImageView(Tools.mat2jfxImage(frame));
-		// ImageView src2 = new ImageView(Tools.mat2jfxImage(frame));
-		ImageView src3 = new ImageView(Tools.mat2jfxImage(frame));
 		mainGrid.add(src0, 0, 0);
-		// mainGrid.add(src1, 0, 1);
+
+		ImageView src1 = new ImageView(Tools.mat2jfxImage(frame));
+		// ImageView src2 = new ImageView(Tools.mat2jfxImage(frame));
+		// ImageView src3 = new ImageView(Tools.mat2jfxImage(frame));
+
+		mainGrid.add(src1, 0, 1);
+
 		// mainGrid.add(src2, 1, 0);
-		mainGrid.add(src3, 0, 1);
+		// mainGrid.add(src3, 0, 1);
 		oldKeypoints = new MatOfKeyPoint();
 		oldDescriptors = new Mat();
 		Mat stabilizedMat = new Mat();
 		timer.scheduleAtFixedRate(() -> {
 			synchronized (this) {
 				try {
+					capture.read(frame);
+					Img old = new Img(frame, true);
 					capture.read(frame);
 					Img frameImg = new Img(frame, false).bilateralFilter();
 					Img deskewed_ = deskew(frameImg);
@@ -103,43 +108,38 @@ public class CamLayoutAnalyzer extends AbstractApp {
 					// Img binary = deskewed_/* .cleanFaces(0.1, 0.26) */.adaptativeGaussianThreshold(17, 7).cleanTables(0.05);
 					// binary.buildLayout().draw(deskiewedCopy, new Scalar(0, 255, 0), 1);
 
-					Img stabilized = stabilize(stabilizedMat, matcher);
-					if (stabilized != null) {
-						if (stabilizationHasChanged) {
-							// Img binary2 = stabilized/* .cleanFaces(0.1, 0.26) */.adaptativeGaussianThreshold(17, 7).cleanTables(0.05);
-							// layout = binary2.buildLayout();
-							List<MatOfPoint> contours = new ArrayList<>();
-							Img closed = stabilized.adaptativeGaussianInvThreshold(17, 9).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(17, 5));
-							Imgproc.findContours(closed.getSrc(), contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
-							fields.merge(contours.stream().filter(contour -> Imgproc.contourArea(contour) > minArea));
-							stabilizationHasChanged = false;
-						}
-						// layout.ocrTree(stabilized, 0.03, 0.1);
-						Img display = new Img(frame, true);
-						// layout.drawOcrPerspectiveInverse(display, homography[0].inv(), new Scalar(0, 0, 255), 1);
-
-						Img stabilizedDisplay = new Img(stabilized.getSrc(), true);
-
-						fields.consolidateOcr(stabilized);
-						fields.drawConsolidated(stabilizedDisplay);
-						fields.drawOcrPerspectiveInverse(display, homography.inv(), new Scalar(0, 0, 255), 1);
-						// contours.stream().filter(contour -> Imgproc.contourArea(contour) > minArea).peek(c -> Imgproc.drawContours(stabilizedDisplay.getSrc(), Arrays.asList(c), 0, new Scalar(0, 255, 0), 1)).map(Imgproc::boundingRect)
-						// .forEach(rect -> Imgproc.rectangle(stabilizedDisplay.getSrc(), rect.tl(), rect.br(), new Scalar(0, 0, 255)));
-
-						// double area = layout.area(stabilized);
-						// Imgproc.putText(stabilizedCopy.getSrc(), "Surface : " + area, new Point(0.5 * stabilizedCopy.width(), 0.05 * stabilizedCopy.height()), Core.FONT_HERSHEY_PLAIN, 1, new Scalar(255, 0, 0), 1);
-						src0.setImage(display.toJfxImage());
-						// src1.setImage(deskewed_.toJfxImage());
-						// src2.setImage(deskiewedCopy.toJfxImage());
-						src3.setImage(stabilizedDisplay.toJfxImage());
+				Img stabilized = stabilize(stabilizedMat, matcher);
+				if (stabilized != null) {
+					if (stabilizationHasChanged) {
+						// Img binary2 = stabilized/* .cleanFaces(0.1, 0.26) */.adaptativeGaussianThreshold(17, 7).cleanTables(0.05);
+						// layout = binary2.buildLayout();
+						List<MatOfPoint> contours = new ArrayList<>();
+						Img closed = stabilized.adaptativeGaussianInvThreshold(17, 9).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(17, 5));
+						Imgproc.findContours(closed.getSrc(), contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+						fields.merge(contours.stream().filter(contour -> Imgproc.contourArea(contour) > minArea));
+						stabilizationHasChanged = false;
 					}
-				} catch (Throwable e) {
-					logger.warn("Exception while computing layout.", e);
-				}
-			}
-		}, 500, 33, TimeUnit.MILLISECONDS);
+					// layout.ocrTree(stabilized, 0.03, 0.1);
+					Img display = new Img(frame, true);
+					// layout.drawOcrPerspectiveInverse(display, homography[0].inv(), new Scalar(0, 0, 255), 1);
 
-		timer.scheduleAtFixedRate(() -> onSpace(), 0, 1000, TimeUnit.MILLISECONDS);
+					Img stabilizedDisplay = new Img(stabilized.getSrc(), true);
+
+					fields.consolidateOcr(stabilized);
+					fields.drawConsolidated(stabilizedDisplay);
+					fields.drawOcrPerspectiveInverse(display, homography.inv(), new Scalar(0, 0, 255), 1);
+					src0.setImage(display.toJfxImage());
+					src1.setImage(old.absDiff(new Img(frame, false)).adaptativeGaussianInvThreshold(17, 9).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(5, 5)).toJfxImage());// deskewed_.toJfxImage());
+					// src2.setImage(deskiewedCopy.toJfxImage());
+					// src3.setImage(stabilizedDisplay.toJfxImage());
+				}
+			} catch (Throwable e) {
+				logger.warn("Exception while computing layout.", e);
+			}
+		}
+	}, 500, 33, TimeUnit.MILLISECONDS);
+
+		timer.scheduleAtFixedRate(() -> onSpace(), 0, 650, TimeUnit.MILLISECONDS);
 	}
 
 	@Override
@@ -251,7 +251,6 @@ public class CamLayoutAnalyzer extends AbstractApp {
 			Point[] targets = results.toArray();
 			Imgproc.line(display.getSrc(), targets[0], new Point(targets[0].x, targets[0].y - 30), color, thickness);
 			Imgproc.putText(display.getSrc(), Normalizer.normalize(consolidated, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", ""), new Point(targets[0].x - 10, targets[0].y - 30), Core.FONT_HERSHEY_PLAIN, 1, new Scalar(255, 0, 0), 1);
-
 		}
 
 		public void draw(Img stabilizedDisplay) {
@@ -328,7 +327,7 @@ public class CamLayoutAnalyzer extends AbstractApp {
 				return new Img(stabilized, false);
 			}
 		}
-		System.out.println("No stabilized image");
+		// System.out.println("No stabilized image");
 		return null;
 
 	}
@@ -396,8 +395,9 @@ public class CamLayoutAnalyzer extends AbstractApp {
 
 	@Override
 	public void stop() throws Exception {
-		timer.shutdown();
-		capture.release();
 		super.stop();
+		timer.shutdown();
+		timer.awaitTermination(5000, TimeUnit.MILLISECONDS);
+		capture.release();
 	}
 }
