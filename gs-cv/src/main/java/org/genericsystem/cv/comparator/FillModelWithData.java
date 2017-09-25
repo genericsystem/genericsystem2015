@@ -13,7 +13,6 @@ import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
 import org.genericsystem.cv.Img;
-import org.genericsystem.cv.Zone;
 import org.genericsystem.cv.Zones;
 import org.genericsystem.cv.model.Doc;
 import org.genericsystem.cv.model.Doc.DocFilename;
@@ -152,19 +151,17 @@ public class FillModelWithData {
 
 		// Save the zones if necessary
 		zones.getZones().forEach(z -> {
-			ZoneInstance zoneInstance = docClassInstance.getZone(z.getNum());
+			ZoneInstance zoneInstance = docClassInstance.getZone(z.getUid());
 			if (zoneInstance != null) {
-				Zone zone = zoneInstance.getZoneObject();
-				// logger.info("z : {} ; zone : {}", z, zone);
-				if (z.equals(zone)) {
-					logger.info("Zone n°{} already known", z.getNum());
+				if (z.getUid().equals(zoneInstance.getValue())) {
+					logger.info("Zone n°{} already known", z.getUid());
 				} else {
-					logger.info("Adding zone n°{} ", z.getNum());
-					docClassInstance.setZone(z.getNum(), z.getRect().x, z.getRect().y, z.getRect().width, z.getRect().height);
+					logger.info("Adding zone n°{} ", z.getUid());
+					docClassInstance.setZone(z);
 				}
 			} else {
-				logger.info("Adding zone n°{} ", z.getNum());
-				docClassInstance.setZone(z.getNum(), z.getRect().x, z.getRect().y, z.getRect().width, z.getRect().height);
+				logger.info("Adding zone n°{} ", z.getUid());
+				docClassInstance.setZone(z);
 			}
 		});
 
@@ -180,7 +177,7 @@ public class FillModelWithData {
 			} else {
 				// TODO: add another criteria to verify if the filter has been applied on the image
 				boolean containsNullZoneTextInstance = zones.getZones().stream().anyMatch(z -> {
-					ZoneTextInstance zti = zoneText.getZoneText(docInstance, docClassInstance.getZone(z.getNum()), filter);
+					ZoneTextInstance zti = zoneText.getZoneText(docInstance, docClassInstance.getZone(z.getUid()), filter);
 					return zti == null;
 				});
 				if (containsNullZoneTextInstance) {
@@ -264,7 +261,7 @@ public class FillModelWithData {
 					map.put(entry.getKey(), ocrText);
 				}
 			});
-			result.put(String.valueOf(z.getNum()), map);
+			result.put(String.valueOf(z.getUid()), map);
 		});
 		jsonObject.put(ZONES, result);
 
@@ -287,7 +284,7 @@ public class FillModelWithData {
 		String filename = data.getString(FILENAME);
 		String filenameExt = data.getString(ENCODED_FILENAME);
 		Long timestamp = data.getLong(DOC_TIMESTAMP);
-		JsonObject zones = data.getJsonObject(ZONES);
+		JsonObject zonesResults = data.getJsonObject(ZONES);
 
 		// Get the generics
 		DocClass docClass = engine.find(DocClass.class);
@@ -308,9 +305,9 @@ public class FillModelWithData {
 				throw new RuntimeException(e1);
 			}
 
-			zones.forEach(entry -> {
-				logger.info("Current zone: {}", entry.getKey());
-				ZoneInstance zoneInstance = docClassInstance.getZone(Integer.parseInt(entry.getKey(), 10));
+			zonesResults.forEach(entry -> {
+				logger.info("Current zone: {}", entry.getKey()); // Prints the UID
+				ZoneInstance zoneInstance = docClassInstance.getZone(String.valueOf(entry.getKey()));
 				JsonObject currentZone = (JsonObject) entry.getValue();
 				if (!currentZone.isEmpty())
 					currentZone.put("reality", ""); // Add this filter only if there are other filters

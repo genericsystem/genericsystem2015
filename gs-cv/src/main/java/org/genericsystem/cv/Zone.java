@@ -13,16 +13,21 @@ import org.opencv.imgproc.Imgproc;
 public class Zone implements Serializable {
 	private Rect rect;
 	private int num;
-
 	private String uid;
 
 	public Zone() {
 	}
 
+	/**
+	 * Create a new Zone with a given number and UID.
+	 * 
+	 * @param num - a number for the zone
+	 * @param rect - a {@link Rect} object which define the zone
+	 */
 	public Zone(int num, Rect rect) {
 		this.num = num;
 		this.rect = rect;
-		this.uid = ModelTools.generateZoneUID(this);
+		this.uid = ModelTools.generateZoneUID(rect);
 	}
 
 	public Rect getRect() {

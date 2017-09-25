@@ -155,4 +155,9 @@ public class Zones implements Iterable<Zone> {
 	public boolean isEmpty() {
 		return zones.isEmpty();
 	}
+
+	@Override
+	public String toString() {
+		return "Zones [zones=" + zones + "]";
+	}
 }
