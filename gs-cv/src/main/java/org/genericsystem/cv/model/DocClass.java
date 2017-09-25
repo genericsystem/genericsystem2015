@@ -1,5 +1,6 @@
 package org.genericsystem.cv.model;
 
+import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.annotations.InstanceClass;
 import org.genericsystem.api.core.annotations.SystemGeneric;
 import org.genericsystem.common.Generic;
@@ -35,6 +36,16 @@ public class DocClass implements Generic {
 			zoneInstance.setHolder(getRoot().find(ZoneH.class), rect.height);
 			zoneInstance.setHolder(getRoot().find(ZoneNum.class), zone.getNum());
 			return zoneInstance;
+		}
+
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		public Snapshot<ZoneInstance> getZones() {
+			return (Snapshot) getHolders(getRoot().find(ZoneGeneric.class));
+		}
+
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		public Snapshot<DocInstance> getDocs() {
+			return (Snapshot) getHolders(getRoot().find(Doc.class));
 		}
 
 		public DocInstance setDoc(Generic docInstance, String filename) {

@@ -13,6 +13,7 @@ import org.genericsystem.cv.model.ZoneGeneric.ZoneNum;
 import org.genericsystem.cv.model.ZoneGeneric.ZoneW;
 import org.genericsystem.cv.model.ZoneGeneric.ZoneX;
 import org.genericsystem.cv.model.ZoneGeneric.ZoneY;
+import org.opencv.core.Rect;
 
 /**
  * This class stores zones for given class of documents.
@@ -32,8 +33,20 @@ public class ZoneGeneric implements Generic {
 			return (DocClassInstance) getHolder(getRoot().find(DocClass.class));
 		}
 
+		public Generic setZoneNum(int num) {
+			return setHolder(getRoot().find(ZoneNum.class), num);
+		}
+
 		public Generic getZoneNum() {
 			return getHolder(getRoot().find(ZoneNum.class));
+		}
+
+		public Rect getRect() {
+			int x = (int) getHolder(getRoot().find(ZoneX.class)).getValue();
+			int y = (int) getHolder(getRoot().find(ZoneY.class)).getValue();
+			int width = (int) getHolder(getRoot().find(ZoneW.class)).getValue();
+			int height = (int) getHolder(getRoot().find(ZoneH.class)).getValue();
+			return new Rect(x, y, width, height);
 		}
 
 	}
