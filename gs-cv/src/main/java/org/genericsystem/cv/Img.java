@@ -15,6 +15,9 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+
 import javax.swing.ImageIcon;
 
 import org.genericsystem.layout.Layout;
@@ -42,9 +45,6 @@ import org.opencv.utils.Converters;
 import org.opencv.ximgproc.Ximgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 
 public class Img implements AutoCloseable, Serializable {
 
@@ -421,7 +421,7 @@ public class Img implements AutoCloseable, Serializable {
 		return result_;
 	}
 
-	public Img grad(int k1, int k2) {
+	public Img grad(double k1, double k2) {
 		// Img gray = bgr2Gray();
 		Img grad = morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_RECT, new Size(k1, k2));
 		return grad;
@@ -511,7 +511,7 @@ public class Img implements AutoCloseable, Serializable {
 	}
 
 	public Img sauvolaThreshold() {
-		return sauvolaThreshold(17, 0.3);
+		return sauvolaThreshold(17, 0.4);
 	}
 
 	public Img nickThreshold() {
