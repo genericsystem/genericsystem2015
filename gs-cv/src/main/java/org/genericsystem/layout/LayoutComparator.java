@@ -68,7 +68,7 @@ public class LayoutComparator extends AbstractApp {
 
 				List<MatOfPoint> contours = new ArrayList<>();
 				Imgproc.findContours(diff, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
-				double minArea = 100;
+				double minArea = 20;
 				Img img4 = new Img(new Mat(frame.size(), CvType.CV_8U, new Scalar(255)), false);
 				contours.stream().filter(contour -> Imgproc.contourArea(contour) > minArea).forEach(c -> Imgproc.drawContours(img4.getSrc(), Arrays.asList(c), 0, new Scalar(0)));// map(Imgproc::boundingRect).forEach(rect ->);
 
@@ -93,7 +93,7 @@ public class LayoutComparator extends AbstractApp {
 				src1.setImage(img1.toJfxImage());
 				src2.setImage(img2.toJfxImage());
 				src3.setImage(img3.toJfxImage());
-				src4.setImage(Tools.mat2jfxImage(diff));
+				src4.setImage(img4.toJfxImage());
 			} catch (Throwable t) {
 				t.printStackTrace();
 			}
