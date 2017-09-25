@@ -83,7 +83,7 @@ public class Zones implements Iterable<Zone> {
 		layout.traverse(img, (roi, shard) -> {
 			if (shard.getChildren().isEmpty()) {
 				Zone zone = new Zone(count.getAndIncrement(), shard.getLargeRect(img, 0.02, 0.1));
-				System.out.println("Zone " + count.get() + " | " + zone.getRect());
+				System.out.println("Zone " + count.get() + " | " + zone);
 				zones.add(zone);
 			}
 		});
