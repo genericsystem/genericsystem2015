@@ -18,6 +18,7 @@ import javax.xml.bind.DatatypeConverter;
 
 import org.apache.commons.io.FilenameUtils;
 import org.genericsystem.cv.Zone;
+import org.opencv.core.Rect;
 
 /**
  * This class contains only static methods, which can be used as general purpose tools.
@@ -199,8 +200,18 @@ public class ModelTools {
 	 * @return a String representing the zone's unique ID
 	 */
 	public static String generateZoneUID(Zone zone) {
+		return generateZoneUID(zone.getRect());
+	}
+
+	/**
+	 * Generate a unique ID for a given {@link Rect}. This hashcode is computed from the String representation of the rectangle.
+	 * 
+	 * @param rect - the {@link Rect} for which a label has to be generated
+	 * @return a String representing the rectangle's unique ID
+	 */
+	public static String generateZoneUID(Rect rect) {
 		try {
-			byte[] bytes = zone.getRect().toString().getBytes(Charset.forName("UTF8"));
+			byte[] bytes = rect.toString().getBytes(Charset.forName("UTF8"));
 			String zoneUID = ModelTools.getHashFromBytes(bytes, "sha-256");
 			return zoneUID;
 		} catch (RuntimeException e) {
