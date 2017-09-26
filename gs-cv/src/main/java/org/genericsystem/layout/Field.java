@@ -10,7 +10,6 @@ import org.genericsystem.cv.Img;
 import org.genericsystem.cv.Ocr;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
@@ -24,20 +23,22 @@ public class Field {
 	private String consolidated;
 	private int attempts = 0;
 
-	public Field(MatOfPoint contour) {
-		rect = Imgproc.boundingRect(contour);
+	public Field(Rect rect) {
+		this.rect = rect;
 	}
 
 	public void merge(Field field) {
 		labels = field.getLabels();
+		consolidated = field.getConsolidated();
 	}
 
 	public Map<String, Integer> getLabels() {
 		return labels;
 	}
 
-	public boolean contains(Point pt) {
-		return rect.contains(pt);
+	public boolean contains(Point center) {
+		Point localCenter = center();
+		return Math.sqrt(Math.pow(localCenter.x - center.x, 2) + Math.pow(localCenter.y - center.y, 2)) <= 10;
 	}
 
 	public Point center() {
@@ -78,7 +79,7 @@ public class Field {
 	}
 
 	public boolean isConsolidated() {
-		return consolidated != null;
+		return consolidated != null && consolidated.length() >= 5;
 	}
 
 	public String getConsolidated() {
@@ -86,7 +87,7 @@ public class Field {
 	}
 
 	public boolean needOcr() {
-		return !isConsolidated() && attempts < 10;
+		return consolidated == null && attempts < 10;
 	}
 
 }

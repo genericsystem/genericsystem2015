@@ -12,6 +12,7 @@ import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
+import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
 
 public class Fields {
@@ -21,7 +22,7 @@ public class Fields {
 
 	public void merge(Stream<MatOfPoint> contours) {
 		List<Field> oldFields = fields;
-		fields = contours.map(Field::new).collect(Collectors.toList());
+		fields = contours.map(c -> new Field(Imgproc.boundingRect(c))).collect(Collectors.toList());
 		if (lastHomography != null) {
 			List<Point> newPoints = restabilize(oldFields.stream().map(f -> f.center()).collect(Collectors.toList()));
 			for (int index = 0; index < oldFields.size(); index++)
@@ -32,7 +33,7 @@ public class Fields {
 						System.out.println("Merge : " + oldFields.get(index).getConsolidated());
 						System.out.println(newPoints.get(index) + " " + field.center());
 					} else
-						System.out.println("Can 't merge : " + oldFields.get(index).getConsolidated());
+						System.out.println("Can 't merge : " + oldFields.get(index).getConsolidated() + " ");
 				}
 		}
 	}
