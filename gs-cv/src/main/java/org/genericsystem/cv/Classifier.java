@@ -252,10 +252,13 @@ public class Classifier {
 				objectPointsMat.release();
 				scenePointsMat.release();
 				Mat transformedImage = new Mat();
-				Imgproc.warpPerspective(img1, transformedImage, homography, new Size(img2.cols(), img2.rows()));
-				result = new CompareFeatureResult(transformedImage, goodMatches.size());
-				homography.release();
-				logger.debug("----------------- possible match found, threshold: {}, goodMatches: {}.", matchingThreshold, goodMatches.size());
+				if (homography.rows() == 3 && homography.cols() == 3) {
+					Imgproc.warpPerspective(img1, transformedImage, homography, new Size(img2.cols(), img2.rows()));
+					result = new CompareFeatureResult(transformedImage, goodMatches.size());
+					homography.release();
+					logger.debug("----------------- possible match found, threshold: {}, goodMatches: {}.", matchingThreshold, goodMatches.size());
+				} else
+					logger.debug("----------------- unable to find a correct homography");
 			} else
 				logger.debug("----------------- not a match, threshold: {}, goodMatches: {}.", matchingThreshold, goodMatches.size());
 		}

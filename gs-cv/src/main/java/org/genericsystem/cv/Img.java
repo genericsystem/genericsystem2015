@@ -15,9 +15,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-
 import javax.swing.ImageIcon;
 
 import org.genericsystem.layout.Layout;
@@ -45,6 +42,9 @@ import org.opencv.utils.Converters;
 import org.opencv.ximgproc.Ximgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 
 public class Img implements AutoCloseable, Serializable {
 
@@ -511,7 +511,7 @@ public class Img implements AutoCloseable, Serializable {
 	}
 
 	public Img sauvolaThreshold() {
-		return sauvolaThreshold(17, 0.4);
+		return sauvolaThreshold(17, 0.3);
 	}
 
 	public Img nickThreshold() {
@@ -672,7 +672,7 @@ public class Img implements AutoCloseable, Serializable {
 	}
 
 	public Img bilateralFilter() {
-		return bilateralFilter(5, 80, 80);
+		return bilateralFilter(10, 80, 80);
 	}
 
 	public Img distanceTransform() {
@@ -684,6 +684,12 @@ public class Img implements AutoCloseable, Serializable {
 	public Img absDiff(Img img) {
 		Mat result = new Mat();
 		Core.absdiff(src, img.getSrc(), result);
+		return new Img(result, false);
+	}
+
+	public Img absDiff(Scalar scalar) {
+		Mat result = new Mat();
+		Core.absdiff(src, scalar, result);
 		return new Img(result, false);
 	}
 
