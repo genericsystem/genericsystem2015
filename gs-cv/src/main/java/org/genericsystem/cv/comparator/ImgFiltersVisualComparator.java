@@ -6,7 +6,6 @@ import java.util.Map.Entry;
 
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
-import org.genericsystem.cv.ImgClass;
 import org.genericsystem.cv.Tools;
 import org.genericsystem.cv.Zone;
 import org.genericsystem.cv.Zones;
@@ -33,8 +32,6 @@ public class ImgFiltersVisualComparator extends AbstractApp {
 	protected void fillGrid(GridPane mainGrid) {
 		int columnIndex = 0;
 		int rowIndex = 0;
-
-		ImgClass imgClass = ImgClass.fromDirectory(imgClassDirectory);
 
 		Img img = Tools.firstImg(imgClassDirectory);
 

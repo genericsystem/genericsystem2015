@@ -15,7 +15,6 @@ import org.genericsystem.layout.Layout;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
-import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -129,20 +128,6 @@ public class Zones implements Iterable<Zone> {
 
 	public static Zones load(String imgClassDirectory) {
 		return load(new File(imgClassDirectory + "/zones/zones.json"));
-	}
-
-	// TODO: update the algorithm for de-zoning
-	public static Zones loadZones(String imgClassDirectory) {
-		ImgClass imgClass = ImgClass.fromDirectory(imgClassDirectory);
-		Zones zones = null;
-		try {
-			zones = load(imgClassDirectory);
-		} catch (RuntimeException e) {
-			log.warn("Could not load accurate zones!");
-			imgClass.addMapper(img -> img.eraseCorners(0.1).dilateBlacks(86, 255, 76, new Size(20, 3)));
-			zones = get(imgClass.getClosedVarianceZones(new Size(9, 10)), 300, 6, 6);
-		}
-		return zones;
 	}
 
 	public static boolean isZonesFilePresent(String imgPath) {

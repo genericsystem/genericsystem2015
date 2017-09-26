@@ -1,10 +1,7 @@
 package org.genericsystem.cv;
 
 import java.io.Serializable;
-import java.util.Map.Entry;
-import java.util.stream.Stream;
 
-import org.genericsystem.cv.comparator.ZoneScorerMap;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
@@ -28,20 +25,6 @@ public class Zone implements Serializable {
 
 	public Rect getRect() {
 		return rect;
-	}
-
-	public ZoneScorer newUnsupervisedScorer(Stream<Img> imgs) {
-		return new ZoneScorer(this, imgs);
-	}
-
-	public ZoneScorerMap newUnsupervisedScorerMap(String fileName, Stream<Entry<Img, String>> stream) {
-		ZoneScorerMap scorer = new ZoneScorerMap(this, stream, fileName, false);
-		return scorer;
-	}
-
-	public ZoneScorerMap newSupervisedScorerMap(String fileName, String realText, Stream<Entry<Img, String>> stream) {
-		ZoneScorerMap scorer = new ZoneScorerMap(this, stream, fileName, realText, true);
-		return scorer;
 	}
 
 	public Zone adjustRect(double dx, double dy, int maxWidht, int maxHeight) {
