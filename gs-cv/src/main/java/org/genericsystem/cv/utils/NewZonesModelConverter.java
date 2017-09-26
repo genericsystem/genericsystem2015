@@ -37,8 +37,13 @@ public class NewZonesModelConverter {
 				currentZone.updateValue(ModelTools.generateZoneUID(rect));
 				long stop = System.nanoTime();
 				System.out.println("--------- update: " + (stop - start) / 1_000_000 + "ms");
+
+				start = System.nanoTime();
+				root.getCurrentCache().flush();
+				stop = System.nanoTime();
+				System.out.println("--- flush: " + (stop - start) / 1_000_000 + "ms");
 			});
-			root.getCurrentCache().flush();
+
 		});
 
 		docClasses.forEach(currentDocClass -> {
