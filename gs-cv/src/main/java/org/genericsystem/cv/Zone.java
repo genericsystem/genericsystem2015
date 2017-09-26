@@ -1,10 +1,8 @@
 package org.genericsystem.cv;
 
 import java.io.Serializable;
-import java.util.Map.Entry;
-import java.util.stream.Stream;
 
-import org.genericsystem.cv.comparator.ZoneScorerMap;
+import org.genericsystem.cv.model.ModelTools;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
@@ -15,33 +13,25 @@ import org.opencv.imgproc.Imgproc;
 public class Zone implements Serializable {
 	private Rect rect;
 	private int num;
-
-	private String label;
+	private String uid;
 
 	public Zone() {
 	}
 
+	/**
+	 * Create a new Zone with a given number and UID.
+	 * 
+	 * @param num - a number for the zone
+	 * @param rect - a {@link Rect} object which define the zone
+	 */
 	public Zone(int num, Rect rect) {
 		this.num = num;
 		this.rect = rect;
+		this.uid = ModelTools.generateZoneUID(rect);
 	}
 
 	public Rect getRect() {
 		return rect;
-	}
-
-	public ZoneScorer newUnsupervisedScorer(Stream<Img> imgs) {
-		return new ZoneScorer(this, imgs);
-	}
-
-	public ZoneScorerMap newUnsupervisedScorerMap(String fileName, Stream<Entry<Img, String>> stream) {
-		ZoneScorerMap scorer = new ZoneScorerMap(this, stream, fileName, false);
-		return scorer;
-	}
-
-	public ZoneScorerMap newSupervisedScorerMap(String fileName, String realText, Stream<Entry<Img, String>> stream) {
-		ZoneScorerMap scorer = new ZoneScorerMap(this, stream, fileName, realText, true);
-		return scorer;
 	}
 
 	public Zone adjustRect(double dx, double dy, int maxWidht, int maxHeight) {
@@ -80,7 +70,7 @@ public class Zone implements Serializable {
 
 	@Override
 	public String toString() {
-		return "Zone [rect=" + rect + ", num=" + num + "]";
+		return "Zone [rect=" + rect + ", num=" + num + ", uid=" + uid + "]";
 	}
 
 	@Override
@@ -111,12 +101,8 @@ public class Zone implements Serializable {
 		return true;
 	}
 
-	public String getLabel() {
-		return label;
-	}
-
-	public void setLabel(String label) {
-		this.label = label;
+	public String getUid() {
+		return uid;
 	}
 
 }
