@@ -42,49 +42,28 @@ public class MotionDetector {
 		camera.read(frame);
 		jframe.setSize(frame.width(), frame.height());
 		jframe.setVisible(true);
-		// Mat prevAdjustedFrame = adjust(frame);
-		Mat average = adjust(frame);
-		double n = 20;
 		while (camera.read(frame)) {
-			Mat currentAdjustedFrame = adjust(frame);
-			Core.addWeighted(average, (n - 1) / n, currentAdjustedFrame, 10d / n, 0, average);
-			Mat diffFrame = computeDiffFrame(currentAdjustedFrame, average);
-			// prevAdjustedFrame = currentAdjustedFrame;
+			Mat diffFrame = new Mat();
+			Core.absdiff(adjust(frame), new Scalar(255), diffFrame);
+			Imgproc.adaptiveThreshold(diffFrame, diffFrame, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 7, 3);
 			for (Rect rect : detection_contours(frame, diffFrame))
 				Imgproc.rectangle(frame, rect.br(), rect.tl(), new Scalar(0, 0, 255), 1);
 
-			ImageIcon image = new ImageIcon(mat2bufferedImage(diffFrame));
+			ImageIcon image = new ImageIcon(mat2bufferedImage(frame));
 			vidpanel.setIcon(image);
 			vidpanel.repaint();
 		}
 	}
 
-	public static Mat computeDiffFrame(Mat currentAdjustedFrame, Mat prevAdjustedFrame) {
-		Mat result = new Mat();
-		Core.absdiff(currentAdjustedFrame, prevAdjustedFrame, result);
-		Imgproc.adaptiveThreshold(result, result, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 9, 3);
-		return result;
-	}
-
 	public static List<Rect> detection_contours(Mat frame, Mat diffFrame) {
 		List<MatOfPoint> contours = new ArrayList<>();
 		Imgproc.findContours(diffFrame, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
-
-		double maxArea = 100;
+		double maxArea = 10;
 		List<Rect> rectangles = new ArrayList<>();
-		// contours = contours.stream().filter(c -> Imgproc.contourArea(c) >= maxArea).collect(Collectors.toList());
-		// contours.sort((a, b) -> Double.compare(Imgproc.contourArea(b), Imgproc.contourArea(a)));
-		// if (contours.size() > 0) {
-		// rectangles.add(Imgproc.boundingRect(contours.get(0)));
-		// Imgproc.drawContours(frame, contours, 0, new Scalar(0, 255, 0));
-		// }
-
-		// Collections.sort(contours, (c1, c2) -> Double.compare(Imgproc.contourArea(c2), Imgproc.contourArea(c1)));
 		for (int i = 0; i < contours.size(); i++) {
 			MatOfPoint contour = contours.get(i);
 			double contourarea = Imgproc.contourArea(contour);
 			if (contourarea > maxArea) {
-				// maxArea = contourarea;
 				MatOfPoint2f contour2F = new MatOfPoint2f(contour.toArray());
 				Point[] result = new Point[4];
 				Imgproc.minAreaRect(contour2F).points(result);
@@ -98,7 +77,7 @@ public class MotionDetector {
 	}
 
 	public static Mat adjust(Mat frame) {
-		Mat result = frame.clone();
+		Mat result = new Mat();
 		Imgproc.cvtColor(frame, result, Imgproc.COLOR_BGR2GRAY);
 		Imgproc.GaussianBlur(result, result, new Size(3, 3), 0);
 		// Imgproc.Canny(result, result, 150d, 150d * 2, 3, true);

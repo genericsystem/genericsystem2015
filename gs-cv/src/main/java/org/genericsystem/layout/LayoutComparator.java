@@ -66,12 +66,12 @@ public class LayoutComparator extends AbstractApp {
 				capture.read(frame);
 				Img frameImg = new Img(frame, false);
 
-				Img img0 = frameImg.bilateralFilter(10, 80, 80).bgr2Gray().adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY, 13, 3).bitwise_not().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(11, 5));
-				Img img1 = frameImg.canny(60, 180).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(11, 5));
+				Img img0 = frameImg.bilateralFilter(10, 80, 80).bgr2Gray().adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY, 11, 3).bitwise_not().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(11, 3));
+				Img img1 = frameImg.canny(60, 180).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(11, 3));
 				Img img2 = frameImg.bgr2Gray().grad(2.0d, 2.0d).thresHold(0, 255, Imgproc.THRESH_BINARY_INV + Imgproc.THRESH_OTSU).bitwise_not().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(11, 3));
-				Img img3 = frameImg.sauvolaThreshold().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(11, 3));
-				Img img4 = frameImg.bgr2Gray().gaussianBlur(new Size(3, 3)).absDiff(new Scalar(255.0)).adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY, 11, 5).bitwise_not().morphologyEx(Imgproc.MORPH_CLOSE,
-						Imgproc.MORPH_ELLIPSE, new Size(11, 3));
+				Img img3 = frameImg.sauvolaThreshold().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(11, 3));
+				Img img4 = frameImg.bgr2Gray().gaussianBlur(new Size(3, 3)).absDiff(new Scalar(255.0)).adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY, 11, 3).bitwise_not().morphologyEx(Imgproc.MORPH_CLOSE,
+						Imgproc.MORPH_RECT, new Size(11, 3));
 
 				// Layout layout = img0.buildLayout();
 				// Layout layout1 = img1.buildLayout();

@@ -88,7 +88,7 @@ public class CamLayoutAnalyzer extends AbstractApp {
 			synchronized (this) {
 				try {
 					capture.read(frame);
-					Img frameImg = new Img(frame, false).bilateralFilter();
+					Img frameImg = new Img(frame, false).bilateralFilter(10, 80, 80);
 					Img deskewed_ = deskew(frameImg);
 					newKeypoints = detect(deskewed_);
 					newDescriptors = new Mat();
@@ -98,14 +98,18 @@ public class CamLayoutAnalyzer extends AbstractApp {
 					// binary.buildLayout().draw(deskiewedCopy, new Scalar(0, 255, 0), 1);
 
 					Img stabilized = stabilize(stabilizedMat, matcher);
+
+					Img closed;
 					if (stabilized != null) {
 						if (stabilizationHasChanged) {
 							// Img binary2 = stabilized/* .cleanFaces(0.1, 0.26) */.adaptativeGaussianThreshold(17, 7).cleanTables(0.05);
 							// layout = binary2.buildLayout();
 							List<MatOfPoint> contours = new ArrayList<>();
-							Img closed = stabilized.adaptativeGaussianInvThreshold(13, 3).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(11, 5));
-							Imgproc.findContours(closed.getSrc(), contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
-							fields.merge(contours.stream().filter(contour -> Imgproc.contourArea(contour) > 10));
+							closed = stabilized.adaptativeGaussianInvThreshold(11, 3).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(11, 3));
+							Imgproc.findContours(closed.getSrc(), contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+
+							fields.merge(contours.stream().filter(contour -> Imgproc.contourArea(contour) > 200));
+
 							stabilizationHasChanged = false;
 						}
 						// layout.ocrTree(stabilized, 0.03, 0.1);
@@ -120,7 +124,7 @@ public class CamLayoutAnalyzer extends AbstractApp {
 						src0.setImage(display.toJfxImage());
 						// src1.setImage(old.absDiff(new Img(frame, false)).adaptativeGaussianInvThreshold(17, 9).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(5, 5)).toJfxImage());// deskewed_.toJfxImage());
 						// src2.setImage(deskiewedCopy.toJfxImage());
-						// src3.setImage(stabilizedDisplay.toJfxImage());
+						src1.setImage(stabilizedDisplay.toJfxImage());
 					}
 				} catch (Throwable e) {
 					logger.warn("Exception while computing layout.", e);
@@ -128,7 +132,7 @@ public class CamLayoutAnalyzer extends AbstractApp {
 			}
 		}, 500, 33, TimeUnit.MILLISECONDS);
 
-		timer.scheduleAtFixedRate(() -> onSpace(), 0, 650, TimeUnit.MILLISECONDS);
+		timer.scheduleAtFixedRate(() -> onSpace(), 0, 200, TimeUnit.MILLISECONDS);
 	}
 
 	@Override
@@ -178,13 +182,13 @@ public class CamLayoutAnalyzer extends AbstractApp {
 				return new Img(stabilized, false);
 			}
 		}
-		// System.out.println("No stabilized image");
+		System.out.println("No stabilized image");
 		return null;
 
 	}
 
 	private MatOfKeyPoint detect(Img frame) {
-		Img closed = frame.adaptativeGaussianInvThreshold(17, 9).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(5, 5));
+		Img closed = frame.adaptativeGaussianInvThreshold(17, 3).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(5, 5));
 		List<MatOfPoint> contours = new ArrayList<>();
 		Imgproc.findContours(closed.getSrc(), contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
 		double minArea = 100;
@@ -199,7 +203,7 @@ public class CamLayoutAnalyzer extends AbstractApp {
 	}
 
 	private Img deskew(Img frame) {
-		Img closed = frame.adaptativeGaussianInvThreshold(17, 9).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(5, 5));
+		Img closed = frame.adaptativeGaussianInvThreshold(17, 3).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(5, 5));
 		angle = detection_contours(frame.getSrc(), closed.getSrc());
 		Mat matrix = Imgproc.getRotationMatrix2D(new Point(frame.width() / 2, frame.height() / 2), angle, 1);
 		Mat rotated = new Mat(frame.size(), CvType.CV_8UC3, new Scalar(255, 255, 255));
