@@ -73,11 +73,11 @@ public class CamLayoutAnalyzer extends AbstractApp {
 		ImageView src0 = new ImageView(Tools.mat2jfxImage(frame));
 		mainGrid.add(src0, 0, 0);
 
-		ImageView src1 = new ImageView(Tools.mat2jfxImage(frame));
+		// ImageView src1 = new ImageView(Tools.mat2jfxImage(frame));
 		// ImageView src2 = new ImageView(Tools.mat2jfxImage(frame));
 		// ImageView src3 = new ImageView(Tools.mat2jfxImage(frame));
 
-		mainGrid.add(src1, 0, 1);
+		// mainGrid.add(src1, 0, 1);
 
 		// mainGrid.add(src2, 1, 0);
 		// mainGrid.add(src3, 0, 1);
@@ -88,7 +88,7 @@ public class CamLayoutAnalyzer extends AbstractApp {
 			synchronized (this) {
 				try {
 					capture.read(frame);
-					Img frameImg = new Img(frame, false).bilateralFilter(10, 80, 80);
+					Img frameImg = new Img(frame, false).bilateralFilter(5, 100, 100);
 					Img deskewed_ = deskew(frameImg);
 					newKeypoints = detect(deskewed_);
 					newDescriptors = new Mat();
@@ -105,7 +105,7 @@ public class CamLayoutAnalyzer extends AbstractApp {
 							// Img binary2 = stabilized/* .cleanFaces(0.1, 0.26) */.adaptativeGaussianThreshold(17, 7).cleanTables(0.05);
 							// layout = binary2.buildLayout();
 							List<MatOfPoint> contours = new ArrayList<>();
-							closed = stabilized.adaptativeGaussianInvThreshold(11, 3).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(11, 3));
+							closed = stabilized.adaptativeGaussianInvThreshold(7, 3).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(9, 1));
 							Imgproc.findContours(closed.getSrc(), contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 
 							fields.merge(contours.stream().filter(contour -> Imgproc.contourArea(contour) > 200));
@@ -116,15 +116,15 @@ public class CamLayoutAnalyzer extends AbstractApp {
 						Img display = new Img(frame, true);
 						// layout.drawOcrPerspectiveInverse(display, homography[0].inv(), new Scalar(0, 0, 255), 1);
 
-						Img stabilizedDisplay = new Img(stabilized.getSrc(), true);
+						// Img stabilizedDisplay = new Img(stabilized.getSrc(), true);
 
 						fields.consolidateOcr(stabilized);
-						fields.drawConsolidated(stabilizedDisplay);
+						// fields.drawConsolidated(stabilizedDisplay);
 						fields.drawOcrPerspectiveInverse(display, homography.inv(), new Scalar(0, 0, 255), 1);
 						src0.setImage(display.toJfxImage());
 						// src1.setImage(old.absDiff(new Img(frame, false)).adaptativeGaussianInvThreshold(17, 9).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(5, 5)).toJfxImage());// deskewed_.toJfxImage());
 						// src2.setImage(deskiewedCopy.toJfxImage());
-						src1.setImage(stabilizedDisplay.toJfxImage());
+						// src1.setImage(stabilizedDisplay.toJfxImage());
 					}
 				} catch (Throwable e) {
 					logger.warn("Exception while computing layout.", e);
@@ -132,7 +132,7 @@ public class CamLayoutAnalyzer extends AbstractApp {
 			}
 		}, 500, 33, TimeUnit.MILLISECONDS);
 
-		timer.scheduleAtFixedRate(() -> onSpace(), 0, 200, TimeUnit.MILLISECONDS);
+		timer.scheduleAtFixedRate(() -> onSpace(), 0, 110, TimeUnit.MILLISECONDS);
 	}
 
 	@Override
@@ -190,7 +190,7 @@ public class CamLayoutAnalyzer extends AbstractApp {
 	private MatOfKeyPoint detect(Img frame) {
 		Img closed = frame.adaptativeGaussianInvThreshold(17, 3).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(5, 5));
 		List<MatOfPoint> contours = new ArrayList<>();
-		Imgproc.findContours(closed.getSrc(), contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+		Imgproc.findContours(closed.getSrc(), contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 		double minArea = 100;
 		List<KeyPoint> keyPoints = new ArrayList<>();
 		contours.stream().filter(contour -> Imgproc.contourArea(contour) > minArea).map(Imgproc::boundingRect).forEach(rect -> {

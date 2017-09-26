@@ -72,7 +72,8 @@ public class Fields {
 	}
 
 	public void consolidateOcr(Img rootImg) {
-		fields.stream().filter(Field::needOcr).filter(f -> Math.random() < 1).forEach(f -> f.ocr(rootImg));
+		long TS = System.currentTimeMillis();
+		fields.stream().filter(Field::needOcr).filter(f -> System.currentTimeMillis() - TS <= 100).forEach(f -> f.ocr(rootImg));
 	}
 
 	public Stream<Field> consolidatedFieldStream() {

@@ -47,10 +47,18 @@ public class Field {
 
 	public void drawOcrPerspectiveInverse(Img display, Mat homography, Scalar color, int thickness) {
 		MatOfPoint2f results = new MatOfPoint2f();
-		Core.perspectiveTransform(Converters.vector_Point2f_to_Mat(Arrays.asList(center())), results, homography);
+		Core.perspectiveTransform(
+				Converters.vector_Point2f_to_Mat(Arrays.asList(center(), new Point(rect.x, rect.y), new Point(rect.x + rect.width - 1, rect.y), new Point(rect.x + rect.width - 1, rect.y + rect.height - 1), new Point(rect.x, rect.y + rect.height - 1))),
+				results, homography);
 		Point[] targets = results.toArray();
-		Imgproc.line(display.getSrc(), targets[0], new Point(targets[0].x, targets[0].y - 30), color, thickness);
-		Imgproc.putText(display.getSrc(), Normalizer.normalize(consolidated, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", ""), new Point(targets[0].x - 10, targets[0].y - 30), Core.FONT_HERSHEY_PLAIN, 1, new Scalar(255, 0, 0), 1);
+		Imgproc.line(display.getSrc(), targets[1], targets[2], color, thickness);
+		Imgproc.line(display.getSrc(), targets[2], targets[3], color, thickness);
+		Imgproc.line(display.getSrc(), targets[3], targets[4], color, thickness);
+		Imgproc.line(display.getSrc(), targets[4], targets[1], color, thickness);
+		Point topCenter = new Point((targets[1].x + targets[2].x) / 2, (targets[1].y + targets[2].y) / 2);
+		double l = Math.sqrt(Math.pow(targets[1].x - topCenter.x, 2) + Math.pow(targets[1].y - topCenter.y, 2));
+		Imgproc.line(display.getSrc(), new Point(topCenter.x, topCenter.y - 2), new Point(topCenter.x, topCenter.y - 20), new Scalar(0, 255, 0), 1);
+		Imgproc.putText(display.getSrc(), Normalizer.normalize(consolidated, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", ""), new Point(topCenter.x - l, topCenter.y - 22), Core.FONT_HERSHEY_TRIPLEX, 0.5, new Scalar(0, 255, 0), 1);
 	}
 
 	public void draw(Img stabilizedDisplay) {
@@ -79,7 +87,7 @@ public class Field {
 	}
 
 	public boolean isConsolidated() {
-		return consolidated != null && consolidated.length() >= 5;
+		return consolidated != null && consolidated.length() >= 3;
 	}
 
 	public String getConsolidated() {
@@ -87,7 +95,7 @@ public class Field {
 	}
 
 	public boolean needOcr() {
-		return consolidated == null && attempts < 10;
+		return consolidated == null && attempts < 20;
 	}
 
 }
