@@ -1,13 +1,19 @@
 package org.genericsystem.cv.classifier;
 
+import java.io.File;
+import java.io.IOException;
+import java.lang.invoke.MethodHandles;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 
+import org.apache.commons.io.FilenameUtils;
 import org.genericsystem.cv.Img;
+import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -18,7 +24,10 @@ import org.opencv.core.Rect;
 import org.opencv.core.RotatedRect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
+import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class contains static methods that can be used to deskew an {@link Img}.
@@ -28,8 +37,52 @@ import org.opencv.imgproc.Imgproc;
  */
 public class Deskewer {
 
+	static {
+		NativeLibraryLoader.load();
+	}
+
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
 	private static final double closedImgSizeFactor = 2E-6;
 	private static final double minAreaFactor = 3E-5;
+
+	// Only for testing purposes
+	public static void main(String[] args) {
+		final String filename = System.getenv("HOME") + "/genericsystem/gs-ir-files/converted-png/image-4.png";
+		Path imgPath = Paths.get(filename);
+		Path temp = deskewAndSave(imgPath);
+		System.out.println(temp);
+	}
+
+	/**
+	 * Deskew an image, and save it in the same folder as the original image.
+	 * 
+	 * @param imgPath - the Path to the image
+	 * @return the path of the newly saved image
+	 */
+	public static Path deskewAndSave(final Path imgPath) {
+		final String ext = FilenameUtils.getExtension(imgPath.getFileName().toString());
+		final String filename = imgPath.toString().replace("." + ext, "") + "_deskewed." + ext;
+		Path savedPath = imgPath.resolveSibling(filename);
+
+		Img img = deskew(imgPath);
+		try {
+			synchronized (Deskewer.class) {
+				if (savedPath.toFile().exists()) {
+					String[] fileNameParts = savedPath.getFileName().toString().split("\\.(?=[^\\.]+$)");
+					savedPath = File.createTempFile(fileNameParts[0] + "-", "." + fileNameParts[1], imgPath.getParent().toFile()).toPath();
+				}
+			}
+			Imgcodecs.imwrite(savedPath.toString(), img.getSrc());
+			return savedPath;
+		} catch (IOException e) {
+			logger.error("An error has occured while saving file " + savedPath.toString(), e);
+			return null;
+		} finally {
+			if (null != img)
+				img.close();
+		}
+	}
 
 	/**
 	 * Deskew an image.
@@ -38,6 +91,8 @@ public class Deskewer {
 	 * @return a new {@link Img}
 	 */
 	public static Img deskew(final Path imgPath) {
+		if (!imgPath.toFile().exists())
+			throw new IllegalStateException("No files were found at Path " + imgPath);
 		Img img = new Img(imgPath.toString());
 		Img deskewed = _deskew(img);
 		img.close();
