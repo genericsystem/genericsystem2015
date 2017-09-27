@@ -8,11 +8,10 @@ import java.util.stream.Stream;
 import org.genericsystem.cv.Img;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
+import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
-import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
 
 public class Fields {
@@ -20,9 +19,9 @@ public class Fields {
 	private Mat lastHomography;
 	private Mat lastRotation;
 
-	public void merge(Stream<MatOfPoint> contours) {
+	public void merge(List<Rect> rects) {
 		List<Field> oldFields = fields;
-		fields = contours.map(c -> new Field(Imgproc.boundingRect(c))).collect(Collectors.toList());
+		fields = rects.stream().map(rect -> new Field(rect)).collect(Collectors.toList());
 		if (lastHomography != null) {
 			List<Point> newPoints = restabilize(oldFields.stream().map(f -> f.center()).collect(Collectors.toList()));
 			for (int index = 0; index < oldFields.size(); index++)

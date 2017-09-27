@@ -8,9 +8,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
-
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.Tools;
@@ -26,6 +23,7 @@ import org.opencv.core.MatOfKeyPoint;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
+import org.opencv.core.Rect;
 import org.opencv.core.RotatedRect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
@@ -36,6 +34,9 @@ import org.opencv.utils.Converters;
 import org.opencv.videoio.VideoCapture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
 
 public class CamLayoutAnalyzer extends AbstractApp {
 
@@ -97,40 +98,32 @@ public class CamLayoutAnalyzer extends AbstractApp {
 					// Img binary = deskewed_/* .cleanFaces(0.1, 0.26) */.adaptativeGaussianThreshold(17, 7).cleanTables(0.05);
 					// binary.buildLayout().draw(deskiewedCopy, new Scalar(0, 255, 0), 1);
 
-				Img stabilized = stabilize(stabilizedMat, matcher);
+					Img stabilized = stabilize(stabilizedMat, matcher);
 
-				Img closed;
-				if (stabilized != null) {
-					if (stabilizationHasChanged) {
-						// Img binary2 = stabilized/* .cleanFaces(0.1, 0.26) */.adaptativeGaussianThreshold(17, 7).cleanTables(0.05);
-						// layout = binary2.buildLayout();
-						List<MatOfPoint> contours = new ArrayList<>();
-						closed = stabilized.adaptativeGaussianInvThreshold(7, 3).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(9, 1));
-						Imgproc.findContours(closed.getSrc(), contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+					if (stabilized != null) {
+						if (stabilizationHasChanged) {
+							fields.merge(detectRects(stabilized));
+							stabilizationHasChanged = false;
+						}
+						// layout.ocrTree(stabilized, 0.03, 0.1);
+						Img display = new Img(frame, true);
+						// layout.drawOcrPerspectiveInverse(display, homography[0].inv(), new Scalar(0, 0, 255), 1);
 
-						fields.merge(contours.stream().filter(contour -> Imgproc.contourArea(contour) > 200));
+						// Img stabilizedDisplay = new Img(stabilized.getSrc(), true);
 
-						stabilizationHasChanged = false;
+						fields.consolidateOcr(stabilized);
+						// fields.drawConsolidated(stabilizedDisplay);
+						fields.drawOcrPerspectiveInverse(display, homography.inv(), new Scalar(0, 0, 255), 1);
+						src0.setImage(display.toJfxImage());
+						// src1.setImage(old.absDiff(new Img(frame, false)).adaptativeGaussianInvThreshold(17, 9).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(5, 5)).toJfxImage());// deskewed_.toJfxImage());
+						// src2.setImage(deskiewedCopy.toJfxImage());
+						// src1.setImage(stabilizedDisplay.toJfxImage());
 					}
-					// layout.ocrTree(stabilized, 0.03, 0.1);
-					Img display = new Img(frame, true);
-					// layout.drawOcrPerspectiveInverse(display, homography[0].inv(), new Scalar(0, 0, 255), 1);
-
-					// Img stabilizedDisplay = new Img(stabilized.getSrc(), true);
-
-					fields.consolidateOcr(stabilized);
-					// fields.drawConsolidated(stabilizedDisplay);
-					fields.drawOcrPerspectiveInverse(display, homography.inv(), new Scalar(0, 0, 255), 1);
-					src0.setImage(display.toJfxImage());
-					// src1.setImage(old.absDiff(new Img(frame, false)).adaptativeGaussianInvThreshold(17, 9).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(5, 5)).toJfxImage());// deskewed_.toJfxImage());
-					// src2.setImage(deskiewedCopy.toJfxImage());
-					// src1.setImage(stabilizedDisplay.toJfxImage());
+				} catch (Throwable e) {
+					logger.warn("Exception while computing layout.", e);
 				}
-			} catch (Throwable e) {
-				logger.warn("Exception while computing layout.", e);
 			}
-		}
-	}, 500, 33, TimeUnit.MILLISECONDS);
+		}, 500, 33, TimeUnit.MILLISECONDS);
 
 		timer.scheduleAtFixedRate(() -> onSpace(), 0, 110, TimeUnit.MILLISECONDS);
 	}
@@ -185,6 +178,13 @@ public class CamLayoutAnalyzer extends AbstractApp {
 		System.out.println("No stabilized image");
 		return null;
 
+	}
+
+	private List<Rect> detectRects(Img stabilized) {
+		List<MatOfPoint> contours = new ArrayList<>();
+		Img closed = stabilized.adaptativeGaussianInvThreshold(7, 3).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(9, 1));
+		Imgproc.findContours(closed.getSrc(), contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+		return contours.stream().filter(contour -> Imgproc.contourArea(contour) > 200).map(c -> Imgproc.boundingRect(c)).collect(Collectors.toList());
 	}
 
 	private MatOfKeyPoint detect(Img frame) {
