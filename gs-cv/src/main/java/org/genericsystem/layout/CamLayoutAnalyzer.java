@@ -8,6 +8,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
+
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.Tools;
@@ -33,9 +36,6 @@ import org.opencv.utils.Converters;
 import org.opencv.videoio.VideoCapture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
 
 public class CamLayoutAnalyzer extends AbstractApp {
 
@@ -97,40 +97,40 @@ public class CamLayoutAnalyzer extends AbstractApp {
 					// Img binary = deskewed_/* .cleanFaces(0.1, 0.26) */.adaptativeGaussianThreshold(17, 7).cleanTables(0.05);
 					// binary.buildLayout().draw(deskiewedCopy, new Scalar(0, 255, 0), 1);
 
-					Img stabilized = stabilize(stabilizedMat, matcher);
+				Img stabilized = stabilize(stabilizedMat, matcher);
 
-					Img closed;
-					if (stabilized != null) {
-						if (stabilizationHasChanged) {
-							// Img binary2 = stabilized/* .cleanFaces(0.1, 0.26) */.adaptativeGaussianThreshold(17, 7).cleanTables(0.05);
-							// layout = binary2.buildLayout();
-							List<MatOfPoint> contours = new ArrayList<>();
-							closed = stabilized.adaptativeGaussianInvThreshold(7, 3).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(9, 1));
-							Imgproc.findContours(closed.getSrc(), contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+				Img closed;
+				if (stabilized != null) {
+					if (stabilizationHasChanged) {
+						// Img binary2 = stabilized/* .cleanFaces(0.1, 0.26) */.adaptativeGaussianThreshold(17, 7).cleanTables(0.05);
+						// layout = binary2.buildLayout();
+						List<MatOfPoint> contours = new ArrayList<>();
+						closed = stabilized.adaptativeGaussianInvThreshold(7, 3).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(9, 1));
+						Imgproc.findContours(closed.getSrc(), contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 
-							fields.merge(contours.stream().filter(contour -> Imgproc.contourArea(contour) > 200));
+						fields.merge(contours.stream().filter(contour -> Imgproc.contourArea(contour) > 200));
 
-							stabilizationHasChanged = false;
-						}
-						// layout.ocrTree(stabilized, 0.03, 0.1);
-						Img display = new Img(frame, true);
-						// layout.drawOcrPerspectiveInverse(display, homography[0].inv(), new Scalar(0, 0, 255), 1);
-
-						// Img stabilizedDisplay = new Img(stabilized.getSrc(), true);
-
-						fields.consolidateOcr(stabilized);
-						// fields.drawConsolidated(stabilizedDisplay);
-						fields.drawOcrPerspectiveInverse(display, homography.inv(), new Scalar(0, 0, 255), 1);
-						src0.setImage(display.toJfxImage());
-						// src1.setImage(old.absDiff(new Img(frame, false)).adaptativeGaussianInvThreshold(17, 9).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(5, 5)).toJfxImage());// deskewed_.toJfxImage());
-						// src2.setImage(deskiewedCopy.toJfxImage());
-						// src1.setImage(stabilizedDisplay.toJfxImage());
+						stabilizationHasChanged = false;
 					}
-				} catch (Throwable e) {
-					logger.warn("Exception while computing layout.", e);
+					// layout.ocrTree(stabilized, 0.03, 0.1);
+					Img display = new Img(frame, true);
+					// layout.drawOcrPerspectiveInverse(display, homography[0].inv(), new Scalar(0, 0, 255), 1);
+
+					// Img stabilizedDisplay = new Img(stabilized.getSrc(), true);
+
+					fields.consolidateOcr(stabilized);
+					// fields.drawConsolidated(stabilizedDisplay);
+					fields.drawOcrPerspectiveInverse(display, homography.inv(), new Scalar(0, 0, 255), 1);
+					src0.setImage(display.toJfxImage());
+					// src1.setImage(old.absDiff(new Img(frame, false)).adaptativeGaussianInvThreshold(17, 9).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(5, 5)).toJfxImage());// deskewed_.toJfxImage());
+					// src2.setImage(deskiewedCopy.toJfxImage());
+					// src1.setImage(stabilizedDisplay.toJfxImage());
 				}
+			} catch (Throwable e) {
+				logger.warn("Exception while computing layout.", e);
 			}
-		}, 500, 33, TimeUnit.MILLISECONDS);
+		}
+	}, 500, 33, TimeUnit.MILLISECONDS);
 
 		timer.scheduleAtFixedRate(() -> onSpace(), 0, 110, TimeUnit.MILLISECONDS);
 	}
@@ -194,10 +194,10 @@ public class CamLayoutAnalyzer extends AbstractApp {
 		double minArea = 100;
 		List<KeyPoint> keyPoints = new ArrayList<>();
 		contours.stream().filter(contour -> Imgproc.contourArea(contour) > minArea).map(Imgproc::boundingRect).forEach(rect -> {
-			keyPoints.add(new KeyPoint(Double.valueOf(rect.tl().x).floatValue(), Double.valueOf(rect.tl().y).floatValue(), 6));
-			keyPoints.add(new KeyPoint(Double.valueOf(rect.tl().x).floatValue(), Double.valueOf(rect.br().y).floatValue(), 6));
-			keyPoints.add(new KeyPoint(Double.valueOf(rect.br().x).floatValue(), Double.valueOf(rect.tl().y).floatValue(), 6));
-			keyPoints.add(new KeyPoint(Double.valueOf(rect.br().x).floatValue(), Double.valueOf(rect.br().y).floatValue(), 6));
+			keyPoints.add(new KeyPoint((float) rect.tl().x, (float) rect.tl().y, 6));
+			keyPoints.add(new KeyPoint((float) rect.tl().x, (float) rect.br().y, 6));
+			keyPoints.add(new KeyPoint((float) rect.br().x, (float) rect.tl().y, 6));
+			keyPoints.add(new KeyPoint((float) rect.br().x, (float) rect.br().y, 6));
 		});
 		return new MatOfKeyPoint(keyPoints.stream().toArray(KeyPoint[]::new));
 	}
