@@ -19,21 +19,20 @@ public class OCRPlasty {
 		labels.add("had I expresset th agny I frequently feltu he wouald have ben taufht to lng fr its alevation");
 
 		System.out.println(similarity(labels));
-
 		System.out.println(ocrPlasty(labels));
 
 	}
 
 	public static String ocrPlasty(List<String> labels) {
 		if (labels == null || labels.isEmpty())
-			throw new IllegalStateException("Attempted to compute the longestCommonSubsequence on an empty list");
+			throw new IllegalStateException("Attempt to compute the longestCommonSubsequence on an empty list");
 		String common = longestCommonSubsequence(labels);
 		String consensus = "";
 		for (int i = 0; i < common.length() + 1; i++) {
 			List<String> candidates = new ArrayList<>();
-			for (int l = 0; l < labels.size(); l++) {
-				List<String> is = (i < common.length()) ? interString(labels.get(l), common.charAt(i)) : endString(labels.get(l));
-				labels.set(l, is.get(0));
+			for (int label = 0; label < labels.size(); label++) {
+				List<String> is = (i < common.length()) ? interString(labels.get(label), common.charAt(i)) : endString(labels.get(label));
+				labels.set(label, is.get(0));
 				candidates.add(is.get(1));
 			}
 			consensus += selectBest(candidates);
@@ -76,8 +75,7 @@ public class OCRPlasty {
 		return is;
 	}
 
-	private static String leastDifferent(List<String> strings) { // "least different" string from the others (smallest
-																	// sum of levenshtein distance with the others)
+	private static String leastDifferent(List<String> strings) { // "least different" string from the others (smallest sum of Levenshtein distance with the others)
 		int n = strings.size();
 		int[][] distances = new int[n][n];
 		for (int i = 0; i < n; i++) {
@@ -100,7 +98,6 @@ public class OCRPlasty {
 			}
 		}
 		return leastDiff;
-
 	}
 
 	public static String longestCommonSubsequence(List<String> labels) { // lcs between n strings
@@ -126,25 +123,23 @@ public class OCRPlasty {
 		return 1 - 2 * sim / n / (n - 1); // divide by the total number of distances
 	}
 
-	public static String lcs(String X, String Y) { // lcs between 2 strings
-
-		int m = X.length();
-		int n = Y.length();
-		int[][] L = new int[m + 1][n + 1];
-		// Following steps build L[m+1][n+1] in bottom up fashion. Note
-		// that L[i][j] contains length of LCS of X[0..i-1] and Y[0..j-1]
+	public static String lcs(String stringX, String stringY) { // lcs between 2 strings
+		int m = stringX.length();
+		int n = stringY.length();
+		int[][] mat = new int[m + 1][n + 1];
+		// Following steps build mat[m+1][n+1] in bottom up fashion. Note that mat[i][j] contains length of LCS of X[0..i-1] and Y[0..j-1]
 		for (int i = 0; i <= m; i++) {
 			for (int j = 0; j <= n; j++) {
 				if (i == 0 || j == 0)
-					L[i][j] = 0;
-				else if (X.charAt(i - 1) == Y.charAt(j - 1))
-					L[i][j] = L[i - 1][j - 1] + 1;
+					mat[i][j] = 0;
+				else if (stringX.charAt(i - 1) == stringY.charAt(j - 1))
+					mat[i][j] = mat[i - 1][j - 1] + 1;
 				else
-					L[i][j] = Math.max(L[i - 1][j], L[i][j - 1]);
+					mat[i][j] = Math.max(mat[i - 1][j], mat[i][j - 1]);
 			}
 		}
 		// Following code is used to print LCS
-		int index = L[m][n];
+		int index = mat[m][n];
 		int temp = index;
 		// Create a character array to store the lcs string
 		char[] lcs = new char[index + 1];
@@ -153,16 +148,16 @@ public class OCRPlasty {
 		int i = m, j = n;
 		while (i > 0 && j > 0) {
 			// If current character in X[] and Y are same, then current character is part of LCS
-			if (X.charAt(i - 1) == Y.charAt(j - 1)) {
+			if (stringX.charAt(i - 1) == stringY.charAt(j - 1)) {
 				// Put current character in result
-				lcs[index - 1] = X.charAt(i - 1);
+				lcs[index - 1] = stringX.charAt(i - 1);
 				// reduce values of i, j and index
 				i--;
 				j--;
 				index--;
 			}
 			// If not same, then find the larger of two and go in the direction of larger value
-			else if (L[i - 1][j] > L[i][j - 1])
+			else if (mat[i - 1][j] > mat[i][j - 1])
 				i--;
 			else
 				j--;
@@ -172,7 +167,6 @@ public class OCRPlasty {
 			lcsValue += lcs[k];
 
 		return lcsValue;
-
 	}
 
 }
