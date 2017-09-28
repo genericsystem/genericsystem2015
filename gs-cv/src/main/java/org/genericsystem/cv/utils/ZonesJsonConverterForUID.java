@@ -43,11 +43,11 @@ public class ZonesJsonConverterForUID {
 			// If zones-old.json doesn't exist:
 			if (!pathname.toFile().exists()) {
 				// If zones.json exists:
-				if (pathname.toFile().exists()) {
+				if (newPathname.toFile().exists()) {
 					// Copy zones -> zones-old; then remove zones
 					try {
 						Files.copy(newPathname, pathname, StandardCopyOption.REPLACE_EXISTING);
-						pathname.toFile().delete();
+						newPathname.toFile().delete();
 					} catch (IOException e) {
 						throw new IllegalStateException(e);
 					}
