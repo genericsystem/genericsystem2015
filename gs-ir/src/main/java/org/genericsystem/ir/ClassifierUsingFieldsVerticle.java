@@ -39,8 +39,10 @@ public class ClassifierUsingFieldsVerticle extends ActionVerticle {
 	protected void handleResult(AsyncResult<Object> res, JsonObject task) {
 		if (res.succeeded()) {
 			String message = (String) res.result();
-			if (message == ERROR_MSG)
-				addTask(message.replaceFirst(DistributedVerticle.BASE_PATH, ""), NewClassCreatorVerticle.ACTION);
+			if (message == ERROR_MSG) {
+				// In case of failure, send the original file
+				addTask(task.getString(DistributedVerticle.FILENAME), NewClassCreatorVerticle.ACTION);
+			}
 			// else
 			// addTask(message.replaceFirst(DistributedVerticle.BASE_PATH, ""), AddImageToEngineVerticle.ACTION);
 		} else
