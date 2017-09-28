@@ -8,23 +8,27 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import org.genericsystem.defaults.tools.TransformationObservableList;
-import org.genericsystem.reactor.FilteredChildren.FilteredChildContexts;
 import org.genericsystem.reactor.FilteredChildren.FilteredTagChildren;
+import org.genericsystem.reactor.MetaBinding.IndexedSubContext;
 import org.genericsystem.reactor.contextproperties.ActionDefaults;
 import org.genericsystem.reactor.contextproperties.SelectionDefaults;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import io.reactivex.Observable;
 import io.reactivex.disposables.CompositeDisposable;
 import io.vertx.core.json.JsonObject;
 import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
+import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.MapChangeListener;
 import javafx.collections.SetChangeListener;
 
 public class HtmlDomNode {
 
+	private static final Logger logger = LoggerFactory.getLogger(HtmlDomNode.class);
 	static int count = 0;
 	private final String id;
 	private HtmlDomNode parent;
@@ -90,11 +94,8 @@ public class HtmlDomNode {
 		assert !destroyed : "Node : " + getId();
 		destroyed = true;
 		((FilteredTagChildren) tag.getContextAttribute("filteredChildren", context)).filteredList.removeListener(tagListener);
-		for (Tag childTag : tag.getObservableChildren()) {
+		for (Tag childTag : tag.getObservableChildren())
 			childTag.getMetaBindingProperty().removeListener(metaBindingListeners.get(childTag));
-			if (childTag.getMetaBinding() != null && context.getSubContexts(childTag) != null)
-				((FilteredChildContexts<?>) childTag.getContextAttribute("filteredContexts", context)).transformationListSubContexts.unbind();
-		}
 		disposables.dispose();
 		tag.getDomNodeTextProperty(context).removeListener(textListener);
 		tag.getDomNodeStyles(context).removeListener(stylesListener);
@@ -137,12 +138,25 @@ public class HtmlDomNode {
 	private <BETWEEN> void updateMetaBinding(Tag childTag, MetaBinding<BETWEEN> metaBinding) {
 		if (metaBinding != null) {
 			if (context.getSubContexts(childTag) == null) {
-				FilteredChildContexts<BETWEEN> subContexts = new FilteredChildContexts<>(metaBinding, childTag, context);
-				childTag.addContextAttribute("filteredContexts", context, subContexts);
-				context.setSubContexts(childTag, new TransformationObservableList<Context, Context>(subContexts.filteredSubContexts, (i, subContext) -> {
-					childTag.createNode(this, subContext).init(computeIndex(i, childTag));
-					return subContext;
-				}, subContext -> subContext.removeTag(childTag)));
+				context.setSubContexts(childTag, FXCollections.observableArrayList());
+				Observable<IndexedSubContext> subContexts = metaBinding.buildFilteredChildren(context, childTag);
+				// TODO: Dispose on MetaBinding change.
+				disposables.add(subContexts.subscribe(sc -> {
+					Context subContext = sc.getContext();
+					if (sc.getCreate()) {
+						context.getSubContexts(childTag).add(subContext);
+						childTag.createNode(this, subContext).init(computeIndex(sc.getIndex(), childTag));
+					} else {
+						subContext.removeTag(childTag);
+						if (sc.getIndex() == -1) {// SubContext removed
+							context.getSubContexts(childTag).forEach(c_ -> {
+								if (c_.equals(subContext))
+									c_.destroy();
+							});
+						}
+						context.getSubContexts(childTag).remove(subContext);
+					}
+				}, e -> logger.error("Error on filtered contexts subscriber. (ext)", e)));
 			}
 		} else if (context.getHtmlDomNode(childTag) == null)
 			childTag.createNode(this, context).init(computeIndex(0, childTag));
@@ -209,8 +223,7 @@ public class HtmlDomNode {
 			sendMessage(new JsonObject().put(ReactorStatics.MSG_TYPE, ReactorStatics.REMOVE_STYLECLASS).put(ReactorStatics.ID, getId()).put(ReactorStatics.STYLECLASS, change.getElementRemoved()));
 	};
 
-	private final ChangeListener<String> textListener = (o, old,
-			newValue) -> sendMessage(new JsonObject().put(ReactorStatics.MSG_TYPE, ReactorStatics.UPDATE_TEXT).put(ReactorStatics.ID, getId()).put(ReactorStatics.TEXT_CONTENT, newValue != null ? newValue : ""));
+	private final ChangeListener<String> textListener = (o, old, newValue) -> sendMessage(new JsonObject().put(ReactorStatics.MSG_TYPE, ReactorStatics.UPDATE_TEXT).put(ReactorStatics.ID, getId()).put(ReactorStatics.TEXT_CONTENT, newValue != null ? newValue : ""));
 
 	private final Map<Tag, ChangeListener<MetaBinding<?>>> metaBindingListeners = new HashMap<Tag, ChangeListener<MetaBinding<?>>>() {
 

@@ -1,8 +1,12 @@
 package org.genericsystem.reactor;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
+import org.genericsystem.api.core.Snapshot;
+import org.genericsystem.defaults.tools.RxJavaHelpers;
 import org.genericsystem.reactor.HtmlDomNode.HtmlDomNodeAction;
 import org.genericsystem.reactor.HtmlDomNode.HtmlDomNodeCheckbox;
 import org.genericsystem.reactor.HtmlDomNode.HtmlDomNodeInputText;
@@ -28,12 +32,8 @@ import org.genericsystem.reactor.gscomponents.Controller.StepsStep;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.TagImpl;
 
-import javafx.beans.binding.Bindings;
-import javafx.beans.binding.ListBinding;
+import io.reactivex.Observable;
 import javafx.beans.property.Property;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 
 public interface RootTag extends Tag {
 
@@ -257,35 +257,30 @@ public interface RootTag extends Tag {
 		tag.addPostfixBinding(context -> processBindSelection(tag, context, value, valuePos));
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({ "unchecked" })
 	default void processStep(Tag tag, Class<? extends TagImpl> next, String prevText, String nextText) {
 		if (tag.getMetaBinding() == null) {
 			tag.addPrefixBinding(context -> {
 				Controller controller = Controller.get(tag, context);
-				controller.addStep(tag, new SimpleIntegerProperty(1), next, prevText, nextText);
+				controller.addStep(tag, Observable.just(1), next, prevText, nextText);
 			});
 		} else {
-			Function<Context, ObservableList<Object>> contextOl = tag.getMetaBinding().getBetweenChildren();
+			Function<Context, Observable<Snapshot<Object>>> contextOl = tag.getMetaBinding().getBetweenChildren();
 			tag.getMetaBinding().setBetweenChildren(context -> {
-				ObservableList ol = contextOl.apply(context);
 				Controller controller = Controller.get(tag, context);
-				StepsStep subSteps = controller.getStep(tag);
-				if (subSteps == null)
-					subSteps = controller.addStep(tag, Bindings.size(ol), next, prevText, nextText);
 				Property<Boolean> activeProperty = controller.getActiveProperty();
-				SimpleIntegerProperty indexProperty = subSteps.getIndexProperty();
-				return new ListBinding() {
-					{
-						bind(indexProperty, activeProperty);
+				return RxJavaHelpers.valuesOf(activeProperty).switchMap(active -> {
+					if (!active)
+						return contextOl.apply(context);
+					else {
+						Observable<List<Object>> ol = contextOl.apply(context).switchMap(s -> s.setOnChanged().map(set -> set.stream().collect(Collectors.toList())));
+						StepsStep subSteps = controller.getStep(tag);
+						if (subSteps == null)
+							subSteps = controller.addStep(tag, ol.map(l -> l.size()), next, prevText, nextText);
+						Observable<Integer> indexProperty = subSteps.getIndexProperty();
+						return indexProperty.withLatestFrom(ol, (index, currList) -> index >= 0 && index < currList.size() ? Snapshot.singleton(currList.get(index)) : Snapshot.empty());
 					}
-
-					@Override
-					protected ObservableList computeValue() {
-						if (!activeProperty.getValue())
-							return ol;
-						return (indexProperty.get() >= 0) && (indexProperty.get() < ol.size()) ? FXCollections.singletonObservableList(ol.get(indexProperty.get())) : FXCollections.emptyObservableList();
-					}
-				};
+				});
 			});
 		}
 		tag.getRootTag().processSwitch(tag, new Class[] { MainSwitcher.class });

@@ -53,7 +53,7 @@ import org.genericsystem.reactor.gscomponents.instancebuilder.InstanceBuilder;
 @Children(path = HeaderRow.class, value = { ValueComponents.class, ValueComponents.class, ButtonDiv.class })
 @Children(path = ContentRow.class, value = { ValueComponents.class, Holders.class, LinksDiv.class })
 @ForEach(path = { HeaderRow.class, ValueComponents.class }, pos = { 0, 1 }, value = ObservableListExtractor.ATTRIBUTES_OF_TYPE.class)
-@ForEach(path = ContentRow.class, value = ObservableListExtractor.SUBINSTANCES.class)
+@ForEach(path = ContentRow.class, value = ObservableListExtractor.SUBINSTANCES_ALPHABETICAL_ORDER.class)
 @ForEach(path = { ContentRow.class, Holders.class }, value = ObservableListExtractor.ATTRIBUTES_OF_INSTANCES.class)
 @ForEach(path = { ContentRow.class, ValueComponents.class, Content.class }, value = ObservableListExtractor.OTHER_COMPONENTS_2.class)
 public class InstancesTable extends FlexDiv implements SelectionDefaults {

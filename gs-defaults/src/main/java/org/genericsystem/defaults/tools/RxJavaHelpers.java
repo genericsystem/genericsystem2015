@@ -73,12 +73,22 @@ public class RxJavaHelpers {
 	}
 
 	/**
+	 * Creates an observable that emits the whole map every time it changes.
+	 *
+	 * @param source      The source ObservableMap.
+	 * @return An Observable emitting the new map after each change.
+	 */
+	public static <K, T> Observable<Map<K, T>> changesOf(final ObservableMap<K, T> source) {
+		return fromObservableMap(source);
+	}
+
+	/**
 	 * Creates an observable that emits all additions to an ObservableMap.
 	 *
 	 * @param source      The source ObservableMap for the item add events.
 	 * @return An Observable emitting Entry items added to the ObservableMap.
 	 */
-	public static <K,T> Observable<Map.Entry<K,T>> additionsOf(final ObservableMap<K,T> source) {
+	public static <K, T> Observable<Map.Entry<K, T>> additionsOf(final ObservableMap<K, T> source) {
 		return fromObservableMapAdds(source);
 	}
 
@@ -168,6 +178,14 @@ public class RxJavaHelpers {
 			source.addListener(listener);
 			subscriber.setDisposable(Disposables.fromRunnable(() -> source.removeListener(listener)));
 		});
+	}
+
+	private static <K, T> Observable<Map<K, T>> fromObservableMap(final ObservableMap<K, T> source) {
+		return Observable.create((ObservableOnSubscribe<Map<K, T>>) subscriber -> {
+			MapChangeListener<K, T> listener = c -> subscriber.onNext(source);
+			source.addListener(listener);
+			subscriber.setDisposable(Disposables.fromRunnable(() -> source.removeListener(listener)));
+		}).startWith(source);
 	}
 
 	private static <K,T> Observable<Entry<K,T>> fromObservableMapAdds(final ObservableMap<K,T> source) {

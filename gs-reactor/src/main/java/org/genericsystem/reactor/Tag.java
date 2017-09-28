@@ -5,11 +5,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.context.ObservableListExtractor;
 import org.genericsystem.reactor.context.TagSwitcher;
@@ -28,11 +30,10 @@ import org.genericsystem.reactor.gscomponents.TagImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javafx.beans.binding.ListBinding;
+import io.reactivex.Observable;
 import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
 import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
@@ -102,7 +103,7 @@ public interface Tag extends TagNode, ActionDefaults, SelectionDefaults, Stepper
 		bindOptionalStyleClass(styleClass, modelPropertyName, context);
 	}
 
-	default void forEach2(Function<Context, ObservableList<Generic>> applyOnModel) {
+	default void forEach2(Function<Context, Observable<Snapshot<Generic>>> applyOnModel) {
 		setMetaBinding(MetaBinding.forEachMetaBinding(applyOnModel));
 	}
 
@@ -117,32 +118,20 @@ public interface Tag extends TagNode, ActionDefaults, SelectionDefaults, Stepper
 	default void select(Function<Generic[], Generic> genericSupplier) {
 		forEach((ObservableListExtractor) gs -> {
 			Generic generic = genericSupplier.apply(gs);
-			return generic != null ? FXCollections.singletonObservableList(generic) : FXCollections.emptyObservableList();
+			return Observable.just(generic != null ? Snapshot.singleton(generic) : Snapshot.empty());
 		});
 	}
 
-	default void select_(Function<Context, ObservableList<Context>> applyOnModel) {
+	default void select_(Function<Context, Observable<Snapshot<Context>>> applyOnModel) {
 		setMetaBinding(MetaBinding.selectMetaBinding(applyOnModel));
 	}
 
-	default void select__(Function<Context, ObservableValue<Context>> applyOnModelContext) {
-		// fix probable issues with transmitSuccessiveInvalidations
-		select_(context -> new ListBinding<Context>() {
-			ObservableValue<Context> ov = applyOnModelContext.apply(context);
-			{
-				bind(ov);
-			}
-
-			@Override
-			protected ObservableList<Context> computeValue() {
-				Context context_ = ov.getValue();
-				return context_ != null ? FXCollections.singletonObservableList(context_) : FXCollections.emptyObservableList();
-			}
-		});
+	default void select__(Function<Context, Observable<Optional<Context>>> applyOnModelContext) {
+		select_(context -> applyOnModelContext.apply(context).map(opt -> opt.isPresent() ? Snapshot.singleton(opt.get()) : Snapshot.empty()));
 	}
 
 	default void select(Class<?> genericClass) {
-		forEach((ObservableListExtractor) gs -> FXCollections.singletonObservableList(gs[0].getRoot().find(genericClass)));
+		forEach((ObservableListExtractor) gs -> Observable.just(Snapshot.singleton(gs[0].getRoot().find(genericClass))));
 	}
 
 	default ObservableListExtractor getObservableListExtractor() {

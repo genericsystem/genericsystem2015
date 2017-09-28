@@ -18,7 +18,7 @@ import org.genericsystem.reactor.gscomponents.InputTextWithConversion.InputTextE
 @GenericValueBackgroundColor(path = { HtmlDatalist.class, HtmlOption.class }, value = "")
 @Children({ InputTextWithConversion.class, HtmlDatalist.class })
 @Children(path = HtmlDatalist.class, value = HtmlOption.class)
-@ForEach(path = { HtmlDatalist.class, HtmlOption.class }, value = ObservableListExtractor.SUBINSTANCES.class)
+@ForEach(path = { HtmlDatalist.class, HtmlOption.class }, value = ObservableListExtractor.SUBINSTANCES_ALPHABETICAL_ORDER.class)
 @BindText(path = { HtmlDatalist.class, HtmlOption.class })
 public class InputWithDatalist extends FlexDiv {
 	@Override

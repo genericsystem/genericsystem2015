@@ -1,21 +1,28 @@
 package org.genericsystem.todomvc;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
+import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.BidirectionalBinding;
-import org.genericsystem.defaults.tools.ObservableListWrapper;
-import org.genericsystem.defaults.tools.RxJavaHelpers;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.ReactorStatics;
+import org.genericsystem.reactor.Tag;
+import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.DependsOnModel;
+import org.genericsystem.reactor.annotations.DirectSelect;
+import org.genericsystem.reactor.annotations.ForEach;
+import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.StyleClass;
+import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.annotations.TagName;
 import org.genericsystem.reactor.appserver.ApplicationServer;
+import org.genericsystem.reactor.context.ContextAction.CANCEL;
+import org.genericsystem.reactor.context.ContextAction.FLUSH;
+import org.genericsystem.reactor.context.ObservableListExtractor.SUBINSTANCES;
+import org.genericsystem.reactor.context.TagSwitcher;
 import org.genericsystem.reactor.gscomponents.FlexDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlDiv;
@@ -58,15 +65,13 @@ import org.genericsystem.todomvc.TodoApp.MyHtmlDiv.MyHtmlFooter2.MyHtmlDiv4.MyHt
 import org.genericsystem.todomvc.TodoApp.MyHtmlDiv.MyHtmlFooter2.MyHtmlDiv4.MyHtmlButton4;
 import org.genericsystem.todomvc.Todos.Completed;
 
-import javafx.beans.Observable;
+import io.reactivex.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableObjectValue;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
-import javafx.collections.transformation.FilteredList;
 
 /**
  * @author Nicolas Feybesse
@@ -77,58 +82,48 @@ import javafx.collections.transformation.FilteredList;
 public class TodoApp extends RootTagImpl {
 
 	public static final String FILTER_MODE = "mode";
-	public static final String TODOS = "todos";
-	public static final String FILTERED_TODOS = "filteredTodos";
-	public static final String ACTIVE_TODOS = "activeTodos";
 	public static final String COMPLETED = "completed";
-	public static final String COMPLETED_TODOS = "completedTodos";
 
 	public static void main(String[] mainArgs) {
 		ApplicationServer.startSimpleGenericApp(mainArgs, TodoApp.class, "/todo2/");
 	}
 
-	private Property<Predicate<Generic>> getModeProperty(Context model) {
-		return getContextProperty(FILTER_MODE, model);
+	protected static Property<Predicate<ObservableValue<Generic>>> getModeProperty(Tag tag, Context model) {
+		return tag.getContextProperty(FILTER_MODE, model);
 	}
-
-	private ObservableList<Generic> getTodos(Context model) {
-		return this.<ObservableList<Generic>> getContextProperty(TODOS, model).getValue();
-	}
-
-	private Map<Generic, Observable[]> getExtractors(Context model) {
-		return this.<Map<Generic, Observable[]>> getContextProperty("extractorMap", model).getValue();
-	}
-
-	static Predicate<Generic> ALL = null;
-	static Predicate<Generic> ACTIVE = todo -> {
-		Generic completed = todo.getHolder(todo.getRoot().find(Completed.class));
-		return completed != null ? Boolean.FALSE.equals(completed.getValue()) : true;
-	};
-	static Predicate<Generic> COMPLETE = ACTIVE.negate();
 
 	@Override
 	public void init() {
-		createNewInitializedProperty("extractorMap", model -> new HashMap<Generic, Observable[]>() {
+		addContextAttribute(FILTER_MODE, c -> new SimpleObjectProperty<Predicate<ObservableValue<Generic>>>(ALL));
+	}
 
-			private static final long serialVersionUID = -435743147955810836L;
+	public static class StateFilter implements TagSwitcher {
+		@Override
+		public ObservableValue<Boolean> apply(Context context, Tag tag) {
+			Generic todo = context.getGeneric();
+			ObservableValue<Generic> completed = todo.getObservableHolder(todo.getRoot().find(Completed.class));
+			Property<Predicate<ObservableValue<Generic>>> mode = getModeProperty(tag, context);
+			return Bindings.createBooleanBinding(() -> mode.getValue().test(completed), completed, mode);
+		}
+	}
 
-			@Override
-			public Observable[] get(Object key) {
-				Observable[] result = super.get(key);
-				if (result == null)
-					put((Generic) key, result = new Observable[] { ((Generic) key).getObservableHolder(((Generic) key).getRoot().find(Completed.class)) });
-				return result;
-			};
-		});
-		createNewInitializedProperty(TODOS, model -> new ObservableListWrapper<>(model.find(Todos.class).getSubInstances().toObservableList(), todo -> getExtractors(model).get(todo)));
-		createNewInitializedProperty(FILTER_MODE, model -> ALL);
-		createNewInitializedProperty(FILTERED_TODOS, model -> {
-			FilteredList<Generic> filtered = new FilteredList<>(getTodos(model));
-			filtered.predicateProperty().bind(getModeProperty(model));
-			return filtered;
-		});
-		createNewInitializedProperty(ACTIVE_TODOS, model -> getTodos(model).filtered(ACTIVE));
-		createNewInitializedProperty(COMPLETED_TODOS, model -> getTodos(model).filtered(COMPLETE));
+	static Predicate<ObservableValue<Generic>> ALL = o -> true;
+	static Predicate<ObservableValue<Generic>> ACTIVE = completedObs -> {
+		return completedObs.getValue() != null ? Boolean.FALSE.equals(completedObs.getValue().getValue()) : true;
+	};
+	static Predicate<ObservableValue<Generic>> COMPLETE = ACTIVE.negate();
+
+	static Predicate<Generic> completed = todo -> {
+		Generic completed = todo.getHolder(todo.getRoot().find(Completed.class));
+		return completed != null && Boolean.TRUE.equals(completed.getValue());
+	};
+
+	protected static Snapshot<Generic> getTodos(Context context) {
+		return context.find(Todos.class).getSubInstances();
+	}
+
+	protected static Snapshot<Generic> getCompleted(Context context) {
+		return context.find(Completed.class).getSubInstances();
 	}
 
 	@Children({ MyDiv.class, MyHtmlFooter2.class })
@@ -173,9 +168,12 @@ public class TodoApp extends RootTagImpl {
 
 				@StyleClass("todo-list")
 				@Children(MyHtmlLi.class)
+				@DirectSelect(Todos.class)
 				public static class MyHtmlUl extends HtmlUl {
 
 					@Children(MyHtmlDiv2.class)
+					@ForEach(SUBINSTANCES.class)
+					@Switch(StateFilter.class)
 					public static class MyHtmlLi extends HtmlLi {
 
 						@Override
@@ -184,12 +182,7 @@ public class TodoApp extends RootTagImpl {
 								Generic completed = model.getGeneric().getHolder(model.getGeneric().getRoot().find(Completed.class));
 								return new SimpleBooleanProperty(completed != null && Boolean.TRUE.equals(completed.getValue()) ? true : false);
 							});
-							forEach2(model -> getFilteredTodos(model));
 							bindOptionalStyleClass(COMPLETED, COMPLETED);
-						}
-
-						private ObservableList<Generic> getFilteredTodos(Context model) {
-							return this.<ObservableList<Generic>> getContextProperty(FILTERED_TODOS, model).getValue();
 						}
 
 						@StyleClass("view")
@@ -199,15 +192,11 @@ public class TodoApp extends RootTagImpl {
 							@StyleClass("toggle")
 							@TagName(value = TagName.INPUT, type = TagName.CHECKBOX)
 							public static class MyHtmlCheckBox extends TagImpl {
-								Map<Generic, Observable[]> getExtractors(Context model) {
-									return this.<Map<Generic, Observable[]>> getContextProperty("extractorMap", model).getValue();
-								}
-
 								@Override
 								public void init() {
 									addPrefixBinding(todo -> {
 										Property<Boolean> completedProperty = getContextProperty(COMPLETED, todo);
-										ObservableValue<Generic> completed = (ObservableValue<Generic>) getExtractors(todo.getParent()).get(todo.getGeneric())[0];
+										ObservableValue<Generic> completed = todo.getGeneric().getObservableHolder(todo.getGeneric().getRoot().find(Completed.class));
 										Property<Generic> completedGenericProperty = new SimpleObjectProperty(completed.getValue());
 										completed.addListener((ov, v, nv) -> completedGenericProperty.setValue(nv));
 										BidirectionalBinding.bind(completedProperty, completedGenericProperty, b -> todo.getGeneric().isAlive() ? todo.getGeneric().setHolder(todo.find(Completed.class), b) : null,
@@ -251,11 +240,8 @@ public class TodoApp extends RootTagImpl {
 
 				@Override
 				public void init() {
-					bindOptionalStyleClass("hide", "hasNoTodo", model -> Bindings.createBooleanBinding(() -> getTodos(model).size() == 0 ? true : false, getTodos(model)));
-				}
-
-				private ObservableList<Generic> getTodos(Context model) {
-					return this.<ObservableList<Generic>> getContextProperty(TODOS, model).getValue();
+					// Broken
+					// bindOptionalStyleClass("hide", "hasNoTodo", model -> Bindings.createBooleanBinding(() -> getTodos(this, model).size() == 0 ? true : false, getTodos(this, model)));
 				}
 
 				@Children({ MyHtmlSpan.class, MyHtmlUl2.class, MyHtmlButton.class })
@@ -270,14 +256,9 @@ public class TodoApp extends RootTagImpl {
 
 							@Override
 							public void init() {
-								bindText(model -> RxJavaHelpers.changesOf(getActiveTodos(model)).map(list -> {
-									int size = list.size();
-									return size + " item" + (size > 1 ? "s" : "") + " left";
-								}));
-							}
-
-							private ObservableList<Generic> getActiveTodos(Context model) {
-								return this.<ObservableList<Generic>> getContextProperty(ACTIVE_TODOS, model).getValue();
+								bindText(model -> Observable.combineLatest(getTodos(model).setOnChanged(), getCompleted(model).setOnChanged(), (todos, comp) ->
+								todos.stream().filter(g -> !completed.test(g)).collect(Collectors.toList())).map(list -> list.size())
+										.map(size -> size + " item" + (size > 1 ? "s" : "") + " left"));
 							}
 						}
 					}
@@ -289,17 +270,13 @@ public class TodoApp extends RootTagImpl {
 						@Children(MyHtmlHyperLink.class)
 						public static class MyHtmlLi2 extends HtmlLi {
 
+							@SetText("All")
 							public static class MyHtmlHyperLink extends HtmlHyperLink {
 
 								@Override
 								public void init() {
-									setText("All");
-									bindAction(model -> getModeProperty(model).setValue(ALL));
-									bindOptionalStyleClass("selected", "allMode", model -> Bindings.equal((ObservableObjectValue<?>) getModeProperty(model), ALL));
-								}
-
-								private Property<Predicate<Generic>> getModeProperty(Context model) {
-									return getContextProperty(FILTER_MODE, model);
+									bindAction(model -> getModeProperty(this, model).setValue(ALL));
+									bindOptionalStyleClass("selected", "allMode", model -> Bindings.equal((ObservableObjectValue<?>) getModeProperty(this, model), ALL));
 								}
 							}
 						}
@@ -307,17 +284,13 @@ public class TodoApp extends RootTagImpl {
 						@Children(MyHtmlHyperLink2.class)
 						public static class MyHtmlLi3 extends HtmlLi {
 
+							@SetText("Actives")
 							public static class MyHtmlHyperLink2 extends HtmlHyperLink {
 
 								@Override
 								public void init() {
-									setText("Actives");
-									bindAction(model -> getModeProperty(model).setValue(ACTIVE));
-									bindOptionalStyleClass("selected", "activeMode", model -> Bindings.equal((ObservableObjectValue<?>) getModeProperty(model), ACTIVE));
-								}
-
-								private Property<Predicate<Generic>> getModeProperty(Context model) {
-									return getContextProperty(FILTER_MODE, model);
+									bindAction(model -> getModeProperty(this, model).setValue(ACTIVE));
+									bindOptionalStyleClass("selected", "activeMode", model -> Bindings.equal((ObservableObjectValue<?>) getModeProperty(this, model), ACTIVE));
 								}
 							}
 						}
@@ -325,21 +298,16 @@ public class TodoApp extends RootTagImpl {
 						@Children(MyHtmlHyperLink3.class)
 						public static class MyHtmlLi4 extends HtmlLi {
 
+							@SetText("Completes")
 							public static class MyHtmlHyperLink3 extends HtmlHyperLink {
 
 								@Override
 								public void init() {
-									setText("Completes");
-									bindAction(model -> getModeProperty(model).setValue(COMPLETE));
-									bindOptionalStyleClass("selected", "completeMode", model -> Bindings.equal((ObservableObjectValue<?>) getModeProperty(model), COMPLETE));
-								}
-
-								private Property<Predicate<Generic>> getModeProperty(Context model) {
-									return getContextProperty(FILTER_MODE, model);
+									bindAction(model -> getModeProperty(this, model).setValue(COMPLETE));
+									bindOptionalStyleClass("selected", "completeMode", model -> Bindings.equal((ObservableObjectValue<?>) getModeProperty(this, model), COMPLETE));
 								}
 							}
 						}
-
 					}
 
 					@StyleClass("clear-completed")
@@ -347,13 +315,12 @@ public class TodoApp extends RootTagImpl {
 
 						@Override
 						public void init() {
-							bindAction(model -> new ArrayList<>(getCompletedTodos(model)).forEach(Generic::remove));
-							bindText(model -> RxJavaHelpers.changesOf(getCompletedTodos(model)).map(list -> "Clear completed (" + list.size() + ")"));
-							bindOptionalStyleClass("hide", "hasNoCompleted", model -> Bindings.createBooleanBinding(() -> getCompletedTodos(model).size() == 0 ? true : false, getCompletedTodos(model)));
-						}
-
-						private ObservableList<Generic> getCompletedTodos(Context model) {
-							return this.<ObservableList<Generic>> getContextProperty(COMPLETED_TODOS, model).getValue();
+							bindAction(model -> getTodos(model).filter(completed).toList().forEach(Generic::remove));
+							bindText(model -> getCompleted(model).setOnChanged()
+									.map(instances -> instances.stream().filter(g -> Boolean.TRUE.equals(g.getValue())).collect(Collectors.toList()))
+									.map(list -> list.size()).map(size -> "Clear completed (" + size + ")"));
+							// Broken
+							// bindOptionalStyleClass("hide", "hasNoCompleted", model -> Bindings.createBooleanBinding(() -> getCompletedTodos(model).size() == 0 ? true : false, getCompletedTodos(model)));
 						}
 					}
 				}
@@ -370,23 +337,15 @@ public class TodoApp extends RootTagImpl {
 			public static class MyHtmlDiv4 extends TagImpl {
 
 				@StyleClass("save")
+				@SetText("Save")
+				@BindAction(FLUSH.class)
 				public static class MyHtmlButton3 extends HtmlButton {
-
-					@Override
-					public void init() {
-						setText("Save");
-						bindAction(Context::flush);
-					}
 				}
 
 				@StyleClass("cancel")
+				@SetText("Cancel")
+				@BindAction(CANCEL.class)
 				public static class MyHtmlButton4 extends HtmlButton {
-
-					@Override
-					public void init() {
-						setText("Cancel");
-						bindAction(Context::cancel);
-					}
 				}
 			}
 		}

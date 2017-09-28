@@ -17,7 +17,7 @@ import javafx.beans.property.Property;
 
 @Children(HtmlRepeatedOption.class)
 @BindText(path = HtmlRepeatedOption.class)
-@ForEach(path = HtmlRepeatedOption.class, value = ObservableListExtractor.SUBINSTANCES.class)
+@ForEach(path = HtmlRepeatedOption.class, value = ObservableListExtractor.SUBINSTANCES_ALPHABETICAL_ORDER.class)
 @GenericValueBackgroundColor(path = HtmlOption.class, value = "")
 @TagName(TagName.SELECT)
 public class Combobox extends TagImpl implements SelectionDefaults, ComponentsDefaults {

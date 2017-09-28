@@ -3,7 +3,6 @@ package org.genericsystem.common;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Stream;
 
 import org.genericsystem.api.core.FiltersBuilder;
@@ -18,8 +17,6 @@ import org.slf4j.LoggerFactory;
 import io.reactivex.Observable;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
 
 /**
  * @author Nicolas Feybesse
@@ -63,20 +60,10 @@ public class Differential implements IDifferential<Generic> {
 		return subDifferential instanceof Differential ? new SimpleIntegerProperty(((Differential) subDifferential).getCacheLevel() + 1) : new SimpleIntegerProperty(0);
 	}
 
-	@Override
-	public ObservableValue<IDifferential<Generic>> getDifferentialProperty() {
-		return subDifferential.getDifferentialProperty();
-	}
-
 	@SuppressWarnings("unchecked")
 	@Override
 	public Observable<Differential> getDifferentialObservable() {
 		return (Observable<Differential>) subDifferential.getDifferentialObservable();
-	}
-
-	@Override
-	public Map<Generic, ObservableList<Generic>> getDependenciesAsObservableListCacheMap() {
-		return subDifferential.getDependenciesAsObservableListCacheMap();
 	}
 
 	void checkConstraints(Checker checker) throws RollbackException {
@@ -128,16 +115,6 @@ public class Differential implements IDifferential<Generic> {
 			public Observable<Generic> getRemovesObservable() {
 				return getDifferentialObservable().switchMap(diff -> diff.getRemovesObservable(generic).filter(g -> !getCache().isAlive(g)))
 						.replay().refCount();
-			}
-
-			@Override
-			public ObservableList<Generic> toObservableList() {
-				ObservableList<Generic> result = getDependenciesAsObservableListCacheMap().get(generic);
-				if (result == null) {
-					result = Snapshot.super.toObservableList();
-					getDependenciesAsObservableListCacheMap().put(generic, result);
-				}
-				return result;
 			}
 		};
 	}

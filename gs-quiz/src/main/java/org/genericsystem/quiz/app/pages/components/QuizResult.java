@@ -5,6 +5,8 @@ import org.genericsystem.quiz.app.pages.components.QuizResult.AllResults;
 import org.genericsystem.quiz.app.pages.components.QuizResult.SummaryResults;
 import org.genericsystem.quiz.model.ScoreUserQuiz;
 import org.genericsystem.quiz.utils.QuizContextAction;
+import org.genericsystem.quiz.utils.QuizExtractors.FILTER_QUIZ;
+import org.genericsystem.quiz.utils.QuizExtractors.FILTER_USER;
 import org.genericsystem.quiz.utils.QuizExtractors.QUIZ_EXTRACTOR;
 import org.genericsystem.quiz.utils.QuizExtractors.SCORES_FILTERED;
 import org.genericsystem.quiz.utils.QuizExtractors.USER_EXTRACTOR;
@@ -19,6 +21,7 @@ import org.genericsystem.reactor.annotations.SelectContext;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.StyleClass;
+import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.context.ObservableContextSelector.SELECTION_SELECTOR;
 import org.genericsystem.reactor.contextproperties.SelectionDefaults;
 import org.genericsystem.reactor.gscomponents.FlexDiv;
@@ -125,6 +128,7 @@ public class QuizResult extends FlexDiv {
 	}
 
 	@ForEachContext(SCORES_FILTERED.class)
+	@Switch({ FILTER_QUIZ.class, FILTER_USER.class })
 	@Children({ UserDiv.class, FlexDiv.class, Score01.class, Score02.class, QuizDiv.class })
 	@Select(path = UserDiv.class, value = USER_EXTRACTOR.class)
 	@Select(path = QuizDiv.class, value = QUIZ_EXTRACTOR.class)

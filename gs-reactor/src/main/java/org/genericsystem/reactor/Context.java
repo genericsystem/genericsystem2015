@@ -1,16 +1,16 @@
 package org.genericsystem.reactor;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.common.AbstractCache;
 import org.genericsystem.common.Generic;
-import org.genericsystem.defaults.tools.TransformationObservableList;
-import org.genericsystem.reactor.FilteredChildren.FilteredChildContexts;
 import org.genericsystem.reactor.context.RootContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -127,12 +127,9 @@ public class Context {
 			htmlDomNode.destroy();
 			htmlDomNode.sendRemove();
 		}
-		if (getSubContexts(tag) != null) {
-			((TransformationObservableList<?, ?>) getSubContexts(tag)).unbind();
-			((FilteredChildContexts<?>) tag.getContextAttribute("filteredContexts", this)).transformationListSubContexts.unbind();
+		if (getSubContexts(tag) != null)
 			for (Context subContext : getSubContexts(tag))
 				subContext.destroy();
-		}
 		tagDataMap.remove(tag);
 	}
 
@@ -160,11 +157,9 @@ public class Context {
 		// System.out.println("context destroy : " + this);
 		assert !destroyed : this;
 		destroyed = true;
-		for (ObservableList<Context> subModels : getSubContextsLists()) {
-			((TransformationObservableList<?, ?>) subModels).unbind();
+		for (ObservableList<Context> subModels : getSubContextsLists())
 			for (Context subModel : subModels)
 				subModel.destroy();
-		}
 		List<HtmlDomNode> domNodes = getHtmlDomNodes();
 		domNodes.forEach(htmlDomNode -> htmlDomNode.destroy());
 		if (!domNodes.isEmpty())
@@ -251,5 +246,18 @@ public class Context {
 
 	public AbstractCache getCache() {
 		return getParent().getCache();
+	}
+
+	@Override
+	public int hashCode() {
+		return Arrays.hashCode(generics);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (!(obj instanceof Context))
+			return false;
+		Context other = (Context) obj;
+		return Arrays.equals(generics, other.generics) && Objects.equals(parent, other.parent);
 	}
 }

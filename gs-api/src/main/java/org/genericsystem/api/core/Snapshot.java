@@ -1,10 +1,18 @@
 package org.genericsystem.api.core;
 
 import java.lang.invoke.MethodHandles;
+import java.text.Collator;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -13,6 +21,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.reactivex.Observable;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.functions.Function;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -29,6 +39,32 @@ import javafx.collections.ObservableList;
  */
 @FunctionalInterface
 public interface Snapshot<T> extends Iterable<T> {
+
+	public static<T> Snapshot<T> empty() {
+		return new Snapshot<T>() {
+			@Override public Stream<T> unfilteredStream() {
+				return Stream.empty();
+			}
+		};
+	}
+
+	public static<T> Snapshot<T> singleton(T element) {
+		return new Snapshot<T>() {
+			@Override
+			public Stream<T> unfilteredStream() {
+				return Stream.of(element);
+			}
+		};
+	}
+
+	public static<T> Snapshot<T> fromCollection(Collection<T> elements) {
+		return new Snapshot<T>() {
+			@Override
+			public Stream<T> unfilteredStream() {
+				return elements.stream();
+			}
+		};
+	}
 
 	default Snapshot<T> getParent() {
 		return null;
@@ -132,7 +168,6 @@ public interface Snapshot<T> extends Iterable<T> {
 	 *
 	 * @return the first element of this snapshot or <code>null</code> if this snapshot is empty.
 	 */
-
 	default T first() {
 		return (iterator().hasNext() ? iterator().next() : null);
 	}
@@ -149,6 +184,102 @@ public interface Snapshot<T> extends Iterable<T> {
 		return null;
 	}
 
+	default Observable<T> getAddsObservable() {
+		return Observable.empty();
+	}
+
+	default Observable<T> getRemovesObservable() {
+		return Observable.empty();
+	}
+
+	default Comparator<T> getComparator() {
+		return null;
+	}
+
+	// No duplicates
+	@SuppressWarnings("unchecked")
+	default Observable<IndexedElement<T>> getIndexedElements() {
+		Set<T> set = getComparator() != null ? new ConcurrentSkipListSet<>(getComparator()) : Collections.newSetFromMap(new ConcurrentHashMap<>());
+		return Observable.merge(Observable.concat(Observable.fromIterable(toList()), getAddsObservable())
+				.map(g -> {
+					if (set.add(g)) {
+						if (getComparator() != null)
+							return Optional.of(new IndexedElement<T>(g, Collections.binarySearch(new ArrayList<T>(set), g, getComparator())));
+						else
+							return Optional.of(new IndexedElement<T>(g, new ArrayList<T>(set).indexOf(g)));
+					}
+					return Optional.empty();
+				}), getRemovesObservable().map(g -> {
+					set.remove(g);
+					return Optional.empty();
+				})).filter(opt -> opt.isPresent()).map(opt -> (IndexedElement<T>) opt.get());
+	}
+
+	// No duplicates
+	@SuppressWarnings("unchecked")
+	default Observable<Set<T>> setOnChanged() {
+		Set<T> set = getComparator() != null ? new ConcurrentSkipListSet<>(getComparator()) : new ConcurrentSkipListSet<>();
+		set.addAll(toList());
+		return Observable.merge(
+				getAddsObservable().map(g -> {
+					if (set.add(g))
+						return Optional.of(set);
+					return Optional.empty();
+				}), getRemovesObservable().map(g -> {
+					if (set.remove(g))
+						return Optional.of(set);
+					return Optional.empty();
+				})).filter(opt -> opt.isPresent()).map(opt -> (Set<T>) opt.get())
+				.startWith(set);
+	}
+
+	default Snapshot<T> sort(Comparator<T> comparator) {
+		return new Snapshot<T>() {
+			@Override
+			public Stream<T> unfilteredStream() {
+				return Snapshot.this.stream().sorted(comparator);
+			}
+
+			@Override
+			public Comparator<T> getComparator() {
+				return comparator;
+			}
+
+			@Override
+			public Observable<T> getAddsObservable() {
+				return Snapshot.this.getAddsObservable();
+			}
+
+			@Override
+			public Observable<T> getRemovesObservable() {
+				return Snapshot.this.getRemovesObservable();
+			}
+		};
+	}
+
+	default Snapshot<T> sorted() {
+		Comparator<T> naturalOrder = new Comparator<T>() {
+
+			@SuppressWarnings("unchecked")
+			@Override
+			public int compare(T o1, T o2) {
+				if (o1 == null && o2 == null)
+					return 0;
+				if (o1 == null)
+					return -1;
+				if (o2 == null)
+					return 1;
+
+				if (o1 instanceof Comparable) {
+					return ((Comparable<T>) o1).compareTo(o2);
+				}
+
+				return Collator.getInstance().compare(o1.toString(), o2.toString());
+			}
+		};
+		return sort(naturalOrder);
+	}
+
 	default Snapshot<T> filter(Predicate<T> predicate) {
 		return new Snapshot<T>() {
 
@@ -159,14 +290,13 @@ public interface Snapshot<T> extends Iterable<T> {
 
 			@Override
 			public Observable<T> getAddsObservable() {
-				return getParent().getAddsObservable().filter(g -> predicate.test(g)).replay().refCount();
+				return Snapshot.this.getAddsObservable().filter(g -> predicate.test(g)).replay().refCount();
 			}
 
 			@Override
 			public Observable<T> getRemovesObservable() {
-				return getParent().getRemovesObservable().filter(g -> predicate.test(g)).replay().refCount();
+				return Snapshot.this.getRemovesObservable().filter(g -> predicate.test(g)).replay().refCount();
 			}
-
 
 			@Override
 			public T get(Object o) {
@@ -223,7 +353,6 @@ public interface Snapshot<T> extends Iterable<T> {
 				return Snapshot.this.getRemovesObservable().filter(g -> filters.stream().allMatch(filter -> filter.test((IGeneric<?>) g))).replay().refCount();
 			}
 
-
 			@Override
 			public T get(Object o) {
 				T result = Snapshot.this.get(o);
@@ -232,31 +361,101 @@ public interface Snapshot<T> extends Iterable<T> {
 		};
 	}
 
+	/**
+	 * Applies a transformation to each element of the snapshot. If the source Snapshot is sorted,
+	 * the source order is preserved.
+	 * 
+	 * @param mapper	The transformation to apply to the Snapshot’s elements.
+	 * @return			A Snapshot containing the result of the application of the given function
+	 * 					to each Snapshot element.
+	 */
+	default <U> Snapshot<U> map(Function<T, U> mapper) {
+		return new Snapshot<U>() {
+			@Override
+			public Stream<U> unfilteredStream() {
+				return Snapshot.this.stream().map(e -> {
+					try {
+						return mapper.apply(e);
+					} catch (Exception ex) {
+						throw new IllegalStateException("Exception while handling Snapshot.", ex);
+					}
+				});
+			}
+
+			// Keep order from before the mapping.
+			@Override
+			public Observable<IndexedElement<U>> getIndexedElements() {
+				return Snapshot.this.getIndexedElements().map(ie -> new IndexedElement<>(mapper.apply(ie.getElement()), ie.getIndex()));
+			}
+
+			@Override
+			public Observable<U> getAddsObservable() {
+				return Snapshot.this.getAddsObservable().map(mapper);
+			}
+
+			@Override
+			public Observable<U> getRemovesObservable() {
+				return Snapshot.this.getRemovesObservable().map(mapper);
+			}
+		};
+	}
+
 	default List<T> toList() {
 		return stream().collect(Collectors.toList());
 	}
 
-	default Observable<T> getAddsObservable() {
-		return Observable.never();
-	}
-
-	default Observable<T> getRemovesObservable() {
-		return Observable.never();
-	}
-
+	/**
+	 * Returns an ObservableList representing the Snapshot’s state. Deprecated because is does not
+	 * allow disposal of the subscriptions to getAddsObservable() and getRemovesObservable().
+	 * 
+	 * @return an ObservableList representing this Snapshot.
+	 */
+	@Deprecated
 	default ObservableList<T> toObservableList() {
 		Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-		ObservableList<T> result = FXCollections.observableArrayList(toList());
-		getAddsObservable().subscribe(g -> {
-			if (!result.contains(g)) {
+		ObservableList<T> list = FXCollections.observableArrayList(toList());
+		CompositeDisposable disposables = new CompositeDisposable();
+		disposables.add(getAddsObservable().subscribe(g -> {
+			if (!list.contains(g)) {
+				list.add(g);
 				logger.debug("Snapshot {}, generic added, {}", System.identityHashCode(this), g);
-				result.add(g);
 			}
-		}, e -> logger.error("Exception while computing observable list.", e));
-		getRemovesObservable().subscribe(g -> {
+		}, e -> logger.error("Exception while computing observable list.", e)));
+		disposables.add(getRemovesObservable().subscribe(g -> {
+			list.remove(g);
 			logger.debug("Snapshot {}, generic removed, {}", System.identityHashCode(this), g);
-			result.remove(g);
-		}, e -> logger.error("Exception while computing observable list.", e));
-		return result;
+		}, e -> logger.error("Exception while computing observable list.", e)));
+		return list;
+	}
+
+	public static class IndexedElement<T> {
+		private final int index;
+		private final T element;
+
+		public IndexedElement(T element, int index) {
+			this.element = element;
+			this.index = index;
+		}
+
+		public int getIndex() {
+			return index;
+		}
+
+		public T getElement() {
+			return element;
+		}
+
+		@Override
+		public int hashCode() {
+			return element.hashCode();
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (!(obj instanceof IndexedElement))
+				return false;
+			IndexedElement<?> other = (IndexedElement<?>) obj;
+			return other.index == index && element.equals(other.element);
+		}
 	}
 }

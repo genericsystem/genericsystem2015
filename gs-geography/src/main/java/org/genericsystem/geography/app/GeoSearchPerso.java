@@ -1,5 +1,8 @@
 package org.genericsystem.geography.app;
 
+import java.util.Optional;
+
+import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.RxJavaHelpers;
 import org.genericsystem.geography.app.GeoSearchPerso.Input1;
@@ -25,7 +28,6 @@ import org.genericsystem.reactor.gscomponents.RootTagImpl;
 
 import io.reactivex.Observable;
 import javafx.beans.property.Property;
-import javafx.collections.transformation.SortedList;
 
 @DependsOnModel({ AdministrativeTerritory.class, Country.class, City.class, Building.class })
 @Children({ Input1.class, Input2.class, Test1.class, Test2.class })
@@ -51,8 +53,8 @@ public class GeoSearchPerso extends RootTagImpl {
 	@DirectSelect(City.class)
 	public static class Input2 extends InputSelectInstance {
 		@Override
-		public SortedList<Generic> filterInstances(Context c, Property<String> t) {
-			return c.getGeneric().getSubInstances().toObservableList().filtered(res -> (t.getValue() != null && t.getValue().length() > 1) ? ((String) res.getValue()).toLowerCase().contains(t.getValue().toLowerCase()) : false).sorted();
+		public Snapshot<Generic> filterInstances(Context c, Optional<String> t) {
+			return c.getGeneric().getSubInstances().filter(res -> (t.isPresent() && t.get().length() > 1) ? ((String) res.getValue()).toLowerCase().contains(t.get().toLowerCase()) : false).sorted();
 		}
 	}
 

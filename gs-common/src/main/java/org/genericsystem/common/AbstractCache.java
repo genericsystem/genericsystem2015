@@ -3,9 +3,7 @@ package org.genericsystem.common;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Supplier;
 
 import org.genericsystem.api.core.Snapshot;
@@ -28,7 +26,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableIntegerValue;
 import javafx.beans.value.ObservableLongValue;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
 
 /**
  * @author Nicolas Feybesse
@@ -81,11 +78,6 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 	private ObservableIntegerValue cacheLevel;
 	private ObservableLongValue ts;
 	private final ContextEventListener<Generic> listener;
-	private Map<Generic, ObservableList<Generic>> dependenciesAsObservableListCacheMap = new HashMap<>();
-
-	public Map<Generic, ObservableList<Generic>> getDependenciesAsObservableListCacheMap() {
-		return dependenciesAsObservableListCacheMap;
-	}
 
 	@Override
 	public long shiftTs() throws RollbackException {
@@ -344,18 +336,8 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 		}
 
 		@Override
-		public ObjectProperty<IDifferential<Generic>> getDifferentialProperty() {
-			return (ObjectProperty) AbstractCache.this.differentialProperty;
-		}
-
-		@Override
 		public Observable<IDifferential<Generic>> getDifferentialObservable() {
 			return (Observable) AbstractCache.this.differentialObservable;
-		}
-
-		@Override
-		public Map<Generic, ObservableList<Generic>> getDependenciesAsObservableListCacheMap() {
-			return AbstractCache.this.getDependenciesAsObservableListCacheMap();
 		}
 
 		@Override

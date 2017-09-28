@@ -3,7 +3,6 @@ package org.genericsystem.reactor;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.genericsystem.defaults.tools.TransformationObservableList;
 import org.genericsystem.reactor.context.TagSwitcher;
 
 import com.sun.javafx.collections.ObservableListWrapper;
@@ -44,26 +43,6 @@ class FilteredChildren<T> {
 				selectorsByChild.put(child, result);
 				return new ObservableList[] { result };
 			}), child -> child.getMetaBinding() != null || selectorsByChildAndSwitcher.get(child).entrySet().stream().allMatch(entry -> !selectorsByChild.get(child).contains(entry.getKey()) || Boolean.TRUE.equals(entry.getValue().getValue())));
-		}
-	}
-
-	static class FilteredChildContexts<BETWEEN> extends FilteredChildren<Context> {
-
-		final ObservableList<Context> filteredSubContexts;
-		final TransformationObservableList<BETWEEN, Context> transformationListSubContexts;
-
-		FilteredChildContexts(MetaBinding<BETWEEN> metaBinding, Tag childTag, Context context) {
-			transformationListSubContexts = new TransformationObservableList<>(context.getCache().safeSupply(() -> metaBinding.buildBetweenChildren(context)), (i, between) -> metaBinding.buildModel(context, between), Context::destroy, childContext -> {
-				ObservableList<TagSwitcher> result = new ObservableListWrapper<>(childTag.getObservableSwitchers(), s -> {
-					ObservableValue<Boolean> selector = context.getCache().safeSupply(() -> s.apply(childContext, childTag));
-					selectorsByChildAndSwitcher.get(childContext).put(s, selector);
-					return new ObservableValue[] { selector };
-				});
-				selectorsByChild.put(childContext, result);
-				return new ObservableList[] { result };
-			});
-			filteredSubContexts = new FilteredList<>(transformationListSubContexts,
-					childContext -> selectorsByChildAndSwitcher.get(childContext).entrySet().stream().allMatch(entry -> !selectorsByChild.get(childContext).contains(entry.getKey()) || Boolean.TRUE.equals(entry.getValue().getValue())));
 		}
 	}
 }

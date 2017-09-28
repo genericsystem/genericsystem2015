@@ -1,6 +1,10 @@
 package org.genericsystem.geography.components;
 
+import java.util.Optional;
+
+import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
+import org.genericsystem.defaults.tools.RxJavaHelpers;
 import org.genericsystem.geography.components.InputSelectInstance.ResultUl;
 import org.genericsystem.geography.components.InputSelectInstance.SearchInput;
 import org.genericsystem.geography.components.InputSelectInstance.SimpleBr;
@@ -24,11 +28,8 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLi;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlUl;
 
 import io.reactivex.Observable;
-import javafx.beans.binding.ListBinding;
 import javafx.beans.property.Property;
 import javafx.collections.MapChangeListener;
-import javafx.collections.ObservableList;
-import javafx.collections.transformation.SortedList;
 
 @Children({ SearchInput.class, SimpleBr.class, ResultUl.class })
 public class InputSelectInstance extends HtmlDiv {
@@ -118,24 +119,15 @@ public class InputSelectInstance extends HtmlDiv {
 		}
 	}
 
-	public SortedList<Generic> filterInstances(Context c, Property<String> t) {
-		return c.getGeneric().getSubInstances().toObservableList().filtered(res -> (t.getValue() != null && t.getValue().length() > 1) ? ((String) res.getValue()).toLowerCase().startsWith(t.getValue().toLowerCase()) : false).sorted();
+	public Snapshot<Generic> filterInstances(Context c, Optional<String> t) {
+		return c.getGeneric().getSubInstances().filter(res -> (t.isPresent() && t.get().length() > 1) ? ((String) res.getValue()).toLowerCase().startsWith(t.get().toLowerCase()) : false).sorted();
 	}
 
 	public static class TEXT_FILTERED implements ObservableListExtractorFromContext {
 		@Override
-		public ObservableList<Generic> apply(Context context, Tag tag) {
+		public Observable<Snapshot<Generic>> apply(Context context, Tag tag) {
 			Property<String> text = tag.getContextProperty("txt", context);
-			return new ListBinding<Generic>() {
-				{
-					bind(text);
-				}
-
-				@Override
-				protected ObservableList<Generic> computeValue() {
-					return ((InputSelectInstance) tag.getParent().getParent()).filterInstances(context, text);
-				}
-			};
+			return RxJavaHelpers.optionalValuesOf(text).map(opt -> ((InputSelectInstance) tag.getParent().getParent()).filterInstances(context, opt));
 		}
 	}
 
