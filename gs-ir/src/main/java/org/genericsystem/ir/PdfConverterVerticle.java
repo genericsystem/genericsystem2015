@@ -38,6 +38,8 @@ public class PdfConverterVerticle extends ActionVerticle {
 				// addTask(newPng.toString().replaceFirst(DistributedVerticle.BASE_PATH, ""), DeskewerVerticle.ACTION);
 				addTask(newPng.toString().replaceFirst(DistributedVerticle.BASE_PATH, ""), ClassifierVerticle.ACTION);
 			}
+		} else {
+			throw new IllegalStateException("An error has occured while extracting images from PDF", res.cause());
 		}
 	}
 }
