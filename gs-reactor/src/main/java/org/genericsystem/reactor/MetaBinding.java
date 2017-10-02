@@ -23,24 +23,24 @@ public class MetaBinding<BETWEEN> {
 	}
 
 	private Observable<Snapshot<Context>> buildChildren(Context context, Tag childTag) {
-		return betweenChildren.apply(context).map(s -> s.map(g -> modelBuilder.apply(context, g)));
+		return betweenChildren.apply(context).map(snapshot -> snapshot.map(g -> modelBuilder.apply(context, g)));
 	}
 
 	public Observable<IndexedSubContext> buildFilteredChildren(Context context, Tag childTag) {
-		return buildChildren(context, childTag).doOnNext(s -> {
+		return buildChildren(context, childTag).doOnNext(unused -> {
 			// Delete existing subContexts when a new Snapshot is received.
-			context.getSubContexts(childTag).forEach(sc -> sc.destroy());
+			context.getSubContexts(childTag).forEach(subContext -> subContext.destroy());
 			context.getSubContexts(childTag).clear();
-		}).switchMap(s -> s.getIndexedElements().flatMap(indexedSubContext -> buildIndexedFilteredObservable(s, indexedSubContext.getElement(), childTag, indexedSubContext.getIndex())));
+		}).switchMap(snapshot -> snapshot.getIndexedElements().flatMap(indexedSubContext -> buildObservableBySubContext(snapshot, indexedSubContext.getElement(), childTag, indexedSubContext.getIndex())));
 	}
 
 	@SuppressWarnings("unchecked")
-	private Observable<IndexedSubContext> buildIndexedFilteredObservable(Snapshot<Context> snapshot, Context subContext, Tag childTag, int index) {
+	private Observable<IndexedSubContext> buildObservableBySubContext(Snapshot<Context> snapshot, Context subContext, Tag childTag, int index) {
 		return RxJavaHelpers.changesOf(childTag.getObservableSwitchers()).switchMap(list -> list.isEmpty() ? Observable.just(new IndexedSubContext(subContext, true, index)) :
 			Observable.combineLatest(list.stream().map(switcher -> RxJavaHelpers.valuesOf(switcher.apply(subContext, childTag))).toArray(Observable[]::new),
 					args -> new IndexedSubContext(subContext, Arrays.stream(args).allMatch(v -> Boolean.TRUE.equals(v)), index)).distinctUntilChanged())
-				.mergeWith(snapshot.getRemovesObservable().filter(c -> c.equals(subContext)).map(c -> new IndexedSubContext(c, false, -1)))
-				.takeUntil(ic -> ((IndexedSubContext) ic).getIndex() < 0);
+				.mergeWith(snapshot.getRemovesObservable().filter(context -> context.equals(subContext)).map(context -> new IndexedSubContext(context, false, -1)))
+				.takeUntil(indexedContext -> ((IndexedSubContext) indexedContext).getIndex() < 0);
 	}
 
 	public Function<Context, Observable<Snapshot<BETWEEN>>> getBetweenChildren() {
