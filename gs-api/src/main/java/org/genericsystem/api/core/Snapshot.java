@@ -6,12 +6,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.TreeSet;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -197,7 +197,7 @@ public interface Snapshot<T> extends Iterable<T> {
 
 	// No duplicates
 	default Observable<IndexedElement<T>> getIndexedElements() {
-		Set<T> set = getComparator() != null ? new ConcurrentSkipListSet<>(getComparator()) : Collections.newSetFromMap(new ConcurrentHashMap<>());
+		Set<T> set = getComparator() != null ? new TreeSet<>(getComparator()) : new HashSet<T>();
 		return Observable.merge(Observable.concat(Observable.fromIterable(toList()), getAddsObservable()).map(g -> new TaggedElement<T, ChangeType>(g, ChangeType.ADD)),
 				getRemovesObservable().map(g -> new TaggedElement<T, ChangeType>(g, ChangeType.REMOVE)))
 				.scan(new TaggedElement<Set<T>, IndexedElement<T>>(set, null), (acc, change) -> {
@@ -218,7 +218,7 @@ public interface Snapshot<T> extends Iterable<T> {
 
 	// No duplicates
 	default Observable<Set<T>> setOnChanged() {
-		Set<T> set = getComparator() != null ? new ConcurrentSkipListSet<>(getComparator()) : new ConcurrentSkipListSet<>();
+		Set<T> set = getComparator() != null ? new TreeSet<>(getComparator()) : new HashSet<T>();
 		set.addAll(toList());
 		return Observable.merge(getAddsObservable().map(g -> new TaggedElement<T, ChangeType>(g, ChangeType.ADD)),
 				getRemovesObservable().map(g -> new TaggedElement<T, ChangeType>(g, ChangeType.REMOVE)))
