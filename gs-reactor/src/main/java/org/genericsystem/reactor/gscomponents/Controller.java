@@ -44,7 +44,7 @@ public class Controller {
 	}
 
 	public Observable<Class<? extends Tag>> getClassProperty() {
-		return classProperty;
+		return classProperty.hide();
 	}
 
 	public Property<Boolean> getActiveProperty() {
@@ -110,7 +110,7 @@ public class Controller {
 	}
 
 	public Observable<String> countText(Tag tag) {
-		return globalIncs.scan(0, (sum, curr) -> sum + curr).map(ind -> "Step: " + Integer.toString(ind + 1));
+		return globalIncs.hide().scan(0, (sum, curr) -> sum + curr).map(ind -> "Step: " + Integer.toString(ind + 1));
 	}
 
 	public class StepsStep {
@@ -128,7 +128,7 @@ public class Controller {
 		public StepsStep(Tag tag, Observable<Integer> observableSize, Class<? extends TagImpl> nextClass, String prevText, String nextText) {
 			this.tag = tag;
 			this.observableSize = observableSize;
-			indexProperty = observableSize.switchMap(size -> inc.scan(0, (curr, inc) -> {
+			indexProperty = observableSize.switchMap(size -> inc.hide().scan(0, (curr, inc) -> {
 				int newIndex = curr + inc;
 				if (newIndex >= 0 && newIndex < size)
 					return newIndex;

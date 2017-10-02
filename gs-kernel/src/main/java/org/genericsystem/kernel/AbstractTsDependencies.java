@@ -159,12 +159,12 @@ abstract class AbstractTsDependencies {
 	}
 
 	public Observable<Generic> getAddsObservable(long ts) {
-		return adds.filter(g -> !((RootServerHandler) g.getProxyHandler()).getLifeManager().isAlive(ts))
+		return adds.hide().filter(g -> !((RootServerHandler) g.getProxyHandler()).getLifeManager().isAlive(ts))
 				.replay().refCount();
 	}
 
 	public Observable<Generic> getRemovesObservable(long ts) {
-		return removals.filter(g -> ((RootServerHandler) g.getProxyHandler()).getLifeManager().isAlive(ts))
+		return removals.hide().filter(g -> ((RootServerHandler) g.getProxyHandler()).getLifeManager().isAlive(ts))
 				.replay().refCount();
 	}
 

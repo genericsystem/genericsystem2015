@@ -222,11 +222,11 @@ public class PseudoConcurrentCollection<T extends IGeneric<?>> implements Snapsh
 	private Subject<T> removes = PublishSubject.create();
 
 	public Observable<T> getFilteredAdds(Predicate<T> predicate) {
-		return adds.filter(x -> fireInvalidations && predicate.test(x)).serialize();
+		return adds.hide().filter(x -> fireInvalidations && predicate.test(x)).serialize();
 	}
 
 	public Observable<T> getFilteredRemoves(Predicate<T> predicate) {
-		return removes.filter(x -> fireInvalidations && predicate.test(x)).serialize();
+		return removes.hide().filter(x -> fireInvalidations && predicate.test(x)).serialize();
 	}
 
 	private boolean fireInvalidations = true;
