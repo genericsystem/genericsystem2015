@@ -110,7 +110,7 @@ public class Controller {
 	}
 
 	public Observable<String> countText(Tag tag) {
-		return globalIncs.scan((sum, curr) -> sum + curr).map(ind -> "Step: " + Integer.toString(ind + 1));
+		return globalIncs.scan(0, (sum, curr) -> sum + curr).map(ind -> "Step: " + Integer.toString(ind + 1));
 	}
 
 	public class StepsStep {
