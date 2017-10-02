@@ -13,52 +13,57 @@ public class Ransac<DATA> {
 	private final int n;
 	private final int k;
 	private Model<DATA> bestModel;
-	private Map<Integer, DATA> bestDataSet;
+	private Map<Integer, DATA> bestDataMap;
 	private double bestError = Double.MAX_VALUE;
 	private double t;
 	private int d;
 	private final Function<Collection<DATA>, Model<DATA>> modelProvider;
 
 	public Ransac(List<DATA> datas, Function<Collection<DATA>, Model<DATA>> modelProvider, int n, int k, double t, int d) {
+		if (n > datas.size())
+			throw new IllegalStateException("n parameter must be inferior or equal to data size");
+		if (d > datas.size())
+			throw new IllegalStateException("d parameter must be inferior or equal to data size");
+		if (n > d)
+			throw new IllegalStateException("d parameter must be superior or equal to n parameter");
 		assert n < datas.size();
+		assert n <= d;
 		this.datas = datas;
+		this.t = t;
 		this.n = n;
 		this.k = k;
 		this.d = d;
 		this.modelProvider = modelProvider;
+
 	}
 
 	public void compute() {
 		for (int i = 0; i < k; i++) {
-			Map<Integer, DATA> randomDataSet = new HashMap<>();
+			Map<Integer, DATA> randomDataMap = new HashMap<>();
 			for (int j = 0; j <= n;) {
 				int random = Double.valueOf(Math.floor(Math.random() * datas.size())).intValue();
-				if (randomDataSet.put(random, datas.get(random)) == null)
+				if (randomDataMap.put(random, datas.get(random)) == null)
 					j++;
-				System.out.println("randomDataSet : " + randomDataSet);
 			}
-			System.out.println("randomDataSet2 : " + randomDataSet);
-			Model<DATA> possibleModel = modelProvider.apply(randomDataSet.values());
-			for (int pt = 0; pt < datas.size(); pt++) {
-				if (!randomDataSet.keySet().contains(pt)) {
-					if (possibleModel.computeError(datas.get(pt)) < t) {
-						randomDataSet.put(pt, datas.get(pt));
-					}
+			Model<DATA> possibleModel = modelProvider.apply(randomDataMap.values());
+			for (int pt = 0; pt < datas.size(); pt++)
+				if (!randomDataMap.containsKey(pt))
+					if (possibleModel.computeError(datas.get(pt)) < t)
+						randomDataMap.put(pt, datas.get(pt));
 
-				}
-			}
-			System.out.println("randomDataSet3 : " + randomDataSet);
-			if (randomDataSet.size() >= d) {
-				possibleModel = modelProvider.apply(randomDataSet.values());
-				double erreur = possibleModel.computeGlobalError(randomDataSet.values());
+			if (randomDataMap.size() >= d) {
+				possibleModel = modelProvider.apply(randomDataMap.values());
+				double erreur = possibleModel.computeGlobalError(randomDataMap.values());
 				if (erreur < bestError) {
 					bestModel = possibleModel;
-					bestDataSet = randomDataSet;
+					bestDataMap = randomDataMap;
 					bestError = erreur;
+					System.out.println("Improved error : " + bestError);
 				}
 			}
-
 		}
+		if (bestModel == null)
+			throw new IllegalStateException("Unable to find a good model. Please, check your parameters n = " + n + ", t = " + t + ", d = " + d);
 	}
 
 	public Model<DATA> getBestModel() {
@@ -70,7 +75,7 @@ public class Ransac<DATA> {
 	}
 
 	public Map<Integer, DATA> getBestDataSet() {
-		return bestDataSet;
+		return bestDataMap;
 	}
 
 	public static interface Model<DATA> {
@@ -105,7 +110,6 @@ public class Ransac<DATA> {
 				public Object[] getParams() {
 					return new Object[] { meanParam };
 				}
-
 			};
 		};
 		List<Double> datas = Arrays.asList(1d, 1d, 2d, 3d, 1d, 2d, 1d, 1d);
@@ -113,5 +117,6 @@ public class Ransac<DATA> {
 		Ransac<Double> ransac = new Ransac<>(datas, modelProvider, 4, 100, 0.1, datas.size() / 2);
 		ransac.compute();
 		System.out.println("Result : " + ransac.getBestModel().getParams()[0]);
+
 	}
 }

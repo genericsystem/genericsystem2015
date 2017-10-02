@@ -15,6 +15,9 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+
 import javax.swing.ImageIcon;
 
 import org.genericsystem.layout.Layout;
@@ -42,9 +45,6 @@ import org.opencv.utils.Converters;
 import org.opencv.ximgproc.Ximgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 
 public class Img implements AutoCloseable, Serializable {
 
@@ -857,10 +857,10 @@ public class Img implements AutoCloseable, Serializable {
 		return new Img(result, false);
 	}
 
-	public Img houghLinesP(int rho, double theta, int threshold, double mineLineLenght, double maxLineGap) {
+	public Mat houghLinesP(int rho, double theta, int threshold, double mineLineLenght, double maxLineGap) {
 		Mat result = new Mat();
 		Imgproc.HoughLinesP(src, result, rho, theta, threshold, mineLineLenght, maxLineGap);
-		return new Img(result, false);
+		return result;
 	}
 
 	public Image toJfxImage() {
