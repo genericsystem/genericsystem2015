@@ -9,7 +9,6 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
@@ -197,47 +196,50 @@ public interface Snapshot<T> extends Iterable<T> {
 	}
 
 	// No duplicates
-	@SuppressWarnings("unchecked")
 	default Observable<IndexedElement<T>> getIndexedElements() {
 		Set<T> set = getComparator() != null ? new ConcurrentSkipListSet<>(getComparator()) : Collections.newSetFromMap(new ConcurrentHashMap<>());
-		return Observable.merge(Observable.concat(Observable.fromIterable(toList()), getAddsObservable())
-				.map(g -> {
-					if (set.add(g)) {
-						if (getComparator() != null)
-							return Optional.of(new IndexedElement<T>(g, Collections.binarySearch(new ArrayList<T>(set), g, getComparator())));
-						else
-							return Optional.of(new IndexedElement<T>(g, new ArrayList<T>(set).indexOf(g)));
+		return Observable.merge(Observable.concat(Observable.fromIterable(toList()), getAddsObservable()).map(g -> new TaggedElement<T, ChangeType>(g, ChangeType.ADD)),
+				getRemovesObservable().map(g -> new TaggedElement<T, ChangeType>(g, ChangeType.REMOVE)))
+				.scan(new TaggedElement<Set<T>, IndexedElement<T>>(set, null), (acc, change) -> {
+					if (change.tag == ChangeType.ADD) {
+						if (acc.element.add(change.element)) {
+							if (getComparator() != null)
+								return new TaggedElement<>(acc.element, new IndexedElement<T>(change.element, Collections.binarySearch(new ArrayList<T>(acc.element), change.element, getComparator())));
+							else
+								return new TaggedElement<>(acc.element, new IndexedElement<T>(change.element, new ArrayList<T>(acc.element).indexOf(change.element)));
+						}
+						return new TaggedElement<>(acc.element, null);
+					} else {
+						acc.element.remove(change.element);
+						return new TaggedElement<>(acc.element, null);
 					}
-					return Optional.empty();
-				}), getRemovesObservable().map(g -> {
-					set.remove(g);
-					return Optional.empty();
-				})).filter(opt -> opt.isPresent()).map(opt -> (IndexedElement<T>) opt.get());
+				}).filter(tagElt -> tagElt.tag != null).map(tagElt -> tagElt.tag);
 	}
 
 	// No duplicates
-	@SuppressWarnings("unchecked")
 	default Observable<Set<T>> setOnChanged() {
 		Set<T> set = getComparator() != null ? new ConcurrentSkipListSet<>(getComparator()) : new ConcurrentSkipListSet<>();
 		set.addAll(toList());
-		return Observable.merge(
-				getAddsObservable().map(g -> {
-					if (set.add(g))
-						return Optional.of(set);
-					return Optional.empty();
-				}), getRemovesObservable().map(g -> {
-					if (set.remove(g))
-						return Optional.of(set);
-					return Optional.empty();
-				})).filter(opt -> opt.isPresent()).map(opt -> (Set<T>) opt.get())
-				.startWith(set);
+		return Observable.merge(getAddsObservable().map(g -> new TaggedElement<T, ChangeType>(g, ChangeType.ADD)),
+				getRemovesObservable().map(g -> new TaggedElement<T, ChangeType>(g, ChangeType.REMOVE)))
+				.scan(new TaggedElement<Set<T>, Boolean>(set, true), (acc, change) -> {
+					if (change.tag == ChangeType.ADD) {
+						if (acc.element.add(change.element))
+							return new TaggedElement<>(acc.element, true);
+						return new TaggedElement<>(acc.element, false);
+					} else {
+						if (acc.element.remove(change.element))
+							return new TaggedElement<>(acc.element, true);
+						return new TaggedElement<>(acc.element, false);
+					}
+				}).filter(tagElt -> tagElt.tag).map(tagElt -> Collections.unmodifiableSet(tagElt.element));
 	}
 
 	default Snapshot<T> sort(Comparator<T> comparator) {
 		return new Snapshot<T>() {
 			@Override
 			public Stream<T> unfilteredStream() {
-				return Snapshot.this.stream().sorted(comparator);
+				return Snapshot.this.stream();
 			}
 
 			@Override
@@ -289,6 +291,11 @@ public interface Snapshot<T> extends Iterable<T> {
 			}
 
 			@Override
+			public Comparator<T> getComparator() {
+				return Snapshot.this.getComparator();
+			}
+
+			@Override
 			public Observable<T> getAddsObservable() {
 				return Snapshot.this.getAddsObservable().filter(g -> predicate.test(g)).replay().refCount();
 			}
@@ -319,6 +326,11 @@ public interface Snapshot<T> extends Iterable<T> {
 			}
 
 			@Override
+			public Comparator<T> getComparator() {
+				return Snapshot.this.getComparator();
+			}
+
+			@Override
 			public Observable<T> getAddsObservable() {
 				return getParent().getAddsObservable().filter(g -> filter.test((IGeneric<?>) g)).replay().refCount();
 			}
@@ -341,6 +353,11 @@ public interface Snapshot<T> extends Iterable<T> {
 			@Override
 			public Stream<T> unfilteredStream() {
 				return Snapshot.this.stream().filter(g -> filters.stream().allMatch(filter -> filter.test((IGeneric<?>) g)));
+			}
+
+			@Override
+			public Comparator<T> getComparator() {
+				return Snapshot.this.getComparator();
 			}
 
 			@Override
@@ -426,6 +443,20 @@ public interface Snapshot<T> extends Iterable<T> {
 			logger.debug("Snapshot {}, generic removed, {}", System.identityHashCode(this), g);
 		}, e -> logger.error("Exception while computing observable list.", e)));
 		return list;
+	}
+
+	public static enum ChangeType {
+		ADD, REMOVE;
+	}
+
+	public static class TaggedElement<T, U> {
+		protected final T element;
+		protected final U tag;
+
+		public TaggedElement(T element, U tag) {
+			this.element = element;
+			this.tag = tag;
+		}
 	}
 
 	public static class IndexedElement<T> {
