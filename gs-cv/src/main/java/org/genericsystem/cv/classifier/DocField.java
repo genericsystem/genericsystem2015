@@ -1,7 +1,6 @@
 package org.genericsystem.cv.classifier;
 
 import java.text.Normalizer;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -15,7 +14,6 @@ import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
-import org.opencv.utils.Converters;
 
 public class DocField {
 	private final Rect rect;
@@ -45,10 +43,8 @@ public class DocField {
 		return new Point(rect.x + rect.width / 2, rect.y + rect.height / 2);
 	}
 
-	public void drawOcrPerspectiveInverse(Img display, Mat homography, Scalar color, int thickness) {
-		Mat src = Converters.vector_Point2f_to_Mat(Arrays.asList(center(), new Point(rect.x, rect.y), new Point(rect.x + rect.width - 1, rect.y), new Point(rect.x + rect.width - 1, rect.y + rect.height - 1), new Point(rect.x, rect.y + rect.height - 1)));
-		MatOfPoint2f results = new MatOfPoint2f();
-		Core.perspectiveTransform(src, results, homography);
+	public void drawOcrPerspectiveInverse(Img display, Scalar color, int thickness) {
+		MatOfPoint2f results = new MatOfPoint2f(center(), new Point(rect.x, rect.y), new Point(rect.x + rect.width - 1, rect.y), new Point(rect.x + rect.width - 1, rect.y + rect.height - 1), new Point(rect.x, rect.y + rect.height - 1));
 		Point[] targets = results.toArray();
 		Imgproc.line(display.getSrc(), targets[1], targets[2], color, thickness);
 		Imgproc.line(display.getSrc(), targets[2], targets[3], color, thickness);
@@ -57,8 +53,7 @@ public class DocField {
 		Point topCenter = new Point((targets[1].x + targets[2].x) / 2, (targets[1].y + targets[2].y) / 2);
 		double l = Math.sqrt(Math.pow(targets[1].x - topCenter.x, 2) + Math.pow(targets[1].y - topCenter.y, 2));
 		Imgproc.line(display.getSrc(), new Point(topCenter.x, topCenter.y - 2), new Point(topCenter.x, topCenter.y - 20), new Scalar(0, 255, 0), 1);
-		Imgproc.putText(display.getSrc(), Normalizer.normalize(consolidated, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", ""), new Point(topCenter.x - l, topCenter.y - 22), Core.FONT_HERSHEY_TRIPLEX, 0.45, new Scalar(0, 255, 0), 1);
-		src.release();
+		Imgproc.putText(display.getSrc(), Normalizer.normalize(consolidated, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", ""), new Point(topCenter.x - l, topCenter.y - 22), Core.FONT_HERSHEY_TRIPLEX, 1.0, color, thickness);
 		results.release();
 	}
 

@@ -63,6 +63,7 @@ public class Deskewer {
 	public static Path deskewAndSave(final Path imgPath) {
 		final String ext = FilenameUtils.getExtension(imgPath.getFileName().toString());
 		final String filename = imgPath.toString().replace("." + ext, "") + "_deskewed." + ext;
+		// TODO: save to a child folder containing only deskewed images?
 		Path savedPath = imgPath.resolveSibling(filename);
 
 		Img img = deskew(imgPath);

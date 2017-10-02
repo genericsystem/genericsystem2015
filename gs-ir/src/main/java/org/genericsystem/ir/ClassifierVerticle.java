@@ -1,6 +1,5 @@
 package org.genericsystem.ir;
 
-import java.io.File;
 import java.lang.invoke.MethodHandles;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -25,11 +24,11 @@ public class ClassifierVerticle extends ActionVerticle {
 
 	@Override
 	protected void handle(Future<Object> future, JsonObject task) {
-		File file = new File(DistributedVerticle.BASE_PATH + task.getString(DistributedVerticle.FILENAME));
-		logger.info("Starting classification for {}", file.getAbsolutePath());
+		Path imgPath = Paths.get(DistributedVerticle.BASE_PATH + task.getString(DistributedVerticle.FILENAME));
+		logger.info("Starting classification for {}", imgPath.toAbsolutePath().normalize());
 		Path savedFile;
 		synchronized (ClassifierVerticle.class) {
-			savedFile = Classifier.classify(Paths.get(DistributedVerticle.BASE_PATH + "classes/"), file.toPath());
+			savedFile = Classifier.classify(Paths.get(DistributedVerticle.BASE_PATH + "classes/"), imgPath);
 		}
 		if (savedFile != null)
 			future.complete(savedFile.toString());

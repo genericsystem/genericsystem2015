@@ -54,6 +54,9 @@ public class DistributedVerticle extends AbstractVerticle {
 		vertx.deployVerticle(new PdfConverterVerticle());
 		vertx.deployVerticle(new ClassifierVerticle());
 		vertx.deployVerticle(new OcrWorkerVerticle());
+		vertx.deployVerticle(new DeskewerVerticle());
+		vertx.deployVerticle(new ClassifierUsingFieldsVerticle());
+		vertx.deployVerticle(new NewClassCreatorVerticle());
 	}
 
 	public static void main(String[] args) {

@@ -15,9 +15,17 @@ import org.opencv.core.Scalar;
 import org.opencv.utils.Converters;
 
 public class DocFields {
-	private List<DocField> fields = new ArrayList<>();
+	private List<DocField> fields;
 	private Mat lastHomography;
 	private Mat lastRotation;
+
+	public DocFields() {
+		this.fields = new ArrayList<>();
+	}
+
+	public DocFields(List<DocField> fields) {
+		this.fields = fields;
+	}
 
 	public void merge(List<Rect> rects) {
 		List<DocField> oldFields = fields;
@@ -32,7 +40,7 @@ public class DocFields {
 						System.out.println("Merge : " + oldFields.get(index).getConsolidated());
 						System.out.println(newPoints.get(index) + " " + field.center());
 					} else
-						System.out.println("Can 't merge : " + oldFields.get(index).getConsolidated() + " ");
+						System.out.println("Can't merge : " + oldFields.get(index).getConsolidated() + " ");
 				}
 		}
 	}
@@ -64,8 +72,8 @@ public class DocFields {
 		this.lastRotation = rotation;
 	}
 
-	public void drawOcrPerspectiveInverse(Img display, Mat homography, Scalar color, int thickness) {
-		consolidatedFieldStream().forEach(field -> field.drawOcrPerspectiveInverse(display, homography, color, thickness));
+	public void drawOcrPerspectiveInverse(Img display, Scalar color, int thickness) {
+		consolidatedFieldStream().forEach(field -> field.drawOcrPerspectiveInverse(display, color, thickness));
 	}
 
 	public void drawConsolidated(Img stabilizedDisplay) {

@@ -34,8 +34,12 @@ public class PdfConverterVerticle extends ActionVerticle {
 	@Override
 	protected void handleResult(AsyncResult<Object> res, JsonObject task) {
 		if (res.succeeded()) {
-			for (Path newPng : (List<Path>) res.result())
+			for (Path newPng : (List<Path>) res.result()) {
+				// addTask(newPng.toString().replaceFirst(DistributedVerticle.BASE_PATH, ""), DeskewerVerticle.ACTION);
 				addTask(newPng.toString().replaceFirst(DistributedVerticle.BASE_PATH, ""), ClassifierVerticle.ACTION);
+			}
+		} else {
+			throw new IllegalStateException("An error has occured while extracting images from PDF", res.cause());
 		}
 	}
 }
