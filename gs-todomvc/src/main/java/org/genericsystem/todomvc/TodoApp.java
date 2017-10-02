@@ -1,7 +1,6 @@
 package org.genericsystem.todomvc;
 
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
@@ -122,8 +121,8 @@ public class TodoApp extends RootTagImpl {
 		return context.find(Todos.class).getSubInstances();
 	}
 
-	protected static Snapshot<Generic> getCompleted(Context context) {
-		return context.find(Completed.class).getSubInstances();
+	protected static Snapshot<Generic> getCompletedTodos(Context context) {
+		return context.find(Completed.class).getSubInstances().filter(comp -> Boolean.TRUE.equals(comp.getValue())).map(comp -> comp.getComponent(0));
 	}
 
 	@Children({ MyDiv.class, MyHtmlFooter2.class })
@@ -178,10 +177,7 @@ public class TodoApp extends RootTagImpl {
 
 						@Override
 						public void init() {
-							addContextAttribute(COMPLETED, model -> {
-								Generic completed = model.getGeneric().getHolder(model.getGeneric().getRoot().find(Completed.class));
-								return new SimpleBooleanProperty(completed != null && Boolean.TRUE.equals(completed.getValue()) ? true : false);
-							});
+							addContextAttribute(COMPLETED, context -> new SimpleBooleanProperty(completed.test(context.getGeneric())));
 							bindOptionalStyleClass(COMPLETED, COMPLETED);
 						}
 
@@ -197,7 +193,7 @@ public class TodoApp extends RootTagImpl {
 									addPrefixBinding(todo -> {
 										Property<Boolean> completedProperty = getContextProperty(COMPLETED, todo);
 										ObservableValue<Generic> completed = todo.getGeneric().getObservableHolder(todo.getGeneric().getRoot().find(Completed.class));
-										Property<Generic> completedGenericProperty = new SimpleObjectProperty(completed.getValue());
+										Property<Generic> completedGenericProperty = new SimpleObjectProperty<>(completed.getValue());
 										completed.addListener((ov, v, nv) -> completedGenericProperty.setValue(nv));
 										BidirectionalBinding.bind(completedProperty, completedGenericProperty, b -> todo.getGeneric().isAlive() ? todo.getGeneric().setHolder(todo.find(Completed.class), b) : null,
 												g -> g == null ? false : (Boolean) g.getValue());
@@ -240,8 +236,10 @@ public class TodoApp extends RootTagImpl {
 
 				@Override
 				public void init() {
-					// Broken
-					// bindOptionalStyleClass("hide", "hasNoTodo", model -> Bindings.createBooleanBinding(() -> getTodos(this, model).size() == 0 ? true : false, getTodos(this, model)));
+					addContextAttribute("hasNoTodo", context -> new SimpleBooleanProperty());
+					addPrefixBinding(context -> context.getHtmlDomNode(this).getDisposables().add(getTodos(context).setOnChanged()
+							.map(set -> set.isEmpty()).subscribe(empty -> getContextProperty("hasNoTodo", context).setValue(empty))));
+					bindOptionalStyleClass("hidden", "hasNoTodo");
 				}
 
 				@Children({ MyHtmlSpan.class, MyHtmlUl2.class, MyHtmlButton.class })
@@ -256,9 +254,8 @@ public class TodoApp extends RootTagImpl {
 
 							@Override
 							public void init() {
-								bindText(model -> Observable.combineLatest(getTodos(model).setOnChanged(), getCompleted(model).setOnChanged(), (todos, comp) ->
-								todos.stream().filter(g -> !completed.test(g)).collect(Collectors.toList())).map(list -> list.size())
-										.map(size -> size + " item" + (size > 1 ? "s" : "") + " left"));
+								bindText(context -> Observable.combineLatest(getTodos(context).setOnChanged(), getCompletedTodos(context).setOnChanged(),
+										(todos, completed) -> todos.size() - completed.size()).map(size -> size + " item" + (size > 1 ? "s" : "") + " left"));
 							}
 						}
 					}
@@ -315,12 +312,12 @@ public class TodoApp extends RootTagImpl {
 
 						@Override
 						public void init() {
-							bindAction(model -> getTodos(model).filter(completed).toList().forEach(Generic::remove));
-							bindText(model -> getCompleted(model).setOnChanged()
-									.map(instances -> instances.stream().filter(g -> Boolean.TRUE.equals(g.getValue())).collect(Collectors.toList()))
-									.map(list -> list.size()).map(size -> "Clear completed (" + size + ")"));
-							// Broken
-							// bindOptionalStyleClass("hide", "hasNoCompleted", model -> Bindings.createBooleanBinding(() -> getCompletedTodos(model).size() == 0 ? true : false, getCompletedTodos(model)));
+							bindAction(model -> getCompletedTodos(model).toList().forEach(Generic::remove));
+							bindText(model -> getCompletedTodos(model).setOnChanged().map(list -> list.size()).map(size -> "Clear completed (" + size + ")"));
+							addContextAttribute("hasNoCompleted", context -> new SimpleBooleanProperty());
+							addPrefixBinding(context -> context.getHtmlDomNode(this).getDisposables().add(getCompletedTodos(context).setOnChanged()
+									.map(set -> set.isEmpty()).subscribe(empty -> getContextProperty("hasNoCompleted", context).setValue(empty))));
+							bindOptionalStyleClass("hidden", "hasNoCompleted");
 						}
 					}
 				}
