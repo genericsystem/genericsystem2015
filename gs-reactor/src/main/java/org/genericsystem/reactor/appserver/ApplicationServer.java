@@ -193,7 +193,8 @@ public class ApplicationServer extends AbstractBackEnd {
 			return (v) -> {
 				for (CacheSocket cacheSocketContext : caches)
 					if (socket.equals(cacheSocketContext.getSocket())) {
-						cacheSocketContext.getDomNodeVerticle().getRootHtmlDomNode().getModelContext().destroy();
+						if (cacheSocketContext.getDomNodeVerticle().getRootHtmlDomNode() != null)
+							cacheSocketContext.getDomNodeVerticle().getRootHtmlDomNode().getModelContext().destroy();
 						cacheSocketContext.getCache().disableReactive();
 						caches.remove(cacheSocketContext);
 					}
