@@ -59,7 +59,8 @@ public class TextBindingCustom {
 			DocInstance currentDoc = (DocInstance) context.getGeneric();
 			Root root = currentDoc.getRoot();
 			RefreshTimestamp refreshTimestamp = root.find(RefreshTimestamp.class);
-			return Observable.concat(Observable.just(formatTimeStamp(refreshTimestamp.getRefreshTimestamp(currentDoc))), refreshTimestamp.getInstances(currentDoc).getAddsObservable().map(timeStamp -> formatTimeStamp(timeStamp)));
+			return refreshTimestamp.getInstances(currentDoc).getAddsObservable().map(timeStamp -> formatTimeStamp(timeStamp))
+					.startWith(formatTimeStamp(refreshTimestamp.getRefreshTimestamp(currentDoc)));
 		}
 
 		private String formatTimeStamp(Generic timeStamp) {
