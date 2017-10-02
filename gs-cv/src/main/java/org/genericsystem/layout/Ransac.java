@@ -40,7 +40,7 @@ public class Ransac<DATA> {
 	public void compute() {
 		for (int i = 0; i < k; i++) {
 			Map<Integer, DATA> randomDataMap = new HashMap<>();
-			for (int j = 0; j <= n;) {
+			for (int j = 0; j < n;) {
 				int random = Double.valueOf(Math.floor(Math.random() * datas.size())).intValue();
 				if (randomDataMap.put(random, datas.get(random)) == null)
 					j++;
