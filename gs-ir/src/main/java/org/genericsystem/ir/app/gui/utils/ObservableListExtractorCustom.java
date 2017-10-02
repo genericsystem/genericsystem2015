@@ -1,8 +1,6 @@
 package org.genericsystem.ir.app.gui.utils;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
+import java.text.Collator;
 import java.util.function.Predicate;
 
 import org.genericsystem.api.core.Snapshot;
@@ -124,18 +122,7 @@ public class ObservableListExtractorCustom {
 			Root root = currentDoc.getRoot();
 			Predicate<ZoneTextInstance> filterByZone = z -> z.getZoneNum() == zti.getZoneNum() && !z.getValue().toString().isEmpty();
 			Snapshot<ZoneTextInstance> zoneTextInstances = (Snapshot) currentDoc.getHolders(root.find(ZoneText.class));
-			return Observable.just(zoneTextInstances.filter(filterByZone.and(distinctByKey(g -> g.getValue()))).sort((g1, g2) -> Integer.compare(g1.getZoneNum(), g2.getZoneNum())));
-		}
-
-		/**
-		 * Utility function that can be used to filter a stream to get distinct values, using a personalized function.
-		 * 
-		 * @param keyExtractor - lambda expression that will provide the filter criteria
-		 * @return a predicate
-		 */
-		public <T> Predicate<T> distinctByKey(Function<? super T, Object> keyExtractor) {
-			Map<Object, Boolean> seen = new ConcurrentHashMap<>();
-			return t -> seen.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
+			return Observable.just(zoneTextInstances.filter(filterByZone).sort((g1, g2) -> Collator.getInstance().compare(g1.getValue(), g2.getValue())));
 		}
 	}
 
