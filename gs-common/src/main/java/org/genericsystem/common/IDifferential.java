@@ -21,9 +21,9 @@ public interface IDifferential<T extends DefaultGeneric<T>> {
 
 	void apply(Snapshot<T> removes, Snapshot<T> adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException;
 
-	Observable<Generic> getAddsObservable(Generic generic);
+	Observable<Generic> getAdds(Generic generic);
 
-	Observable<Generic> getRemovesObservable(Generic generic);
+	Observable<Generic> getRemovals(Generic generic);
 
 	default AbstractCache getCache() {
 		return null;

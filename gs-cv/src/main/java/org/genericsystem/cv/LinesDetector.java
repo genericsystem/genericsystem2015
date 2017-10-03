@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.genericsystem.layout.Ransac;
 import org.genericsystem.layout.Ransac.Model;
-import org.opencv.calib3d.Calib3d;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -62,7 +61,6 @@ public class LinesDetector extends AbstractApp {
 				capture.read(frame);
 				Img grad = new Img(frame, false).morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_RECT, new Size(2, 2)).otsu();
 				Lines lines = new Lines(grad.houghLinesP(1, Math.PI / 180, 100, 100, 10));
-
 				System.out.println("Average angle: " + lines.getMean() / Math.PI * 180);
 				if (lines.size() > 16) {
 					lines.draw(frame, new Scalar(0, 0, 255));
@@ -70,18 +68,10 @@ public class LinesDetector extends AbstractApp {
 					lines.draw(frame, new Scalar(0, 255, 0));
 					damper.pushNewValue(lines.getMean());
 					System.out.println("Ransac angle: " + lines.getMean() / Math.PI * 180);
+					binaryView.setImage(Tools.mat2jfxImage(grad.getSrc()));
+					frameView.setImage(Tools.mat2jfxImage(frame));
 
-					// Mat matrix = Imgproc.getRotationMatrix2D(new Point(frame.width() / 2, frame.height() / 2), damper.getMean() / Math.PI * 180, 1);
-					// Mat rotated = new Mat(frame.size(), CvType.CV_8UC3, new Scalar(255, 255, 255));
-					// Mat rotatedMasked = new Mat();
-					// Mat mask = new Mat(frame.size(), CvType.CV_8UC1, new Scalar(255));
-					// Mat warpedMask = new Mat();
-					// Imgproc.warpAffine(mask, warpedMask, matrix, frame.size());
-					// Imgproc.warpAffine(frame, rotatedMasked, matrix, frame.size(), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(255));
-					// rotatedMasked.copyTo(rotated, warpedMask);
-					// deskiewedView.setImage(Tools.mat2jfxImage(rotated));
-
-					Mat matrix = Imgproc.getRotationMatrix2D(new Point(frame.width() / 2, frame.height() / 2), lines.getMean() / Math.PI * 180, 1);
+					Mat matrix = Imgproc.getRotationMatrix2D(new Point(frame.width() / 2, frame.height() / 2), damper.getMean() / Math.PI * 180, 1);
 					Mat rotated = new Mat(frame.size(), CvType.CV_8UC3, new Scalar(255, 255, 255));
 					Mat rotatedMasked = new Mat();
 					Mat mask = new Mat(frame.size(), CvType.CV_8UC1, new Scalar(255));
@@ -95,7 +85,7 @@ public class LinesDetector extends AbstractApp {
 					System.out.println("zzzz" + lines.getMean());
 
 					Mat dePerspectived = new Mat(frame.size(), CvType.CV_8UC3, new Scalar(255, 255, 255));
-					Mat homography = lines.findPerspectiveMatrix();
+					Mat homography = lines.findPerspectiveMatrix(frame.width(), frame.height());
 					mask = new Mat(frame.size(), CvType.CV_8UC1, new Scalar(255));
 					Mat maskWarpped = new Mat();
 					Imgproc.warpPerspective(mask, maskWarpped, homography, frame.size());
@@ -106,9 +96,6 @@ public class LinesDetector extends AbstractApp {
 
 				} else
 					System.out.println("Not enough lines : " + lines.size());
-
-				binaryView.setImage(Tools.mat2jfxImage(grad.getSrc()));
-				frameView.setImage(Tools.mat2jfxImage(frame));
 
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -134,12 +121,17 @@ public class LinesDetector extends AbstractApp {
 			this.mean = mean / src.rows();
 		}
 
-		public Mat findPerspectiveMatrix() {
+		public Mat findPerspectiveMatrix(int width, int height) {
 			Function<Collection<Line>, Model<Line>> modelProvider = datas -> {
-				Line line = datas.stream().findFirst().orElse(null);
-				Mat homography = Calib3d.findHomography(new MatOfPoint2f(new Point[] { new Point(line.x1, line.y1), new Point(line.x2, line.y2), new Point(line.x2, 0), new Point(line.x1, 0) }), new MatOfPoint2f(new Point[] {
-						new Point(line.x1, line.y1 < 0 ? Math.min(line.y1, line.y2) : Math.max(line.y1, line.y2)), new Point(line.x2, line.y1 < 0 ? Math.min(line.y1, line.y2) : Math.max(line.y1, line.y2)), new Point(line.x2, 0), new Point(line.x1, 0) }),
-						Calib3d.RANSAC, 5);
+				Line line = datas.iterator().next();
+				if (datas.size() > 1)
+					throw new IllegalStateException("" + datas.size());
+				double a = (line.y2 - line.y1) / (line.x2 - line.x1);
+				double b = (line.y1 + line.y2 - a * (line.x1 + line.x2)) / 2;
+				double newy = a * width / 2 + b;
+
+				Mat homography = Imgproc.getPerspectiveTransform(new MatOfPoint2f(new Point[] { new Point(line.x1, line.y1), new Point(line.x2, line.y2), new Point(line.x2, height / 2), new Point(line.x1, height / 2) }),
+						new MatOfPoint2f(new Point[] { new Point(line.x1, newy), new Point(line.x2, newy), new Point(line.x2, height / 2), new Point(line.x1, height / 2) }));
 
 				return new Model<Line>() {
 
@@ -156,9 +148,15 @@ public class LinesDetector extends AbstractApp {
 				};
 			};
 
-			Ransac<Line> ransac = new Ransac<>(lines, modelProvider, 1, 100, 3 * Math.PI / 180, lines.size() / 3);
-			ransac.compute();
-			System.out.println("Error max : " + ransac.getBestError());
+			Ransac<Line> ransac = new Ransac<>(lines, modelProvider, 1, 200, 2 * Math.PI / 180, Double.valueOf(Math.floor(lines.size() * 0.6)).intValue());
+			ransac.compute(false);
+			// System.out.println("Error max : " + ransac.getBestError());
+			// System.out.println("----------------------");
+			// for (Line line : lines) {
+			// System.out.println("line angle : " + line.getAngle() + " result angle :" + line.perspectivTransform((Mat) ransac.getBestModel().getParams()[0]).getAngle());
+			// }
+			// System.out.println("------end-------------");
+
 			return (Mat) ransac.getBestModel().getParams()[0];
 		}
 
@@ -204,7 +202,7 @@ public class LinesDetector extends AbstractApp {
 
 				};
 			};
-			Ransac<Line> ransac = new Ransac<>(lines, modelProvider, lines.size() / 8, 100, 20 * Math.PI / 180, lines.size() / 3);
+			Ransac<Line> ransac = new Ransac<>(lines, modelProvider, lines.size() / 8, 100, 25 * Math.PI / 180, lines.size() / 3);
 			ransac.compute();
 			return new Lines(ransac.getBestDataSet().values());
 		}

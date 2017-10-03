@@ -352,13 +352,13 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 
 		// Transmit adds and removes only when the transaction changes, i.e. when shiftTs is called.
 		@Override
-		public Observable<Generic> getAddsObservable(Generic generic) {
-			return RxJavaHelpers.prevFromObservableValue(transactionProperty).switchMap(prevTransaction -> prevTransaction.getAddsObservable(generic));
+		public Observable<Generic> getAdds(Generic generic) {
+			return RxJavaHelpers.prevFromObservableValue(transactionProperty).switchMap(prevTransaction -> prevTransaction.getAdds(generic));
 		}
 
 		@Override
-		public Observable<Generic> getRemovesObservable(Generic generic) {
-			return RxJavaHelpers.prevFromObservableValue(transactionProperty).switchMap(prevTransaction -> prevTransaction.getRemovesObservable(generic));
+		public Observable<Generic> getRemovals(Generic generic) {
+			return RxJavaHelpers.prevFromObservableValue(transactionProperty).switchMap(prevTransaction -> prevTransaction.getRemovals(generic));
 		}
 	}
 
