@@ -18,6 +18,8 @@ import org.genericsystem.cv.classifier.newmodel.SimpleModel.ImgFilter;
 import org.genericsystem.cv.classifier.newmodel.SimpleModel.ImgFilter.ImgFilterInstance;
 import org.genericsystem.cv.classifier.newmodel.SimpleModel.Zone;
 import org.genericsystem.cv.classifier.newmodel.SimpleModel.Zone.ZoneInstance;
+import org.genericsystem.cv.classifier.newmodel.SimpleModel.ZoneNum;
+import org.genericsystem.cv.classifier.newmodel.SimpleModel.ZoneNum.ZoneNumInstance;
 import org.genericsystem.kernel.Engine;
 import org.opencv.core.Rect;
 import org.testng.annotations.AfterClass;
@@ -42,8 +44,8 @@ public class SimpleModelTest {
 
 	@BeforeClass
 	public void init() {
-		engine = new Engine(ImgFilter.class, ImgFilterInstance.class, Doc.class, DocInstance.class, Zone.class, ZoneInstance.class, Consolidated.class, ConsolidatedInstance.class, DocPath.class, DocPathInstance.class, DocTimestamp.class,
-				DocTimestampInstance.class);
+		engine = new Engine(ImgFilter.class, ImgFilterInstance.class, Doc.class, DocInstance.class, Zone.class, ZoneInstance.class, ZoneNum.class, ZoneNumInstance.class, Consolidated.class, ConsolidatedInstance.class, DocPath.class, DocPathInstance.class,
+				DocTimestamp.class, DocTimestampInstance.class);
 	}
 
 	@AfterClass
@@ -88,6 +90,38 @@ public class SimpleModelTest {
 		assertEquals(zone4, zone1); // Getter ok
 		assertTrue(zones.containsAll(Arrays.asList(zone1, zone3))); // Snapshot OK
 		assertEquals(zone3.getZoneRect(), rect2); // Instance value ok
+	}
+
+	@Test
+	public void testConsolidated() {
+		Doc doc = engine.find(Doc.class);
+		DocInstance doc1 = doc.setDoc(filename1);
+		Rect rect1 = new Rect(0, 0, 200, 100);
+		ZoneInstance zone1 = doc1.setZone(rect1);
+		ConsolidatedInstance string1 = zone1.setConsolidated(filename1);
+
+		assertEquals(string1.getZoneInstance(), zone1); // Composition OK
+		assertEquals(zone1.getConsolidated(), string1); // Getter OK
+
+		ConsolidatedInstance string2 = zone1.setConsolidated(filename2);
+
+		assertEquals(zone1.getConsolidated(), string2); // PropertyConstraint
+	}
+
+	@Test
+	public void testZoneNum() {
+		Doc doc = engine.find(Doc.class);
+		DocInstance doc1 = doc.setDoc(filename1);
+		Rect rect1 = new Rect(0, 0, 200, 100);
+		ZoneInstance zone1 = doc1.setZone(rect1);
+		ZoneNumInstance num1 = zone1.setZoneNum(1);
+
+		assertEquals(num1.getZoneInstance(), zone1); // Composition OK
+		assertEquals(zone1.getZoneNum(), num1); // Getter OK
+
+		ZoneNumInstance num2 = zone1.setZoneNum(2);
+
+		assertEquals(zone1.getZoneNum(), num2); // PropertyConstraint
 	}
 
 	@Test

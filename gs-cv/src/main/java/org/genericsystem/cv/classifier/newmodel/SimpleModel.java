@@ -15,6 +15,7 @@ import org.genericsystem.cv.classifier.newmodel.SimpleModel.DocPath.DocPathInsta
 import org.genericsystem.cv.classifier.newmodel.SimpleModel.DocTimestamp.DocTimestampInstance;
 import org.genericsystem.cv.classifier.newmodel.SimpleModel.ImgFilter.ImgFilterInstance;
 import org.genericsystem.cv.classifier.newmodel.SimpleModel.Zone.ZoneInstance;
+import org.genericsystem.cv.classifier.newmodel.SimpleModel.ZoneNum.ZoneNumInstance;
 import org.opencv.core.Rect;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -135,6 +136,14 @@ public class SimpleModel {
 				return (DocInstance) getBaseComponent();
 			}
 
+			public ZoneNumInstance setZoneNum(int num) {
+				return (ZoneNumInstance) setHolder(getRoot().find(ZoneNum.class), num);
+			}
+
+			public ZoneNumInstance getZoneNum() {
+				return (ZoneNumInstance) getHolder(getRoot().find(ZoneNum.class));
+			}
+
 			public ConsolidatedInstance setConsolidated(String consolidated) {
 				return (ConsolidatedInstance) setHolder(getRoot().find(Consolidated.class), consolidated);
 			}
@@ -176,6 +185,23 @@ public class SimpleModel {
 	@SystemGeneric
 	@Components(Zone.class)
 	@PropertyConstraint
+	@InstanceClass(ZoneNumInstance.class)
+	@InstanceValueClassConstraint(Integer.class)
+	public static class ZoneNum implements Generic {
+
+		@SystemGeneric
+		public static class ZoneNumInstance implements Generic {
+
+			public ZoneInstance getZoneInstance() {
+				return (ZoneInstance) getBaseComponent();
+			}
+		}
+
+	}
+
+	@SystemGeneric
+	@Components(Zone.class)
+	@PropertyConstraint
 	@InstanceClass(ConsolidatedInstance.class)
 	@InstanceValueClassConstraint(String.class)
 	public static class Consolidated implements Generic {
@@ -186,7 +212,6 @@ public class SimpleModel {
 			public ZoneInstance getZoneInstance() {
 				return (ZoneInstance) getBaseComponent();
 			}
-
 		}
 	}
 
