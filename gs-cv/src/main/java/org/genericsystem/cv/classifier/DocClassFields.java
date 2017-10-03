@@ -15,14 +15,20 @@ import org.slf4j.LoggerFactory;
 public class DocClassFields {
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
+	private String classDirectory;
 	private final DocFields fields;
 
 	public DocClassFields() {
-		this.fields = new DocFields();
+		this(new DocFields(), null);
 	}
 
 	public DocClassFields(DocFields fields) {
+		this(fields, null);
+	}
+
+	public DocClassFields(DocFields fields, String classDirectory) {
 		this.fields = fields;
+		this.classDirectory = classDirectory;
 	}
 
 	public void consolidateOcr(Img img) {
@@ -30,12 +36,20 @@ public class DocClassFields {
 	}
 
 	public void merge(Img img) {
-		fields.merge(ClassifierUsingFields.detectRects(img));
+		fields.addFields(ClassifierUsingFields.detectRects(img));
 	}
 
 	public Img drawOcr(Img img, Scalar scalar, int thickness) {
 		Img imgCopy = new Img(img.getSrc(), true);
 		fields.drawOcrPerspectiveInverse(imgCopy, scalar, thickness);
 		return imgCopy;
+	}
+
+	public String getClassDirectory() {
+		return String.valueOf(classDirectory);
+	}
+
+	public void setClassDirectory(String classDirectory) {
+		this.classDirectory = classDirectory;
 	}
 }

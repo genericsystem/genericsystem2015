@@ -83,6 +83,10 @@ public class SimpleModel {
 				}
 			}
 
+			public ZoneInstance setZone(String json) {
+				return (ZoneInstance) setHolder(getRoot().find(Zone.class), json);
+			}
+
 			public ZoneInstance getZone(String json) {
 				return (ZoneInstance) getHolder(getRoot().find(Zone.class), json);
 			}
