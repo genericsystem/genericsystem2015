@@ -122,7 +122,7 @@ public class ObservableListExtractorCustom {
 			Root root = currentDoc.getRoot();
 			Predicate<ZoneTextInstance> filterByZone = z -> z.getZoneNum() == zti.getZoneNum() && !z.getValue().toString().isEmpty();
 			Snapshot<ZoneTextInstance> zoneTextInstances = (Snapshot) currentDoc.getHolders(root.find(ZoneText.class));
-			return Observable.just(zoneTextInstances.filter(filterByZone).sort((g1, g2) -> Collator.getInstance().compare(g1.getValue(), g2.getValue())));
+			return Observable.just((Snapshot) zoneTextInstances.filter(filterByZone).sort((g1, g2) -> Collator.getInstance().compare(g1.getValue(), g2.getValue())));
 		}
 	}
 

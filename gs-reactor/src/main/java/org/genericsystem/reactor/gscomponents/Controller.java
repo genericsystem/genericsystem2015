@@ -25,6 +25,8 @@ public class Controller {
 	public static final String CONTROLLER = "controller";
 	private final Tag containerTag;
 	private final Subject<Class<? extends Tag>> classProperty;
+	// Emits +1 when going to the next element and -1 when going to the previous element,
+	// so that the sum of emitted elements is the current index.
 	private final Subject<Integer> globalIncs = ReplaySubject.create();
 	private final ObservableMap<Tag, StepsStep> steps = FXCollections.observableHashMap();
 	private Property<Boolean> activeProperty = new SimpleBooleanProperty(true);

@@ -28,7 +28,7 @@ import javafx.collections.ObservableList;
 /**
  * Represents a <code>Set</code> of results <em>aware</em> of its context.
  * <p>
- * This is a functional interface whose functional method is {@link #get}.
+ * This is a functional interface whose functional method is {@link #unfilteredStream}.
  * </p>
  *
  * @author Nicolas Feybesse
@@ -39,6 +39,11 @@ import javafx.collections.ObservableList;
 @FunctionalInterface
 public interface Snapshot<T> extends Iterable<T> {
 
+	/**
+	 * Returns an empty Snapshot.
+	 * 
+	 * @return an empty Snapshot.
+	 */
 	public static<T> Snapshot<T> empty() {
 		return new Snapshot<T>() {
 			@Override public Stream<T> unfilteredStream() {
@@ -47,6 +52,12 @@ public interface Snapshot<T> extends Iterable<T> {
 		};
 	}
 
+	/**
+	 * Returns a Snapshot containing only an element.
+	 * 
+	 * @param element The returned Snapshot’s element.
+	 * @return		  A Snapshot with an element.
+	 */
 	public static<T> Snapshot<T> singleton(T element) {
 		return new Snapshot<T>() {
 			@Override
@@ -56,6 +67,12 @@ public interface Snapshot<T> extends Iterable<T> {
 		};
 	}
 
+	/**
+	 * Returns a Snapshot containing the elements of the given Collection.
+	 * 
+	 * @param elements The returned Snapshot’s elements.
+	 * @return		   A Snapshot with the given elements.
+	 */
 	public static<T> Snapshot<T> fromCollection(Collection<T> elements) {
 		return new Snapshot<T>() {
 			@Override
@@ -65,14 +82,31 @@ public interface Snapshot<T> extends Iterable<T> {
 		};
 	}
 
+	/**
+	 * Returns this Snapshot’s parent. The return value must be non-null iff
+	 * {@link #getFilter()}’s return value is not null.
+	 * 
+	 * @return This Snapshot’s parent.
+	 */
 	default Snapshot<T> getParent() {
 		return null;
 	}
 
+	/**
+	 * Returns the {@link IndexFilter} to apply to the parent to build this Snapshot.
+	 * The return value must be non-null iff {@link #getParent()}’s return value is not null.
+	 * 
+	 * @return This Snapshot’s filter.
+	 */
 	default IndexFilter getFilter() {
 		return null;
 	}
 
+	/**
+	 * Returns an Iterator over the elements of this Snapshot.
+	 * 
+	 * @return	An iterator for this Snapshot.
+	 */
 	@Override
 	default Iterator<T> iterator() {
 		return stream().iterator();
@@ -80,6 +114,11 @@ public interface Snapshot<T> extends Iterable<T> {
 
 	/**
 	 * Returns a <code>Stream</code> of this <code>Snapshot</code>.
+	 * This method builds this Snapshot’s stream(), taking into account 
+	 * the values of {@link #getFilter()} and {@link #getParent()} if any.
+	 * It must not be overridden. To define the Snapshot contents, override 
+	 * the methods {@link #unfilteredStream()}, {@link #getAdds()} 
+	 * and {@link #getRemovals()}.
 	 *
 	 * @return a <code>Stream</code> of this <code>Snapshot</code>.
 	 */
@@ -96,9 +135,14 @@ public interface Snapshot<T> extends Iterable<T> {
 	}
 
 	/**
-	 * Returns a <code>Stream</code> of this <code>Snapshot</code>. Used only if this <code>Snapshot</code> is not filtered.
+	 * Defines a Stream of this Snapshot.
+	 * If this Snapshot’s {@link #getFilter()}’s method returns {@code null}, the return value of
+	 * {@link #stream()} is the same as the return value of unfilteredStream().
+	 * This method must be overridden when defining a new Snapshot that can then be filtered
+	 * with {@link #filter(IndexFilter)} However, to obtain a Stream of any Snapshot,
+	 * {@link #stream()} should be used, never {@link #unfilteredStream()}.
 	 *
-	 * @return a <code>Stream</code> of this <code>Snapshot</code>.
+	 * @return a Stream of this Snapshot.
 	 */
 	public Stream<T> unfilteredStream();
 
@@ -171,6 +215,15 @@ public interface Snapshot<T> extends Iterable<T> {
 		return (iterator().hasNext() ? iterator().next() : null);
 	}
 
+	/**
+	 * Returns the Snapshot’s element with the given index.
+	 * Returns the element at the given index in the iterator returned by
+	 * {@link #iterator()}. If there is no such element, returns {@code null}.
+	 * 
+	 * @param index The index of the wanted element.
+	 * @return		The element at the given index, or {@code null} if there is no
+	 * 				element at that index.
+	 */
 	default T getByIndex(int index) {
 		Iterator<T> iterator = iterator();
 		int i = 0;
@@ -183,23 +236,74 @@ public interface Snapshot<T> extends Iterable<T> {
 		return null;
 	}
 
-	default Observable<T> getAddsObservable() {
+	/**
+	 * Returns an {@link Observable} emitting the items added to the Snapshot after it was created.
+	 * This must be overridden if these updates are necessary, e.g. to update a view of the Snapshot’s contents.
+	 * 
+	 * @return	An {@link Observable} emitting the elements added to the Snapshot after its creation.
+	 * 		 	An empty Observable by default.
+	 */
+	default Observable<T> getAdds() {
 		return Observable.empty();
 	}
 
-	default Observable<T> getRemovesObservable() {
+	/**
+	 * Returns an {@link Observable} emitting the items deleted from the Snapshot after it was created.
+	 * This must be overridden if these updates are necessary, e.g. to update a view of the Snapshot’s contents.
+	 * 
+	 * @return	An {@link Observable} emitting the elements removed from the Snapshot since its creation.
+	 * 		 	An empty Observable by default.
+	 */
+	default Observable<T> getRemovals() {
 		return Observable.empty();
 	}
 
+	/**
+	 * Returns the {@link Comparator} for this Snapshot. This is used only to determine the indices of the elements
+	 * in {@link #getIndexedElements()}, and to order the emitted sets in {@link #setOnChanged()}.
+	 * The Comparator provided must be consistent with equals (see {@link Comparator}).
+	 * 
+	 * @return The Comparator for this Snapshot. {@code null} by default.
+	 */
 	default Comparator<T> getComparator() {
 		return null;
 	}
 
-	// No duplicates
+	/**
+	 * Returns an {@link Observable} emitting each element of the Snapshot with its index.
+	 * Returns an Observable that emits {@link IndexedElement}s corresponding to:
+	 * 	<ul>
+	 * 		<li>
+	 * 			The items initially contained in this Snapshot, with an index
+	 * 			corresponding to their position in a List representing the Snapshot.
+	 *		</li>
+	 * 		<li>
+	 * 			The items added to this Snapshot as they are emitted by the Observable obtained
+	 *  		with {@link #getAdds()}, with an index corresponding to their position 
+	 *  		in a List representing the Snapshot.
+	 * 		</li>
+	 * 		<li>
+	 * 			The items removed from this Snapshot as they are emitted by the Observable obtained
+	 * 			with {@link #getRemovals()}, with an index of -1.
+	 *		</li>
+	 *	</ul>
+	 * 
+	 * <p>
+	 * <b>Warning:</b> Although this method returns indices as though the Snapshot was represented by a List, it
+	 * uses a Set internally to forbid duplicates.
+	 * </p>
+	 * 
+	 * <p>
+	 * If {@link #getComparator()} returns a non-null value, the provided {@link Comparator} is used to order
+	 * the elements of the Snapshot.
+	 * </p>
+	 * 
+	 * @return An {@link Observable} emitting the indexed elements of this Snapshot.
+	 */
 	default Observable<IndexedElement<T>> getIndexedElements() {
 		Set<T> set = getComparator() != null ? new TreeSet<>(getComparator()) : new HashSet<T>();
-		return Observable.merge(Observable.concat(Observable.fromIterable(toList()), getAddsObservable()).map(g -> new TaggedElement<T, ChangeType>(g, ChangeType.ADD)),
-				getRemovesObservable().map(g -> new TaggedElement<T, ChangeType>(g, ChangeType.REMOVE)))
+		return Observable.merge(Observable.concat(Observable.fromIterable(toList()), getAdds()).map(g -> new TaggedElement<T, ChangeType>(g, ChangeType.ADD)),
+				getRemovals().map(g -> new TaggedElement<T, ChangeType>(g, ChangeType.REMOVE)))
 				.scan(new TaggedElement<Set<T>, IndexedElement<T>>(set, null), (acc, change) -> {
 					if (change.tag == ChangeType.ADD) {
 						if (acc.element.add(change.element)) {
@@ -211,17 +315,24 @@ public interface Snapshot<T> extends Iterable<T> {
 						return new TaggedElement<>(acc.element, null);
 					} else {
 						acc.element.remove(change.element);
-						return new TaggedElement<>(acc.element, null);
+						return new TaggedElement<>(acc.element, new IndexedElement<T>(change.element, -1));
 					}
 				}).filter(tagElt -> tagElt.tag != null).map(tagElt -> tagElt.tag);
 	}
 
-	// No duplicates
+	/**
+	 * Returns an {@link Observable} emitting a {@link Set} representing the Snapshot after each change.
+	 * 
+	 * If {@link #getComparator()} provides a {@link Comparator} to use for this Snapshot, the emitted set
+	 * is ordered with the given comparator.
+	 * 
+	 * @return An {@link Observable} emitting a {@link Set} representing the Snapshot after each change.
+	 */
 	default Observable<Set<T>> setOnChanged() {
 		Set<T> set = getComparator() != null ? new TreeSet<>(getComparator()) : new HashSet<T>();
 		set.addAll(toList());
-		return Observable.merge(getAddsObservable().map(g -> new TaggedElement<T, ChangeType>(g, ChangeType.ADD)),
-				getRemovesObservable().map(g -> new TaggedElement<T, ChangeType>(g, ChangeType.REMOVE)))
+		return Observable.merge(getAdds().map(g -> new TaggedElement<T, ChangeType>(g, ChangeType.ADD)),
+				getRemovals().map(g -> new TaggedElement<T, ChangeType>(g, ChangeType.REMOVE)))
 				.scan(new TaggedElement<Set<T>, Boolean>(set, true), (acc, change) -> {
 					if (change.tag == ChangeType.ADD) {
 						if (acc.element.add(change.element))
@@ -235,6 +346,12 @@ public interface Snapshot<T> extends Iterable<T> {
 				}).filter(tagElt -> tagElt.tag).map(tagElt -> Collections.unmodifiableSet(tagElt.element));
 	}
 
+	/**
+	 * Returns a new Snapshot sorted with the given {@link Comparator}.
+	 * 
+	 * @param comparator The {@link Comparator} to use for the new Snapshot.
+	 * @return			 A Snapshot sorted with the given Comparator.
+	 */
 	default Snapshot<T> sort(Comparator<T> comparator) {
 		return new Snapshot<T>() {
 			@Override
@@ -248,17 +365,27 @@ public interface Snapshot<T> extends Iterable<T> {
 			}
 
 			@Override
-			public Observable<T> getAddsObservable() {
-				return Snapshot.this.getAddsObservable();
+			public Observable<T> getAdds() {
+				return Snapshot.this.getAdds();
 			}
 
 			@Override
-			public Observable<T> getRemovesObservable() {
-				return Snapshot.this.getRemovesObservable();
+			public Observable<T> getRemovals() {
+				return Snapshot.this.getRemovals();
 			}
 		};
 	}
 
+	/**
+	 * Returns a new Snapshot sorted according to the natural order.
+	 * 
+	 * If the Snapshot’s elements implement {@link Comparable}, the new Snapshot uses
+	 * this implementation to sort the elements. Otherwise, the elements are sorted according 
+	 * to the Strings returned by {@link #toString()}, using the {@link Collator} for the current
+	 * default Locale.
+	 * 
+	 * @return			 A Snapshot sorted with the natural order.
+	 */
 	default Snapshot<T> sorted() {
 		Comparator<T> naturalOrder = new Comparator<T>() {
 
@@ -282,6 +409,15 @@ public interface Snapshot<T> extends Iterable<T> {
 		return sort(naturalOrder);
 	}
 
+	/**
+	 * Returns a new Snapshot containing only the elements matching the given {@link Predicate}.
+	 * 
+	 * If {@link #getComparator()} defines a {@link Comparator} for the current Snapshot, the sort order 
+	 * is kept for the returned Snapshot.
+	 * 
+	 * @param predicate	The predicate used to filter the Snapshot.
+	 * @return			A Snapshot filtered with the given predicate.
+	 */
 	default Snapshot<T> filter(Predicate<T> predicate) {
 		return new Snapshot<T>() {
 
@@ -296,13 +432,13 @@ public interface Snapshot<T> extends Iterable<T> {
 			}
 
 			@Override
-			public Observable<T> getAddsObservable() {
-				return Snapshot.this.getAddsObservable().filter(g -> predicate.test(g)).replay().refCount();
+			public Observable<T> getAdds() {
+				return Snapshot.this.getAdds().filter(g -> predicate.test(g)).replay().refCount();
 			}
 
 			@Override
-			public Observable<T> getRemovesObservable() {
-				return Snapshot.this.getRemovesObservable().filter(g -> predicate.test(g)).replay().refCount();
+			public Observable<T> getRemovals() {
+				return Snapshot.this.getRemovals().filter(g -> predicate.test(g)).replay().refCount();
 			}
 
 			@Override
@@ -313,6 +449,16 @@ public interface Snapshot<T> extends Iterable<T> {
 		};
 	}
 
+	/**
+	 * A new Snapshot filtered with the given {@link IndexFilter}.
+	 * 
+	 * The returned Snapshot is a child of the current Snapshot.
+	 * If {@link #getComparator()} defines a {@link Comparator} for the current Snapshot, the sort order 
+	 * is kept for the returned Snapshot.
+	 * 
+	 * @param filter	The filter to use to select the elements to keep.
+	 * @return			A Snapshot filtered with the given IndexFilter.
+	 */
 	default Snapshot<T> filter(IndexFilter filter) {
 		return new Snapshot<T>() {
 			@Override
@@ -331,13 +477,13 @@ public interface Snapshot<T> extends Iterable<T> {
 			}
 
 			@Override
-			public Observable<T> getAddsObservable() {
-				return getParent().getAddsObservable().filter(g -> filter.test((IGeneric<?>) g)).replay().refCount();
+			public Observable<T> getAdds() {
+				return getParent().getAdds().filter(g -> filter.test((IGeneric<?>) g)).replay().refCount();
 			}
 
 			@Override
-			public Observable<T> getRemovesObservable() {
-				return getParent().getRemovesObservable().filter(g -> filter.test((IGeneric<?>) g)).replay().refCount();
+			public Observable<T> getRemovals() {
+				return getParent().getRemovals().filter(g -> filter.test((IGeneric<?>) g)).replay().refCount();
 			}
 
 			@Override
@@ -347,6 +493,15 @@ public interface Snapshot<T> extends Iterable<T> {
 		};
 	}
 
+	/**
+	 * A new Snapshot filtered with the given {@link IndexFilter}s.
+	 * 
+	 * If {@link #getComparator()} defines a {@link Comparator} for the current Snapshot, the sort order 
+	 * is kept for the returned Snapshot.
+	 * 
+	 * @param filters	The filters to use to select the elements to keep.
+	 * @return			A Snapshot filtered with the given IndexFilters.
+	 */
 	default Snapshot<T> filter(List<IndexFilter> filters) {
 		return new Snapshot<T>() {
 
@@ -361,13 +516,13 @@ public interface Snapshot<T> extends Iterable<T> {
 			}
 
 			@Override
-			public Observable<T> getAddsObservable() {
-				return Snapshot.this.getAddsObservable().filter(g -> filters.stream().allMatch(filter -> filter.test((IGeneric<?>) g))).replay().refCount();
+			public Observable<T> getAdds() {
+				return Snapshot.this.getAdds().filter(g -> filters.stream().allMatch(filter -> filter.test((IGeneric<?>) g))).replay().refCount();
 			}
 
 			@Override
-			public Observable<T> getRemovesObservable() {
-				return Snapshot.this.getRemovesObservable().filter(g -> filters.stream().allMatch(filter -> filter.test((IGeneric<?>) g))).replay().refCount();
+			public Observable<T> getRemovals() {
+				return Snapshot.this.getRemovals().filter(g -> filters.stream().allMatch(filter -> filter.test((IGeneric<?>) g))).replay().refCount();
 			}
 
 			@Override
@@ -379,8 +534,10 @@ public interface Snapshot<T> extends Iterable<T> {
 	}
 
 	/**
-	 * Applies a transformation to each element of the snapshot. If the source Snapshot is sorted,
-	 * the source order is preserved.
+	 * Applies a transformation to each element of the Snapshot.
+	 * 
+	 * If {@link #getComparator()} defines a {@link Comparator} for the current Snapshot, the sort order 
+	 * is kept for the returned Snapshot.
 	 * 
 	 * @param mapper	The transformation to apply to the Snapshot’s elements.
 	 * @return			A Snapshot containing the result of the application of the given function
@@ -406,24 +563,31 @@ public interface Snapshot<T> extends Iterable<T> {
 			}
 
 			@Override
-			public Observable<U> getAddsObservable() {
-				return Snapshot.this.getAddsObservable().map(mapper);
+			public Observable<U> getAdds() {
+				return Snapshot.this.getAdds().map(mapper);
 			}
 
 			@Override
-			public Observable<U> getRemovesObservable() {
-				return Snapshot.this.getRemovesObservable().map(mapper);
+			public Observable<U> getRemovals() {
+				return Snapshot.this.getRemovals().map(mapper);
 			}
 		};
 	}
 
+	/**
+	 * Returns a List representation of the Snapshot.
+	 * 
+	 * @return A list representation of the Snapshot.
+	 */
 	default List<T> toList() {
 		return stream().collect(Collectors.toList());
 	}
 
 	/**
-	 * Returns an ObservableList representing the Snapshot’s state. Deprecated because is does not
-	 * allow disposal of the subscriptions to getAddsObservable() and getRemovesObservable().
+	 * Returns an ObservableList representing the Snapshot’s state.
+	 * 
+	 * Deprecated because is does not allow disposal of the subscriptions 
+	 * to {@link #getAdds()} and {@link getRemovals()}.
 	 * 
 	 * @return an ObservableList representing this Snapshot.
 	 */
@@ -432,13 +596,13 @@ public interface Snapshot<T> extends Iterable<T> {
 		Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 		ObservableList<T> list = FXCollections.observableArrayList(toList());
 		CompositeDisposable disposables = new CompositeDisposable();
-		disposables.add(getAddsObservable().subscribe(g -> {
+		disposables.add(getAdds().subscribe(g -> {
 			if (!list.contains(g)) {
 				list.add(g);
 				logger.debug("Snapshot {}, generic added, {}", System.identityHashCode(this), g);
 			}
 		}, e -> logger.error("Exception while computing observable list.", e)));
-		disposables.add(getRemovesObservable().subscribe(g -> {
+		disposables.add(getRemovals().subscribe(g -> {
 			list.remove(g);
 			logger.debug("Snapshot {}, generic removed, {}", System.identityHashCode(this), g);
 		}, e -> logger.error("Exception while computing observable list.", e)));
@@ -459,6 +623,13 @@ public interface Snapshot<T> extends Iterable<T> {
 		}
 	}
 
+	/**
+	 * Helper class whose instances contain an element of type T and an int index.
+	 * Used by {@link Snapshot#getIndexedElements()} to return both an added or removed
+	 * element with the corresponding index.
+	 * 
+	 * @param <T>
+	 */
 	public static class IndexedElement<T> {
 		private final int index;
 		private final T element;

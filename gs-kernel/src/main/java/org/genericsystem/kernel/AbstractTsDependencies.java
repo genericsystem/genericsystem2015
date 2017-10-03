@@ -158,12 +158,12 @@ abstract class AbstractTsDependencies {
 		return indexesTree.getIndex(new ArrayList<>(), ts).stream(ts);
 	}
 
-	public Observable<Generic> getAddsObservable(long ts) {
+	public Observable<Generic> getAdds(long ts) {
 		return adds.hide().filter(g -> !((RootServerHandler) g.getProxyHandler()).getLifeManager().isAlive(ts))
 				.replay().refCount();
 	}
 
-	public Observable<Generic> getRemovesObservable(long ts) {
+	public Observable<Generic> getRemovals(long ts) {
 		return removals.hide().filter(g -> ((RootServerHandler) g.getProxyHandler()).getLifeManager().isAlive(ts))
 				.replay().refCount();
 	}

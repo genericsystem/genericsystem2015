@@ -31,12 +31,12 @@ public class Container implements Snapshot<Generic> {
 	}
 
 	@Override
-	public Observable<Generic> getAddsObservable() {
+	public Observable<Generic> getAdds() {
 		return RxJavaHelpers.additionsOf(container).map(entry -> entry.getKey()).replay().refCount();
 	}
 
 	@Override
-	public Observable<Generic> getRemovesObservable() {
+	public Observable<Generic> getRemovals() {
 		return RxJavaHelpers.removalsOf(container).map(entry -> entry.getKey()).replay().refCount();
 	}
 }

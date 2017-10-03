@@ -91,13 +91,13 @@ public class Transaction extends CheckedContext implements IDifferential<Generic
 			}
 
 			@Override
-			public Observable<Generic> getAddsObservable() {
-				return ((RootServerHandler) ancestor.getProxyHandler()).getDependencies().getAddsObservable(getTs());
+			public Observable<Generic> getAdds() {
+				return ((RootServerHandler) ancestor.getProxyHandler()).getDependencies().getAdds(getTs());
 			}
 
 			@Override
-			public Observable<Generic> getRemovesObservable() {
-				return ((RootServerHandler) ancestor.getProxyHandler()).getDependencies().getRemovesObservable(getTs());
+			public Observable<Generic> getRemovals() {
+				return ((RootServerHandler) ancestor.getProxyHandler()).getDependencies().getRemovals(getTs());
 			}
 
 			@Override
@@ -185,12 +185,12 @@ public class Transaction extends CheckedContext implements IDifferential<Generic
 	}
 
 	@Override
-	public Observable<Generic> getAddsObservable(Generic generic) {
-		return getDependencies(generic).getAddsObservable();
+	public Observable<Generic> getAdds(Generic generic) {
+		return getDependencies(generic).getAdds();
 	}
 
 	@Override
-	public Observable<Generic> getRemovesObservable(Generic generic) {
-		return getDependencies(generic).getRemovesObservable();
+	public Observable<Generic> getRemovals(Generic generic) {
+		return getDependencies(generic).getRemovals();
 	}
 }

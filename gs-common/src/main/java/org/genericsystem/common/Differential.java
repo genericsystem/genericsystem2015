@@ -98,6 +98,7 @@ public class Differential implements IDifferential<Generic> {
 				return Stream.concat(adds.contains(generic) ? Stream.empty() : subDifferential.getDependencies(generic).filter(new IndexFilter(FiltersBuilder.NOT_CONTAINED_IN_PARAM, new ArrayList<>(removes.toList()))).stream(),
 						adds.filter(new IndexFilter(FiltersBuilder.IS_DIRECT_DEPENDENCY_OF, generic)).stream());
 			}
+
 			@Override
 			public Snapshot<Generic> filter(List<IndexFilter> filters) {
 				List<IndexFilter> filters_ = new ArrayList<>(filters);
@@ -106,14 +107,14 @@ public class Differential implements IDifferential<Generic> {
 			}
 
 			@Override
-			public Observable<Generic> getAddsObservable() {
-				return getDifferentialObservable().switchMap(diff -> diff.getAddsObservable(generic).filter(g -> getCache().isAlive(g)))
+			public Observable<Generic> getAdds() {
+				return getDifferentialObservable().switchMap(diff -> diff.getAdds(generic).filter(g -> getCache().isAlive(g)))
 						.replay().refCount();
 			}
 
 			@Override
-			public Observable<Generic> getRemovesObservable() {
-				return getDifferentialObservable().switchMap(diff -> diff.getRemovesObservable(generic).filter(g -> !getCache().isAlive(g)))
+			public Observable<Generic> getRemovals() {
+				return getDifferentialObservable().switchMap(diff -> diff.getRemovals(generic).filter(g -> !getCache().isAlive(g)))
 						.replay().refCount();
 			}
 		};
@@ -146,15 +147,15 @@ public class Differential implements IDifferential<Generic> {
 	}
 
 	@Override
-	public Observable<Generic> getAddsObservable(Generic generic) {
-		return Observable.merge(getSubDifferential().getAddsObservable(generic),
+	public Observable<Generic> getAdds(Generic generic) {
+		return Observable.merge(getSubDifferential().getAdds(generic),
 				adds.getFilteredAdds(generic::isDirectAncestorOf),
 				removes.getFilteredRemoves(generic::isDirectAncestorOf)).replay().refCount();
 	}
 
 	@Override
-	public Observable<Generic> getRemovesObservable(Generic generic) {
-		return Observable.merge(getSubDifferential().getRemovesObservable(generic),
+	public Observable<Generic> getRemovals(Generic generic) {
+		return Observable.merge(getSubDifferential().getRemovals(generic),
 				removes.getFilteredAdds(generic::isDirectAncestorOf),
 				adds.getFilteredRemoves(generic::isDirectAncestorOf)).replay().refCount();
 	}

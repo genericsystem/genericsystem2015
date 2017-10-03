@@ -31,7 +31,8 @@ public class MetaBinding<BETWEEN> {
 			// Delete existing subContexts when a new Snapshot is received.
 			context.getSubContexts(childTag).forEach(subContext -> subContext.destroy());
 			context.getSubContexts(childTag).clear();
-		}).switchMap(snapshot -> snapshot.getIndexedElements().flatMap(indexedSubContext -> buildObservableBySubContext(snapshot, indexedSubContext.getElement(), childTag, indexedSubContext.getIndex())));
+		}).switchMap(snapshot -> snapshot.getIndexedElements().filter(indexedContext -> indexedContext.getIndex() >= 0)
+				.flatMap(indexedSubContext -> buildObservableBySubContext(snapshot, indexedSubContext.getElement(), childTag, indexedSubContext.getIndex())));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -39,7 +40,7 @@ public class MetaBinding<BETWEEN> {
 		return RxJavaHelpers.changesOf(childTag.getObservableSwitchers()).switchMap(list -> list.isEmpty() ? Observable.just(new IndexedSubContext(subContext, true, index)) :
 			Observable.combineLatest(list.stream().map(switcher -> RxJavaHelpers.valuesOf(switcher.apply(subContext, childTag))).toArray(Observable[]::new),
 					args -> new IndexedSubContext(subContext, Arrays.stream(args).allMatch(v -> Boolean.TRUE.equals(v)), index)).distinctUntilChanged())
-				.mergeWith(snapshot.getRemovesObservable().filter(context -> context.equals(subContext)).map(context -> new IndexedSubContext(context, false, -1)))
+				.mergeWith(snapshot.getRemovals().filter(context -> context.equals(subContext)).map(context -> new IndexedSubContext(context, false, -1)))
 				.takeUntil(indexedContext -> ((IndexedSubContext) indexedContext).getIndex() < 0);
 	}
 
