@@ -38,6 +38,10 @@ public class Ransac<DATA> {
 	}
 
 	public void compute() {
+		compute(true);
+	}
+
+	public void compute(boolean adjust) {
 		for (int i = 0; i < k; i++) {
 			Map<Integer, DATA> randomDataMap = new HashMap<>();
 			for (int j = 0; j < n;) {
@@ -52,7 +56,8 @@ public class Ransac<DATA> {
 						randomDataMap.put(pt, datas.get(pt));
 
 			if (randomDataMap.size() >= d) {
-				possibleModel = modelProvider.apply(randomDataMap.values());
+				if (adjust)
+					possibleModel = modelProvider.apply(randomDataMap.values());
 				double erreur = possibleModel.computeGlobalError(randomDataMap.values());
 				if (erreur < bestError) {
 					bestModel = possibleModel;
