@@ -50,7 +50,7 @@ public class ClassifierUsingFields {
 		Img closed = getClosedImage(img); // getClosedImage(img, 7, 3, new Size(9, 1));
 		List<MatOfPoint> contours = getContours(closed);
 		double minArea = minAreaFactor * img.size().area();
-		List<Rect> res = contours.stream().filter(contour -> Imgproc.contourArea(contour) > minArea).map(Imgproc::boundingRect).collect(Collectors.toList());
+		List<Rect> res = contours.stream().filter(contour -> Imgproc.contourArea(contour) > minArea).map(Imgproc::boundingRect).filter(rect -> rect.height > 3 && rect.width > 3).collect(Collectors.toList());
 		contours.forEach(MatOfPoint::release);
 		return res;
 	}
@@ -64,7 +64,6 @@ public class ClassifierUsingFields {
 		double size = (closedImgSizeFactor * img.size().area());
 		// Round the size factor to the nearest odd int
 		size = 2 * (Math.floor(size / 2)) + 1;
-		System.out.println("sz = " + size);
 		return img.bilateralFilter(10, 80, 80).bgr2Gray().grad(2.0d, 2.0d).thresHold(0, 255, Imgproc.THRESH_BINARY_INV + Imgproc.THRESH_OTSU).bitwise_not().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(size, size / 5 + 1));
 	}
 
