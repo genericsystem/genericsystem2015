@@ -117,8 +117,8 @@ public interface Snapshot<T> extends Iterable<T> {
 	 * This method builds this Snapshot’s stream(), taking into account 
 	 * the values of {@link #getFilter()} and {@link #getParent()} if any.
 	 * It must not be overridden. To define the Snapshot contents, override 
-	 * the methods {@link #unfilteredStream()}, {@link #getAddsObservable()} 
-	 * and {@link #getRemovesObservable()}.
+	 * the methods {@link #unfilteredStream()}, {@link #getAdds()} 
+	 * and {@link #getRemovals()}.
 	 *
 	 * @return a <code>Stream</code> of this <code>Snapshot</code>.
 	 */
@@ -243,7 +243,7 @@ public interface Snapshot<T> extends Iterable<T> {
 	 * @return	An {@link Observable} emitting the elements added to the Snapshot after its creation.
 	 * 		 	An empty Observable by default.
 	 */
-	default Observable<T> getAddsObservable() {
+	default Observable<T> getAdds() {
 		return Observable.empty();
 	}
 
@@ -254,7 +254,7 @@ public interface Snapshot<T> extends Iterable<T> {
 	 * @return	An {@link Observable} emitting the elements removed from the Snapshot since its creation.
 	 * 		 	An empty Observable by default.
 	 */
-	default Observable<T> getRemovesObservable() {
+	default Observable<T> getRemovals() {
 		return Observable.empty();
 	}
 
@@ -279,12 +279,12 @@ public interface Snapshot<T> extends Iterable<T> {
 	 *		</li>
 	 * 		<li>
 	 * 			The items added to this Snapshot as they are emitted by the Observable obtained
-	 *  		with {@link #getAddsObservable()}, with an index corresponding to their position 
+	 *  		with {@link #getAdds()}, with an index corresponding to their position 
 	 *  		in a List representing the Snapshot.
 	 * 		</li>
 	 * 		<li>
 	 * 			The items removed from this Snapshot as they are emitted by the Observable obtained
-	 * 			with {@link #getRemovesObservable()}, with an index of -1.
+	 * 			with {@link #getRemovals()}, with an index of -1.
 	 *		</li>
 	 *	</ul>
 	 * 
@@ -302,8 +302,8 @@ public interface Snapshot<T> extends Iterable<T> {
 	 */
 	default Observable<IndexedElement<T>> getIndexedElements() {
 		Set<T> set = getComparator() != null ? new TreeSet<>(getComparator()) : new HashSet<T>();
-		return Observable.merge(Observable.concat(Observable.fromIterable(toList()), getAddsObservable()).map(g -> new TaggedElement<T, ChangeType>(g, ChangeType.ADD)),
-				getRemovesObservable().map(g -> new TaggedElement<T, ChangeType>(g, ChangeType.REMOVE)))
+		return Observable.merge(Observable.concat(Observable.fromIterable(toList()), getAdds()).map(g -> new TaggedElement<T, ChangeType>(g, ChangeType.ADD)),
+				getRemovals().map(g -> new TaggedElement<T, ChangeType>(g, ChangeType.REMOVE)))
 				.scan(new TaggedElement<Set<T>, IndexedElement<T>>(set, null), (acc, change) -> {
 					if (change.tag == ChangeType.ADD) {
 						if (acc.element.add(change.element)) {
@@ -331,8 +331,8 @@ public interface Snapshot<T> extends Iterable<T> {
 	default Observable<Set<T>> setOnChanged() {
 		Set<T> set = getComparator() != null ? new TreeSet<>(getComparator()) : new HashSet<T>();
 		set.addAll(toList());
-		return Observable.merge(getAddsObservable().map(g -> new TaggedElement<T, ChangeType>(g, ChangeType.ADD)),
-				getRemovesObservable().map(g -> new TaggedElement<T, ChangeType>(g, ChangeType.REMOVE)))
+		return Observable.merge(getAdds().map(g -> new TaggedElement<T, ChangeType>(g, ChangeType.ADD)),
+				getRemovals().map(g -> new TaggedElement<T, ChangeType>(g, ChangeType.REMOVE)))
 				.scan(new TaggedElement<Set<T>, Boolean>(set, true), (acc, change) -> {
 					if (change.tag == ChangeType.ADD) {
 						if (acc.element.add(change.element))
@@ -365,13 +365,13 @@ public interface Snapshot<T> extends Iterable<T> {
 			}
 
 			@Override
-			public Observable<T> getAddsObservable() {
-				return Snapshot.this.getAddsObservable();
+			public Observable<T> getAdds() {
+				return Snapshot.this.getAdds();
 			}
 
 			@Override
-			public Observable<T> getRemovesObservable() {
-				return Snapshot.this.getRemovesObservable();
+			public Observable<T> getRemovals() {
+				return Snapshot.this.getRemovals();
 			}
 		};
 	}
@@ -432,13 +432,13 @@ public interface Snapshot<T> extends Iterable<T> {
 			}
 
 			@Override
-			public Observable<T> getAddsObservable() {
-				return Snapshot.this.getAddsObservable().filter(g -> predicate.test(g)).replay().refCount();
+			public Observable<T> getAdds() {
+				return Snapshot.this.getAdds().filter(g -> predicate.test(g)).replay().refCount();
 			}
 
 			@Override
-			public Observable<T> getRemovesObservable() {
-				return Snapshot.this.getRemovesObservable().filter(g -> predicate.test(g)).replay().refCount();
+			public Observable<T> getRemovals() {
+				return Snapshot.this.getRemovals().filter(g -> predicate.test(g)).replay().refCount();
 			}
 
 			@Override
@@ -477,13 +477,13 @@ public interface Snapshot<T> extends Iterable<T> {
 			}
 
 			@Override
-			public Observable<T> getAddsObservable() {
-				return getParent().getAddsObservable().filter(g -> filter.test((IGeneric<?>) g)).replay().refCount();
+			public Observable<T> getAdds() {
+				return getParent().getAdds().filter(g -> filter.test((IGeneric<?>) g)).replay().refCount();
 			}
 
 			@Override
-			public Observable<T> getRemovesObservable() {
-				return getParent().getRemovesObservable().filter(g -> filter.test((IGeneric<?>) g)).replay().refCount();
+			public Observable<T> getRemovals() {
+				return getParent().getRemovals().filter(g -> filter.test((IGeneric<?>) g)).replay().refCount();
 			}
 
 			@Override
@@ -516,13 +516,13 @@ public interface Snapshot<T> extends Iterable<T> {
 			}
 
 			@Override
-			public Observable<T> getAddsObservable() {
-				return Snapshot.this.getAddsObservable().filter(g -> filters.stream().allMatch(filter -> filter.test((IGeneric<?>) g))).replay().refCount();
+			public Observable<T> getAdds() {
+				return Snapshot.this.getAdds().filter(g -> filters.stream().allMatch(filter -> filter.test((IGeneric<?>) g))).replay().refCount();
 			}
 
 			@Override
-			public Observable<T> getRemovesObservable() {
-				return Snapshot.this.getRemovesObservable().filter(g -> filters.stream().allMatch(filter -> filter.test((IGeneric<?>) g))).replay().refCount();
+			public Observable<T> getRemovals() {
+				return Snapshot.this.getRemovals().filter(g -> filters.stream().allMatch(filter -> filter.test((IGeneric<?>) g))).replay().refCount();
 			}
 
 			@Override
@@ -563,13 +563,13 @@ public interface Snapshot<T> extends Iterable<T> {
 			}
 
 			@Override
-			public Observable<U> getAddsObservable() {
-				return Snapshot.this.getAddsObservable().map(mapper);
+			public Observable<U> getAdds() {
+				return Snapshot.this.getAdds().map(mapper);
 			}
 
 			@Override
-			public Observable<U> getRemovesObservable() {
-				return Snapshot.this.getRemovesObservable().map(mapper);
+			public Observable<U> getRemovals() {
+				return Snapshot.this.getRemovals().map(mapper);
 			}
 		};
 	}
@@ -587,7 +587,7 @@ public interface Snapshot<T> extends Iterable<T> {
 	 * Returns an ObservableList representing the Snapshot’s state.
 	 * 
 	 * Deprecated because is does not allow disposal of the subscriptions 
-	 * to getAddsObservable() and getRemovesObservable().
+	 * to {@link #getAdds()} and {@link getRemovals()}.
 	 * 
 	 * @return an ObservableList representing this Snapshot.
 	 */
@@ -596,13 +596,13 @@ public interface Snapshot<T> extends Iterable<T> {
 		Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 		ObservableList<T> list = FXCollections.observableArrayList(toList());
 		CompositeDisposable disposables = new CompositeDisposable();
-		disposables.add(getAddsObservable().subscribe(g -> {
+		disposables.add(getAdds().subscribe(g -> {
 			if (!list.contains(g)) {
 				list.add(g);
 				logger.debug("Snapshot {}, generic added, {}", System.identityHashCode(this), g);
 			}
 		}, e -> logger.error("Exception while computing observable list.", e)));
-		disposables.add(getRemovesObservable().subscribe(g -> {
+		disposables.add(getRemovals().subscribe(g -> {
 			list.remove(g);
 			logger.debug("Snapshot {}, generic removed, {}", System.identityHashCode(this), g);
 		}, e -> logger.error("Exception while computing observable list.", e)));

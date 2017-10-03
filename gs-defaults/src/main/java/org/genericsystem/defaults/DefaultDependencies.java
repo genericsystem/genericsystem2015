@@ -122,17 +122,17 @@ public interface DefaultDependencies<T extends DefaultGeneric<T>> extends IGener
 			}
 
 			@Override
-			public Observable<T> getAddsObservable() {
-				return Observable.merge(getInheritings().getAddsObservable(),
-						Observable.fromIterable(getInheritings()).flatMap(g -> g.getSubInheritings().getAddsObservable()),
-						getInheritings().getAddsObservable().flatMap(g -> g.getSubInheritings().getAddsObservable())).replay().refCount();
+			public Observable<T> getAdds() {
+				return Observable.merge(getInheritings().getAdds(),
+						Observable.fromIterable(getInheritings()).flatMap(g -> g.getSubInheritings().getAdds()),
+						getInheritings().getAdds().flatMap(g -> g.getSubInheritings().getAdds())).replay().refCount();
 			}
 
 			@Override
-			public Observable<T> getRemovesObservable() {
-				return Observable.merge(getInheritings().getRemovesObservable(),
-						Observable.fromIterable(getInheritings()).flatMap(g -> g.getSubInheritings().getRemovesObservable()),
-						getInheritings().getAddsObservable().flatMap(g -> g.getSubInheritings().getRemovesObservable())).replay().refCount();
+			public Observable<T> getRemovals() {
+				return Observable.merge(getInheritings().getRemovals(),
+						Observable.fromIterable(getInheritings()).flatMap(g -> g.getSubInheritings().getRemovals()),
+						getInheritings().getAdds().flatMap(g -> g.getSubInheritings().getRemovals())).replay().refCount();
 			}
 		};
 	}
@@ -147,15 +147,15 @@ public interface DefaultDependencies<T extends DefaultGeneric<T>> extends IGener
 			}
 
 			@Override
-			public Observable<T> getAddsObservable() {
-				return Observable.merge(Observable.fromIterable(getSubInheritings()).flatMap(g -> g.getInstances().getAddsObservable()),
-						getSubInheritings().getAddsObservable().flatMap(g -> g.getInstances().getAddsObservable())).replay().refCount();
+			public Observable<T> getAdds() {
+				return Observable.merge(Observable.fromIterable(getSubInheritings()).flatMap(g -> g.getInstances().getAdds()),
+						getSubInheritings().getAdds().flatMap(g -> g.getInstances().getAdds())).replay().refCount();
 			}
 
 			@Override
-			public Observable<T> getRemovesObservable() {
-				return Observable.merge(Observable.fromIterable(getSubInheritings()).flatMap(g -> g.getInstances().getRemovesObservable()),
-						getSubInheritings().getAddsObservable().flatMap(g -> g.getInstances().getRemovesObservable())).replay().refCount();
+			public Observable<T> getRemovals() {
+				return Observable.merge(Observable.fromIterable(getSubInheritings()).flatMap(g -> g.getInstances().getRemovals()),
+						getSubInheritings().getAdds().flatMap(g -> g.getInstances().getRemovals())).replay().refCount();
 			}
 		};
 	}

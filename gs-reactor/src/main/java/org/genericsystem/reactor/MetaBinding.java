@@ -40,7 +40,7 @@ public class MetaBinding<BETWEEN> {
 		return RxJavaHelpers.changesOf(childTag.getObservableSwitchers()).switchMap(list -> list.isEmpty() ? Observable.just(new IndexedSubContext(subContext, true, index)) :
 			Observable.combineLatest(list.stream().map(switcher -> RxJavaHelpers.valuesOf(switcher.apply(subContext, childTag))).toArray(Observable[]::new),
 					args -> new IndexedSubContext(subContext, Arrays.stream(args).allMatch(v -> Boolean.TRUE.equals(v)), index)).distinctUntilChanged())
-				.mergeWith(snapshot.getRemovesObservable().filter(context -> context.equals(subContext)).map(context -> new IndexedSubContext(context, false, -1)))
+				.mergeWith(snapshot.getRemovals().filter(context -> context.equals(subContext)).map(context -> new IndexedSubContext(context, false, -1)))
 				.takeUntil(indexedContext -> ((IndexedSubContext) indexedContext).getIndex() < 0);
 	}
 
