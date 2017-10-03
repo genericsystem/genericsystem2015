@@ -31,7 +31,8 @@ public class MetaBinding<BETWEEN> {
 			// Delete existing subContexts when a new Snapshot is received.
 			context.getSubContexts(childTag).forEach(subContext -> subContext.destroy());
 			context.getSubContexts(childTag).clear();
-		}).switchMap(snapshot -> snapshot.getIndexedElements().flatMap(indexedSubContext -> buildObservableBySubContext(snapshot, indexedSubContext.getElement(), childTag, indexedSubContext.getIndex())));
+		}).switchMap(snapshot -> snapshot.getIndexedElements().filter(indexedContext -> indexedContext.getIndex() >= 0)
+				.flatMap(indexedSubContext -> buildObservableBySubContext(snapshot, indexedSubContext.getElement(), childTag, indexedSubContext.getIndex())));
 	}
 
 	@SuppressWarnings("unchecked")

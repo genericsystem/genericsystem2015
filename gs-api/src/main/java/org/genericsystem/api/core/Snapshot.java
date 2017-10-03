@@ -211,7 +211,7 @@ public interface Snapshot<T> extends Iterable<T> {
 						return new TaggedElement<>(acc.element, null);
 					} else {
 						acc.element.remove(change.element);
-						return new TaggedElement<>(acc.element, null);
+						return new TaggedElement<>(acc.element, new IndexedElement<T>(change.element, -1));
 					}
 				}).filter(tagElt -> tagElt.tag != null).map(tagElt -> tagElt.tag);
 	}
