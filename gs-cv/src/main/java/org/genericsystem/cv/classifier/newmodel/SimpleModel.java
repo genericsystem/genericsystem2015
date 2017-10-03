@@ -13,6 +13,7 @@ import org.genericsystem.cv.classifier.newmodel.SimpleModel.Consolidated.Consoli
 import org.genericsystem.cv.classifier.newmodel.SimpleModel.Doc.DocInstance;
 import org.genericsystem.cv.classifier.newmodel.SimpleModel.DocPath.DocPathInstance;
 import org.genericsystem.cv.classifier.newmodel.SimpleModel.DocTimestamp.DocTimestampInstance;
+import org.genericsystem.cv.classifier.newmodel.SimpleModel.ImgFilter.ImgFilterInstance;
 import org.genericsystem.cv.classifier.newmodel.SimpleModel.Zone.ZoneInstance;
 import org.opencv.core.Rect;
 
@@ -28,6 +29,29 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class SimpleModel {
 
 	private static final ObjectMapper mapper = new ObjectMapper();
+
+	@SystemGeneric
+	@InstanceClass(ImgFilterInstance.class)
+	@InstanceValueClassConstraint(String.class)
+	public static class ImgFilter implements Generic {
+
+		@SystemGeneric
+		public static class ImgFilterInstance implements Generic {
+
+		}
+
+		public Snapshot<ImgFilterInstance> getImgFilters() {
+			return (Snapshot) getInstances();
+		}
+
+		public ImgFilterInstance setImgFilter(String filtername) {
+			return (ImgFilterInstance) setInstance(filtername);
+		}
+
+		public ImgFilterInstance getImgFilter(String filtername) {
+			return (ImgFilterInstance) getInstance(filtername);
+		}
+	}
 
 	@SystemGeneric
 	@InstanceClass(DocInstance.class)
