@@ -26,7 +26,7 @@ public class OcrWorkerVerticle extends ActionVerticle {
 	@Override
 	protected void handle(Future<Object> future, JsonObject task) {
 		JsonObject fields = task.getJsonObject(DistributedVerticle.JSON_OBJECT);
-		Path imgPath = Paths.get(task.getString(DistributedVerticle.FILENAME));
+		Path imgPath = Paths.get(DistributedVerticle.BASE_PATH).resolve(Paths.get(task.getString(DistributedVerticle.FILENAME)));
 		JsonObject ocrData = FillNewModelWithData.processFile(imgPath, fields);
 		if (null != ocrData)
 			future.complete(ocrData);

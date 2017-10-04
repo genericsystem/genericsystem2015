@@ -115,12 +115,20 @@ public class FillNewModelWithData {
 	}
 
 	public static JsonObject processFile(Path imgPath, JsonObject jsonFields) {
+		if (!imgPath.isAbsolute())
+			throw new IllegalArgumentException("The provided path must be absolute. Got instead: " + imgPath.toString());
 		// Create a JsonObject for the answer
 		JsonObject jsonObject = new JsonObject();
-		jsonObject.put(DOC_PATH, Paths.get(BASE_PATH).relativize(imgPath).toString());
 		jsonObject.put(FILENAME, imgPath.getFileName().toString());
 		jsonObject.put(ENCODED_FILENAME, ModelTools.generateFileName(imgPath));
 		jsonObject.put(DOC_TIMESTAMP, ModelTools.getCurrentDate());
+		try {
+			// Case where the given Path is absolute
+			jsonObject.put(DOC_PATH, Paths.get(BASE_PATH).relativize(imgPath).toString());
+		} catch (IllegalArgumentException e) {
+			logger.debug("Unable to find a common path between BASE_PATH and imgPath. Using the provided path instead.", e);
+			jsonObject.put(DOC_PATH, imgPath.toString());
+		}
 
 		// Get the doc fields
 		DocFields fields = DocFields.of(jsonFields);
@@ -137,7 +145,7 @@ public class FillNewModelWithData {
 
 			long start = System.nanoTime();
 			if ("original".equals(filtername) || "reality".equals(filtername)) {
-				img = deskewed;
+				img = new Img(deskewed.getSrc(), true);
 			} else {
 				img = function.apply(deskewed);
 			}
