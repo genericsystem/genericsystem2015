@@ -16,8 +16,6 @@ import org.opencv.core.MatOfPoint;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -25,7 +23,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 public class Zones implements Iterable<Zone> {
 	private final List<Zone> zones;
 	private static final ObjectMapper mapper = new ObjectMapper();
-	private static Logger log = LoggerFactory.getLogger(Zones.class);
 
 	public static Zones get(Img img, double minArea) {
 		return new Zones(img.channels() == 1 ? img : img.bgr2Gray(), minArea);
