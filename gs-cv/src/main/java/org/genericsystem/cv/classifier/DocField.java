@@ -20,12 +20,14 @@ import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
 public class DocField {
-	private final Rect rect;
-	private final int num;
-	private final String uid;
-
+	private Rect rect;
+	private int num;
+	private String uid;
 	private Map<String, Integer> labels = new HashMap<>();
 	private Optional<String> consolidated;
+
+	public DocField() {
+	}
 
 	public DocField(int num, Rect rect) {
 		this.rect = rect;
@@ -33,25 +35,10 @@ public class DocField {
 		this.uid = ModelTools.generateZoneUID(rect);
 	}
 
-	public Map<String, Integer> getLabels() {
-		return labels;
-	}
-
-	public boolean contains(Point center) {
-		Point localCenter = center();
-		return Math.sqrt(Math.pow(localCenter.x - center.x, 2) + Math.pow(localCenter.y - center.y, 2)) <= 10;
-	}
-
-	public Point center() {
-		return new Point(rect.x + rect.width / 2, rect.y + rect.height / 2);
-	}
-
 	public void ocr(final Img rootImg) {
-		Mat roi = new Mat(rootImg.getSrc(), getLargeRect(rootImg, 0.03, 0.1));
-		String ocr = Ocr.doWork(roi);
+		String ocr = doOcr(rootImg);
 		Integer count = labels.get(ocr);
 		labels.put(ocr, 1 + (count != null ? count : 0));
-		roi.release();
 	}
 
 	public void consolidateOcr() {
@@ -62,46 +49,15 @@ public class DocField {
 			consolidated = Optional.empty();
 	}
 
-	public String doOcr(final Img rootImg) {
+	private String doOcr(final Img rootImg) {
 		Mat roi = new Mat(rootImg.getSrc(), getLargeRect(rootImg, 0.03, 0.1));
 		String ocr = Ocr.doWork(roi);
 		roi.release();
 		return ocr;
 	}
 
-	public Rect getLargeRect(final Img imgRoot, final double deltaW, final double deltaH) {
-		int adjustW = 3 + Double.valueOf(Math.floor(rect.width * deltaW)).intValue();
-		int adjustH = 3 + Double.valueOf(Math.floor(rect.height * deltaH)).intValue();
-
-		Point tl = new Point(rect.tl().x - adjustW > 0 ? rect.tl().x - adjustW : 0, rect.tl().y - adjustH > 0 ? rect.tl().y - adjustH : 0);
-		Point br = new Point(rect.br().x + adjustW > imgRoot.width() ? imgRoot.width() : rect.br().x + adjustW, rect.br().y + adjustH > imgRoot.height() ? imgRoot.height() : rect.br().y + adjustH);
-
-		return new Rect(tl, br);
-	}
-
-	public boolean isConsolidated() {
-		return consolidated != null;
-	}
-
-	public Optional<String> getConsolidated() {
-		return consolidated;
-	}
-
-	public Rect getRect() {
-		return rect;
-	}
-
-	public int getNum() {
-		return num;
-	}
-
-	public String getUid() {
-		return uid;
-	}
-
-	public boolean needOcr() {
-		// TODO: add some logic
-		return consolidated == null;
+	public Point center() {
+		return new Point(rect.x + rect.width / 2, rect.y + rect.height / 2);
 	}
 
 	public void drawOcrPerspectiveInverse(Img display, Scalar color, int thickness) {
@@ -122,9 +78,75 @@ public class DocField {
 		Imgproc.rectangle(img.getSrc(), rect.tl(), rect.br(), new Scalar(0, 0, 255));
 	}
 
+	public Rect getLargeRect(final Img imgRoot, final double deltaW, final double deltaH) {
+		int adjustW = 3 + Double.valueOf(Math.floor(rect.width * deltaW)).intValue();
+		int adjustH = 3 + Double.valueOf(Math.floor(rect.height * deltaH)).intValue();
+
+		Point tl = new Point(rect.tl().x - adjustW > 0 ? rect.tl().x - adjustW : 0, rect.tl().y - adjustH > 0 ? rect.tl().y - adjustH : 0);
+		Point br = new Point(rect.br().x + adjustW > imgRoot.width() ? imgRoot.width() : rect.br().x + adjustW, rect.br().y + adjustH > imgRoot.height() ? imgRoot.height() : rect.br().y + adjustH);
+
+		return new Rect(tl, br);
+	}
+
+	// Booleans
+
+	public boolean needOcr() {
+		// TODO: add some logic
+		return consolidated == null;
+	}
+
+	public boolean isConsolidated() {
+		return consolidated != null;
+	}
+
+	// Getters
+
+	public Map<String, Integer> getLabels() {
+		return labels;
+	}
+
+	public Optional<String> getConsolidated() {
+		return consolidated;
+	}
+
+	public Rect getRect() {
+		return rect;
+	}
+
+	public int getNum() {
+		return num;
+	}
+
+	public String getUid() {
+		return uid;
+	}
+
 	@Override
 	public String toString() {
 		return "DocField [rect=" + rect + ", num=" + num + ", consolidated=" + consolidated + "]";
+	}
+
+	// The private setters are needed by Jackson to serialize/de-serialize the JSON objects
+
+	protected void setRect(Rect rect) {
+		this.rect = rect;
+		this.uid = ModelTools.generateZoneUID(rect);
+	}
+
+	protected void setNum(int num) {
+		this.num = num;
+	}
+
+	protected void setUid(String uid) {
+		this.uid = uid;
+	}
+
+	protected void setLabels(Map<String, Integer> labels) {
+		this.labels = labels;
+	}
+
+	protected void setConsolidated(Optional<String> consolidated) {
+		this.consolidated = consolidated;
 	}
 
 }
