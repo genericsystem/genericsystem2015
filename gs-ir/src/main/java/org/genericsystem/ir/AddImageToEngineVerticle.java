@@ -3,7 +3,7 @@ package org.genericsystem.ir;
 import java.nio.file.Paths;
 
 import org.genericsystem.common.Root;
-import org.genericsystem.cv.comparator.FillModelWithData;
+import org.genericsystem.cv.classifier.FillNewModelWithData;
 import org.genericsystem.kernel.Engine;
 
 import io.vertx.core.AsyncResult;
@@ -32,7 +32,7 @@ public class AddImageToEngineVerticle extends ActionPersistentVerticle {
 	@Override
 	protected void handle(Future<Object> future, JsonObject task) {
 		String imagePath = DistributedVerticle.BASE_PATH + task.getString(DistributedVerticle.FILENAME);
-		boolean result = FillModelWithData.registerNewFile(engine, Paths.get(imagePath), DistributedVerticle.RESOURCES_FOLDER);
+		boolean result = FillNewModelWithData.registerNewFile(engine, Paths.get(imagePath), Paths.get(DistributedVerticle.RESOURCES_FOLDER));
 		if (result)
 			future.complete();
 		else

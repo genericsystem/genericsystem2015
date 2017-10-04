@@ -1,8 +1,11 @@
 package org.genericsystem.cv.classifier;
 
+import java.io.IOException;
 import java.lang.invoke.MethodHandles;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -61,7 +64,7 @@ public class FillNewModelWithData {
 
 	public static void main(String[] args) {
 		Path filePath = Paths.get(BASE_PATH, "converted-png", "image-1.png");
-		Path deskewedPath = deskewFile(filePath);
+		Path deskewedPath = Deskewer.deskewAndSave(filePath);
 		JsonObject jsonFields = detectFields(deskewedPath);
 		System.out.println(jsonFields.encodePrettily());
 		JsonObject data = processFile(deskewedPath, jsonFields);
@@ -77,9 +80,27 @@ public class FillNewModelWithData {
 				DocPathInstance.class, DocTimestamp.class, DocTimestampInstance.class);
 	}
 
-	public static Path deskewFile(Path imgPath) {
-		Path deskewed = Deskewer.deskewAndSave(imgPath, METHOD.ROTADED_RECTANGLES);
-		return deskewed;
+	public static boolean registerNewFile(Root engine, Path imgPath, Path resourcesFolder) {
+		logger.info("Adding a new image ({}) ", imgPath.getFileName());
+		String filenameExt = ModelTools.generateFileName(imgPath);
+		Doc doc = engine.find(Doc.class);
+		DocInstance docInstance = doc.setDoc(filenameExt);
+		engine.getCurrentCache().flush();
+		if (null == docInstance) {
+			logger.error("An error has occured while saving file {}", filenameExt);
+			return false;
+		} else {
+			Path relative = Paths.get(BASE_PATH).relativize(imgPath);
+			docInstance.setDocPath(relative.toString());
+			docInstance.setDocTimestamp(ModelTools.getCurrentDate());
+			engine.getCurrentCache().flush();
+			try {
+				Files.copy(imgPath, resourcesFolder.resolve(filenameExt), StandardCopyOption.REPLACE_EXISTING);
+			} catch (IOException e) {
+				logger.error(String.format("An error has occured while copying image %s to resources folder", filenameExt), e);
+			}
+			return true;
+		}
 	}
 
 	public static JsonObject detectFields(Path imgPath) {
