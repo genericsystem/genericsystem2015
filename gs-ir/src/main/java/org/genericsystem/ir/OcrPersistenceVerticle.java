@@ -1,7 +1,7 @@
 package org.genericsystem.ir;
 
 import org.genericsystem.common.Root;
-import org.genericsystem.cv.comparator.FillModelWithData;
+import org.genericsystem.cv.classifier.FillNewModelWithData;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -29,7 +29,7 @@ public class OcrPersistenceVerticle extends ActionPersistentVerticle {
 	protected void handle(Future<Object> future, JsonObject task) {
 		JsonObject data = task.getJsonObject(DistributedVerticle.JSON_OBJECT);
 		try {
-			FillModelWithData.saveOcrDataInModel(engine, data);
+			FillNewModelWithData.saveOcrDataInModel(engine, data);
 			future.complete();
 		} catch (RuntimeException e) {
 			future.fail(e);
