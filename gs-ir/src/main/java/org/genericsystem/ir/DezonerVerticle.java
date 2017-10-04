@@ -1,14 +1,12 @@
 package org.genericsystem.ir;
 
 import java.lang.invoke.MethodHandles;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.genericsystem.common.Root;
-import org.genericsystem.cv.Img;
-import org.genericsystem.cv.Zones;
+import org.genericsystem.cv.classifier.FillNewModelWithData;
 import org.genericsystem.cv.utils.ModelTools;
-import org.opencv.core.Scalar;
-import org.opencv.imgcodecs.Imgcodecs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,31 +35,21 @@ public class DezonerVerticle extends ActionPersistentVerticle {
 
 	@Override
 	protected void handle(Future<Object> future, JsonObject task) {
-		String imagePath = DistributedVerticle.BASE_PATH + task.getString(DistributedVerticle.FILENAME);
-		if (Zones.isZonesFilePresent(imagePath)) {
-			final Zones zones = Zones.load(Paths.get(imagePath).getParent().toString());
-			Img imgCopy = new Img(imagePath);
-			zones.draw(imgCopy, new Scalar(0, 255, 0), 3);
-			zones.writeNum(imgCopy, new Scalar(0, 0, 255), 3);
-			// TODO implement a filter mechanism to avoid creating duplicates in a public folder
-			String filenameExt = ModelTools.generateFileName(Paths.get(imagePath));
-			Imgcodecs.imwrite(DistributedVerticle.RESOURCES_FOLDER + filenameExt, imgCopy.getSrc());
-			imgCopy.close();
-			future.complete();
-		} else {
-			// No zones file was found, need to define the zones manually
-			// TODO: replace the future.fail by a notification to the system that a zone needs to be defined for this file
-			future.fail("No accurate zones found for " + imagePath);
-		}
+		Path imagePath = Paths.get(DistributedVerticle.BASE_PATH + task.getString(DistributedVerticle.FILENAME));
+		JsonObject fields = FillNewModelWithData.detectFields(imagePath);
+		if (null == fields || fields.isEmpty())
+			future.fail("No fields detected for image " + task.getString(DistributedVerticle.FILENAME));
+		else
+			future.complete(fields);
 	}
 
 	@Override
 	protected void handleResult(AsyncResult<Object> res, JsonObject task) {
-		if (res.succeeded())
-			addTask(task.getString(DistributedVerticle.FILENAME), OcrParametersVerticle.ACTION);
-		else {
-			logger.info("No zones defined for file {}.", task.getString(DistributedVerticle.FILENAME));
-			res.cause().printStackTrace();
+		if (res.succeeded()) {
+			// TODO: add another task that will annotate the image with the new zones (draw rect + nums) and copy it to the resources folder
+			addTask(task.getString(DistributedVerticle.FILENAME), (JsonObject) res.result(), OcrWorkerVerticle.ACTION);
+		} else {
+			logger.info(String.format("No zones defined for file {}.", task.getString(DistributedVerticle.FILENAME)), res.cause());
 		}
 	}
 }
