@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import org.genericsystem.cv.Img;
 import org.opencv.core.Rect;
@@ -51,6 +52,14 @@ public class DocFields implements Iterable<DocField> {
 
 	public int size() {
 		return fields.size();
+	}
+
+	public Stream<DocField> stream() {
+		return StreamSupport.stream(fields.spliterator(), false);
+	}
+
+	public Stream<DocField> parallelStream() {
+		return StreamSupport.stream(fields.spliterator(), true);
 	}
 
 	@Override
