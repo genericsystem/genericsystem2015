@@ -37,7 +37,7 @@ public class DocClassFields {
 	}
 
 	public void merge(Img img) {
-		fields.addFields(ClassifierUsingFields.detectRects(img));
+		fields.buildFields(ClassifierUsingFields.detectRects(img));
 	}
 
 	public Img drawOcr(Img img, Scalar scalar, int thickness) {

@@ -35,7 +35,7 @@ public class DocFields implements Iterable<DocField> {
 
 	public static DocFields of(List<Rect> rects) {
 		DocFields fields = new DocFields();
-		fields.addFields(rects);
+		fields.buildFields(rects);
 		return fields;
 	}
 
@@ -59,7 +59,7 @@ public class DocFields implements Iterable<DocField> {
 		return new JsonObject().put(FIELDS, fields);
 	}
 
-	public void addFields(List<Rect> rects) {
+	public void buildFields(List<Rect> rects) {
 		AtomicInteger counter = new AtomicInteger(0);
 		fields = rects.stream().map(rect -> new DocField(counter.incrementAndGet(), rect)).collect(Collectors.toList());
 	}
