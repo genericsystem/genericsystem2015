@@ -32,6 +32,7 @@ public class PdfConverterVerticle extends ActionVerticle {
 		future.complete(createdPngs);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	protected void handleResult(AsyncResult<Object> res, JsonObject task) {
 		if (res.succeeded()) {
