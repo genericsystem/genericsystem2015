@@ -4,6 +4,7 @@ import java.util.Comparator;
 
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
+import org.genericsystem.defaults.tools.RxJavaHelpers;
 import org.genericsystem.quiz.model.Answer;
 import org.genericsystem.quiz.model.Description;
 import org.genericsystem.quiz.model.Question;
@@ -16,9 +17,7 @@ import org.genericsystem.reactor.context.ObservableValueSelector;
 import org.genericsystem.reactor.context.TagSwitcher;
 
 import io.reactivex.Observable;
-import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
-import javafx.beans.value.ObservableValue;
 
 public class QuizExtractors {
 
@@ -69,23 +68,23 @@ public class QuizExtractors {
 	public static class FILTER_QUIZ implements TagSwitcher {
 
 		@Override
-		public ObservableValue<Boolean> apply(Context context, Tag tag) {
+		public Observable<Boolean> apply(Context context, Tag tag) {
 			if (tag.getContextProperty(QuizContextAction.SELECTED_QUIZ, context) == null)
 				tag.getRootTag().createNewContextProperty(QuizContextAction.SELECTED_QUIZ, context.getRootContext());
 			Property<Generic> selectedQuiz = tag.getContextProperty(QuizContextAction.SELECTED_QUIZ, context);
-			return Bindings.createBooleanBinding(() -> selectedQuiz.getValue() == null || context.getGeneric().getComponent(1).equals(selectedQuiz.getValue()), selectedQuiz);
+			return RxJavaHelpers.optionalValuesOf(selectedQuiz).map(optQuiz -> !optQuiz.isPresent() || context.getGeneric().getComponent(1).equals(optQuiz.get()));
 		}
 	}
 
 	public static class FILTER_USER implements TagSwitcher {
 
 		@Override
-		public ObservableValue<Boolean> apply(Context context, Tag tag) {
+		public Observable<Boolean> apply(Context context, Tag tag) {
 			if (tag.getContextProperty(QuizContextAction.SELECTED_USER, context) == null)
 				tag.getRootTag().createNewContextProperty(QuizContextAction.SELECTED_USER, context.getRootContext());
 			Property<String> selectedUser = tag.getContextProperty(QuizContextAction.SELECTED_USER, context);
-			return Bindings.createBooleanBinding(() -> selectedUser.getValue() == null || selectedUser.getValue().trim().isEmpty() || 
-					((String) context.getGeneric().getComponent(0).getValue()).trim().toLowerCase().contains(selectedUser.getValue().trim().toLowerCase()), selectedUser);
+			return RxJavaHelpers.optionalValuesOf(selectedUser).map(optUser -> !optUser.isPresent() || optUser.get().trim().isEmpty()
+					|| ((String) context.getGeneric().getComponent(0).getValue()).trim().toLowerCase().contains(optUser.get().trim().toLowerCase()));
 		}
 	}
 

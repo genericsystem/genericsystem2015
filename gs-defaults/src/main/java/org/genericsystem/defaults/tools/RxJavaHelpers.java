@@ -132,9 +132,7 @@ public class RxJavaHelpers {
 
 	private static <T> Observable<Optional<T>> fromNullableObservableValue(final ObservableValue<T> fxObservable) {
 		return Observable.create((ObservableEmitter<Optional<T>> emitter) -> {
-			if (fxObservable.getValue() != null) {
-				emitter.onNext(Optional.of(fxObservable.getValue()));
-			}
+			emitter.onNext(Optional.ofNullable(fxObservable.getValue()));
 
 			final ChangeListener<T> listener = (observableValue, prev, current) -> {
 				emitter.onNext(Optional.ofNullable(current));

@@ -7,6 +7,8 @@ import org.genericsystem.reactor.context.TagSwitcher;
 
 import com.sun.javafx.collections.ObservableListWrapper;
 
+import javafx.beans.property.Property;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -36,7 +38,8 @@ class FilteredChildren<T> {
 				if (child.getMetaBinding() != null)
 					return new ObservableValue[] {};
 				ObservableList<TagSwitcher> result = new ObservableListWrapper<>(child.getObservableSwitchers(), s -> {
-					ObservableValue<Boolean> selector = context.getCache().safeSupply(() -> s.apply(context, child));
+					Property<Boolean> selector = new SimpleBooleanProperty();
+					context.getHtmlDomNode(tag).getDisposables().add(context.getCache().safeSupply(() -> s.apply(context, child)).subscribe(bool -> selector.setValue(bool)));
 					selectorsByChildAndSwitcher.get(child).put(s, selector);
 					return new ObservableValue[] { selector };
 				});

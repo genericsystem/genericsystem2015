@@ -5,6 +5,7 @@ import java.util.function.Predicate;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.BidirectionalBinding;
+import org.genericsystem.defaults.tools.RxJavaHelpers;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.Tag;
@@ -48,11 +49,11 @@ import org.genericsystem.todomvc.TodoApp.RootDiv.ContentDiv.TodosContent.TodoIte
 import org.genericsystem.todomvc.TodoApp.RootDiv.ContentDiv.TodosContent.TodoItem.ItemContent.TodoCheckBox;
 import org.genericsystem.todomvc.TodoApp.RootDiv.ContentDiv.TodosFooter;
 import org.genericsystem.todomvc.TodoApp.RootDiv.ContentDiv.TodosFooter.ClearCompletedButton;
-import org.genericsystem.todomvc.TodoApp.RootDiv.ContentDiv.TodosFooter.ItemsLeft;
 import org.genericsystem.todomvc.TodoApp.RootDiv.ContentDiv.TodosFooter.Filters;
 import org.genericsystem.todomvc.TodoApp.RootDiv.ContentDiv.TodosFooter.Filters.ModeActiveLink;
 import org.genericsystem.todomvc.TodoApp.RootDiv.ContentDiv.TodosFooter.Filters.ModeAllLink;
 import org.genericsystem.todomvc.TodoApp.RootDiv.ContentDiv.TodosFooter.Filters.ModeCompleteLink;
+import org.genericsystem.todomvc.TodoApp.RootDiv.ContentDiv.TodosFooter.ItemsLeft;
 import org.genericsystem.todomvc.TodoApp.RootDiv.MainFooter;
 import org.genericsystem.todomvc.Todos.Completed;
 
@@ -79,30 +80,31 @@ public class TodoApp extends RootTagImpl {
 		ApplicationServer.startSimpleGenericApp(mainArgs, TodoApp.class, "/todo2/");
 	}
 
-	protected static Property<Predicate<ObservableValue<Generic>>> getModeProperty(Tag tag, Context model) {
+	protected static Property<Predicate<Generic>> getModeProperty(Tag tag, Context model) {
 		return tag.getContextProperty(FILTER_MODE, model);
 	}
 
 	@Override
 	public void init() {
-		addContextAttribute(FILTER_MODE, c -> new SimpleObjectProperty<Predicate<ObservableValue<Generic>>>(ALL));
+		addContextAttribute(FILTER_MODE, c -> new SimpleObjectProperty<Predicate<Generic>>(ALL));
 	}
 
 	public static class StateFilter implements TagSwitcher {
 		@Override
-		public ObservableValue<Boolean> apply(Context context, Tag tag) {
+		public Observable<Boolean> apply(Context context, Tag tag) {
 			Generic todo = context.getGeneric();
 			ObservableValue<Generic> completed = todo.getObservableHolder(todo.getRoot().find(Completed.class));
-			Property<Predicate<ObservableValue<Generic>>> mode = getModeProperty(tag, context);
-			return Bindings.createBooleanBinding(() -> mode.getValue().test(completed), completed, mode);
+			Property<Predicate<Generic>> modeProp = getModeProperty(tag, context);
+			return Observable.combineLatest(RxJavaHelpers.optionalValuesOf(completed), RxJavaHelpers.valuesOf(modeProp),
+					(optCompleted, mode) -> mode.test(optCompleted.isPresent() ? optCompleted.get() : null));
 		}
 	}
 
-	static Predicate<ObservableValue<Generic>> ALL = o -> true;
-	static Predicate<ObservableValue<Generic>> ACTIVE = completedObs -> {
-		return completedObs.getValue() != null ? Boolean.FALSE.equals(completedObs.getValue().getValue()) : true;
+	static Predicate<Generic> ALL = o -> true;
+	static Predicate<Generic> ACTIVE = completedObs -> {
+		return completedObs != null ? Boolean.FALSE.equals(completedObs.getValue()) : true;
 	};
-	static Predicate<ObservableValue<Generic>> COMPLETE = ACTIVE.negate();
+	static Predicate<Generic> COMPLETE = ACTIVE.negate();
 
 	static Predicate<Generic> completed = todo -> {
 		Generic completed = todo.getHolder(todo.getRoot().find(Completed.class));

@@ -1,15 +1,15 @@
 package org.genericsystem.quiz.utils;
 
 import org.genericsystem.common.Generic;
+import org.genericsystem.defaults.tools.RxJavaHelpers;
 import org.genericsystem.quiz.model.Quiz;
 import org.genericsystem.quiz.model.ScoreUserQuiz;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.context.TagSwitcher;
 
-import javafx.beans.binding.Bindings;
+import io.reactivex.Observable;
 import javafx.beans.property.Property;
-import javafx.beans.value.ObservableValue;
 
 public class QuizTagSwitcher {
 
@@ -21,7 +21,7 @@ public class QuizTagSwitcher {
 	public static class QUIZ_NOT_DONE implements TagSwitcher {
 
 		@Override
-		public ObservableValue<Boolean> apply(Context context, Tag tag) {
+		public Observable<Boolean> apply(Context context, Tag tag) {
 			Property<Generic> loggedUser = tag.getLoggedUserProperty(context);
 			Generic quiz = context.getGeneric();
 
@@ -30,9 +30,8 @@ public class QuizTagSwitcher {
 
 			Generic scoreUser = quiz.getLink(context.getRootContext().find(ScoreUserQuiz.class), loggedUser.getValue());
 
-			return Bindings.createBooleanBinding(() -> scoreUser == null, loggedUser);
+			return RxJavaHelpers.optionalValuesOf(loggedUser).map(optUser -> scoreUser == null);
 		}
-
 	}
 
 	// ************* NAVIGATION ENTRE LES PAGES **********************
@@ -40,27 +39,27 @@ public class QuizTagSwitcher {
 	public static class HOME_PAGE implements TagSwitcher {
 
 		@Override
-		public ObservableValue<Boolean> apply(Context context, Tag tag) {
+		public Observable<Boolean> apply(Context context, Tag tag) {
 			Property<String> pageProperty = tag.getContextProperty(PAGE, context);
-			return Bindings.createBooleanBinding(() -> HOME_PAGE.equals(pageProperty.getValue()), pageProperty);
+			return RxJavaHelpers.valuesOf(pageProperty).map(page -> HOME_PAGE.equals(page));
 		}
 	}
 
 	public static class QUESTION_PAGE implements TagSwitcher {
 
 		@Override
-		public ObservableValue<Boolean> apply(Context context, Tag tag) {
+		public Observable<Boolean> apply(Context context, Tag tag) {
 			Property<String> pageProperty = tag.getContextProperty(PAGE, context);
-			return Bindings.createBooleanBinding(() -> QUESTION_PAGE.equals(pageProperty.getValue()), pageProperty);
+			return RxJavaHelpers.valuesOf(pageProperty).map(page -> QUESTION_PAGE.equals(page));
 		}
 	}
 
 	public static class RESULT_PAGE implements TagSwitcher {
 
 		@Override
-		public ObservableValue<Boolean> apply(Context context, Tag tag) {
+		public Observable<Boolean> apply(Context context, Tag tag) {
 			Property<String> pageProperty = tag.getContextProperty(PAGE, context);
-			return Bindings.createBooleanBinding(() -> RESULT_PAGE.equals(pageProperty.getValue()), pageProperty);
+			return RxJavaHelpers.valuesOf(pageProperty).map(page -> RESULT_PAGE.equals(page));
 		}
 	}
 }

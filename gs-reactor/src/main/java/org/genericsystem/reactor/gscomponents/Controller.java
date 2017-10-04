@@ -13,11 +13,8 @@ import io.reactivex.Observable;
 import io.reactivex.subjects.BehaviorSubject;
 import io.reactivex.subjects.ReplaySubject;
 import io.reactivex.subjects.Subject;
-import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
 
@@ -205,12 +202,10 @@ public class Controller {
 	public static class MainSwitcher implements TagSwitcher {
 
 		@Override
-		public ObservableValue<Boolean> apply(Context context, Tag tag) {
+		public Observable<Boolean> apply(Context context, Tag tag) {
 			Controller controller = Controller.get(tag, context);
-			Property<Class<? extends Tag>> classProperty = new SimpleObjectProperty<>();
-			controller.getClassProperty().subscribe(clazz -> classProperty.setValue(clazz));
 			Property<Boolean> activeProperty = controller.getActiveProperty();
-			return Bindings.createBooleanBinding(() -> !activeProperty.getValue() || tag.getClass().equals(classProperty.getValue()), classProperty, activeProperty);
+			return Observable.combineLatest(RxJavaHelpers.valuesOf(activeProperty), controller.getClassProperty(), (active, clazz) -> !active || tag.getClass().equals(clazz));
 		}
 	}
 
@@ -260,40 +255,32 @@ public class Controller {
 	public static class CountTextSwitcher implements TagSwitcher {
 
 		@Override
-		public ObservableValue<Boolean> apply(Context context, Tag tag) {
-			return Controller.get(tag, context).activeProperty;
+		public Observable<Boolean> apply(Context context, Tag tag) {
+			return RxJavaHelpers.valuesOf(Controller.get(tag, context).activeProperty);
 		}
 	}
 
-	// TODO: Dispose subscriptions.
 	public static class PrevSwitcher implements TagSwitcher {
 
 		@Override
-		public ObservableValue<Boolean> apply(Context context, Tag tag) {
-			Property<Boolean> result = new SimpleBooleanProperty();
-			Controller.get(tag, context).hasPrev(tag).subscribe(bool -> result.setValue(bool));
-			return result;
+		public Observable<Boolean> apply(Context context, Tag tag) {
+			return Controller.get(tag, context).hasPrev(tag);
 		}
-
 	}
 
 	public static class NextSwitcher implements TagSwitcher {
 
 		@Override
-		public ObservableValue<Boolean> apply(Context context, Tag tag) {
-			Property<Boolean> result = new SimpleBooleanProperty();
-			Controller.get(tag, context).hasNext(tag).subscribe(bool -> result.setValue(bool));
-			return result;
+		public Observable<Boolean> apply(Context context, Tag tag) {
+			return Controller.get(tag, context).hasNext(tag);
 		}
 	}
 
 	public static class LastSwitcher implements TagSwitcher {
 
 		@Override
-		public ObservableValue<Boolean> apply(Context context, Tag tag) {
-			Property<Boolean> result = new SimpleBooleanProperty();
-			Controller.get(tag, context).hasNext(tag).subscribe(bool -> result.setValue(!bool));
-			return result;
+		public Observable<Boolean> apply(Context context, Tag tag) {
+			return Controller.get(tag, context).hasNext(tag).map(bool -> !bool);
 		}
 	}
 }

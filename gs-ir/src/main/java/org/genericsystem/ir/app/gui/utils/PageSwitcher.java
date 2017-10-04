@@ -1,12 +1,12 @@
 package org.genericsystem.ir.app.gui.utils;
 
+import org.genericsystem.defaults.tools.RxJavaHelpers;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.context.TagSwitcher;
 
-import javafx.beans.binding.Bindings;
+import io.reactivex.Observable;
 import javafx.beans.property.Property;
-import javafx.beans.value.ObservableValue;
 
 public class PageSwitcher {
 
@@ -16,17 +16,17 @@ public class PageSwitcher {
 
 	public static class HOME_PAGE implements TagSwitcher {
 		@Override
-		public ObservableValue<Boolean> apply(Context context, Tag tag) {
+		public Observable<Boolean> apply(Context context, Tag tag) {
 			Property<String> pageProperty = tag.getContextProperty(PAGE, context);
-			return Bindings.createBooleanBinding(() -> HOME_PAGE.equals(pageProperty.getValue()), pageProperty);
+			return RxJavaHelpers.optionalValuesOf(pageProperty).map(opt -> opt.isPresent() && HOME_PAGE.equals(opt.get()));
 		}
 	}
 
 	public static class FILTERS_STATISTICS implements TagSwitcher {
 		@Override
-		public ObservableValue<Boolean> apply(Context context, Tag tag) {
+		public Observable<Boolean> apply(Context context, Tag tag) {
 			Property<String> pageProperty = tag.getContextProperty(PAGE, context);
-			return Bindings.createBooleanBinding(() -> FILTERS_STATISTICS.equals(pageProperty.getValue()), pageProperty);
+			return RxJavaHelpers.optionalValuesOf(pageProperty).map(opt -> opt.isPresent() && FILTERS_STATISTICS.equals(opt.get()));
 		}
 	}
 
