@@ -1,5 +1,6 @@
 package org.genericsystem.cv.classifier;
 
+import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -11,8 +12,18 @@ import java.util.stream.StreamSupport;
 import org.genericsystem.cv.Img;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 
 public class DocFields implements Iterable<DocField> {
+
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+	private static final String FIELDS = "fields";
+
 	private List<DocField> fields;
 
 	public DocFields() {
@@ -27,6 +38,26 @@ public class DocFields implements Iterable<DocField> {
 		DocFields fields = new DocFields();
 		fields.addFields(rects);
 		return fields;
+	}
+
+	public static DocFields of(JsonObject jsonFields) {
+		List<DocField> list = new ArrayList<>();
+		JsonArray array = jsonFields.getJsonArray(FIELDS);
+		array.forEach(field -> {
+			try {
+				list.add((DocField) field);
+			} catch (Exception e) {
+				logger.debug("Unable to cast {} as DocField ({}). Using Json.decodeValue instead.", field, e.getMessage());
+				DocField f = Json.decodeValue(((JsonObject) field).encode(), DocField.class);
+				list.add(f);
+			}
+		});
+		DocFields fields = new DocFields(list);
+		return fields;
+	}
+
+	public JsonObject toJsonObject() {
+		return new JsonObject().put(FIELDS, fields);
 	}
 
 	public void addFields(List<Rect> rects) {
