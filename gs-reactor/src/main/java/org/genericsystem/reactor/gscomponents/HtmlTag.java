@@ -4,6 +4,11 @@ import org.genericsystem.reactor.annotations.TagName;
 
 public class HtmlTag {
 
+	@TagName(TagName.BR)
+	public static class HtmlBr extends TagImpl {
+
+	}
+
 	@TagName(TagName.BUTTON)
 	public static class HtmlButton extends TagImpl {
 
@@ -16,6 +21,16 @@ public class HtmlTag {
 
 	@TagName(TagName.DIV)
 	public static class HtmlDiv extends TagImpl {
+
+	}
+
+	@TagName(TagName.FOOTER)
+	public static class HtmlFooter extends TagImpl {
+
+	}
+
+	@TagName(TagName.HEADER)
+	public static class HtmlHeader extends TagImpl {
 
 	}
 
@@ -60,11 +75,6 @@ public class HtmlTag {
 		}
 	}
 
-	@TagName(TagName.BR)
-	public static class HtmlBr extends TagImpl {
-
-	}
-
 	@TagName(TagName.LI)
 	public static class HtmlLi extends TagImpl {
 
@@ -82,6 +92,11 @@ public class HtmlTag {
 
 	@TagName(TagName.SPAN)
 	public static class HtmlSpan extends TagImpl {
+
+	}
+
+	@TagName(TagName.STRONG)
+	public static class HtmlStrong extends TagImpl {
 
 	}
 
