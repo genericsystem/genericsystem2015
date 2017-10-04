@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.lang.invoke.MethodHandles;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
 
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.common.Generic;
@@ -66,10 +67,9 @@ import org.genericsystem.security.model.User.Salt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javafx.beans.binding.Bindings;
+import io.reactivex.Observable;
 import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 
 @Style(name = "flex", value = "1 1 0%")
 @Style(name = "overflow", value = "hidden")
@@ -137,14 +137,13 @@ public class InstanceEditor extends FlexDiv implements SelectionDefaults, Steppe
 		@Override
 		public void init() {
 			initValueProperty(context -> context.getGenerics()[2].getLink(context.getGenerics()[1], context.getGeneric()) != null ? true : false);
-			addContextAttribute("exists", context -> {
-				ObservableValue<Generic> observableLink = context.getGenerics()[2].getObservableLink(context.getGenerics()[1], context.getGeneric());
-				ObservableValue<Boolean> exists = Bindings.createBooleanBinding(() -> observableLink.getValue() != null ? true : false, observableLink);
-				exists.addListener((o, v, nva) -> {
+			addPrefixBinding(context -> {
+				Observable<Optional<Generic>> observableLink = context.getGenerics()[2].getObservableLink(context.getGenerics()[1], context.getGeneric());
+				Observable<Boolean> exists = observableLink.map(opt -> opt.isPresent());
+				context.getHtmlDomNode(this).getDisposables().add(exists.subscribe(bool -> {
 					if (!context.isDestroyed())
-						getConvertedValueProperty(context).setValue(nva);
-				});
-				return exists;
+						getConvertedValueProperty(context).setValue(bool);
+				}));
 			});
 			addConvertedValueChangeListener((context, nva) -> {
 				if (Boolean.TRUE.equals(nva))

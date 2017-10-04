@@ -12,7 +12,6 @@ import org.genericsystem.security.model.UserRole;
 
 import io.reactivex.Observable;
 import javafx.beans.property.Property;
-import javafx.beans.value.ObservableValue;
 
 public interface TagSwitcher extends BiFunction<Context, Tag, Observable<Boolean>> {
 
@@ -50,8 +49,12 @@ public interface TagSwitcher extends BiFunction<Context, Tag, Observable<Boolean
 		@Override
 		public Observable<Boolean> apply(Context context, Tag tag) {
 			Property<Generic> loggedUserProperty = tag.getLoggedUserProperty(context);
-			ObservableValue<Generic> adminObservable = context.find(Admin.class).getObservableLink(context.find(UserRole.class), loggedUserProperty.getValue());
-			return RxJavaHelpers.optionalValuesOf(loggedUserProperty).map(opt -> opt.isPresent() && adminObservable.getValue() != null);
+			return RxJavaHelpers.optionalValuesOf(loggedUserProperty).map(opt -> {
+				if (!opt.isPresent())
+					return false;
+				Generic admin = context.find(Admin.class).getLink(context.find(UserRole.class), opt.get());
+				return admin != null;
+			});
 		}
 	}
 }

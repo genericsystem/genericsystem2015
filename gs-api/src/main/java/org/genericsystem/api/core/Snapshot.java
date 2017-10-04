@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Predicate;
@@ -347,6 +348,33 @@ public interface Snapshot<T> extends Iterable<T> {
 						return new TaggedElement<>(acc.element, false);
 					}
 				}).filter(tagElt -> tagElt.tag).map(tagElt -> Collections.unmodifiableSet(tagElt.element));
+	}
+
+	/**
+	 * Returns an {@link Observable} emitting a {@link List} representing the Snapshot after each change.
+	 * 
+	 * The emitted lists contain no duplicates.
+	 * 
+	 * If {@link #getComparator()} provides a {@link Comparator} to use for this Snapshot, the emitted list
+	 * is ordered with the given comparator.
+	 * 
+	 * @return An {@link Observable} emitting a {@link List} representing the Snapshot after each change.
+	 */
+	default Observable<List<T>> listOnChanged() {
+		return setOnChanged().map(set -> Collections.unmodifiableList(new ArrayList<>(set)));
+	}
+
+	/**
+	 * Returns an {@link Observable} emitting {@link Optional}s with the first element of the Snapshot.
+	 * 
+	 * Emits an Optional containing the first element of the Snapshot when that element changes.
+	 * Emits an empty Optional if the Snapshot is empty.
+	 * 
+	 * @return
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	default Observable<Optional<T>> firstOnChanged() {
+		return (Observable) listOnChanged().map(list -> list.isEmpty() ? Optional.empty() : Optional.of(list.get(0))).distinctUntilChanged();
 	}
 
 	/**

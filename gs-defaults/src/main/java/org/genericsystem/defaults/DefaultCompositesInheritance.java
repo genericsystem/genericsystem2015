@@ -3,6 +3,7 @@ package org.genericsystem.defaults;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -15,8 +16,6 @@ import org.genericsystem.defaults.DefaultConfig.NonHeritableProperty;
 import org.genericsystem.defaults.tools.InheritanceComputer;
 
 import io.reactivex.Observable;
-import javafx.beans.binding.Bindings;
-import javafx.beans.value.ObservableValue;
 
 /**
  * @author Nicolas Feybesse
@@ -32,8 +31,8 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 	}
 
 	@SuppressWarnings("unchecked")
-	default ObservableValue<T> getObservableAttribute(Serializable value, T... targets) {
-		return Bindings.valueAt(getAttributes(value, targets).toObservableList(), 0);
+	default Observable<Optional<T>> getObservableAttribute(Serializable value, T... targets) {
+		return getAttributes(value, targets).firstOnChanged();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -43,8 +42,8 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 	}
 
 	@SuppressWarnings("unchecked")
-	default ObservableValue<T> getObservableAttribute(T... targets) {
-		return Bindings.valueAt(getAttributes(targets).toObservableList(), 0);
+	default Observable<Optional<T>> getObservableAttribute(T... targets) {
+		return getAttributes(targets).firstOnChanged();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -64,7 +63,6 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 		return getAttributes(getRoot().getMetaAttribute()).filter(new IndexFilter(FiltersBuilder.COMPOSITE_HAS_COMPONENTS, (Object[]) addThisToTargets(targets)));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	default Snapshot<T> getAttributes(int pos) {
 		return getAttributes().filter(new IndexFilter(FiltersBuilder.HAS_COMPONENT_AT_POS, this, pos));
@@ -104,8 +102,8 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 	}
 
 	@SuppressWarnings("unchecked")
-	default ObservableValue<T> getObservableHolder(T attribute, Serializable value, T... targets) {
-		return Bindings.valueAt(getHolders(attribute, value, targets).toObservableList(), 0);
+	default Observable<Optional<T>> getObservableHolder(T attribute, Serializable value, T... targets) {
+		return getHolders(attribute, value, targets).firstOnChanged();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -115,8 +113,8 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 	}
 
 	@SuppressWarnings("unchecked")
-	default ObservableValue<T> getObservableHolder(T attribute, T... targets) {
-		return Bindings.valueAt(getHolders(attribute, targets).toObservableList(), 0);
+	default Observable<Optional<T>> getObservableHolder(T attribute, T... targets) {
+		return getHolders(attribute, targets).firstOnChanged();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -170,8 +168,8 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 	}
 
 	@SuppressWarnings("unchecked")
-	default ObservableValue<T> getObservableRelation(Serializable value, T... targets) {
-		return Bindings.valueAt(getRelations(value, targets).toObservableList(), 0);
+	default Observable<Optional<T>> getObservableRelation(Serializable value, T... targets) {
+		return getRelations(value, targets).firstOnChanged();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -181,8 +179,8 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 	}
 
 	@SuppressWarnings("unchecked")
-	default ObservableValue<T> getObservableRelation(T... targets) {
-		return Bindings.valueAt(getRelations(targets).toObservableList(), 0);
+	default Observable<Optional<T>> getObservableRelation(T... targets) {
+		return getRelations(targets).firstOnChanged();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -216,8 +214,8 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 	}
 
 	@SuppressWarnings("unchecked")
-	default ObservableValue<T> getObservableLink(T relation, Serializable value, T... targets) {
-		return Bindings.valueAt(getLinks(relation, value, targets).toObservableList(), 0);
+	default Observable<Optional<T>> getObservableLink(T relation, Serializable value, T... targets) {
+		return getLinks(relation, value, targets).firstOnChanged();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -227,8 +225,8 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 	}
 
 	@SuppressWarnings("unchecked")
-	default ObservableValue<T> getObservableLink(T relation, T... targets) {
-		return Bindings.valueAt(getLinks(relation, targets).toObservableList(), 0);
+	default Observable<Optional<T>> getObservableLink(T relation, T... targets) {
+		return getLinks(relation, targets).firstOnChanged();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -262,11 +260,8 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 	}
 
 	@SuppressWarnings("unchecked")
-	default ObservableValue<Serializable> getObservableValue(T attribute, Serializable value, T... targets) {
-		return Bindings.createObjectBinding(() -> {
-			ObservableValue<T> holder = getObservableHolder(attribute, value, targets);
-			return holder.getValue() != null ? holder.getValue().getValue() : null;
-		}, getObservableHolder(attribute, value, targets));
+	default Observable<Optional<Serializable>> getObservableValue(T attribute, Serializable value, T... targets) {
+		return getObservableHolder(attribute, value, targets).map(optHolder -> optHolder.isPresent() ? Optional.of(optHolder.get().getValue()) : Optional.empty());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -277,11 +272,8 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 	}
 
 	@SuppressWarnings("unchecked")
-	default ObservableValue<Serializable> getObservableValue(T attribute, T... targets) {
-		return Bindings.createObjectBinding(() -> {
-			ObservableValue<T> holder = getObservableHolder(attribute, targets);
-			return holder.getValue() != null ? holder.getValue().getValue() : null;
-		}, getObservableHolder(attribute, targets));
+	default Observable<Optional<Serializable>> getObservableValue(T attribute, T... targets) {
+		return getObservableHolder(attribute, targets).map(optHolder -> optHolder.isPresent() ? Optional.of(optHolder.get().getValue()) : Optional.empty());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -373,11 +365,8 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 	}
 
 	@SuppressWarnings("unchecked")
-	default ObservableValue<T> getObservableLinkTargetComponent(T relation, T... targets) {
-		return Bindings.createObjectBinding(() -> {
-			ObservableValue<T> link = getObservableLink(relation, targets);
-			return link.getValue() != null ? link.getValue().getTargetComponent() : null;
-		}, getObservableLink(relation, targets));
+	default Observable<Optional<T>> getObservableLinkTargetComponent(T relation, T... targets) {
+		return getObservableLink(relation, targets).map(optLink -> optLink.isPresent() ? Optional.of(optLink.get().getTargetComponent()) : Optional.empty());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -387,10 +376,7 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 	}
 
 	@SuppressWarnings("unchecked")
-	default ObservableValue<T> getObservablecLinkTargetComponent(T relation, Serializable value, T... targets) {
-		return Bindings.createObjectBinding(() -> {
-			ObservableValue<T> link = getObservableLink(relation, value, targets);
-			return link.getValue() != null ? link.getValue().getTargetComponent() : null;
-		}, getObservableLink(relation, value, targets));
+	default Observable<Optional<T>> getObservablecLinkTargetComponent(T relation, Serializable value, T... targets) {
+		return getObservableLink(relation, value, targets).map(optLink -> optLink.isPresent() ? Optional.of(optLink.get().getTargetComponent()) : Optional.empty());
 	}
 }

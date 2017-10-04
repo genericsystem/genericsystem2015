@@ -1,10 +1,10 @@
 package org.genericsystem.todomvc;
 
+import java.util.Optional;
 import java.util.function.Predicate;
 
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
-import org.genericsystem.defaults.tools.BidirectionalBinding;
 import org.genericsystem.defaults.tools.RxJavaHelpers;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.ReactorStatics;
@@ -63,7 +63,6 @@ import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableObjectValue;
-import javafx.beans.value.ObservableValue;
 
 /**
  * @author Nicolas Feybesse
@@ -93,9 +92,9 @@ public class TodoApp extends RootTagImpl {
 		@Override
 		public Observable<Boolean> apply(Context context, Tag tag) {
 			Generic todo = context.getGeneric();
-			ObservableValue<Generic> completed = todo.getObservableHolder(todo.getRoot().find(Completed.class));
+			Observable<Optional<Generic>> completed = todo.getObservableHolder(todo.getRoot().find(Completed.class));
 			Property<Predicate<Generic>> modeProp = getModeProperty(tag, context);
-			return Observable.combineLatest(RxJavaHelpers.optionalValuesOf(completed), RxJavaHelpers.valuesOf(modeProp),
+			return Observable.combineLatest(completed, RxJavaHelpers.valuesOf(modeProp),
 					(optCompleted, mode) -> mode.test(optCompleted.isPresent() ? optCompleted.get() : null));
 		}
 	}
@@ -161,6 +160,7 @@ public class TodoApp extends RootTagImpl {
 
 					@Override
 					public void init() {
+						// Initialization of the COMPLETED property with the real state of the item.
 						addContextAttribute(COMPLETED, context -> new SimpleBooleanProperty(completed.test(context.getGeneric())));
 						bindOptionalStyleClass(COMPLETED, COMPLETED);
 					}
@@ -179,16 +179,13 @@ public class TodoApp extends RootTagImpl {
 							public void init() {
 								addPrefixBinding(todo -> {
 									Property<Boolean> completedProperty = getContextProperty(COMPLETED, todo);
-									ObservableValue<Generic> completed = todo.getGeneric().getObservableHolder(todo.getGeneric().getRoot().find(Completed.class));
-									Property<Generic> completedGenericProperty = new SimpleObjectProperty<>(completed.getValue());
-									completed.addListener((ov, v, nv) -> completedGenericProperty.setValue(nv));
-									BidirectionalBinding.bind(completedProperty, completedGenericProperty, b -> todo.getGeneric().isAlive() ? todo.getGeneric().setHolder(todo.find(Completed.class), b) : null,
-											g -> g == null ? false : (Boolean) g.getValue());
-								});
-								addPrefixBinding(todo -> {
-									if (Boolean.TRUE.equals(getContextObservableValue(COMPLETED, todo).getValue())) {
-										getDomNodeAttributes(todo).put(ReactorStatics.CHECKED, ReactorStatics.CHECKED);
-									}
+									Observable<Boolean> completed = todo.getGeneric().getObservableHolder(todo.getGeneric().getRoot().find(Completed.class))
+											.map(opt -> opt.isPresent() && (Boolean) opt.get().getValue()).distinctUntilChanged();
+									todo.getHtmlDomNode(this).getDisposables().add(completed.subscribe(bool -> completedProperty.setValue(bool)));
+									completedProperty.addListener((o, v, nv) -> {
+										if (todo.getGeneric().isAlive())
+											todo.getGeneric().setHolder(todo.find(Completed.class), nv);
+									});
 								});
 								bindOptionalBiDirectionalAttribute(COMPLETED, ReactorStatics.CHECKED, ReactorStatics.CHECKED);
 							}
