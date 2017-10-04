@@ -1,13 +1,10 @@
 package org.genericsystem.ir;
 
-import java.io.IOException;
 import java.lang.invoke.MethodHandles;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 
-import org.genericsystem.cv.model.ModelTools;
+import org.genericsystem.cv.classifier.ImageAnnotator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,11 +12,11 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 
-public class CopyToResourcesVerticle extends ActionVerticle {
+public class AnnotateImageVerticle extends ActionVerticle {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-	public static final String ACTION = "copyToResources";
+	public static final String ACTION = "annotateImage";
 
 	@Override
 	public String getAction() {
@@ -29,13 +26,14 @@ public class CopyToResourcesVerticle extends ActionVerticle {
 	@Override
 	protected void handle(Future<Object> future, JsonObject task) {
 		Path filePath = Paths.get(DistributedVerticle.BASE_PATH + task.getString(DistributedVerticle.FILENAME));
-		String filename = ModelTools.generateFileName(filePath);
-		try {
-			Files.copy(filePath, Paths.get(DistributedVerticle.RESOURCES_FOLDER).resolve(filename), StandardCopyOption.REPLACE_EXISTING);
+		JsonObject fields = task.getJsonObject(DistributedVerticle.JSON_OBJECT);
+		Path savedPath = ImageAnnotator.annotateImage(filePath, Paths.get(DistributedVerticle.RESOURCES_FOLDER), fields);
+
+		if (savedPath.toFile().exists())
 			future.complete();
-		} catch (IOException e) {
-			future.fail(e);
-		}
+		else
+			future.fail("An error has occured while saving file " + filePath.toString());
+
 	}
 
 	@Override

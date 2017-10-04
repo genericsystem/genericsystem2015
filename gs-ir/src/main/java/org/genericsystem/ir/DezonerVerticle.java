@@ -46,7 +46,7 @@ public class DezonerVerticle extends ActionPersistentVerticle {
 	@Override
 	protected void handleResult(AsyncResult<Object> res, JsonObject task) {
 		if (res.succeeded()) {
-			// TODO: add another task that will annotate the image with the new zones (draw rect + nums) and copy it to the resources folder
+			addTask(task.getString(DistributedVerticle.FILENAME), (JsonObject) res.result(), AnnotateImageVerticle.ACTION);
 			addTask(task.getString(DistributedVerticle.FILENAME), (JsonObject) res.result(), OcrWorkerVerticle.ACTION);
 		} else {
 			logger.info(String.format("No zones defined for file {}.", task.getString(DistributedVerticle.FILENAME)), res.cause());

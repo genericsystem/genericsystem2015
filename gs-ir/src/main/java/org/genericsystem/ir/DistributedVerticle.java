@@ -57,6 +57,8 @@ public class DistributedVerticle extends AbstractVerticle {
 		vertx.deployVerticle(new DeskewerVerticle());
 		vertx.deployVerticle(new ClassifierUsingFieldsVerticle());
 		vertx.deployVerticle(new NewClassCreatorVerticle());
+		vertx.deployVerticle(new CopyToResourcesVerticle());
+		vertx.deployVerticle(new AnnotateImageVerticle());
 	}
 
 	public static void main(String[] args) {

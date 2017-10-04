@@ -64,12 +64,18 @@ public class DocFields implements Iterable<DocField> {
 		fields = rects.stream().map(rect -> new DocField(counter.incrementAndGet(), rect)).collect(Collectors.toList());
 	}
 
+	public Img annotateImage(final Img img, final double fontScale, final Scalar color, final int thickness) {
+		Img annotated = new Img(img.getSrc(), true);
+		stream().forEach(field -> field.annotateImage(annotated, fontScale, color, thickness));
+		return annotated;
+	}
+
 	public void drawOcrPerspectiveInverse(Img display, Scalar color, int thickness) {
 		consolidatedFieldStream().forEach(field -> field.drawOcrPerspectiveInverse(display, color, thickness));
 	}
 
 	public void drawConsolidated(Img stabilizedDisplay) {
-		consolidatedFieldStream().forEach(field -> field.draw(stabilizedDisplay));
+		consolidatedFieldStream().forEach(field -> field.drawRect(stabilizedDisplay, new Scalar(0, 0, 255), 2));
 	}
 
 	public void consolidateOcr(Img rootImg) {

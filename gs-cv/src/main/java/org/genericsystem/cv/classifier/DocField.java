@@ -74,8 +74,12 @@ public class DocField {
 		results.release();
 	}
 
-	public void draw(Img img) {
-		Imgproc.rectangle(img.getSrc(), rect.tl(), rect.br(), new Scalar(0, 0, 255));
+	public void drawRect(Img img, Scalar color, int thickness) {
+		Imgproc.rectangle(img.getSrc(), rect.tl(), rect.br(), color, thickness);
+	}
+
+	public void writeNum(Img img, String text, double fontScale, Scalar color, int thickness) {
+		Imgproc.putText(img.getSrc(), text, new Point(rect.tl().x, rect.br().y), Core.FONT_HERSHEY_PLAIN, fontScale, color, thickness);
 	}
 
 	public Rect getLargeRect(final Img imgRoot, final double deltaW, final double deltaH) {
@@ -86,6 +90,11 @@ public class DocField {
 		Point br = new Point(rect.br().x + adjustW > imgRoot.width() ? imgRoot.width() : rect.br().x + adjustW, rect.br().y + adjustH > imgRoot.height() ? imgRoot.height() : rect.br().y + adjustH);
 
 		return new Rect(tl, br);
+	}
+
+	public void annotateImage(Img annotated, double fontScale, Scalar color, int thickness) {
+		drawRect(annotated, color, thickness);
+		writeNum(annotated, String.valueOf(num), fontScale, color, thickness);
 	}
 
 	// Booleans
