@@ -42,6 +42,7 @@ public interface Snapshot<T> extends Iterable<T> {
 	/**
 	 * Returns an empty Snapshot.
 	 * 
+	 * @param <T> Type of the elements of the Snapshot.
 	 * @return an empty Snapshot.
 	 */
 	public static<T> Snapshot<T> empty() {
@@ -56,6 +57,7 @@ public interface Snapshot<T> extends Iterable<T> {
 	 * Returns a Snapshot containing only an element.
 	 * 
 	 * @param element The returned Snapshot’s element.
+	 * @param <T> Type of the elements of the Snapshot.
 	 * @return		  A Snapshot with an element.
 	 */
 	public static<T> Snapshot<T> singleton(T element) {
@@ -71,6 +73,7 @@ public interface Snapshot<T> extends Iterable<T> {
 	 * Returns a Snapshot containing the elements of the given Collection.
 	 * 
 	 * @param elements The returned Snapshot’s elements.
+	 * @param <T> Type of the elements of the Snapshot.
 	 * @return		   A Snapshot with the given elements.
 	 */
 	public static<T> Snapshot<T> fromCollection(Collection<T> elements) {
@@ -381,7 +384,7 @@ public interface Snapshot<T> extends Iterable<T> {
 	 * 
 	 * If the Snapshot’s elements implement {@link Comparable}, the new Snapshot uses
 	 * this implementation to sort the elements. Otherwise, the elements are sorted according 
-	 * to the Strings returned by {@link #toString()}, using the {@link Collator} for the current
+	 * to the Strings returned by toString(), using the {@link Collator} for the current
 	 * default Locale.
 	 * 
 	 * @return			 A Snapshot sorted with the natural order.
@@ -540,6 +543,7 @@ public interface Snapshot<T> extends Iterable<T> {
 	 * is kept for the returned Snapshot.
 	 * 
 	 * @param mapper	The transformation to apply to the Snapshot’s elements.
+	 * @param <U>		Type of the elements of the returned Snapshot.
 	 * @return			A Snapshot containing the result of the application of the given function
 	 * 					to each Snapshot element.
 	 */
@@ -587,7 +591,7 @@ public interface Snapshot<T> extends Iterable<T> {
 	 * Returns an ObservableList representing the Snapshot’s state.
 	 * 
 	 * Deprecated because is does not allow disposal of the subscriptions 
-	 * to {@link #getAdds()} and {@link getRemovals()}.
+	 * to {@link #getAdds()} and {@link #getRemovals()}.
 	 * 
 	 * @return an ObservableList representing this Snapshot.
 	 */
@@ -628,7 +632,7 @@ public interface Snapshot<T> extends Iterable<T> {
 	 * Used by {@link Snapshot#getIndexedElements()} to return both an added or removed
 	 * element with the corresponding index.
 	 * 
-	 * @param <T>
+	 * @param <T>	Type of the indexed elements.
 	 */
 	public static class IndexedElement<T> {
 		private final int index;
