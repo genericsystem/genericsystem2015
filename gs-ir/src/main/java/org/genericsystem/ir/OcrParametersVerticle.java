@@ -14,6 +14,7 @@ import io.vertx.core.json.JsonObject;
  * 
  * @author Pierrik Lassalas
  */
+@Deprecated
 public class OcrParametersVerticle extends ActionPersistentVerticle {
 
 	public static final String ACTION = "ocr";
