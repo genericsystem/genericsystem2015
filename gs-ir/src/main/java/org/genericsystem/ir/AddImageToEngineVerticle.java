@@ -36,14 +36,16 @@ public class AddImageToEngineVerticle extends ActionPersistentVerticle {
 		if (result)
 			future.complete();
 		else
-			future.fail("An error has occured while saving file " + imagePath);
+			future.fail(String.format("An error has occured while saving file %s in Generic System ", imagePath));
 	}
 
 	@Override
 	protected void handleResult(AsyncResult<Object> res, JsonObject task) {
-		if (res.succeeded())
-			addTask(task.getString(DistributedVerticle.FILENAME), DezonerVerticle.ACTION);
-		else
+		if (res.succeeded()) {
+			String filename = task.getString(DistributedVerticle.FILENAME);
+			addTask(filename, CopyToResourcesVerticle.ACTION);
+			addTask(filename, DezonerVerticle.ACTION);
+		} else
 			throw new IllegalStateException("An error has occurred while saving file " + task.getString(DistributedVerticle.FILENAME), res.cause());
 	}
 }

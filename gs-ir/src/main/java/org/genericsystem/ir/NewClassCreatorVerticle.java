@@ -40,8 +40,6 @@ public class NewClassCreatorVerticle extends ActionVerticle {
 			Path path = Paths.get((String) res.result());
 			Path relative = Paths.get(DistributedVerticle.BASE_PATH).relativize(path);
 			logger.info("Created new class {} for file {}", relative.getParent(), path.getFileName());
-			// TODO: go to cropper / Layout analysis?
-			// TODO: Ask to persist the new docClass?
 			addTask(relative.toString(), AddImageToEngineVerticle.ACTION);
 		} else
 			throw new IllegalStateException("Error while creating a new class for image " + task.getString(DistributedVerticle.FILENAME), res.cause());
