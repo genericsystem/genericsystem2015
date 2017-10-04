@@ -37,9 +37,12 @@ public class NewClassCreatorVerticle extends ActionVerticle {
 	@Override
 	protected void handleResult(AsyncResult<Object> res, JsonObject task) {
 		if (res.succeeded()) {
-			System.out.println("ok");
+			Path path = Paths.get((String) res.result());
+			Path relative = Paths.get(DistributedVerticle.BASE_PATH).relativize(path);
+			logger.info("Created new class {} for file {}", relative.getParent(), path.getFileName());
 			// TODO: go to cropper / Layout analysis?
-			// Ask to persist the new docClass?
+			// TODO: Ask to persist the new docClass?
+			addTask(relative.toString(), AddImageToEngineVerticle.ACTION);
 		} else
 			throw new IllegalStateException("Error while creating a new class for image " + task.getString(DistributedVerticle.FILENAME), res.cause());
 	}
