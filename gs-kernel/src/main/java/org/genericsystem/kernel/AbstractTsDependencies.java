@@ -151,8 +151,10 @@ abstract class AbstractTsDependencies {
 	}
 
 	private final Map<Generic, Generic> map = new ConcurrentHashMap<>();
-	private final Subject<Generic> adds = ReplaySubject.create();
-	private final Subject<Generic> removals = ReplaySubject.create();
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private final Subject<Generic> adds = (Subject) ReplaySubject.create().toSerialized();
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private final Subject<Generic> removals = (Subject) ReplaySubject.create().toSerialized();
 
 	public Stream<Generic> stream(long ts) {
 		return indexesTree.getIndex(new ArrayList<>(), ts).stream(ts);
