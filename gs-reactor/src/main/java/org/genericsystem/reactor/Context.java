@@ -145,6 +145,12 @@ public class Context {
 		tagData.setSubContexts(subContexts);
 	}
 
+	boolean addSubContext(Tag tag, Context subContext) {
+		if (getSubContexts(tag).contains(subContext))
+			return false;
+		return getSubContexts(tag).add(subContext);
+	}
+
 	public void register(HtmlDomNode htmlDomNode) {
 		TagData domNodeTagData = tagDataMap.get(htmlDomNode.getTag());
 		assert domNodeTagData == null || domNodeTagData.getHtmlDomNode() == null;

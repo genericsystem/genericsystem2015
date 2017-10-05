@@ -144,8 +144,8 @@ public class HtmlDomNode {
 				disposables.add(subContexts.subscribe(sc -> {
 					Context subContext = sc.getContext();
 					if (sc.getCreate()) {
-						context.getSubContexts(childTag).add(subContext);
-						childTag.createNode(this, subContext).init(computeIndex(sc.getIndex(), childTag));
+						if (context.addSubContext(childTag, subContext))
+							childTag.createNode(this, subContext).init(computeIndex(sc.getIndex(), childTag));
 					} else {
 						subContext.removeTag(childTag);
 						if (sc.getIndex() == -1) {// SubContext removed
@@ -156,7 +156,7 @@ public class HtmlDomNode {
 						}
 						context.getSubContexts(childTag).remove(subContext);
 					}
-				}, e -> logger.error("Error on filtered contexts subscriber. (ext)", e)));
+				}, e -> logger.error("Error on filtered contexts subscriber.", e)));
 			}
 		} else if (context.getHtmlDomNode(childTag) == null)
 			childTag.createNode(this, context).init(computeIndex(0, childTag));
