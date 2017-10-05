@@ -17,7 +17,7 @@ import org.genericsystem.reactor.annotations.Stepper;
 import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.appserver.Script;
-import org.genericsystem.reactor.context.ObservableListExtractor;
+import org.genericsystem.reactor.context.ForEachExtractor;
 import org.genericsystem.reactor.gscomponents.Controller;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlDiv;
@@ -72,13 +72,13 @@ public class SwitchApp extends RootTagImpl {
 	}
 
 	@Step(next = SwitchDiv5.class)
-	@ForEach(ObservableListExtractor.INSTANCES.class)
+	@ForEach(ForEachExtractor.INSTANCES.class)
 	public static class SwitchDiv4 extends StepDiv {
 
 	}
 
 	@Step(next = SwitchDiv5.class)
-	@ForEach(ObservableListExtractor.INSTANCES.class)
+	@ForEach(ForEachExtractor.INSTANCES.class)
 	public static class SwitchDiv5 extends StepDiv {
 
 	}

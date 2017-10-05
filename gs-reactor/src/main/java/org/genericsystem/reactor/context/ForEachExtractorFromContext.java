@@ -9,6 +9,6 @@ import org.genericsystem.reactor.Tag;
 
 import io.reactivex.Observable;
 
-public interface ObservableListExtractorFromContext extends BiFunction<Context, Tag, Observable<Snapshot<Generic>>> {
+public interface ForEachExtractorFromContext extends BiFunction<Context, Tag, Observable<Snapshot<Generic>>> {
 
 }

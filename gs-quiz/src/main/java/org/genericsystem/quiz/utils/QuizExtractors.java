@@ -11,9 +11,9 @@ import org.genericsystem.quiz.model.Question;
 import org.genericsystem.quiz.model.ScoreUserQuiz;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.context.ObservableListExtractor;
-import org.genericsystem.reactor.context.ObservableListExtractorFromContext;
-import org.genericsystem.reactor.context.ObservableValueSelector;
+import org.genericsystem.reactor.context.ForEachExtractor;
+import org.genericsystem.reactor.context.ForEachExtractorFromContext;
+import org.genericsystem.reactor.context.GenericSelector;
 import org.genericsystem.reactor.context.TagSwitcher;
 
 import io.reactivex.Observable;
@@ -21,7 +21,7 @@ import javafx.beans.property.Property;
 
 public class QuizExtractors {
 
-	public static class ANSWERS_EXTRACTOR implements ObservableListExtractor {
+	public static class ANSWERS_EXTRACTOR implements ForEachExtractor {
 		// generics[0] est l'element courant.
 		// Le getRoot permet d'utiliser la methode find (Le root donne accès à tous les éléments du context)
 		// TODO Rendre la méthode générique -> lui faire trouver les enfants d'un generic ssi il y a un unique enfant
@@ -31,14 +31,14 @@ public class QuizExtractors {
 		}
 	}
 
-	public static class QUESTIONS_EXTRACTOR implements ObservableListExtractor {
+	public static class QUESTIONS_EXTRACTOR implements ForEachExtractor {
 		@Override
 		public Observable<Snapshot<Generic>> apply(Generic[] generics) {
 			return Observable.just(generics[0].getHolders(generics[0].getRoot().find(Question.class)));
 		}
 	}
 
-	public static class DESCRIPTION_EXTRACTOR implements ObservableListExtractor {
+	public static class DESCRIPTION_EXTRACTOR implements ForEachExtractor {
 
 		@Override
 		public Observable<Snapshot<Generic>> apply(Generic[] generics) {
@@ -47,7 +47,7 @@ public class QuizExtractors {
 
 	}
 
-	public static class USER_EXTRACTOR implements ObservableValueSelector {
+	public static class USER_EXTRACTOR implements GenericSelector {
 
 		@Override
 		public Generic apply(Generic[] generics) {
@@ -56,7 +56,7 @@ public class QuizExtractors {
 
 	}
 
-	public static class QUIZ_EXTRACTOR implements ObservableValueSelector {
+	public static class QUIZ_EXTRACTOR implements GenericSelector {
 
 		@Override
 		public Generic apply(Generic[] generics) {
@@ -88,7 +88,7 @@ public class QuizExtractors {
 		}
 	}
 
-	public static class SCORES_FILTERED implements ObservableListExtractorFromContext {
+	public static class SCORES_FILTERED implements ForEachExtractorFromContext {
 
 		@Override
 		public Observable<Snapshot<Generic>> apply(Context context, Tag tag) {

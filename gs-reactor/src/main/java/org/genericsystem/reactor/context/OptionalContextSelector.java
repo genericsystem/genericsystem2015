@@ -10,9 +10,9 @@ import org.genericsystem.reactor.contextproperties.SelectionDefaults;
 
 import io.reactivex.Observable;
 
-public interface ObservableContextSelector extends BiFunction<Context, Tag, Observable<Optional<Context>>> {
+public interface OptionalContextSelector extends BiFunction<Context, Tag, Observable<Optional<Context>>> {
 
-	public static class SELECTION_SELECTOR implements ObservableContextSelector {
+	public static class SELECTION_SELECTOR implements OptionalContextSelector {
 		@Override
 		public Observable<Optional<Context>> apply(Context context, Tag tag) {
 			if (SelectionDefaults.class.isAssignableFrom(tag.getClass()))
@@ -22,19 +22,19 @@ public interface ObservableContextSelector extends BiFunction<Context, Tag, Obse
 		}
 	}
 
-	public static class REMOVABLE_HOLDER_SELECTOR implements ObservableContextSelector {
+	public static class REMOVABLE_HOLDER_SELECTOR implements OptionalContextSelector {
 		@Override
 		public Observable<Optional<Context>> apply(Context context, Tag tag) {
-			return ObservableListExtractor.HOLDERS.apply(context.getParent().getGenerics()).switchMap(s -> s.setOnChanged()).map(holders ->
+			return ForEachExtractor.HOLDERS.apply(context.getParent().getGenerics()).switchMap(s -> s.setOnChanged()).map(holders ->
 			(!context.getParent().getGeneric().isRequiredConstraintEnabled(context.getGeneric().getComponents().indexOf(context.getGenerics()[2])) && holders.size() == 1) || holders.size() > 1 ?
 					Optional.of(context) : Optional.empty());
 		}
 	}
 
-	public static class HOLDER_ADDITION_ENABLED_SELECTOR implements ObservableContextSelector {
+	public static class HOLDER_ADDITION_ENABLED_SELECTOR implements OptionalContextSelector {
 		@Override
 		public Observable<Optional<Context>> apply(Context context, Tag tag) {
-			return ObservableListExtractor.HOLDERS.apply(context.getGenerics()).switchMap(s -> s.setOnChanged())
+			return ForEachExtractor.HOLDERS.apply(context.getGenerics()).switchMap(s -> s.setOnChanged())
 					.map(holders ->  holders.isEmpty()
 							|| (!(context.getGeneric().getComponents().size() == 1 && context.getGeneric().isPropertyConstraintEnabled())
 									&& !context.getGeneric().isSingularConstraintEnabled(context.getGeneric().getComponents().indexOf(context.getGenerics()[2])))

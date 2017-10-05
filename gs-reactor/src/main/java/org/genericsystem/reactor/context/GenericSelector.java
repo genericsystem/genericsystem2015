@@ -4,107 +4,107 @@ import java.util.function.Function;
 
 import org.genericsystem.common.Generic;
 
-public interface ObservableValueSelector extends Function<Generic[], Generic> {
+public interface GenericSelector extends Function<Generic[], Generic> {
 
-	public static class STRICT_ATTRIBUTE_SELECTOR implements ObservableValueSelector {
+	public static class STRICT_ATTRIBUTE_SELECTOR implements GenericSelector {
 		@Override
 		public Generic apply(Generic[] gs) {
 			return gs[0].getComponents().size() < 2 ? gs[0] : null;
 		}
 	}
 
-	public static class GENERIC_INSTANCE_VALUE_DISPLAYER implements ObservableValueSelector {
+	public static class GENERIC_INSTANCE_VALUE_DISPLAYER implements GenericSelector {
 		@Override
 		public Generic apply(Generic[] gs) {
 			return !gs[1].isValueHidden() ? gs[0] : null;
 		}
 	}
 
-	public static class GENERIC_VALUE_DISPLAYER implements ObservableValueSelector {
+	public static class GENERIC_VALUE_DISPLAYER implements GenericSelector {
 		@Override
 		public Generic apply(Generic[] gs) {
 			return !gs[0].isValueHidden() ? gs[0] : null;
 		}
 	}
 
-	public static class INSTANCE_CHECK_BOX_DISPLAYER implements ObservableValueSelector {
+	public static class INSTANCE_CHECK_BOX_DISPLAYER implements GenericSelector {
 		@Override
 		public Generic apply(Generic[] gs) {
 			return !gs[1].isValueHidden() && Boolean.class.equals(gs[1].getInstanceValueClassConstraint()) ? gs[0] : null;
 		}
 	}
 
-	public static class CHECK_BOX_DISPLAYER implements ObservableValueSelector {
+	public static class CHECK_BOX_DISPLAYER implements GenericSelector {
 		@Override
 		public Generic apply(Generic[] gs) {
 			return !gs[0].isValueHidden() && Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null;
 		}
 	}
 
-	public static class INSTANCE_LABEL_DISPLAYER implements ObservableValueSelector {
+	public static class INSTANCE_LABEL_DISPLAYER implements GenericSelector {
 		@Override
 		public Generic apply(Generic[] gs) {
 			return !gs[1].isValueHidden() && !Boolean.class.equals(gs[1].getInstanceValueClassConstraint()) ? gs[0] : null;
 		}
 	}
 
-	public static class LABEL_DISPLAYER implements ObservableValueSelector {
+	public static class LABEL_DISPLAYER implements GenericSelector {
 		@Override
 		public Generic apply(Generic[] gs) {
 			return !gs[0].isValueHidden() && !Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null;
 		}
 	}
 
-	public static class VALUE_BUILDER_DISPLAYER_SELECTOR implements ObservableValueSelector {
+	public static class VALUE_BUILDER_DISPLAYER_SELECTOR implements GenericSelector {
 		@Override
 		public Generic apply(Generic[] gs) {
 			return !gs[0].isValueHidden() && !Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) && gs[0].getInstanceValueGenerator() == null ? gs[0] : null;
 		}
 	}
 
-	public static class PASSWORD_INSTANCE_SELECTOR implements ObservableValueSelector {
+	public static class PASSWORD_INSTANCE_SELECTOR implements GenericSelector {
 		@Override
 		public Generic apply(Generic[] gs) {
 			return gs[1].isInstanceValueHashed() ? gs[0] : null;
 		}
 	}
 
-	public static class NON_PASSWORD_INSTANCE_SELECTOR implements ObservableValueSelector {
+	public static class NON_PASSWORD_INSTANCE_SELECTOR implements GenericSelector {
 		@Override
 		public Generic apply(Generic[] gs) {
 			return !gs[1].isInstanceValueHashed() ? gs[0] : null;
 		}
 	}
 
-	public static class PASSWORD_ATTRIBUTE_SELECTOR implements ObservableValueSelector {
+	public static class PASSWORD_ATTRIBUTE_SELECTOR implements GenericSelector {
 		@Override
 		public Generic apply(Generic[] gs) {
 			return gs[0].isInstanceValueHashed() ? gs[0] : null;
 		}
 	}
 
-	public static class NON_PASSWORD_ATTRIBUTE_SELECTOR implements ObservableValueSelector {
+	public static class NON_PASSWORD_ATTRIBUTE_SELECTOR implements GenericSelector {
 		@Override
 		public Generic apply(Generic[] gs) {
 			return !gs[0].isInstanceValueHashed() ? gs[0] : null;
 		}
 	}
 
-	public static class DIRECT_RELATION_SELECTOR implements ObservableValueSelector {
+	public static class DIRECT_RELATION_SELECTOR implements GenericSelector {
 		@Override
 		public Generic apply(Generic[] gs) {
 			return gs[1].isReferentialIntegrityEnabled(gs[1].getComponents().indexOf(gs[0])) ? gs[0] : null;
 		}
 	}
 
-	public static class REVERSED_RELATION_SELECTOR implements ObservableValueSelector {
+	public static class REVERSED_RELATION_SELECTOR implements GenericSelector {
 		@Override
 		public Generic apply(Generic[] gs) {
 			return !gs[1].isReferentialIntegrityEnabled(gs[1].getComponents().indexOf(gs[0])) && !gs[0].getLinks(gs[2]).isEmpty() ? gs[0] : null;
 		}
 	}
 
-	public static class MULTICHECKBOX_INSTANCE_SELECTOR implements ObservableValueSelector {
+	public static class MULTICHECKBOX_INSTANCE_SELECTOR implements GenericSelector {
 		@Override
 		public Generic apply(Generic[] gs) {
 			Generic component = gs[0].getComponents().stream().filter(c -> gs[2].inheritsFrom(c)).findFirst().get();
@@ -112,7 +112,7 @@ public interface ObservableValueSelector extends Function<Generic[], Generic> {
 		}
 	}
 
-	public static class NON_MULTICHECKBOX_INSTANCE_SELECTOR implements ObservableValueSelector {
+	public static class NON_MULTICHECKBOX_INSTANCE_SELECTOR implements GenericSelector {
 		@Override
 		public Generic apply(Generic[] gs) {
 			Generic component = gs[0].getComponents().stream().filter(c -> gs[2].inheritsFrom(c)).findFirst().get();
@@ -120,7 +120,7 @@ public interface ObservableValueSelector extends Function<Generic[], Generic> {
 		}
 	}
 
-	public static class MULTICHECKBOX_SELECTOR implements ObservableValueSelector {
+	public static class MULTICHECKBOX_SELECTOR implements GenericSelector {
 		@Override
 		public Generic apply(Generic[] gs) {
 			Generic component = gs[0].getComponents().stream().filter(c -> gs[1].inheritsFrom(c)).findFirst().get();
@@ -128,7 +128,7 @@ public interface ObservableValueSelector extends Function<Generic[], Generic> {
 		}
 	}
 
-	public static class NON_MULTICHECKBOX_SELECTOR implements ObservableValueSelector {
+	public static class NON_MULTICHECKBOX_SELECTOR implements GenericSelector {
 		@Override
 		public Generic apply(Generic[] gs) {
 			Generic component = gs[0].getComponents().stream().filter(c -> gs[1].inheritsFrom(c)).findFirst().get();
@@ -136,7 +136,7 @@ public interface ObservableValueSelector extends Function<Generic[], Generic> {
 		}
 	}
 
-	public static class TYPE_SELECTOR implements ObservableValueSelector {
+	public static class TYPE_SELECTOR implements GenericSelector {
 		@Override
 		public Generic apply(Generic[] gs) {
 			return gs[1];

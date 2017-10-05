@@ -16,12 +16,12 @@ import org.genericsystem.cv.model.ZoneGeneric;
 import org.genericsystem.cv.model.ZoneGeneric.ZoneInstance;
 import org.genericsystem.cv.model.ZoneText;
 import org.genericsystem.cv.model.ZoneText.ZoneTextInstance;
-import org.genericsystem.reactor.context.ObservableListExtractor;
+import org.genericsystem.reactor.context.ForEachExtractor;
 
 import io.reactivex.Observable;
 
 /**
- * This class contains all the {@link ObservableListExtractor} needed across the app.
+ * This class contains all the {@link ForEachExtractor} needed across the app.
  * 
  * @author Pierrik Lassalas
  */
@@ -31,7 +31,7 @@ public class ObservableListExtractorCustom {
 	 * === DOC CLASS AND DOC ===
 	 */
 
-	public static class DOC_CLASS_SELECTOR implements ObservableListExtractor {
+	public static class DOC_CLASS_SELECTOR implements ForEachExtractor {
 		@Override
 		public Observable<Snapshot<Generic>> apply(Generic[] generics) {
 			Root root = generics[0].getRoot();
@@ -43,7 +43,7 @@ public class ObservableListExtractorCustom {
 		}
 	}
 
-	public static class DOC_SELECTOR implements ObservableListExtractor {
+	public static class DOC_SELECTOR implements ForEachExtractor {
 		@Override
 		public Observable<Snapshot<Generic>> apply(Generic[] generics) {
 			DocClassInstance currentDocClass = (DocClassInstance) generics[0];
@@ -63,7 +63,7 @@ public class ObservableListExtractorCustom {
 	 * === ZONES ===
 	 */
 
-	public static class ZONE_SELECTOR implements ObservableListExtractor {
+	public static class ZONE_SELECTOR implements ForEachExtractor {
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		@Override
 		public Observable<Snapshot<Generic>> apply(Generic[] generics) {
@@ -77,7 +77,7 @@ public class ObservableListExtractorCustom {
 		}
 	}
 
-	public static class ZONE_SELECTOR_BEST implements ObservableListExtractor {
+	public static class ZONE_SELECTOR_BEST implements ForEachExtractor {
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		@Override
 		public Observable<Snapshot<Generic>> apply(Generic[] generics) {
@@ -91,7 +91,7 @@ public class ObservableListExtractorCustom {
 		}
 	}
 
-	public static class ZONE_SELECTOR_REALITY implements ObservableListExtractor {
+	public static class ZONE_SELECTOR_REALITY implements ForEachExtractor {
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		@Override
 		public Observable<Snapshot<Generic>> apply(Generic[] generics) {
@@ -113,7 +113,7 @@ public class ObservableListExtractorCustom {
 	 * === DATALIST ===
 	 */
 
-	public static class DATALIST_SELECTOR implements ObservableListExtractor {
+	public static class DATALIST_SELECTOR implements ForEachExtractor {
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		@Override
 		public Observable<Snapshot<Generic>> apply(Generic[] generics) {
@@ -130,7 +130,7 @@ public class ObservableListExtractorCustom {
 	 * === OCR TEXT ===
 	 */
 
-	public static class OCR_SELECTOR implements ObservableListExtractor {
+	public static class OCR_SELECTOR implements ForEachExtractor {
 		@Override
 		public Observable<Snapshot<Generic>> apply(Generic[] generics) {
 			Root root = generics[0].getRoot();
@@ -145,7 +145,7 @@ public class ObservableListExtractorCustom {
 	 * === SCORE ===
 	 */
 
-	public static class SCORE_SELECTOR implements ObservableListExtractor {
+	public static class SCORE_SELECTOR implements ForEachExtractor {
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		@Override
 		public Observable<Snapshot<Generic>> apply(Generic[] generics) {

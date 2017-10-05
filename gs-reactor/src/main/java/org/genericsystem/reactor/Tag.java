@@ -13,7 +13,7 @@ import java.util.function.Function;
 
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
-import org.genericsystem.reactor.context.ObservableListExtractor;
+import org.genericsystem.reactor.context.ForEachExtractor;
 import org.genericsystem.reactor.context.TagSwitcher;
 import org.genericsystem.reactor.contextproperties.ActionDefaults;
 import org.genericsystem.reactor.contextproperties.AttributesDefaults;
@@ -107,7 +107,7 @@ public interface Tag extends TagNode, ActionDefaults, SelectionDefaults, Stepper
 		setMetaBinding(MetaBinding.forEachMetaBinding(applyOnModel));
 	}
 
-	default void forEach(ObservableListExtractor observableListExtractor) {
+	default void forEach(ForEachExtractor observableListExtractor) {
 		forEach2(model -> observableListExtractor.apply(model.getGenerics()));
 	}
 
@@ -116,7 +116,7 @@ public interface Tag extends TagNode, ActionDefaults, SelectionDefaults, Stepper
 	}
 
 	default void select(Function<Generic[], Generic> genericSupplier) {
-		forEach((ObservableListExtractor) gs -> {
+		forEach((ForEachExtractor) gs -> {
 			Generic generic = genericSupplier.apply(gs);
 			return Observable.just(generic != null ? Snapshot.singleton(generic) : Snapshot.empty());
 		});
@@ -131,11 +131,11 @@ public interface Tag extends TagNode, ActionDefaults, SelectionDefaults, Stepper
 	}
 
 	default void select(Class<?> genericClass) {
-		forEach((ObservableListExtractor) gs -> Observable.just(Snapshot.singleton(gs[0].getRoot().find(genericClass))));
+		forEach((ForEachExtractor) gs -> Observable.just(Snapshot.singleton(gs[0].getRoot().find(genericClass))));
 	}
 
-	default ObservableListExtractor getObservableListExtractor() {
-		return ObservableListExtractor.SUBINSTANCES;
+	default ForEachExtractor getObservableListExtractor() {
+		return ForEachExtractor.SUBINSTANCES;
 	}
 
 	@Override

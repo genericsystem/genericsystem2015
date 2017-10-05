@@ -19,7 +19,7 @@ import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.appserver.Script;
-import org.genericsystem.reactor.context.ObservableValueSelector;
+import org.genericsystem.reactor.context.GenericSelector;
 import org.genericsystem.reactor.context.StringExtractor;
 import org.genericsystem.reactor.context.TextBinding;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
@@ -95,7 +95,7 @@ public class TestEvent extends RootTagImpl {
 	public static class DateInput2 extends InputDate {
 	}
 
-	public static class DATE_SELECTOR implements ObservableValueSelector {
+	public static class DATE_SELECTOR implements GenericSelector {
 
 		@Override
 		public Generic apply(Generic[] generics) {

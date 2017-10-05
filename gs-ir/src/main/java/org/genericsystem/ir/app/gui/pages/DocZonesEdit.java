@@ -26,7 +26,7 @@ import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.context.ContextAction.CANCEL;
 import org.genericsystem.reactor.context.ContextAction.RESET_SELECTION;
-import org.genericsystem.reactor.context.ObservableContextSelector.SELECTION_SELECTOR;
+import org.genericsystem.reactor.context.OptionalContextSelector.SELECTION_SELECTOR;
 import org.genericsystem.reactor.context.TagSwitcher;
 import org.genericsystem.reactor.contextproperties.SelectionDefaults;
 import org.genericsystem.reactor.gscomponents.FlexDirection;

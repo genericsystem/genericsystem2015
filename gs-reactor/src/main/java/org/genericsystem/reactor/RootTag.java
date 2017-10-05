@@ -13,11 +13,11 @@ import org.genericsystem.reactor.HtmlDomNode.HtmlDomNodeInputText;
 import org.genericsystem.reactor.HtmlDomNode.HtmlDomNodeSelect;
 import org.genericsystem.reactor.HtmlDomNode.Sender;
 import org.genericsystem.reactor.context.ContextAction;
-import org.genericsystem.reactor.context.ObservableContextSelector;
-import org.genericsystem.reactor.context.ObservableListExtractor;
-import org.genericsystem.reactor.context.ObservableListExtractor.NO_FOR_EACH;
-import org.genericsystem.reactor.context.ObservableListExtractorFromContext;
-import org.genericsystem.reactor.context.ObservableValueSelector;
+import org.genericsystem.reactor.context.OptionalContextSelector;
+import org.genericsystem.reactor.context.ForEachExtractor;
+import org.genericsystem.reactor.context.ForEachExtractor.NO_FOR_EACH;
+import org.genericsystem.reactor.context.ForEachExtractorFromContext;
+import org.genericsystem.reactor.context.GenericSelector;
 import org.genericsystem.reactor.context.StringExtractor;
 import org.genericsystem.reactor.context.TagSwitcher;
 import org.genericsystem.reactor.context.TextBinding;
@@ -182,9 +182,9 @@ public interface RootTag extends Tag {
 	}
 
 	default void processSelect(Tag tag, Class<?> value) {
-		if (ObservableValueSelector.class.isAssignableFrom(value))
+		if (GenericSelector.class.isAssignableFrom(value))
 			try {
-				tag.select((ObservableValueSelector) value.newInstance());
+				tag.select((GenericSelector) value.newInstance());
 			} catch (InstantiationException | IllegalAccessException e) {
 				throw new IllegalStateException(e);
 			}
@@ -193,10 +193,10 @@ public interface RootTag extends Tag {
 	}
 
 	default void processSelectContext(Tag tag, Class<?> value) {
-		if (ObservableContextSelector.class.isAssignableFrom(value))
+		if (OptionalContextSelector.class.isAssignableFrom(value))
 			tag.select__(context -> {
 				try {
-					return ((ObservableContextSelector) value.newInstance()).apply(context, tag);
+					return ((OptionalContextSelector) value.newInstance()).apply(context, tag);
 				} catch (InstantiationException | IllegalAccessException e) {
 					throw new IllegalStateException(e);
 				}
@@ -206,10 +206,10 @@ public interface RootTag extends Tag {
 	}
 
 	default void processForEach(Tag tag, Class<?> value) {
-		if (ObservableListExtractor.class.isAssignableFrom(value))
+		if (ForEachExtractor.class.isAssignableFrom(value))
 			try {
 				if (!NO_FOR_EACH.class.equals(value))
-					tag.forEach((ObservableListExtractor) value.newInstance());
+					tag.forEach((ForEachExtractor) value.newInstance());
 			} catch (InstantiationException | IllegalAccessException e) {
 				throw new IllegalStateException(e);
 			}
@@ -218,10 +218,10 @@ public interface RootTag extends Tag {
 	}
 
 	default void processForEachContext(Tag tag, Class<?> value) {
-		if (ObservableListExtractorFromContext.class.isAssignableFrom(value))
+		if (ForEachExtractorFromContext.class.isAssignableFrom(value))
 			tag.forEach2(context -> {
 				try {
-					return ((ObservableListExtractorFromContext) value.getDeclaredConstructor().newInstance()).apply(context, tag);
+					return ((ForEachExtractorFromContext) value.getDeclaredConstructor().newInstance()).apply(context, tag);
 				} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
 					throw new IllegalStateException(e);
 				}

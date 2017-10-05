@@ -20,7 +20,7 @@ import org.genericsystem.reactor.annotations.Stepper;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.annotations.Switch;
-import org.genericsystem.reactor.context.ObservableContextSelector.SELECTION_SELECTOR;
+import org.genericsystem.reactor.context.OptionalContextSelector.SELECTION_SELECTOR;
 import org.genericsystem.reactor.contextproperties.SelectionDefaults;
 import org.genericsystem.reactor.contextproperties.StepperDefaults;
 import org.genericsystem.reactor.gscomponents.CheckBoxWithValue;

@@ -24,17 +24,17 @@ import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection;
 import org.genericsystem.reactor.context.ContextAction.ADD_HOLDER;
 import org.genericsystem.reactor.context.ContextAction.MODAL_DISPLAY_FLEX;
 import org.genericsystem.reactor.context.ContextAction.REMOVE;
-import org.genericsystem.reactor.context.ObservableContextSelector.HOLDER_ADDITION_ENABLED_SELECTOR;
-import org.genericsystem.reactor.context.ObservableContextSelector.REMOVABLE_HOLDER_SELECTOR;
-import org.genericsystem.reactor.context.ObservableListExtractor;
-import org.genericsystem.reactor.context.ObservableListExtractor.NO_FOR_EACH;
-import org.genericsystem.reactor.context.ObservableListExtractor.SUBINSTANCES_OF_LINK_COMPONENT;
-import org.genericsystem.reactor.context.ObservableValueSelector;
-import org.genericsystem.reactor.context.ObservableValueSelector.MULTICHECKBOX_INSTANCE_SELECTOR;
-import org.genericsystem.reactor.context.ObservableValueSelector.NON_MULTICHECKBOX_INSTANCE_SELECTOR;
-import org.genericsystem.reactor.context.ObservableValueSelector.PASSWORD_ATTRIBUTE_SELECTOR;
-import org.genericsystem.reactor.context.ObservableValueSelector.STRICT_ATTRIBUTE_SELECTOR;
-import org.genericsystem.reactor.context.ObservableValueSelector.TYPE_SELECTOR;
+import org.genericsystem.reactor.context.OptionalContextSelector.HOLDER_ADDITION_ENABLED_SELECTOR;
+import org.genericsystem.reactor.context.OptionalContextSelector.REMOVABLE_HOLDER_SELECTOR;
+import org.genericsystem.reactor.context.ForEachExtractor;
+import org.genericsystem.reactor.context.ForEachExtractor.NO_FOR_EACH;
+import org.genericsystem.reactor.context.ForEachExtractor.SUBINSTANCES_OF_LINK_COMPONENT;
+import org.genericsystem.reactor.context.GenericSelector;
+import org.genericsystem.reactor.context.GenericSelector.MULTICHECKBOX_INSTANCE_SELECTOR;
+import org.genericsystem.reactor.context.GenericSelector.NON_MULTICHECKBOX_INSTANCE_SELECTOR;
+import org.genericsystem.reactor.context.GenericSelector.PASSWORD_ATTRIBUTE_SELECTOR;
+import org.genericsystem.reactor.context.GenericSelector.STRICT_ATTRIBUTE_SELECTOR;
+import org.genericsystem.reactor.context.GenericSelector.TYPE_SELECTOR;
 import org.genericsystem.reactor.contextproperties.ComponentsDefaults;
 import org.genericsystem.reactor.contextproperties.ConvertedValueDefaults;
 import org.genericsystem.reactor.contextproperties.PasswordDefaults;
@@ -86,11 +86,11 @@ import javafx.beans.value.ChangeListener;
 @Children(path = { Composite.class, ValueComponents.class, Header.class }, pos = { -1, 0, -1 }, value = GSLabelDisplayer.class)
 @Children(path = { AttributeEdition.class, Content.class }, value = { PasswordHoldersEditor.class, HoldersEditor.class, MultiCheckbox.class })
 @Children(path = { InstanceName.class, ValueComponentsEditor.class }, value = { Content.class, Header.class })
-@ForEach(path = AttributeEdition.class, value = ObservableListExtractor.ATTRIBUTES_OF_INSTANCES.class)
-@ForEach(path = { AttributeEdition.class, AttributeContent.class }, value = ObservableListExtractor.NO_FOR_EACH.class)
-@ForEach(path = { AttributeEdition.class, ValueComponents.class, Content.class }, value = ObservableListExtractor.OTHER_COMPONENTS_2.class)
+@ForEach(path = AttributeEdition.class, value = ForEachExtractor.ATTRIBUTES_OF_INSTANCES.class)
+@ForEach(path = { AttributeEdition.class, AttributeContent.class }, value = ForEachExtractor.NO_FOR_EACH.class)
+@ForEach(path = { AttributeEdition.class, ValueComponents.class, Content.class }, value = ForEachExtractor.OTHER_COMPONENTS_2.class)
 @Select(path = { InstanceName.class, ValueComponents.class }, pos = { 0, 0 }, value = TYPE_SELECTOR.class)
-@Select(path = { Composite.class, ValueComponents.class, Header.class }, pos = { -1, 0, -1 }, value = ObservableValueSelector.GENERIC_VALUE_DISPLAYER.class)
+@Select(path = { Composite.class, ValueComponents.class, Header.class }, pos = { -1, 0, -1 }, value = GenericSelector.GENERIC_VALUE_DISPLAYER.class)
 public class InstanceEditor extends FlexDiv implements SelectionDefaults, StepperDefaults {
 
 	protected static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -102,7 +102,7 @@ public class InstanceEditor extends FlexDiv implements SelectionDefaults, Steppe
 	}
 
 	@Children({ PasswordHoldersEditor.class, HoldersEditor.class, MultiCheckbox.class })
-	@ForEach(ObservableListExtractor.ATTRIBUTES_OF_INSTANCES.class)
+	@ForEach(ForEachExtractor.ATTRIBUTES_OF_INSTANCES.class)
 	@Select(path = PasswordHoldersEditor.class, value = PASSWORD_ATTRIBUTE_SELECTOR.class)
 	@Select(path = HoldersEditor.class, value = NON_MULTICHECKBOX_INSTANCE_SELECTOR.class)
 	@Select(path = MultiCheckbox.class, value = MULTICHECKBOX_INSTANCE_SELECTOR.class)
@@ -248,7 +248,7 @@ public class InstanceEditor extends FlexDiv implements SelectionDefaults, Steppe
 
 	@Style(path = ValueComponents.class, name = "flex", value = "1 0 auto")
 	@Children(value = { PasswordEditor.class, PasswordAdder.class })
-	@ForEach(path = PasswordEditor.class, value = ObservableListExtractor.HOLDERS.class)
+	@ForEach(path = PasswordEditor.class, value = ForEachExtractor.HOLDERS.class)
 	@SelectContext(path = PasswordAdder.class, value = HOLDER_ADDITION_ENABLED_SELECTOR.class)
 	@FlexDirectionStyle(FlexDirection.COLUMN)
 	@Style(name = "flex-wrap", value = "wrap")
@@ -266,8 +266,8 @@ public class InstanceEditor extends FlexDiv implements SelectionDefaults, Steppe
 	@Children(path = Header.class, value = { InputTextEditorWithConversion.class, CheckBoxEditor.class })
 	@Children(path = Content.class, value = DirectRelationComponentEditor.class)
 	@SelectContext(path = ActionLink.class, value = REMOVABLE_HOLDER_SELECTOR.class)
-	@Select(path = { Header.class, InputTextEditorWithConversion.class }, value = ObservableValueSelector.INSTANCE_LABEL_DISPLAYER.class)
-	@Select(path = { Header.class, CheckBoxEditor.class }, value = ObservableValueSelector.INSTANCE_CHECK_BOX_DISPLAYER.class)
+	@Select(path = { Header.class, InputTextEditorWithConversion.class }, value = GenericSelector.INSTANCE_LABEL_DISPLAYER.class)
+	@Select(path = { Header.class, CheckBoxEditor.class }, value = GenericSelector.INSTANCE_CHECK_BOX_DISPLAYER.class)
 	@SetText(path = ActionLink.class, value = "×")
 	@BindAction(path = ActionLink.class, value = REMOVE.class)
 	public static class ValueComponentsEditor extends ValueComponents implements ComponentsDefaults {
@@ -305,9 +305,9 @@ public class InstanceEditor extends FlexDiv implements SelectionDefaults, Steppe
 	@Children(path = Header.class, value = { HolderAdderInput.class, BooleanHolderAdderInput.class })
 	@Children(path = Content.class, value = DatalistEditor.class)
 	@Select(path = ActionLink.class, value = STRICT_ATTRIBUTE_SELECTOR.class) // TODO: Remove
-	@Select(path = Header.class, value = ObservableValueSelector.GENERIC_VALUE_DISPLAYER.class)
-	@Select(path = { Header.class, HolderAdderInput.class }, value = ObservableValueSelector.LABEL_DISPLAYER.class)
-	@Select(path = { Header.class, BooleanHolderAdderInput.class }, value = ObservableValueSelector.CHECK_BOX_DISPLAYER.class)
+	@Select(path = Header.class, value = GenericSelector.GENERIC_VALUE_DISPLAYER.class)
+	@Select(path = { Header.class, HolderAdderInput.class }, value = GenericSelector.LABEL_DISPLAYER.class)
+	@Select(path = { Header.class, BooleanHolderAdderInput.class }, value = GenericSelector.CHECK_BOX_DISPLAYER.class)
 	@SetText(path = ActionLink.class, value = "+")
 	@BindAction(path = ActionLink.class, value = ADD_HOLDER.class)
 	public static class HolderAdder extends ValueComponents implements ComponentsDefaults, ConvertedValueDefaults {

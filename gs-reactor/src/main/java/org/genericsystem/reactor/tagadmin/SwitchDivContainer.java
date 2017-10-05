@@ -9,7 +9,7 @@ import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Step;
 import org.genericsystem.reactor.annotations.Stepper;
 import org.genericsystem.reactor.annotations.Switch;
-import org.genericsystem.reactor.context.ObservableListExtractor;
+import org.genericsystem.reactor.context.ForEachExtractor;
 import org.genericsystem.reactor.extended.ExtendedRootTag.GTag;
 import org.genericsystem.reactor.extended.ExtendedRootTag.TagType;
 import org.genericsystem.reactor.gscomponents.Controller;
@@ -60,14 +60,14 @@ public class SwitchDivContainer extends HtmlDiv {
 
 	@Step(next = SwitchDiv5.class)
 	@SetText("SwitchDiv4")
-	@ForEach(ObservableListExtractor.INSTANCES.class)
+	@ForEach(ForEachExtractor.INSTANCES.class)
 	public static class SwitchDiv4 extends StepDiv {
 
 	}
 
 	@Step(next = SwitchDiv5.class)
 	@SetText("SwitchDiv5")
-	@ForEach(ObservableListExtractor.INSTANCES.class)
+	@ForEach(ForEachExtractor.INSTANCES.class)
 	public static class SwitchDiv5 extends StepDiv {
 
 	}

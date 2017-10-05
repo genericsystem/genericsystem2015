@@ -13,7 +13,7 @@ import org.genericsystem.reactor.annotations.DirectSelect.MetaBindingAnnotationP
 import org.genericsystem.reactor.annotations.SelectContext.SelectContextGenericProcessor;
 import org.genericsystem.reactor.annotations.SelectContext.SelectContextProcessor;
 import org.genericsystem.reactor.annotations.SelectContext.SelectContexts;
-import org.genericsystem.reactor.context.ObservableContextSelector;
+import org.genericsystem.reactor.context.OptionalContextSelector;
 import org.genericsystem.reactor.extended.ExtendedRootTag.GTag;
 import org.genericsystem.reactor.extended.ExtendedRootTag.GTagAnnotation;
 import org.genericsystem.reactor.extended.ExtendedRootTag.GTagAnnotationContent;
@@ -27,7 +27,7 @@ import org.genericsystem.reactor.gscomponents.TagImpl;
 public @interface SelectContext {
 	Class<? extends TagImpl>[] path() default {};
 
-	Class<? extends ObservableContextSelector> value();
+	Class<? extends OptionalContextSelector> value();
 
 	int[] pos() default {};
 

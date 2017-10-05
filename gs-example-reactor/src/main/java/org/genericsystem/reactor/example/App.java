@@ -17,7 +17,7 @@ import org.genericsystem.reactor.annotations.SelectContext;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.appserver.Script;
-import org.genericsystem.reactor.context.ObservableContextSelector;
+import org.genericsystem.reactor.context.OptionalContextSelector;
 import org.genericsystem.reactor.example.App.ExampleReactorScript;
 import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledHorizontalInstanceEditor;
 import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledHorizontalInstanceStepEditor;
@@ -35,7 +35,7 @@ import org.genericsystem.reactor.gscomponents.RootTagImpl;
 @DirectSelect(path = TitledInstancesTable.class, pos = 0, value = Car.class)
 @DirectSelect(path = TitledHorizontalInstancesTable.class, pos = 0, value = Car.class)
 @DirectSelect(path = TitledInstancesTable.class, pos = 2, value = Color.class)
-@SelectContext(path = TitledInstanceEditor.class, value = ObservableContextSelector.SELECTION_SELECTOR.class)
+@SelectContext(path = TitledInstanceEditor.class, value = OptionalContextSelector.SELECTION_SELECTOR.class)
 @Style(name = "flex-wrap", value = "wrap")
 @Style(name = "flex", value = "1 1 0%")
 public class App extends RootTagImpl {

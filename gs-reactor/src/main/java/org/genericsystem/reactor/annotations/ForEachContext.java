@@ -13,7 +13,7 @@ import org.genericsystem.reactor.annotations.DirectSelect.MetaBindingAnnotationP
 import org.genericsystem.reactor.annotations.ForEachContext.ForEachContextGenericProcessor;
 import org.genericsystem.reactor.annotations.ForEachContext.ForEachContextProcessor;
 import org.genericsystem.reactor.annotations.ForEachContext.ForEachContexts;
-import org.genericsystem.reactor.context.ObservableListExtractorFromContext;
+import org.genericsystem.reactor.context.ForEachExtractorFromContext;
 import org.genericsystem.reactor.extended.ExtendedRootTag.GTag;
 import org.genericsystem.reactor.extended.ExtendedRootTag.GTagAnnotation;
 import org.genericsystem.reactor.extended.ExtendedRootTag.GTagAnnotationContent;
@@ -28,7 +28,7 @@ public @interface ForEachContext {
 
 	Class<? extends TagImpl>[] path() default {};
 
-	Class<? extends ObservableListExtractorFromContext> value();
+	Class<? extends ForEachExtractorFromContext> value();
 
 	int[] pos() default {};
 

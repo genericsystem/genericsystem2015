@@ -23,7 +23,7 @@ import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.context.ContextAction.CANCEL;
 import org.genericsystem.reactor.context.ContextAction.FLUSH;
 import org.genericsystem.reactor.context.ContextAction.REMOVE;
-import org.genericsystem.reactor.context.ObservableListExtractor.SUBINSTANCES;
+import org.genericsystem.reactor.context.ForEachExtractor.SUBINSTANCES;
 import org.genericsystem.reactor.context.TagSwitcher;
 import org.genericsystem.reactor.gscomponents.FlexDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;

@@ -34,7 +34,7 @@ import org.genericsystem.reactor.context.ContextAction.MOUNT;
 import org.genericsystem.reactor.context.ContextAction.RESET_SELECTION;
 import org.genericsystem.reactor.context.ContextAction.SET_SELECTION;
 import org.genericsystem.reactor.context.ContextAction.UNMOUNT;
-import org.genericsystem.reactor.context.ObservableContextSelector.SELECTION_SELECTOR;
+import org.genericsystem.reactor.context.OptionalContextSelector.SELECTION_SELECTOR;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.FlexDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;

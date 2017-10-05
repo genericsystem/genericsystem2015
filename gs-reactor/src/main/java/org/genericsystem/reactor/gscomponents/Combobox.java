@@ -6,7 +6,7 @@ import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.Style.GenericValueBackgroundColor;
 import org.genericsystem.reactor.annotations.TagName;
-import org.genericsystem.reactor.context.ObservableListExtractor;
+import org.genericsystem.reactor.context.ForEachExtractor;
 import org.genericsystem.reactor.context.StringExtractor;
 import org.genericsystem.reactor.contextproperties.ComponentsDefaults;
 import org.genericsystem.reactor.contextproperties.SelectionDefaults;
@@ -17,7 +17,7 @@ import javafx.beans.property.Property;
 
 @Children(HtmlRepeatedOption.class)
 @BindText(path = HtmlRepeatedOption.class)
-@ForEach(path = HtmlRepeatedOption.class, value = ObservableListExtractor.SUBINSTANCES_ALPHABETICAL_ORDER.class)
+@ForEach(path = HtmlRepeatedOption.class, value = ForEachExtractor.SUBINSTANCES_ALPHABETICAL_ORDER.class)
 @GenericValueBackgroundColor(path = HtmlOption.class, value = "")
 @TagName(TagName.SELECT)
 public class Combobox extends TagImpl implements SelectionDefaults, ComponentsDefaults {
@@ -38,8 +38,8 @@ public class Combobox extends TagImpl implements SelectionDefaults, ComponentsDe
 	}
 
 	@Children({ HtmlOption.class, HtmlRepeatedOption.class })
-	@ForEach(path = HtmlOption.class, pos = 0, value = ObservableListExtractor.NO_FOR_EACH.class)
-	@ForEach(path = HtmlOption.class, pos = 1, value = ObservableListExtractor.SUBINSTANCES.class)
+	@ForEach(path = HtmlOption.class, pos = 0, value = ForEachExtractor.NO_FOR_EACH.class)
+	@ForEach(path = HtmlOption.class, pos = 1, value = ForEachExtractor.SUBINSTANCES.class)
 	public static class ComboboxWithEmptyEntry extends Combobox {
 
 		@Override
@@ -56,7 +56,7 @@ public class Combobox extends TagImpl implements SelectionDefaults, ComponentsDe
 		}
 	}
 
-	@ForEach(path = HtmlOption.class, value = ObservableListExtractor.SUBINSTANCES_OF_META.class)
+	@ForEach(path = HtmlOption.class, value = ForEachExtractor.SUBINSTANCES_OF_META.class)
 	public static class InstanceEditorCombobox extends Combobox {
 		@Override
 		public void init() {

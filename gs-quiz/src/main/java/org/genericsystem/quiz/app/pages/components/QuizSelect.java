@@ -12,7 +12,7 @@ import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.annotations.Switch;
-import org.genericsystem.reactor.context.ObservableListExtractor;
+import org.genericsystem.reactor.context.ForEachExtractor;
 import org.genericsystem.reactor.contextproperties.SelectionDefaults;
 import org.genericsystem.reactor.gscomponents.FlexDiv;
 import org.genericsystem.reactor.gscomponents.FlexDiv.FlexRow;
@@ -28,7 +28,7 @@ public class QuizSelect extends HtmlDiv {
 	@Children({ FlexDiv.class, FlexRow.class })
 	@Children(path = FlexDiv.class, pos = 0, value = { HtmlH4.class, HtmlP.class })
 	@Children(path = FlexRow.class, value = { QuizButton.class, ResultButton.class })
-	@ForEach(ObservableListExtractor.SUBINSTANCES.class)
+	@ForEach(ForEachExtractor.SUBINSTANCES.class)
 	@ForEach(path = { FlexDiv.class, HtmlP.class }, value = DESCRIPTION_EXTRACTOR.class)
 	//
 	@BindText(path = { FlexDiv.class, HtmlH4.class })

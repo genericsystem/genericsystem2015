@@ -16,9 +16,9 @@ import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.context.ContextAction.MOUNT;
 import org.genericsystem.reactor.context.ContextAction.REMOVE;
 import org.genericsystem.reactor.context.ContextAction.SET_SELECTION;
-import org.genericsystem.reactor.context.ObservableListExtractor;
-import org.genericsystem.reactor.context.ObservableValueSelector;
-import org.genericsystem.reactor.context.ObservableValueSelector.GENERIC_VALUE_DISPLAYER;
+import org.genericsystem.reactor.context.ForEachExtractor;
+import org.genericsystem.reactor.context.GenericSelector;
+import org.genericsystem.reactor.context.GenericSelector.GENERIC_VALUE_DISPLAYER;
 import org.genericsystem.reactor.context.TagSwitcher;
 import org.genericsystem.reactor.contextproperties.SelectionDefaults;
 import org.genericsystem.reactor.gscomponents.CheckBoxWithValue.CheckBoxDisplayer;
@@ -52,10 +52,10 @@ import org.genericsystem.reactor.gscomponents.instancebuilder.InstanceBuilder;
 @Children({ HeaderRow.class, InstanceBuilder.class, ContentRow.class })
 @Children(path = HeaderRow.class, value = { ValueComponents.class, ValueComponents.class, ButtonDiv.class })
 @Children(path = ContentRow.class, value = { ValueComponents.class, Holders.class, LinksDiv.class })
-@ForEach(path = { HeaderRow.class, ValueComponents.class }, pos = { 0, 1 }, value = ObservableListExtractor.ATTRIBUTES_OF_TYPE.class)
-@ForEach(path = ContentRow.class, value = ObservableListExtractor.SUBINSTANCES_ALPHABETICAL_ORDER.class)
-@ForEach(path = { ContentRow.class, Holders.class }, value = ObservableListExtractor.ATTRIBUTES_OF_INSTANCES.class)
-@ForEach(path = { ContentRow.class, ValueComponents.class, Content.class }, value = ObservableListExtractor.OTHER_COMPONENTS_2.class)
+@ForEach(path = { HeaderRow.class, ValueComponents.class }, pos = { 0, 1 }, value = ForEachExtractor.ATTRIBUTES_OF_TYPE.class)
+@ForEach(path = ContentRow.class, value = ForEachExtractor.SUBINSTANCES_ALPHABETICAL_ORDER.class)
+@ForEach(path = { ContentRow.class, Holders.class }, value = ForEachExtractor.ATTRIBUTES_OF_INSTANCES.class)
+@ForEach(path = { ContentRow.class, ValueComponents.class, Content.class }, value = ForEachExtractor.OTHER_COMPONENTS_2.class)
 public class InstancesTable extends FlexDiv implements SelectionDefaults {
 
 	@GenericValueBackgroundColor(path = { ValueComponents.class, FlexDiv.class }, value = "#ea0084")
@@ -74,8 +74,8 @@ public class InstancesTable extends FlexDiv implements SelectionDefaults {
 
 	@GenericValueBackgroundColor(path = { ValueComponents.class, Content.class }, value = "#e5ed00")
 	@Children(value = ValueComponents.class)
-	@ForEach(path = ValueComponents.class, value = ObservableListExtractor.HOLDERS.class)
-	@ForEach(path = { ValueComponents.class, Content.class }, value = ObservableListExtractor.OTHER_COMPONENTS_2.class)
+	@ForEach(path = ValueComponents.class, value = ForEachExtractor.HOLDERS.class)
+	@ForEach(path = { ValueComponents.class, Content.class }, value = ForEachExtractor.OTHER_COMPONENTS_2.class)
 	public static class Holders extends Composite {
 	}
 
@@ -85,12 +85,12 @@ public class InstancesTable extends FlexDiv implements SelectionDefaults {
 	@Style(path = FlexDiv.class, name = "align-items", value = "center")
 	@Style(path = FlexDiv.class, name = "margin-right", value = "1px")
 	@Style(path = FlexDiv.class, name = "margin-bottom", value = "1px")
-	@ForEach(path = Content.class, value = ObservableListExtractor.OTHER_COMPONENTS_1.class)
-	@Select(path = Header.class, value = ObservableValueSelector.GENERIC_INSTANCE_VALUE_DISPLAYER.class)
-	@Select(path = { Header.class, FlexDiv.class, HtmlLabel.class }, pos = { -1, 0, 0 }, value = ObservableValueSelector.NON_PASSWORD_INSTANCE_SELECTOR.class)
-	@Select(path = { Header.class, FlexDiv.class, HtmlLabel.class }, pos = { -1, 0, 1 }, value = ObservableValueSelector.PASSWORD_INSTANCE_SELECTOR.class)
-	@Select(path = { Header.class, CheckBoxDisplayer.class }, value = ObservableValueSelector.INSTANCE_CHECK_BOX_DISPLAYER.class)
-	@Select(path = { Header.class, FlexDiv.class }, value = ObservableValueSelector.INSTANCE_LABEL_DISPLAYER.class)
+	@ForEach(path = Content.class, value = ForEachExtractor.OTHER_COMPONENTS_1.class)
+	@Select(path = Header.class, value = GenericSelector.GENERIC_INSTANCE_VALUE_DISPLAYER.class)
+	@Select(path = { Header.class, FlexDiv.class, HtmlLabel.class }, pos = { -1, 0, 0 }, value = GenericSelector.NON_PASSWORD_INSTANCE_SELECTOR.class)
+	@Select(path = { Header.class, FlexDiv.class, HtmlLabel.class }, pos = { -1, 0, 1 }, value = GenericSelector.PASSWORD_INSTANCE_SELECTOR.class)
+	@Select(path = { Header.class, CheckBoxDisplayer.class }, value = GenericSelector.INSTANCE_CHECK_BOX_DISPLAYER.class)
+	@Select(path = { Header.class, FlexDiv.class }, value = GenericSelector.INSTANCE_LABEL_DISPLAYER.class)
 	@Children({ Content.class, Header.class })
 	@Children(path = Header.class, value = { CheckBoxDisplayer.class, FlexDiv.class })
 	@Children(path = { Header.class, FlexDiv.class }, value = { GSLabelDisplayer.class, HtmlLabel.class })

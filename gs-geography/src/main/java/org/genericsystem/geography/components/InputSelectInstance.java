@@ -17,7 +17,7 @@ import org.genericsystem.reactor.annotations.ForEachContext;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.context.ContextAction;
-import org.genericsystem.reactor.context.ObservableListExtractorFromContext;
+import org.genericsystem.reactor.context.ForEachExtractorFromContext;
 import org.genericsystem.reactor.context.StringExtractor;
 import org.genericsystem.reactor.context.TextBinding;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlBr;
@@ -123,7 +123,7 @@ public class InputSelectInstance extends HtmlDiv {
 		return c.getGeneric().getSubInstances().filter(res -> (t.isPresent() && t.get().length() > 1) ? ((String) res.getValue()).toLowerCase().startsWith(t.get().toLowerCase()) : false).sorted();
 	}
 
-	public static class TEXT_FILTERED implements ObservableListExtractorFromContext {
+	public static class TEXT_FILTERED implements ForEachExtractorFromContext {
 		@Override
 		public Observable<Snapshot<Generic>> apply(Context context, Tag tag) {
 			Property<String> text = tag.getContextProperty("txt", context);

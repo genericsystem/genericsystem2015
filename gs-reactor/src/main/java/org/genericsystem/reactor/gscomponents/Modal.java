@@ -13,7 +13,7 @@ import org.genericsystem.reactor.context.ContextAction.DISPLAY_NONE;
 import org.genericsystem.reactor.context.ContextAction.FLUSH;
 import org.genericsystem.reactor.context.ContextAction.RESET_SELECTION;
 import org.genericsystem.reactor.context.ContextAction.UNMOUNT;
-import org.genericsystem.reactor.context.ObservableContextSelector.SELECTION_SELECTOR;
+import org.genericsystem.reactor.context.OptionalContextSelector.SELECTION_SELECTOR;
 import org.genericsystem.reactor.contextproperties.SelectionDefaults;
 import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledInstanceEditor;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
