@@ -13,20 +13,26 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.common.Root;
 import org.genericsystem.cv.Img;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.Consolidated;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.Consolidated.ConsolidatedInstance;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.Doc;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.Doc.DocInstance;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.DocPath;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.DocPath.DocPathInstance;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.DocTimestamp;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.DocTimestamp.DocTimestampInstance;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.ImgFilter;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.ImgFilter.ImgFilterInstance;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.Zone;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.Zone.ZoneInstance;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.ZoneNum;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.ZoneNum.ZoneNumInstance;
+import org.genericsystem.cv.classifier.newmodel.SimpleModel.ConsolidatedType;
+import org.genericsystem.cv.classifier.newmodel.SimpleModel.ConsolidatedType.ConsolidatedInstance;
+import org.genericsystem.cv.classifier.newmodel.SimpleModel.DocClassType;
+import org.genericsystem.cv.classifier.newmodel.SimpleModel.DocClassType.DocClassInstance;
+import org.genericsystem.cv.classifier.newmodel.SimpleModel.DocType;
+import org.genericsystem.cv.classifier.newmodel.SimpleModel.DocType.DocInstance;
+import org.genericsystem.cv.classifier.newmodel.SimpleModel.ImgDocRel;
+import org.genericsystem.cv.classifier.newmodel.SimpleModel.ImgDocRel.ImgDocLink;
+import org.genericsystem.cv.classifier.newmodel.SimpleModel.ImgPathType;
+import org.genericsystem.cv.classifier.newmodel.SimpleModel.ImgPathType.ImgPathInstance;
+import org.genericsystem.cv.classifier.newmodel.SimpleModel.ImgTimestampType;
+import org.genericsystem.cv.classifier.newmodel.SimpleModel.ImgTimestampType.ImgTimestampInstance;
+import org.genericsystem.cv.classifier.newmodel.SimpleModel.ImgType;
+import org.genericsystem.cv.classifier.newmodel.SimpleModel.ImgType.ImgInstance;
+import org.genericsystem.cv.classifier.newmodel.SimpleModel.LayoutType;
+import org.genericsystem.cv.classifier.newmodel.SimpleModel.LayoutType.LayoutInstance;
+import org.genericsystem.cv.classifier.newmodel.SimpleModel.ZoneNumType;
+import org.genericsystem.cv.classifier.newmodel.SimpleModel.ZoneNumType.ZoneNumInstance;
+import org.genericsystem.cv.classifier.newmodel.SimpleModel.ZoneType;
+import org.genericsystem.cv.classifier.newmodel.SimpleModel.ZoneType.ZoneInstance;
 import org.genericsystem.cv.comparator.FillModelWithData;
 import org.genericsystem.cv.comparator.ImgFilterFunction;
 import org.genericsystem.cv.comparator.ImgFunction;
@@ -76,23 +82,23 @@ public class FillNewModelWithData {
 	}
 
 	public static Root getEngine(String gsPath) {
-		return new Engine(gsPath, ImgFilter.class, ImgFilterInstance.class, Doc.class, DocInstance.class, Zone.class, ZoneInstance.class, ZoneNum.class, ZoneNumInstance.class, Consolidated.class, ConsolidatedInstance.class, DocPath.class,
-				DocPathInstance.class, DocTimestamp.class, DocTimestampInstance.class);
+		return new Engine(gsPath, DocClassType.class, DocClassInstance.class, LayoutType.class, LayoutInstance.class, ImgDocRel.class, ImgDocLink.class, DocType.class, DocInstance.class, ImgType.class, ImgInstance.class, ZoneType.class, ZoneInstance.class,
+				ZoneNumType.class, ZoneNumInstance.class, ConsolidatedType.class, ConsolidatedInstance.class, ImgPathType.class, ImgPathInstance.class, ImgTimestampType.class, ImgTimestampInstance.class);
 	}
 
 	public static boolean registerNewFile(Root engine, Path imgPath, Path resourcesFolder) {
 		logger.info("Adding a new image ({}) ", imgPath.getFileName());
 		String filenameExt = ModelTools.generateFileName(imgPath);
-		Doc doc = engine.find(Doc.class);
-		DocInstance docInstance = doc.setDoc(filenameExt);
+		ImgType imgType = engine.find(ImgType.class);
+		ImgInstance imgInstance = imgType.setImg(filenameExt);
 		engine.getCurrentCache().flush();
-		if (null == docInstance) {
+		if (null == imgInstance) {
 			logger.error("An error has occured while saving file {}", filenameExt);
 			return false;
 		} else {
 			Path relative = Paths.get(BASE_PATH).relativize(imgPath);
-			docInstance.setDocPath(relative.toString());
-			docInstance.setDocTimestamp(ModelTools.getCurrentDate());
+			imgInstance.setImgPath(relative.toString());
+			imgInstance.setImgTimestamp(ModelTools.getCurrentDate());
 			engine.getCurrentCache().flush();
 			try {
 				Files.copy(imgPath, resourcesFolder.resolve(filenameExt), StandardCopyOption.REPLACE_EXISTING);
@@ -200,13 +206,13 @@ public class FillNewModelWithData {
 		JsonObject zonesResults = data.getJsonObject(ZONES);
 
 		// Get the generics
-		Doc doc = engine.find(Doc.class);
+		ImgType imgType = engine.find(ImgType.class);
 
 		// Set the doc instance and some attributes
-		DocInstance docInstance = doc.setDoc(filenameExt);
+		ImgInstance imgInstance = imgType.setImg(filenameExt);
 		try {
-			docInstance.setDocPath(docPath);
-			docInstance.setDocTimestamp(timestamp);
+			imgInstance.setImgPath(docPath);
+			imgInstance.setImgTimestamp(timestamp);
 		} catch (RollbackException e) {
 			logger.debug("Filename or timestamp have already been set. Resuming task...");
 		} catch (Exception e) {
@@ -219,7 +225,7 @@ public class FillNewModelWithData {
 			JsonObject field = (JsonObject) entry.getValue();
 			String ocr = field.getString(CONSOLIDATED);
 			JsonObject rect = field.getJsonObject(RECT);
-			ZoneInstance zoneInstance = docInstance.setZone(rect.encode());
+			ZoneInstance zoneInstance = imgInstance.setZone(rect.encode());
 			zoneInstance.setConsolidated(ocr);
 			zoneInstance.setZoneNum(field.getInteger(FIELD_NUM));
 		});
