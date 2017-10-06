@@ -6,7 +6,6 @@ import org.genericsystem.common.Root;
 import org.genericsystem.cv.comparator.FillModelWithData;
 import org.genericsystem.cv.model.DocClass;
 import org.genericsystem.cv.model.DocClass.DocClassInstance;
-import org.genericsystem.cv.model.ModelTools;
 import org.genericsystem.cv.model.ZoneGeneric.ZoneInstance;
 import org.opencv.core.Rect;
 

@@ -8,7 +8,7 @@ import org.genericsystem.cv.comparator.ComputeBestTextPerZone;
 import org.genericsystem.cv.comparator.ComputeTrainedScores;
 import org.genericsystem.cv.model.Doc.DocInstance;
 import org.genericsystem.cv.model.DocClass.DocClassInstance;
-import org.genericsystem.cv.model.ModelTools;
+import org.genericsystem.cv.utils.ModelTools;
 import org.genericsystem.ir.app.gui.pages.HomePageTable;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.EncryptionUtils;

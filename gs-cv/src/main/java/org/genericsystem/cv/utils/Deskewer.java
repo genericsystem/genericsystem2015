@@ -1,4 +1,4 @@
-package org.genericsystem.cv.classifier;
+package org.genericsystem.cv.utils;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,7 +13,6 @@ import java.util.stream.DoubleStream;
 
 import org.apache.commons.io.FilenameUtils;
 import org.genericsystem.cv.Img;
-import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;

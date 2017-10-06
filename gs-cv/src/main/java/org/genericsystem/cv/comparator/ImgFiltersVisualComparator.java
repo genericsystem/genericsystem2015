@@ -6,10 +6,10 @@ import java.util.Map.Entry;
 
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
-import org.genericsystem.cv.Tools;
 import org.genericsystem.cv.Zone;
 import org.genericsystem.cv.Zones;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
+import org.genericsystem.cv.utils.Tools;
 import org.opencv.core.Core;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;

@@ -12,7 +12,7 @@ import java.util.function.Function;
 
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.Ocr;
-import org.genericsystem.cv.docPattern.OCRPlasty;
+import org.genericsystem.cv.utils.OCRPlasty;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint2f;

@@ -5,6 +5,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 
 import org.genericsystem.cv.utils.NativeLibraryLoader;
+import org.genericsystem.cv.utils.Tools;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.video.BackgroundSubtractorMOG2;

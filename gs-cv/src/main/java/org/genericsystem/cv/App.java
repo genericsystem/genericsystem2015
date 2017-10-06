@@ -13,6 +13,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.genericsystem.cv.utils.NativeLibraryLoader;
+import org.genericsystem.cv.utils.Tools;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
