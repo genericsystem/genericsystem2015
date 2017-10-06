@@ -52,6 +52,8 @@ public class SimpleModelTest {
 	private static final String lay4 = "layout4";
 	private static final String lay5 = "layout5";
 	private static final String link1 = "link1";
+	private static final String link2 = "link2";
+	private static final String link3 = "link3";
 	private static final String filename1 = "document1.png";
 	private static final String filename2 = "document2.png";
 	private static final String docPath1 = "/path/to/file";
@@ -85,6 +87,7 @@ public class SimpleModelTest {
 
 		assertEquals(instance1, instance2); // Getter OK
 		assertEquals(instance1.getValue(), docClass1); // Instance value OK
+		assertEquals(instances.size(), 2);
 		assertTrue(instances.containsAll(Arrays.asList(instance1, instance3))); // Snapshot OK
 
 		try {
@@ -105,6 +108,7 @@ public class SimpleModelTest {
 
 		assertEquals(doc1, doc3); // Getter OK
 		assertEquals(doc1.getValue(), filename1); // Instance value OK
+		assertEquals(docs.size(), 2);
 		assertTrue(docs.containsAll(Arrays.asList(doc1, doc4))); // Snapshot OK
 
 		try {
@@ -125,6 +129,7 @@ public class SimpleModelTest {
 
 		assertEquals(layout1, layout2); // Getter OK
 		assertEquals(layout1.getValue(), lay1); // Instance value OK
+		assertEquals(layouts.size(), 2);
 		assertTrue(layouts.containsAll(Arrays.asList(layout1, layout3))); // Snapshot OK
 
 		try {
@@ -179,11 +184,79 @@ public class SimpleModelTest {
 		ImgDocRel imgDocRel = engine.find(ImgDocRel.class);
 		DocClassInstance docClass = docClassType.addDocClass(docClass1);
 		DocInstance doc = docClass.addDocInstance(filename1);
-		ImgInstance img = imgType.addImg(filename1);
-		ImgDocLink link = (ImgDocLink) imgDocRel.setInstance(link1, img, doc);
+		ImgInstance img1 = imgType.addImg(filename1);
+		ImgInstance img2 = imgType.addImg(filename2);
+		ImgDocLink imgDocLink1 = imgDocRel.addImgDocLink(link1, img1, doc);
+		ImgDocLink imgDocLink2 = imgDocRel.addImgDocLink(link2, img2, doc);
+		ImgDocLink imgDocLink3 = imgDocRel.getImgDocLink(img1, doc);
+		Snapshot<ImgDocLink> links = imgDocRel.getAllImgDocLinks();
 
-		// XXX finish
-		// assertEquals(doc.getDocClassInstance(), docClass); // Composition OK
+		assertEquals(imgDocLink1.getImgInstance(), img1); // Composition OK
+		assertEquals(imgDocLink1.getDocInstance(), doc); // Composition OK
+		assertEquals(imgDocLink3, imgDocLink1); // Getter OK
+		assertEquals(links.size(), 2);
+		assertTrue(links.containsAll(Arrays.asList(imgDocLink1, imgDocLink2))); // Snapshot OK
+
+		try {
+			imgDocRel.addImgDocLink(link2, img1, doc);
+		} catch (Exception e) {
+			assertTrue(e instanceof RollbackException);
+		}
+	}
+
+	@Test
+	public void testImgDocLinksSingularConstraint() {
+		DocClassType docClassType = engine.find(DocClassType.class);
+		ImgType imgType = engine.find(ImgType.class);
+		ImgDocRel imgDocRel = engine.find(ImgDocRel.class);
+		DocClassInstance docClass = docClassType.addDocClass(docClass1);
+		DocInstance doc1 = docClass.addDocInstance(filename1);
+		DocInstance doc2 = docClass.addDocInstance(filename2);
+		ImgInstance img1 = imgType.addImg(filename1);
+		ImgInstance img2 = imgType.addImg(filename2);
+		imgDocRel.addImgDocLink(link1, img1, doc1);
+		imgDocRel.addImgDocLink(link2, img2, doc1);
+
+		try {
+			imgDocRel.addImgDocLink(link3, img1, doc2);
+		} catch (Exception e) {
+			assertTrue(e instanceof RollbackException);
+		}
+	}
+
+	@Test
+	public void testImgDocLinksFromDoc() {
+		DocClassType docClassType = engine.find(DocClassType.class);
+		ImgType imgType = engine.find(ImgType.class);
+		DocClassInstance docClass = docClassType.addDocClass(docClass1);
+		DocInstance doc = docClass.addDocInstance(filename1);
+		ImgInstance img1 = imgType.addImg(filename1);
+		ImgInstance img2 = imgType.addImg(filename2);
+		ImgDocLink imgDocLink1 = doc.addImgDocLink(link1, img1);
+		ImgDocLink imgDocLink2 = doc.addImgDocLink(link2, img2);
+		ImgDocLink imgDocLink3 = doc.getImgDocLink(img1);
+		Snapshot<ImgDocLink> links = doc.getAllImgDocLinks();
+		Snapshot<ImgInstance> imgs = doc.getAllLinkedImgs();
+
+		assertEquals(imgDocLink3, imgDocLink1); // Getter OK
+		assertEquals(links.size(), 2);
+		assertTrue(links.containsAll(Arrays.asList(imgDocLink1, imgDocLink2))); // Snapshot OK
+		assertEquals(imgs.size(), 2);
+		assertTrue(imgs.containsAll(Arrays.asList(img1, img2))); // Snapshot OK
+	}
+
+	@Test
+	public void testImgDocLinksFromImg() {
+		DocClassType docClassType = engine.find(DocClassType.class);
+		ImgType imgType = engine.find(ImgType.class);
+		DocClassInstance docClass = docClassType.addDocClass(docClass1);
+		DocInstance doc = docClass.addDocInstance(filename1);
+		ImgInstance img = imgType.addImg(filename1);
+		ImgDocLink imgDocLink1 = img.addImgDocLink(link1, doc);
+		ImgDocLink imgDocLink2 = img.getImgDocLink();
+
+		assertEquals(imgDocLink2, imgDocLink1); // Getter OK
+		assertEquals(img.getLinkedDoc(), doc);
 	}
 
 	@Test
@@ -196,6 +269,7 @@ public class SimpleModelTest {
 
 		assertEquals(doc1, doc2); // Getter OK
 		assertEquals(doc1.getValue(), filename1); // Instance value OK
+		assertEquals(docs.size(), 2);
 		assertTrue(docs.containsAll(Arrays.asList(doc1, doc3))); // Snapshot OK
 
 		try {
@@ -220,6 +294,7 @@ public class SimpleModelTest {
 
 		assertEquals(zone1.getImgInstance(), doc1); // Composition OK
 		assertEquals(zone3, zone1); // Getter ok
+		assertEquals(zones.size(), 2);
 		assertTrue(zones.containsAll(Arrays.asList(zone1, zone2))); // Snapshot OK
 		assertTrue(emptyZones.contains(zone2));
 		assertFalse(emptyZones.contains(zone1));

@@ -143,7 +143,18 @@ public class SimpleModel {
 			public DocInstance getDocInstance() {
 				return (DocInstance) getComponent(1);
 			}
+		}
 
+		public Snapshot<ImgDocLink> getAllImgDocLinks() {
+			return (Snapshot) getInstances();
+		}
+
+		public ImgDocLink addImgDocLink(String name, ImgInstance imgInstance, DocInstance docInstance) {
+			return (ImgDocLink) addInstance(name, imgInstance, docInstance);
+		}
+
+		public ImgDocLink getImgDocLink(ImgInstance imgInstance, DocInstance docInstance) {
+			return (ImgDocLink) getInstance(imgInstance, docInstance);
 		}
 	}
 
@@ -162,6 +173,22 @@ public class SimpleModel {
 
 			public DocClassInstance getDocClassInstance() {
 				return (DocClassInstance) getBaseComponent();
+			}
+
+			public Snapshot<ImgDocLink> getAllImgDocLinks() {
+				return (Snapshot) getLinks(getRoot().find(ImgDocRel.class));
+			}
+
+			public Snapshot<ImgInstance> getAllLinkedImgs() {
+				return getAllImgDocLinks().map(link -> link.getImgInstance());
+			}
+
+			public ImgDocLink addImgDocLink(String name, ImgInstance imgInstance) {
+				return (ImgDocLink) addLink(getRoot().find(ImgDocRel.class), name, imgInstance);
+			}
+
+			public ImgDocLink getImgDocLink(ImgInstance imgInstance) {
+				return (ImgDocLink) getLink(getRoot().find(ImgDocRel.class), imgInstance);
 			}
 		}
 
@@ -231,6 +258,18 @@ public class SimpleModel {
 
 			public ImgTimestampInstance getImgTimestamp() {
 				return (ImgTimestampInstance) getHolder(getRoot().find(ImgTimestampType.class));
+			}
+
+			public ImgDocLink addImgDocLink(String name, DocInstance docInstance) {
+				return (ImgDocLink) addLink(getRoot().find(ImgDocRel.class), name, docInstance);
+			}
+
+			public ImgDocLink getImgDocLink() {
+				return (ImgDocLink) getLink(getRoot().find(ImgDocRel.class));
+			}
+
+			public DocInstance getLinkedDoc() {
+				return getImgDocLink().getDocInstance();
 			}
 
 		}
