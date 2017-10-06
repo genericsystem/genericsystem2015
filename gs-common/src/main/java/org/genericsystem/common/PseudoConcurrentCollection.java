@@ -218,10 +218,10 @@ public class PseudoConcurrentCollection<T extends IGeneric<?>> implements Snapsh
 		return map.get(o);
 	}
 
-	@SuppressWarnings("unchecked")
-	private Subject<T> adds = (Subject<T>) PublishSubject.create().toSerialized();
-	@SuppressWarnings("unchecked")
-	private Subject<T> removes = (Subject<T>) PublishSubject.create().toSerialized();
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private Subject<T> adds = (Subject) PublishSubject.create().toSerialized();
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private Subject<T> removes = (Subject) PublishSubject.create().toSerialized();
 
 	public Observable<T> getFilteredAdds(Predicate<T> predicate) {
 		return adds.hide().filter(x -> fireInvalidations && predicate.test(x));
