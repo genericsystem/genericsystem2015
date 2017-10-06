@@ -66,14 +66,13 @@ public class FillNewModelWithData {
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 	private static final String gsPath = System.getenv("HOME") + "/genericsystem/gs-cv-newmodel";
 
-	private static final String BASE_PATH = System.getenv("HOME") + "/genericsystem/gs-ir-files/";
-
 	public static void main(String[] args) {
-		Path filePath = Paths.get(BASE_PATH, "converted-png", "image-1.png");
+		Path basePath = Paths.get(System.getenv("HOME") + "/genericsystem/gs-ir-files/");
+		Path filePath = basePath.resolve(Paths.get("converted-png", "image-1.png"));
 		Path deskewedPath = Deskewer.deskewAndSave(filePath);
 		JsonObject jsonFields = detectFields(deskewedPath);
 		System.out.println(jsonFields.encodePrettily());
-		JsonObject data = processFile(deskewedPath, jsonFields);
+		JsonObject data = processFile(basePath.relativize(deskewedPath), basePath, jsonFields);
 		System.out.println(data.encodePrettily());
 		Root engine = getEngine(gsPath);
 		saveOcrDataInModel(engine, data);
@@ -86,9 +85,10 @@ public class FillNewModelWithData {
 				ZoneNumType.class, ZoneNumInstance.class, ConsolidatedType.class, ConsolidatedInstance.class, ImgPathType.class, ImgPathInstance.class, ImgTimestampType.class, ImgTimestampInstance.class);
 	}
 
-	public static boolean registerNewFile(Root engine, Path imgPath, Path resourcesFolder) {
-		logger.info("Adding a new image ({}) ", imgPath.getFileName());
-		String filenameExt = ModelTools.generateFileName(imgPath);
+	public static boolean registerNewFile(Root engine, Path relativeImgPath, Path basePath, Path resourcesFolder) {
+		logger.info("Adding a new image ({}) ", relativeImgPath.getFileName());
+		Path absolutePath = basePath.resolve(relativeImgPath);
+		String filenameExt = ModelTools.generateFileName(absolutePath);
 		ImgType imgType = engine.find(ImgType.class);
 		ImgInstance imgInstance = imgType.setImg(filenameExt);
 		engine.getCurrentCache().flush();
@@ -96,12 +96,11 @@ public class FillNewModelWithData {
 			logger.error("An error has occured while saving file {}", filenameExt);
 			return false;
 		} else {
-			Path relative = Paths.get(BASE_PATH).relativize(imgPath);
-			imgInstance.setImgPath(relative.toString());
+			imgInstance.setImgPath(relativeImgPath.toString());
 			imgInstance.setImgTimestamp(ModelTools.getCurrentDate());
 			engine.getCurrentCache().flush();
 			try {
-				Files.copy(imgPath, resourcesFolder.resolve(filenameExt), StandardCopyOption.REPLACE_EXISTING);
+				Files.copy(absolutePath, resourcesFolder.resolve(filenameExt), StandardCopyOption.REPLACE_EXISTING);
 			} catch (IOException e) {
 				logger.error(String.format("An error has occured while copying image %s to resources folder", filenameExt), e);
 			}
@@ -120,27 +119,20 @@ public class FillNewModelWithData {
 		}
 	}
 
-	public static JsonObject processFile(Path imgPath, JsonObject jsonFields) {
-		if (!imgPath.isAbsolute())
-			throw new IllegalArgumentException("The provided path must be absolute. Got instead: " + imgPath.toString());
+	public static JsonObject processFile(Path relativeImgPath, Path basePath, JsonObject jsonFields) {
+		Path absolutePath = basePath.resolve(relativeImgPath);
 		// Create a JsonObject for the answer
 		JsonObject jsonObject = new JsonObject();
-		jsonObject.put(FILENAME, imgPath.getFileName().toString());
-		jsonObject.put(ENCODED_FILENAME, ModelTools.generateFileName(imgPath));
+		jsonObject.put(FILENAME, relativeImgPath.getFileName().toString());
+		jsonObject.put(ENCODED_FILENAME, ModelTools.generateFileName(absolutePath));
 		jsonObject.put(DOC_TIMESTAMP, ModelTools.getCurrentDate());
-		try {
-			// Case where the given Path is absolute
-			jsonObject.put(DOC_PATH, Paths.get(BASE_PATH).relativize(imgPath).toString());
-		} catch (IllegalArgumentException e) {
-			logger.debug("Unable to find a common path between BASE_PATH and imgPath. Using the provided path instead.", e);
-			jsonObject.put(DOC_PATH, imgPath.toString());
-		}
+		jsonObject.put(DOC_PATH, relativeImgPath.toString());
 
 		// Get the doc fields
 		DocFields fields = DocFields.of(jsonFields);
 
 		// Get the imgFilterFunctions, and create a Map with the processed images
-		Img deskewed = new Img(imgPath.toString());
+		Img deskewed = new Img(absolutePath.toString());
 		final List<ImgFilterFunction> imgFilterFunctions = FillModelWithData.getFilterFunctions();
 		Map<String, Img> imgs = new ConcurrentHashMap<>(imgFilterFunctions.size() + 1);
 		imgFilterFunctions.forEach(entry -> {
@@ -161,7 +153,7 @@ public class FillNewModelWithData {
 			if (null != img) {
 				imgs.put(filtername, img);
 			} else {
-				logger.error("An error as occured for image {} and filter {}", imgPath.getFileName(), filtername);
+				logger.error("An error as occured for image {} and filter {}", relativeImgPath.getFileName(), filtername);
 			}
 		});
 

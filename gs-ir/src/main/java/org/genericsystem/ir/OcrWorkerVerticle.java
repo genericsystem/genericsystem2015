@@ -1,6 +1,5 @@
 package org.genericsystem.ir;
 
-import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.genericsystem.cv.classifier.FillNewModelWithData;
@@ -26,8 +25,7 @@ public class OcrWorkerVerticle extends ActionVerticle {
 	@Override
 	protected void handle(Future<Object> future, JsonObject task) {
 		JsonObject fields = task.getJsonObject(DistributedVerticle.JSON_OBJECT);
-		Path imgPath = Paths.get(DistributedVerticle.BASE_PATH).resolve(Paths.get(task.getString(DistributedVerticle.FILENAME)));
-		JsonObject ocrData = FillNewModelWithData.processFile(imgPath, fields);
+		JsonObject ocrData = FillNewModelWithData.processFile(Paths.get(task.getString(DistributedVerticle.FILENAME)), Paths.get(DistributedVerticle.BASE_PATH), fields);
 		if (null != ocrData)
 			future.complete(ocrData);
 		else
