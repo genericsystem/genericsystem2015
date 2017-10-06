@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -55,14 +54,6 @@ public class Deskewer {
 	private static final double ransacError = 0.1;
 	private static final double closedImgSizeFactor = 2E-6;
 	private static final double minAreaFactor = 3E-5;
-
-	// Only for testing purposes
-	public static void main(String[] args) {
-		final String filename = System.getenv("HOME") + "/genericsystem/gs-ir-files/converted-png/image-test2-0.png";
-		Path imgPath = Paths.get(filename);
-		Path temp = deskewAndSave(imgPath, METHOD.ROTADED_RECTANGLES);
-		System.out.println(temp);
-	}
 
 	/**
 	 * Deskew an image, and save it in the same folder as the original image.
@@ -139,6 +130,7 @@ public class Deskewer {
 		logger.trace("Deskew angle = {}", angle);
 		if (Double.isNaN(angle))
 			return img;
+		logger.info("Found deskew angle : {}", angle);
 
 		final Point center = new Point(img.width() / 2, img.height() / 2);
 		// Rotation matrix
