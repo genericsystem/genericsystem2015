@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.genericsystem.cv.utils.Levenshtein;
+
 //TODO compute score / bestText on every add ?
 public class Scores {
 

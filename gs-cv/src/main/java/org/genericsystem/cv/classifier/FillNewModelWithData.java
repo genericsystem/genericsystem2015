@@ -27,7 +27,9 @@ import org.genericsystem.cv.classifier.newmodel.SimpleModel.ZoneNum.ZoneNumInsta
 import org.genericsystem.cv.comparator.FillModelWithData;
 import org.genericsystem.cv.comparator.ImgFilterFunction;
 import org.genericsystem.cv.comparator.ImgFunction;
-import org.genericsystem.cv.model.ModelTools;
+import org.genericsystem.cv.utils.ClassifierUsingFields;
+import org.genericsystem.cv.utils.Deskewer;
+import org.genericsystem.cv.utils.ModelTools;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.genericsystem.kernel.Engine;
 import org.opencv.core.Rect;

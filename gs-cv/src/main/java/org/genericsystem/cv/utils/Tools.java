@@ -1,4 +1,4 @@
-package org.genericsystem.cv;
+package org.genericsystem.cv.utils;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 
 import javax.imageio.ImageIO;
 
+import org.genericsystem.cv.Img;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
 import org.opencv.imgcodecs.Imgcodecs;

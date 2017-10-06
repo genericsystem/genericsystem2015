@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
-import org.genericsystem.cv.Levenshtein;
 import org.genericsystem.cv.model.Doc;
 import org.genericsystem.cv.model.Doc.DocInstance;
 import org.genericsystem.cv.model.DocClass;
@@ -16,6 +15,7 @@ import org.genericsystem.cv.model.ZoneGeneric;
 import org.genericsystem.cv.model.ZoneGeneric.ZoneInstance;
 import org.genericsystem.cv.model.ZoneText;
 import org.genericsystem.cv.model.ZoneText.ZoneTextInstance;
+import org.genericsystem.cv.utils.Levenshtein;
 import org.genericsystem.kernel.Engine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

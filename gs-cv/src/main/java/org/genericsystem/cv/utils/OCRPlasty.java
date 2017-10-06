@@ -1,4 +1,4 @@
-package org.genericsystem.cv.docPattern;
+package org.genericsystem.cv.utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
-
-import org.genericsystem.cv.Levenshtein;
 
 public class OCRPlasty {
 

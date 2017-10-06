@@ -7,7 +7,7 @@ import org.genericsystem.api.core.annotations.SystemGeneric;
 import org.genericsystem.api.core.annotations.constraints.PropertyConstraint;
 import org.genericsystem.common.Generic;
 import org.genericsystem.cv.model.DocClass.DocClassInstance;
-import org.genericsystem.cv.model.ModelTools;
+import org.genericsystem.cv.utils.ModelTools;
 import org.opencv.core.Rect;
 
 @SystemGeneric

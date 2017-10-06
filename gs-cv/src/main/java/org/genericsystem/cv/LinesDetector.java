@@ -12,6 +12,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.genericsystem.cv.utils.NativeLibraryLoader;
+import org.genericsystem.cv.utils.Tools;
 import org.genericsystem.layout.Ransac;
 import org.genericsystem.layout.Ransac.Model;
 import org.opencv.core.Core;

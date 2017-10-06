@@ -4,6 +4,7 @@ import java.nio.file.Paths;
 
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
+import org.genericsystem.cv.utils.Deskewer;
 import org.opencv.core.Scalar;
 
 import javafx.scene.layout.GridPane;

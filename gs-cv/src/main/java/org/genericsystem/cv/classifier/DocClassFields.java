@@ -3,6 +3,7 @@ package org.genericsystem.cv.classifier;
 import java.lang.invoke.MethodHandles;
 
 import org.genericsystem.cv.Img;
+import org.genericsystem.cv.utils.ClassifierUsingFields;
 import org.opencv.core.Scalar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

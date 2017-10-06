@@ -6,7 +6,7 @@ import java.nio.file.Paths;
 import org.genericsystem.common.Root;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.Zones;
-import org.genericsystem.cv.model.ModelTools;
+import org.genericsystem.cv.utils.ModelTools;
 import org.opencv.core.Scalar;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.slf4j.Logger;

@@ -2,7 +2,7 @@ package org.genericsystem.cv;
 
 import java.io.Serializable;
 
-import org.genericsystem.cv.model.ModelTools;
+import org.genericsystem.cv.utils.ModelTools;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;

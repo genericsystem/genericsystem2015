@@ -1,4 +1,4 @@
-package org.genericsystem.cv.classifier;
+package org.genericsystem.cv.utils;
 
 import java.io.File;
 import java.io.IOException;

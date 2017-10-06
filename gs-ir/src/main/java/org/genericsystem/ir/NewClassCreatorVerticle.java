@@ -4,7 +4,7 @@ import java.lang.invoke.MethodHandles;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.genericsystem.cv.classifier.NewClassCreator;
+import org.genericsystem.cv.utils.NewClassCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
