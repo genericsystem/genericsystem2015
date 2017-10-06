@@ -248,4 +248,26 @@ public class FillNewModelWithData {
 		engine.getCurrentCache().flush();
 	}
 
+	public static void linkImgToDocClass(Root engine, Path filePath, String defaultClassName) {
+		String name = ModelTools.generateFileName(filePath);
+		DocClassType docClassType = engine.find(DocClassType.class);
+		ImgType imgType = engine.find(ImgType.class);
+
+		ImgInstance imgInstance = imgType.getImg(name);
+
+		DocClassInstance defaultDocClass = docClassType.getDocClass(defaultClassName);
+		if (null == defaultDocClass) {
+			logger.info("Default class {} does not exist. Creating...", defaultClassName);
+			defaultDocClass = docClassType.addDocClass(defaultClassName);
+		}
+
+		ImgDocLink imgDocLink = imgInstance.getImgDocLink();
+		if (null == imgDocLink) {
+			DocInstance docInstance = defaultDocClass.addDocInstance(name);
+			docInstance.addImgDocLink(name, imgInstance);
+		} else {
+			logger.info("Img {} is already in class {}", name, imgDocLink.getDocInstance().getDocClassInstance());
+		}
+	}
+
 }

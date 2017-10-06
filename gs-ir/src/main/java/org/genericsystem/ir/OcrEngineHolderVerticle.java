@@ -31,8 +31,9 @@ public class OcrEngineHolderVerticle extends AbstractSingletonVerticle {
 		};
 		vertx.deployVerticle(new AddImageToEngineVerticle(engine), completionHandler);
 		vertx.deployVerticle(new DezonerVerticle(engine), completionHandler);
-		vertx.deployVerticle(new OcrParametersVerticle(engine), completionHandler);
+		// vertx.deployVerticle(new OcrParametersVerticle(engine), completionHandler);
 		vertx.deployVerticle(new OcrPersistenceVerticle(engine), completionHandler);
+		vertx.deployVerticle(new LinkImgToDocClassVerticle(engine), completionHandler);
 	}
 
 	@Override
