@@ -4,7 +4,7 @@ import java.lang.invoke.MethodHandles;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.genericsystem.cv.classifier.ImageAnnotator;
+import org.genericsystem.cv.utils.ImageAnnotator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
