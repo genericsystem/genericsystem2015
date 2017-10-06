@@ -215,7 +215,7 @@ public class FillNewModelWithData {
 		try {
 			imgInstance = imgType.addImg(filenameExt);
 		} catch (RollbackException e1) {
-			logger.info(String.format("File {} has already been processed by the system. Retriving the reference...", filenameExt), e1);
+			logger.info(String.format("File %s has already been processed by the system. Retrieving the reference...", filenameExt), e1);
 			imgInstance = imgType.getImg(filenameExt);
 		}
 		try {
@@ -232,12 +232,12 @@ public class FillNewModelWithData {
 			logger.info("Current zone: {}", entry.getKey());
 			JsonObject field = (JsonObject) entry.getValue();
 			String ocr = field.getString(CONSOLIDATED);
-			JsonObject rect = field.getJsonObject(RECT);
+			String rect = field.getJsonObject(RECT).encode();
 			int num = field.getInteger(FIELD_NUM);
 			// Try to get Zone: override if exists, otherwise create a new one
-			ZoneInstance zoneInstance = imgInstance.getZone(rect.encode());
+			ZoneInstance zoneInstance = imgInstance.getZone(rect);
 			if (null == zoneInstance) {
-				zoneInstance = imgInstance.addZone(rect.encode());
+				zoneInstance = imgInstance.addZone(rect);
 			} else {
 				logger.debug("Zone {} already known. Override consolidated ('{}' with '{}') and zone num ('{}' with '{}')", entry.getKey(), zoneInstance.getConsolidated(), ocr, zoneInstance.getZoneNum(), num);
 			}
