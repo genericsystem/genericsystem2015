@@ -95,14 +95,14 @@ public class Differential implements IDifferential<Generic> {
 
 			@Override
 			public Stream<Generic> unfilteredStream() {
-				return Stream.concat(adds.contains(generic) ? Stream.empty() : subDifferential.getDependencies(generic).filter(new IndexFilter(FiltersBuilder.NOT_CONTAINED_IN_PARAM, new ArrayList<>(removes.toList()))).stream(),
+				return Stream.concat(adds.contains(generic) ? Stream.empty() : subDifferential.getDependencies(generic).filter(new IndexFilter(FiltersBuilder.NOT_CONTAINED_IN_PARAM, removes.toSet())).stream(),
 						adds.filter(new IndexFilter(FiltersBuilder.IS_DIRECT_DEPENDENCY_OF, generic)).stream());
 			}
 
 			@Override
 			public Snapshot<Generic> filter(List<IndexFilter> filters) {
 				List<IndexFilter> filters_ = new ArrayList<>(filters);
-				filters_.add(new IndexFilter(FiltersBuilder.NOT_CONTAINED_IN_PARAM, new ArrayList<>(removes.toList())));
+				filters_.add(new IndexFilter(FiltersBuilder.NOT_CONTAINED_IN_PARAM, removes.toSet()));
 				return Snapshot.super.filter(filters_);
 			}
 

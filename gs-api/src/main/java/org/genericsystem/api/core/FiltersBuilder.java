@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -25,7 +26,7 @@ public class FiltersBuilder {
 	public static final FilterGetter HAS_COMPONENT_AT_POS = params -> (holder -> holder.getComponent((int) params[1]) != null && ((IGeneric) params[0]).isSpecializationOf(holder.getComponent((int) params[1])));
 	public static final FilterGetter IS_SPECIALIZATION_OF = params -> (holder -> ((IGeneric) holder).isSpecializationOf((IGeneric) params[0]));
 	public static final FilterGetter HAS_LEVEL = params -> (holder -> holder.getLevel() == (int) params[0]);
-	public static final FilterGetter NOT_CONTAINED_IN_PARAM = params -> (x -> !((List) params[0]).contains(x));
+	public static final FilterGetter NOT_CONTAINED_IN_PARAM = params -> (x -> !((Set) params[0]).contains(x));
 	public static final FilterGetter IS_DIRECT_DEPENDENCY_OF = params -> (x -> ((IGeneric) params[0]).isDirectAncestorOf(x));
 
 	static Predicate<IGeneric<?>> filter(List<?> ancestors, List<Object> ancestorsReached) {

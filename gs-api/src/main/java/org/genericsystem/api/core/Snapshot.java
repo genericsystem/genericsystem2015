@@ -615,6 +615,10 @@ public interface Snapshot<T> extends Iterable<T> {
 		return stream().collect(Collectors.toList());
 	}
 
+	default Set<T> toSet() {
+		return stream().collect(Collectors.toSet());
+	}
+
 	/**
 	 * Returns an ObservableList representing the Snapshot’s state.
 	 * 
