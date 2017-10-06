@@ -90,7 +90,7 @@ public class FillNewModelWithData {
 		Path absolutePath = basePath.resolve(relativeImgPath);
 		String filenameExt = ModelTools.generateFileName(absolutePath);
 		ImgType imgType = engine.find(ImgType.class);
-		ImgInstance imgInstance = imgType.setImg(filenameExt);
+		ImgInstance imgInstance = imgType.addImg(filenameExt);
 		engine.getCurrentCache().flush();
 		if (null == imgInstance) {
 			logger.error("An error has occured while saving file {}", filenameExt);
@@ -201,7 +201,7 @@ public class FillNewModelWithData {
 		ImgType imgType = engine.find(ImgType.class);
 
 		// Set the doc instance and some attributes
-		ImgInstance imgInstance = imgType.setImg(filenameExt);
+		ImgInstance imgInstance = imgType.addImg(filenameExt);
 		try {
 			imgInstance.setImgPath(docPath);
 			imgInstance.setImgTimestamp(timestamp);
@@ -217,7 +217,7 @@ public class FillNewModelWithData {
 			JsonObject field = (JsonObject) entry.getValue();
 			String ocr = field.getString(CONSOLIDATED);
 			JsonObject rect = field.getJsonObject(RECT);
-			ZoneInstance zoneInstance = imgInstance.setZone(rect.encode());
+			ZoneInstance zoneInstance = imgInstance.addZone(rect.encode());
 			zoneInstance.setConsolidated(ocr);
 			zoneInstance.setZoneNum(field.getInteger(FIELD_NUM));
 		});

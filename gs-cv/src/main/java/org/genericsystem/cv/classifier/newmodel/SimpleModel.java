@@ -1,6 +1,8 @@
 package org.genericsystem.cv.classifier.newmodel;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
 
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.annotations.Components;
@@ -35,6 +37,11 @@ public class SimpleModel {
 
 	private static final ObjectMapper mapper = new ObjectMapper();
 
+	/**
+	 * DocClassType represents the type of all the classes.
+	 * 
+	 * @author Pierrik Lassalas
+	 */
 	@SystemGeneric
 	@InstanceClass(DocClassInstance.class)
 	public static class DocClassType implements Generic {
@@ -42,10 +49,64 @@ public class SimpleModel {
 		@SystemGeneric
 		public static class DocClassInstance implements Generic {
 
+			public Snapshot<DocInstance> getAllDocInstances() {
+				return (Snapshot) getHolders(getRoot().find(DocType.class));
+			}
+
+			public Snapshot<LayoutInstance> getAllLayouts() {
+				return (Snapshot) getComposites().filter(composite -> getRoot().find(LayoutType.class).equals(composite.getMeta()));
+			}
+
+			public Snapshot<LayoutInstance> getAllLayoutLeaves() {
+				return getAllLayouts().filter(layout -> layout.getInheritings().isEmpty());
+			}
+
+			public LayoutInstance getLayoutRoot() {
+				return getAllLayouts().filter(layout -> layout.getSupers().isEmpty()).first();
+			}
+
+			public DocInstance addDocInstance(String name) {
+				return (DocInstance) addHolder(getRoot().find(DocType.class), name);
+			}
+
+			public DocInstance getDocInstance(String name) {
+				return (DocInstance) getHolder(getRoot().find(DocType.class), name);
+			}
+
+			public LayoutInstance addLayout(String json) {
+				return (LayoutInstance) addHolder(getRoot().find(LayoutType.class), Collections.emptyList(), json);
+			}
+
+			public LayoutInstance addLayout(String json, LayoutInstance... parents) {
+				return (LayoutInstance) addHolder(getRoot().find(LayoutType.class), Arrays.asList(parents), json);
+			}
+
+			public LayoutInstance getLayout(String json) {
+				return (LayoutInstance) getHolder(getRoot().find(LayoutType.class), json);
+			}
+
+		}
+
+		public Snapshot<DocClassInstance> getAllDocClasses() {
+			return (Snapshot) getInstances();
+		}
+
+		public DocClassInstance addDocClass(String name) {
+			return (DocClassInstance) addInstance(name);
+		}
+
+		public DocClassInstance getDocClass(String name) {
+			return (DocClassInstance) getInstance(name);
 		}
 
 	}
 
+	/**
+	 * LayoutType represents the type of the attribute Layout on the {@link DocClassType}. Each element of the layout is a holder of type LayoutType. </br>
+	 * The children/parents relationships are mapped using inheritance.
+	 * 
+	 * @author Pierrik Lassalas
+	 */
 	@SystemGeneric
 	@Components(DocClassType.class)
 	@InstanceClass(LayoutInstance.class)
@@ -58,7 +119,6 @@ public class SimpleModel {
 				return (DocClassInstance) getBaseComponent();
 			}
 
-			// Add utility methods to wrap interaction with inheritance
 		}
 	}
 
@@ -69,6 +129,7 @@ public class SimpleModel {
 	 */
 	@SystemGeneric
 	@Components({ ImgType.class, DocType.class })
+	@SingularConstraint(value = 0)
 	@InstanceClass(ImgDocLink.class)
 	public static class ImgDocRel implements Generic {
 
@@ -93,7 +154,6 @@ public class SimpleModel {
 	 */
 	@SystemGeneric
 	@Components(DocClassType.class)
-	@SingularConstraint
 	@InstanceClass(DocInstance.class)
 	public static class DocType implements Generic {
 
@@ -124,10 +184,17 @@ public class SimpleModel {
 				return (Snapshot) getHolders(getRoot().find(ZoneType.class));
 			}
 
-			public ZoneInstance setZone(Rect rect) {
+			public Snapshot<ZoneInstance> getEmptyZoneInstances() {
+				return getZoneInstances().filter(zone -> {
+					ConsolidatedInstance consolidated = zone.getConsolidated();
+					return consolidated == null || consolidated.getValue() == null || "".equals(consolidated.getValue());
+				});
+			}
+
+			public ZoneInstance addZone(Rect rect) {
 				try {
 					String json = mapper.writeValueAsString(rect);
-					return (ZoneInstance) setHolder(getRoot().find(ZoneType.class), json);
+					return (ZoneInstance) addHolder(getRoot().find(ZoneType.class), json);
 				} catch (JsonProcessingException e) {
 					throw new IllegalStateException("An error has occured while converting the rectangle to a json string", e);
 				}
@@ -142,8 +209,8 @@ public class SimpleModel {
 				}
 			}
 
-			public ZoneInstance setZone(String json) {
-				return (ZoneInstance) setHolder(getRoot().find(ZoneType.class), json);
+			public ZoneInstance addZone(String json) {
+				return (ZoneInstance) addHolder(getRoot().find(ZoneType.class), json);
 			}
 
 			public ZoneInstance getZone(String json) {
@@ -172,8 +239,8 @@ public class SimpleModel {
 			return (Snapshot) getInstances();
 		}
 
-		public ImgInstance setImg(String name) {
-			return (ImgInstance) setInstance(name);
+		public ImgInstance addImg(String name) {
+			return (ImgInstance) addInstance(name);
 		}
 
 		public ImgInstance getImg(String name) {
@@ -186,6 +253,7 @@ public class SimpleModel {
 	@InstanceClass(ZoneInstance.class)
 	@InstanceValueClassConstraint(String.class)
 	public static class ZoneType implements Generic {
+		// TODO: might need to change the value of the instance: String not ideal, since there is no direct comparison of the json objects
 
 		@SystemGeneric
 		public static class ZoneInstance implements Generic {
@@ -218,25 +286,6 @@ public class SimpleModel {
 					throw new IllegalStateException("An error has occured while converting the json to a rectangle", e);
 				}
 			}
-		}
-
-		public Snapshot<ZoneInstance> getZoneInstances() {
-			return (Snapshot) getInstances();
-		}
-
-		public Snapshot<ZoneInstance> getEmptyZoneInstances() {
-			return (Snapshot) getInstances().filter(zone -> {
-				ConsolidatedInstance consolidated = ((ZoneInstance) zone).getConsolidated();
-				return consolidated == null || consolidated.getValue() == null || "".equals(consolidated.getValue());
-			});
-		}
-
-		public ZoneInstance setZone(String json) {
-			return (ZoneInstance) setInstance(json);
-		}
-
-		public ZoneInstance getZone(String json) {
-			return (ZoneInstance) getInstance(json);
 		}
 	}
 
