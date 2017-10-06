@@ -54,14 +54,14 @@ public class FillNewModelWithData {
 		NativeLibraryLoader.load();
 	}
 
-	public static final String DOC_PATH = "docPath";
-	public static final String FILENAME = "filename";
-	public static final String ENCODED_FILENAME = "encodedFilename";
-	public static final String DOC_TIMESTAMP = "docTimestamp";
-	public static final String ZONES = "zones";
-	public static final String FIELD_NUM = "fieldNum";
-	public static final String RECT = "rectangle";
-	public static final String CONSOLIDATED = "consolidated";
+	private static final String DOC_PATH = "docPath";
+	private static final String FILENAME = "filename";
+	private static final String ENCODED_FILENAME = "encodedFilename";
+	private static final String DOC_TIMESTAMP = "docTimestamp";
+	private static final String ZONES = "zones";
+	private static final String FIELD_NUM = "fieldNum";
+	private static final String RECT = "rectangle";
+	private static final String CONSOLIDATED = "consolidated";
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 	private static final String gsPath = System.getenv("HOME") + "/genericsystem/gs-cv-newmodel";
