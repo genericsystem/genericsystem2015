@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.genericsystem.api.core.exceptions.RollbackException;
@@ -85,26 +86,34 @@ public class FillNewModelWithData {
 				ZoneNumType.class, ZoneNumInstance.class, ConsolidatedType.class, ConsolidatedInstance.class, ImgPathType.class, ImgPathInstance.class, ImgTimestampType.class, ImgTimestampInstance.class);
 	}
 
+	// XXX: might need to refactor the code to be able to indicate whether the file already exists (or not) or if an error occurred at some point in the method
 	public static boolean registerNewFile(Root engine, Path relativeImgPath, Path basePath, Path resourcesFolder) {
 		logger.info("Adding a new image ({}) ", relativeImgPath.getFileName());
 		Path absolutePath = basePath.resolve(relativeImgPath);
 		String filenameExt = ModelTools.generateFileName(absolutePath);
 		ImgType imgType = engine.find(ImgType.class);
-		ImgInstance imgInstance = imgType.addImg(filenameExt);
-		engine.getCurrentCache().flush();
-		if (null == imgInstance) {
-			logger.error("An error has occured while saving file {}", filenameExt);
-			return false;
-		} else {
-			imgInstance.setImgPath(relativeImgPath.toString());
-			imgInstance.setImgTimestamp(ModelTools.getCurrentDate());
+		try {
+			ImgInstance imgInstance = imgType.addImg(filenameExt);
 			engine.getCurrentCache().flush();
-			try {
-				Files.copy(absolutePath, resourcesFolder.resolve(filenameExt), StandardCopyOption.REPLACE_EXISTING);
-			} catch (IOException e) {
-				logger.error(String.format("An error has occured while copying image %s to resources folder", filenameExt), e);
+			if (null == imgInstance) {
+				logger.error("An error has occured while saving file {}", filenameExt);
+				return false;
+			} else {
+				imgInstance.setImgPath(relativeImgPath.toString());
+				imgInstance.setImgTimestamp(ModelTools.getCurrentDate());
+				engine.getCurrentCache().flush();
+				try {
+					Files.copy(absolutePath, resourcesFolder.resolve(filenameExt), StandardCopyOption.REPLACE_EXISTING);
+				} catch (IOException e) {
+					logger.error(String.format("An error has occured while copying image %s to resources folder", filenameExt), e);
+				}
+				return true;
 			}
-			return true;
+		} catch (RollbackException e) {
+			logger.warn("The image {} has already been saved in Generic System", relativeImgPath.getFileName());
+			return false;
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
 		}
 	}
 
@@ -190,6 +199,7 @@ public class FillNewModelWithData {
 		return jsonObject;
 	}
 
+	// Update the return type to indicate whether the document was already known, if new zones were added, etc.
 	public static void saveOcrDataInModel(Root engine, JsonObject data) {
 		// Parse the data
 		String docPath = data.getString(DOC_PATH);
@@ -201,7 +211,13 @@ public class FillNewModelWithData {
 		ImgType imgType = engine.find(ImgType.class);
 
 		// Set the doc instance and some attributes
-		ImgInstance imgInstance = imgType.addImg(filenameExt);
+		ImgInstance imgInstance;
+		try {
+			imgInstance = imgType.addImg(filenameExt);
+		} catch (RollbackException e1) {
+			logger.info(String.format("File {} has already been processed by the system. Retriving the reference...", filenameExt), e1);
+			imgInstance = imgType.getImg(filenameExt);
+		}
 		try {
 			imgInstance.setImgPath(docPath);
 			imgInstance.setImgTimestamp(timestamp);
@@ -212,16 +228,22 @@ public class FillNewModelWithData {
 		}
 
 		// Save the results for each field
-		zonesResults.forEach(entry -> {
+		for (Entry<String, Object> entry : zonesResults) {
 			logger.info("Current zone: {}", entry.getKey());
 			JsonObject field = (JsonObject) entry.getValue();
 			String ocr = field.getString(CONSOLIDATED);
 			JsonObject rect = field.getJsonObject(RECT);
-			ZoneInstance zoneInstance = imgInstance.addZone(rect.encode());
+			int num = field.getInteger(FIELD_NUM);
+			// Try to get Zone: override if exists, otherwise create a new one
+			ZoneInstance zoneInstance = imgInstance.getZone(rect.encode());
+			if (null == zoneInstance) {
+				zoneInstance = imgInstance.addZone(rect.encode());
+			} else {
+				logger.debug("Zone {} already known. Override consolidated ('{}' with '{}') and zone num ('{}' with '{}')", entry.getKey(), zoneInstance.getConsolidated(), ocr, zoneInstance.getZoneNum(), num);
+			}
 			zoneInstance.setConsolidated(ocr);
-			zoneInstance.setZoneNum(field.getInteger(FIELD_NUM));
-		});
-
+			zoneInstance.setZoneNum(num);
+		}
 		// Flush the cache
 		engine.getCurrentCache().flush();
 	}
