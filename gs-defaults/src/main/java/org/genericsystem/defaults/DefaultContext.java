@@ -66,10 +66,8 @@ public interface DefaultContext<T extends DefaultGeneric<T>> extends IContext<T>
 			private static final long serialVersionUID = -441180182522681264L;
 
 			OrderedDependencies visit(T node) {
-				if (!contains(node)) {
-					add(node);
+				if (add(node))
 					getDependencies(node).stream().forEach(this::visit);
-				}
 				return this;
 			}
 		}
