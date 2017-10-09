@@ -20,6 +20,7 @@ import org.genericsystem.cv.classifier.newmodel.SimpleModel.ImgDocRel.ImgDocLink
 import org.genericsystem.cv.classifier.newmodel.SimpleModel.ImgPathType;
 import org.genericsystem.cv.classifier.newmodel.SimpleModel.ImgPathType.ImgPathInstance;
 import org.genericsystem.cv.classifier.newmodel.SimpleModel.ImgRefreshTimestampType;
+import org.genericsystem.cv.classifier.newmodel.SimpleModel.ImgRefreshTimestampType.ImgRefreshTimestampInstance;
 import org.genericsystem.cv.classifier.newmodel.SimpleModel.ImgTimestampType;
 import org.genericsystem.cv.classifier.newmodel.SimpleModel.ImgTimestampType.ImgTimestampInstance;
 import org.genericsystem.cv.classifier.newmodel.SimpleModel.ImgType;
@@ -27,6 +28,7 @@ import org.genericsystem.cv.classifier.newmodel.SimpleModel.ImgType.ImgInstance;
 import org.genericsystem.cv.classifier.newmodel.SimpleModel.LayoutType;
 import org.genericsystem.cv.classifier.newmodel.SimpleModel.LayoutType.LayoutInstance;
 import org.genericsystem.cv.classifier.newmodel.SimpleModel.SupervisedType;
+import org.genericsystem.cv.classifier.newmodel.SimpleModel.SupervisedType.SupervisedInstance;
 import org.genericsystem.cv.classifier.newmodel.SimpleModel.ZoneNumType;
 import org.genericsystem.cv.classifier.newmodel.SimpleModel.ZoneNumType.ZoneNumInstance;
 import org.genericsystem.cv.classifier.newmodel.SimpleModel.ZoneType;
@@ -293,13 +295,18 @@ public class SimpleModelTest {
 		zone1.setConsolidated(filename1);
 		Snapshot<ZoneInstance> zones = doc1.getZoneInstances();
 		Snapshot<ZoneInstance> emptyZones = doc1.getEmptyZoneInstances();
+		Snapshot<ZoneInstance> consolidatedZones = doc1.getConsolidatedZoneInstances();
 
 		assertEquals(zone1.getImgInstance(), doc1); // Composition OK
 		assertEquals(zone3, zone1); // Getter ok
 		assertEquals(zones.size(), 2);
 		assertTrue(zones.containsAll(Arrays.asList(zone1, zone2))); // Snapshot OK
+		assertEquals(emptyZones.size(), 1);
 		assertTrue(emptyZones.contains(zone2));
 		assertFalse(emptyZones.contains(zone1));
+		assertEquals(consolidatedZones.size(), 1);
+		assertTrue(consolidatedZones.contains(zone1));
+		assertFalse(consolidatedZones.contains(zone2));
 		assertEquals(zone2.getZoneRect(), rect2); // Instance value ok
 
 		try {
@@ -324,6 +331,23 @@ public class SimpleModelTest {
 
 		assertNotEquals(zone1.getConsolidated(), string1);
 		assertEquals(zone1.getConsolidated(), string2); // PropertyConstraint
+	}
+
+	@Test
+	public void testSupervised() {
+		ImgType imgType = engine.find(ImgType.class);
+		ImgInstance doc1 = imgType.addImg(filename1);
+		Rect rect1 = new Rect(0, 0, 200, 100);
+		ZoneInstance zone1 = doc1.addZone(rect1);
+		SupervisedInstance string1 = zone1.setSupervised(filename1);
+
+		assertEquals(string1.getZoneInstance(), zone1); // Composition OK
+		assertEquals(zone1.getSupervised(), string1); // Getter OK
+
+		SupervisedInstance string2 = zone1.setSupervised(filename2);
+
+		assertNotEquals(zone1.getSupervised(), string1);
+		assertEquals(zone1.getSupervised(), string2); // PropertyConstraint
 	}
 
 	@Test
@@ -371,6 +395,21 @@ public class SimpleModelTest {
 
 		assertNotEquals(doc1.getImgTimestamp(), dti1);
 		assertEquals(doc1.getImgTimestamp(), dti2); // PropertyConstraint
+	}
+
+	@Test
+	public void testRefreshTimestamp() {
+		ImgType imgType = engine.find(ImgType.class);
+		ImgInstance doc1 = imgType.addImg(filename1);
+		ImgRefreshTimestampInstance refresh1 = doc1.setImgRefreshTimestamp(timestamp1);
+
+		assertEquals(refresh1.getImgInstance(), doc1); // Composition OK
+		assertEquals(doc1.getImgRefreshTimestamp(), refresh1); // Getter OK
+
+		ImgRefreshTimestampInstance refresh2 = doc1.setImgRefreshTimestamp(timestamp2);
+
+		assertNotEquals(doc1.getImgRefreshTimestamp(), refresh1);
+		assertEquals(doc1.getImgRefreshTimestamp(), refresh2); // PropertyConstraint
 	}
 
 }
