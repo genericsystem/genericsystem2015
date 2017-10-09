@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.genericsystem.cv.utils.Tools;
+import org.genericsystem.cv.utils.VanishingPointsDetector;
 import org.genericsystem.layout.Ransac;
 import org.genericsystem.layout.Ransac.Model;
 import org.opencv.core.Core;
@@ -62,6 +63,11 @@ public class LinesDetector extends AbstractApp {
 				capture.read(frame);
 				Img grad = new Img(frame, false).morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_RECT, new Size(2, 2)).otsu();
 				Lines lines = new Lines(grad.houghLinesP(1, Math.PI / 180, 100, 100, 10));
+				List<List<Point[]>> lineSegmentsClusters = new ArrayList<>();
+				List<Integer> numInliers = new ArrayList<>();
+				List<Mat> vps = new ArrayList<>();
+				new VanishingPointsDetector(frame.size(), true).multipleVPEstimation(lines.toLinesSegments(), lineSegmentsClusters, numInliers, vps, 1);
+
 				System.out.println("Average angle: " + lines.getMean() / Math.PI * 180);
 				if (lines.size() > 16) {
 					lines.draw(frame, new Scalar(0, 0, 255));
@@ -120,6 +126,10 @@ public class LinesDetector extends AbstractApp {
 				mean += line.getAngle();
 			}
 			this.mean = mean / src.rows();
+		}
+
+		public List<Point[]> toLinesSegments() {
+			return lines.stream().map(line -> line.getSegment()).collect(Collectors.toList());
 		}
 
 		public Mat findPerspectiveMatrix(int width, int height) {
@@ -223,6 +233,10 @@ public class LinesDetector extends AbstractApp {
 			this.y1 = y1;
 			this.y2 = y2;
 			this.angle = Math.atan2(y2 - y1, x2 - x1);
+		}
+
+		public Point[] getSegment() {
+			return new Point[] { new Point(x1, y1), new Point(x2, y2) };
 		}
 
 		public Line transform(Mat rotationMatrix) {
