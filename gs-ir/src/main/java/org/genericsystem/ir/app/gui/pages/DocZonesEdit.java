@@ -3,14 +3,15 @@ package org.genericsystem.ir.app.gui.pages;
 import java.io.Serializable;
 
 import org.genericsystem.common.Generic;
+import org.genericsystem.cv.classifier.newmodel.SimpleModel.SupervisedType.SupervisedInstance;
+import org.genericsystem.cv.classifier.newmodel.SimpleModel.ZoneType.ZoneInstance;
 import org.genericsystem.ir.app.gui.pages.DocZonesEdit.TextDiv;
 import org.genericsystem.ir.app.gui.utils.ContextActionCustom.MODAL_DISPLAY_FLEX_CUSTOM;
 import org.genericsystem.ir.app.gui.utils.ContextActionCustom.SAVE;
 import org.genericsystem.ir.app.gui.utils.DocumentImage;
 import org.genericsystem.ir.app.gui.utils.ObservableListExtractorCustom.DATALIST_SELECTOR;
-import org.genericsystem.ir.app.gui.utils.ObservableListExtractorCustom.ZONE_SELECTOR_REALITY;
+import org.genericsystem.ir.app.gui.utils.ObservableListExtractorCustom.ZONE_SELECTOR_BEST;
 import org.genericsystem.ir.app.gui.utils.TextBindingCustom.ZONE_LABEL;
-import org.genericsystem.ir.app.gui.utils.TextBindingCustom.ZONE_TEXT;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.annotations.Attribute;
 import org.genericsystem.reactor.annotations.BindAction;
@@ -18,6 +19,7 @@ import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.InheritStyle;
+import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.SelectContext;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
@@ -26,6 +28,7 @@ import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.context.ContextAction.CANCEL;
 import org.genericsystem.reactor.context.ContextAction.RESET_SELECTION;
+import org.genericsystem.reactor.context.GenericSelector;
 import org.genericsystem.reactor.context.OptionalContextSelector.SELECTION_SELECTOR;
 import org.genericsystem.reactor.context.TagSwitcher;
 import org.genericsystem.reactor.contextproperties.SelectionDefaults;
@@ -59,6 +62,7 @@ public class DocZonesEdit extends ModalEditor {
 	@StyleClass(path = FlexDiv.class, pos = 0, value = "doc-title")
 	@Style(path = FlexDiv.class, pos = 2, name = "justify-content", value = "center")
 	@Style(path = FlexDiv.class, pos = 2, name = "align-items", value = "center")
+	@Style(path = { FlexDiv.class, FlexDiv.class }, pos = { 1, 1 }, name = "flex-wrap", value = "wrap")
 	@SelectContext(path = FlexDiv.class, pos = 0, value = SELECTION_SELECTOR.class)
 	@SelectContext(path = FlexDiv.class, pos = 1, value = SELECTION_SELECTOR.class)
 	@SelectContext(path = { FlexDiv.class, FlexDiv.class }, pos = { 1, -1 }, value = SELECTION_SELECTOR.class)
@@ -85,8 +89,8 @@ public class DocZonesEdit extends ModalEditor {
 	}
 
 	@FlexDirectionStyle(FlexDirection.COLUMN)
-	@Children({ ZoneLabelInput.class, DocZonesShowDetails.class })
-	@ForEach(ZONE_SELECTOR_REALITY.class)
+	@Children({ ZoneLabelInput.class /* , DocZonesShowDetails.class */ })
+	@ForEach(ZONE_SELECTOR_BEST.class) // XXX same zone selector, but need a different textbinding
 	public static class ZoneTextDiv extends FlexDiv {
 		// For each zone, create a div with label + inputText and create a div for the results for all filters
 	}
@@ -115,7 +119,8 @@ public class DocZonesEdit extends ModalEditor {
 	@ForEach(path = { HtmlDatalist.class, HtmlOption.class }, value = DATALIST_SELECTOR.class)
 	@Children({ CustomInputDatalist.class, HtmlDatalist.class })
 	@StyleClass(path = CustomInputDatalist.class, value = "glowing-border")
-	@BindText(path = { HtmlDatalist.class, HtmlOption.class }, value = ZONE_TEXT.class)
+	@BindText(path = { HtmlDatalist.class, HtmlOption.class }) // , value = ZONE_TEXT.class
+	@Select(SUPERVISED_TEXT_SELECTOR.class)
 	public static class ZoneInput extends InputWithDatalist implements SelectionDefaults {
 		// Define the inputText
 		// TODO: add a remove button to empty the field
@@ -123,13 +128,20 @@ public class DocZonesEdit extends ModalEditor {
 	}
 
 	public static class CustomInputDatalist extends InputTextEditorWithConversionForDatalist {
-		// TODO: remove next function?
 		@Override
 		protected Generic updateGeneric(Context context, Serializable newValue) {
-			long start = System.nanoTime();
-			Generic updateValue = context.getGeneric().updateValue(newValue);
-			System.out.println("==> update: " + (System.nanoTime() - start) / 1_000_000 + "ms");
-			return updateValue;
+			SupervisedInstance supervisedInstance = (SupervisedInstance) context.getGeneric();
+			// XXX update the value of the holder
+			Generic newConsolidated = supervisedInstance.updateValue(newValue);
+			return newConsolidated;
+		}
+	}
+
+	public static class SUPERVISED_TEXT_SELECTOR implements GenericSelector {
+		@Override
+		public Generic apply(Generic[] gs) {
+			SupervisedInstance text = ((ZoneInstance) gs[0]).getSupervised();
+			return text == null ? ((ZoneInstance) gs[0]).setSupervised("") : text;
 		}
 	}
 

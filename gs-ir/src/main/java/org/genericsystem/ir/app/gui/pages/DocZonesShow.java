@@ -46,6 +46,7 @@ public class DocZonesShow extends ModalEditor {
 	@StyleClass(path = FlexDiv.class, pos = 0, value = "doc-title")
 	@Style(path = FlexDiv.class, pos = 2, name = "justify-content", value = "center")
 	@Style(path = FlexDiv.class, pos = 2, name = "align-items", value = "center")
+	@Style(path = { FlexDiv.class, FlexDiv.class }, pos = { 1, 1 }, name = "flex-wrap", value = "wrap")
 	@SelectContext(path = FlexDiv.class, pos = 0, value = SELECTION_SELECTOR.class)
 	@SelectContext(path = FlexDiv.class, pos = 1, value = SELECTION_SELECTOR.class)
 	@SelectContext(path = { FlexDiv.class, FlexDiv.class }, pos = { 1, -1 }, value = SELECTION_SELECTOR.class)
