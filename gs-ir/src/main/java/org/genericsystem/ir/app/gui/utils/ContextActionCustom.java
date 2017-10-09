@@ -41,6 +41,14 @@ public class ContextActionCustom {
 		}
 	}
 
+	public static class CALL_CLASSIFIER_PAGE implements ContextAction {
+		@Override
+		public void accept(Context context, Tag tag) {
+			System.out.println("Redirecting to classifier page");
+			tag.setInheritedContextPropertyValue(PageSwitcher.PAGE, context, PageSwitcher.CLASSIFIER_PAGE);
+		}
+	}
+
 	public static class TEST implements ContextAction {
 		@Override
 		public void accept(Context context, Tag tag) {

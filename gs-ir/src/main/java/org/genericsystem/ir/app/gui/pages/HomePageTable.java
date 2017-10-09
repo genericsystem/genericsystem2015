@@ -8,7 +8,7 @@ import org.genericsystem.ir.app.gui.utils.DocPropertiesSwitcher.DOC_NOT_DEZONED;
 import org.genericsystem.ir.app.gui.utils.DocPropertiesSwitcher.DOC_NOT_OCRD;
 import org.genericsystem.ir.app.gui.utils.DocPropertiesSwitcher.DOC_OCRD;
 import org.genericsystem.ir.app.gui.utils.DocumentImage;
-import org.genericsystem.ir.app.gui.utils.ObservableListExtractorCustom.DOC_SELECTOR;
+import org.genericsystem.ir.app.gui.utils.ObservableListExtractorCustom.IMG_SELECTOR;
 import org.genericsystem.ir.app.gui.utils.TextBindingCustom.LAST_DOC_UPDATE_LABEL;
 import org.genericsystem.reactor.annotations.Attribute;
 import org.genericsystem.reactor.annotations.BindAction;
@@ -34,7 +34,7 @@ import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
 
 @Children({ HeaderRow.class, FlexDiv.class })
 @Children(path = FlexDiv.class, pos = 1, value = DocumentsList.class)
-@ForEach(path = FlexDiv.class, pos = 1, value = DOC_SELECTOR.class)
+@ForEach(path = FlexDiv.class, pos = 1, value = IMG_SELECTOR.class)
 @StyleClass(path = FlexDiv.class, pos = 1, value = "alternate-rows")
 public class HomePageTable extends FlexDiv {
 

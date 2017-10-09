@@ -2,6 +2,7 @@ package org.genericsystem.ir.app.gui.pages;
 
 import org.genericsystem.ir.app.gui.pages.HomePage.DocClassDiv;
 import org.genericsystem.ir.app.gui.pages.HomePage.GeneralActionsButtonsDiv;
+import org.genericsystem.ir.app.gui.utils.ContextActionCustom.CALL_CLASSIFIER_PAGE;
 import org.genericsystem.ir.app.gui.utils.ContextActionCustom.TEST;
 import org.genericsystem.ir.app.gui.utils.PageSwitcher.HOME_PAGE;
 import org.genericsystem.reactor.annotations.Attribute;
@@ -33,10 +34,10 @@ public class HomePage extends FlexDiv {
 
 	@FlexDirectionStyle(FlexDirection.ROW)
 	@Children({ HtmlButton.class, HtmlButton.class })
-	@SetText(path = HtmlButton.class, value = { "Visualize statistics", "Resume pending tasks" })
-	// @BindAction(path = HtmlButton.class, pos = 0, value = CALL_STATISTICS_PAGE.class)
+	@SetText(path = HtmlButton.class, value = { "Classifier page", "Resume pending tasks" })
+	@BindAction(path = HtmlButton.class, pos = 0, value = CALL_CLASSIFIER_PAGE.class)
 	@BindAction(path = HtmlButton.class, pos = 1, value = TEST.class)
-	@Attribute(path = HtmlButton.class, name = "disabled", value = "true")
+	@Attribute(path = HtmlButton.class, pos = 1, name = "disabled", value = "true")
 	public static class GeneralActionsButtonsDiv extends FlexDiv {
 		// TODO implement the action that will resume the waiting tasks
 	}

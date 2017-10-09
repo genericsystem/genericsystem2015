@@ -6,6 +6,9 @@ import java.util.function.Predicate;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
+import org.genericsystem.cv.classifier.newmodel.SimpleModel.DocClassType;
+import org.genericsystem.cv.classifier.newmodel.SimpleModel.DocClassType.DocClassInstance;
+import org.genericsystem.cv.classifier.newmodel.SimpleModel.DocType.DocInstance;
 import org.genericsystem.cv.classifier.newmodel.SimpleModel.ImgType;
 import org.genericsystem.cv.classifier.newmodel.SimpleModel.ImgType.ImgInstance;
 import org.genericsystem.cv.classifier.newmodel.SimpleModel.ZoneType.ZoneInstance;
@@ -25,19 +28,30 @@ public class ObservableListExtractorCustom {
 	 * === DOC CLASS AND DOC ===
 	 */
 
-	// public static class DOC_CLASS_SELECTOR implements ForEachExtractor {
-	// @Override
-	// public Observable<Snapshot<Generic>> apply(Generic[] generics) {
-	// Root root = generics[0].getRoot();
-	// DocClassType docClass = root.find(DocClassType.class);
-	// Snapshot<Generic> docClassInstances = (Snapshot) docClass.getAllDocClasses();
-	// if (null == docClassInstances)
-	// return Observable.just(Snapshot.empty());
-	// return Observable.just(docClassInstances);
-	// }
-	// }
+	public static class DOC_CLASS_SELECTOR implements ForEachExtractor {
+		@Override
+		public Observable<Snapshot<Generic>> apply(Generic[] generics) {
+			Root root = generics[0].getRoot();
+			DocClassType docClass = root.find(DocClassType.class);
+			Snapshot<Generic> docClassInstances = (Snapshot) docClass.getAllDocClasses();
+			if (null == docClassInstances)
+				return Observable.just(Snapshot.empty());
+			return Observable.just(docClassInstances);
+		}
+	}
 
 	public static class DOC_SELECTOR implements ForEachExtractor {
+		@Override
+		public Observable<Snapshot<Generic>> apply(Generic[] generics) {
+			DocClassInstance currentDocClass = (DocClassInstance) generics[0];
+			Snapshot<DocInstance> docs = currentDocClass.getAllDocInstances();
+			if (null == docs)
+				return Observable.just(Snapshot.empty());
+			return Observable.just((Snapshot) docs);
+		}
+	}
+
+	public static class IMG_SELECTOR implements ForEachExtractor {
 		@Override
 		public Observable<Snapshot<Generic>> apply(Generic[] generics) {
 			Root root = generics[0].getRoot();

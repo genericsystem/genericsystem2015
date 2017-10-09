@@ -14,6 +14,7 @@ import org.genericsystem.cv.classifier.newmodel.SimpleModel.SupervisedType;
 import org.genericsystem.cv.classifier.newmodel.SimpleModel.ZoneNumType;
 import org.genericsystem.cv.classifier.newmodel.SimpleModel.ZoneType;
 import org.genericsystem.ir.OcrEngineHolderVerticle;
+import org.genericsystem.ir.app.gui.pages.ClassifierPage;
 import org.genericsystem.ir.app.gui.pages.HomePage;
 import org.genericsystem.ir.app.gui.utils.PageSwitcher;
 import org.genericsystem.reactor.annotations.Children;
@@ -33,7 +34,7 @@ import org.genericsystem.security.model.UserRole;
  */
 @DependsOnModel({ Role.class, User.class, UserRole.class, DocClassType.class, LayoutType.class, ImgDocRel.class, DocType.class, ImgType.class, ZoneType.class, ZoneNumType.class, ConsolidatedType.class, ImgPathType.class, ImgTimestampType.class,
 		ImgRefreshTimestampType.class, SupervisedType.class })
-@Children({ HomePage.class, /* FiltersStatisticsPage.class */ })
+@Children({ HomePage.class, ClassifierPage.class })
 public class WatchApp extends RootTagImpl {
 
 	// private static final String gsPath = "/gs-cv_model3";
