@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.Function;
 
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.FiltersBuilder;
@@ -17,6 +18,7 @@ import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ReferentialIntegrityConstraintViolationException;
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.api.core.exceptions.UnreachableOverridesException;
+import org.genericsystem.defaults.tools.Memoizer;
 import org.genericsystem.defaults.tools.SupersComputer;
 
 /**
@@ -78,22 +80,32 @@ public interface DefaultContext<T extends DefaultGeneric<T>> extends IContext<T>
 		class PotentialDependenciesComputer extends TreeSet<T> {
 			private static final long serialVersionUID = -4464199068092100672L;
 			private final Set<T> alreadyVisited = new HashSet<>();
+			private Function<T, Boolean> memoizedIsDependency;
+
+			PotentialDependenciesComputer() {
+				memoizedIsDependency = Memoizer.memoize(node -> node.inheritsFrom(meta, supers, value, components)
+						|| node.getComponents().stream().anyMatch(component -> memoizedIsDependency.apply(component))
+						|| !node.isMeta() && memoizedIsDependency.apply(node.getMeta())
+						|| !components.equals(node.getComponents()) && node.componentsDepends(node.getComponents(), components) && supers.stream().anyMatch(override -> override.inheritsFrom(node.getMeta())));
+			}
 
 			PotentialDependenciesComputer visit(T node) {
-				if (!alreadyVisited.contains(node))
-					if (node.isDependencyOf(meta, supers, value, components))
-						super.addAll(computeDependencies(node));
-					else {
-						alreadyVisited.add(node);
+				if (alreadyVisited.add(node)) {
+					if (memoizedIsDependency.apply(node)) {
+						NavigableSet<T> deps = computeDependencies(node);
+						alreadyVisited.addAll(deps);
+						super.addAll(deps);
+					} else
 						getDependencies(node).stream().forEach(this::visit);
-					}
+				}
 				return this;
 			}
 		}
+
 		if (components.isEmpty())
 			return meta.isMeta() ? new PotentialDependenciesComputer().visit(meta) : new TreeSet<>();
-		else
-			return new PotentialDependenciesComputer().visit(components.get(0));
+			else
+				return new PotentialDependenciesComputer().visit(components.get(0));
 	}
 
 	default NavigableSet<T> computeRemoveDependencies(T node) {
