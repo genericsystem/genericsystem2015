@@ -2,9 +2,10 @@ package org.genericsystem.ir.app.gui.pages;
 
 import org.genericsystem.cv.model.MeanLevenshtein;
 import org.genericsystem.cv.model.Score;
-import org.genericsystem.ir.app.gui.pages.ClassifierPage.ClassifierDiv;
+import org.genericsystem.ir.app.gui.pages.ClassifierPage.DocClassDiv;
 import org.genericsystem.ir.app.gui.pages.ClassifierPage.GeneralButtonsDiv;
 import org.genericsystem.ir.app.gui.utils.ContextActionCustom.CALL_HOME_PAGE;
+import org.genericsystem.ir.app.gui.utils.DocPropertiesSwitcher.DOC_CLASS_NOT_EMPTY;
 import org.genericsystem.ir.app.gui.utils.ObservableListExtractorCustom.DOC_CLASS_SELECTOR;
 import org.genericsystem.ir.app.gui.utils.PageSwitcher.CLASSIFIER_PAGE;
 import org.genericsystem.reactor.annotations.BindAction;
@@ -31,7 +32,7 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlH1;
 @Switch(CLASSIFIER_PAGE.class)
 @Style(name = "background-color", value = "#ffffff")
 @Children({ Header.class, FlexDiv.class })
-@Children(path = FlexDiv.class, pos = 1, value = { GeneralButtonsDiv.class, ClassifierDiv.class })
+@Children(path = FlexDiv.class, pos = 1, value = { GeneralButtonsDiv.class, DocClassDiv.class })
 @SetText(path = { Header.class, AppTitleDiv.class, HtmlH1.class }, value = "Document classification")
 public class ClassifierPage extends FlexDiv {
 
@@ -43,42 +44,24 @@ public class ClassifierPage extends FlexDiv {
 
 	}
 
+	@Switch(path = FlexDiv.class, value = DOC_CLASS_NOT_EMPTY.class)
 	@Children(FlexDiv.class)
 	@Children(path = FlexDiv.class, value = { FlexDiv.class, FlexDiv.class })
 	@Children(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 0 }, value = { FlexDiv.class, FlexDiv.class })
 	@Children(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 1 }, value = ClassifierTable.class)
-	// @Children(path = { FlexDiv.class, FlexDiv.class, FlexDiv.class }, pos = { 0, 0, 1 }, value = ButtonDiv.class)
 	@BindText(path = { FlexDiv.class, FlexDiv.class, FlexDiv.class }, pos = { 0, 0, 0 })
 	@FlexDirectionStyle(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 0 }, value = FlexDirection.ROW)
 	@Style(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 0 }, name = "justify-content", value = "center")
 	@Style(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 0 }, name = "align-items", value = "center")
-	// @Style(path = { FlexDiv.class, FlexDiv.class, FlexDiv.class }, pos = { 0, 0, 0 }, name = "flex", value = "1 1 auto")
-	// @Style(path = { FlexDiv.class, FlexDiv.class, FlexDiv.class }, pos = { 0, 0, 1 }, name = "flex", value = "0 1 auto")
+	@Style(path = { FlexDiv.class, FlexDiv.class, FlexDiv.class }, pos = { 0, 0, 0 }, name = "flex", value = "1 1 auto")
+	@Style(path = { FlexDiv.class, FlexDiv.class, FlexDiv.class }, pos = { 0, 0, 1 }, name = "flex", value = "0 1 auto")
 	@StyleClass(path = { FlexDiv.class, FlexDiv.class, FlexDiv.class }, pos = { 0, 0, 0 }, value = "doc-class-title")
 	@Style(name = "width", value = "95%")
 	@Style(name = "margin", value = "auto")
 	@Style(path = FlexDiv.class, name = "margin", value = "0.5em 0")
 	@ForEach(path = FlexDiv.class, value = DOC_CLASS_SELECTOR.class)
-	public static class ClassifierDiv extends FlexDiv {
+	public static class DocClassDiv extends FlexDiv {
 
 	}
-
-	// @Children({ ComputeStatsButton.class, ComputeStatsStrictButton.class })
-	// @FlexDirectionStyle(FlexDirection.ROW)
-	// public static class ButtonDiv extends FlexDiv {
-	//
-	// }
-	//
-	// @SetText("Compute statistics")
-	// @BindAction({ COMPUTE_STATS.class })
-	// public static class ComputeStatsButton extends HtmlButton {
-	//
-	// }
-	//
-	// @SetText("Compute statistics (strict mode)")
-	// @BindAction({ COMPUTE_STATS_STRICT.class })
-	// public static class ComputeStatsStrictButton extends HtmlButton {
-	//
-	// }
 
 }

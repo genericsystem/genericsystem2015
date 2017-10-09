@@ -1,5 +1,6 @@
 package org.genericsystem.ir.app.gui.utils;
 
+import org.genericsystem.cv.classifier.newmodel.SimpleModel.DocClassType.DocClassInstance;
 import org.genericsystem.cv.classifier.newmodel.SimpleModel.ImgType.ImgInstance;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
@@ -12,20 +13,20 @@ public class DocPropertiesSwitcher {
 
 	// private static final String ZONES_FILE_BASE_PATH = DistributedVerticle.BASE_PATH + "/classes/";
 
-	// public static class DOC_CLASS_EMPTY implements TagSwitcher {
-	// @Override
-	// public Observable<Boolean> apply(Context context, Tag tag) {
-	// return isDocClassEmpty(context, false);
-	// }
-	// }
-	//
-	// public static class DOC_CLASS_NOT_EMPTY implements TagSwitcher {
-	// @Override
-	// public Observable<Boolean> apply(Context context, Tag tag) {
-	// return isDocClassEmpty(context, true);
-	// }
-	// }
-	//
+	public static class DOC_CLASS_EMPTY implements TagSwitcher {
+		@Override
+		public Observable<Boolean> apply(Context context, Tag tag) {
+			return isDocClassEmpty(context, false);
+		}
+	}
+
+	public static class DOC_CLASS_NOT_EMPTY implements TagSwitcher {
+		@Override
+		public Observable<Boolean> apply(Context context, Tag tag) {
+			return isDocClassEmpty(context, true);
+		}
+	}
+
 	// public static class SUPERVISION_AVAILABLE implements TagSwitcher {
 	// @Override
 	// public Observable<Boolean> apply(Context context, Tag tag) {
@@ -82,9 +83,11 @@ public class DocPropertiesSwitcher {
 	// }
 	// }
 
-	// public static Observable<Boolean> isDocClassEmpty(Context context, boolean reverse) {
-	// return Observable.just(true);
-	// }
+	public static Observable<Boolean> isDocClassEmpty(Context context, boolean reverse) {
+		DocClassInstance currentDocClass = (DocClassInstance) context.getGeneric();
+		Observable<Boolean> binding = currentDocClass.getAllDocInstances().setOnChanged().map(docs -> docs.isEmpty());
+		return reverse ? binding.map(bool -> !bool) : binding;
+	}
 
 	// public static Observable<Boolean> isSupervisionAvailable(Context context, boolean reverse) {
 	// DocClassInstance currentDocClass = (DocClassInstance) context.getGeneric();
