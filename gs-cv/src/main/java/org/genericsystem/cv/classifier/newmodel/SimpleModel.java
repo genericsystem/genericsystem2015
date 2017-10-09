@@ -17,9 +17,11 @@ import org.genericsystem.cv.classifier.newmodel.SimpleModel.DocClassType.DocClas
 import org.genericsystem.cv.classifier.newmodel.SimpleModel.DocType.DocInstance;
 import org.genericsystem.cv.classifier.newmodel.SimpleModel.ImgDocRel.ImgDocLink;
 import org.genericsystem.cv.classifier.newmodel.SimpleModel.ImgPathType.ImgPathInstance;
+import org.genericsystem.cv.classifier.newmodel.SimpleModel.ImgRefreshTimestampType.ImgRefreshTimestampInstance;
 import org.genericsystem.cv.classifier.newmodel.SimpleModel.ImgTimestampType.ImgTimestampInstance;
 import org.genericsystem.cv.classifier.newmodel.SimpleModel.ImgType.ImgInstance;
 import org.genericsystem.cv.classifier.newmodel.SimpleModel.LayoutType.LayoutInstance;
+import org.genericsystem.cv.classifier.newmodel.SimpleModel.SupervisedType.SupervisedInstance;
 import org.genericsystem.cv.classifier.newmodel.SimpleModel.ZoneNumType.ZoneNumInstance;
 import org.genericsystem.cv.classifier.newmodel.SimpleModel.ZoneType.ZoneInstance;
 import org.opencv.core.Rect;
@@ -214,8 +216,19 @@ public class SimpleModel {
 			public Snapshot<ZoneInstance> getEmptyZoneInstances() {
 				return getZoneInstances().filter(zone -> {
 					ConsolidatedInstance consolidated = zone.getConsolidated();
-					return consolidated == null || consolidated.getValue() == null || "".equals(consolidated.getValue());
+					return !isConsolidated(consolidated);
 				});
+			}
+
+			public Snapshot<ZoneInstance> getConsolidatedZoneInstances() {
+				return getZoneInstances().filter(zone -> {
+					ConsolidatedInstance consolidated = zone.getConsolidated();
+					return isConsolidated(consolidated);
+				});
+			}
+
+			private boolean isConsolidated(ConsolidatedInstance consolidated) {
+				return consolidated != null && consolidated.getValue() != null && !"".equals(consolidated.getValue());
 			}
 
 			public ZoneInstance addZone(Rect rect) {
@@ -258,6 +271,14 @@ public class SimpleModel {
 
 			public ImgTimestampInstance getImgTimestamp() {
 				return (ImgTimestampInstance) getHolder(getRoot().find(ImgTimestampType.class));
+			}
+
+			public ImgRefreshTimestampInstance setImgRefreshTimestamp(Long timestamp) {
+				return (ImgRefreshTimestampInstance) setHolder(getRoot().find(ImgRefreshTimestampType.class), timestamp);
+			}
+
+			public ImgRefreshTimestampInstance getImgRefreshTimestamp() {
+				return (ImgRefreshTimestampInstance) getHolder(getRoot().find(ImgRefreshTimestampType.class));
 			}
 
 			public ImgDocLink addImgDocLink(String name, DocInstance docInstance) {
@@ -317,6 +338,14 @@ public class SimpleModel {
 				return (ConsolidatedInstance) getHolder(getRoot().find(ConsolidatedType.class));
 			}
 
+			public SupervisedInstance setSupervised(String supervised) {
+				return (SupervisedInstance) setHolder(getRoot().find(SupervisedType.class), supervised);
+			}
+
+			public SupervisedInstance getSupervised() {
+				return (SupervisedInstance) getHolder(getRoot().find(SupervisedType.class));
+			}
+
 			public Rect getZoneRect() {
 				try {
 					Rect rect = mapper.readValue(getValue().toString(), Rect.class);
@@ -362,6 +391,22 @@ public class SimpleModel {
 	}
 
 	@SystemGeneric
+	@Components(ZoneType.class)
+	@PropertyConstraint
+	@InstanceClass(SupervisedInstance.class)
+	@InstanceValueClassConstraint(String.class)
+	public static class SupervisedType implements Generic {
+
+		@SystemGeneric
+		public static class SupervisedInstance implements Generic {
+
+			public ZoneInstance getZoneInstance() {
+				return (ZoneInstance) getBaseComponent();
+			}
+		}
+	}
+
+	@SystemGeneric
 	@Components(ImgType.class)
 	@PropertyConstraint
 	@InstanceClass(ImgPathInstance.class)
@@ -391,6 +436,22 @@ public class SimpleModel {
 				return (ImgInstance) getBaseComponent();
 			}
 
+		}
+	}
+
+	@SystemGeneric
+	@Components(ImgType.class)
+	@PropertyConstraint
+	@InstanceClass(ImgRefreshTimestampInstance.class)
+	@InstanceValueClassConstraint(Long.class)
+	public static class ImgRefreshTimestampType implements Generic {
+
+		@SystemGeneric
+		public static class ImgRefreshTimestampInstance implements Generic {
+
+			public ImgInstance getImgInstance() {
+				return (ImgInstance) getBaseComponent();
+			}
 		}
 	}
 }

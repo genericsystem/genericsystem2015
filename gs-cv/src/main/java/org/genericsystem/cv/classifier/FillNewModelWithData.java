@@ -15,7 +15,6 @@ import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.common.Root;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.classifier.newmodel.SimpleModel.ConsolidatedType;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.ConsolidatedType.ConsolidatedInstance;
 import org.genericsystem.cv.classifier.newmodel.SimpleModel.DocClassType;
 import org.genericsystem.cv.classifier.newmodel.SimpleModel.DocClassType.DocClassInstance;
 import org.genericsystem.cv.classifier.newmodel.SimpleModel.DocType;
@@ -23,15 +22,13 @@ import org.genericsystem.cv.classifier.newmodel.SimpleModel.DocType.DocInstance;
 import org.genericsystem.cv.classifier.newmodel.SimpleModel.ImgDocRel;
 import org.genericsystem.cv.classifier.newmodel.SimpleModel.ImgDocRel.ImgDocLink;
 import org.genericsystem.cv.classifier.newmodel.SimpleModel.ImgPathType;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.ImgPathType.ImgPathInstance;
+import org.genericsystem.cv.classifier.newmodel.SimpleModel.ImgRefreshTimestampType;
 import org.genericsystem.cv.classifier.newmodel.SimpleModel.ImgTimestampType;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.ImgTimestampType.ImgTimestampInstance;
 import org.genericsystem.cv.classifier.newmodel.SimpleModel.ImgType;
 import org.genericsystem.cv.classifier.newmodel.SimpleModel.ImgType.ImgInstance;
 import org.genericsystem.cv.classifier.newmodel.SimpleModel.LayoutType;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.LayoutType.LayoutInstance;
+import org.genericsystem.cv.classifier.newmodel.SimpleModel.SupervisedType;
 import org.genericsystem.cv.classifier.newmodel.SimpleModel.ZoneNumType;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.ZoneNumType.ZoneNumInstance;
 import org.genericsystem.cv.classifier.newmodel.SimpleModel.ZoneType;
 import org.genericsystem.cv.classifier.newmodel.SimpleModel.ZoneType.ZoneInstance;
 import org.genericsystem.cv.comparator.FillModelWithData;
@@ -82,8 +79,8 @@ public class FillNewModelWithData {
 	}
 
 	public static Root getEngine(String gsPath) {
-		return new Engine(gsPath, DocClassType.class, DocClassInstance.class, LayoutType.class, LayoutInstance.class, ImgDocRel.class, ImgDocLink.class, DocType.class, DocInstance.class, ImgType.class, ImgInstance.class, ZoneType.class, ZoneInstance.class,
-				ZoneNumType.class, ZoneNumInstance.class, ConsolidatedType.class, ConsolidatedInstance.class, ImgPathType.class, ImgPathInstance.class, ImgTimestampType.class, ImgTimestampInstance.class);
+		return new Engine(gsPath, DocClassType.class, LayoutType.class, ImgDocRel.class, DocType.class, ImgType.class, ZoneType.class, ZoneNumType.class, ConsolidatedType.class, ImgPathType.class, ImgTimestampType.class, ImgRefreshTimestampType.class,
+				SupervisedType.class);
 	}
 
 	// XXX: might need to refactor the code to be able to indicate whether the file already exists (or not) or if an error occurred at some point in the method
@@ -221,6 +218,7 @@ public class FillNewModelWithData {
 		try {
 			imgInstance.setImgPath(docPath);
 			imgInstance.setImgTimestamp(timestamp);
+			imgInstance.setImgRefreshTimestamp(timestamp);
 		} catch (RollbackException e) {
 			logger.debug("Filename or timestamp have already been set. Resuming task...");
 		} catch (Exception e) {
@@ -242,6 +240,8 @@ public class FillNewModelWithData {
 				logger.debug("Zone {} already known. Override consolidated ('{}' with '{}') and zone num ('{}' with '{}')", entry.getKey(), zoneInstance.getConsolidated(), ocr, zoneInstance.getZoneNum(), num);
 			}
 			zoneInstance.setConsolidated(ocr);
+			if (zoneInstance.getSupervised() == null)
+				zoneInstance.setSupervised("");
 			zoneInstance.setZoneNum(num);
 		}
 		// Flush the cache
