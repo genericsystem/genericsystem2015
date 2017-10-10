@@ -3,12 +3,11 @@ package org.genericsystem.defaults;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.NavigableSet;
-import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.FiltersBuilder;
@@ -77,35 +76,21 @@ public interface DefaultContext<T extends DefaultGeneric<T>> extends IContext<T>
 	}
 
 	default NavigableSet<T> computePotentialDependencies(T meta, List<T> supers, Serializable value, List<T> components) {
-		class PotentialDependenciesComputer extends TreeSet<T> {
-			private static final long serialVersionUID = -4464199068092100672L;
-			private final Set<T> alreadyVisited = new HashSet<>();
-			private Function<T, Boolean> memoizedIsDependency;
-
-			PotentialDependenciesComputer() {
-				memoizedIsDependency = Memoizer.memoize(node -> node.inheritsFrom(meta, supers, value, components)
-						|| node.getComponents().stream().anyMatch(component -> memoizedIsDependency.apply(component))
-						|| !node.isMeta() && memoizedIsDependency.apply(node.getMeta())
-						|| !components.equals(node.getComponents()) && node.componentsDepends(node.getComponents(), components) && supers.stream().anyMatch(override -> override.inheritsFrom(node.getMeta())));
-			}
-
-			PotentialDependenciesComputer visit(T node) {
-				if (alreadyVisited.add(node)) {
-					if (memoizedIsDependency.apply(node)) {
-						NavigableSet<T> deps = computeDependencies(node);
-						alreadyVisited.addAll(deps);
-						super.addAll(deps);
-					} else
-						getDependencies(node).stream().forEach(this::visit);
-				}
-				return this;
-			}
-		}
+		// Add back the class PotentialDependenciesComputer if the performance gain from directly adding the dependencies
+		// of a node that matches isDependencyOf(meta, supers, value, components) is necessary.
+		// Use an array because Java needs a final variable in the lambdas…
+		@SuppressWarnings("unchecked")
+		Function<T, Boolean>[] memoizedIsDependencyA = new Function[1];
+		memoizedIsDependencyA[0] = Memoizer.memoize(node -> node.inheritsFrom(meta, supers, value, components)
+				|| node.getComponents().stream().anyMatch(component -> memoizedIsDependencyA[0].apply(component))
+				|| !node.isMeta() && memoizedIsDependencyA[0].apply(node.getMeta())
+				|| !components.equals(node.getComponents()) && node.componentsDepends(node.getComponents(), components) && supers.stream().anyMatch(override -> override.inheritsFrom(node.getMeta())));
+		Function<T, Boolean> memoizedIsDependency = memoizedIsDependencyA[0];
 
 		if (components.isEmpty())
-			return meta.isMeta() ? new PotentialDependenciesComputer().visit(meta) : new TreeSet<>();
+			return meta.isMeta() ? new TreeSet<>(computeDependencies(meta).stream().filter(node -> memoizedIsDependency.apply(node)).collect(Collectors.toSet())) : new TreeSet<>();
 			else
-				return new PotentialDependenciesComputer().visit(components.get(0));
+				return new TreeSet<>(computeDependencies(components.get(0)).stream().filter(node -> memoizedIsDependency.apply(node)).collect(Collectors.toSet()));
 	}
 
 	default NavigableSet<T> computeRemoveDependencies(T node) {
