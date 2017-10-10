@@ -38,17 +38,19 @@ public class OCRPlasty {
 			return Collections.emptyList();
 
 		// int maxLength = getMaxLcsLength(trimmed);
-		double maxSimilarity = getMaxSimilarity(trimmed);
+		// double maxSimilarity = getMaxSimilarity(trimmed);
+		double maxLevenshtein = getMaxLevenshtein(trimmed);
 
 		Map<Integer, String> bestFit = new HashMap<>();
 		for (int i = 1, maxAttempts = 10; bestFit.size() <= 3 && i <= maxAttempts; ++i) {
 			int t = 1;
 			// Ransac<String> ransac = new Ransac<>(trimmed, getModelProviderMaxLcs(maxLength), 3, 50 * i, t, trimmed.size() / 2);
-			Ransac<String> ransac = new Ransac<>(trimmed, getModelProviderSimilarity(maxSimilarity), 3, 50 * i, t, trimmed.size() / 2);
+			// Ransac<String> ransac = new Ransac<>(trimmed, getModelProviderSimilarity(maxSimilarity), 3, 50 * i, t, trimmed.size() / 2);
+			Ransac<String> ransac = new Ransac<>(trimmed, getModelProviderLevenshtein(maxLevenshtein), 3, 50 * i, t, trimmed.size() / 2);
 			try {
 				ransac.compute();
 				bestFit = ransac.getBestDataSet();
-				// bestFit.entrySet().forEach(entry -> System.out.println("key: " + entry.getKey() + " | value: " + entry.getValue()));
+				bestFit.entrySet().forEach(entry -> System.out.println("key: " + entry.getKey() + " | value: " + entry.getValue()));
 			} catch (Exception e) {
 				// Can't get a good model. Increase the error margin
 				t += 1;
@@ -67,6 +69,17 @@ public class OCRPlasty {
 			String base = labels.get(i);
 			for (int j = 0; j < labels.size(); ++j) { // could use int j = i, but not possible with an iterator in the modelprovider
 				max += LetterPairSimilarity.compareStrings(base, labels.get(j));
+			}
+		}
+		return max;
+	}
+
+	private static double getMaxLevenshtein(List<String> labels) {
+		double max = 0d;
+		for (int i = 0; i < labels.size(); ++i) {
+			String base = labels.get(i);
+			for (int j = 0; j < labels.size(); ++j) { // could use int j = i, but not possible with an iterator in the modelprovider
+				max += Levenshtein.distance(base, labels.get(j)) / ((double) base.length() + labels.get(j).length());
 			}
 		}
 		return max;
@@ -113,6 +126,29 @@ public class OCRPlasty {
 						}
 					}
 					return Math.abs(max - maxSimilarity);
+				}
+
+				@Override
+				public Object[] getParams() {
+					return new Object[] { max };
+				}
+			};
+		};
+	}
+
+	private static Function<Collection<String>, Model<String>> getModelProviderLevenshtein(double maxLevenshtein) { // TODO
+		return datas -> {
+			return new Model<String>() {
+				private double max = 0d;
+
+				@Override
+				public double computeError(String data) {
+					for (String s : datas) {
+						if (s != data) {
+							max += Levenshtein.distance(data, s);
+						}
+					}
+					return Math.abs(max - maxLevenshtein);
 				}
 
 				@Override
