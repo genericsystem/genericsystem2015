@@ -24,7 +24,6 @@ public class OCRPlasty {
 		labels.add("had I expresset th agny I frequently feltu he wouald have ben taufht to lng fr its alevation");
 		labels.add("had I # tly feltu he wouald have ben taufht to lng fr iets alevation");
 		labels.add("fger gezrgze ertg");
-		// labels.add("");
 
 		// System.out.println(similarity(labels));
 		System.out.println("----");
@@ -42,8 +41,8 @@ public class OCRPlasty {
 		double maxLevenshtein = getMaxLevenshtein(trimmed);
 
 		Map<Integer, String> bestFit = new HashMap<>();
+		int t = 1;
 		for (int i = 1, maxAttempts = 10; bestFit.size() <= 3 && i <= maxAttempts; ++i) {
-			int t = 1;
 			// Ransac<String> ransac = new Ransac<>(trimmed, getModelProviderMaxLcs(maxLength), 3, 50 * i, t, trimmed.size() / 2);
 			// Ransac<String> ransac = new Ransac<>(trimmed, getModelProviderSimilarity(maxSimilarity), 3, 50 * i, t, trimmed.size() / 2);
 			Ransac<String> ransac = new Ransac<>(trimmed, getModelProviderLevenshtein(maxLevenshtein), 3, 50 * i, t, trimmed.size() / 2);
