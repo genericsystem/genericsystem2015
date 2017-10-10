@@ -37,12 +37,14 @@ public class OCRPlasty {
 		if (trimmed.isEmpty())
 			return Collections.emptyList();
 
-		int maxLength = getMaxLength(trimmed);
+		// int maxLength = getMaxLength(trimmed);
+		double maxSimilarity = getMaxSimilarity(trimmed);
 
 		Map<Integer, String> bestFit = new HashMap<>();
 		for (int i = 1, maxAttempts = 10; bestFit.size() <= 3 && i <= maxAttempts; ++i) {
 			int t = 1;
-			Ransac<String> ransac = new Ransac<>(trimmed, getModelProviderMaxLcs(maxLength), 3, 50 * i, t, trimmed.size() / 2);
+			// Ransac<String> ransac = new Ransac<>(trimmed, getModelProviderMaxLcs(maxLength), 3, 50 * i, t, trimmed.size() / 2);
+			Ransac<String> ransac = new Ransac<>(trimmed, getModelProviderSimilarity(maxSimilarity), 3, 50 * i, t, trimmed.size() / 2);
 			try {
 				ransac.compute();
 				bestFit = ransac.getBestDataSet();
@@ -57,6 +59,15 @@ public class OCRPlasty {
 
 	private static int getMaxLength(List<String> labels) {
 		return labels.stream().map(s -> s.length()).max((x, y) -> Integer.compare(x, y)).orElse(0);
+	}
+
+	private static double getMaxSimilarity(List<String> labels) {
+		String base = labels.get(0);
+		double max = 0d;
+		for (int i = 1; i < labels.size(); ++i) {
+			max += LetterPairSimilarity.compareStrings(base, labels.get(i));
+		}
+		return max / labels.size();
 	}
 
 	private static Function<Collection<String>, Model<String>> getModelProviderMaxLcs(int maxLength) {
@@ -81,6 +92,38 @@ public class OCRPlasty {
 				@Override
 				public Object[] getParams() {
 					return new Object[] { common };
+				}
+			};
+		};
+	}
+
+	private static Function<Collection<String>, Model<String>> getModelProviderSimilarity(double maxSimilarity) {
+		return datas -> {
+			Iterator<String> it = datas.iterator();
+			String firstWord = null;
+			double sim = 0d;
+
+			if (it.hasNext())
+				firstWord = it.next();
+			else
+				throw new IllegalArgumentException("datas can't be empty");
+
+			while (it.hasNext()) {
+				String label = it.next().trim();
+				if (!(firstWord.isEmpty() || label.isEmpty()))
+					sim += LetterPairSimilarity.compareStrings(firstWord, label);
+			}
+			double similarity = sim;
+
+			return new Model<String>() {
+				@Override
+				public double computeError(String data) {
+					return Math.abs(similarity - maxSimilarity);
+				}
+
+				@Override
+				public Object[] getParams() {
+					return new Object[] { similarity };
 				}
 			};
 		};
