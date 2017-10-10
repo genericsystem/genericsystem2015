@@ -37,14 +37,14 @@ public class OCRPlasty {
 		if (trimmed.isEmpty())
 			return Collections.emptyList();
 
-		// int maxLength = getMaxLength(trimmed);
-		double maxSimilarity = getMaxSimilarity(trimmed);
+		int maxLength = getMaxLcsLength(trimmed);
+		// double maxSimilarity = getMaxSimilarity(trimmed);
 
 		Map<Integer, String> bestFit = new HashMap<>();
 		for (int i = 1, maxAttempts = 10; bestFit.size() <= 3 && i <= maxAttempts; ++i) {
 			int t = 1;
-			// Ransac<String> ransac = new Ransac<>(trimmed, getModelProviderMaxLcs(maxLength), 3, 50 * i, t, trimmed.size() / 2);
-			Ransac<String> ransac = new Ransac<>(trimmed, getModelProviderSimilarity(maxSimilarity), 3, 50 * i, t, trimmed.size() / 2);
+			Ransac<String> ransac = new Ransac<>(trimmed, getModelProviderMaxLcs(maxLength), 3, 50 * i, t, trimmed.size() / 2);
+			// Ransac<String> ransac = new Ransac<>(trimmed, getModelProviderSimilarity(maxSimilarity), 3, 50 * i, t, trimmed.size() / 2);
 			try {
 				ransac.compute();
 				bestFit = ransac.getBestDataSet();
@@ -57,7 +57,7 @@ public class OCRPlasty {
 		return bestFit.values().stream().collect(Collectors.toList());
 	}
 
-	private static int getMaxLength(List<String> labels) {
+	private static int getMaxLcsLength(List<String> labels) {
 		return labels.stream().map(s -> s.length()).max((x, y) -> Integer.compare(x, y)).orElse(0);
 	}
 
@@ -86,7 +86,8 @@ public class OCRPlasty {
 			return new Model<String>() {
 				@Override
 				public double computeError(String data) {
-					return Math.abs(common.length() - maxLength);
+					String lcs = lcs(data, common);
+					return Math.abs(lcs.length() - maxLength); // common.length() - maxLength
 				}
 
 				@Override
