@@ -32,27 +32,31 @@ public class OCRPlasty {
 		labels.add("had I # tly feltu he wouald have ben taufht to lng fr iets alevation");
 		labels.add("fger gezrgze ertg");
 
-		System.out.println(ocrPlasty(getRansacInliers(new ArrayList<>(labels), getModelProviderMaxLcs(getMaxLcsLength(labels)))));
+		// System.out.println(correctStrings(labels, RANSAC.LCS));
+		System.out.println(correctStrings(labels, RANSAC.SIMILARITY));
+		// System.out.println(correctStrings(labels, RANSAC.LEVENSHTEIN));
 	}
 
 	public static String correctStrings(List<String> labels, OCRPlasty.RANSAC options) {
 		List<String> trimmed = labels.stream().map(s -> s.trim()).filter(s -> s.length() > 0).collect(Collectors.toList());
 		Function<Collection<String>, Model<String>> modelProvider = null;
+		double error = 1;
 		switch (options) {
 		default:
 		case NONE:
 			return ocrPlasty(trimmed);
 		case LCS:
-			modelProvider = getModelProviderMaxLcs(getMaxLcsLength(trimmed));
+			modelProvider = getModelProviderMaxLcs();
 			break;
 		case SIMILARITY:
-			modelProvider = getModelProviderSimilarity(getMaxSimilarity(trimmed));
+			modelProvider = getModelProviderSimilarity();
+			error = 0.2;
 			break;
 		case LEVENSHTEIN:
-			modelProvider = getModelProviderLevenshtein(getMaxLevenshtein(trimmed));
+			modelProvider = getModelProviderLevenshtein();
 			break;
 		}
-		List<String> inliers = getRansacInliers(trimmed, modelProvider);
+		List<String> inliers = getRansacInliers(trimmed, modelProvider, error);
 		return ocrPlasty(inliers);
 	}
 
@@ -89,54 +93,27 @@ public class OCRPlasty {
 		return consensus;
 	}
 
-	private static List<String> getRansacInliers(List<String> labels, Function<Collection<String>, Model<String>> modelProvider) {
+	private static List<String> getRansacInliers(List<String> labels, Function<Collection<String>, Model<String>> modelProvider, double error) {
 		List<String> trimmed = labels.stream().map(s -> s.trim()).filter(s -> s.length() > 0).collect(Collectors.toList());
 		if (trimmed.isEmpty())
 			return Collections.emptyList();
 
 		Map<Integer, String> bestFit = new HashMap<>();
-		int t = 1;
 		for (int i = 1, maxAttempts = 10; bestFit.size() <= 3 && i <= maxAttempts; ++i) {
-			Ransac<String> ransac = new Ransac<>(trimmed, modelProvider, 3, 50 * i, t, trimmed.size() / 2);
+			Ransac<String> ransac = new Ransac<>(trimmed, modelProvider, 3, 50 * i, error, trimmed.size() / 2);
 			try {
 				ransac.compute();
 				bestFit = ransac.getBestDataSet();
 				bestFit.entrySet().forEach(entry -> System.out.println("key: " + entry.getKey() + " | value: " + entry.getValue()));
 			} catch (Exception e) {
-				t += 1;
-				System.err.println("Can't get a good model. Increase the error margin to " + t);
+				error *= 1.5;
+				System.err.println("Can't get a good model. Increase the error margin to " + error);
 			}
 		}
 		return bestFit.values().stream().collect(Collectors.toList());
 	}
 
-	private static int getMaxLcsLength(List<String> labels) {
-		return labels.stream().map(s -> s.length()).max((x, y) -> Integer.compare(x, y)).orElse(0);
-	}
-
-	private static double getMaxSimilarity(List<String> labels) {
-		double max = 0d;
-		for (int i = 0; i < labels.size(); ++i) {
-			String base = labels.get(i);
-			for (int j = 0; j < labels.size(); ++j) { // could use int j = i, but not possible with an iterator in the modelprovider
-				max += LetterPairSimilarity.compareStrings(base, labels.get(j));
-			}
-		}
-		return max;
-	}
-
-	private static double getMaxLevenshtein(List<String> labels) {
-		double max = 0d;
-		for (int i = 0; i < labels.size(); ++i) {
-			String base = labels.get(i);
-			for (int j = 0; j < labels.size(); ++j) { // could use int j = i, but not possible with an iterator in the modelprovider
-				max += Levenshtein.distance(base, labels.get(j)) / ((double) base.length() + labels.get(j).length());
-			}
-		}
-		return max;
-	}
-
-	private static Function<Collection<String>, Model<String>> getModelProviderMaxLcs(int maxLength) {
+	private static Function<Collection<String>, Model<String>> getModelProviderMaxLcs() {
 		return datas -> {
 			Iterator<String> it = datas.iterator();
 			String subsequence = null;
@@ -150,33 +127,37 @@ public class OCRPlasty {
 			String common = subsequence;
 
 			return new Model<String>() {
+				private double dist = 0d;
+
 				@Override
 				public double computeError(String data) {
-					String lcs = lcs(data, common);
-					return Math.abs(lcs.length() - maxLength); // common.length() - maxLength
+					dist = Levenshtein.distance(data, common);
+					return dist;
 				}
 
 				@Override
 				public Object[] getParams() {
-					return new Object[] { common };
+					return new Object[] { dist };
 				}
 			};
 		};
 	}
 
-	private static Function<Collection<String>, Model<String>> getModelProviderSimilarity(double maxSimilarity) {
+	private static Function<Collection<String>, Model<String>> getModelProviderSimilarity() {
 		return datas -> {
 			return new Model<String>() {
 				private double max = 0d;
 
 				@Override
 				public double computeError(String data) {
+					max = 0d;
 					for (String s : datas) {
 						if (s != data) {
-							max += LetterPairSimilarity.compareStrings(data, s);
+							double sim = LetterPairSimilarity.compareStrings(data, s);
+							max += 1 - sim; // return the 'diversity' instead of the similarity
 						}
 					}
-					return Math.abs(max - maxSimilarity);
+					return max;
 				}
 
 				@Override
@@ -187,19 +168,20 @@ public class OCRPlasty {
 		};
 	}
 
-	private static Function<Collection<String>, Model<String>> getModelProviderLevenshtein(double maxLevenshtein) {
+	private static Function<Collection<String>, Model<String>> getModelProviderLevenshtein() {
 		return datas -> {
 			return new Model<String>() {
 				private double max = 0d;
 
 				@Override
 				public double computeError(String data) {
+					max = 0d;
 					for (String s : datas) {
 						if (s != data) {
 							max += Levenshtein.distance(data, s);
 						}
 					}
-					return Math.abs(max - maxLevenshtein);
+					return max;
 				}
 
 				@Override
