@@ -1,6 +1,7 @@
 package org.genericsystem.cv.utils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.opencv.core.Core;
@@ -31,6 +32,7 @@ public class VanishingPointsDetector {
 	// Parameters
 	int minimal_sample_set_dimension = 2;
 	private Mat K;
+	private Mat Li;
 	private Mat Mi;
 	private Mat Lengths;
 
@@ -59,7 +61,8 @@ public class VanishingPointsDetector {
 
 		// Transform all line segments
 		// this.Li = [l_00 l_01 l_02; l_10 l_11 l_12; l_20 l_21 l_22; ...]; where li=[l_i0;l_i1;l_i2]^T is li=an x bn;
-		li = new Mat(numLines, 3, CvType.CV_32F);
+		Li = new Mat(numLines, 3, CvType.CV_32F);
+
 		Mi = new Mat(numLines, 3, CvType.CV_32F);
 		Lengths = new Mat(numLines, numLines, CvType.CV_32F, new Scalar(0));
 		// Lengths.setTo(0);
@@ -100,11 +103,10 @@ public class VanishingPointsDetector {
 			// Compute the general form of the line
 			li = an.cross(bn);
 			Core.normalize(li, li);
-
 			// Insert line into appended array
-			li.put(i, 0, li.get(0, 0));
-			li.put(i, 1, li.get(1, 0));
-			li.put(i, 2, li.get(2, 0));
+			Li.put(i, 0, li.get(0, 0));
+			Li.put(i, 1, li.get(1, 0));
+			Li.put(i, 2, li.get(2, 0));
 
 			if (this.mode == MODE_NIETO) {
 				// Store mid-Point too
@@ -165,43 +167,42 @@ public class VanishingPointsDetector {
 			// RANSAC loop
 			while ((iter <= min_iters) || ((iter <= T_iter) && (iter <= max_iters) && (no_updates <= max_no_updates))) {
 				iter++;
-
 				if (iter >= max_iters)
 					break;
 
 				// Hypothesize ------------------------
 				// Select MSS
 				int[] MSS = new int[minimal_sample_set_dimension];
-				if (li.rows() < MSS.length)
+				if (Li.rows() < MSS.length)
 					break;
 				Mat vpAux = new Mat(3, 1, CvType.CV_32F);
-				getMinimalSampleSet(li, Lengths, Mi, MSS, vpAux); // output this.vpAux is calibrated
+				getMinimalSampleSet(Li, Lengths, Mi, MSS, vpAux); // output this.vpAux is calibrated
 
 				// Test --------------------------------
 				// Find the consensus set and cost
-				int N_I = 0;
-				float J = getConsensusSet(vpNum, li, Lengths, Mi, vpAux, E, N_I); // the CS is indexed in CS_idx
+				int[] N_I = new int[] { 0 };
+				float J = getConsensusSet(vpNum, Li, Lengths, Mi, vpAux, E, N_I); // the CS is indexed in CS_idx
 
 				boolean notify;
 				boolean update_T_iter = false;
 				// Update ------------------------------
 				// If the new cost is better than the best one, update
-				if (N_I >= this.minimal_sample_set_dimension && (J < J_best) || ((J == J_best) && (N_I > N_I_best))) {
+				if (N_I[0] >= this.minimal_sample_set_dimension && (J < J_best) || ((J == J_best) && (N_I[0] > N_I_best))) {
 					notify = true;
 
 					J_best = J;
 					CS_best = CS_idx;
 					vp = vpAux; // Store into this.vp (current best hypothesis): this.vp is therefore calibrated
 
-					if (N_I > N_I_best)
+					if (N_I[0] > N_I_best)
 						update_T_iter = true;
 
-					N_I_best = N_I;
+					N_I_best = N_I[0];
 
 					if (update_T_iter) {
 						// Update number of iterations
 						double q = 0;
-						if (this.minimal_sample_set_dimension > N_I_best) {
+						if (minimal_sample_set_dimension > N_I_best) {
 							// Error!
 							new IllegalStateException("The number of inliers must be higher than minimal sample set");
 						}
@@ -209,12 +210,12 @@ public class VanishingPointsDetector {
 							q = 1;
 						} else {
 							q = 1;
-							for (int j = 0; j < this.minimal_sample_set_dimension; j++)
+							for (int j = 0; j < minimal_sample_set_dimension; j++)
 								q *= (double) (N_I_best - j) / (numLines - j);
 						}
 						// Estimate the number of iterations for RANSAC
 						if ((1 - q) > 1e-12)
-							T_iter = (int) Math.ceil(Math.log(this.epsilon) / Math.log(1 - q));
+							T_iter = (int) Math.ceil(Math.log(epsilon) / Math.log(1 - q));
 						else
 							T_iter = 0;
 					}
@@ -228,7 +229,7 @@ public class VanishingPointsDetector {
 					System.out.println("Inliers = " + N_I_best + "/" + numLines + " (cost is J = " + J_best);
 
 					if (this.verbose)
-						System.out.println("MSS Cal.VP = " + vp.get(0, 0)[0] + "," + vp.get(1, 0)[0] + "," + vp.get(2, 0)[0]);
+						System.out.println("MSS Cal.VP = (" + vp.get(0, 0)[0] + "," + vp.get(1, 0)[0] + "," + vp.get(2, 0)[0] + ")");
 				}
 
 				// Check CS length (for the case all line segments are in the CS)
@@ -242,32 +243,31 @@ public class VanishingPointsDetector {
 			// Reestimate ------------------------------
 			if (this.verbose) {
 				System.out.println("Number of iterations: " + iter);
-				System.out.println("Final number of inliers = " + N_I_best + numLines);
+				System.out.println("Final number of inliers = " + N_I_best + "/" + numLines);
 			}
 
 			// Vector containing indexes for current vp
-			int[] ind_CS = new int[numLines];
+			List<Integer> ind_CS = new ArrayList<Integer>();
 
 			// Fill ind_CS with this.CS_best
 			List<Point[]> lineSegmentsCurrent = new ArrayList<>();
 			for (int i = 0; i < numLines; i++) {
 				if (CS_best[i] == vpNum) {
-					int a = i;
-					ind_CS[i] = (a);
-					lineSegmentsCurrent.set(i, lineSegments.get(i));
+					ind_CS.add(i);
+					lineSegmentsCurrent.add(lineSegments.get(i));
 				}
 			}
 
-			if (J_best > 0 && ind_CS.length > this.minimal_sample_set_dimension) // if J==0 maybe its because all line segments are perfectly parallel and the vanishing point is at the infinity
+			if (J_best > 0 && ind_CS.size() > minimal_sample_set_dimension) // if J==0 maybe its because all line segments are perfectly parallel and the vanishing point is at the infinity
 			{
 				if (this.verbose) {
 					System.out.println("Reestimating the solution... ");
 				}
 
 				if (this.mode == MODE_LS)
-					estimateLS(li, Lengths, ind_CS, N_I_best, vp);
+					estimateLS(Li, Lengths, ind_CS, N_I_best, vp);
 				else if (this.mode == MODE_NIETO)
-					;// estimateNIETO(li, Lengths, Mi, ind_CS, N_I_best, this.vp); // Output this.vp is calibrated
+					;// estimateNIETO(Li, Lengths, Mi, ind_CS, N_I_best, this.vp); // Output this.vp is calibrated
 				else
 					throw new IllegalStateException("ERROR: mode not supported, please use {LS, LIEB, NIETO}\n");
 
@@ -276,18 +276,19 @@ public class VanishingPointsDetector {
 
 				// Uncalibrate
 				if (this.verbose)
-					System.out.println("Cal.VP = " + vp.get(0, 0)[0] + "," + vp.get(1, 0)[0] + "," + vp.get(2, 0)[0]);
-				vp = this.K.mul(vp);
+					System.out.println("Cal.VP = (" + vp.get(0, 0)[0] + "," + vp.get(1, 0)[0] + "," + vp.get(2, 0)[0] + ")");
+				Core.gemm(K, vp, 1, new Mat(), 0, vp);
+
 				if (vp.get(2, 0)[0] != 0) {
 					vp.put(0, 0, new float[] { Double.valueOf(vp.get(0, 0)[0] / vp.get(2, 0)[0]).floatValue() });
 					vp.put(1, 0, new float[] { Double.valueOf(vp.get(1, 0)[0] / vp.get(2, 0)[0]).floatValue() });
 					vp.put(2, 0, new float[] { 1 });
 				} else {
 					// Since this is infinite, it is better to leave it calibrated
-					vp = this.K.inv().mul(vp);
+					Core.gemm(K.inv(), vp, 1, new Mat(), 0, vp);
 				}
 				if (this.verbose)
-					System.out.println("VP = " + vp.get(0, 0)[0] + "," + vp.get(1, 0)[0] + "," + vp.get(2, 0)[0]);
+					System.out.println("VP = (" + vp.get(0, 0)[0] + "," + vp.get(1, 0)[0] + "," + vp.get(2, 0)[0] + ")");
 
 				// Copy to output vector
 				vps.add(vp);
@@ -299,7 +300,8 @@ public class VanishingPointsDetector {
 					}
 
 					// Uncalibrate
-					vp = K.mul(vp);
+					Core.gemm(K, vp, 1, new Mat(), 0, vp);
+
 					if (vp.get(2, 0)[0] != 0) {
 						vp.put(0, 0, new float[] { Double.valueOf(vp.get(0, 0)[0] / vp.get(2, 0)[0]).floatValue() });
 						vp.put(1, 0, new float[] { Double.valueOf(vp.get(1, 0)[0] / vp.get(2, 0)[0]).floatValue() });
@@ -310,6 +312,8 @@ public class VanishingPointsDetector {
 					} else {
 						// Calibrate
 						vp = this.K.inv().mul(vp);
+						Core.gemm(K.inv(), vp, 1, new Mat(), 0, vp);
+
 					}
 					// Copy to output vector
 					vps.add(vp);
@@ -319,8 +323,8 @@ public class VanishingPointsDetector {
 			// Fill lineSegmentsClusters containing the indexes of inliers for current vps
 			if (N_I_best > 2) {
 
-				for (int index = ind_CS.length - 1; index >= 0; index--) {
-					lineSegments.remove(ind_CS[index]);
+				for (int index = ind_CS.size() - 1; index >= 0; index--) {
+					lineSegments.remove(ind_CS.get(index));
 				}
 
 				// while (ind_CS.size() > 0) {
@@ -351,14 +355,14 @@ public class VanishingPointsDetector {
 			;
 		// Estimate the vanishing point and the residual error
 		if (this.mode == MODE_LS)
-			estimateLS(Li, Lengths, MSS, 2, vp);
+			estimateLS(Li, Lengths, Arrays.asList(MSS[0], MSS[1]), 2, vp);
 		else if (this.mode == MODE_NIETO)
 			;// estimateNIETO(Li, Mi, Lengths, MSS, 2, vp);
 		else
 			new IllegalStateException("ERROR: mode not supported. Please use {LS, LIEB, NIETO}");
 	}
 
-	private float getConsensusSet(int vpNum, Mat Li, Mat Lengths, Mat Mi, Mat vp, float[] E, int CS_counter) {
+	private float getConsensusSet(int vpNum, Mat Li, Mat Lengths, Mat Mi, Mat vp, float[] E, int[] CS_counter) {
 		// Compute the error of each line segment of LSS with respect to v_est
 		// If it is less than the threshold, add to the CS
 		for (int i = 0; i < CS_idx.length; i++)
@@ -377,43 +381,44 @@ public class VanishingPointsDetector {
 	}
 
 	// Estimation functions
-	private void estimateLS(Mat Li, Mat Lengths, int[] set, int set_length, Mat vp) {
+	private void estimateLS(Mat Li, Mat Lengths, List<Integer> set, int set_length, Mat vp) {
+		// System.out.println("zzz" + set.size() + " " + set_length);
 		if (set_length == this.minimal_sample_set_dimension) {
 			// Just the cross product
 			// DATA IS CALIBRATED in MODE_LS
 			Mat ls0 = new Mat(3, 1, CvType.CV_32F);
 			Mat ls1 = new Mat(3, 1, CvType.CV_32F);
 
-			ls0.put(0, 0, Li.get(set[0], 0));
-			System.out.println(set[0] + " " + Li.get(set[0], 1));
-			ls0.put(1, 0, Li.get(set[0], 1));
-			ls0.put(2, 0, Li.get(set[0], 2));
+			ls0.put(0, 0, Li.get(set.get(0), 0));
+			ls0.put(1, 0, Li.get(set.get(0), 1));
+			ls0.put(2, 0, Li.get(set.get(0), 2));
 
-			ls1.put(0, 0, Li.get(set[1], 0));
-			ls1.put(1, 0, Li.get(set[1], 1));
-			ls1.put(2, 0, Li.get(set[1], 2));
+			ls1.put(0, 0, Li.get(set.get(1), 0));
+			ls1.put(1, 0, Li.get(set.get(1), 1));
+			ls1.put(2, 0, Li.get(set.get(1), 2));
 
 			vp = ls0.cross(ls1);
 
 			Core.normalize(vp, vp);
 
 			return;
-		} else if (set_length < this.minimal_sample_set_dimension) {
+		} else if (set_length < minimal_sample_set_dimension) {
 			new IllegalStateException("Error: at least 2 line-segments are required");
 			return;
 		}
 
 		// Extract the line segments corresponding to the indexes contained in the set
 		Mat li_set = new Mat(3, set_length, CvType.CV_32F);
-		Mat Lengths_set = new Mat(set_length, set_length, CvType.CV_32F, new Scalar(0));
+		Mat Lengths_set = new Mat(set_length, set_length, CvType.CV_32F, new Scalar(0, 0, 0));
 		// Lengths_set.setTo(0);
 
 		// Fill line segments info
 		for (int i = 0; i < set_length; i++) {
-			li_set.put(0, i, Li.get(set[i], 0));
-			li_set.put(2, i, Li.get(set[i], 2));
+			li_set.put(0, i, Li.get(set.get(i), 0));
+			li_set.put(1, i, Li.get(set.get(i), 1));
+			li_set.put(2, i, Li.get(set.get(i), 2));
 
-			Lengths_set.put(i, i, Lengths.get(set[i], set[i]));
+			Lengths_set.put(i, i, Lengths.get(set.get(i), set.get(i)));
 		}
 
 		// Least squares solution
@@ -421,7 +426,11 @@ public class VanishingPointsDetector {
 		Mat L = li_set.t();
 		Mat Tau = Lengths_set;
 		Mat ATA = new Mat(3, 3, CvType.CV_32F);
-		ATA = L.t().mul(Tau.t()).mul(Tau).mul(L);
+		Mat dst = new Mat();
+
+		Core.gemm(L.t(), Tau.t(), 1, new Mat(), 0, dst);
+		Core.gemm(dst, Tau, 1, new Mat(), 0, dst);
+		Core.gemm(dst, L, 1, new Mat(), 0, ATA);
 
 		// Obtain eigendecomposition
 		Mat w = new Mat();
@@ -630,7 +639,7 @@ public class VanishingPointsDetector {
 	// }
 
 	// Error functions
-	public float errorLS(int vpNum, Mat Li, Mat vp, float[] E, int CS_counter) {
+	public float errorLS(int vpNum, Mat Li, Mat vp, float[] E, int[] CS_counter) {
 		Mat vn = vp;
 		double vn_norm = Core.norm(vn);
 
@@ -653,7 +662,7 @@ public class VanishingPointsDetector {
 			/* Add to CS if error is less than expected noise */
 			if (E[i] <= T_noise_squared) {
 				CS_idx[i] = vpNum; // set index to 1
-				(CS_counter)++;
+				CS_counter[0]++;
 
 				// Torr method
 				J += E[i];
@@ -662,7 +671,7 @@ public class VanishingPointsDetector {
 			}
 		}
 
-		J /= (CS_counter);
+		J /= CS_counter[0];
 
 		return J;
 	}
@@ -722,16 +731,16 @@ public class VanishingPointsDetector {
 	// return J;
 	// }
 
-	public void drawCS(Mat im, Point[][][] lineSegmentsClusters, Mat[] vps) {
+	public void drawCS(Mat im, List<List<Point[]>> lineSegmentsClusters, List<Mat> vps) {
 		List<Scalar> colors = new ArrayList<>();
 		colors.add(new Scalar(0, 0, 255)); // First is RED
 		colors.add(new Scalar(0, 255, 0)); // Second is GREEN
 		colors.add(new Scalar(255, 0, 0)); // Third is BLUE
 
 		// Paint vps
-		for (int vpNum = 0; vpNum < vps.length; vpNum++) {
-			if (vps[vpNum].get(2, 0)[0] != 0) {
-				Point vp = new Point(vps[vpNum].get(0, 0)[0], vps[vpNum].get(1, 0)[0]);
+		for (int vpNum = 0; vpNum < vps.size(); vpNum++) {
+			if (vps.get(vpNum).get(2, 0)[0] != 0) {
+				Point vp = new Point(vps.get(vpNum).get(0, 0)[0], vps.get(vpNum).get(1, 0)[0]);
 
 				// Paint vp if inside the image
 				if (vp.x >= 0 && vp.x < im.cols() && vp.y >= 0 && vp.y < im.rows()) {
@@ -741,10 +750,10 @@ public class VanishingPointsDetector {
 			}
 		}
 		// Paint line segments
-		for (int localc = 0; localc < lineSegmentsClusters.length; localc++) {
-			for (int i = 0; i < lineSegmentsClusters[localc].length; i++) {
-				Point pt1 = lineSegmentsClusters[localc][i][0];
-				Point pt2 = lineSegmentsClusters[localc][i][1];
+		for (int localc = 0; localc < lineSegmentsClusters.size(); localc++) {
+			for (int i = 0; i < lineSegmentsClusters.get(localc).size(); i++) {
+				Point pt1 = lineSegmentsClusters.get(localc).get(i)[0];
+				Point pt2 = lineSegmentsClusters.get(localc).get(i)[1];
 
 				Imgproc.line(im, pt1, pt2, colors.get(localc), 1);
 			}

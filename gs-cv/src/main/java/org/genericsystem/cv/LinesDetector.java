@@ -11,13 +11,15 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
+
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.genericsystem.cv.utils.Tools;
 import org.genericsystem.cv.utils.VanishingPointsDetector;
 import org.genericsystem.layout.Ransac;
 import org.genericsystem.layout.Ransac.Model;
 import org.opencv.core.Core;
-import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
@@ -26,9 +28,6 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
 import org.opencv.videoio.VideoCapture;
-
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
 
 public class LinesDetector extends AbstractApp {
 
@@ -66,49 +65,50 @@ public class LinesDetector extends AbstractApp {
 				List<List<Point[]>> lineSegmentsClusters = new ArrayList<>();
 				List<Integer> numInliers = new ArrayList<>();
 				List<Mat> vps = new ArrayList<>();
-				new VanishingPointsDetector(frame.size(), true).multipleVPEstimation(lines.toLinesSegments(), lineSegmentsClusters, numInliers, vps, 1);
-
-				System.out.println("Average angle: " + lines.getMean() / Math.PI * 180);
-				if (lines.size() > 16) {
-					lines.draw(frame, new Scalar(0, 0, 255));
-					lines = lines.ransacMean();
-					lines.draw(frame, new Scalar(0, 255, 0));
-					damper.pushNewValue(lines.getMean());
-					System.out.println("Ransac angle: " + lines.getMean() / Math.PI * 180);
-					binaryView.setImage(Tools.mat2jfxImage(grad.getSrc()));
-					frameView.setImage(Tools.mat2jfxImage(frame));
-
-					Mat matrix = Imgproc.getRotationMatrix2D(new Point(frame.width() / 2, frame.height() / 2), damper.getMean() / Math.PI * 180, 1);
-					Mat rotated = new Mat(frame.size(), CvType.CV_8UC3, new Scalar(255, 255, 255));
-					Mat rotatedMasked = new Mat();
-					Mat mask = new Mat(frame.size(), CvType.CV_8UC1, new Scalar(255));
-					Mat warpedMask = new Mat();
-					Imgproc.warpAffine(mask, warpedMask, matrix, frame.size());
-					Imgproc.warpAffine(frame, rotatedMasked, matrix, frame.size(), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(255));
-					rotatedMasked.copyTo(rotated, warpedMask);
-					rotatedView.setImage(Tools.mat2jfxImage(rotated));
-
-					lines = lines.rotate(matrix);
-					System.out.println("zzzz" + lines.getMean());
-
-					Mat dePerspectived = new Mat(frame.size(), CvType.CV_8UC3, new Scalar(255, 255, 255));
-					Mat homography = lines.findPerspectiveMatrix(frame.width(), frame.height());
-					mask = new Mat(frame.size(), CvType.CV_8UC1, new Scalar(255));
-					Mat maskWarpped = new Mat();
-					Imgproc.warpPerspective(mask, maskWarpped, homography, frame.size());
-					Mat tmp = new Mat();
-					Imgproc.warpPerspective(rotated, tmp, homography, frame.size(), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(255));
-					tmp.copyTo(dePerspectived, maskWarpped);
-					deskiewedView.setImage(Tools.mat2jfxImage(dePerspectived));
-
-				} else
-					System.out.println("Not enough lines : " + lines.size());
+				VanishingPointsDetector vpd = new VanishingPointsDetector(frame.size(), true);
+				vpd.multipleVPEstimation(lines.toLinesSegments(), lineSegmentsClusters, numInliers, vps, 1);
+				vpd.drawCS(frame, lineSegmentsClusters, vps);
+				// System.out.println("Average angle: " + lines.getMean() / Math.PI * 180);
+				// if (lines.size() > 16) {
+				// lines.draw(frame, new Scalar(0, 0, 255));
+				// lines = lines.ransacMean();
+				// lines.draw(frame, new Scalar(0, 255, 0));
+				// damper.pushNewValue(lines.getMean());
+				// System.out.println("Ransac angle: " + lines.getMean() / Math.PI * 180);
+				// binaryView.setImage(Tools.mat2jfxImage(grad.getSrc()));
+				frameView.setImage(Tools.mat2jfxImage(frame));
+				//
+				// Mat matrix = Imgproc.getRotationMatrix2D(new Point(frame.width() / 2, frame.height() / 2), damper.getMean() / Math.PI * 180, 1);
+				// Mat rotated = new Mat(frame.size(), CvType.CV_8UC3, new Scalar(255, 255, 255));
+				// Mat rotatedMasked = new Mat();
+				// Mat mask = new Mat(frame.size(), CvType.CV_8UC1, new Scalar(255));
+				// Mat warpedMask = new Mat();
+				// Imgproc.warpAffine(mask, warpedMask, matrix, frame.size());
+				// Imgproc.warpAffine(frame, rotatedMasked, matrix, frame.size(), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(255));
+				// rotatedMasked.copyTo(rotated, warpedMask);
+				// rotatedView.setImage(Tools.mat2jfxImage(rotated));
+				//
+				// lines = lines.rotate(matrix);
+				// System.out.println("zzzz" + lines.getMean());
+				//
+				// Mat dePerspectived = new Mat(frame.size(), CvType.CV_8UC3, new Scalar(255, 255, 255));
+				// Mat homography = lines.findPerspectiveMatrix(frame.width(), frame.height());
+				// mask = new Mat(frame.size(), CvType.CV_8UC1, new Scalar(255));
+				// Mat maskWarpped = new Mat();
+				// Imgproc.warpPerspective(mask, maskWarpped, homography, frame.size());
+				// Mat tmp = new Mat();
+				// Imgproc.warpPerspective(rotated, tmp, homography, frame.size(), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(255));
+				// tmp.copyTo(dePerspectived, maskWarpped);
+				// deskiewedView.setImage(Tools.mat2jfxImage(dePerspectived));
+				//
+				// } else
+				// System.out.println("Not enough lines : " + lines.size());
 
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 
-		}, 0, 33, TimeUnit.MILLISECONDS);
+		}, 0, 1000, TimeUnit.MILLISECONDS);
 
 	}
 
@@ -141,8 +141,8 @@ public class LinesDetector extends AbstractApp {
 				double b = (line.y1 + line.y2 - a * (line.x1 + line.x2)) / 2;
 				double newy = a * width / 2 + b;
 
-				Mat homography = Imgproc.getPerspectiveTransform(new MatOfPoint2f(new Point[] { new Point(line.x1, line.y1), new Point(line.x2, line.y2), new Point(line.x2, height / 2), new Point(line.x1, height / 2) }),
-						new MatOfPoint2f(new Point[] { new Point(line.x1, newy), new Point(line.x2, newy), new Point(line.x2, height / 2), new Point(line.x1, height / 2) }));
+				Mat homography = Imgproc.getPerspectiveTransform(new MatOfPoint2f(new Point[] { new Point(line.x1, line.y1), new Point(line.x2, line.y2), new Point(line.x2, height / 2), new Point(line.x1, height / 2) }), new MatOfPoint2f(new Point[] {
+						new Point(line.x1, newy), new Point(line.x2, newy), new Point(line.x2, height / 2), new Point(line.x1, height / 2) }));
 
 				return new Model<Line>() {
 
