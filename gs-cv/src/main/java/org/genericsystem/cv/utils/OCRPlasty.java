@@ -219,9 +219,9 @@ public class OCRPlasty {
 		if (n == 1)
 			return 1;
 		for (int i = 0; i < n; i++) {
-			for (int j = 0; j < n; j++) {
-				if (j > i) // each distance will be between 0 and 1
-					sim += Levenshtein.distance(strings.get(i), strings.get(j)) / ((double) strings.get(i).length() + strings.get(j).length());
+			for (int j = i + 1; j < n; j++) {
+				// each distance will be between 0 and 1
+				sim += Levenshtein.distance(strings.get(i), strings.get(j)) / ((double) strings.get(i).length() + strings.get(j).length());
 			}
 		}
 		return 1 - 2 * sim / n / (n - 1); // divide by the total number of distances
