@@ -1,6 +1,5 @@
 package org.genericsystem.cv.utils;
 
-import java.text.Collator;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +23,7 @@ public class LetterPairSimilarity {
 			String pair1 = pairs1.get(i);
 			for (int j = 0; j < pairs2.size(); ++j) {
 				String pair2 = pairs2.get(j);
-				if (Collator.getInstance().compare(pair1, pair2) == 0) {
+				if (pair1.equals(pair2)) {
 					intersection++;
 					pairs2.remove(j);
 					break;

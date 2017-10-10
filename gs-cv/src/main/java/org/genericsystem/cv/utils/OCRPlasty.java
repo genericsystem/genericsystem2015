@@ -37,14 +37,14 @@ public class OCRPlasty {
 		if (trimmed.isEmpty())
 			return Collections.emptyList();
 
-		int maxLength = getMaxLcsLength(trimmed);
-		// double maxSimilarity = getMaxSimilarity(trimmed);
+		// int maxLength = getMaxLcsLength(trimmed);
+		double maxSimilarity = getMaxSimilarity(trimmed);
 
 		Map<Integer, String> bestFit = new HashMap<>();
 		for (int i = 1, maxAttempts = 10; bestFit.size() <= 3 && i <= maxAttempts; ++i) {
 			int t = 1;
-			Ransac<String> ransac = new Ransac<>(trimmed, getModelProviderMaxLcs(maxLength), 3, 50 * i, t, trimmed.size() / 2);
-			// Ransac<String> ransac = new Ransac<>(trimmed, getModelProviderSimilarity(maxSimilarity), 3, 50 * i, t, trimmed.size() / 2);
+			// Ransac<String> ransac = new Ransac<>(trimmed, getModelProviderMaxLcs(maxLength), 3, 50 * i, t, trimmed.size() / 2);
+			Ransac<String> ransac = new Ransac<>(trimmed, getModelProviderSimilarity(maxSimilarity), 3, 50 * i, t, trimmed.size() / 2);
 			try {
 				ransac.compute();
 				bestFit = ransac.getBestDataSet();
@@ -62,12 +62,14 @@ public class OCRPlasty {
 	}
 
 	private static double getMaxSimilarity(List<String> labels) {
-		String base = labels.get(0);
 		double max = 0d;
-		for (int i = 1; i < labels.size(); ++i) {
-			max += LetterPairSimilarity.compareStrings(base, labels.get(i));
+		for (int i = 0; i < labels.size(); ++i) {
+			String base = labels.get(i);
+			for (int j = 0; j < labels.size(); ++j) { // could use int j = i, but not possible with an iterator in the modelprovider
+				max += LetterPairSimilarity.compareStrings(base, labels.get(j));
+			}
 		}
-		return max / labels.size();
+		return max;
 	}
 
 	private static Function<Collection<String>, Model<String>> getModelProviderMaxLcs(int maxLength) {
@@ -101,20 +103,16 @@ public class OCRPlasty {
 	private static Function<Collection<String>, Model<String>> getModelProviderSimilarity(double maxSimilarity) {
 		return datas -> {
 			Iterator<String> it = datas.iterator();
-			String firstWord = null;
-			double sim = 0d;
-
-			if (it.hasNext())
-				firstWord = it.next();
-			else
-				throw new IllegalArgumentException("datas can't be empty");
-
+			double max = 0d;
 			while (it.hasNext()) {
-				String label = it.next().trim();
-				if (!(firstWord.isEmpty() || label.isEmpty()))
-					sim += LetterPairSimilarity.compareStrings(firstWord, label);
+				String label1 = it.next();
+				Iterator<String> nestedIt = datas.iterator();
+				while (nestedIt.hasNext()) {
+					String label2 = nestedIt.next();
+					max += LetterPairSimilarity.compareStrings(label1, label2);
+				}
 			}
-			double similarity = sim;
+			double similarity = max;
 
 			return new Model<String>() {
 				@Override
