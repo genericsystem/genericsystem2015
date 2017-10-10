@@ -22,7 +22,6 @@ public class OCRPlasty {
 		labels.add("gad I sed the agony I fefjuently felt he would have been to long for its alleviafcion");
 		labels.add("had I expressed tbe agony I frejuently felt he would have been taught to long for its alleviationq");
 		labels.add("had I expresset th agny I frequently feltu he wouald have ben taufht to lng fr its alevation");
-		labels.add("had I expressed tbe agony I frequently felt she would have been taught to long for its alleviationq");
 		labels.add("had I # tly feltu he wouald have ben taufht to lng fr iets alevation");
 		labels.add("fger gezrgze ertg");
 		// labels.add("");
@@ -38,12 +37,12 @@ public class OCRPlasty {
 		if (trimmed.isEmpty())
 			return Collections.emptyList();
 
-		int maxLength = trimmed.stream().map(s -> s.length()).max((x, y) -> Integer.compare(x, y)).orElse(0);
+		int maxLength = getMaxLength(trimmed);
 
 		Map<Integer, String> bestFit = new HashMap<>();
 		for (int i = 1, maxAttempts = 10; bestFit.size() <= 3 && i <= maxAttempts; ++i) {
 			int t = 1;
-			Ransac<String> ransac = new Ransac<>(trimmed, getModelProvider(maxLength), 3, 50 * i, t, trimmed.size() / 2);
+			Ransac<String> ransac = new Ransac<>(trimmed, getModelProviderMaxLcs(maxLength), 3, 50 * i, t, trimmed.size() / 2);
 			try {
 				ransac.compute();
 				bestFit = ransac.getBestDataSet();
@@ -56,7 +55,11 @@ public class OCRPlasty {
 		return bestFit.values().stream().collect(Collectors.toList());
 	}
 
-	private static Function<Collection<String>, Model<String>> getModelProvider(int maxLength) {
+	private static int getMaxLength(List<String> labels) {
+		return labels.stream().map(s -> s.length()).max((x, y) -> Integer.compare(x, y)).orElse(0);
+	}
+
+	private static Function<Collection<String>, Model<String>> getModelProviderMaxLcs(int maxLength) {
 		return datas -> {
 			Iterator<String> it = datas.iterator();
 			String subsequence = null;
