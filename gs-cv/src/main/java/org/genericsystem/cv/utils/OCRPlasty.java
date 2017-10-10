@@ -1,11 +1,18 @@
 package org.genericsystem.cv.utils;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import org.genericsystem.layout.Ransac;
+import org.genericsystem.layout.Ransac.Model;
 
 public class OCRPlasty {
 
@@ -15,16 +22,75 @@ public class OCRPlasty {
 		labels.add("gad I sed the agony I fefjuently felt he would have been to long for its alleviafcion");
 		labels.add("had I expressed tbe agony I frejuently felt he would have been taught to long for its alleviationq");
 		labels.add("had I expresset th agny I frequently feltu he wouald have ben taufht to lng fr its alevation");
+		labels.add("had I expressed tbe agony I frequently felt she would have been taught to long for its alleviationq");
+		labels.add("had I # tly feltu he wouald have ben taufht to lng fr iets alevation");
+		labels.add("fger gezrgze ertg");
+		// labels.add("");
 
-		System.out.println(similarity(labels));
-		System.out.println(ocrPlasty(labels));
+		// System.out.println(similarity(labels));
+		System.out.println("----");
+		System.out.println(ocrPlasty(getRansacInliers(new ArrayList<>(labels))));
+		System.out.println(ocrPlasty(new ArrayList<>(labels)));
+	}
 
+	public static List<String> getRansacInliers(List<String> labels) {
+		List<String> trimmed = labels.stream().map(s -> s.trim()).filter(s -> s.length() > 0).collect(Collectors.toList());
+		if (trimmed.isEmpty())
+			return Collections.emptyList();
+
+		int maxLength = trimmed.stream().map(s -> s.length()).max((x, y) -> Integer.compare(x, y)).orElse(0);
+
+		Map<Integer, String> bestFit = new HashMap<>();
+		for (int i = 1, maxAttempts = 10; bestFit.size() <= 3 && i <= maxAttempts; ++i) {
+			int t = 1;
+			Ransac<String> ransac = new Ransac<>(trimmed, getModelProvider(maxLength), 3, 50 * i, t, trimmed.size() / 2);
+			try {
+				ransac.compute();
+				bestFit = ransac.getBestDataSet();
+				// bestFit.entrySet().forEach(entry -> System.out.println("key: " + entry.getKey() + " | value: " + entry.getValue()));
+			} catch (Exception e) {
+				// Can't get a good model. Increase the error margin
+				t += 1;
+			}
+		}
+		return bestFit.values().stream().collect(Collectors.toList());
+	}
+
+	private static Function<Collection<String>, Model<String>> getModelProvider(int maxLength) {
+		return datas -> {
+			Iterator<String> it = datas.iterator();
+			String subsequence = null;
+			if (it.hasNext())
+				subsequence = it.next();
+			while (it.hasNext()) {
+				String label = it.next().trim();
+				if (!(subsequence.isEmpty() || label.isEmpty()))
+					subsequence = lcs(subsequence, label);
+			}
+			String common = subsequence;
+
+			return new Model<String>() {
+				@Override
+				public double computeError(String data) {
+					return Math.abs(common.length() - maxLength);
+				}
+
+				@Override
+				public Object[] getParams() {
+					return new Object[] { common };
+				}
+			};
+		};
 	}
 
 	public static String ocrPlasty(List<String> labels) {
 		if (labels == null || labels.isEmpty())
 			throw new IllegalStateException("Attempt to compute the longestCommonSubsequence on an empty list");
+
 		String common = longestCommonSubsequence(labels);
+
+		System.out.println("LCS: " + common);
+
 		String consensus = "";
 		for (int i = 0; i < common.length() + 1; i++) {
 			List<String> candidates = new ArrayList<>();
