@@ -106,7 +106,7 @@ public class ComputeBestTextPerZone {
 			logger.debug("No text found for {} => zone n°{}", docInstance.getValue(), zoneInstance.getValue());
 			return null;
 		} else {
-			String bestText = OCRPlasty.ocrPlasty(ocrTexts);
+			String bestText = OCRPlasty.correctStrings(ocrTexts, OCRPlasty.RANSAC.NONE);
 			logger.debug("Best text: {}", bestText);
 			return bestText;
 		}

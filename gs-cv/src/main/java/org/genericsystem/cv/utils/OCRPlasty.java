@@ -16,6 +16,13 @@ import org.genericsystem.layout.Ransac.Model;
 
 public class OCRPlasty {
 
+	public static enum RANSAC {
+		NONE,
+		LCS,
+		SIMILARITY,
+		LEVENSHTEIN
+	}
+
 	public static void main(String[] args) {
 		List<String> labels = new ArrayList<>();
 		labels.add("had I expressed the agony I frequentl felt he would have been taught to long for its alleviati");
@@ -25,34 +32,79 @@ public class OCRPlasty {
 		labels.add("had I # tly feltu he wouald have ben taufht to lng fr iets alevation");
 		labels.add("fger gezrgze ertg");
 
-		// System.out.println(similarity(labels));
-		System.out.println("----");
-		System.out.println(ocrPlasty(getRansacInliers(new ArrayList<>(labels))));
-		System.out.println(ocrPlasty(new ArrayList<>(labels)));
+		System.out.println(ocrPlasty(getRansacInliers(new ArrayList<>(labels), getModelProviderMaxLcs(getMaxLcsLength(labels)))));
 	}
 
-	public static List<String> getRansacInliers(List<String> labels) {
+	public static String correctStrings(List<String> labels, OCRPlasty.RANSAC options) {
+		List<String> trimmed = labels.stream().map(s -> s.trim()).filter(s -> s.length() > 0).collect(Collectors.toList());
+		Function<Collection<String>, Model<String>> modelProvider = null;
+		switch (options) {
+		default:
+		case NONE:
+			return ocrPlasty(trimmed);
+		case LCS:
+			modelProvider = getModelProviderMaxLcs(getMaxLcsLength(trimmed));
+			break;
+		case SIMILARITY:
+			modelProvider = getModelProviderSimilarity(getMaxSimilarity(trimmed));
+			break;
+		case LEVENSHTEIN:
+			modelProvider = getModelProviderLevenshtein(getMaxLevenshtein(trimmed));
+			break;
+		}
+		List<String> inliers = getRansacInliers(trimmed, modelProvider);
+		return ocrPlasty(inliers);
+	}
+
+	public static double similarity(List<String> strings) {
+		double sim = 0;
+		int n = strings.size();
+		if (n == 1)
+			return 1;
+		for (int i = 0; i < n; i++) {
+			for (int j = i + 1; j < n; j++) {
+				// each distance will be between 0 and 1
+				sim += Levenshtein.distance(strings.get(i), strings.get(j)) / ((double) strings.get(i).length() + strings.get(j).length());
+			}
+		}
+		return 1 - 2 * sim / n / (n - 1); // divide by the total number of distances
+	}
+
+	private static String ocrPlasty(List<String> labels) {
+		if (labels == null || labels.isEmpty())
+			throw new IllegalStateException("Attempt to compute the longestCommonSubsequence on an empty list");
+		String common = longestCommonSubsequence(labels);
+		String consensus = "";
+		for (int i = 0; i < common.length() + 1; i++) {
+			List<String> candidates = new ArrayList<>();
+			for (int label = 0; label < labels.size(); label++) {
+				List<String> is = (i < common.length()) ? interString(labels.get(label), common.charAt(i)) : endString(labels.get(label));
+				labels.set(label, is.get(0));
+				candidates.add(is.get(1));
+			}
+			consensus += selectBest(candidates);
+			if (i < common.length() - 1)
+				consensus += common.charAt(i);
+		}
+		return consensus;
+	}
+
+	private static List<String> getRansacInliers(List<String> labels, Function<Collection<String>, Model<String>> modelProvider) {
 		List<String> trimmed = labels.stream().map(s -> s.trim()).filter(s -> s.length() > 0).collect(Collectors.toList());
 		if (trimmed.isEmpty())
 			return Collections.emptyList();
 
-		// int maxLength = getMaxLcsLength(trimmed);
-		// double maxSimilarity = getMaxSimilarity(trimmed);
-		double maxLevenshtein = getMaxLevenshtein(trimmed);
-
 		Map<Integer, String> bestFit = new HashMap<>();
 		int t = 1;
 		for (int i = 1, maxAttempts = 10; bestFit.size() <= 3 && i <= maxAttempts; ++i) {
-			// Ransac<String> ransac = new Ransac<>(trimmed, getModelProviderMaxLcs(maxLength), 3, 50 * i, t, trimmed.size() / 2);
-			// Ransac<String> ransac = new Ransac<>(trimmed, getModelProviderSimilarity(maxSimilarity), 3, 50 * i, t, trimmed.size() / 2);
-			Ransac<String> ransac = new Ransac<>(trimmed, getModelProviderLevenshtein(maxLevenshtein), 3, 50 * i, t, trimmed.size() / 2);
+			Ransac<String> ransac = new Ransac<>(trimmed, modelProvider, 3, 50 * i, t, trimmed.size() / 2);
 			try {
 				ransac.compute();
 				bestFit = ransac.getBestDataSet();
 				bestFit.entrySet().forEach(entry -> System.out.println("key: " + entry.getKey() + " | value: " + entry.getValue()));
 			} catch (Exception e) {
-				// Can't get a good model. Increase the error margin
 				t += 1;
+				System.err.println("Can't get a good model. Increase the error margin to " + t);
 			}
 		}
 		return bestFit.values().stream().collect(Collectors.toList());
@@ -135,7 +187,7 @@ public class OCRPlasty {
 		};
 	}
 
-	private static Function<Collection<String>, Model<String>> getModelProviderLevenshtein(double maxLevenshtein) { // TODO
+	private static Function<Collection<String>, Model<String>> getModelProviderLevenshtein(double maxLevenshtein) {
 		return datas -> {
 			return new Model<String>() {
 				private double max = 0d;
@@ -158,30 +210,7 @@ public class OCRPlasty {
 		};
 	}
 
-	public static String ocrPlasty(List<String> labels) {
-		if (labels == null || labels.isEmpty())
-			throw new IllegalStateException("Attempt to compute the longestCommonSubsequence on an empty list");
-
-		String common = longestCommonSubsequence(labels);
-
-		System.out.println("LCS: " + common);
-
-		String consensus = "";
-		for (int i = 0; i < common.length() + 1; i++) {
-			List<String> candidates = new ArrayList<>();
-			for (int label = 0; label < labels.size(); label++) {
-				List<String> is = (i < common.length()) ? interString(labels.get(label), common.charAt(i)) : endString(labels.get(label));
-				labels.set(label, is.get(0));
-				candidates.add(is.get(1));
-			}
-			consensus += selectBest(candidates);
-			if (i < common.length() - 1)
-				consensus += common.charAt(i);
-		}
-		return consensus;
-	}
-
-	public static String selectBest(List<String> candidates) {
+	private static String selectBest(List<String> candidates) {
 		Map<String, Integer> occurrences = new HashMap<>();
 		for (String s : candidates)
 			occurrences.put("@" + s, (occurrences.containsKey("@" + s)) ? occurrences.get("@" + s) + 1 : 1);
@@ -239,7 +268,7 @@ public class OCRPlasty {
 		return leastDiff;
 	}
 
-	public static String longestCommonSubsequence(List<String> labels) { // lcs between n strings
+	private static String longestCommonSubsequence(List<String> labels) { // lcs between n strings
 		String subsequence = labels.get(0).trim();
 		for (int i = 1; i < labels.size(); i++) {
 			if (!(subsequence.isEmpty() || labels.get(i).trim().isEmpty()))
@@ -248,21 +277,7 @@ public class OCRPlasty {
 		return subsequence;
 	}
 
-	public static double similarity(List<String> strings) {
-		double sim = 0;
-		int n = strings.size();
-		if (n == 1)
-			return 1;
-		for (int i = 0; i < n; i++) {
-			for (int j = i + 1; j < n; j++) {
-				// each distance will be between 0 and 1
-				sim += Levenshtein.distance(strings.get(i), strings.get(j)) / ((double) strings.get(i).length() + strings.get(j).length());
-			}
-		}
-		return 1 - 2 * sim / n / (n - 1); // divide by the total number of distances
-	}
-
-	public static String lcs(String stringX, String stringY) { // lcs between 2 strings
+	private static String lcs(String stringX, String stringY) { // lcs between 2 strings
 		int m = stringX.length();
 		int n = stringY.length();
 		int[][] mat = new int[m + 1][n + 1];

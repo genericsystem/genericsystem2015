@@ -188,7 +188,7 @@ public class Layout {
 	}
 
 	private String getConsolidatedLabel() {
-		return getLabels().isEmpty() ? "?" : OCRPlasty.ocrPlasty(new ArrayList<>(getLabels().keySet()));
+		return getLabels().isEmpty() ? "?" : OCRPlasty.correctStrings(new ArrayList<>(getLabels().keySet()), OCRPlasty.RANSAC.NONE);
 	}
 
 	private String getBestLabel() {
