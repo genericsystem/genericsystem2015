@@ -102,27 +102,22 @@ public class OCRPlasty {
 
 	private static Function<Collection<String>, Model<String>> getModelProviderSimilarity(double maxSimilarity) {
 		return datas -> {
-			Iterator<String> it = datas.iterator();
-			double max = 0d;
-			while (it.hasNext()) {
-				String label1 = it.next();
-				Iterator<String> nestedIt = datas.iterator();
-				while (nestedIt.hasNext()) {
-					String label2 = nestedIt.next();
-					max += LetterPairSimilarity.compareStrings(label1, label2);
-				}
-			}
-			double similarity = max;
-
 			return new Model<String>() {
+				private double max = 0d;
+
 				@Override
 				public double computeError(String data) {
-					return Math.abs(similarity - maxSimilarity);
+					for (String s : datas) {
+						if (s != data) {
+							max += LetterPairSimilarity.compareStrings(data, s);
+						}
+					}
+					return Math.abs(max - maxSimilarity);
 				}
 
 				@Override
 				public Object[] getParams() {
-					return new Object[] { similarity };
+					return new Object[] { max };
 				}
 			};
 		};
