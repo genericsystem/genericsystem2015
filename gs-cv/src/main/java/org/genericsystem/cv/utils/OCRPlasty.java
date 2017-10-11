@@ -257,17 +257,12 @@ public class OCRPlasty {
 	 * @return the best candidate
 	 */
 	private static String selectBest(List<String> candidates) {
-		Map<String, Integer> occurrences = new HashMap<>();
-		for (String s : candidates)
-			occurrences.put("@" + s, (occurrences.containsKey("@" + s)) ? occurrences.get("@" + s) + 1 : 1);
-		int maxOcc = Collections.max(occurrences.values());
-		if (maxOcc > 1) {
-			for (Map.Entry<String, Integer> e : occurrences.entrySet()) {
-				if (e.getValue().equals(maxOcc))
-					return e.getKey().substring(1);
-			}
-		}
-		return leastDifferent(candidates); // if there's no candidate with at least 2 occurrences
+		Map<String, Long> occurrences = candidates.stream().collect(Collectors.groupingBy(s -> s, Collectors.counting()));
+		long maxOcc = Collections.max(occurrences.values());
+		if (maxOcc > 1)
+			return occurrences.entrySet().stream().filter(entry -> entry.getValue().equals(maxOcc)).findFirst().map(e -> e.getKey()).orElse(leastDifferent(candidates));
+		else
+			return leastDifferent(candidates);
 	}
 
 	/**
