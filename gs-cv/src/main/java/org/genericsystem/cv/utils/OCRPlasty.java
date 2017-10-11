@@ -53,7 +53,8 @@ public class OCRPlasty {
 
 		// System.out.println(correctStrings(labels, RANSAC.LCS));
 		// System.out.println(correctStrings(labels, RANSAC.DIVERSITY));
-		System.out.println(correctStrings(labels, RANSAC.LEVENSHTEIN));
+		System.out.println(correctStrings(new ArrayList<>(labels), RANSAC.LEVENSHTEIN));
+		System.out.println("similarity: " + similarity(labels));
 	}
 
 	/**
@@ -105,10 +106,10 @@ public class OCRPlasty {
 			return 1;
 		for (int i = 0; i < n; i++) {
 			for (int j = i + 1; j < n; j++) {
-				sim += Levenshtein.distance(strings.get(i), strings.get(j)) / ((double) strings.get(i).length() + strings.get(j).length());
+				sim += Levenshtein.distance(strings.get(i), strings.get(j)) / ((double) Math.max(strings.get(i).length(), strings.get(j).length()));
 			}
 		}
-		return 1 - 2 * sim / n / (n - 1); // divide by the total number of distances
+		return 1 - 2 * sim / (n * (n - 1)); // divide by the total number of distances
 	}
 
 	/**
