@@ -1,5 +1,6 @@
 package org.genericsystem.cv.utils;
 
+import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -13,6 +14,8 @@ import java.util.stream.IntStream;
 
 import org.genericsystem.layout.Ransac;
 import org.genericsystem.layout.Ransac.Model;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class is used to compute the best possible string from a given list of closely-related strings. <br>
@@ -35,6 +38,8 @@ public class OCRPlasty {
 		DIVERSITY,
 		LEVENSHTEIN
 	}
+
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	public static void main(String[] args) {
 		List<String> labels = new ArrayList<>();
@@ -136,14 +141,14 @@ public class OCRPlasty {
 
 		Map<Integer, String> bestFit = new HashMap<>();
 		for (int i = 1, maxAttempts = 10; bestFit.size() <= 3 && i <= maxAttempts; ++i) {
-			Ransac<String> ransac = new Ransac<>(trimmed, modelProvider, 3, 10 * i, error, trimmed.size() / 2);
+			Ransac<String> ransac = new Ransac<>(trimmed, modelProvider, 2, 10 * i, error, trimmed.size() / 2);
 			try {
 				ransac.compute();
 				bestFit = ransac.getBestDataSet();
-				// bestFit.entrySet().forEach(entry -> System.out.println("key: " + entry.getKey() + " | value: " + entry.getValue()));
+				// bestFit.entrySet().forEach(entry -> logger.debug("key: {} | | value: {}", entry.getKey(), entry.getValue()));
 			} catch (Exception e) {
 				error *= 1.5;
-				System.err.println("Can't get a good model. Increase the error margin to " + error);
+				logger.debug("Can't get a good model. Increase the error margin to {}", error);
 			}
 		}
 		return bestFit.values().stream().collect(Collectors.toList());
