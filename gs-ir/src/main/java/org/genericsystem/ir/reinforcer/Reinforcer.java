@@ -14,11 +14,11 @@ public class Reinforcer {
 
 	public static void main(String[] args) {
 		Reinforcer reinforcer = new Reinforcer();
-		PublishSubject<AbsoluteLabels> source = PublishSubject.create();
+		PublishSubject<Labels> source = PublishSubject.create();
 		source.subscribe(reinforcer.getObserver());
-		AbsoluteLabels labels = new AbsoluteLabels();
-		labels.addAbsoluteLabel(0, 0, 10, 10, "First Label");
-		labels.addAbsoluteLabel(5, 5, 15, 15, "Second Label");
+		Labels labels = new Labels();
+		labels.addLabel(0, 0, 10, 10, "First Label");
+		labels.addLabel(5, 5, 15, 15, "Second Label");
 
 		source.onNext(labels);
 
@@ -26,11 +26,11 @@ public class Reinforcer {
 
 	}
 
-	public Consumer<AbsoluteLabels> getObserver() {
+	public Consumer<Labels> getObserver() {
 		return labels -> reinforce(labels);
 	}
 
-	public void reinforce(AbsoluteLabels absoluteLabels) {
+	public void reinforce(Labels absoluteLabels) {
 		for (Template template : templates)
 			if (template.getMatchRate(absoluteLabels) > MATCHING_RATE)
 				template.reinforce(absoluteLabels);

@@ -8,14 +8,17 @@ public class RinforcerTest {
 	private Reinforcer reinforcer = new Reinforcer();
 
 	public void test001() {
-		AbsoluteLabels labels = new AbsoluteLabels();
-		labels.addAbsoluteLabel(0, 0, 9, 9, "First Label");
-		labels.addAbsoluteLabel(10, 10, 15, 15, "Second Label");
+		Labels labels = new Labels();
+		labels.addLabel(0, 0, 5, 5, "First Label");
+		labels.addLabel(10, 10, 15, 15, "Second Label");
 		reinforcer.reinforce(labels);
 		assert reinforcer.getUnclassifiable().contains(labels);
 		reinforcer.reinforce(labels);
 		assert reinforcer.getUnclassifiable().contains(labels);
 		reinforcer.reinforce(labels);
+
+		System.out.println(labels.normalizeLabels());
+
 		assert reinforcer.getUnclassifiable().contains(labels);
 
 	}
