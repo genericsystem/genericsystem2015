@@ -11,18 +11,33 @@ import org.genericsystem.cv.utils.OCRPlasty.RANSAC;
 
 public class OCRPlastyScorer {
 
+	private static final double MUTATION_PERCENTAGE = 0.08;
 	private static Random rand = new Random(System.currentTimeMillis());
 
 	public static void main(String[] args) {
 		List<String> strings = getReferenceStrings();
 		int idx = rand.nextInt(strings.size());
 		String original = strings.get(idx);
-		List<String> results = getMutatedStrings(original, 10);
-		results.forEach(System.out::println);
+		computeScore(original).forEach(res -> res.printResults());
+	}
 
-		String corrected = getCorrectedString(results);
-		double similarity = getSimilarity(original, corrected);
-		System.out.println(String.format("Original = %s\nCorrected = %s\nSimilarity = %.3f", original, corrected, similarity));
+	private static List<Results> computeScore(String testString) {
+		List<Results> results = new ArrayList<>();
+
+		String corrected;
+		List<String> mutateds = getMutatedStrings(testString, 10);
+
+		for (RANSAC option : RANSAC.values()) {
+			long start = System.nanoTime();
+			corrected = getCorrectedString(mutateds, option);
+			long stop = System.nanoTime();
+
+			double similarity = getSimilarity(testString, corrected);
+			long duration = stop - start;
+			results.add(new Results(option.name(), duration, similarity, testString, corrected));
+		}
+
+		return results;
 	}
 
 	private static List<String> getReferenceStrings() {
@@ -58,18 +73,48 @@ public class OCRPlastyScorer {
 	private static List<String> getMutatedStrings(String string, int size) {
 		List<String> results = new ArrayList<>(size + 1);
 		IntStream.rangeClosed(0, size).forEach(i -> {
-			int maxMutations = 1 + rand.nextInt((int) (1 + Math.round(string.length() * 0.05)));
+			int maxMutations = 1 + rand.nextInt((int) (1 + Math.round(string.length() * MUTATION_PERCENTAGE)));
 			results.add(RandomStringMutator.mutate(string, maxMutations));
 		});
 		return results;
 	}
 
-	private static String getCorrectedString(List<String> labels) {
+	private static String getCorrectedString(List<String> labels, RANSAC options) {
 		try {
-			return OCRPlasty.correctStrings(labels, RANSAC.LCS);
+			return OCRPlasty.correctStrings(labels, options);
 		} catch (Exception e) {
 			System.err.println("Unable to get a RANSAC model");
 			return OCRPlasty.correctStrings(labels, RANSAC.NONE);
+		}
+	}
+
+	public static class Results {
+		private long duration;
+		private double score;
+		private String original;
+		private String corrected;
+		private String ransacMethod;
+
+		public Results(String ransacMethod, long duration, double score, String original, String corrected) {
+			this.duration = duration;
+			this.score = score;
+			this.original = original;
+			this.corrected = corrected;
+			this.ransacMethod = ransacMethod;
+		}
+
+		public void printResults() {
+			System.out.println("--------------------------------------------------------");
+			System.out.println("Method: " + ransacMethod);
+			System.out.println();
+			System.out.println("-> similarity = " + score);
+			System.out.println(String.format("-> duration = %,d ms", duration / 1_000_000));
+			System.out.println();
+			System.out.println("Original:");
+			System.out.println(original);
+			System.out.println("Corrected:");
+			System.out.println(corrected);
+			System.out.println("--------------------------------------------------------");
 		}
 	}
 
