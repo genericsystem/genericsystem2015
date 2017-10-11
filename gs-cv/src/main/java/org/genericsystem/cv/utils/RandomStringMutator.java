@@ -17,16 +17,24 @@ public class RandomStringMutator {
 			double random = rand.nextDouble();
 			int randIdx = rand.nextInt(sb.length());
 			int mutationLength = 1 + rand.nextInt(mutationCount > 2 ? mutationCount / 2 : 1);
-			if (random < 0.33) {
+			if (random < 0.28) {
 				// do mutation
 				sb.replace(randIdx, randIdx, getRandomString(mutationLength));
-			} else if (random < 0.67) {
+			} else if (random < 0.56) {
 				// do insertion
 				sb.insert(randIdx, getRandomString(mutationLength));
-			} else {
+			} else if (random < 0.85) {
 				// do deletion
 				int max = randIdx + mutationLength >= sb.length() ? randIdx : randIdx + mutationLength;
 				sb.delete(randIdx, max);
+			} else {
+				// do a harsh modification
+				int max = randIdx + sb.length() / 2 >= sb.length() ? sb.length() : randIdx + sb.length() / 2;
+				sb.replace(randIdx, max, getRandomString(mutationLength));
+				sb.append(getRandomString(mutationLength * 2));
+				int tmp = rand.nextInt(sb.length());
+				max = tmp + sb.length() / 2 > sb.length() ? sb.length() : tmp + sb.length() / 2;
+				sb.delete(tmp, max);
 			}
 		});
 		return sb.toString();
