@@ -36,7 +36,8 @@ public class OCRPlasty {
 		NONE,
 		LCS,
 		DIVERSITY,
-		LEVENSHTEIN
+		LEVENSHTEIN,
+		NORM_LEVENSHTEIN
 	}
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -81,6 +82,10 @@ public class OCRPlasty {
 		case LEVENSHTEIN:
 			modelProvider = getModelProviderLevenshtein();
 			error = 1d;
+			break;
+		case NORM_LEVENSHTEIN:
+			modelProvider = getModelProviderNormLevenshtein();
+			error = 0.1;
 			break;
 		}
 		List<String> inliers = getRansacInliers(trimmed, modelProvider, error);
@@ -216,6 +221,26 @@ public class OCRPlasty {
 					error = 0d;
 					for (String s : datas) {
 						error += Levenshtein.distance(data, s);
+					}
+					return error / datas.size();
+				}
+			};
+		};
+	}
+
+	/**
+	 * Get a model based on the minimization of the normalized Levenshtein distance.
+	 * 
+	 * @return the model
+	 */
+	private static Function<Collection<String>, Model<String>> getModelProviderNormLevenshtein() {
+		return datas -> {
+			return new OcrModel() {
+				@Override
+				public double computeError(String data) {
+					error = 0d;
+					for (String s : datas) {
+						error += Levenshtein.distance(data, s) / ((double) Math.max(s.length(), data.length()));
 					}
 					return error / datas.size();
 				}
