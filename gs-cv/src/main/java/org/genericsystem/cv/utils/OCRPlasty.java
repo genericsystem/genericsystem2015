@@ -14,12 +14,25 @@ import java.util.stream.IntStream;
 import org.genericsystem.layout.Ransac;
 import org.genericsystem.layout.Ransac.Model;
 
+/**
+ * This class is used to compute the best possible string from a given list of closely-related strings. <br>
+ * Its main use is to get a consensus of the correct string from a given list of OCR text. <br>
+ * The list will be evaluated to look for the LCS (longest linear subsequence), and the characters between the characters of the LCS will be estimated from all the strings.
+ * 
+ * @author Jean Mathorel
+ * @author Pierrik Lassalas
+ */
 public class OCRPlasty {
 
+	/**
+	 * This enum contains all the methods available to compute an error with the RANSAC model.
+	 * 
+	 * @author Pierrik Lassalas
+	 */
 	public static enum RANSAC {
 		NONE,
 		LCS,
-		SIMILARITY,
+		DIVERSITY,
 		LEVENSHTEIN
 	}
 
@@ -33,10 +46,17 @@ public class OCRPlasty {
 		labels.add("fger gezrgze ertg");
 
 		// System.out.println(correctStrings(labels, RANSAC.LCS));
-		System.out.println(correctStrings(labels, RANSAC.SIMILARITY));
-		// System.out.println(correctStrings(labels, RANSAC.LEVENSHTEIN));
+		// System.out.println(correctStrings(labels, RANSAC.DIVERSITY));
+		System.out.println(correctStrings(labels, RANSAC.LEVENSHTEIN));
 	}
 
+	/**
+	 * Get a corrected String from a given list of strings.
+	 * 
+	 * @param labels - the list of string that will be 'averaged'
+	 * @param options - one of the value of {@link RANSAC} enum, which represents the algorithm used to compute the error in the RANSAC model
+	 * @return the String that reached the best consensus
+	 */
 	public static String correctStrings(List<String> labels, OCRPlasty.RANSAC options) {
 		List<String> trimmed = labels.stream().map(s -> s.trim()).filter(s -> s.length() > 0).collect(Collectors.toList());
 		Function<Collection<String>, Model<String>> modelProvider = null;
@@ -47,19 +67,27 @@ public class OCRPlasty {
 			return ocrPlasty(trimmed);
 		case LCS:
 			modelProvider = getModelProviderMaxLcs();
+			error = 1d;
 			break;
-		case SIMILARITY:
-			modelProvider = getModelProviderSimilarity();
-			error = 0.2;
+		case DIVERSITY:
+			modelProvider = getModelProviderDiversity();
+			error = 0.1;
 			break;
 		case LEVENSHTEIN:
 			modelProvider = getModelProviderLevenshtein();
+			error = 1d;
 			break;
 		}
 		List<String> inliers = getRansacInliers(trimmed, modelProvider, error);
 		return ocrPlasty(inliers);
 	}
 
+	/**
+	 * Compute the similarity between the members of a list of strings.
+	 * 
+	 * @param strings - the list of strings
+	 * @return a score between 0 and 1
+	 */
 	public static double similarity(List<String> strings) {
 		double sim = 0;
 		int n = strings.size();
@@ -67,12 +95,20 @@ public class OCRPlasty {
 			return 1;
 		for (int i = 0; i < n; i++) {
 			for (int j = i + 1; j < n; j++) {
-				// each distance will be between 0 and 1
 				sim += Levenshtein.distance(strings.get(i), strings.get(j)) / ((double) strings.get(i).length() + strings.get(j).length());
 			}
 		}
 		return 1 - 2 * sim / n / (n - 1); // divide by the total number of distances
 	}
+
+	/**
+	 * Compute a limited set of strings from a given list, eliminating the outliers using a RANSAC algorithm.
+	 * 
+	 * @param labels - the list of strings
+	 * @param modelProvider - the model provider (see {@link Ransac})
+	 * @param error - the error margin used in the RANSAC to determine whether a value is considered in the model
+	 * @return a new list of strings consisting without the outliers
+	 */
 
 	private static String ocrPlasty(List<String> labels) {
 		if (labels == null || labels.isEmpty())
@@ -100,11 +136,11 @@ public class OCRPlasty {
 
 		Map<Integer, String> bestFit = new HashMap<>();
 		for (int i = 1, maxAttempts = 10; bestFit.size() <= 3 && i <= maxAttempts; ++i) {
-			Ransac<String> ransac = new Ransac<>(trimmed, modelProvider, 3, 50 * i, error, trimmed.size() / 2);
+			Ransac<String> ransac = new Ransac<>(trimmed, modelProvider, 3, 10 * i, error, trimmed.size() / 2);
 			try {
 				ransac.compute();
 				bestFit = ransac.getBestDataSet();
-				bestFit.entrySet().forEach(entry -> System.out.println("key: " + entry.getKey() + " | value: " + entry.getValue()));
+				// bestFit.entrySet().forEach(entry -> System.out.println("key: " + entry.getKey() + " | value: " + entry.getValue()));
 			} catch (Exception e) {
 				error *= 1.5;
 				System.err.println("Can't get a good model. Increase the error margin to " + error);
@@ -113,6 +149,11 @@ public class OCRPlasty {
 		return bestFit.values().stream().collect(Collectors.toList());
 	}
 
+	/**
+	 * Get a model based on the maximization of the LCS length.
+	 * 
+	 * @return the model
+	 */
 	private static Function<Collection<String>, Model<String>> getModelProviderMaxLcs() {
 		return datas -> {
 			Iterator<String> it = datas.iterator();
@@ -120,78 +161,101 @@ public class OCRPlasty {
 			if (it.hasNext())
 				subsequence = it.next();
 			while (it.hasNext()) {
-				String label = it.next().trim();
+				String label = it.next();
 				if (!(subsequence.isEmpty() || label.isEmpty()))
 					subsequence = lcs(subsequence, label);
 			}
 			String common = subsequence;
 
-			return new Model<String>() {
-				private double dist = 0d;
-
+			return new OcrModel() {
 				@Override
 				public double computeError(String data) {
-					dist = Levenshtein.distance(data, common);
-					return dist;
-				}
-
-				@Override
-				public Object[] getParams() {
-					return new Object[] { dist };
+					error = Levenshtein.distance(data, common);
+					return error;
 				}
 			};
 		};
 	}
 
-	private static Function<Collection<String>, Model<String>> getModelProviderSimilarity() {
+	/**
+	 * Get a model based on the maximization of the similarity (decreasing the diversity).
+	 * 
+	 * @return the model
+	 */
+	private static Function<Collection<String>, Model<String>> getModelProviderDiversity() {
 		return datas -> {
-			return new Model<String>() {
-				private double max = 0d;
-
+			return new OcrModel() {
 				@Override
 				public double computeError(String data) {
-					max = 0d;
+					error = 0d;
 					for (String s : datas) {
-						if (s != data) {
-							double sim = LetterPairSimilarity.compareStrings(data, s);
-							max += 1 - sim; // return the 'diversity' instead of the similarity
-						}
+						double sim = LetterPairSimilarity.compareStrings(data, s);
+						error += 1 - sim; // return the 'diversity' instead of the similarity
 					}
-					return max;
-				}
-
-				@Override
-				public Object[] getParams() {
-					return new Object[] { max };
+					return error / datas.size();
 				}
 			};
 		};
 	}
 
+	/**
+	 * Get a model based on the minimization of the Levenshtein distance.
+	 * 
+	 * @return the model
+	 */
 	private static Function<Collection<String>, Model<String>> getModelProviderLevenshtein() {
 		return datas -> {
-			return new Model<String>() {
-				private double max = 0d;
-
+			return new OcrModel() {
 				@Override
 				public double computeError(String data) {
-					max = 0d;
+					error = 0d;
 					for (String s : datas) {
-						if (s != data) {
-							max += Levenshtein.distance(data, s);
-						}
+						error += Levenshtein.distance(data, s);
 					}
-					return max;
-				}
-
-				@Override
-				public Object[] getParams() {
-					return new Object[] { max };
+					return error / datas.size();
 				}
 			};
 		};
 	}
 
+	/**
+	 * Custom {@link Model} used in the {@link OCRPlasty} class. <br>
+	 * 
+	 * @author Pierrik Lassalas
+	 */
+	public static abstract class OcrModel implements Model<String> {
+		/**
+		 * Computed local error.
+		 */
+		protected double error = 0d;
+
+		/**
+		 * Compute the global error (sum of the square of each individual error)
+		 */
+		@Override
+		public double computeGlobalError(Collection<String> datas) {
+			double globalError = 0d;
+			for (String s : datas) {
+				globalError += Math.pow(computeError(s), 2d);
+			}
+			return globalError;
+		}
+
+		/**
+		 * Best error
+		 */
+		@Override
+		public Object[] getParams() {
+			return new Object[] { error };
+		}
+	}
+
+	/**
+	 * Select the best string candidate from a list.
+	 * 
+	 * @param candidates - the list of strings
+	 * @return the best candidate
+	 */
 	private static String selectBest(List<String> candidates) {
 		Map<String, Integer> occurrences = new HashMap<>();
 		for (String s : candidates)
@@ -206,7 +270,14 @@ public class OCRPlasty {
 		return leastDifferent(candidates); // if there's no candidate with at least 2 occurrences
 	}
 
-	private static List<String> interString(String string, char c) { // string between 2 consecutive elements of the lcs
+	/**
+	 * String between two consecutive elements of the LCS
+	 * 
+	 * @param string - the string in which the search is performed
+	 * @param c - the character in the LCS
+	 * @return a list with the cropped string as the first element, and the 'interstring' as the second element
+	 */
+	private static List<String> interString(String string, char c) {
 		String inter = "";
 		int index = string.indexOf(c);
 		if (index > 0)
@@ -218,6 +289,12 @@ public class OCRPlasty {
 		return is;
 	}
 
+	/**
+	 * String following the last element of the LCS
+	 * 
+	 * @param string - the string in which the search is performed
+	 * @return a list with an empty string as the first element, and the string as the second element
+	 */
 	private static List<String> endString(String string) { // string following the last element of the lcs
 		List<String> is = new ArrayList<>();
 		is.add("");
@@ -250,7 +327,13 @@ public class OCRPlasty {
 		return leastDiff;
 	}
 
-	private static String longestCommonSubsequence(List<String> labels) { // lcs between n strings
+	/**
+	 * Compute the LCS distance between each element of a list
+	 * 
+	 * @param labels - a list of strings
+	 * @return the LCS
+	 */
+	private static String longestCommonSubsequence(List<String> labels) {
 		String subsequence = labels.get(0).trim();
 		for (int i = 1; i < labels.size(); i++) {
 			if (!(subsequence.isEmpty() || labels.get(i).trim().isEmpty()))
@@ -259,7 +342,14 @@ public class OCRPlasty {
 		return subsequence;
 	}
 
-	private static String lcs(String stringX, String stringY) { // lcs between 2 strings
+	/**
+	 * Compute the LCS between two strings
+	 * 
+	 * @param stringX - the first string
+	 * @param stringY - the second string
+	 * @return the LCS
+	 */
+	private static String lcs(String stringX, String stringY) {
 		int m = stringX.length();
 		int n = stringY.length();
 		int[][] mat = new int[m + 1][n + 1];
