@@ -55,7 +55,7 @@ public class OCRPlastyScorer {
 		String corrected;
 		List<String> mutateds = getMutatedStrings(testString, 10);
 
-		System.err.println(mutateds);
+		mutateds.forEach(System.err::println);
 
 		for (RANSAC option : RANSAC.values()) {
 			long start = System.nanoTime();
