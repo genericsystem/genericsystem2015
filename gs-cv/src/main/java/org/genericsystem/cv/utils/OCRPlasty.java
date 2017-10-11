@@ -50,11 +50,13 @@ public class OCRPlasty {
 		labels.add("had I expresset th agny I frequently feltu he wouald have ben taufht to lng fr its alevation");
 		labels.add("had I # tly feltu he wouald have ben taufht to lng fr iets alevation");
 		labels.add("fger gezrgze ertg");
+		labels.add("");
 
-		// System.out.println(correctStrings(labels, RANSAC.LCS));
-		// System.out.println(correctStrings(labels, RANSAC.DIVERSITY));
-		System.out.println(correctStrings(new ArrayList<>(labels), RANSAC.LEVENSHTEIN));
-		System.out.println("similarity: " + similarity(labels));
+		for (RANSAC option : RANSAC.values()) {
+			System.out.println(option.name());
+			System.out.println(correctStrings(new ArrayList<>(labels), option));
+			System.out.println("similarity: " + similarity(labels));
+		}
 	}
 
 	/**
@@ -90,6 +92,7 @@ public class OCRPlasty {
 			break;
 		}
 		List<String> inliers = getRansacInliers(trimmed, modelProvider, error);
+		// System.out.println(similarity(inliers));
 		return ocrPlasty(inliers);
 	}
 
@@ -154,7 +157,7 @@ public class OCRPlasty {
 				// bestFit.entrySet().forEach(entry -> logger.debug("key: {} | | value: {}", entry.getKey(), entry.getValue()));
 			} catch (Exception e) {
 				error *= 1.5;
-				logger.debug("Can't get a good model. Increase the error margin to {}", error);
+				logger.trace("Can't get a good model. Increase the error margin to {}", error);
 			}
 		}
 		return bestFit.values().stream().collect(Collectors.toList());
