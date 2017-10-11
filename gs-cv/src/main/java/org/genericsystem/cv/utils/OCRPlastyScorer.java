@@ -27,7 +27,12 @@ public class OCRPlastyScorer {
 
 	private static List<String> getReferenceStrings() {
 		List<String> strings = new ArrayList<>();
-		strings.add("NOM :");
+		strings.add("Nom :");
+		strings.add("Prénom :");
+		strings.add("IDFRABABOUN<<<<<<<<<<<<<<<<<<<772354");
+		strings.add("Né(e) le :");
+		strings.add("24.07.1976");
+		strings.add("PRÉFECTURE DE SEINE-MARITIME (76)");
 		strings.add("The quick, brown fox jumps over a lazy dog");
 		strings.add("But I must explain to you how all this mistaken idea of denouncing pleasure and praising pain was born and I will give you a complete account of the system");
 		strings.add("The European languages are members of the same family.");
