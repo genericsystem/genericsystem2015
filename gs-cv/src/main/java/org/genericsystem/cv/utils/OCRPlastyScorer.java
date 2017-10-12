@@ -134,6 +134,7 @@ public class OCRPlastyScorer {
 	 */
 	private static List<String> getMutatedStrings(String string, int size) {
 		List<String> results = new ArrayList<>(size + 1);
+		results.add(".");
 		IntStream.rangeClosed(0, size).forEach(i -> {
 			int maxMutations = 1 + rand.nextInt((int) (1 + Math.round(string.length() * MUTATION_PERCENTAGE)));
 			results.add(RandomStringMutator.mutate(string, maxMutations));
