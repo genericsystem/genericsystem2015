@@ -15,7 +15,7 @@ public class Label {
 
 	@Override
 	public String toString() {
-		return "(" + tlx + "," + tly + ")" + "(" + brx + "," + bry + ") " + label;
+		return String.format("tl(%.1f, %.1f), br(%.1f, %.1f), %s", tlx, tly, brx, bry, label);
 	}
 
 	@Override

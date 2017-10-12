@@ -2,15 +2,21 @@ package org.genericsystem.ir.reinforcer;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
-public class Labels {
+public class Labels implements Iterable<Label> {
 
 	private final Set<Label> labels = new HashSet<>();
 
 	public boolean addLabel(double tlx, double tly, double brx, double bry, String candidateLabel) {
 		Label candidate = new Label(tlx, tly, brx, bry, candidateLabel);
+		return addLabel(candidate);
+	}
+
+	public boolean addLabel(Label candidate) {
 		for (Label label : labels)
 			if (label.intersectWith(candidate))
 				throw new IllegalStateException(label + " intersect with : " + candidate);
@@ -52,5 +58,14 @@ public class Labels {
 		for (Label label : labels)
 			normalized.add(label.normalize(mintlx, mintly, width, height));
 		return normalized;
+	}
+
+	@Override
+	public Iterator<Label> iterator() {
+		return labels.iterator();
+	}
+
+	public Stream<Label> stream() {
+		return labels.stream();
 	}
 }
