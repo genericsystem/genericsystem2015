@@ -11,9 +11,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
-
 import org.genericsystem.cv.LinesDetector.Damper;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.genericsystem.cv.utils.Tools;
@@ -29,6 +26,9 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
 import org.opencv.videoio.VideoCapture;
+
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
 
 public class LinesDetector2 extends AbstractApp {
 
@@ -120,9 +120,11 @@ public class LinesDetector2 extends AbstractApp {
 
 				double vpx = (b2 - b) / (a - a2);
 				double vpy = a * vpx + b;
-				double alpha = Math.atan2((vpy - height / 2), (vpx - width / 2));
 
-				assert alpha < Math.PI / 2 || alpha > Math.PI / 2 : alpha + " dy: " + (vpy - height / 2) + " dx: " + (vpx - width / 2) + " vpy: " + vpy + " vpx: " + vpx;
+				double alpha = Math.atan2((vpy - height / 2), (vpx - width / 2));
+				// System.out.println("(" + vpx + "/" + vpy + ")" + alpha);
+				if ((alpha > Math.PI / 2 || alpha < -Math.PI / 2))
+					System.out.println(alpha + " dy: " + (vpy - height / 2) + " dx: " + (vpx - width / 2) + " vpy: " + vpy + " vpx: " + vpx);
 
 				Mat[] homography = new Mat[] { null };
 				if (Double.isFinite(alpha) && Double.isFinite(vpx) && Double.isFinite(vpy)) {
@@ -134,16 +136,17 @@ public class LinesDetector2 extends AbstractApp {
 					MatOfPoint2f results = new MatOfPoint2f();
 					Core.transform(pointsToRotate, results, matrix);
 					Point[] rotTargets = results.toArray();
-					a = (rotTargets[1].y - rotTargets[0].y) / (rotTargets[1].x - rotTargets[0].x);
-					b = (rotTargets[0].y + rotTargets[1].y - a * (rotTargets[0].x + rotTargets[1].x)) / 2;
-					double newy1 = a * width / 2 + b;
+					// a = (rotTargets[1].y - rotTargets[0].y) / (rotTargets[1].x - rotTargets[0].x);
+					// b = (rotTargets[0].y + rotTargets[1].y - a * (rotTargets[0].x + rotTargets[1].x)) / 2;
+					// double newy1 = a * width / 2 + b;
+					double newy1 = Math.max(rotTargets[0].y, rotTargets[1].y);
 
-					Mat pointsToRotateInv = Converters.vector_Point2f_to_Mat(Arrays.asList(new Point(rotTargets[1].x, height / 2), new Point(rotTargets[0].x, height / 2)));
+					Mat pointsToRotateInv = Converters.vector_Point2f_to_Mat(Arrays.asList(new Point(rotTargets[0].x, height / 2), new Point(rotTargets[1].x, height / 2)));
 					MatOfPoint2f resultsInv = new MatOfPoint2f();
 					Core.transform(pointsToRotateInv, resultsInv, matrixInv);
 					Point[] rotInvTargets = resultsInv.toArray();
 
-					Mat points = Converters.vector_Point2f_to_Mat(Arrays.asList(new Point(line.x1, line.y1), new Point(line.x2, line.y2), rotInvTargets[0], rotInvTargets[1]));
+					Mat points = Converters.vector_Point2f_to_Mat(Arrays.asList(new Point(line.x1, line.y1), new Point(line.x2, line.y2), rotInvTargets[1], rotInvTargets[0]));
 					Point[] targets = new Point[] { new Point(rotTargets[0].x, newy1), new Point(rotTargets[1].x, newy1), new Point(rotTargets[1].x, height / 2), new Point(rotTargets[0].x, height / 2) };
 					homography[0] = Imgproc.getPerspectiveTransform(points, new MatOfPoint2f(targets));
 				}
@@ -151,7 +154,7 @@ public class LinesDetector2 extends AbstractApp {
 
 					@Override
 					public double computeError(Line line) {
-						return Double.isNaN(alpha) ? Double.MAX_VALUE : Math.abs(line.perspectivTransform(homography[0]).getAngle());
+						return Double.isFinite(alpha) && Double.isFinite(vpx) && Double.isFinite(vpy) ? Math.abs(line.perspectivTransform(homography[0]).getAngle()) : Double.MAX_VALUE;
 					}
 
 					@Override
@@ -170,7 +173,7 @@ public class LinesDetector2 extends AbstractApp {
 				};
 			};
 
-			Ransac<Line> ransac = new Ransac<>(lines, modelProvider, 2, 200, 2 * Math.PI / 180, Double.valueOf(Math.floor(lines.size() * 0.5)).intValue());
+			Ransac<Line> ransac = new Ransac<>(lines, modelProvider, 2, 200, 3 * Math.PI / 180, Double.valueOf(Math.floor(lines.size() * 0.6)).intValue());
 			ransac.compute(false);
 			return ransac;
 		}
