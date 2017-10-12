@@ -15,6 +15,15 @@ public class LetterPairSimilarity {
 	}
 
 	public static double compareStrings(String string1, String string2) {
+		if (null == string1 || null == string2)
+			throw new IllegalArgumentException("LetterPairSimilarity requires two not null strings");
+		if (string1.equals(string2))
+			return 1d;
+		if (string1.isEmpty())
+			return 0;
+		if (string2.isEmpty())
+			return 0;
+
 		List<String> pairs1 = wordLetterPairs(string1.toLowerCase());
 		List<String> pairs2 = wordLetterPairs(string2.toLowerCase());
 		int intersection = 0;
