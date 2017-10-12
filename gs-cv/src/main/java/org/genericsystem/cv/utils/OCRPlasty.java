@@ -93,8 +93,7 @@ public class OCRPlasty {
 			break;
 		}
 		List<String> inliers = getRansacInliers(trimmed, modelProvider, error);
-		// System.out.println(similarity(inliers));
-		return ocrPlasty(inliers);
+		return inliers.isEmpty() ? ocrPlasty(trimmed) : ocrPlasty(inliers);
 	}
 
 	/**
@@ -117,17 +116,16 @@ public class OCRPlasty {
 	}
 
 	/**
-	 * Compute a limited set of strings from a given list, eliminating the outliers using a RANSAC algorithm.
+	 * Attempt to provide a corrected string from a list of string candidates.
 	 * 
 	 * @param labels - the list of strings
-	 * @param modelProvider - the model provider (see {@link Ransac})
-	 * @param error - the error margin used in the RANSAC to determine whether a value is considered in the model
-	 * @return a new list of strings consisting without the outliers
+	 * @return a string if it was found, <code>null</code> otherwise
 	 */
-
 	private static String ocrPlasty(List<String> labels) {
-		if (labels == null || labels.isEmpty())
-			throw new IllegalStateException("Attempt to compute the longestCommonSubsequence on an empty list");
+		if (labels == null)
+			throw new IllegalArgumentException("The list cannot be null");
+		if (labels.isEmpty())
+			return null;
 		String common = longestCommonSubsequence(labels);
 		String consensus = "";
 		for (int i = 0; i < common.length() + 1; i++) {
@@ -141,17 +139,29 @@ public class OCRPlasty {
 			if (i < common.length() - 1)
 				consensus += common.charAt(i);
 		}
-		return consensus;
+		return consensus.isEmpty() ? null : consensus;
 	}
 
+	/**
+	 * Compute a limited set of strings from a given list, eliminating the outliers using a RANSAC algorithm.
+	 * 
+	 * @param labels - the list of strings
+	 * @param modelProvider - the model provider (see {@link Ransac})
+	 * @param error - the error margin used in the RANSAC to determine whether a value is considered in the model
+	 * @return a new list of strings consisting without the outliers
+	 */
 	private static List<String> getRansacInliers(List<String> labels, Function<Collection<String>, Model<String>> modelProvider, double error) {
 		List<String> trimmed = labels.stream().map(s -> s.trim()).filter(s -> s.length() > 0).collect(Collectors.toList());
 		if (trimmed.isEmpty())
 			return Collections.emptyList();
 
+		int minSize = 1 + trimmed.size() / 2;
+		if (minSize < 2)
+			return Collections.emptyList();
+
 		Map<Integer, String> bestFit = new HashMap<>();
 		for (int i = 1, maxAttempts = 10; bestFit.size() <= 3 && i <= maxAttempts; ++i) {
-			Ransac<String> ransac = new Ransac<>(trimmed, modelProvider, 2, 10 * i, error, trimmed.size() / 2);
+			Ransac<String> ransac = new Ransac<>(trimmed, modelProvider, 2, 10 * i, error, minSize);
 			try {
 				ransac.compute();
 				bestFit = ransac.getBestDataSet();
