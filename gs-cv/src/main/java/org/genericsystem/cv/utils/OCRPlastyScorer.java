@@ -14,6 +14,13 @@ import org.genericsystem.cv.utils.OCRPlasty.RANSAC;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * OCRPlastyScorer can be used to compute the efficiency of OCRPlasty, depending on the RANSAC method applied to the list of strings given as argument. <br>
+ * It uses a list of strings (see {@link #getReferenceStrings()}) that are randomly modified to generate a list of potential candidates (similar to what one get after OCR of the same field across several images). These lists are then submitted to
+ * {@link OCRPlasty} to get a corrected string, which is compared to the one used to generate the random list. The results store the similarity between the two strings, and the duration of the computation.
+ * 
+ * @author Pierrik Lassalas
+ */
 public class OCRPlastyScorer {
 
 	private static final double MUTATION_PERCENTAGE = 0.05;
@@ -28,6 +35,9 @@ public class OCRPlastyScorer {
 		computeAll();
 	}
 
+	/**
+	 * Run all the computations: each string will be randomly modified, then subjected to each algorithm defined in {@link OCRPlasty.RANSAC} for correction.
+	 */
 	private static void computeAll() {
 		List<Results> total = new ArrayList<>();
 		for (String s : getReferenceStrings()) {
@@ -36,7 +46,7 @@ public class OCRPlastyScorer {
 		}
 
 		for (RANSAC option : RANSAC.values()) {
-			List<Double> scores = total.stream().filter(res -> option.name().equals(res.getRansacMethod())).map(Results::getScore).collect(Collectors.toList());
+			List<Double> scores = total.stream().filter(res -> option.name().equals(res.getRansacMethod())).map(Results::getSimilarity).collect(Collectors.toList());
 			Statistics scoreStat = new Statistics(scores);
 			logger.info("SCORE for {} {}", option.name(), scoreStat.format());
 
@@ -46,6 +56,12 @@ public class OCRPlastyScorer {
 		}
 	}
 
+	/**
+	 * Perform the computation for a given String, and store the results as a {@link Results} object.
+	 * 
+	 * @param testString - the original string
+	 * @return a List of {@link Results} containing the results of each correction
+	 */
 	private static List<Results> computeScore(String testString) {
 		List<Results> results = new ArrayList<>();
 
@@ -67,6 +83,11 @@ public class OCRPlastyScorer {
 		return results;
 	}
 
+	/**
+	 * Get the list of reference strings used for computation.
+	 * 
+	 * @return the lsit of reference strings
+	 */
 	private static List<String> getReferenceStrings() {
 		List<String> strings = new ArrayList<>();
 		strings.add("Nom :");
@@ -93,10 +114,24 @@ public class OCRPlastyScorer {
 		return strings.stream().map(s -> s.trim()).collect(Collectors.toList());
 	}
 
+	/**
+	 * Get the similarity between two strings, as defined in {@link OCRPlasty}.
+	 * 
+	 * @param string1 - the first string
+	 * @param string2 - the second string
+	 * @return the similarity between the strings, between 0.0 and 1.0
+	 */
 	private static double getSimilarity(String string1, String string2) {
 		return OCRPlasty.similarity(Arrays.asList(string1, string2));
 	}
 
+	/**
+	 * Apply random modifications on a given string using {@link RandomStringMutator}.
+	 * 
+	 * @param string - the original string
+	 * @param size - the size of the {@link List} that will be generated
+	 * @return - a list of randomly modified strings
+	 */
 	private static List<String> getMutatedStrings(String string, int size) {
 		List<String> results = new ArrayList<>(size + 1);
 		IntStream.rangeClosed(0, size).forEach(i -> {
@@ -106,6 +141,13 @@ public class OCRPlastyScorer {
 		return results;
 	}
 
+	/**
+	 * Get the corrected version of a string from a list of approximate strings.
+	 * 
+	 * @param labels - the list of strings candidates
+	 * @param options - one of {@link RANSAC} values, which represents the algorithm used to compute the error in the RANSAC model
+	 * @return the corrected string
+	 */
 	private static String getCorrectedString(List<String> labels, RANSAC options) {
 		try {
 			return OCRPlasty.correctStrings(labels, options);
@@ -115,16 +157,21 @@ public class OCRPlastyScorer {
 		}
 	}
 
+	/**
+	 * Utility class used to store the results of the computations.
+	 * 
+	 * @author Pierrik Lassalas
+	 */
 	public static class Results {
 		private long duration;
-		private double score;
+		private double similarity;
 		private String original;
 		private String corrected;
 		private String ransacMethod;
 
-		public Results(String ransacMethod, long duration, double score, String original, String corrected) {
+		public Results(String ransacMethod, long duration, double similarity, String original, String corrected) {
 			this.duration = duration;
-			this.score = score;
+			this.similarity = similarity;
 			this.original = original;
 			this.corrected = corrected;
 			this.ransacMethod = ransacMethod;
@@ -136,7 +183,7 @@ public class OCRPlastyScorer {
 			sb.append("--------------------------------------------------------").append("\n");
 			sb.append("Method: ").append(ransacMethod).append("\n");
 			sb.append("\n");
-			sb.append("-> similarity = ").append(score).append("\n");
+			sb.append("-> similarity = ").append(similarity).append("\n");
 			sb.append("-> duration = ").append(String.format("%,d ms", duration / 1_000_000)).append("\n");
 			sb.append("\n");
 			sb.append("Original:").append("\n").append(original).append("\n");
@@ -149,8 +196,8 @@ public class OCRPlastyScorer {
 			return duration;
 		}
 
-		public double getScore() {
-			return score;
+		public double getSimilarity() {
+			return similarity;
 		}
 
 		public String getOriginal() {
@@ -166,6 +213,11 @@ public class OCRPlastyScorer {
 		}
 	}
 
+	/**
+	 * Utility class used to compute some basic statistics of a {@link List<Double>}
+	 * 
+	 * @author Pierrik Lassalas
+	 */
 	public static class Statistics {
 		private List<Double> values;
 		private boolean computed;
