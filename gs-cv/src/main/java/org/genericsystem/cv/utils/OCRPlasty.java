@@ -51,6 +51,7 @@ public class OCRPlasty {
 		labels.add("had I # tly feltu he wouald have ben taufht to lng fr iets alevation");
 		labels.add("fger gezrgze ertg");
 		labels.add("");
+		labels.add(".");
 
 		for (RANSAC option : RANSAC.values()) {
 			System.out.println(option.name());
