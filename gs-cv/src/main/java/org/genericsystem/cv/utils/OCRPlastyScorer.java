@@ -29,13 +29,10 @@ public class OCRPlastyScorer {
 	}
 
 	private static void computeAll() {
-		int i = 0;
 		List<Results> total = new ArrayList<>();
 		for (String s : getReferenceStrings()) {
 			List<Results> results = computeScore(s);
 			total.addAll(results);
-			// if (i++ > 3)
-			// break;
 		}
 
 		for (RANSAC option : RANSAC.values()) {
@@ -43,9 +40,9 @@ public class OCRPlastyScorer {
 			Statistics scoreStat = new Statistics(scores);
 			logger.info("SCORE for {} {}", option.name(), scoreStat.format());
 
-			// List<Double> durations = total.stream().filter(res -> option.name().equals(res.getRansacMethod())).map(res -> Long.valueOf(res.getDuration()).doubleValue() / res.getOriginal().length()).map(x -> x / 1_000_000).collect(Collectors.toList());
-			// Statistics durationStat = new Statistics(durations);
-			// logger.info("DURATION (PER CHAR) for {} (ms) {}", option.name(), durationStat.format());
+			List<Double> durations = total.stream().filter(res -> option.name().equals(res.getRansacMethod())).map(res -> Long.valueOf(res.getDuration()).doubleValue() / res.getOriginal().length()).map(x -> x / 1_000_000).collect(Collectors.toList());
+			Statistics durationStat = new Statistics(durations);
+			logger.info("DURATION (PER CHAR) for {} (ms) {}", option.name(), durationStat.format());
 		}
 	}
 
