@@ -11,6 +11,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
+
 import org.genericsystem.cv.LinesDetector.Damper;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.genericsystem.cv.utils.Tools;
@@ -26,9 +29,6 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
 import org.opencv.videoio.VideoCapture;
-
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
 
 public class LinesDetector2 extends AbstractApp {
 
@@ -57,8 +57,8 @@ public class LinesDetector2 extends AbstractApp {
 		timer.scheduleAtFixedRate(() -> {
 			try {
 				capture.read(frame);
-				Img grad = new Img(frame, false).morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(2, 2)).otsu().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(7, 7));
-				Lines lines = new Lines(grad.houghLinesP(1, Math.PI / 180, 100, 200, 20));
+				Img grad = new Img(frame, false).morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_RECT, new Size(2, 2)).otsu();
+				Lines lines = new Lines(grad.houghLinesP(1, Math.PI / 180, 100, 100, 10));
 				System.out.println("Average angle: " + lines.getMean() / Math.PI * 180);
 				if (lines.size() > 10) {
 					lines.draw(frame, new Scalar(0, 0, 255));
@@ -80,11 +80,11 @@ public class LinesDetector2 extends AbstractApp {
 				} else
 					System.out.println("Not enough lines : " + lines.size());
 
-			} catch (Exception e) {
+			} catch (Throwable e) {
 				e.printStackTrace();
 			}
 
-		}, 0, 33, TimeUnit.MILLISECONDS);
+		}, 33, 33, TimeUnit.MILLISECONDS);
 
 	}
 
@@ -120,33 +120,38 @@ public class LinesDetector2 extends AbstractApp {
 
 				double vpx = (b2 - b) / (a - a2);
 				double vpy = a * vpx + b;
-				double alpha = ((vpy - height / 2) / (vpx - width / 2));
-				// System.out.println("alpha : " + alpha / Math.PI * 180);
-				Mat matrix = Imgproc.getRotationMatrix2D(new Point(width / 2, height / 2), alpha, 1);
-				Mat points = Converters.vector_Point2f_to_Mat(Arrays.asList(new Point(line.x1, line.y1), new Point(line.x2, line.y2), new Point(line2.x2, line2.y2), new Point(line2.x1, line2.y1)));
-				MatOfPoint2f results = new MatOfPoint2f();
-				Core.transform(points, results, matrix);
-				Point[] targets = results.toArray();
-				a = (targets[1].y - targets[0].y) / (targets[1].x - targets[0].x);
-				b = (targets[0].y + targets[1].y - a * (targets[0].x + targets[1].x)) / 2;
-				double newy1 = a * width / 2 + b;
+				double alpha = Math.atan2((vpy - height / 2), (vpx - width / 2));
 
-				targets[0] = new Point(targets[0].x, newy1);
-				targets[1] = new Point(targets[1].x, newy1);
-				a = (targets[2].y - targets[3].y) / (targets[2].x - targets[3].x);
-				b = (targets[3].y + targets[2].y - a * (targets[3].x + targets[2].x)) / 2;
-				double newy2 = a * width / 2 + b;
+				assert alpha < Math.PI / 2 || alpha > Math.PI / 2 : alpha + " dy: " + (vpy - height / 2) + " dx: " + (vpx - width / 2) + " vpy: " + vpy + " vpx: " + vpx;
 
-				targets[2] = new Point(targets[2].x, newy2);
-				targets[3] = new Point(targets[3].x, newy2);
+				Mat[] homography = new Mat[] { null };
+				if (Double.isFinite(alpha) && Double.isFinite(vpx) && Double.isFinite(vpy)) {
+					// System.out.println("alpha : " + alpha / Math.PI * 180);
+					Mat matrix = Imgproc.getRotationMatrix2D(new Point(width / 2, height / 2), alpha, 1);
+					Mat matrixInv = Imgproc.getRotationMatrix2D(new Point(width / 2, height / 2), -alpha, 1);
 
-				Mat homography = Imgproc.getPerspectiveTransform(points, new MatOfPoint2f(targets));
+					Mat pointsToRotate = Converters.vector_Point2f_to_Mat(Arrays.asList(new Point(line.x1, line.y1), new Point(line.x2, line.y2)));
+					MatOfPoint2f results = new MatOfPoint2f();
+					Core.transform(pointsToRotate, results, matrix);
+					Point[] rotTargets = results.toArray();
+					a = (rotTargets[1].y - rotTargets[0].y) / (rotTargets[1].x - rotTargets[0].x);
+					b = (rotTargets[0].y + rotTargets[1].y - a * (rotTargets[0].x + rotTargets[1].x)) / 2;
+					double newy1 = a * width / 2 + b;
 
+					Mat pointsToRotateInv = Converters.vector_Point2f_to_Mat(Arrays.asList(new Point(rotTargets[1].x, height / 2), new Point(rotTargets[0].x, height / 2)));
+					MatOfPoint2f resultsInv = new MatOfPoint2f();
+					Core.transform(pointsToRotateInv, resultsInv, matrixInv);
+					Point[] rotInvTargets = resultsInv.toArray();
+
+					Mat points = Converters.vector_Point2f_to_Mat(Arrays.asList(new Point(line.x1, line.y1), new Point(line.x2, line.y2), rotInvTargets[0], rotInvTargets[1]));
+					Point[] targets = new Point[] { new Point(rotTargets[0].x, newy1), new Point(rotTargets[1].x, newy1), new Point(rotTargets[1].x, height / 2), new Point(rotTargets[0].x, height / 2) };
+					homography[0] = Imgproc.getPerspectiveTransform(points, new MatOfPoint2f(targets));
+				}
 				return new Model<Line>() {
 
 					@Override
 					public double computeError(Line line) {
-						return Math.abs(line.perspectivTransform(homography).getAngle());
+						return Double.isNaN(alpha) ? Double.MAX_VALUE : Math.abs(line.perspectivTransform(homography[0]).getAngle());
 					}
 
 					@Override
@@ -159,13 +164,13 @@ public class LinesDetector2 extends AbstractApp {
 
 					@Override
 					public Object[] getParams() {
-						return new Object[] { homography, alpha };
+						return new Object[] { homography[0], alpha };
 					}
 
 				};
 			};
 
-			Ransac<Line> ransac = new Ransac<>(lines, modelProvider, 2, 200, 0.5 * Math.PI / 180, Double.valueOf(Math.floor(lines.size() * 0.5)).intValue());
+			Ransac<Line> ransac = new Ransac<>(lines, modelProvider, 2, 200, 2 * Math.PI / 180, Double.valueOf(Math.floor(lines.size() * 0.5)).intValue());
 			ransac.compute(false);
 			return ransac;
 		}
