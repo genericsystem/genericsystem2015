@@ -1,7 +1,7 @@
 package org.genericsystem.ir.app.gui.utils;
 
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.DocClassType.DocClassInstance;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.ImgType.ImgInstance;
+import org.genericsystem.cv.newmodel.SimpleModel.DocClassType.DocClassInstance;
+import org.genericsystem.cv.newmodel.SimpleModel.ImgType.ImgInstance;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.context.TagSwitcher;

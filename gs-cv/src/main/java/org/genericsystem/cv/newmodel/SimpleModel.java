@@ -1,4 +1,4 @@
-package org.genericsystem.cv.classifier.newmodel;
+package org.genericsystem.cv.newmodel;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -12,18 +12,18 @@ import org.genericsystem.api.core.annotations.constraints.InstanceValueClassCons
 import org.genericsystem.api.core.annotations.constraints.PropertyConstraint;
 import org.genericsystem.api.core.annotations.constraints.SingularConstraint;
 import org.genericsystem.common.Generic;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.ConsolidatedType.ConsolidatedInstance;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.DocClassType.DocClassInstance;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.DocType.DocInstance;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.ImgDocRel.ImgDocLink;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.ImgPathType.ImgPathInstance;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.ImgRefreshTimestampType.ImgRefreshTimestampInstance;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.ImgTimestampType.ImgTimestampInstance;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.ImgType.ImgInstance;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.LayoutType.LayoutInstance;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.SupervisedType.SupervisedInstance;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.ZoneNumType.ZoneNumInstance;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.ZoneType.ZoneInstance;
+import org.genericsystem.cv.newmodel.SimpleModel.ConsolidatedType.ConsolidatedInstance;
+import org.genericsystem.cv.newmodel.SimpleModel.DocClassType.DocClassInstance;
+import org.genericsystem.cv.newmodel.SimpleModel.DocType.DocInstance;
+import org.genericsystem.cv.newmodel.SimpleModel.ImgDocRel.ImgDocLink;
+import org.genericsystem.cv.newmodel.SimpleModel.ImgPathType.ImgPathInstance;
+import org.genericsystem.cv.newmodel.SimpleModel.ImgRefreshTimestampType.ImgRefreshTimestampInstance;
+import org.genericsystem.cv.newmodel.SimpleModel.ImgTimestampType.ImgTimestampInstance;
+import org.genericsystem.cv.newmodel.SimpleModel.ImgType.ImgInstance;
+import org.genericsystem.cv.newmodel.SimpleModel.LayoutType.LayoutInstance;
+import org.genericsystem.cv.newmodel.SimpleModel.SupervisedType.SupervisedInstance;
+import org.genericsystem.cv.newmodel.SimpleModel.ZoneNumType.ZoneNumInstance;
+import org.genericsystem.cv.newmodel.SimpleModel.ZoneType.ZoneInstance;
 import org.opencv.core.Rect;
 
 import com.fasterxml.jackson.core.JsonProcessingException;

@@ -6,12 +6,12 @@ import java.util.function.Predicate;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.DocClassType;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.DocClassType.DocClassInstance;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.DocType.DocInstance;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.ImgType;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.ImgType.ImgInstance;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.ZoneType.ZoneInstance;
+import org.genericsystem.cv.newmodel.SimpleModel.DocClassType;
+import org.genericsystem.cv.newmodel.SimpleModel.ImgType;
+import org.genericsystem.cv.newmodel.SimpleModel.DocClassType.DocClassInstance;
+import org.genericsystem.cv.newmodel.SimpleModel.DocType.DocInstance;
+import org.genericsystem.cv.newmodel.SimpleModel.ImgType.ImgInstance;
+import org.genericsystem.cv.newmodel.SimpleModel.ZoneType.ZoneInstance;
 import org.genericsystem.reactor.context.ForEachExtractor;
 
 import io.reactivex.Observable;

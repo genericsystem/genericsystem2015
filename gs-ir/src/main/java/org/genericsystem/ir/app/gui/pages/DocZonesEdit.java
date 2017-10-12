@@ -3,8 +3,8 @@ package org.genericsystem.ir.app.gui.pages;
 import java.io.Serializable;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.SupervisedType.SupervisedInstance;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.ZoneType.ZoneInstance;
+import org.genericsystem.cv.newmodel.SimpleModel.SupervisedType.SupervisedInstance;
+import org.genericsystem.cv.newmodel.SimpleModel.ZoneType.ZoneInstance;
 import org.genericsystem.ir.app.gui.pages.DocZonesEdit.TextDiv;
 import org.genericsystem.ir.app.gui.utils.ContextActionCustom.MODAL_DISPLAY_FLEX_CUSTOM;
 import org.genericsystem.ir.app.gui.utils.ContextActionCustom.SAVE;
