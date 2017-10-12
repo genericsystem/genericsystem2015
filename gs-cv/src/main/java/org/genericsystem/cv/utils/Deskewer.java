@@ -6,13 +6,19 @@ import java.lang.invoke.MethodHandles;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 
 import org.apache.commons.io.FilenameUtils;
 import org.genericsystem.cv.Img;
+import org.genericsystem.layout.Ransac;
+import org.genericsystem.layout.Ransac.Model;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -194,7 +200,8 @@ public class Deskewer {
 				rotatedRect.size.height = tmp;
 			}
 		}
-		return getInliers(rotatedRects, 1.0).stream().mapToDouble(i -> i.angle).average().getAsDouble();
+		// return getInliers(rotatedRects, 1.0).stream().mapToDouble(i -> i.angle).average().getAsDouble();
+		return getRansacInliers(rotatedRects, 0.1).stream().mapToDouble(i -> i.angle).average().getAsDouble();
 	}
 
 	private static List<RotatedRect> getInliers(final List<RotatedRect> data, final double confidence) {
@@ -211,10 +218,53 @@ public class Deskewer {
 		else
 			median = DoubleStream.of(data.get(middle).angle, data.get(middle - 1).angle).average().getAsDouble();
 
-		List<RotatedRect> result = data.stream().filter(rect -> Math.abs(rect.angle - median) < confidence * sd).collect(Collectors.toList());
-		// List<RotatedRect> result = data.stream().filter(rect -> Math.abs(rect.angle - average) < confidence * sd).collect(Collectors.toList());
-		// List<RotatedRect> result = data.stream().filter(rect -> Math.abs(rect.angle - average) < 5).collect(Collectors.toList());
-		return result;
+		return data.stream().filter(rect -> Math.abs(rect.angle - median) < confidence * sd).collect(Collectors.toList());
+	}
+
+	private static List<RotatedRect> getRansacInliers(final List<RotatedRect> data, final double error) {
+		int n = 3; // number of random samples
+		int k = 50; // number of iterations
+		double t = error; // error margin
+		int d = data.size() / 2; // number of minimum matches
+		Map<Integer, RotatedRect> bestFit = new HashMap<>();
+		for (int i = 1, maxAttempts = 10; bestFit.size() <= 3 && i <= maxAttempts; ++i) {
+			Ransac<RotatedRect> ransac = new Ransac<>(data, getModelProvider(), n, k * i, t, d);
+			try {
+				ransac.compute();
+				bestFit = ransac.getBestDataSet();
+				// bestFit.entrySet().forEach(entry -> logger.debug("key: {} | | value: {}", entry.getKey(), entry.getValue()));
+			} catch (Exception e) {
+				t *= 1.5;
+				logger.trace("Can't get a good model. Increase the error margin to {}", t);
+			}
+		}
+		return bestFit.values().stream().collect(Collectors.toList());
+	}
+
+	private static Function<Collection<RotatedRect>, Model<RotatedRect>> getModelProvider() {
+		return datas -> {
+			double average = datas.stream().mapToDouble(rect -> rect.angle).average().getAsDouble();
+
+			return new Model<RotatedRect>() {
+				@Override
+				public double computeError(RotatedRect data) {
+					return Math.abs(data.angle - average);
+				}
+
+				@Override
+				public double computeGlobalError(Collection<RotatedRect> datas) {
+					double error = 0;
+					for (RotatedRect rect : datas)
+						error += Math.pow(computeError(rect), 2);
+					return error;
+				}
+
+				@Override
+				public Object[] getParams() {
+					return new Object[] { average };
+				}
+			};
+		};
 	}
 
 	private static List<RotatedRect> getRotatedRects(final Mat dilated) {
