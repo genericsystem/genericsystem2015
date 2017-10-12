@@ -4,12 +4,14 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.genericsystem.api.core.IndexFilter;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
+import org.genericsystem.api.tools.Memoizer;
 import org.genericsystem.common.CheckedContext;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.IDependencies;
@@ -25,6 +27,8 @@ import io.reactivex.Observable;
 public class Transaction extends CheckedContext implements IDifferential<Generic> {
 
 	private final long ts;
+	private final Function<Generic, Observable<Generic>> addsM = Memoizer.memoize(generic -> getDependencies(generic).getAdds());
+	private final Function<Generic, Observable<Generic>> remsM = Memoizer.memoize(generic -> getDependencies(generic).getRemovals());
 
 	public Transaction(AbstractServer root, long ts) {
 		super(root);
@@ -80,8 +84,7 @@ public class Transaction extends CheckedContext implements IDifferential<Generic
 		set.stream().forEach(ancestor -> ((RootServerHandler) ancestor.getProxyHandler()).getDependencies().signalRemoval(generic));
 	}
 
-	@Override
-	public IDependencies<Generic> getDependencies(Generic ancestor) {
+	private final Function<Generic, IDependencies<Generic>> depsM = Memoizer.memoize(ancestor -> {
 		assert ancestor != null;
 		return new IDependencies<Generic>() {
 
@@ -120,6 +123,11 @@ public class Transaction extends CheckedContext implements IDifferential<Generic
 				return ((RootServerHandler) ancestor.getProxyHandler()).getDependencies().remove(remove);
 			}
 		};
+	});
+
+	@Override
+	public IDependencies<Generic> getDependencies(Generic ancestor) {
+		return depsM.apply(ancestor);
 	}
 
 	@Override
@@ -186,11 +194,11 @@ public class Transaction extends CheckedContext implements IDifferential<Generic
 
 	@Override
 	public Observable<Generic> getAdds(Generic generic) {
-		return getDependencies(generic).getAdds();
+		return addsM.apply(generic);
 	}
 
 	@Override
 	public Observable<Generic> getRemovals(Generic generic) {
-		return getDependencies(generic).getRemovals();
+		return remsM.apply(generic);
 	}
 }

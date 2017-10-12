@@ -280,6 +280,8 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 	@Override
 	default Snapshot<Serializable> getValues(T attribute, Serializable value, T... targets) {
 		return new Snapshot<Serializable>() {
+			private Observable<Serializable> adds = getLinks(attribute, value, targets).getAdds().map(h -> h.getValue()).share();
+			private Observable<Serializable> removals = getLinks(attribute, value, targets).getRemovals().map(h -> h.getValue()).share();
 
 			@Override
 			public Stream<Serializable> unfilteredStream() {
@@ -288,12 +290,12 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 
 			@Override
 			public Observable<Serializable> getAdds() {
-				return getLinks(attribute, value, targets).getAdds().map(h -> h.getValue()).replay().refCount();
+				return adds;
 			}
 
 			@Override
 			public Observable<Serializable> getRemovals() {
-				return getLinks(attribute, value, targets).getRemovals().map(h -> h.getValue()).replay().refCount();
+				return removals;
 			}
 		};
 	}
@@ -302,6 +304,8 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 	@Override
 	default Snapshot<Serializable> getValues(T attribute, T... targets) {
 		return new Snapshot<Serializable>() {
+			private Observable<Serializable> adds = getLinks(attribute, targets).getAdds().map(h -> h.getValue()).share();
+			private Observable<Serializable> removals = getLinks(attribute, targets).getRemovals().map(h -> h.getValue()).share();
 
 			@Override
 			public Stream<Serializable> unfilteredStream() {
@@ -310,12 +314,12 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 
 			@Override
 			public Observable<Serializable> getAdds() {
-				return getLinks(attribute, targets).getAdds().map(h -> h.getValue()).replay().refCount();
+				return adds;
 			}
 
 			@Override
 			public Observable<Serializable> getRemovals() {
-				return getLinks(attribute, targets).getRemovals().map(h -> h.getValue()).replay().refCount();
+				return removals;
 			}
 		};
 	}
@@ -323,6 +327,8 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 	@Override
 	default Snapshot<Serializable> getValues(T attribute, int pos) {
 		return new Snapshot<Serializable>() {
+			private Observable<Serializable> adds = getHolders(attribute, pos).getAdds().map(h -> h.getValue()).share();
+			private Observable<Serializable> removals = getHolders(attribute, pos).getRemovals().map(h -> h.getValue()).share();
 
 			@Override
 			public Stream<Serializable> unfilteredStream() {
@@ -331,12 +337,12 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 
 			@Override
 			public Observable<Serializable> getAdds() {
-				return getHolders(attribute, pos).getAdds().map(h -> h.getValue()).replay().refCount();
+				return adds;
 			}
 
 			@Override
 			public Observable<Serializable> getRemovals() {
-				return getHolders(attribute, pos).getRemovals().map(h -> h.getValue()).replay().refCount();
+				return removals;
 			}
 		};
 	}

@@ -15,6 +15,8 @@ import javafx.collections.ObservableMap;
  */
 public class Container implements Snapshot<Generic> {
 	final ObservableMap<Generic, Generic> container = FXCollections.observableHashMap();// TODO is pseudoConcurrrentCollection needed?
+	private final Observable<Generic> adds = RxJavaHelpers.additionsOf(container).map(entry -> entry.getKey()).share();
+	private final Observable<Generic> removals = RxJavaHelpers.removalsOf(container).map(entry -> entry.getKey()).share();
 
 	public Container(Stream<Generic> stream) {
 		stream.forEach(add -> container.put(add, add));
@@ -32,11 +34,11 @@ public class Container implements Snapshot<Generic> {
 
 	@Override
 	public Observable<Generic> getAdds() {
-		return RxJavaHelpers.additionsOf(container).map(entry -> entry.getKey()).replay().refCount();
+		return adds;
 	}
 
 	@Override
 	public Observable<Generic> getRemovals() {
-		return RxJavaHelpers.removalsOf(container).map(entry -> entry.getKey()).replay().refCount();
+		return removals;
 	}
 }

@@ -101,15 +101,16 @@ public interface DefaultGeneric<T extends DefaultGeneric<T>> extends DefaultAnce
 	}
 
 	default boolean isDependencyOf(T meta, List<T> supers, Serializable value, List<T> components) {
-
-		return (inheritsFrom(meta, supers, value, components) || getComponents().stream().anyMatch(component -> component.isDependencyOf(meta, supers, value, components)) || (!isMeta() && getMeta().isDependencyOf(meta, supers, value, components))
-				|| (!components.equals(getComponents()) && componentsDepends(getComponents(), components) && supers.stream().anyMatch(override -> override.inheritsFrom(getMeta()))));
-
+		return inheritsFrom(meta, supers, value, components)
+				|| getComponents().stream().anyMatch(component -> component.isDependencyOf(meta, supers, value, components))
+				|| !isMeta() && getMeta().isDependencyOf(meta, supers, value, components)
+				|| !components.equals(getComponents()) && componentsDepends(getComponents(), components) && supers.stream().anyMatch(override -> override.inheritsFrom(getMeta()));
 	}
 
 	@SuppressWarnings("unchecked")
 	default boolean isSuperOf(T subMeta, List<T> overrides, Serializable subValue, List<T> subComponents) {
-		return overrides.stream().anyMatch(override -> override.inheritsFrom((T) this)) || (ApiStatics.areOverridesReached(getSupers(), overrides) && isSuperOf(subMeta, subValue, subComponents, getMeta(), getValue(), getComponents()));
+		return overrides.stream().anyMatch(override -> override.inheritsFrom((T) this))
+				|| ApiStatics.areOverridesReached(getSupers(), overrides) && isSuperOf(subMeta, subValue, subComponents, getMeta(), getValue(), getComponents());
 	}
 
 	default boolean componentsDepends(List<T> subComponents, List<T> superComponents) {

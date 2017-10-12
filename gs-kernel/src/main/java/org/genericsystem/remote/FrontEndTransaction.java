@@ -3,10 +3,12 @@ package org.genericsystem.remote;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
+import org.genericsystem.api.tools.Memoizer;
 import org.genericsystem.common.CheckedContext;
 import org.genericsystem.common.Container;
 import org.genericsystem.common.Generic;
@@ -23,6 +25,8 @@ import io.reactivex.Observable;
 public class FrontEndTransaction extends CheckedContext implements IDifferential<Generic> {
 
 	private final long ts;
+	private final Function<Generic, Observable<Generic>> addsM = Memoizer.memoize(generic -> getDependencies(generic).getAdds());
+	private final Function<Generic, Observable<Generic>> remsM = Memoizer.memoize(generic -> getDependencies(generic).getRemovals());
 
 	protected FrontEndTransaction(ClientEngine engine, long ts) {
 		super(engine);
@@ -102,11 +106,11 @@ public class FrontEndTransaction extends CheckedContext implements IDifferential
 
 	@Override
 	public Observable<Generic> getAdds(Generic generic) {
-		return getDependencies(generic).getAdds();
+		return addsM.apply(generic);
 	}
 
 	@Override
 	public Observable<Generic> getRemovals(Generic generic) {
-		return getDependencies(generic).getRemovals();
+		return remsM.apply(generic);
 	}
 }

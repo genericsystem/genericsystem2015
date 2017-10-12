@@ -17,6 +17,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.genericsystem.api.tools.Memoizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -451,6 +452,8 @@ public interface Snapshot<T> extends Iterable<T> {
 	 */
 	default Snapshot<T> filter(Predicate<T> predicate) {
 		return new Snapshot<T>() {
+			private Observable<T> adds = Snapshot.this.getAdds().filter(g -> predicate.test(g)).share();
+			private Observable<T> removals = Snapshot.this.getRemovals().filter(g -> predicate.test(g)).share();
 
 			@Override
 			public Stream<T> unfilteredStream() {
@@ -464,12 +467,12 @@ public interface Snapshot<T> extends Iterable<T> {
 
 			@Override
 			public Observable<T> getAdds() {
-				return Snapshot.this.getAdds().filter(g -> predicate.test(g)).replay().refCount();
+				return adds;
 			}
 
 			@Override
 			public Observable<T> getRemovals() {
-				return Snapshot.this.getRemovals().filter(g -> predicate.test(g)).replay().refCount();
+				return removals;
 			}
 
 			@Override
@@ -490,38 +493,9 @@ public interface Snapshot<T> extends Iterable<T> {
 	 * @param filter	The filter to use to select the elements to keep.
 	 * @return			A Snapshot filtered with the given IndexFilter.
 	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	default Snapshot<T> filter(IndexFilter filter) {
-		return new Snapshot<T>() {
-			@Override
-			public Snapshot<T> getParent() {
-				return Snapshot.this;
-			}
-
-			@Override
-			public IndexFilter getFilter() {
-				return filter;
-			}
-
-			@Override
-			public Comparator<T> getComparator() {
-				return Snapshot.this.getComparator();
-			}
-
-			@Override
-			public Observable<T> getAdds() {
-				return getParent().getAdds().filter(g -> filter.test((IGeneric<?>) g)).replay().refCount();
-			}
-
-			@Override
-			public Observable<T> getRemovals() {
-				return getParent().getRemovals().filter(g -> filter.test((IGeneric<?>) g)).replay().refCount();
-			}
-
-			@Override
-			public Stream<T> unfilteredStream() {
-				throw new UnsupportedOperationException("unfilteredStream() should be called only on unfiltered snapshots.");
-			}
-		};
+		return (Snapshot) Memoizer.getIndexFilterM.apply(this).apply(filter);
 	}
 
 	/**
@@ -533,35 +507,9 @@ public interface Snapshot<T> extends Iterable<T> {
 	 * @param filters	The filters to use to select the elements to keep.
 	 * @return			A Snapshot filtered with the given IndexFilters.
 	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	default Snapshot<T> filter(List<IndexFilter> filters) {
-		return new Snapshot<T>() {
-
-			@Override
-			public Stream<T> unfilteredStream() {
-				return Snapshot.this.stream().filter(g -> filters.stream().allMatch(filter -> filter.test((IGeneric<?>) g)));
-			}
-
-			@Override
-			public Comparator<T> getComparator() {
-				return Snapshot.this.getComparator();
-			}
-
-			@Override
-			public Observable<T> getAdds() {
-				return Snapshot.this.getAdds().filter(g -> filters.stream().allMatch(filter -> filter.test((IGeneric<?>) g))).replay().refCount();
-			}
-
-			@Override
-			public Observable<T> getRemovals() {
-				return Snapshot.this.getRemovals().filter(g -> filters.stream().allMatch(filter -> filter.test((IGeneric<?>) g))).replay().refCount();
-			}
-
-			@Override
-			public T get(Object o) {
-				T result = Snapshot.this.get(o);
-				return result != null && filters.stream().allMatch(filter -> filter.test((IGeneric<?>) result)) ? result : null;
-			}
-		};
+		return (Snapshot) Memoizer.getIndexListFilterM.apply(this).apply(filters);
 	}
 
 	/**
@@ -577,6 +525,9 @@ public interface Snapshot<T> extends Iterable<T> {
 	 */
 	default <U> Snapshot<U> map(Function<T, U> mapper) {
 		return new Snapshot<U>() {
+			private Observable<U> adds = Snapshot.this.getAdds().map(mapper).share();
+			private Observable<U> removals = Snapshot.this.getRemovals().map(mapper).share();
+
 			@Override
 			public Stream<U> unfilteredStream() {
 				return Snapshot.this.stream().map(e -> {
@@ -596,12 +547,12 @@ public interface Snapshot<T> extends Iterable<T> {
 
 			@Override
 			public Observable<U> getAdds() {
-				return Snapshot.this.getAdds().map(mapper);
+				return adds;
 			}
 
 			@Override
 			public Observable<U> getRemovals() {
-				return Snapshot.this.getRemovals().map(mapper);
+				return removals;
 			}
 		};
 	}
