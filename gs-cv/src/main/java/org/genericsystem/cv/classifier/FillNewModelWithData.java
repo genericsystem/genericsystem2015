@@ -19,20 +19,20 @@ import org.genericsystem.cv.comparator.ImgFilterFunction;
 import org.genericsystem.cv.comparator.ImgFunction;
 import org.genericsystem.cv.newmodel.SimpleModel.ConsolidatedType;
 import org.genericsystem.cv.newmodel.SimpleModel.DocClassType;
+import org.genericsystem.cv.newmodel.SimpleModel.DocClassType.DocClassInstance;
 import org.genericsystem.cv.newmodel.SimpleModel.DocType;
+import org.genericsystem.cv.newmodel.SimpleModel.DocType.DocInstance;
 import org.genericsystem.cv.newmodel.SimpleModel.ImgDocRel;
+import org.genericsystem.cv.newmodel.SimpleModel.ImgDocRel.ImgDocLink;
 import org.genericsystem.cv.newmodel.SimpleModel.ImgPathType;
 import org.genericsystem.cv.newmodel.SimpleModel.ImgRefreshTimestampType;
 import org.genericsystem.cv.newmodel.SimpleModel.ImgTimestampType;
 import org.genericsystem.cv.newmodel.SimpleModel.ImgType;
+import org.genericsystem.cv.newmodel.SimpleModel.ImgType.ImgInstance;
 import org.genericsystem.cv.newmodel.SimpleModel.LayoutType;
 import org.genericsystem.cv.newmodel.SimpleModel.SupervisedType;
 import org.genericsystem.cv.newmodel.SimpleModel.ZoneNumType;
 import org.genericsystem.cv.newmodel.SimpleModel.ZoneType;
-import org.genericsystem.cv.newmodel.SimpleModel.DocClassType.DocClassInstance;
-import org.genericsystem.cv.newmodel.SimpleModel.DocType.DocInstance;
-import org.genericsystem.cv.newmodel.SimpleModel.ImgDocRel.ImgDocLink;
-import org.genericsystem.cv.newmodel.SimpleModel.ImgType.ImgInstance;
 import org.genericsystem.cv.newmodel.SimpleModel.ZoneType.ZoneInstance;
 import org.genericsystem.cv.utils.ClassifierUsingFields;
 import org.genericsystem.cv.utils.Deskewer;
@@ -212,7 +212,7 @@ public class FillNewModelWithData {
 		try {
 			imgInstance = imgType.addImg(filenameExt);
 		} catch (RollbackException e1) {
-			logger.info(String.format("File %s has already been processed by the system. Retrieving the reference...", filenameExt), e1);
+			logger.info(String.format("File %s has already been processed by the system. Retrieving the reference...", filenameExt));
 			imgInstance = imgType.getImg(filenameExt);
 		}
 		try {
