@@ -57,7 +57,7 @@ public class DocField {
 	public void consolidateOcr() {
 		if (!labels.isEmpty()) {
 			List<String> ocrs = labels.keySet().stream().collect(Collectors.toList());
-			consolidated = Optional.of(OCRPlasty.ocrPlasty(ocrs));
+			consolidated = Optional.of(OCRPlasty.correctStrings(ocrs, OCRPlasty.RANSAC.NONE));
 		} else
 			consolidated = Optional.empty();
 	}
