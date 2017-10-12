@@ -3,6 +3,7 @@ package org.genericsystem.common;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.genericsystem.api.core.FiltersBuilder;
@@ -11,6 +12,7 @@ import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.api.core.exceptions.RollbackException;
+import org.genericsystem.api.tools.Memoizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +30,14 @@ public class Differential implements IDifferential<Generic> {
 	private final IDifferential<Generic> subDifferential;
 	protected final PseudoConcurrentCollection<Generic> adds = new PseudoConcurrentCollection<>();
 	protected final PseudoConcurrentCollection<Generic> removes = new PseudoConcurrentCollection<>();
+	private Function<Generic, Observable<Generic>> addsM = Memoizer.memoize(generic -> Observable.merge(getSubDifferential().getAdds(generic),
+			adds.getFilteredAdds(generic::isDirectAncestorOf),
+			removes.getFilteredRemoves(generic::isDirectAncestorOf))
+			.share());
+	private Function<Generic, Observable<Generic>> remsM = Memoizer.memoize(generic -> Observable.merge(getSubDifferential().getRemovals(generic),
+			removes.getFilteredAdds(generic::isDirectAncestorOf),
+			adds.getFilteredRemoves(generic::isDirectAncestorOf))
+			.share());
 
 	public Differential(IDifferential<Generic> subDifferential) {
 		this.subDifferential = subDifferential;
@@ -82,42 +92,45 @@ public class Differential implements IDifferential<Generic> {
 			removes.add(generic);
 	}
 
+	private final Function<Generic, Snapshot<Generic>> getDepsM = Memoizer.memoize(generic -> new Snapshot<Generic>() {
+		private Observable<Generic> addsObs = getDifferentialObservable().switchMap(diff -> diff.getAdds(generic).filter(g -> getCache().isAlive(g))).share();
+		private Observable<Generic> removalsObs = getDifferentialObservable().switchMap(diff -> diff.getRemovals(generic).filter(g -> !getCache().isAlive(g))).share();
+
+		@Override
+		public Generic get(Object o) {
+			Generic result = adds.get(o);
+			if (result != null)
+				return generic.isDirectAncestorOf(result) ? result : null;
+			return !removes.contains(o) ? subDifferential.getDependencies(generic).get(o) : null;
+		}
+
+		@Override
+		public Stream<Generic> unfilteredStream() {
+			return Stream.concat(adds.contains(generic) ? Stream.empty() : subDifferential.getDependencies(generic).filter(new IndexFilter(FiltersBuilder.NOT_CONTAINED_IN_PARAM, removes.toSet())).stream(),
+					adds.filter(new IndexFilter(FiltersBuilder.IS_DIRECT_DEPENDENCY_OF, generic)).stream());
+		}
+
+		@Override
+		public Snapshot<Generic> filter(List<IndexFilter> filters) {
+			List<IndexFilter> filters_ = new ArrayList<>(filters);
+			filters_.add(new IndexFilter(FiltersBuilder.NOT_CONTAINED_IN_PARAM, removes.toSet()));
+			return Snapshot.super.filter(filters_);
+		}
+
+		@Override
+		public Observable<Generic> getAdds() {
+			return addsObs;
+		}
+
+		@Override
+		public Observable<Generic> getRemovals() {
+			return removalsObs;
+		}
+	});
+
 	@Override
 	public Snapshot<Generic> getDependencies(Generic generic) {
-		return new Snapshot<Generic>() {
-			@Override
-			public Generic get(Object o) {
-				Generic result = adds.get(o);
-				if (result != null)
-					return generic.isDirectAncestorOf(result) ? result : null;
-				return !removes.contains(o) ? subDifferential.getDependencies(generic).get(o) : null;
-			}
-
-			@Override
-			public Stream<Generic> unfilteredStream() {
-				return Stream.concat(adds.contains(generic) ? Stream.empty() : subDifferential.getDependencies(generic).filter(new IndexFilter(FiltersBuilder.NOT_CONTAINED_IN_PARAM, removes.toSet())).stream(),
-						adds.filter(new IndexFilter(FiltersBuilder.IS_DIRECT_DEPENDENCY_OF, generic)).stream());
-			}
-
-			@Override
-			public Snapshot<Generic> filter(List<IndexFilter> filters) {
-				List<IndexFilter> filters_ = new ArrayList<>(filters);
-				filters_.add(new IndexFilter(FiltersBuilder.NOT_CONTAINED_IN_PARAM, removes.toSet()));
-				return Snapshot.super.filter(filters_);
-			}
-
-			@Override
-			public Observable<Generic> getAdds() {
-				return getDifferentialObservable().switchMap(diff -> diff.getAdds(generic).filter(g -> getCache().isAlive(g)))
-						.replay().refCount();
-			}
-
-			@Override
-			public Observable<Generic> getRemovals() {
-				return getDifferentialObservable().switchMap(diff -> diff.getRemovals(generic).filter(g -> !getCache().isAlive(g)))
-						.replay().refCount();
-			}
-		};
+		return getDepsM.apply(generic);
 	}
 
 	void apply() throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
@@ -148,15 +161,11 @@ public class Differential implements IDifferential<Generic> {
 
 	@Override
 	public Observable<Generic> getAdds(Generic generic) {
-		return Observable.merge(getSubDifferential().getAdds(generic),
-				adds.getFilteredAdds(generic::isDirectAncestorOf),
-				removes.getFilteredRemoves(generic::isDirectAncestorOf)).replay().refCount();
+		return addsM.apply(generic);
 	}
 
 	@Override
 	public Observable<Generic> getRemovals(Generic generic) {
-		return Observable.merge(getSubDifferential().getRemovals(generic),
-				removes.getFilteredAdds(generic::isDirectAncestorOf),
-				adds.getFilteredRemoves(generic::isDirectAncestorOf)).replay().refCount();
+		return remsM.apply(generic);
 	}
 }

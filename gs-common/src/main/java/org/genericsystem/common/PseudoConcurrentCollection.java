@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Spliterators;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -15,6 +16,7 @@ import org.genericsystem.api.core.FiltersBuilder;
 import org.genericsystem.api.core.IGeneric;
 import org.genericsystem.api.core.IndexFilter;
 import org.genericsystem.api.core.Snapshot;
+import org.genericsystem.api.tools.Memoizer;
 
 import io.reactivex.Observable;
 import io.reactivex.subjects.PublishSubject;
@@ -218,20 +220,21 @@ public class PseudoConcurrentCollection<T extends IGeneric<?>> implements Snapsh
 		return map.get(o);
 	}
 
+	private boolean fireInvalidations = true;
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private Subject<T> adds = (Subject) PublishSubject.create().toSerialized();
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private Subject<T> removes = (Subject) PublishSubject.create().toSerialized();
+	private Function<Predicate<T>, Observable<T>> getAddsM = Memoizer.memoize(p -> adds.hide().filter(x -> fireInvalidations && p.test(x)));
+	private Function<Predicate<T>, Observable<T>> getRemsM = Memoizer.memoize(p -> removes.hide().filter(x -> fireInvalidations && p.test(x)));
 
 	public Observable<T> getFilteredAdds(Predicate<T> predicate) {
-		return adds.hide().filter(x -> fireInvalidations && predicate.test(x));
+		return getAddsM.apply(predicate);
 	}
 
 	public Observable<T> getFilteredRemoves(Predicate<T> predicate) {
-		return removes.hide().filter(x -> fireInvalidations && predicate.test(x));
+		return getRemsM.apply(predicate);
 	}
-
-	private boolean fireInvalidations = true;
 
 	public void disableInvalidations() {
 		fireInvalidations = false;

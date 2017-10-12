@@ -17,7 +17,7 @@ import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ReferentialIntegrityConstraintViolationException;
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.api.core.exceptions.UnreachableOverridesException;
-import org.genericsystem.defaults.tools.Memoizer;
+import org.genericsystem.api.tools.Memoizer;
 import org.genericsystem.defaults.tools.SupersComputer;
 
 /**

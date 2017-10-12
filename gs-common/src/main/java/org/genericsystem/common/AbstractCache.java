@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.genericsystem.api.core.Snapshot;
@@ -11,6 +12,7 @@ import org.genericsystem.api.core.exceptions.CacheNoStartedException;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.api.core.exceptions.RollbackException;
+import org.genericsystem.api.tools.Memoizer;
 import org.genericsystem.common.GenericBuilder.AddBuilder;
 import org.genericsystem.common.GenericBuilder.MergeBuilder;
 import org.genericsystem.common.GenericBuilder.SetBuilder;
@@ -325,6 +327,9 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 
 	protected class TransactionDifferential implements IDifferential<Generic> {
 
+		private Function<Generic, Observable<Generic>> addsM = Memoizer.memoize(generic -> RxJavaHelpers.prevFromObservableValue(transactionProperty).switchMap(prevTransaction -> prevTransaction.getAdds(generic)));
+		private Function<Generic, Observable<Generic>> remsM = Memoizer.memoize(generic -> RxJavaHelpers.prevFromObservableValue(transactionProperty).switchMap(prevTransaction -> prevTransaction.getRemovals(generic)));
+
 		@Override
 		public void apply(Snapshot<Generic> removes, Snapshot<Generic> adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
 			getTransaction().apply(removes, adds);
@@ -353,12 +358,12 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 		// Transmit adds and removes only when the transaction changes, i.e. when shiftTs is called.
 		@Override
 		public Observable<Generic> getAdds(Generic generic) {
-			return RxJavaHelpers.prevFromObservableValue(transactionProperty).switchMap(prevTransaction -> prevTransaction.getAdds(generic));
+			return addsM.apply(generic);
 		}
 
 		@Override
 		public Observable<Generic> getRemovals(Generic generic) {
-			return RxJavaHelpers.prevFromObservableValue(transactionProperty).switchMap(prevTransaction -> prevTransaction.getRemovals(generic));
+			return remsM.apply(generic);
 		}
 	}
 
