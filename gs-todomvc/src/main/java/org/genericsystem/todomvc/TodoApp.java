@@ -22,7 +22,6 @@ import org.genericsystem.reactor.annotations.TagName;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.context.ContextAction.CANCEL;
 import org.genericsystem.reactor.context.ContextAction.FLUSH;
-import org.genericsystem.reactor.context.ContextAction.REMOVE;
 import org.genericsystem.reactor.context.ForEachExtractor.SUBINSTANCES;
 import org.genericsystem.reactor.context.TagSwitcher;
 import org.genericsystem.reactor.gscomponents.FlexDiv;
@@ -46,6 +45,7 @@ import org.genericsystem.todomvc.TodoApp.RootDiv.ContentDiv.TodoInput;
 import org.genericsystem.todomvc.TodoApp.RootDiv.ContentDiv.TodosContent;
 import org.genericsystem.todomvc.TodoApp.RootDiv.ContentDiv.TodosContent.TodoItem;
 import org.genericsystem.todomvc.TodoApp.RootDiv.ContentDiv.TodosContent.TodoItem.ItemContent;
+import org.genericsystem.todomvc.TodoApp.RootDiv.ContentDiv.TodosContent.TodoItem.ItemContent.RemoveButton;
 import org.genericsystem.todomvc.TodoApp.RootDiv.ContentDiv.TodosContent.TodoItem.ItemContent.TodoCheckBox;
 import org.genericsystem.todomvc.TodoApp.RootDiv.ContentDiv.TodosFooter;
 import org.genericsystem.todomvc.TodoApp.RootDiv.ContentDiv.TodosFooter.ClearCompletedButton;
@@ -163,13 +163,16 @@ public class TodoApp extends RootTagImpl {
 						// Initialization of the COMPLETED property with the real state of the item.
 						addContextAttribute(COMPLETED, context -> new SimpleBooleanProperty(completed.test(context.getGeneric())));
 						bindOptionalStyleClass(COMPLETED, COMPLETED);
+						// Set to true when the remove button is clicked. Used because otherwise, the removal of the Completed holder
+						// causes a change to the COMPLETED property, which triggers recreation of the holder, which
+						// prevents the generic’s removal.
+						addContextAttribute("removed", context -> new SimpleBooleanProperty(false));
 					}
 
 					@StyleClass("view")
-					@Children({ TodoCheckBox.class, GSLabelDisplayer.class, HtmlButton.class })
+					@Children({ TodoCheckBox.class, GSLabelDisplayer.class, RemoveButton.class })
 					// Remove button appearing on the right when hovering
 					@StyleClass(path = HtmlButton.class, value = "destroy")
-					@BindAction(path = HtmlButton.class, value = REMOVE.class)
 					public static class ItemContent extends HtmlDiv {
 
 						@StyleClass("toggle")
@@ -179,15 +182,26 @@ public class TodoApp extends RootTagImpl {
 							public void init() {
 								addPrefixBinding(todo -> {
 									Property<Boolean> completedProperty = getContextProperty(COMPLETED, todo);
+									Property<Boolean> removedProperty = getContextProperty("removed", todo);
 									Observable<Boolean> completed = todo.getGeneric().getObservableHolder(todo.getGeneric().getRoot().find(Completed.class))
 											.map(opt -> opt.isPresent() && (Boolean) opt.get().getValue()).distinctUntilChanged();
 									todo.getHtmlDomNode(this).getDisposables().add(completed.subscribe(bool -> completedProperty.setValue(bool)));
 									completedProperty.addListener((o, v, nv) -> {
-										if (todo.getGeneric().isAlive())
+										if (todo.getGeneric().isAlive() && !removedProperty.getValue())
 											todo.getGeneric().setHolder(todo.find(Completed.class), nv);
 									});
 								});
 								bindOptionalBiDirectionalAttribute(COMPLETED, ReactorStatics.CHECKED, ReactorStatics.CHECKED);
+							}
+						}
+
+						public static class RemoveButton extends HtmlButton {
+							@Override
+							public void init() {
+								bindAction(context -> {
+									getContextProperty("removed", context).setValue(true);
+									context.remove();
+								});
 							}
 						}
 					}
