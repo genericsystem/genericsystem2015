@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
@@ -150,12 +151,14 @@ public class OCRPlastyScorer {
 	 * @return the corrected string
 	 */
 	private static String getCorrectedString(List<String> labels, RANSAC options) {
+		Optional<String> result = Optional.empty();
 		try {
-			return OCRPlasty.correctStrings(labels, options);
+			result = OCRPlasty.correctStrings(labels, options);
 		} catch (Exception e) {
-			System.err.println("Unable to get a RANSAC model");
-			return OCRPlasty.correctStrings(labels, RANSAC.NONE);
+			logger.error("Unable to get a RANSAC model");
+			result = OCRPlasty.correctStrings(labels, RANSAC.NONE);
 		}
+		return result.orElse("");
 	}
 
 	/**

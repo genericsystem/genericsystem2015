@@ -382,7 +382,7 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 	}
 
 	@SuppressWarnings("unchecked")
-	default Observable<Optional<T>> getObservablecLinkTargetComponent(T relation, Serializable value, T... targets) {
+	default Observable<Optional<T>> getObservableLinkTargetComponent(T relation, Serializable value, T... targets) {
 		return getObservableLink(relation, value, targets).map(optLink -> optLink.isPresent() ? Optional.of(optLink.get().getTargetComponent()) : Optional.empty());
 	}
 }
