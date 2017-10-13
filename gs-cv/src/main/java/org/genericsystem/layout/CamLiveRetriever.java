@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 
-public class CamLayoutAnalyzer extends AbstractApp {
+public class CamLiveRetriever extends AbstractApp {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
