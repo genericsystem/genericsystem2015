@@ -5,10 +5,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -41,6 +43,29 @@ public class OCRPlasty {
 		NORM_LEVENSHTEIN
 	}
 
+	/**
+	 * Utility class used to return two results : an {@link Optional} string, representing the corrected string, and a {@link Set} strings, representing the outliers eliminated by the RANSAC.
+	 * 
+	 * @author Pierrik Lassalas
+	 */
+	public static class Tuple {
+		private final Optional<String> string;
+		private final Set<String> outliers;
+
+		public Tuple(Optional<String> string, Set<String> outliers) {
+			this.string = string;
+			this.outliers = outliers;
+		}
+
+		public Optional<String> getString() {
+			return string;
+		}
+
+		public Set<String> getOutliers() {
+			return outliers;
+		}
+	}
+
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	public static void main(String[] args) {
@@ -56,7 +81,8 @@ public class OCRPlasty {
 
 		for (RANSAC option : RANSAC.values()) {
 			System.out.println(option.name());
-			System.out.println(correctStrings(new ArrayList<>(labels), option));
+			System.out.println(correctStrings(new ArrayList<>(labels), option).orElse("-- none --"));
+			// System.out.println(correctStringsAndGetOutliers(new ArrayList<>(labels), option));
 			System.out.println("similarity: " + similarity(labels));
 		}
 	}
@@ -69,32 +95,19 @@ public class OCRPlasty {
 	 * @return an {@link Optional} containing the string that reached the best consensus, otherwise an empty {@link Optional}
 	 */
 	public static Optional<String> correctStrings(List<String> labels, OCRPlasty.RANSAC options) {
-		List<String> trimmed = labels.stream().map(s -> s.trim()).filter(s -> s.length() > 0).collect(Collectors.toList());
-		Function<Collection<String>, Model<String>> modelProvider = null;
-		double error = 1;
-		switch (options) {
-		default:
-		case NONE:
-			return ocrPlasty(trimmed);
-		case LCS:
-			modelProvider = getModelProviderMaxLcs();
-			error = 1d;
-			break;
-		case DIVERSITY:
-			modelProvider = getModelProviderDiversity();
-			error = 0.1;
-			break;
-		case LEVENSHTEIN:
-			modelProvider = getModelProviderLevenshtein();
-			error = 1d;
-			break;
-		case NORM_LEVENSHTEIN:
-			modelProvider = getModelProviderNormLevenshtein();
-			error = 0.1;
-			break;
-		}
-		List<String> inliers = getRansacInliers(trimmed, modelProvider, error);
-		return inliers.isEmpty() ? ocrPlasty(trimmed) : ocrPlasty(inliers);
+		Tuple res = doStringCorrection(labels, options, false);
+		return res.getString();
+	}
+
+	/**
+	 * Get a corrected String from a given list of strings, along with a {@link List} of outliers if a RANSAC method was used.
+	 * 
+	 * @param labels - the list of string that will be 'averaged'
+	 * @param options - one of the value of {@link RANSAC} enum, which represents the algorithm used to compute the error in the RANSAC model
+	 * @return a {@link Tuple} object with the results
+	 */
+	public static Tuple correctStringsAndGetOutliers(List<String> labels, OCRPlasty.RANSAC options) {
+		return doStringCorrection(labels, options, true);
 	}
 
 	/**
@@ -114,6 +127,62 @@ public class OCRPlasty {
 			}
 		}
 		return 1 - 2 * sim / (n * (n - 1)); // divide by the total number of distances
+	}
+
+	/**
+	 * Performs the string correction.
+	 * 
+	 * @param labels - the list of string that will be 'averaged'
+	 * @param options - one of the value of {@link RANSAC} enum, which represents the algorithm used to compute the error in the RANSAC model
+	 * @param needOutliers - true if the list of outliers eliminated by the RANSAC is needed, false otherwise
+	 * @return a {@link Tuple} object with the results
+	 */
+	private static Tuple doStringCorrection(List<String> labels, OCRPlasty.RANSAC options, boolean needOutliers) {
+		// Trim all the elements of the list
+		List<String> trimmed = labels.stream().map(s -> s.trim()).filter(s -> s.length() > 0).collect(Collectors.toList());
+		// Initialize the parameters
+		Function<Collection<String>, Model<String>> modelProvider = null;
+		Set<String> outliers = Collections.emptySet();
+		Optional<String> result = Optional.empty();
+		double error = 1;
+
+		switch (options) {
+		default:
+		case NONE:
+			result = ocrPlasty(trimmed);
+		case LCS:
+			modelProvider = getModelProviderMaxLcs();
+			error = 1d;
+			break;
+		case DIVERSITY:
+			modelProvider = getModelProviderDiversity();
+			error = 0.1;
+			break;
+		case LEVENSHTEIN:
+			modelProvider = getModelProviderLevenshtein();
+			error = 1d;
+			break;
+		case NORM_LEVENSHTEIN:
+			modelProvider = getModelProviderNormLevenshtein();
+			error = 0.1;
+			break;
+		}
+
+		if (modelProvider != null) { // One of the RANSAC methods has been called
+			List<String> inliers = getRansacInliers(trimmed, modelProvider, error);
+			Set<String> inliersSet = new HashSet<>(inliers); // Save a Set copy to be able to get the outliers if needed
+			// Compute the string alignment
+			result = inliers.isEmpty() ? ocrPlasty(trimmed) : ocrPlasty(inliers);
+			// If no inliers were found or if we don't need the outliers, return an empty list
+			if (inliers.isEmpty() || !needOutliers) {
+				outliers = Collections.emptySet();
+			} else { // Otherwise get the set difference (elements present in trimmed but not in inliersSet)
+				Map<Boolean, Set<String>> partitionnedMap = trimmed.stream().collect(Collectors.partitioningBy(s -> inliersSet.contains(s), Collectors.toSet()));
+				outliers = partitionnedMap.get(false);
+			}
+		}
+
+		return new Tuple(result, outliers);
 	}
 
 	/**
