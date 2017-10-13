@@ -130,6 +130,14 @@ public class TodoApp extends RootTagImpl {
 		@SetText(path = { HtmlHeader.class, HtmlH1.class}, value = "todos")
 		public static class ContentDiv extends FlexDiv {
 
+			@Override
+			public void init() {
+				// Set to true when the remove button is clicked. Used because otherwise, the removal of the Completed holder
+				// causes a change to the COMPLETED property, which triggers recreation of the holder, which
+				// prevents the generic’s removal.
+				addContextAttribute("removing", context -> new SimpleBooleanProperty(false));
+			}
+
 			@StyleClass("new-todo")
 			@Attribute(name = "placeholder", value = "What needs to be done?")
 			public static class TodoInput extends HtmlInputText {
@@ -163,10 +171,6 @@ public class TodoApp extends RootTagImpl {
 						// Initialization of the COMPLETED property with the real state of the item.
 						addContextAttribute(COMPLETED, context -> new SimpleBooleanProperty(completed.test(context.getGeneric())));
 						bindOptionalStyleClass(COMPLETED, COMPLETED);
-						// Set to true when the remove button is clicked. Used because otherwise, the removal of the Completed holder
-						// causes a change to the COMPLETED property, which triggers recreation of the holder, which
-						// prevents the generic’s removal.
-						addContextAttribute("removed", context -> new SimpleBooleanProperty(false));
 					}
 
 					@StyleClass("view")
@@ -182,12 +186,12 @@ public class TodoApp extends RootTagImpl {
 							public void init() {
 								addPrefixBinding(todo -> {
 									Property<Boolean> completedProperty = getContextProperty(COMPLETED, todo);
-									Property<Boolean> removedProperty = getContextProperty("removed", todo);
+									Property<Boolean> removing = getContextProperty("removing", todo);
 									Observable<Boolean> completed = todo.getGeneric().getObservableHolder(todo.getGeneric().getRoot().find(Completed.class))
 											.map(opt -> opt.isPresent() && (Boolean) opt.get().getValue()).distinctUntilChanged();
 									todo.getHtmlDomNode(this).getDisposables().add(completed.subscribe(bool -> completedProperty.setValue(bool)));
 									completedProperty.addListener((o, v, nv) -> {
-										if (todo.getGeneric().isAlive() && !removedProperty.getValue())
+										if (todo.getGeneric().isAlive() && !removing.getValue())
 											todo.getGeneric().setHolder(todo.find(Completed.class), nv);
 									});
 								});
@@ -199,8 +203,9 @@ public class TodoApp extends RootTagImpl {
 							@Override
 							public void init() {
 								bindAction(context -> {
-									getContextProperty("removed", context).setValue(true);
+									getContextProperty("removing", context).setValue(true);
 									context.remove();
+									getContextProperty("removing", context).setValue(false);
 								});
 							}
 						}
@@ -275,7 +280,12 @@ public class TodoApp extends RootTagImpl {
 
 					@Override
 					public void init() {
-						bindAction(model -> getCompletedTodos(model).toList().forEach(Generic::remove));
+						bindAction(model -> {
+							Property<Boolean> removing = getContextProperty("removing", model);
+							removing.setValue(true);
+							getCompletedTodos(model).toList().forEach(Generic::remove);
+							removing.setValue(false);
+						});
 						bindText(model -> getCompletedTodos(model).setOnChanged().map(list -> list.size()).map(size -> "Clear completed (" + size + ")"));
 						addContextAttribute("hasNoCompleted", context -> new SimpleBooleanProperty());
 						addPrefixBinding(context -> context.getHtmlDomNode(this).getDisposables().add(getCompletedTodos(context).setOnChanged()
