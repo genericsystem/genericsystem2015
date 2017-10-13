@@ -133,6 +133,10 @@ public interface DefaultContext<T extends DefaultGeneric<T>> extends IContext<T>
 
 	Snapshot<T> getDependencies(T vertex);
 
+	Snapshot<T> getSubInstances(T vertex);
+
+	Snapshot<T> getSubInheritings(T vertex);
+
 	default T getMeta(int dim) {
 		T adjustedMeta = getRoot().adjustMeta(rootComponents(dim));
 		return adjustedMeta != null && adjustedMeta.getComponents().size() == dim ? adjustedMeta : null;

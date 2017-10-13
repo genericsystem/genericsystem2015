@@ -14,8 +14,6 @@ import org.genericsystem.api.core.IGeneric;
 import org.genericsystem.api.core.IndexFilter;
 import org.genericsystem.api.core.Snapshot;
 
-import io.reactivex.Observable;
-
 /**
  * @author Nicolas Feybesse
  *
@@ -114,49 +112,13 @@ public interface DefaultDependencies<T extends DefaultGeneric<T>> extends IGener
 	@SuppressWarnings({ "unchecked" })
 	@Override
 	default Snapshot<T> getSubInheritings() {
-		return new Snapshot<T>() {
-			@Override
-			public Stream<T> unfilteredStream() {
-				return Stream.concat(Stream.of((T) DefaultDependencies.this), getInheritings().stream().flatMap(inheriting -> inheriting.getSubInheritings().stream())).distinct();
-			}
-
-			@Override
-			public Observable<T> getAdds() {
-				return Observable.merge(getInheritings().getAdds(),
-						Observable.fromIterable(getInheritings()).flatMap(g -> g.getSubInheritings().getAdds()),
-						getInheritings().getAdds().flatMap(g -> g.getSubInheritings().getAdds())).replay().refCount();
-			}
-
-			@Override
-			public Observable<T> getRemovals() {
-				return Observable.merge(getInheritings().getRemovals(),
-						Observable.fromIterable(getInheritings()).flatMap(g -> g.getSubInheritings().getRemovals()),
-						getInheritings().getAdds().flatMap(g -> g.getSubInheritings().getRemovals())).replay().refCount();
-			}
-		};
+		return getCurrentCache().getSubInheritings((T) this);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	default Snapshot<T> getSubInstances() {
-		return new Snapshot<T>() {
-
-			@Override
-			public Stream<T> unfilteredStream() {
-				return getSubInheritings().stream().flatMap(inheriting -> inheriting.getInstances().stream());
-			}
-
-			@Override
-			public Observable<T> getAdds() {
-				return Observable.merge(Observable.fromIterable(getSubInheritings()).flatMap(g -> g.getInstances().getAdds()),
-						getSubInheritings().getAdds().flatMap(g -> g.getInstances().getAdds())).replay().refCount();
-			}
-
-			@Override
-			public Observable<T> getRemovals() {
-				return Observable.merge(Observable.fromIterable(getSubInheritings()).flatMap(g -> g.getInstances().getRemovals()),
-						getSubInheritings().getAdds().flatMap(g -> g.getInstances().getRemovals())).replay().refCount();
-			}
-		};
+		return getCurrentCache().getSubInstances((T) this);
 	}
 
 	@SuppressWarnings("unchecked")
