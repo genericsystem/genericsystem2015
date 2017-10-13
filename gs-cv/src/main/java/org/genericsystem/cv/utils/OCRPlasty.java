@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -65,9 +66,9 @@ public class OCRPlasty {
 	 * 
 	 * @param labels - the list of string that will be 'averaged'
 	 * @param options - one of the value of {@link RANSAC} enum, which represents the algorithm used to compute the error in the RANSAC model
-	 * @return the String that reached the best consensus
+	 * @return an {@link Optional} containing the string that reached the best consensus, otherwise an empty {@link Optional}
 	 */
-	public static String correctStrings(List<String> labels, OCRPlasty.RANSAC options) {
+	public static Optional<String> correctStrings(List<String> labels, OCRPlasty.RANSAC options) {
 		List<String> trimmed = labels.stream().map(s -> s.trim()).filter(s -> s.length() > 0).collect(Collectors.toList());
 		Function<Collection<String>, Model<String>> modelProvider = null;
 		double error = 1;
@@ -119,13 +120,13 @@ public class OCRPlasty {
 	 * Attempt to provide a corrected string from a list of string candidates.
 	 * 
 	 * @param labels - the list of strings
-	 * @return a string if it was found, <code>null</code> otherwise
+	 * @return an {@link Optional} containing the string if it was found, otherwise an empty {@link Optional}
 	 */
-	private static String ocrPlasty(List<String> labels) {
+	private static Optional<String> ocrPlasty(List<String> labels) {
 		if (labels == null)
 			throw new IllegalArgumentException("The list cannot be null");
 		if (labels.isEmpty())
-			return null;
+			return Optional.empty();
 		String common = longestCommonSubsequence(labels);
 		String consensus = "";
 		for (int i = 0; i < common.length() + 1; i++) {
@@ -139,7 +140,7 @@ public class OCRPlasty {
 			if (i < common.length() - 1)
 				consensus += common.charAt(i);
 		}
-		return consensus.isEmpty() ? null : consensus;
+		return consensus.isEmpty() ? Optional.empty() : Optional.of(consensus);
 	}
 
 	/**
