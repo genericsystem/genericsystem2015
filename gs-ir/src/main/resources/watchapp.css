@@ -61,6 +61,11 @@ a>.fa {
 	padding: 0.5em;
 }
 
+img.big-image {
+	height: fit-content;
+	width: fit-content;
+}
+
 img {
 	height: auto;
 	width: 400px;

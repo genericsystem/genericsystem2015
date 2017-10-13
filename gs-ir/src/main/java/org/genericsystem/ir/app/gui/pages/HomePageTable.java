@@ -21,7 +21,6 @@ import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.annotations.Switch;
-import org.genericsystem.reactor.context.ContextAction.CANCEL;
 import org.genericsystem.reactor.context.ContextAction.RESET_SELECTION;
 import org.genericsystem.reactor.context.ContextAction.SET_SELECTION;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
@@ -56,12 +55,12 @@ public class HomePageTable extends FlexDiv {
 	}
 
 	@FlexDirectionStyle(FlexDirection.ROW)
-	@Children({ DocumentName.class, FlexDiv.class, ModalFlexDiv.class, FlexDiv.class, DocumentDeleteButtonDiv.class, LastDocumentUpdateDiv.class })
-	@Children(path = FlexDiv.class, pos = 1, value = HtmlHyperLink.class)
+	@Children({ DocumentName.class, ModalFlexDiv.class, ModalFlexDiv.class, FlexDiv.class, DocumentDeleteButtonDiv.class, LastDocumentUpdateDiv.class })
+	@Children(path = FlexDiv.class, pos = 1, value = { DocZones.class, HtmlHyperLink.class })
 	@Children(path = { FlexDiv.class, HtmlHyperLink.class }, pos = { 1, 0 }, value = { CheckedImage.class, FailedImage.class })
 	@Switch(path = { FlexDiv.class, HtmlHyperLink.class, CheckedImage.class }, pos = { 1, 0, 0 }, value = DOC_DEZONED.class)
 	@Switch(path = { FlexDiv.class, HtmlHyperLink.class, FailedImage.class }, pos = { 1, 0, 0 }, value = DOC_NOT_DEZONED.class)
-	@BindAction(path = { FlexDiv.class, HtmlHyperLink.class }, pos = { 1, 0 }, value = CANCEL.class)
+	@BindAction(path = { FlexDiv.class, HtmlHyperLink.class }, pos = { 1, 0 }, value = SET_SELECTION.class)
 	@Children(path = FlexDiv.class, pos = 2, value = { DocZonesShow.class, HtmlHyperLink.class })
 	@Children(path = { FlexDiv.class, HtmlHyperLink.class }, pos = { 2, 0 }, value = { CheckedImage.class, FailedImage.class })
 	@BindAction(path = { FlexDiv.class, HtmlHyperLink.class }, pos = { 2, 0 }, value = SET_SELECTION.class)

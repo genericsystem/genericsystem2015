@@ -6,7 +6,7 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlImg;
 import javafx.beans.property.SimpleStringProperty;
 
 /**
- * This class define how the document's iamge is displayed.
+ * This class define how the document's image is displayed.
  * 
  * @author Pierrik Lassalas
  */
