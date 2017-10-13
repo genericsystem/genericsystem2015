@@ -74,11 +74,11 @@ public class CamLiveRetriever extends AbstractApp {
 		ImageView src0 = new ImageView(Tools.mat2jfxImage(frame));
 		mainGrid.add(src0, 0, 0);
 
-		// ImageView src1 = new ImageView(Tools.mat2jfxImage(frame));
+		ImageView src1 = new ImageView(Tools.mat2jfxImage(frame));
 		// ImageView src2 = new ImageView(Tools.mat2jfxImage(frame));
 		// ImageView src3 = new ImageView(Tools.mat2jfxImage(frame));
 
-		// mainGrid.add(src1, 0, 1);
+		mainGrid.add(src1, 0, 1);
 
 		// mainGrid.add(src2, 1, 0);
 		// mainGrid.add(src3, 0, 1);
@@ -109,7 +109,7 @@ public class CamLiveRetriever extends AbstractApp {
 						Img display = new Img(frame, true);
 						// layout.drawOcrPerspectiveInverse(display, homography[0].inv(), new Scalar(0, 0, 255), 1);
 
-						// Img stabilizedDisplay = new Img(stabilized.getSrc(), true);
+						Img stabilizedDisplay = new Img(stabilized.getSrc(), true);
 
 						fields.consolidateOcr(stabilized);
 						// fields.drawConsolidated(stabilizedDisplay);
@@ -117,7 +117,7 @@ public class CamLiveRetriever extends AbstractApp {
 						src0.setImage(display.toJfxImage());
 						// src1.setImage(old.absDiff(new Img(frame, false)).adaptativeGaussianInvThreshold(17, 9).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(5, 5)).toJfxImage());// deskewed_.toJfxImage());
 						// src2.setImage(deskiewedCopy.toJfxImage());
-						// src1.setImage(stabilizedDisplay.toJfxImage());
+						src1.setImage(stabilizedDisplay.toJfxImage());
 					}
 				} catch (Throwable e) {
 					logger.warn("Exception while computing layout.", e);

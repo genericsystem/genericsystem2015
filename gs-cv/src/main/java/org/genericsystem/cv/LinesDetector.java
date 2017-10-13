@@ -169,7 +169,7 @@ public class LinesDetector extends AbstractApp {
 				};
 			};
 
-			Ransac<Line> ransac = new Ransac<>(lines, modelProvider, 1, 200, 2 * Math.PI / 180, Double.valueOf(Math.floor(lines.size() * 0.6)).intValue());
+			Ransac<Line> ransac = new Ransac<>(lines, modelProvider, 1, 200, 3 * Math.PI / 180, Double.valueOf(Math.floor(lines.size() * 0.6)).intValue());
 			ransac.compute(false);
 			// System.out.println("Error max : " + ransac.getBestError());
 			// System.out.println("----------------------");
