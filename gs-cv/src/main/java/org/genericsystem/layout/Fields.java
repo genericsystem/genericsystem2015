@@ -21,9 +21,9 @@ public class Fields {
 
 	public void merge(List<Rect> rects) {
 		List<Field> oldFields = fields;
-		fields = rects.stream().map(rect -> new Field(rect)).collect(Collectors.toList());
+		fields = rects.stream().map(Field::new).collect(Collectors.toList());
 		if (lastHomography != null) {
-			List<Point> newPoints = restabilize(oldFields.stream().map(f -> f.center()).collect(Collectors.toList()));
+			List<Point> newPoints = restabilize(oldFields.stream().map(Field::center).collect(Collectors.toList()));
 			for (int index = 0; index < oldFields.size(); index++)
 				if (oldFields.get(index).isConsolidated()) {
 					Field field = findNewField(newPoints.get(index));
@@ -38,11 +38,7 @@ public class Fields {
 	}
 
 	private Field findNewField(Point pt) {
-		for (Field field : fields) {
-			if (field.contains(pt))
-				return field;
-		}
-		return null;
+		return fields.stream().filter(field -> field.contains(pt)).findFirst().orElse(null);
 	}
 
 	private List<Point> restabilize(List<Point> originals) {

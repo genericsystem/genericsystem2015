@@ -21,7 +21,7 @@ public class Field {
 	private final Rect rect;
 	private Map<String, Integer> labels = new HashMap<>();
 	private String consolidated;
-	private int attempts = 0;
+	private long attempts = 0;
 
 	public Field(Rect rect) {
 		this.rect = rect;
@@ -30,6 +30,7 @@ public class Field {
 	public void merge(Field field) {
 		labels = field.getLabels();
 		consolidated = field.getConsolidated();
+		attempts = field.getAttempts();
 	}
 
 	public Map<String, Integer> getLabels() {
@@ -96,6 +97,10 @@ public class Field {
 
 	public boolean needOcr() {
 		return consolidated == null && attempts < 20;
+	}
+
+	public long getAttempts() {
+		return attempts;
 	}
 
 }

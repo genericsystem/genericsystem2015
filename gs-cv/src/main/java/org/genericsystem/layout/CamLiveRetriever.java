@@ -219,23 +219,18 @@ public class CamLiveRetriever extends AbstractApp {
 		// Predicate<RotatedRect> filter = rect -> rect.center.x > Double.valueOf(frame.width() * crop).intValue() && rect.center.y > Double.valueOf(frame.height() * crop).intValue() && rect.center.x < Double.valueOf(frame.width() * (1 - crop)).intValue()
 		// && rect.center.y < Double.valueOf(frame.height() * (1 - crop)).intValue();
 		List<RotatedRect> rotatedRects = contours.stream().filter(contour -> Imgproc.contourArea(contour) > minArea).map(contour -> Imgproc.minAreaRect(new MatOfPoint2f(contour.toArray())))/* .filter(filter) */.collect(Collectors.toList());
-		double mean = 0;
+
 		for (RotatedRect rotatedRect : rotatedRects) {
-			if (rotatedRect.angle < -45.) {
+			if (rotatedRect.angle <= -45.) {
 				rotatedRect.angle += 90.0;
 				double tmp = rotatedRect.size.width;
 				rotatedRect.size.width = rotatedRect.size.height;
 				rotatedRect.size.height = tmp;
 			}
-			mean += rotatedRect.angle;
 		}
-		final double average = mean / rotatedRects.size();
-
+		final double average = rotatedRects.stream().mapToDouble(r -> r.angle).average().getAsDouble();
 		List<RotatedRect> goodRects = rotatedRects.stream().filter(rotatedRect -> Math.abs(rotatedRect.angle - average) < 5).collect(Collectors.toList());
-		double goodRectsMean = 0;
-		for (RotatedRect rotatedRect : goodRects)
-			goodRectsMean += rotatedRect.angle;
-		return goodRectsMean / goodRects.size();
+		return goodRects.stream().mapToDouble(r -> r.angle).average().getAsDouble();
 	}
 
 	@Override
