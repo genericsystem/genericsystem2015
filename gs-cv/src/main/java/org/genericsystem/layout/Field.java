@@ -1,13 +1,19 @@
 package org.genericsystem.layout;
 
 import java.text.Normalizer;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.IntStream;
 
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.Ocr;
+import org.genericsystem.cv.utils.OCRPlasty;
+import org.genericsystem.cv.utils.OCRPlasty.RANSAC;
+import org.genericsystem.cv.utils.OCRPlasty.Tuple;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint2f;
@@ -70,11 +76,31 @@ public class Field {
 		String ocr = Ocr.doWork(new Mat(rootImg.getSrc(), getLargeRect(rootImg, 0.03, 0.1)));
 		Integer count = labels.get(ocr);
 		labels.put(ocr, 1 + (count != null ? count : 0));
-		int all = labels.values().stream().reduce(0, (i, j) -> i + j);
-		for (Entry<String, Integer> entry : labels.entrySet())
-			if (entry.getValue() > all / 2)
-				consolidated = entry.getKey();
 		attempts++;
+		System.out.println("-> " + attempts);
+		// XXX: attempts almost never gets to more than 4!
+		if (attempts == 1 || attempts % 10 == 0)
+			consolidateOcr();
+	}
+
+	private void consolidateOcr() {
+		List<String> strings = labels.entrySet().stream().sorted(Entry.<String, Integer>comparingByValue().reversed()).limit(20).collect(ArrayList<String>::new, (list, e) -> IntStream.range(0, e.getValue()).forEach(count -> list.add(e.getKey())),
+				List::addAll);
+		// List<String> strings = labels.entrySet().stream().sorted(Entry.<String, Integer>comparingByValue().reversed()).limit(20).map(e -> {
+		// List<String> tmp = new ArrayList<>();
+		// for (int i = 0; i < e.getValue(); ++i) {
+		// tmp.add(e.getKey());
+		// }
+		// return tmp;
+		// }).flatMap(List::stream).collect(Collectors.toList());
+
+		if (labels.size() > 1) {
+			Tuple res = OCRPlasty.correctStringsAndGetOutliers(strings, RANSAC.NORM_LEVENSHTEIN);
+			consolidated = res.getString().orElse(labels.entrySet().stream().map(e -> e.getKey()).findFirst().orElse(null));
+			// res.getOutliers().forEach(outlier -> labels.remove(outlier));
+		} else {
+			consolidated = null;
+		}
 	}
 
 	public Rect getLargeRect(Img imgRoot, double deltaW, double deltaH) {

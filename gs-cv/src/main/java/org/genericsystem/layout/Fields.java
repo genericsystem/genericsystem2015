@@ -23,16 +23,18 @@ public class Fields {
 		List<Field> oldFields = fields;
 		fields = rects.stream().map(Field::new).collect(Collectors.toList());
 		if (lastHomography != null) {
-			List<Point> newPoints = restabilize(oldFields.stream().map(Field::center).collect(Collectors.toList()));
+			List<Point> virtualCenters = restabilize(oldFields.stream().map(Field::center).collect(Collectors.toList()));
 			for (int index = 0; index < oldFields.size(); index++)
 				if (oldFields.get(index).isConsolidated()) {
-					Field field = findNewField(newPoints.get(index));
+					Field field = findNewField(virtualCenters.get(index));
 					if (field != null) {
 						field.merge(oldFields.get(index));
 						System.out.println("Merge : " + oldFields.get(index).getConsolidated());
-						System.out.println(newPoints.get(index) + " " + field.center());
+						// System.out.println(newPoints.get(index) + " " + field.center());
 					} else
 						System.out.println("Can 't merge : " + oldFields.get(index).getConsolidated() + " ");
+				} else {
+					System.err.println("Not consolidated");
 				}
 		}
 	}
@@ -68,7 +70,7 @@ public class Fields {
 
 	public void consolidateOcr(Img rootImg) {
 		long TS = System.currentTimeMillis();
-		fields.stream().filter(Field::needOcr).filter(f -> System.currentTimeMillis() - TS <= 100).forEach(f -> f.ocr(rootImg));
+		fields.stream().filter(Field::needOcr).filter(f -> System.currentTimeMillis() - TS <= 200).forEach(f -> f.ocr(rootImg));
 	}
 
 	public Stream<Field> consolidatedFieldStream() {
