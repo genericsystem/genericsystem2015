@@ -3,6 +3,7 @@ package org.genericsystem.layout;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.stream.IntStream;
 
 import org.genericsystem.cv.Img;
@@ -38,7 +39,6 @@ public class Field extends AbstractField {
 			labels.merge(ocr, 1, Integer::sum);
 			attempts++;
 		}
-		// if (getLabelsSize() == 0 || getLabelsSize() % 10 == 0)
 		consolidateOcr();
 	}
 
@@ -48,10 +48,11 @@ public class Field extends AbstractField {
 				List::addAll);
 		if (getLabelsSize() > 2) {
 			Tuple res = OCRPlasty.correctStringsAndGetOutliers(strings, RANSAC.NORM_LEVENSHTEIN);
-			consolidated = res.getString().orElse(labels.entrySet().stream().map(e -> e.getKey()).findFirst().orElse(null));
-			res.getOutliers().forEach(outlier -> labels.remove(outlier));
+			consolidated = res.getString(); // .orElse(labels.entrySet().stream().map(e -> e.getKey()).findFirst().orElse(null));
+			if (getLabelsSize() > 10)
+				res.getOutliers().forEach(outlier -> labels.remove(outlier));
 		} else {
-			consolidated = null;
+			consolidated = Optional.empty();
 		}
 	}
 

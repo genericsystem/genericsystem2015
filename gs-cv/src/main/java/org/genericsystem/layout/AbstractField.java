@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.genericsystem.cv.Img;
 import org.opencv.core.Core;
@@ -20,12 +21,13 @@ public abstract class AbstractField {
 	protected final Rect rect;
 	protected final Point center;
 	protected Map<String, Integer> labels;
-	protected String consolidated;
+	protected Optional<String> consolidated;
 	protected long attempts;
 
 	public AbstractField(Rect rect) {
 		this.rect = rect;
 		this.labels = new HashMap<>();
+		this.consolidated = Optional.empty();
 		this.center = new Point(rect.x + rect.width / 2, rect.y + rect.height / 2);
 		this.attempts = 0;
 	}
@@ -47,7 +49,7 @@ public abstract class AbstractField {
 			Point topCenter = new Point((targets[1].x + targets[2].x) / 2, (targets[1].y + targets[2].y) / 2);
 			double l = Math.sqrt(Math.pow(targets[1].x - topCenter.x, 2) + Math.pow(targets[1].y - topCenter.y, 2));
 			Imgproc.line(display.getSrc(), new Point(topCenter.x, topCenter.y - 2), new Point(topCenter.x, topCenter.y - 20), new Scalar(0, 255, 0), 1);
-			Imgproc.putText(display.getSrc(), Normalizer.normalize(consolidated, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", ""), new Point(topCenter.x - l, topCenter.y - 22), Core.FONT_HERSHEY_TRIPLEX, 0.45, new Scalar(0, 255, 0), 1);
+			Imgproc.putText(display.getSrc(), Normalizer.normalize(consolidated.orElse(""), Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", ""), new Point(topCenter.x - l, topCenter.y - 22), Core.FONT_HERSHEY_TRIPLEX, 0.45, new Scalar(0, 255, 0), 1);
 		}
 	}
 
@@ -74,7 +76,7 @@ public abstract class AbstractField {
 	}
 
 	public boolean isConsolidated() {
-		return consolidated != null;
+		return consolidated.isPresent();
 	}
 
 	public boolean needOcr() {
@@ -93,7 +95,7 @@ public abstract class AbstractField {
 		return labels.entrySet().stream().mapToInt(entry -> entry.getValue()).sum();
 	}
 
-	public String getConsolidated() {
+	public Optional<String> getConsolidated() {
 		return consolidated;
 	}
 
