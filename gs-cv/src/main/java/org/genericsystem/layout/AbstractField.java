@@ -67,6 +67,14 @@ public abstract class AbstractField {
 		return Math.sqrt(Math.pow(this.center.x - center.x, 2) + Math.pow(this.center.y - center.y, 2)) <= 10;
 	}
 
+	public boolean isOverlapping(AbstractField other) {
+		// Consider overlapping as soon as a rectangle contains one of the corners of the other
+		Rect otherRect = other.getRect();
+		boolean bool1 = rect.contains(otherRect.tl()) || rect.contains(otherRect.br());
+		boolean bool2 = otherRect.contains(rect.tl()) || otherRect.contains(rect.br());
+		return bool1 || bool2;
+	}
+
 	public boolean isOnDisplay(Img display) {
 		return rect.br().x > 0 && rect.br().y > 0;
 	}

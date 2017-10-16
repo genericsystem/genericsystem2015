@@ -21,6 +21,32 @@ public abstract class AbstractFields implements Iterable<AbstractField> {
 		this.fields = fields;
 	}
 
+	public void removeOverlaps() {
+		for (AbstractField field : fields) {
+			List<AbstractField> overlaps = getOverlaps(field);
+			if (overlaps != null && !overlaps.isEmpty()) {
+				tryMerge(field, overlaps);
+			}
+		}
+	}
+
+	public List<AbstractField> getOverlaps(AbstractField targetField) {
+		// TODO Auto-generated method stub
+		// Look for the fields that overlaps targetField
+		List<AbstractField> overlaps = new ArrayList<>();
+		for (AbstractField field : fields) {
+			if (targetField.isOverlapping(field)) {
+				overlaps.add(field);
+			}
+		}
+		return overlaps;
+	}
+
+	public void tryMerge(AbstractField targetField, List<AbstractField> overlaps) {
+		// TODO Auto-generated method stub
+
+	}
+
 	public void consolidateOcr(Img rootImg) {
 		stream().filter(AbstractField::needOcr).forEach(f -> f.ocr(rootImg));
 	}
