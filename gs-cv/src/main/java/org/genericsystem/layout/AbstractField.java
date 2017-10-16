@@ -35,18 +35,20 @@ public abstract class AbstractField {
 	}
 
 	public void drawOcrPerspectiveInverse(Img display, Mat homography, Scalar color, int thickness) {
-		List<Point> points = Arrays.asList(center, new Point(rect.x, rect.y), new Point(rect.x + rect.width - 1, rect.y), new Point(rect.x + rect.width - 1, rect.y + rect.height - 1), new Point(rect.x, rect.y + rect.height - 1));
-		MatOfPoint2f results = new MatOfPoint2f();
-		Core.perspectiveTransform(Converters.vector_Point2f_to_Mat(points), results, homography);
-		Point[] targets = results.toArray();
-		Imgproc.line(display.getSrc(), targets[1], targets[2], color, thickness);
-		Imgproc.line(display.getSrc(), targets[2], targets[3], color, thickness);
-		Imgproc.line(display.getSrc(), targets[3], targets[4], color, thickness);
-		Imgproc.line(display.getSrc(), targets[4], targets[1], color, thickness);
-		Point topCenter = new Point((targets[1].x + targets[2].x) / 2, (targets[1].y + targets[2].y) / 2);
-		double l = Math.sqrt(Math.pow(targets[1].x - topCenter.x, 2) + Math.pow(targets[1].y - topCenter.y, 2));
-		Imgproc.line(display.getSrc(), new Point(topCenter.x, topCenter.y - 2), new Point(topCenter.x, topCenter.y - 20), new Scalar(0, 255, 0), 1);
-		Imgproc.putText(display.getSrc(), Normalizer.normalize(consolidated, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", ""), new Point(topCenter.x - l, topCenter.y - 22), Core.FONT_HERSHEY_TRIPLEX, 0.45, new Scalar(0, 255, 0), 1);
+		if (isOnDisplay(display)) {
+			List<Point> points = Arrays.asList(center, new Point(rect.x, rect.y), new Point(rect.x + rect.width - 1, rect.y), new Point(rect.x + rect.width - 1, rect.y + rect.height - 1), new Point(rect.x, rect.y + rect.height - 1));
+			MatOfPoint2f results = new MatOfPoint2f();
+			Core.perspectiveTransform(Converters.vector_Point2f_to_Mat(points), results, homography);
+			Point[] targets = results.toArray();
+			Imgproc.line(display.getSrc(), targets[1], targets[2], color, thickness);
+			Imgproc.line(display.getSrc(), targets[2], targets[3], color, thickness);
+			Imgproc.line(display.getSrc(), targets[3], targets[4], color, thickness);
+			Imgproc.line(display.getSrc(), targets[4], targets[1], color, thickness);
+			Point topCenter = new Point((targets[1].x + targets[2].x) / 2, (targets[1].y + targets[2].y) / 2);
+			double l = Math.sqrt(Math.pow(targets[1].x - topCenter.x, 2) + Math.pow(targets[1].y - topCenter.y, 2));
+			Imgproc.line(display.getSrc(), new Point(topCenter.x, topCenter.y - 2), new Point(topCenter.x, topCenter.y - 20), new Scalar(0, 255, 0), 1);
+			Imgproc.putText(display.getSrc(), Normalizer.normalize(consolidated, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", ""), new Point(topCenter.x - l, topCenter.y - 22), Core.FONT_HERSHEY_TRIPLEX, 0.45, new Scalar(0, 255, 0), 1);
+		}
 	}
 
 	public Rect getLargeRect(Img imgRoot, double deltaW, double deltaH) {
@@ -60,7 +62,11 @@ public abstract class AbstractField {
 	}
 
 	public boolean contains(Point center) {
-		return Math.sqrt(Math.pow(this.center.x - center.x, 2) + Math.pow(this.center.y - center.y, 2)) <= 30;
+		return Math.sqrt(Math.pow(this.center.x - center.x, 2) + Math.pow(this.center.y - center.y, 2)) <= 10;
+	}
+
+	public boolean isOnDisplay(Img display) {
+		return rect.br().x > 0 && rect.br().y > 0;
 	}
 
 	public boolean needMoreAttempts() {
