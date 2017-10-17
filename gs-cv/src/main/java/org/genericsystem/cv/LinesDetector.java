@@ -1,20 +1,17 @@
 package org.genericsystem.cv;
 
 import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
+import org.genericsystem.cv.utils.Line;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.genericsystem.cv.utils.Ransac;
-import org.genericsystem.cv.utils.Tools;
 import org.genericsystem.cv.utils.Ransac.Model;
+import org.genericsystem.cv.utils.Tools;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -23,7 +20,6 @@ import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
-import org.opencv.utils.Converters;
 import org.opencv.videoio.VideoCapture;
 
 import javafx.scene.image.ImageView;
@@ -87,7 +83,7 @@ public class LinesDetector extends AbstractApp {
 					Imgproc.warpAffine(frame, rotatedMasked, matrix, frame.size(), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(255));
 					rotatedMasked.copyTo(rotated, warpedMask);
 
-					lines = lines.rotate(matrix);
+					lines = Lines.of(lines.rotate(matrix));
 					rotatedView.setImage(Tools.mat2jfxImage(rotated));
 
 					Mat dePerspectived = new Mat(frame.size(), CvType.CV_8UC3, new Scalar(255, 255, 255));
@@ -114,24 +110,18 @@ public class LinesDetector extends AbstractApp {
 
 	}
 
-	public static class Lines {
-
-		private final List<Line> lines = new ArrayList<>();
-		private final double mean;
+	public static class Lines extends org.genericsystem.cv.utils.Lines {
 
 		public Lines(Mat src) {
-			double mean = 0;
-			for (int i = 0; i < src.rows(); i++) {
-				double[] val = src.get(i, 0);
-				Line line = new Line(val[0], val[1], val[2], val[3]);
-				lines.add(line);
-				mean += line.getAngle();
-			}
-			this.mean = mean / src.rows();
+			super(src);
 		}
 
-		public List<Point[]> toLinesSegments() {
-			return lines.stream().map(line -> line.getSegment()).collect(Collectors.toList());
+		public Lines(Collection<Line> lines) {
+			super(lines);
+		}
+
+		public static Lines of(Collection<Line> lines) {
+			return new Lines(lines);
 		}
 
 		public Ransac<Line> findPerspectiveMatrix(int width, int height) {
@@ -139,12 +129,12 @@ public class LinesDetector extends AbstractApp {
 				Line line = datas.iterator().next();
 				if (datas.size() > 1)
 					throw new IllegalStateException("" + datas.size());
-				double a = (line.y2 - line.y1) / (line.x2 - line.x1);
-				double b = (line.y1 + line.y2 - a * (line.x1 + line.x2)) / 2;
+				double a = (line.getY2() - line.getY1()) / (line.getX2() - line.getX1());
+				double b = (line.getY1() + line.getY2() - a * (line.getX1() + line.getX2())) / 2;
 				double newy = a * width / 2 + b;
 
-				Mat homography = Imgproc.getPerspectiveTransform(new MatOfPoint2f(new Point[] { new Point(line.x1, line.y1), new Point(line.x2, line.y2), new Point(line.x2, height / 2), new Point(line.x1, height / 2) }),
-						new MatOfPoint2f(new Point[] { new Point(line.x1, newy), new Point(line.x2, newy), new Point(line.x2, height / 2), new Point(line.x1, height / 2) }));
+				Mat homography = Imgproc.getPerspectiveTransform(new MatOfPoint2f(new Point[] { new Point(line.getX1(), line.getY1()), new Point(line.getX2(), line.getY2()), new Point(line.getX2(), height / 2), new Point(line.getX1(), height / 2) }),
+						new MatOfPoint2f(new Point[] { new Point(line.getX1(), newy), new Point(line.getX2(), newy), new Point(line.getX2(), height / 2), new Point(line.getX1(), height / 2) }));
 
 				return new Model<Line>() {
 
@@ -181,28 +171,6 @@ public class LinesDetector extends AbstractApp {
 			return ransac;
 		}
 
-		public Lines rotate(Mat matrix) {
-			return new Lines(lines.stream().map(line -> line.transform(matrix)).collect(Collectors.toList()));
-		}
-
-		public void draw(Mat frame, Scalar color) {
-			lines.forEach(line -> line.draw(frame, color));
-		}
-
-		public Lines(Collection<Line> lines) {
-			double mean = 0;
-			for (Line line : lines) {
-				this.lines.add(line);
-				mean += line.getAngle();
-			}
-			this.mean = mean / lines.size();
-
-		}
-
-		public int size() {
-			return lines.size();
-		}
-
 		public Lines ransacMean() {
 
 			Function<Collection<Line>, Model<Line>> modelProvider = datas -> {
@@ -234,54 +202,6 @@ public class LinesDetector extends AbstractApp {
 			Ransac<Line> ransac = new Ransac<>(lines, modelProvider, lines.size() / 8, 100, 25 * Math.PI / 180, lines.size() / 3);
 			ransac.compute();
 			return new Lines(ransac.getBestDataSet().values());
-		}
-
-		public double getMean() {
-			return mean;
-		}
-
-	}
-
-	public static class Line {
-		private final double x1, y1, x2, y2, angle;
-
-		public Line(double x1, double y1, double x2, double y2) {
-			this.x1 = x1;
-			this.x2 = x2;
-			this.y1 = y1;
-			this.y2 = y2;
-			this.angle = Math.atan2(y2 - y1, x2 - x1);
-		}
-
-		public Point[] getSegment() {
-			return new Point[] { new Point(x1, y1), new Point(x2, y2) };
-		}
-
-		public Line transform(Mat rotationMatrix) {
-			MatOfPoint2f results = new MatOfPoint2f();
-			Core.transform(Converters.vector_Point2f_to_Mat(Arrays.asList(new Point(x1, y1), new Point(x2, y2))), results, rotationMatrix);
-			Point[] targets = results.toArray();
-			return new Line(targets[0].x, targets[0].y, targets[1].x, targets[1].y);
-		}
-
-		public Line perspectivTransform(Mat homography) {
-			MatOfPoint2f results = new MatOfPoint2f();
-			Core.perspectiveTransform(Converters.vector_Point2f_to_Mat(Arrays.asList(new Point(x1, y1), new Point(x2, y2))), results, homography);
-			Point[] targets = results.toArray();
-			return new Line(targets[0].x, targets[0].y, targets[1].x, targets[1].y);
-		}
-
-		public void draw(Mat frame, Scalar color) {
-			Imgproc.line(frame, new Point(x1, y1), new Point(x2, y2), color, 1);
-		}
-
-		@Override
-		public String toString() {
-			return "Line : " + angle;
-		}
-
-		public double getAngle() {
-			return angle;
 		}
 	}
 
