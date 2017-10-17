@@ -1,17 +1,23 @@
 package org.genericsystem.layout;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.genericsystem.cv.Img;
+import org.genericsystem.cv.utils.OCRPlasty;
 import org.opencv.core.Mat;
+import org.opencv.core.Point;
+import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 
 public abstract class AbstractFields implements Iterable<AbstractField> {
 
 	protected List<AbstractField> fields;
+	protected static final double MIN_SIMILARITY = 0.90;
 
 	public AbstractFields() {
 		this.fields = new ArrayList<>();
@@ -31,7 +37,6 @@ public abstract class AbstractFields implements Iterable<AbstractField> {
 	}
 
 	public List<AbstractField> getOverlaps(AbstractField targetField) {
-		// TODO Auto-generated method stub
 		// Look for the fields that overlaps targetField
 		List<AbstractField> overlaps = new ArrayList<>();
 		for (AbstractField field : fields) {
@@ -44,7 +49,55 @@ public abstract class AbstractFields implements Iterable<AbstractField> {
 
 	public void tryMerge(AbstractField targetField, List<AbstractField> overlaps) {
 		// TODO Auto-generated method stub
+		List<AbstractField> removes = new ArrayList<>();
+		if (targetField.getConsolidated().isPresent()) {
 
+			for (AbstractField field : overlaps) {
+				Optional<String> consolidatedTarget = targetField.getConsolidated();
+				Optional<String> consolidatedField = field.getConsolidated();
+				if (consolidatedField.isPresent()) {
+					if (consolidatedTarget.equals(consolidatedField)) {
+						// merge the intersection to create a new field
+						// add the original field to removes
+						targetField = getIntersection(targetField, field);
+						removes.add(field);
+					} else if (OCRPlasty.similarity(Arrays.asList(consolidatedTarget.get(), consolidatedField.get())) >= MIN_SIMILARITY) {
+						targetField = getUnion(targetField, field);
+						removes.add(field);
+					} else {
+						// Do something, but what?
+					}
+				}
+			}
+		}
+	}
+
+	protected AbstractField getIntersection(AbstractField field1, AbstractField field2) {
+		Rect rect1 = field1.getRect();
+		Rect rect2 = field2.getRect();
+		Field intersect = new Field(getIntersection(rect1, rect2));
+		intersect.merge(Arrays.asList(field1, field2));
+		return intersect;
+	}
+
+	protected AbstractField getUnion(AbstractField field1, AbstractField field2) {
+		Rect rect1 = field1.getRect();
+		Rect rect2 = field2.getRect();
+		Field union = new Field(getUnion(rect1, rect2));
+		union.merge(Arrays.asList(field1, field2));
+		return union;
+	}
+
+	private Rect getIntersection(Rect rect1, Rect rect2) {
+		Point tl = rect1.contains(rect2.tl()) ? rect2.tl() : rect1.tl();
+		Point br = rect1.contains(rect2.br()) ? rect2.br() : rect1.br();
+		return new Rect(tl, br);
+	}
+
+	private Rect getUnion(Rect rect1, Rect rect2) {
+		Point tl = rect1.contains(rect2.tl()) ? rect1.tl() : rect2.tl();
+		Point br = rect1.contains(rect2.br()) ? rect1.br() : rect2.br();
+		return new Rect(tl, br);
 	}
 
 	public void consolidateOcr(Img rootImg) {

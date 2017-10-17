@@ -20,12 +20,6 @@ public class Field extends AbstractField {
 		super(rect);
 	}
 
-	public void merge(Field field) {
-		field.getLabels().entrySet().forEach(entry -> labels.merge(entry.getKey(), entry.getValue(), Integer::sum));
-		consolidated = field.getConsolidated();
-		attempts = field.getAttempts();
-	}
-
 	public Field saveForLater(Rect newRect) {
 		Field f = new Field(newRect);
 		f.merge(this);
@@ -39,14 +33,16 @@ public class Field extends AbstractField {
 			labels.merge(ocr, 1, Integer::sum);
 			attempts++;
 		}
-		consolidateOcr();
+		System.err.println("-> " + attempts);
+		if (attempts <= 3 || attempts % 5 == 0)
+			consolidateOcr();
 	}
 
 	@Override
 	protected void consolidateOcr() {
-		List<String> strings = labels.entrySet().stream().sorted(Entry.<String, Integer>comparingByValue().reversed()).limit(20).collect(ArrayList<String>::new, (list, e) -> IntStream.range(0, e.getValue()).forEach(count -> list.add(e.getKey())),
-				List::addAll);
 		if (getLabelsSize() > 2) {
+			List<String> strings = labels.entrySet().stream().sorted(Entry.<String, Integer>comparingByValue().reversed()).limit(20).collect(ArrayList<String>::new, (list, e) -> IntStream.range(0, e.getValue()).forEach(count -> list.add(e.getKey())),
+					List::addAll);
 			Tuple res = OCRPlasty.correctStringsAndGetOutliers(strings, RANSAC.NORM_LEVENSHTEIN);
 			consolidated = res.getString(); // .orElse(labels.entrySet().stream().map(e -> e.getKey()).findFirst().orElse(null));
 			if (getLabelsSize() > 10)

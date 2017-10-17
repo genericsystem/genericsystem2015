@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.genericsystem.cv.Img;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint2f;
@@ -67,10 +66,10 @@ public class Fields extends AbstractFields {
 		this.lastRotation = rotation;
 	}
 
-	@Override
-	public void consolidateOcr(Img rootImg) {
-		long TS = System.currentTimeMillis();
-		stream().filter(AbstractField::needOcr).filter(f -> System.currentTimeMillis() - TS <= 100).forEach(f -> f.ocr(rootImg));
-	}
+	// @Override
+	// public void consolidateOcr(Img rootImg) {
+	// long TS = System.currentTimeMillis();
+	// stream().filter(AbstractField::needOcr).filter(f -> System.currentTimeMillis() - TS <= 100).forEach(f -> f.ocr(rootImg));
+	// }
 
 }

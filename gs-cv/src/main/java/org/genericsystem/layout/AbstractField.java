@@ -32,6 +32,16 @@ public abstract class AbstractField {
 		this.attempts = 0;
 	}
 
+	public void merge(AbstractField field) {
+		field.getLabels().entrySet().forEach(entry -> labels.merge(entry.getKey(), entry.getValue(), Integer::sum));
+		consolidated = field.getConsolidated(); // TODO: attempt to merge 2 optionals, or compute again the consolidated text from the labels
+		attempts += field.getAttempts();
+	}
+
+	public void merge(List<AbstractField> fields) {
+		fields.forEach(f -> this.merge(f));
+	}
+
 	public void draw(Img stabilizedDisplay) {
 		Imgproc.rectangle(stabilizedDisplay.getSrc(), rect.tl(), rect.br(), new Scalar(0, 0, 255));
 	}
