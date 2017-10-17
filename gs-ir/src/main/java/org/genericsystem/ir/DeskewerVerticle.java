@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.genericsystem.cv.utils.Deskewer;
+import org.genericsystem.cv.utils.Deskewer.METHOD;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +29,7 @@ public class DeskewerVerticle extends ActionVerticle {
 		logger.info("Deskewing image {}", filePath);
 		Path savedFile;
 		synchronized (DeskewerVerticle.class) {
-			savedFile = Deskewer.deskewAndSave(filePath);
+			savedFile = Deskewer.deskewAndSave(filePath, METHOD.ROTADED_RECTANGLES);
 		}
 		if (savedFile != null)
 			future.complete(savedFile.toString());

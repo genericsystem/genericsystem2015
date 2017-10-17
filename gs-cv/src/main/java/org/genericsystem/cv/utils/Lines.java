@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
@@ -47,7 +48,11 @@ public class Lines implements Iterable<Line> {
 	}
 
 	public void draw(Mat frame, Scalar color) {
-		lines.forEach(line -> line.draw(frame, color));
+		lines.forEach(line -> line.draw(frame, color, 1));
+	}
+
+	public List<Line> getLines() {
+		return lines.stream().collect(Collectors.toList());
 	}
 
 	public int size() {
@@ -58,8 +63,16 @@ public class Lines implements Iterable<Line> {
 		return mean;
 	}
 
+	public double getMeanInDegree() {
+		return mean / Math.PI * 180;
+	}
+
 	@Override
 	public Iterator<Line> iterator() {
 		return lines.iterator();
+	}
+
+	public Stream<Line> stream() {
+		return lines.stream();
 	}
 }

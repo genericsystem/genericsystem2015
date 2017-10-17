@@ -45,8 +45,14 @@ public class Deskewer {
 		NativeLibraryLoader.load();
 	}
 
+	public enum METHOD {
+		ROTADED_RECTANGLES,
+		HOUGH_LINES
+	}
+
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
+	private static final double ransacError = 0.1;
 	private static final double closedImgSizeFactor = 2E-6;
 	private static final double minAreaFactor = 3E-5;
 
@@ -54,7 +60,7 @@ public class Deskewer {
 	public static void main(String[] args) {
 		final String filename = System.getenv("HOME") + "/genericsystem/gs-ir-files/converted-png/image-4.png";
 		Path imgPath = Paths.get(filename);
-		Path temp = deskewAndSave(imgPath);
+		Path temp = deskewAndSave(imgPath, METHOD.ROTADED_RECTANGLES);
 		System.out.println(temp);
 	}
 
@@ -64,13 +70,13 @@ public class Deskewer {
 	 * @param imgPath - the Path to the image
 	 * @return the path of the newly saved image
 	 */
-	public static Path deskewAndSave(final Path imgPath) {
+	public static Path deskewAndSave(final Path imgPath, METHOD method) {
 		final String ext = FilenameUtils.getExtension(imgPath.getFileName().toString());
 		final String filename = imgPath.toString().replace("." + ext, "") + "_deskewed." + ext;
 		// TODO: save to a child folder containing only deskewed images?
 		Path savedPath = imgPath.resolveSibling(filename);
 
-		Img img = deskew(imgPath);
+		Img img = deskew(imgPath, METHOD.ROTADED_RECTANGLES);
 		try {
 			synchronized (Deskewer.class) {
 				if (savedPath.toFile().exists()) {
@@ -95,11 +101,11 @@ public class Deskewer {
 	 * @param imgPath - the path to the image
 	 * @return a new {@link Img}
 	 */
-	public static Img deskew(final Path imgPath) {
+	public static Img deskew(final Path imgPath, METHOD method) {
 		if (!imgPath.toFile().exists())
 			throw new IllegalStateException("No files were found at Path " + imgPath);
 		Img img = new Img(imgPath.toString());
-		Img deskewed = _deskew(img);
+		Img deskewed = deskew(img, method);
 		img.close();
 		return deskewed;
 	}
@@ -117,8 +123,19 @@ public class Deskewer {
 		Img closed = getClosedImg(imgCopy);
 		List<RotatedRect> rectangles = getRotatedRects(closed.getSrc());
 		rectangles.stream().forEach(rect -> drawSingleRotatedRectangle(imgCopy.getSrc(), rect, scalar, thickness));
-		List<RotatedRect> filteredRectangles = getInliers(rectangles, 1.0);
+		List<RotatedRect> filteredRectangles = getRansacInliersRects(rectangles, ransacError);
 		filteredRectangles.stream().forEach(rect -> drawSingleRotatedRectangle(imgCopy.getSrc(), rect, new Scalar(0, 255, 0), thickness));
+		closed.close();
+		return imgCopy;
+	}
+
+	public static Img getLinesDrawn(final Img img, Scalar scalar, int thickness) {
+		Img imgCopy = new Img(img.getSrc(), true);
+		Img closed = getClosedImg(imgCopy);
+		Lines lines = getLines(closed.getSrc());
+		lines.stream().forEach(line -> drawSingleLine(imgCopy.getSrc(), line, scalar, thickness));
+		Lines filteredLines = getRansacInliersLines(lines, ransacError);
+		filteredLines.stream().forEach(line -> drawSingleLine(imgCopy.getSrc(), line, new Scalar(0, 255, 0), thickness));
 		closed.close();
 		return imgCopy;
 	}
@@ -142,10 +159,14 @@ public class Deskewer {
 		}
 	}
 
-	private static Img _deskew(final Img img) {
+	private static void drawSingleLine(Mat mat, final Line line, final Scalar scalar, final int thickness) {
+		line.draw(mat, scalar, thickness);
+	}
+
+	private static Img deskew(final Img img, METHOD method) {
 		final Img closed = getClosedImg(img);
-		final double angle = contoursDetection(closed.getSrc());
-		System.out.println("angle: " + angle);
+		final double angle = detectAngle(closed.getSrc(), method);
+		logger.debug("Deskew angle = {}", angle);
 
 		final Point center = new Point(img.width() / 2, img.height() / 2);
 		// Rotation matrix
@@ -189,24 +210,29 @@ public class Deskewer {
 		return img.bilateralFilter(20, 80, 80).bgr2Gray().grad(2.0d, 2.0d).thresHold(0, 255, Imgproc.THRESH_BINARY_INV + Imgproc.THRESH_OTSU).bitwise_not().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(size, size));
 	}
 
-	private static double contoursDetection(final Mat dilated) {
-		List<RotatedRect> rotatedRects = getRotatedRects(dilated);
-		for (RotatedRect rotatedRect : rotatedRects) {
-			if (rotatedRect.angle <= -45.0) {
-				rotatedRect.angle += 90.0;
-				double tmp = rotatedRect.size.width;
-				rotatedRect.size.width = rotatedRect.size.height;
-				rotatedRect.size.height = tmp;
+	private static double detectAngle(final Mat dilated, METHOD method) {
+		switch (method) {
+		case HOUGH_LINES:
+			Lines lines = getLines(dilated);
+			return getRansacInliersLines(lines, ransacError).getMeanInDegree();
+		default:
+		case ROTADED_RECTANGLES:
+			List<RotatedRect> rotatedRects = getRotatedRects(dilated);
+			for (RotatedRect rotatedRect : rotatedRects) {
+				if (rotatedRect.angle <= -45.0) {
+					rotatedRect.angle += 90.0;
+					double tmp = rotatedRect.size.width;
+					rotatedRect.size.width = rotatedRect.size.height;
+					rotatedRect.size.height = tmp;
+				}
 			}
+			return getRansacInliersRects(rotatedRects, ransacError).stream().mapToDouble(i -> i.angle).average().getAsDouble();
 		}
-		// return getInliers(rotatedRects, 1.0).stream().mapToDouble(i -> i.angle).average().getAsDouble();
-		return getRansacInliers(rotatedRects, 0.1).stream().mapToDouble(i -> i.angle).average().getAsDouble();
 	}
 
 	private static List<RotatedRect> getInliers(final List<RotatedRect> data, final double confidence) {
 		if (null == data)
 			return null;
-
 		double average = data.stream().mapToDouble(rect -> rect.angle).average().getAsDouble();
 		double sd = Math.sqrt(data.stream().mapToDouble(rect -> Math.pow(rect.angle - average, 2)).average().getAsDouble());
 		Collections.sort(data, (r1, r2) -> Double.compare(r1.angle, r2.angle));
@@ -216,18 +242,17 @@ public class Deskewer {
 			median = data.get(middle).angle;
 		else
 			median = DoubleStream.of(data.get(middle).angle, data.get(middle - 1).angle).average().getAsDouble();
-
 		return data.stream().filter(rect -> Math.abs(rect.angle - median) < confidence * sd).collect(Collectors.toList());
 	}
 
-	private static List<RotatedRect> getRansacInliers(final List<RotatedRect> data, final double error) {
+	private static List<RotatedRect> getRansacInliersRects(final List<RotatedRect> data, final double error) {
 		int n = 3; // number of random samples
 		int k = 50; // number of iterations
 		double t = error; // error margin
-		int d = data.size() / 2; // number of minimum matches
+		int d = data.size() * 2 / 3; // number of minimum matches
 		Map<Integer, RotatedRect> bestFit = new HashMap<>();
 		for (int i = 1, maxAttempts = 10; bestFit.size() <= 3 && i <= maxAttempts; ++i) {
-			Ransac<RotatedRect> ransac = new Ransac<>(data, getModelProvider(), n, k * i, t, d);
+			Ransac<RotatedRect> ransac = new Ransac<>(data, getModelProviderRects(), n, k * i, t, d);
 			try {
 				ransac.compute();
 				bestFit = ransac.getBestDataSet();
@@ -240,7 +265,27 @@ public class Deskewer {
 		return bestFit.values().stream().collect(Collectors.toList());
 	}
 
-	private static Function<Collection<RotatedRect>, Model<RotatedRect>> getModelProvider() {
+	private static Lines getRansacInliersLines(final Lines data, final double error) {
+		int n = 3; // number of random samples
+		int k = 50; // number of iterations
+		double t = error; // error margin
+		int d = data.size() * 2 / 3; // number of minimum matches
+
+		Map<Integer, Line> bestFit = new HashMap<>();
+		for (int i = 1, maxAttempts = 10; bestFit.size() <= 3 && i <= maxAttempts; ++i) {
+			Ransac<Line> ransac = new Ransac<>(data.getLines(), getModelProviderLines(), n, k * i, t, d);
+			try {
+				ransac.compute();
+				bestFit = ransac.getBestDataSet();
+			} catch (Exception e) {
+				t *= 1.5;
+				logger.trace("Can't get a good model. Increase the error margin to {}", t);
+			}
+		}
+		return new Lines(bestFit.values().stream().collect(Collectors.toList()));
+	}
+
+	private static Function<Collection<RotatedRect>, Model<RotatedRect>> getModelProviderRects() {
 		return datas -> {
 			double average = datas.stream().mapToDouble(rect -> rect.angle).average().getAsDouble();
 
@@ -266,11 +311,45 @@ public class Deskewer {
 		};
 	}
 
+	private static Function<Collection<Line>, Model<Line>> getModelProviderLines() {
+		return datas -> {
+			double average = datas.stream().mapToDouble(line -> line.getAngle()).average().getAsDouble();
+
+			return new Model<Line>() {
+				@Override
+				public double computeError(Line data) {
+					return Math.abs(data.getAngle() - average);
+				}
+
+				@Override
+				public double computeGlobalError(Collection<Line> datas) {
+					double error = 0;
+					for (Line line : datas)
+						error += Math.pow(computeError(line), 2);
+					return error;
+				}
+
+				@Override
+				public Object[] getParams() {
+					return new Object[] { average };
+				}
+
+			};
+		};
+	}
+
 	private static List<RotatedRect> getRotatedRects(final Mat dilated) {
 		List<MatOfPoint> contours = new ArrayList<>();
 		Imgproc.findContours(dilated, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
 		double minArea = minAreaFactor * dilated.size().area();
 		List<RotatedRect> rotatedRects = contours.stream().filter(contour -> Imgproc.contourArea(contour) > minArea).map(contour -> Imgproc.minAreaRect(new MatOfPoint2f(contour.toArray()))).collect(Collectors.toList());
 		return rotatedRects;
+	}
+
+	private static Lines getLines(final Mat dilated) {
+		Img binary = new Img(dilated);
+		Lines lines = new Lines(binary.houghLinesP(1, Math.PI / 180, 100, 100, 10));
+		binary.close();
+		return lines;
 	}
 }

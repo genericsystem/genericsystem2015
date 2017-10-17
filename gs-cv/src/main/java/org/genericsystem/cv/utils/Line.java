@@ -47,8 +47,8 @@ public class Line {
 		return line;
 	}
 
-	public void draw(Mat frame, Scalar color) {
-		Imgproc.line(frame, new Point(x1, y1), new Point(x2, y2), color, 1);
+	public void draw(Mat frame, Scalar color, int thickness) {
+		Imgproc.line(frame, new Point(x1, y1), new Point(x2, y2), color, thickness);
 	}
 
 	@Override
