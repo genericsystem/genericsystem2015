@@ -1,4 +1,4 @@
-package org.genericsystem.layout;
+package org.genericsystem.cv.classifier;
 
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;

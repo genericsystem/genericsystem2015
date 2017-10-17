@@ -1,4 +1,4 @@
-package org.genericsystem.layout;
+package org.genericsystem.cv.classifier;
 
 import java.text.Normalizer;
 import java.util.Arrays;
