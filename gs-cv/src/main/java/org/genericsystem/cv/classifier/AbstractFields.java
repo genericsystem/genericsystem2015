@@ -9,8 +9,8 @@ import java.util.stream.Stream;
 
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.utils.OCRPlasty;
+import org.genericsystem.cv.utils.RectangleTools;
 import org.opencv.core.Mat;
-import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 
@@ -75,7 +75,7 @@ public abstract class AbstractFields implements Iterable<AbstractField> {
 	protected AbstractField getIntersection(AbstractField field1, AbstractField field2) {
 		Rect rect1 = field1.getRect();
 		Rect rect2 = field2.getRect();
-		Field intersect = new Field(getIntersection(rect1, rect2));
+		Field intersect = new Field(RectangleTools.getIntersection(rect1, rect2).get()); // Get the optional directly since one know that the rectangles intersect
 		intersect.merge(Arrays.asList(field1, field2));
 		return intersect;
 	}
@@ -83,21 +83,9 @@ public abstract class AbstractFields implements Iterable<AbstractField> {
 	protected AbstractField getUnion(AbstractField field1, AbstractField field2) {
 		Rect rect1 = field1.getRect();
 		Rect rect2 = field2.getRect();
-		Field union = new Field(getUnion(rect1, rect2));
+		Field union = new Field(RectangleTools.getUnion(rect1, rect2));
 		union.merge(Arrays.asList(field1, field2));
 		return union;
-	}
-
-	private Rect getIntersection(Rect rect1, Rect rect2) {
-		Point tl = rect1.contains(rect2.tl()) ? rect2.tl() : rect1.tl();
-		Point br = rect1.contains(rect2.br()) ? rect2.br() : rect1.br();
-		return new Rect(tl, br);
-	}
-
-	private Rect getUnion(Rect rect1, Rect rect2) {
-		Point tl = rect1.contains(rect2.tl()) ? rect1.tl() : rect2.tl();
-		Point br = rect1.contains(rect2.br()) ? rect1.br() : rect2.br();
-		return new Rect(tl, br);
 	}
 
 	public void consolidateOcr(Img rootImg) {
