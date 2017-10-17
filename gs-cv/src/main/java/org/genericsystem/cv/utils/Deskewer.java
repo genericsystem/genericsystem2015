@@ -17,8 +17,7 @@ import java.util.stream.DoubleStream;
 
 import org.apache.commons.io.FilenameUtils;
 import org.genericsystem.cv.Img;
-import org.genericsystem.layout.Ransac;
-import org.genericsystem.layout.Ransac.Model;
+import org.genericsystem.cv.utils.Ransac.Model;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
