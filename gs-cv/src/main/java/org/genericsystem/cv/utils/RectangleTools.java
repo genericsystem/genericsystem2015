@@ -70,7 +70,8 @@ public class RectangleTools {
 		List<Integer> indx = IntStream.range(0, y2.size()).boxed().sorted((i, j) -> Double.compare(y2.get(i), y2.get(j))).collect(Collectors.toList());
 
 		// Keep looping while some indexes remain in the indx list
-		while (indx.size() > 0) {
+		long count = 0L; // TODO: fix an infinite loop problem
+		while (indx.size() > 0 && count++ < 10 * boxes.size()) {
 			// Grab the last index and add the value to the list of picked indexes
 			int last = indx.size() - 1;
 			int i = indx.get(last);
@@ -90,17 +91,11 @@ public class RectangleTools {
 			for (int j = 0; j < xx1.size(); ++j) {
 				width.add(Math.max(0, xx2.get(j) - xx1.get(j) + 1));
 				height.add(Math.max(0, yy2.get(j) - yy1.get(j) + 1));
-				overlap.add(width.get(j) * height.get(j) / filteredArea.get(j));
+				overlap.add((width.get(j) * height.get(j)) / filteredArea.get(j));
 			}
-
-			// Remove all indexes from the index list whose overlap is above the threshlod
-			List<Integer> removes = new ArrayList<>();
-			IntStream.range(0, overlap.size()).filter(idx -> overlap.get(idx) > overlapThreshold).forEach(idx -> removes.add(idx));
-			indx.removeAll(removes);
-			// for (int j = 0; j < overlap.size(); ++j) {
-			// if (overlap.get(j) > overlapThreshold)
-			// indx.remove(j);
-			// }
+			// Remove all indexes from the index list whose overlap is above the threshold
+			IntStream.range(0, overlap.size()).filter(idx -> overlap.get(idx) > overlapThreshold).boxed().forEach(idx -> indx.remove(idx));
+			// XXX this last part can cause an infinite loop when the remove() function fails => not caught in the unit tests!
 		}
 		List<Rect> res = IntStream.range(0, boxes.size()).filter(idx -> pick.contains(idx)).mapToObj(boxes::get).collect(Collectors.toList());
 		return Optional.of(res);
