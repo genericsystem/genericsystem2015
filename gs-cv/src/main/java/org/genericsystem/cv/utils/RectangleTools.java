@@ -182,18 +182,7 @@ public class RectangleTools {
 	public static boolean isOverlapping(Rect rect1, Rect rect2) throws IllegalArgumentException {
 		if (rect1 == null || rect2 == null)
 			throw new IllegalArgumentException("One of the rectangles is null");
-		Point[] points1 = decomposeClockwise(rect1);
-		Point[] points2 = decomposeClockwise(rect2);
-
-		for (Point p : points2) {
-			if (contains(rect1, p))
-				return true;
-		}
-		for (Point p : points1) {
-			if (contains(rect2, p))
-				return true;
-		}
-		return false;
+		return getIntersection(rect1, rect2).map(rect -> rect.area() > 0 ? true : false).orElse(false);
 	}
 
 	/**
@@ -203,7 +192,7 @@ public class RectangleTools {
 	 * @param rect2 - the second rectangle
 	 * @return an {@link Optional} with the rectangle contained in the other, an empty Optional if no rectangles is contained in the other.
 	 */
-	private static Optional<Rect> getInsider(Rect rect1, Rect rect2) {
+	public static Optional<Rect> getInsider(Rect rect1, Rect rect2) {
 		Point[] points1 = decomposeClockwise(rect1);
 		Point[] points2 = decomposeClockwise(rect2);
 		boolean isRect2InRect1 = true;
@@ -235,7 +224,7 @@ public class RectangleTools {
 	 * @param p - the point
 	 * @return true if <code>p</code> is contained in <code>rect</code>, false otherwise
 	 */
-	private static boolean contains(Rect rect, Point p) {
+	public static boolean contains(Rect rect, Point p) {
 		boolean res = rect.tl().x <= p.x && p.x <= rect.br().x && rect.tl().y <= p.y && p.y <= rect.br().y;
 		return res;
 	}

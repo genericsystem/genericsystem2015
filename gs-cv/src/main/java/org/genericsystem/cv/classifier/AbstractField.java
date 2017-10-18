@@ -78,30 +78,26 @@ public abstract class AbstractField {
 		return Math.sqrt(Math.pow(this.center.x - center.x, 2) + Math.pow(this.center.y - center.y, 2)) <= 10;
 	}
 
-	public boolean isOverlapping(AbstractField other) {
-		return RectangleTools.isOverlapping(this.rect, other.getRect());
+	public boolean isOverlapping(Rect otherRect) {
+		return RectangleTools.isOverlapping(this.rect, otherRect);
 	}
 
-	public boolean overlapsMoreThanThresh(AbstractField other, double overlapThreshold) {
-		double[] res = RectangleTools.commonArea(this.rect, other.getRect());
+	public boolean isOverlapping(AbstractField other) {
+		return isOverlapping(other.getRect());
+	}
+
+	public boolean overlapsMoreThanThresh(Rect otherRect, double overlapThreshold) {
+		double[] res = RectangleTools.commonArea(this.rect, otherRect);
 		return res[0] > overlapThreshold;
 	}
 
+	public boolean overlapsMoreThanThresh(AbstractField other, double overlapThreshold) {
+		return overlapsMoreThanThresh(other.getRect(), overlapThreshold);
+	}
+
 	public boolean isOnDisplay(Img display) {
-		Point[] points = RectangleTools.decomposeClockwise(rect);
-		boolean ok = false;
-		// True if one of the 4 corners is inside the image
-		for (int i = 0; i < points.length; ++i) {
-			ok = ok || (points[i].x > 0 && points[i].x < display.width() && points[i].y > 0 && points[i].y < display.height());
-		}
-		if (!ok) {
-			// True if the rectangle is bigger than display
-			ok = ok || (rect.tl().x < 0 && rect.br().x > display.width() && rect.tl().y < 0 && rect.br().y > display.height());
-			// if (!ok) {
-			// Deal with the case where the bottom/top/left/right of the rect is inside the image
-			// }
-		}
-		return ok;
+		Rect imgRect = new Rect(0, 0, display.width(), display.height());
+		return RectangleTools.isOverlapping(imgRect, this.rect);
 	}
 
 	public boolean needMoreAttempts() {

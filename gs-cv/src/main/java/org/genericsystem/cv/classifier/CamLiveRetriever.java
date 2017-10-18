@@ -230,7 +230,7 @@ public class CamLiveRetriever extends AbstractApp {
 		}
 		final double average = rotatedRects.stream().mapToDouble(r -> r.angle).average().getAsDouble();
 		List<RotatedRect> goodRects = rotatedRects.stream().filter(rotatedRect -> Math.abs(rotatedRect.angle - average) < 5).collect(Collectors.toList());
-		return goodRects.stream().mapToDouble(r -> r.angle).average().getAsDouble();
+		return goodRects.stream().mapToDouble(r -> r.angle).average().orElse(average);
 	}
 
 	@Override
