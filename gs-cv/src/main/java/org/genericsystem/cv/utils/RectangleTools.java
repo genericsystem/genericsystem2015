@@ -246,7 +246,7 @@ public class RectangleTools {
 	 * @param rect - the rectangle
 	 * @return an array of {@link Point} in the order tl, tr, br, bl
 	 */
-	private static Point[] decomposeClockwise(Rect rect) {
+	public static Point[] decomposeClockwise(Rect rect) {
 		Point[] points = new Point[] { rect.tl(), new Point(rect.br().x, rect.tl().y), rect.br(), new Point(rect.tl().x, rect.br().y) };
 		return points;
 	}

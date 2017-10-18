@@ -28,14 +28,19 @@ public class Field extends AbstractField {
 
 	@Override
 	public void ocr(Img rootImg) {
-		String ocr = Ocr.doWork(new Mat(rootImg.getSrc(), getLargeRect(rootImg, 0.03, 0.1)));
+		Rect largeRect = getLargeRect(rootImg, 0.03, 0.1);
+		if (largeRect.empty() || largeRect.width < 3 || largeRect.height < 3)
+			return;
+		Mat roi = new Mat(rootImg.getSrc(), largeRect);
+		String ocr = Ocr.doWork(roi);
 		if (!ocr.isEmpty()) {
 			labels.merge(ocr, 1, Integer::sum);
 			attempts++;
 		}
-		System.err.println("-> " + attempts);
+		// System.err.println("-> " + attempts);
 		if (attempts <= 3 || attempts % 5 == 0)
 			consolidateOcr();
+		roi.release();
 	}
 
 	@Override

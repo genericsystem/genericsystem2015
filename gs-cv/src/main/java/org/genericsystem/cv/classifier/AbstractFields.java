@@ -2,9 +2,12 @@ package org.genericsystem.cv.classifier;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.genericsystem.cv.Img;
@@ -18,6 +21,8 @@ public abstract class AbstractFields implements Iterable<AbstractField> {
 
 	protected List<AbstractField> fields;
 	protected static final double MIN_SIMILARITY = 0.90;
+	protected static final double OVERLAP_THRESHOLD = 0.30;
+	private long count = System.currentTimeMillis();
 
 	public AbstractFields() {
 		this.fields = new ArrayList<>();
@@ -28,56 +33,59 @@ public abstract class AbstractFields implements Iterable<AbstractField> {
 	}
 
 	public void removeOverlaps() {
+		Set<AbstractField> removes = new HashSet<>();
 		for (AbstractField field : fields) {
 			List<AbstractField> overlaps = getOverlaps(field);
 			if (overlaps != null && !overlaps.isEmpty()) {
-				tryMerge(field, overlaps);
+				removes.addAll(tryMerge(field, overlaps));
 			}
 		}
+		// fields.removeAll(removes); // XXX: acts the same as emptying the list
+		// TODO: find an alternative way to remove the fields that are not needed anymore
 	}
 
 	public List<AbstractField> getOverlaps(AbstractField targetField) {
-		// Look for the fields that overlaps targetField
 		List<AbstractField> overlaps = new ArrayList<>();
 		for (AbstractField field : fields) {
-			if (targetField.isOverlapping(field)) {
+			if (targetField.overlapsMoreThanThresh(field, 0.5)) {
 				overlaps.add(field);
 			}
 		}
+		System.out.println("overlaps size: " + overlaps.size());
 		return overlaps;
 	}
 
-	public void tryMerge(AbstractField targetField, List<AbstractField> overlaps) {
-		// TODO Auto-generated method stub
+	public List<AbstractField> tryMerge(AbstractField targetField, List<AbstractField> overlaps) {
 		List<AbstractField> removes = new ArrayList<>();
 		if (targetField.getConsolidated().isPresent()) {
-
 			for (AbstractField field : overlaps) {
 				Optional<String> consolidatedTarget = targetField.getConsolidated();
 				Optional<String> consolidatedField = field.getConsolidated();
 				if (consolidatedField.isPresent()) {
 					if (consolidatedTarget.equals(consolidatedField)) {
-						// merge the intersection to create a new field
-						// add the original field to removes
 						targetField = getIntersection(targetField, field);
 						removes.add(field);
 					} else if (OCRPlasty.similarity(Arrays.asList(consolidatedTarget.get(), consolidatedField.get())) >= MIN_SIMILARITY) {
 						targetField = getUnion(targetField, field);
 						removes.add(field);
 					} else {
-						// Do something, but what?
+						// XXX add an else if() condition to check whether the text in the smaller box is contained within the one in the larger box (word inside sentence, etc.)
+						// Do something?
 					}
-				}
+				} // else do nothing, since the field was not consolidated
 			}
-		}
+			return removes;
+		} // else do nothing, since the field was not consolidated
+		return Collections.emptyList();
 	}
 
 	protected AbstractField getIntersection(AbstractField field1, AbstractField field2) {
 		Rect rect1 = field1.getRect();
 		Rect rect2 = field2.getRect();
-		Field intersect = new Field(RectangleTools.getIntersection(rect1, rect2).get()); // Get the optional directly since one know that the rectangles intersect
-		intersect.merge(Arrays.asList(field1, field2));
-		return intersect;
+		Rect intersect = RectangleTools.getIntersection(rect1, rect2).orElseThrow(() -> new IllegalArgumentException("No intersecting rectangle was found"));
+		Field intersection = new Field(intersect);
+		intersection.merge(Arrays.asList(field1, field2));
+		return intersection;
 	}
 
 	protected AbstractField getUnion(AbstractField field1, AbstractField field2) {
@@ -89,7 +97,11 @@ public abstract class AbstractFields implements Iterable<AbstractField> {
 	}
 
 	public void consolidateOcr(Img rootImg) {
-		stream().filter(AbstractField::needOcr).forEach(f -> f.ocr(rootImg));
+		stream().filter(AbstractField::needOcr).filter(f -> f.canBeOCR(rootImg)).forEach(f -> f.ocr(rootImg));
+		// if ((System.currentTimeMillis() - count) > 2_000) {
+		// removeOverlaps();
+		// count = System.currentTimeMillis();
+		// }
 	}
 
 	public void drawOcrPerspectiveInverse(Img display, Mat homography, Scalar color, int thickness) {

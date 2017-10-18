@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.genericsystem.cv.Img;
+import org.genericsystem.cv.utils.RectangleTools;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint2f;
@@ -78,15 +79,29 @@ public abstract class AbstractField {
 	}
 
 	public boolean isOverlapping(AbstractField other) {
-		// Consider overlapping as soon as a rectangle contains one of the corners of the other
-		Rect otherRect = other.getRect();
-		boolean bool1 = rect.contains(otherRect.tl()) || rect.contains(otherRect.br());
-		boolean bool2 = otherRect.contains(rect.tl()) || otherRect.contains(rect.br());
-		return bool1 || bool2;
+		return RectangleTools.isOverlapping(this.rect, other.getRect());
+	}
+
+	public boolean overlapsMoreThanThresh(AbstractField other, double overlapThreshold) {
+		double[] res = RectangleTools.commonArea(this.rect, other.getRect());
+		return res[0] > overlapThreshold;
 	}
 
 	public boolean isOnDisplay(Img display) {
-		return rect.br().x > 0 && rect.br().y > 0;
+		Point[] points = RectangleTools.decomposeClockwise(rect);
+		boolean ok = false;
+		// True if one of the 4 corners is inside the image
+		for (int i = 0; i < points.length; ++i) {
+			ok = ok || (points[i].x > 0 && points[i].x < display.width() && points[i].y > 0 && points[i].y < display.height());
+		}
+		if (!ok) {
+			// True if the rectangle is bigger than display
+			ok = ok || (rect.tl().x < 0 && rect.br().x > display.width() && rect.tl().y < 0 && rect.br().y > display.height());
+			// if (!ok) {
+			// Deal with the case where the bottom/top/left/right of the rect is inside the image
+			// }
+		}
+		return ok;
 	}
 
 	public boolean needMoreAttempts() {
@@ -99,6 +114,15 @@ public abstract class AbstractField {
 
 	public boolean needOcr() {
 		return !isConsolidated() || needMoreAttempts();
+	}
+
+	public boolean canBeOCR(Img display) {
+		Point[] points = RectangleTools.decomposeClockwise(rect);
+		for (int i = 0; i < points.length; ++i) {
+			if (points[i].x < 0 || points[i].y < 0 || points[i].x > display.width() || points[i].y > display.height())
+				return false;
+		}
+		return true;
 	}
 
 	public abstract void ocr(Img rootImg);
