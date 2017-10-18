@@ -125,4 +125,17 @@ public class RectangleToolsTest {
 		union = RectangleTools.getUnion(rect1, rect4);
 		assertEquals(union, rect1);
 	}
+
+	@Test
+	public void isOverlapping() {
+		assertTrue(RectangleTools.isOverlapping(rect1, rect1));
+		assertTrue(RectangleTools.isOverlapping(rect1, rect2));
+		assertFalse(RectangleTools.isOverlapping(rect1, rect3));
+		assertTrue(RectangleTools.isOverlapping(rect1, rect4));
+	}
+
+	@Test(expectedExceptions = { IllegalArgumentException.class })
+	public void isOverlappingNull() {
+		RectangleTools.isOverlapping(null, null);
+	}
 }

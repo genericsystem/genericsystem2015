@@ -177,6 +177,31 @@ public class RectangleTools {
 	}
 
 	/**
+	 * Check whether two rectangles are overlapping. This method is inclusive, e.g. it will return true if the rectangles have only a side or an angle in common.
+	 * 
+	 * @param rect1 - the first rectangle
+	 * @param rect2 - the second rectangle
+	 * @return true is the rectangles overlap, false otherwise
+	 * @throws IllegalArgumentException if at least one of the rectangles is <code>null</code>
+	 */
+	public static boolean isOverlapping(Rect rect1, Rect rect2) throws IllegalArgumentException {
+		if (rect1 == null || rect2 == null)
+			throw new IllegalArgumentException("One of the rectangles is null");
+		Point[] points1 = decomposeClockwise(rect1);
+		Point[] points2 = decomposeClockwise(rect2);
+
+		for (Point p : points2) {
+			if (contains(rect1, p))
+				return true;
+		}
+		for (Point p : points1) {
+			if (contains(rect2, p))
+				return true;
+		}
+		return false;
+	}
+
+	/**
 	 * Compare 2 rectangles, and returns the smaller rectangle if it is inside the other. Returns an empty {@link Optional} if no rectangles is contained in the other.
 	 * 
 	 * @param rect1 - the first rectangle
