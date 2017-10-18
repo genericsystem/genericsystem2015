@@ -29,6 +29,7 @@ import org.genericsystem.cv.comparator.ImgFilterFunction;
 import org.genericsystem.cv.comparator.ImgFunction;
 import org.genericsystem.cv.utils.ClassifierUsingFields;
 import org.genericsystem.cv.utils.Deskewer;
+import org.genericsystem.cv.utils.Deskewer.METHOD;
 import org.genericsystem.cv.utils.ModelTools;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.genericsystem.kernel.Engine;
@@ -77,7 +78,7 @@ public class FillNewModelWithData {
 	}
 
 	public static Path deskewFile(Path imgPath) {
-		Path deskewed = Deskewer.deskewAndSave(imgPath);
+		Path deskewed = Deskewer.deskewAndSave(imgPath, METHOD.ROTADED_RECTANGLES);
 		return deskewed;
 	}
 

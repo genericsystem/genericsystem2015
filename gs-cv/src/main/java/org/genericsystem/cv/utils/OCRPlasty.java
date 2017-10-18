@@ -15,8 +15,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.genericsystem.layout.Ransac;
-import org.genericsystem.layout.Ransac.Model;
+import org.genericsystem.cv.utils.Ransac.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
