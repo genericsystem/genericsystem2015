@@ -1,6 +1,12 @@
 package org.genericsystem.cv.utils;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
@@ -13,10 +19,87 @@ import org.opencv.core.Rect;
 public class RectangleTools {
 
 	public static void main(String[] args) {
-		Rect rect1 = new Rect(0, 0, 3, 3);
-		Rect rect2 = new Rect(1, 3, 3, 1);
-		System.out.println("Union: " + getUnion(rect1, rect2));
-		System.out.println("Intersection: " + getIntersection(rect1, rect2));
+		// Rect rect1 = new Rect(0, 0, 3, 3);
+		// Rect rect2 = new Rect(1, 3, 3, 1);
+		// System.out.println("Union: " + getUnion(rect1, rect2));
+		// System.out.println("Intersection: " + getIntersection(rect1, rect2));
+		Rect r1 = new Rect(new Point(12, 84), new Point(140, 212));
+		Rect r2 = new Rect(new Point(24, 84), new Point(152, 212));
+		Rect r3 = new Rect(new Point(36, 84), new Point(164, 212));
+		Rect r4 = new Rect(new Point(12, 96), new Point(140, 224));
+		Rect r5 = new Rect(new Point(24, 96), new Point(152, 224));
+		Rect r6 = new Rect(new Point(24, 108), new Point(152, 236));
+		System.out.println(nonMaximumSuppression(Arrays.asList(r1, r2, r3, r4, r5, r6), 0.3));
+
+		r1 = new Rect(new Point(114, 60), new Point(178, 124));
+		r2 = new Rect(new Point(120, 60), new Point(184, 124));
+		r3 = new Rect(new Point(114, 66), new Point(178, 130));
+		System.out.println(nonMaximumSuppression(Arrays.asList(r1, r2, r3), 0.3));
+
+		r1 = new Rect(new Point(12, 30), new Point(76, 94));
+		r2 = new Rect(new Point(12, 36), new Point(76, 100));
+		r3 = new Rect(new Point(72, 36), new Point(200, 164));
+		r4 = new Rect(new Point(84, 48), new Point(212, 176));
+
+		System.out.println(nonMaximumSuppression(Arrays.asList(r1, r2, r3, r4), 0.3));
+	}
+
+	/**
+	 * Method to remove the overlapping {@link Rect}, relying on "non-maximum suppression" to ignore redundant, overlapping boxes.
+	 * 
+	 * @param boxes - the list of rectangles that need to be filtered
+	 * @param overlapThreshold - the overlapping threshold. If the common area between two rectangles is above this threshold, they will be considered as overlapping.
+	 * @return a List of non-overlapping {@link Rect}, or an empty List if none was found
+	 */
+	public static List<Rect> nonMaximumSuppression(List<Rect> boxes, double overlapThreshold) {
+		if (boxes == null || boxes.size() == 0)
+			return Collections.emptyList();
+
+		// Initialize a list of picked indexes
+		List<Integer> pick = new ArrayList<>();
+
+		// Get the coordinates of the boxes tl(x1, y1) and br(x2, y2)
+		List<Double> x1 = boxes.stream().map(rect -> rect.tl().x).collect(Collectors.toList());
+		List<Double> y1 = boxes.stream().map(rect -> rect.tl().y).collect(Collectors.toList());
+		List<Double> x2 = boxes.stream().map(rect -> rect.br().x).collect(Collectors.toList());
+		List<Double> y2 = boxes.stream().map(rect -> rect.br().y).collect(Collectors.toList());
+
+		// Compute the areas
+		List<Double> area = boxes.stream().map(rect -> rect.area()).collect(Collectors.toList());
+
+		// Get the indexes of the boxes sorted by the br() y coordinates (ascending)
+		List<Integer> indx = IntStream.range(0, y2.size()).boxed().sorted((i, j) -> Double.compare(y2.get(i), y2.get(j))).collect(Collectors.toList());
+
+		// Keep looping while some indexes remain in the indx list
+		long count = 0L; // TODO: fix an infinite loop problem
+		while (indx.size() > 0 && count++ < 10 * boxes.size()) {
+			// Grab the last index and add the value to the list of picked indexes
+			int last = indx.size() - 1;
+			int i = indx.get(last);
+			pick.add(i);
+
+			// Find the largest tl(xx1, yy1) coordinates for the start of the box, and the smallest br(xx2, yy2) coordinates for the end of the box
+			List<Double> xx1 = IntStream.range(0, x1.size()).filter(idx -> indx.contains(idx)).mapToObj(x1::get).map(x -> Math.max(x1.get(i), x)).collect(Collectors.toList());
+			List<Double> yy1 = IntStream.range(0, y1.size()).filter(idx -> indx.contains(idx)).mapToObj(y1::get).map(y -> Math.max(y1.get(i), y)).collect(Collectors.toList());
+			List<Double> xx2 = IntStream.range(0, x2.size()).filter(idx -> indx.contains(idx)).mapToObj(x2::get).map(x -> Math.min(x2.get(i), x)).collect(Collectors.toList());
+			List<Double> yy2 = IntStream.range(0, y2.size()).filter(idx -> indx.contains(idx)).mapToObj(y2::get).map(y -> Math.min(y2.get(i), y)).collect(Collectors.toList());
+
+			// Compute the width, height and area of the boxes
+			List<Double> width = new ArrayList<>();
+			List<Double> height = new ArrayList<>();
+			List<Double> overlap = new ArrayList<>();
+			List<Double> filteredArea = IntStream.range(0, area.size()).filter(idx -> indx.contains(idx)).mapToObj(area::get).collect(Collectors.toList());
+			for (int j = 0; j < xx1.size(); ++j) {
+				width.add(Math.max(0, xx2.get(j) - xx1.get(j) + 1));
+				height.add(Math.max(0, yy2.get(j) - yy1.get(j) + 1));
+				overlap.add((width.get(j) * height.get(j)) / filteredArea.get(j));
+			}
+			// Remove all indexes from the index list whose overlap is above the threshold
+			IntStream.range(0, overlap.size()).filter(idx -> overlap.get(idx) > overlapThreshold).boxed().forEach(idx -> indx.remove(idx));
+			// XXX this last part can cause an infinite loop when the remove() function fails => not caught in the unit tests!
+		}
+		List<Rect> res = IntStream.range(0, boxes.size()).filter(idx -> pick.contains(idx)).mapToObj(boxes::get).collect(Collectors.toList());
+		return res;
 	}
 
 	/**
@@ -90,13 +173,27 @@ public class RectangleTools {
 	}
 
 	/**
+	 * Check whether two rectangles are overlapping. This method is inclusive, e.g. it will return true if the rectangles have only a side or an angle in common.
+	 * 
+	 * @param rect1 - the first rectangle
+	 * @param rect2 - the second rectangle
+	 * @return true is the rectangles overlap, false otherwise
+	 * @throws IllegalArgumentException if at least one of the rectangles is <code>null</code>
+	 */
+	public static boolean isOverlapping(Rect rect1, Rect rect2) throws IllegalArgumentException {
+		if (rect1 == null || rect2 == null)
+			throw new IllegalArgumentException("One of the rectangles is null");
+		return getIntersection(rect1, rect2).map(rect -> rect.area() > 0 ? true : false).orElse(false);
+	}
+
+	/**
 	 * Compare 2 rectangles, and returns the smaller rectangle if it is inside the other. Returns an empty {@link Optional} if no rectangles is contained in the other.
 	 * 
 	 * @param rect1 - the first rectangle
 	 * @param rect2 - the second rectangle
 	 * @return an {@link Optional} with the rectangle contained in the other, an empty Optional if no rectangles is contained in the other.
 	 */
-	private static Optional<Rect> getInsider(Rect rect1, Rect rect2) {
+	public static Optional<Rect> getInsider(Rect rect1, Rect rect2) {
 		Point[] points1 = decomposeClockwise(rect1);
 		Point[] points2 = decomposeClockwise(rect2);
 		boolean isRect2InRect1 = true;
@@ -128,7 +225,7 @@ public class RectangleTools {
 	 * @param p - the point
 	 * @return true if <code>p</code> is contained in <code>rect</code>, false otherwise
 	 */
-	private static boolean contains(Rect rect, Point p) {
+	public static boolean contains(Rect rect, Point p) {
 		boolean res = rect.tl().x <= p.x && p.x <= rect.br().x && rect.tl().y <= p.y && p.y <= rect.br().y;
 		return res;
 	}
@@ -139,7 +236,7 @@ public class RectangleTools {
 	 * @param rect - the rectangle
 	 * @return an array of {@link Point} in the order tl, tr, br, bl
 	 */
-	private static Point[] decomposeClockwise(Rect rect) {
+	public static Point[] decomposeClockwise(Rect rect) {
 		Point[] points = new Point[] { rect.tl(), new Point(rect.br().x, rect.tl().y), rect.br(), new Point(rect.tl().x, rect.br().y) };
 		return points;
 	}

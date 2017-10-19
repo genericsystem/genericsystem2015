@@ -58,7 +58,7 @@ public class Deskewer {
 
 	// Only for testing purposes
 	public static void main(String[] args) {
-		final String filename = System.getenv("HOME") + "/genericsystem/gs-ir-files/converted-png/image-4.png";
+		final String filename = System.getenv("HOME") + "/genericsystem/gs-ir-files/converted-png/image-test2-0.png";
 		Path imgPath = Paths.get(filename);
 		Path temp = deskewAndSave(imgPath, METHOD.ROTADED_RECTANGLES);
 		System.out.println(temp);
@@ -68,6 +68,7 @@ public class Deskewer {
 	 * Deskew an image, and save it in the same folder as the original image.
 	 * 
 	 * @param imgPath - the Path to the image
+	 * @param method - the method to use for angle detection
 	 * @return the path of the newly saved image
 	 */
 	public static Path deskewAndSave(final Path imgPath, METHOD method) {
@@ -99,6 +100,7 @@ public class Deskewer {
 	 * Deskew an image.
 	 * 
 	 * @param imgPath - the path to the image
+	 * @param method - the method to use for angle detection
 	 * @return a new {@link Img}
 	 */
 	public static Img deskew(final Path imgPath, METHOD method) {
@@ -111,62 +113,32 @@ public class Deskewer {
 	}
 
 	/**
-	 * Draw the Rotated rectangles used to calculate the deskew angle.
+	 * Deskew an image.
 	 * 
-	 * @param img - the source image
-	 * @param scalar - the color used to draw the rectangles
-	 * @param thickness - the thickness
-	 * @return - an annotated Img
+	 * @param img - the source img
+	 * @param method - the method to use for angle detection
+	 * @return a rotated {@link Img}
 	 */
-	public static Img getRotatedRectanglesDrawn(final Img img, Scalar scalar, int thickness) {
-		Img imgCopy = new Img(img.getSrc(), true);
-		Img closed = getClosedImg(imgCopy);
-		List<RotatedRect> rectangles = getRotatedRects(closed.getSrc());
-		rectangles.stream().forEach(rect -> drawSingleRotatedRectangle(imgCopy.getSrc(), rect, scalar, thickness));
-		List<RotatedRect> filteredRectangles = getRansacInliersRects(rectangles, ransacError);
-		filteredRectangles.stream().forEach(rect -> drawSingleRotatedRectangle(imgCopy.getSrc(), rect, new Scalar(0, 255, 0), thickness));
+	public static Img deskew(final Img img, METHOD method) {
+		final Img closed = getClosedImg(img);
+		Img rotated = deskew(img, closed, method);
 		closed.close();
-		return imgCopy;
-	}
-
-	public static Img getLinesDrawn(final Img img, Scalar scalar, int thickness) {
-		Img imgCopy = new Img(img.getSrc(), true);
-		Img closed = getClosedImg(imgCopy);
-		Lines lines = getLines(closed.getSrc());
-		lines.stream().forEach(line -> drawSingleLine(imgCopy.getSrc(), line, scalar, thickness));
-		Lines filteredLines = getRansacInliersLines(lines, ransacError);
-		filteredLines.stream().forEach(line -> drawSingleLine(imgCopy.getSrc(), line, new Scalar(0, 255, 0), thickness));
-		closed.close();
-		return imgCopy;
+		return rotated;
 	}
 
 	/**
-	 * Get the binary image used to compute the deskew angle.
+	 * Deskew an image with a specific binarization
 	 * 
 	 * @param img - the source image
-	 * @return a binary image
+	 * @param closed - the binary image
+	 * @param method - the method to use for angle detection
+	 * @return a rotated {@link Img}
 	 */
-	public static Img getBinary(final Img img) {
-		return getClosedImg(img);
-	}
-
-	// This function modifies the Mat mat
-	private static void drawSingleRotatedRectangle(Mat mat, final RotatedRect rect, final Scalar scalar, final int thickness) {
-		Point points[] = new Point[4];
-		rect.points(points);
-		for (int i = 0; i < 4; ++i) {
-			Imgproc.line(mat, points[i], points[(i + 1) % 4], scalar, thickness);
-		}
-	}
-
-	private static void drawSingleLine(Mat mat, final Line line, final Scalar scalar, final int thickness) {
-		line.draw(mat, scalar, thickness);
-	}
-
-	private static Img deskew(final Img img, METHOD method) {
-		final Img closed = getClosedImg(img);
+	public static Img deskew(final Img img, final Img closed, METHOD method) {
 		final double angle = detectAngle(closed.getSrc(), method);
-		logger.debug("Deskew angle = {}", angle);
+		logger.trace("Deskew angle = {}", angle);
+		if (Double.isNaN(angle))
+			return img;
 
 		final Point center = new Point(img.width() / 2, img.height() / 2);
 		// Rotation matrix
@@ -198,19 +170,65 @@ public class Deskewer {
 		mask.release();
 		warpedMask.release();
 		rotationMatrix.release();
-		closed.close();
 		return new Img(rotated, false);
 	}
 
-	private static Img getClosedImg(final Img img) {
-		double size = (closedImgSizeFactor * img.size().area());
-		// Round the size factor to the nearest odd int
-		size = 2 * (Math.floor(size / 2)) + 1;
-		// return img.bilateralFilter(20, 80, 80).adaptativeGaussianInvThreshold(17, 9).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(closedImgSizeFactor, closedImgSizeFactor));
-		return img.bilateralFilter(20, 80, 80).bgr2Gray().grad(2.0d, 2.0d).thresHold(0, 255, Imgproc.THRESH_BINARY_INV + Imgproc.THRESH_OTSU).bitwise_not().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(size, size));
+	/**
+	 * Get the binary image used to compute the deskew angle.
+	 * 
+	 * @param img - the source image
+	 * @return a binary image
+	 */
+	public static Img getBinary(final Img img) {
+		return getClosedImg(img);
 	}
 
-	private static double detectAngle(final Mat dilated, METHOD method) {
+	/**
+	 * Draw the Rotated rectangles used to calculate the deskew angle.
+	 * 
+	 * @param img - the source image
+	 * @param scalar - the color used to draw the rectangles
+	 * @param thickness - the thickness
+	 * @return - an annotated Img
+	 */
+	public static Img getRotatedRectanglesDrawn(final Img img, Scalar scalar, int thickness) {
+		Img imgCopy = new Img(img.getSrc(), true);
+		Img closed = getClosedImg(imgCopy);
+		List<RotatedRect> rectangles = getRotatedRects(closed.getSrc());
+		rectangles.stream().forEach(rect -> drawSingleRotatedRectangle(imgCopy.getSrc(), rect, scalar, thickness));
+		List<RotatedRect> filteredRectangles = getRansacInliersRects(rectangles, ransacError);
+		filteredRectangles.stream().forEach(rect -> drawSingleRotatedRectangle(imgCopy.getSrc(), rect, new Scalar(0, 255, 0), thickness));
+		closed.close();
+		return imgCopy;
+	}
+
+	/**
+	 * Draw the Hough lines used to calculate the deskew angle.
+	 * 
+	 * @param img - the source image
+	 * @param scalar - the color used to draw the rectangles
+	 * @param thickness - the thickness
+	 * @return - an annotated Img
+	 */
+	public static Img getLinesDrawn(final Img img, Scalar scalar, int thickness) {
+		Img imgCopy = new Img(img.getSrc(), true);
+		Img closed = getClosedImg(imgCopy);
+		Lines lines = getLines(closed.getSrc());
+		lines.stream().forEach(line -> drawSingleLine(imgCopy.getSrc(), line, scalar, thickness));
+		Lines filteredLines = getRansacInliersLines(lines, ransacError);
+		filteredLines.stream().forEach(line -> drawSingleLine(imgCopy.getSrc(), line, new Scalar(0, 255, 0), thickness));
+		closed.close();
+		return imgCopy;
+	}
+
+	/**
+	 * Detect the deskew angle of an image using one of the methods defined in {@link METHOD}.
+	 * 
+	 * @param dilated - the closed (binary) image
+	 * @param method - the method to use for angle detection
+	 * @return the rotation angle, in degree
+	 */
+	public static double detectAngle(final Mat dilated, METHOD method) {
 		switch (method) {
 		case HOUGH_LINES:
 			Lines lines = getLines(dilated);
@@ -226,8 +244,30 @@ public class Deskewer {
 					rotatedRect.size.height = tmp;
 				}
 			}
-			return getRansacInliersRects(rotatedRects, ransacError).stream().mapToDouble(i -> i.angle).average().getAsDouble();
+			return getRansacInliersRects(rotatedRects, ransacError).stream().mapToDouble(i -> i.angle).average().orElse(rotatedRects.stream().mapToDouble(r -> r.angle).average().getAsDouble());
 		}
+	}
+
+	// This function modifies the Mat mat
+	private static void drawSingleRotatedRectangle(Mat mat, final RotatedRect rect, final Scalar scalar, final int thickness) {
+		Point points[] = new Point[4];
+		rect.points(points);
+		for (int i = 0; i < 4; ++i) {
+			Imgproc.line(mat, points[i], points[(i + 1) % 4], scalar, thickness);
+		}
+	}
+
+	// This function modifies the Mat mat
+	private static void drawSingleLine(Mat mat, final Line line, final Scalar scalar, final int thickness) {
+		line.draw(mat, scalar, thickness);
+	}
+
+	private static Img getClosedImg(final Img img) {
+		double size = (closedImgSizeFactor * img.size().area());
+		// Round the size factor to the nearest odd int
+		size = 2 * (Math.floor(size / 2)) + 1;
+		// return img.bilateralFilter(20, 80, 80).adaptativeGaussianInvThreshold(17, 9).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(closedImgSizeFactor, closedImgSizeFactor));
+		return img.bilateralFilter(20, 80, 80).bgr2Gray().grad(2.0d, 2.0d).thresHold(0, 255, Imgproc.THRESH_BINARY_INV + Imgproc.THRESH_OTSU).bitwise_not().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(size, size));
 	}
 
 	private static List<RotatedRect> getInliers(final List<RotatedRect> data, final double confidence) {
@@ -250,6 +290,13 @@ public class Deskewer {
 		int k = 50; // number of iterations
 		double t = error; // error margin
 		int d = data.size() * 2 / 3; // number of minimum matches
+		if (d < n) {
+			if (d >= n - 1)
+				n = 2;
+			else
+				return data;
+		}
+
 		Map<Integer, RotatedRect> bestFit = new HashMap<>();
 		for (int i = 1, maxAttempts = 10; bestFit.size() <= 3 && i <= maxAttempts; ++i) {
 			Ransac<RotatedRect> ransac = new Ransac<>(data, getModelProviderRects(), n, k * i, t, d);
@@ -270,6 +317,12 @@ public class Deskewer {
 		int k = 50; // number of iterations
 		double t = error; // error margin
 		int d = data.size() * 2 / 3; // number of minimum matches
+		if (d < n) {
+			if (d >= n - 1)
+				n = 2;
+			else
+				return data;
+		}
 
 		Map<Integer, Line> bestFit = new HashMap<>();
 		for (int i = 1, maxAttempts = 10; bestFit.size() <= 3 && i <= maxAttempts; ++i) {

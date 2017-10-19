@@ -2,8 +2,11 @@ package org.genericsystem.cv.utils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class LetterPairSimilarity {
+
+	private static final Pattern SPACE_PATTERN = Pattern.compile("\\s+");
 
 	public static void main(String[] args) {
 		String string = "healed";
@@ -44,7 +47,7 @@ public class LetterPairSimilarity {
 
 	private static List<String> wordLetterPairs(String string) {
 		List<String> allPairs = new ArrayList<>();
-		String[] words = string.split("\\s");
+		String[] words = SPACE_PATTERN.split(string);
 		for (int i = 0; i < words.length; ++i) {
 			String[] pairsInWord = letterPairs(words[i]);
 			for (int j = 0; j < pairsInWord.length; ++j) {

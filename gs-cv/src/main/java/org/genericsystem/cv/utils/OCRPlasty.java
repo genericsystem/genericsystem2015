@@ -122,10 +122,10 @@ public class OCRPlasty {
 			return 1;
 		for (int i = 0; i < n; i++) {
 			for (int j = i + 1; j < n; j++) {
-				sim += Levenshtein.distance(strings.get(i), strings.get(j)) / ((double) Math.max(strings.get(i).length(), strings.get(j).length()));
+				sim += Levenshtein.similarity(strings.get(i), strings.get(j));
 			}
 		}
-		return 1 - 2 * sim / (n * (n - 1)); // divide by the total number of distances
+		return 2 * sim / (n * (n - 1)); // divide by the total number of distances
 	}
 
 	/**

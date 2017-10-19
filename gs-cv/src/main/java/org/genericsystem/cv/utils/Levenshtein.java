@@ -38,4 +38,8 @@ public class Levenshtein {
 		}
 		return costs[b.length()];
 	}
+
+	public static double similarity(String string1, String string2) {
+		return 1 - distance(string1, string2) / (double) Math.max(string1.length(), string2.length());
+	}
 }
