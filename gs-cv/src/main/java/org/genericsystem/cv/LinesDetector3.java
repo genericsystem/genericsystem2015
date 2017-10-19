@@ -22,6 +22,7 @@ import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
 import org.opencv.videoio.VideoCapture;
@@ -59,9 +60,9 @@ public class LinesDetector3 extends AbstractApp {
 		timer.scheduleAtFixedRate(() -> {
 			try {
 				capture.read(frame);
-				// Img grad = new Img(frame, false).morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_RECT, new Size(2, 2)).otsu();
-				Img grad = new Img(frame, false).canny(60, 180);
-				// /Img grad = new Img(frame, false).bilateralFilter(20, 80, 80).bgr2Gray().adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY_INV, 11, 3).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(11,
+				Img grad = new Img(frame, false).morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_RECT, new Size(2, 2)).otsu();
+				// Img grad = new Img(frame, false).canny(60, 180);
+				// Img grad = new Img(frame, false).bilateralFilter(20, 80, 80).bgr2Gray().adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY_INV, 11, 3).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(11,
 				// 3));
 				Lines lines = new Lines(grad.houghLinesP(1, Math.PI / 180, 10, 100, 10));
 				System.out.println("Average angle: " + lines.getMean() / Math.PI * 180);
@@ -110,11 +111,18 @@ public class LinesDetector3 extends AbstractApp {
 
 	}
 
-	private Mat findHomography(Point vp, Point bary, double width, double height) {
-		System.out.println("vpx : " + vp.x);
-		System.out.println("vpy : " + vp.y);
+	public Point[] rotate(Point bary, double alpha, Point... p) {
+		Mat matrix = Imgproc.getRotationMatrix2D(bary, alpha / Math.PI * 180, 1);
+		MatOfPoint2f results = new MatOfPoint2f();
+		Core.transform(new MatOfPoint2f(p), results, matrix);
+		return results.toArray();
+	}
 
-		MatOfPoint2f targetPoints = new MatOfPoint2f(new Point(width / 2, height / 2), new Point(width, height / 2), new Point(width, height), new Point(width / 2, height));
+	public Point center(Point a, Point b) {
+		return new Point((a.x + b.x) / 2, (a.y + b.y) / 2);
+	}
+
+	private Mat findHomography(Point vp, Point bary, double width, double height) {
 
 		double alpha_ = Math.atan2((vp.y - bary.y), (vp.x - bary.x));
 		if (alpha_ < -Math.PI / 2 && alpha_ > -Math.PI)
@@ -123,33 +131,91 @@ public class LinesDetector3 extends AbstractApp {
 			alpha_ = alpha_ - Math.PI;
 		double alpha = alpha_;
 
-		Point A_ = bary;
-		Point B_ = new Point(bary.x + Math.cos(alpha) * width / 2, bary.y + Math.sin(alpha) * width / 2);
-		Point D_ = new Point(bary.x - Math.sin(alpha) * height / 2, bary.y + Math.cos(alpha) * height / 2);
+		Point rotatedVp = rotate(bary, alpha, vp)[0];
 
-		double a_1 = -1 / ((vp.y - bary.y) / (vp.x - bary.x));// Math.tan(alpha + Math.PI / 2);
-		double b_1 = B_.y - a_1 * B_.x;
+		Point A = new Point(0, 0);
+		Point B = new Point(width, 0);
+		Point C = new Point(width, height);
+		Point D = new Point(0, height);
 
-		double a_2 = (vp.y - D_.y) / (vp.x - D_.x);
-		double b_2 = vp.y - a_2 * vp.x;
+		Point AB2 = new Point(width / 2, 0);
+		Point CD2 = new Point(width / 2, height);
 
-		double tmpx = (b_2 - b_1) / (a_1 - a_2);
+		Point A_ = new Line(AB2, rotatedVp).intersection(0);
+		Point B__ = new Line(AB2, rotatedVp).intersection(width);
+		Point D_ = new Line(CD2, rotatedVp).intersection(0);
+		Point C__ = new Line(CD2, rotatedVp).intersection(width);
 
-		Point C_ = new Point(tmpx, a_2 * tmpx + b_2);
+		Point C_ = new Line(A_, bary).intersection(new Line(CD2, rotatedVp));
+		Point B_ = new Line(D_, bary).intersection(new Line(AB2, rotatedVp));
+		Point A__ = new Line(C__, bary).intersection(new Line(AB2, rotatedVp));
+		Point D__ = new Line(B__, bary).intersection(new Line(CD2, rotatedVp));
+
+		System.out.println("vp : " + vp);
+		System.out.println("rotated vp : " + rotatedVp);
 		System.out.println("Alpha : " + alpha * 180 / Math.PI);
-		System.out.println("A : " + new Point(width / 2, height / 2) + " " + A_);
-		System.out.println("B : " + new Point(width, height / 2) + " " + B_);
-		System.out.println("C : " + new Point(width, height) + " " + C_);
-		System.out.println("D : " + new Point(width / 2, height) + " " + D_);
+		System.out.println("A : " + A + " " + A_ + " " + A__);
+		System.out.println("B : " + B + " " + B_ + " " + B__);
+		System.out.println("C : " + C + " " + C_ + " " + C__);
+		System.out.println("D : " + D + " " + D_ + " " + D__);
 
-		Mat homography = Imgproc.getPerspectiveTransform(new MatOfPoint2f(A_, B_, C_, D_), targetPoints);
+		Point A___ = rotatedVp.x >= width / 2 ? A_ : A__;
+		Point B___ = rotatedVp.x >= width / 2 ? B_ : B__;
+		Point C___ = rotatedVp.x >= width / 2 ? C_ : C__;
+		Point D___ = rotatedVp.x >= width / 2 ? D_ : D__;
 
-		MatOfPoint2f results = new MatOfPoint2f();
-		Core.perspectiveTransform(new MatOfPoint2f(new Point(0, 0), bary, new Point(width, height)), results, homography);
-		Point[] targets = results.toArray();
-		System.out.println("Carré : " + Arrays.toString(targets));
+		Mat homography = Imgproc.getPerspectiveTransform(new MatOfPoint2f(rotate(bary, -alpha, A___, B___, C___, D___)), new MatOfPoint2f(A, B, C, D));
+
+		// MatOfPoint2f results = new MatOfPoint2f();
+		// Core.perspectiveTransform(new MatOfPoint2f(new Point(0, 0), bary, new Point(width, height)), results, homography);
+		// Point[] targets = results.toArray();
+		// System.out.println("Carré : " + Arrays.toString(targets));
 		return homography;
 	}
+
+	// private Mat findHomography(Point vp, Point bary, double width, double height) {
+	// System.out.println("vpx : " + vp.x);
+	// System.out.println("vpy : " + vp.y);
+	//
+	// double alpha_ = Math.atan2((vp.y - bary.y), (vp.x - bary.x));
+	// if (alpha_ < -Math.PI / 2 && alpha_ > -Math.PI)
+	// alpha_ = alpha_ + Math.PI;
+	// if (alpha_ < Math.PI && alpha_ > Math.PI / 2)
+	// alpha_ = alpha_ - Math.PI;
+	// double alpha = alpha_;
+	//
+	// Point A = new Point(width / 2, height / 2);
+	// Point B = new Point(width, height / 2);
+	// Point C = new Point(width, height);
+	// Point D = new Point(width / 2, height);
+	//
+	// Point A_ = A;
+	// Point B_ = new Point(bary.x + Math.cos(alpha) * width / 2, bary.y + Math.sin(alpha) * width / 2);
+	// Point D_ = new Point(bary.x - Math.sin(alpha) * height / 2, bary.y + Math.cos(alpha) * height / 2);
+	//
+	// double a_1 = -1 / ((vp.y - bary.y) / (vp.x - bary.x));
+	// double b_1 = B_.y - a_1 * B_.x;
+	//
+	// double a_2 = (vp.y - D_.y) / (vp.x - D_.x);
+	// double b_2 = vp.y - a_2 * vp.x;
+	//
+	// double tmpx = (b_2 - b_1) / (a_1 - a_2);
+	// Point C_ = new Point(tmpx, a_2 * tmpx + b_2);
+	//
+	// System.out.println("Alpha : " + alpha * 180 / Math.PI);
+	// System.out.println("A : " + A + " " + A_);
+	// System.out.println("B : " + B + " " + B_);
+	// System.out.println("C : " + C + " " + C_);
+	// System.out.println("D : " + D + " " + D_);
+	//
+	// Mat homography = Imgproc.getPerspectiveTransform(new MatOfPoint2f(A_, B_, C_, D_), new MatOfPoint2f(A, B, C, D));
+	//
+	// MatOfPoint2f results = new MatOfPoint2f();
+	// Core.perspectiveTransform(new MatOfPoint2f(new Point(0, 0), bary, new Point(width, height)), results, homography);
+	// Point[] targets = results.toArray();
+	// System.out.println("Carré : " + Arrays.toString(targets));
+	// return homography;
+	// }
 
 	public static class Lines {
 
@@ -172,50 +238,39 @@ public class LinesDetector3 extends AbstractApp {
 			Function<Collection<Line>, Model<Line>> modelProvider = datas -> {
 				Iterator<Line> it = datas.iterator();
 				Line line = it.next();
-				if (datas.size() > 2)
-					throw new IllegalStateException("" + datas.size());
-				double a = (line.y2 - line.y1) / (line.x2 - line.x1);
-				double b = line.y1 - a * line.x1;
-
 				Line line2 = it.next();
-
-				double a2 = (line2.y2 - line2.y1) / (line2.x2 - line2.x1);
-				double b2 = line2.y1 - a * line2.x1;
-
-				double vpx = (b2 - b) / (a - a2);
-				double vpy = a * vpx + b;
-
+				Point vp = line.intersection(line2);
 				return new Model<Line>() {
 
 					@Override
 					public double computeError(Line line) {
-						if (!Double.isFinite(vpy) || !Double.isFinite(vpx))
+						if (!Double.isFinite(vp.y) || !Double.isFinite(vp.x))
 							return Double.MAX_VALUE;
 						// Line transformed = line.perspectivTransform(homography[0]);
 						// return transformed.getAngle() * line.size();
-
-						double a1 = (line.y2 - line.y1) / (line.x2 - line.x1);
-						double b1 = line.y1 - a1 * line.x1;
-						return Math.abs(a1 * vpx - vpy + b1) / Math.sqrt(1 + Math.pow(a1, 2));
+						return line.distance(vp);
 					}
 
 					@Override
 					public double computeGlobalError(Collection<Line> datas) {
 						double error = 0;
-						for (Line line : datas)
-							error += Math.pow(computeError(line), 2);
-						return Math.sqrt(error) / Math.sqrt(datas.size());
+						double lineL = 0;
+						for (Line line : datas) {
+							error += Math.pow(computeError(line) * line.size(), 2);
+							lineL += Math.pow(line.size(), 2);
+						}
+						return Math.sqrt(error) / Math.sqrt(lineL);
 					}
 
 					@Override
 					public Object[] getParams() {
-						return new Object[] { new Point(vpx, vpy) };
+						return new Object[] { vp };
 					}
 
 				};
 			};
 
-			Ransac<Line> ransac = new Ransac<>(lines, modelProvider, 2, 300, 100, Double.valueOf(Math.floor(lines.size() * 0.5)).intValue());
+			Ransac<Line> ransac = new Ransac<>(lines, modelProvider, 2, 200, 100, Double.valueOf(Math.floor(lines.size() * 0.4)).intValue());
 			ransac.compute(false);
 			return ransac;
 		}
@@ -255,6 +310,10 @@ public class LinesDetector3 extends AbstractApp {
 	public static class Line {
 		private final double x1, y1, x2, y2, angle;
 
+		public Line(Point p1, Point p2) {
+			this(p1.x, p1.y, p2.x, p2.y);
+		}
+
 		public Line(double x1, double y1, double x2, double y2) {
 			this.x1 = x1;
 			this.x2 = x2;
@@ -292,6 +351,44 @@ public class LinesDetector3 extends AbstractApp {
 
 		public double getAngle() {
 			return angle;
+		}
+
+		public double geta() {
+			return (y2 - y1) / (x2 - x1);
+		}
+
+		public double getOrthoa() {
+			return (x2 - x1) / (y1 - y2);
+		}
+
+		public double getOrthob(Point p) {
+			return p.y - getOrthoa() * p.x;
+		}
+
+		public double getb() {
+			return y1 - geta() * x1;
+		}
+
+		public double distance(Point p) {
+			return Math.abs(geta() * p.x - p.y + getb()) / Math.sqrt(1 + Math.pow(geta(), 2));
+		}
+
+		public Point intersection(double a, double b) {
+			double x = (b - getb()) / (geta() - a);
+			double y = a * x + b;
+			return new Point(x, y);
+		}
+
+		public Point intersection(Line line) {
+			double x = (line.getb() - getb()) / (geta() - line.geta());
+			double y = geta() * x + getb();
+			return new Point(x, y);
+		}
+
+		public Point intersection(double verticalLinex) {
+			double x = verticalLinex;
+			double y = geta() * x + getb();
+			return new Point(x, y);
 		}
 	}
 

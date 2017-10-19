@@ -216,7 +216,7 @@ public class LinesDetector extends AbstractApp {
 
 		void pushNewValue(double value) {
 			deque.push(value);
-			if (deque.size() >= maxSize)
+			if (deque.size() > maxSize)
 				deque.removeLast();
 		}
 
