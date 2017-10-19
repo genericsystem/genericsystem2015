@@ -10,6 +10,8 @@ import java.util.stream.Collectors;
 
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
+import org.genericsystem.cv.utils.Deskewer;
+import org.genericsystem.cv.utils.Deskewer.METHOD;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.genericsystem.cv.utils.Tools;
 import org.opencv.calib3d.Calib3d;
@@ -24,7 +26,6 @@ import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
-import org.opencv.core.RotatedRect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.features2d.DescriptorExtractor;
@@ -64,6 +65,20 @@ public class CamLiveRetriever extends AbstractApp {
 
 	private final VideoCapture capture = new VideoCapture(0);
 	private final ScheduledExecutorService timer = Executors.newSingleThreadScheduledExecutor();
+
+	@Override
+	public void stop() throws Exception {
+		super.stop();
+		timer.shutdown();
+		timer.awaitTermination(5000, TimeUnit.MILLISECONDS);
+		capture.release();
+		oldKeypoints.release();
+		newKeypoints.release();
+		oldDescriptors.release();
+		newDescriptors.release();
+		homography.release();
+		frame.release();
+	}
 
 	@Override
 	protected void fillGrid(GridPane mainGrid) {
@@ -184,7 +199,9 @@ public class CamLiveRetriever extends AbstractApp {
 		List<MatOfPoint> contours = new ArrayList<>();
 		Img closed = stabilized.adaptativeGaussianInvThreshold(7, 3).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(9, 1));
 		Imgproc.findContours(closed.getSrc(), contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
-		return contours.stream().filter(contour -> Imgproc.contourArea(contour) > 200).map(c -> Imgproc.boundingRect(c)).collect(Collectors.toList());
+		List<Rect> res = contours.stream().filter(contour -> Imgproc.contourArea(contour) > 200).map(c -> Imgproc.boundingRect(c)).collect(Collectors.toList());
+		// res = RectangleTools.nonMaximumSuppression(res, 0.3).orElse(Collections.emptyList());
+		return res;
 	}
 
 	private MatOfKeyPoint detect(Img frame) {
@@ -204,40 +221,13 @@ public class CamLiveRetriever extends AbstractApp {
 
 	private Img deskew(Img frame) {
 		Img closed = frame.adaptativeGaussianInvThreshold(17, 3).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(5, 5));
-		angle = detection_contours(frame.getSrc(), closed.getSrc());
+		angle = Deskewer.detectAngle(closed.getSrc(), METHOD.HOUGH_LINES);
 		Mat matrix = Imgproc.getRotationMatrix2D(new Point(frame.width() / 2, frame.height() / 2), angle, 1);
 		Mat rotated = new Mat(frame.size(), CvType.CV_8UC3, new Scalar(255, 255, 255));
 		Imgproc.warpAffine(frame.getSrc(), rotated, matrix, frame.size());
+		closed.close();
+		matrix.release();
 		return new Img(rotated);
 	}
 
-	private double detection_contours(Mat frame, Mat dilated) {
-		List<MatOfPoint> contours = new ArrayList<>();
-		Imgproc.findContours(dilated, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
-		double minArea = 100;
-		// double crop = 0;
-		// Predicate<RotatedRect> filter = rect -> rect.center.x > Double.valueOf(frame.width() * crop).intValue() && rect.center.y > Double.valueOf(frame.height() * crop).intValue() && rect.center.x < Double.valueOf(frame.width() * (1 - crop)).intValue()
-		// && rect.center.y < Double.valueOf(frame.height() * (1 - crop)).intValue();
-		List<RotatedRect> rotatedRects = contours.stream().filter(contour -> Imgproc.contourArea(contour) > minArea).map(contour -> Imgproc.minAreaRect(new MatOfPoint2f(contour.toArray())))/* .filter(filter) */.collect(Collectors.toList());
-
-		for (RotatedRect rotatedRect : rotatedRects) {
-			if (rotatedRect.angle <= -45.) {
-				rotatedRect.angle += 90.0;
-				double tmp = rotatedRect.size.width;
-				rotatedRect.size.width = rotatedRect.size.height;
-				rotatedRect.size.height = tmp;
-			}
-		}
-		final double average = rotatedRects.stream().mapToDouble(r -> r.angle).average().getAsDouble();
-		List<RotatedRect> goodRects = rotatedRects.stream().filter(rotatedRect -> Math.abs(rotatedRect.angle - average) < 5).collect(Collectors.toList());
-		return goodRects.stream().mapToDouble(r -> r.angle).average().orElse(average);
-	}
-
-	@Override
-	public void stop() throws Exception {
-		super.stop();
-		timer.shutdown();
-		timer.awaitTermination(5000, TimeUnit.MILLISECONDS);
-		capture.release();
-	}
 }
