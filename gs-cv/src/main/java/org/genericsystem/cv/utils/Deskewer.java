@@ -163,10 +163,12 @@ public class Deskewer {
 		line.draw(mat, scalar, thickness);
 	}
 
-	private static Img deskew(final Img img, METHOD method) {
+	public static Img deskew(final Img img, METHOD method) {
 		final Img closed = getClosedImg(img);
 		final double angle = detectAngle(closed.getSrc(), method);
-		logger.debug("Deskew angle = {}", angle);
+		logger.trace("Deskew angle = {}", angle);
+		if (Double.isNaN(angle))
+			return img;
 
 		final Point center = new Point(img.width() / 2, img.height() / 2);
 		// Rotation matrix
@@ -226,7 +228,7 @@ public class Deskewer {
 					rotatedRect.size.height = tmp;
 				}
 			}
-			return getRansacInliersRects(rotatedRects, ransacError).stream().mapToDouble(i -> i.angle).average().getAsDouble();
+			return getRansacInliersRects(rotatedRects, ransacError).stream().mapToDouble(i -> i.angle).average().orElse(rotatedRects.stream().mapToDouble(r -> r.angle).average().getAsDouble());
 		}
 	}
 
@@ -250,6 +252,13 @@ public class Deskewer {
 		int k = 50; // number of iterations
 		double t = error; // error margin
 		int d = data.size() * 2 / 3; // number of minimum matches
+		if (d < n) {
+			if (d >= n - 1)
+				n = 2;
+			else
+				return data;
+		}
+
 		Map<Integer, RotatedRect> bestFit = new HashMap<>();
 		for (int i = 1, maxAttempts = 10; bestFit.size() <= 3 && i <= maxAttempts; ++i) {
 			Ransac<RotatedRect> ransac = new Ransac<>(data, getModelProviderRects(), n, k * i, t, d);
@@ -270,6 +279,12 @@ public class Deskewer {
 		int k = 50; // number of iterations
 		double t = error; // error margin
 		int d = data.size() * 2 / 3; // number of minimum matches
+		if (d < n) {
+			if (d >= n - 1)
+				n = 2;
+			else
+				return data;
+		}
 
 		Map<Integer, Line> bestFit = new HashMap<>();
 		for (int i = 1, maxAttempts = 10; bestFit.size() <= 3 && i <= maxAttempts; ++i) {
