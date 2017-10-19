@@ -14,15 +14,15 @@ import java.util.stream.Stream;
 public class StringsComparison {
 
 	private static final int DEFAULT_K = 3;
-	private static final String SPACE_PATTERN = "\\s+";
+	private static final Pattern SPACE_PATTERN = Pattern.compile("\\s+");
 
 	public static List<String> getShinglesSpacesRemoved(String string) {
 		return getShinglesSpacesRemoved(string, DEFAULT_K);
 	}
 
 	public static List<String> getShinglesSpacesRemoved(String string, int k) {
-		String copy = string.replaceAll(SPACE_PATTERN, "");
-		return getShingles(copy, k);
+		String stringNoSpaces = SPACE_PATTERN.matcher(string).replaceAll("");
+		return getShingles(stringNoSpaces, k);
 	}
 
 	public static List<String> getShingles(String string) {
@@ -30,8 +30,7 @@ public class StringsComparison {
 	}
 
 	public static List<String> getShingles(String string, int k) {
-		Pattern pattern = Pattern.compile(SPACE_PATTERN);
-		List<String> shingles = pattern.splitAsStream(string).flatMap(word -> {
+		List<String> shingles = SPACE_PATTERN.splitAsStream(string).flatMap(word -> {
 			if (word.length() < k)
 				return Stream.empty();
 			int size = word.length() - k + 1;
