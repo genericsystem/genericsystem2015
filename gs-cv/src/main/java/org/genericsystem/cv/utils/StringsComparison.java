@@ -82,21 +82,26 @@ public class StringsComparison {
 		int k = candidateNoSpaces.length();
 		Set<String> shingles = getShinglesSpacesRemoved(original.toLowerCase(), k);
 		return shingles.stream().anyMatch(s -> {
-			double sim = 0;
-			switch (option) {
-			default:
-			case LEVENSHTEIN:
-				sim = Levenshtein.similarity(s, candidateNoSpaces);
-				break;
-			case LETTER_PAIRS:
-				sim = LetterPairSimilarity.compareStrings(s, candidateNoSpaces);
-				break;
-			case COSINE:
-				sim = CosineSimilarity.cosineSimilarity(s, candidateNoSpaces, CosineSimilarity.PATTERN.SINGLE_CHAR);
-				break;
-			}
+			double sim = compare(s, candidateNoSpaces, option);
 			return sim > similarityThreshold ? true : false;
 		});
+	}
+
+	public static double compare(String string1, String string2, SIMILARITY option) {
+		double sim = 0;
+		switch (option) {
+		default:
+		case LEVENSHTEIN:
+			sim = Levenshtein.similarity(string1, string2);
+			break;
+		case LETTER_PAIRS:
+			sim = LetterPairSimilarity.compareStrings(string1, string2);
+			break;
+		case COSINE:
+			sim = CosineSimilarity.cosineSimilarity(string1, string2, CosineSimilarity.PATTERN.SINGLE_CHAR);
+			break;
+		}
+		return sim;
 	}
 
 	/**
