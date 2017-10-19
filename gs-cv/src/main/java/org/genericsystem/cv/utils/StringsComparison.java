@@ -92,7 +92,7 @@ public class StringsComparison {
 				sim = LetterPairSimilarity.compareStrings(s, candidateNoSpaces);
 				break;
 			case COSINE:
-				sim = CosineSimilarity.cosineSimilarity(s, candidateNoSpaces);
+				sim = CosineSimilarity.cosineSimilarity(s, candidateNoSpaces, CosineSimilarity.PATTERN.SINGLE_CHAR);
 				break;
 			}
 			return sim > similarityThreshold ? true : false;
