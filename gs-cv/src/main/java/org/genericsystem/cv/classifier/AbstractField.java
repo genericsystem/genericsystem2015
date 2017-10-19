@@ -86,6 +86,10 @@ public abstract class AbstractField {
 		return isOverlapping(other.getRect());
 	}
 
+	public boolean isIn(AbstractField other) {
+		return RectangleTools.getInsider(rect, other.getRect()).map(r -> r.equals(rect) ? true : false).orElse(false);
+	}
+
 	public boolean overlapsMoreThanThresh(Rect otherRect, double overlapThreshold) {
 		double[] res = RectangleTools.commonArea(this.rect, otherRect);
 		return res[0] > overlapThreshold;
