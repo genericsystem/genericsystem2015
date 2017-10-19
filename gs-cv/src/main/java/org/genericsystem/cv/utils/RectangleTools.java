@@ -2,6 +2,7 @@ package org.genericsystem.cv.utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -48,11 +49,11 @@ public class RectangleTools {
 	 * 
 	 * @param boxes - the list of rectangles that need to be filtered
 	 * @param overlapThreshold - the overlapping threshold. If the common area between two rectangles is above this threshold, they will be considered as overlapping.
-	 * @return an {@link Optional} containing a List of non-overlapping {@link Rect}.
+	 * @return a List of non-overlapping {@link Rect}, or an empty List if none was found
 	 */
-	public static Optional<List<Rect>> nonMaximumSuppression(List<Rect> boxes, double overlapThreshold) {
+	public static List<Rect> nonMaximumSuppression(List<Rect> boxes, double overlapThreshold) {
 		if (boxes == null || boxes.size() == 0)
-			return Optional.empty();
+			return Collections.emptyList();
 
 		// Initialize a list of picked indexes
 		List<Integer> pick = new ArrayList<>();
@@ -98,7 +99,7 @@ public class RectangleTools {
 			// XXX this last part can cause an infinite loop when the remove() function fails => not caught in the unit tests!
 		}
 		List<Rect> res = IntStream.range(0, boxes.size()).filter(idx -> pick.contains(idx)).mapToObj(boxes::get).collect(Collectors.toList());
-		return Optional.of(res);
+		return res;
 	}
 
 	/**

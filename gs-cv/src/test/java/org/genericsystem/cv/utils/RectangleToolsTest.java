@@ -1,8 +1,8 @@
 package org.genericsystem.cv.utils;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -23,10 +23,10 @@ public class RectangleToolsTest {
 	@Test
 	public void nonMaximumSuppression() {
 		// Test with empty / null
-		Optional<List<Rect>> optional = RectangleTools.nonMaximumSuppression(Collections.emptyList(), 0.3);
-		assertTrue(Optional.empty().equals(optional));
-		optional = RectangleTools.nonMaximumSuppression(null, 0.3);
-		assertTrue(Optional.empty().equals(optional));
+		List<Rect> list = RectangleTools.nonMaximumSuppression(Collections.emptyList(), 0.3);
+		assertTrue(list.isEmpty());
+		list = RectangleTools.nonMaximumSuppression(null, 0.3);
+		assertTrue(list.isEmpty());
 
 		// Test case 1: should return 1 rect
 		Rect r1 = new Rect(new Point(12, 84), new Point(140, 212));
@@ -37,9 +37,9 @@ public class RectangleToolsTest {
 		Rect r6 = new Rect(new Point(24, 108), new Point(152, 236));
 
 		Rect simplified1 = new Rect(24, 108, 128, 128);
-		optional = RectangleTools.nonMaximumSuppression(Arrays.asList(r1, r2, r3, r4, r5, r6), 0.3);
-		assertTrue(optional.isPresent());
-		assertEquals(optional.get(), Arrays.asList(simplified1));
+		list = RectangleTools.nonMaximumSuppression(Arrays.asList(r1, r2, r3, r4, r5, r6), 0.3);
+		assertTrue(!list.isEmpty());
+		assertEquals(list, Arrays.asList(simplified1));
 
 		// Test 2: should return 1 rect
 		r1 = new Rect(new Point(114, 60), new Point(178, 124));
@@ -47,9 +47,9 @@ public class RectangleToolsTest {
 		r3 = new Rect(new Point(114, 66), new Point(178, 130));
 
 		Rect simplified2 = new Rect(114, 66, 64, 64);
-		optional = RectangleTools.nonMaximumSuppression(Arrays.asList(r1, r2, r3), 0.3);
-		assertTrue(optional.isPresent());
-		assertEquals(optional.get(), Arrays.asList(simplified2));
+		list = RectangleTools.nonMaximumSuppression(Arrays.asList(r1, r2, r3), 0.3);
+		assertTrue(!list.isEmpty());
+		assertEquals(list, Arrays.asList(simplified2));
 
 		// Test case 3: should return 2 rects
 		r1 = new Rect(new Point(12, 30), new Point(76, 94));
@@ -59,9 +59,9 @@ public class RectangleToolsTest {
 		Rect simplified31 = new Rect(12, 36, 64, 64);
 		Rect simplified32 = new Rect(84, 48, 128, 128);
 
-		optional = RectangleTools.nonMaximumSuppression(Arrays.asList(r1, r2, r3, r4), 0.3);
-		assertTrue(optional.isPresent());
-		assertEquals(optional.get(), Arrays.asList(simplified31, simplified32));
+		list = RectangleTools.nonMaximumSuppression(Arrays.asList(r1, r2, r3, r4), 0.3);
+		assertTrue(!list.isEmpty());
+		assertEquals(list, Arrays.asList(simplified31, simplified32));
 	}
 
 	@Test
