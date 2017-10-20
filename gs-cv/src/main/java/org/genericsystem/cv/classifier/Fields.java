@@ -2,11 +2,14 @@ package org.genericsystem.cv.classifier;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.utils.RectangleTools;
+import org.genericsystem.cv.utils.StringCompare;
+import org.genericsystem.cv.utils.StringCompare.SIMILARITY;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint2f;
@@ -20,44 +23,78 @@ public class Fields extends AbstractFields {
 	private Mat lastHomography;
 	private Mat lastRotation;
 
-	public void merge(List<Rect> rects) {
-		List<Field> oldFields = (List) fields;
-		fields = rects.stream().map(Field::new).collect(Collectors.toList());
+	public void scanNewRects(Img display, List<Rect> newRects) {
+		if (fields.isEmpty()) {
+			// First iteration
+			this.fields = newRects.stream().map(Field::new).collect(Collectors.toList());
+			fields.forEach(f -> f.ocr(display));
+		} else {
+			this.newFields = newRects.stream().map(Field::new).collect(Collectors.toList());
+			newFields.forEach(f -> f.ocr(display));
+		}
+	}
 
+	public void merge() {
 		if (lastHomography != null) {
-			List<Field> virtualField = getVirtualFields(oldFields);
-
-			for (int index = 0; index < virtualField.size(); index++) {
-				if (virtualField.get(index).isConsolidated()) {
-					Field virtualOldField = virtualField.get(index);
-					List<Field> matches = (List) findMatchingFieldsWithConfidence(virtualOldField, 0.95);
+			fields = (List) transformFields();
+			System.out.println("fields transformed (" + fields.size() + ")");
+			for (int i = 0; i < fields.size(); i++) {
+				if (fields.get(i).isConsolidated()) {
+					String currentText = fields.get(i).getConsolidated().get();
+					Field currentField = (Field) fields.get(i);
+					List<Field> matches = (List) findMatchingFieldsWithConfidence(currentField, 0.8); // Compare with fields in newFields
 
 					if (!matches.isEmpty()) {
-						// TODO: if multiple matches are found, it might be better to remove the extra fields (NMS?)
-						System.out.println("Merge : " + virtualOldField.getConsolidated());
-						matches.forEach(f -> f.merge(virtualOldField));
+						matches.removeIf(f -> {
+							// Remove the element from the list of matches if it was not consolidated, or if the text was not similar enough
+							Optional<String> optional = f.getConsolidated();
+							return optional.map(s -> !s.equals(currentText) && StringCompare.compare(s, currentText, SIMILARITY.COSINE_CHAR) <= MIN_SIMILARITY).orElse(true);
+						});
+						System.out.println("Merge : " + currentField.getConsolidated());
+						matches.forEach(f -> currentField.merge(f));
+						newFields.removeAll(matches);
 					} else {
 						System.out.println("No exact matches found");
-						List<Field> containings = (List) findContainingFields(virtualOldField);
-						if (!containings.isEmpty()) {
-							// Check whether virtualOldField's text is found in the containing fields
-							System.out.println("Found new fields containing the virtual old field");
-						} else {
-							System.out.println("No containing fields were found");
-							List<Field> containeds = (List) findContainedFields(virtualOldField);
-							if (!containeds.isEmpty()) {
-								System.out.println("Found new fields contained in the virtual old field");
-							} else {
-								System.out.println("No contained fields were found");
-							}
-							fields.add(virtualOldField);
-						}
 					}
 				}
 			}
-			// if (rand.nextBoolean())
-			// mergeOverlaps();
 		}
+
+		// List<Field> oldFields = (List) fields;
+		// fields = rects.stream().map(Field::new).collect(Collectors.toList());
+		//
+		// if (lastHomography != null) {
+		// List<Field> virtualField = getVirtualFields(oldFields);
+		//
+		// for (int index = 0; index < virtualField.size(); index++) {
+		// if (virtualField.get(index).isConsolidated()) {
+		// Field virtualOldField = virtualField.get(index);
+		// List<Field> matches = (List) findMatchingFieldsWithConfidence(virtualOldField, 0.95);
+		//
+		// if (!matches.isEmpty()) {
+		// // TODO: if multiple matches are found, it might be better to remove the extra fields (NMS?)
+		// System.out.println("Merge : " + virtualOldField.getConsolidated());
+		// matches.forEach(f -> f.merge(virtualOldField));
+		// } else {
+		// System.out.println("No exact matches found");
+		// List<Field> containings = (List) findContainingFields(virtualOldField);
+		// if (!containings.isEmpty()) {
+		// // Check whether virtualOldField's text is found in the containing fields
+		// System.out.println("Found new fields containing the virtual old field");
+		// } else {
+		// System.out.println("No containing fields were found");
+		// List<Field> containeds = (List) findContainedFields(virtualOldField);
+		// if (!containeds.isEmpty()) {
+		// System.out.println("Found new fields contained in the virtual old field");
+		// } else {
+		// System.out.println("No contained fields were found");
+		// }
+		// fields.add(virtualOldField);
+		// }
+		// }
+		// }
+		// }
+		// }
 	}
 
 	@Override
@@ -79,11 +116,11 @@ public class Fields extends AbstractFields {
 		return union;
 	}
 
-	private List<Field> getVirtualFields(List<Field> oldFields) {
-		List<Rect> virtualRects = oldFields.stream().map(Field::getRect).map(rect -> findNewRect(rect)).collect(Collectors.toList());
-		return IntStream.range(0, oldFields.size()).mapToObj(i -> {
+	private List<Field> transformFields() {
+		List<Rect> virtualRects = fields.stream().map(AbstractField::getRect).map(rect -> findNewRect(rect)).collect(Collectors.toList());
+		return IntStream.range(0, fields.size()).mapToObj(i -> {
 			Field f = new Field(virtualRects.get(i));
-			f.merge(oldFields.get(i));
+			f.merge(fields.get(i));
 			return f;
 		}).collect(Collectors.toList());
 	}
