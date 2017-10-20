@@ -361,7 +361,7 @@ public class OCRPlasty {
 			for (String s : datas) {
 				globalError += Math.pow(computeError(s), 2d);
 			}
-			return globalError;
+			return globalError / datas.size();
 		}
 
 		/**
