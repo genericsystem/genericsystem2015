@@ -43,17 +43,20 @@ public class OCRPlasty {
 	}
 
 	/**
-	 * Utility class used to return two results : an {@link Optional} string, representing the corrected string, and a {@link Set} strings, representing the outliers eliminated by the RANSAC.
+	 * Utility class used to return two results : an {@link Optional} string, representing the corrected string, a {@link Set} strings, representing the outliers eliminated by the RANSAC, and the confidence (percentage of similarity between inlier
+	 * strings).
 	 * 
 	 * @author Pierrik Lassalas
 	 */
 	public static class Tuple {
 		private final Optional<String> string;
 		private final Set<String> outliers;
+		private final double confidence;
 
-		public Tuple(Optional<String> string, Set<String> outliers) {
+		public Tuple(Optional<String> string, Set<String> outliers, double confidence) {
 			this.string = string;
 			this.outliers = outliers;
+			this.confidence = confidence;
 		}
 
 		public Optional<String> getString() {
@@ -62,6 +65,10 @@ public class OCRPlasty {
 
 		public Set<String> getOutliers() {
 			return outliers;
+		}
+
+		public double getConfidence() {
+			return confidence;
 		}
 	}
 
@@ -143,6 +150,7 @@ public class OCRPlasty {
 		Function<Collection<String>, Model<String>> modelProvider = null;
 		Set<String> outliers = Collections.emptySet();
 		Optional<String> result = Optional.empty();
+		double confidence = 0;
 		double error = 1;
 
 		switch (options) {
@@ -170,6 +178,7 @@ public class OCRPlasty {
 		if (modelProvider != null) { // One of the RANSAC methods has been called
 			List<String> inliers = getRansacInliers(trimmed, modelProvider, error);
 			Set<String> inliersSet = new HashSet<>(inliers); // Save a Set copy to be able to get the outliers if needed
+			confidence = OCRPlasty.similarity(inliers);
 			// Compute the string alignment
 			result = inliers.isEmpty() ? ocrPlasty(trimmed) : ocrPlasty(inliers);
 			// If no inliers were found or if we don't need the outliers, return an empty list
@@ -181,7 +190,7 @@ public class OCRPlasty {
 			}
 		}
 
-		return new Tuple(result, outliers);
+		return new Tuple(result, outliers, confidence);
 	}
 
 	/**
