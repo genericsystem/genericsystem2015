@@ -64,6 +64,8 @@ public class CosineSimilarity {
 		// Compute the intersection
 		Set<String> intersection = new HashSet<>(a.keySet());
 		intersection.retainAll(b.keySet());
+		if (intersection.isEmpty())
+			return 0;
 
 		// Compute the dot product and the magnitudes
 		double dotProduct = intersection.stream().mapToDouble(s -> a.get(s) * b.get(s)).sum();

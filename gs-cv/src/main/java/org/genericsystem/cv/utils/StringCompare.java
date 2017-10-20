@@ -104,16 +104,16 @@ public class StringCompare {
 		switch (option) {
 		default:
 		case LEVENSHTEIN:
-			sim = Levenshtein.similarity(string1, string2);
+			sim = Levenshtein.similarity(string1.trim(), string2.trim());
 			break;
 		case LETTER_PAIRS:
-			sim = LetterPairSimilarity.compareStrings(string1, string2);
+			sim = LetterPairSimilarity.compareStrings(string1.trim(), string2.trim());
 			break;
 		case COSINE_CHAR:
-			sim = CosineSimilarity.cosineSimilarity(string1, string2, CosineSimilarity.PATTERN.SINGLE_CHAR);
+			sim = CosineSimilarity.cosineSimilarity(string1.trim(), string2.trim(), CosineSimilarity.PATTERN.SINGLE_CHAR);
 			break;
 		case COSINE_WORD:
-			sim = CosineSimilarity.cosineSimilarity(string1, string2, CosineSimilarity.PATTERN.WORDS);
+			sim = CosineSimilarity.cosineSimilarity(string1.trim(), string2.trim(), CosineSimilarity.PATTERN.WORDS);
 			break;
 		}
 		return sim;
