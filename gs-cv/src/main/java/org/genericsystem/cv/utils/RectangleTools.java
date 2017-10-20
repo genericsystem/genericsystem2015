@@ -1,7 +1,6 @@
 package org.genericsystem.cv.utils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -19,29 +18,10 @@ import org.opencv.core.Rect;
 public class RectangleTools {
 
 	public static void main(String[] args) {
-		// Rect rect1 = new Rect(0, 0, 3, 3);
-		// Rect rect2 = new Rect(1, 3, 3, 1);
-		// System.out.println("Union: " + getUnion(rect1, rect2));
-		// System.out.println("Intersection: " + getIntersection(rect1, rect2));
-		Rect r1 = new Rect(new Point(12, 84), new Point(140, 212));
-		Rect r2 = new Rect(new Point(24, 84), new Point(152, 212));
-		Rect r3 = new Rect(new Point(36, 84), new Point(164, 212));
-		Rect r4 = new Rect(new Point(12, 96), new Point(140, 224));
-		Rect r5 = new Rect(new Point(24, 96), new Point(152, 224));
-		Rect r6 = new Rect(new Point(24, 108), new Point(152, 236));
-		System.out.println(nonMaximumSuppression(Arrays.asList(r1, r2, r3, r4, r5, r6), 0.3));
-
-		r1 = new Rect(new Point(114, 60), new Point(178, 124));
-		r2 = new Rect(new Point(120, 60), new Point(184, 124));
-		r3 = new Rect(new Point(114, 66), new Point(178, 130));
-		System.out.println(nonMaximumSuppression(Arrays.asList(r1, r2, r3), 0.3));
-
-		r1 = new Rect(new Point(12, 30), new Point(76, 94));
-		r2 = new Rect(new Point(12, 36), new Point(76, 100));
-		r3 = new Rect(new Point(72, 36), new Point(200, 164));
-		r4 = new Rect(new Point(84, 48), new Point(212, 176));
-
-		System.out.println(nonMaximumSuppression(Arrays.asList(r1, r2, r3, r4), 0.3));
+		Rect rect1 = new Rect(0, 0, 3, 3);
+		Rect rect2 = new Rect(1, 3, 3, 1);
+		System.out.println("Union: " + getUnion(rect1, rect2));
+		System.out.println("Intersection: " + getIntersection(rect1, rect2));
 	}
 
 	/**
@@ -121,6 +101,15 @@ public class RectangleTools {
 			result[1] = 0;
 		}
 		return result;
+	}
+
+	public static double inclusiveArea(Rect rect1, Rect rect2) {
+		Optional<Rect> optional = getIntersection(rect1, rect2);
+		if (!optional.isPresent())
+			return 0;
+		Rect intersection = optional.get();
+		Rect union = getUnion(rect1, rect2);
+		return intersection.area() / union.area();
 	}
 
 	/**

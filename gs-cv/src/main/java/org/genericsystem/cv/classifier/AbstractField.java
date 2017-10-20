@@ -149,8 +149,7 @@ public abstract class AbstractField {
 	}
 
 	public boolean overlapsMoreThanThresh(Rect otherRect, double overlapThreshold) {
-		double[] res = RectangleTools.commonArea(this.rect, otherRect);
-		return res[0] > overlapThreshold;
+		return RectangleTools.inclusiveArea(this.rect, otherRect) > overlapThreshold;
 	}
 
 	public boolean overlapsMoreThanThresh(AbstractField other, double overlapThreshold) {
