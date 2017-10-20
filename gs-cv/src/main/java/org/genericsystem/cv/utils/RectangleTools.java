@@ -103,6 +103,13 @@ public class RectangleTools {
 		return result;
 	}
 
+	/**
+	 * Compute the inclusive area between two rectangles (intersection area / union area)
+	 * 
+	 * @param rect1 - the first rectangle
+	 * @param rect2 - the second rectangle
+	 * @return the percentage of overlap between the two rectangles, defined by <code>intersection.area() / union.area()</code>
+	 */
 	public static double inclusiveArea(Rect rect1, Rect rect2) {
 		Optional<Rect> optional = getIntersection(rect1, rect2);
 		if (!optional.isPresent())
