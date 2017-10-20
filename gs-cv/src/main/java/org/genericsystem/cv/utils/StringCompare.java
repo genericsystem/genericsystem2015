@@ -13,7 +13,7 @@ import java.util.stream.Stream;
  * 
  * @author Pierrik Lassalas
  */
-public class StringsComparison {
+public class StringCompare {
 
 	private static final int DEFAULT_K = 3;
 	private static final Pattern SPACE_PATTERN = Pattern.compile("\\s+");
