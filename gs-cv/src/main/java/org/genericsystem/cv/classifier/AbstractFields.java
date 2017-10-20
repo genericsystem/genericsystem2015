@@ -1,107 +1,59 @@
 package org.genericsystem.cv.classifier;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.genericsystem.cv.Img;
-import org.genericsystem.cv.utils.OCRPlasty;
-import org.genericsystem.cv.utils.RectangleTools;
 import org.opencv.core.Mat;
-import org.opencv.core.Rect;
+import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 
 public abstract class AbstractFields implements Iterable<AbstractField> {
 
+	private static ThreadLocalRandom rand = ThreadLocalRandom.current();
 	protected List<AbstractField> fields;
+	protected List<AbstractField> oldFields;
 	protected static final double MIN_SIMILARITY = 0.90;
 	protected static final double OVERLAP_THRESHOLD = 0.30;
+	protected static final double OVERLAP_CONFIDENCE = 0.90;
 	private long count = System.currentTimeMillis();
 
 	public AbstractFields() {
 		this.fields = new ArrayList<>();
+		this.oldFields = new ArrayList<>();
 	}
 
 	public AbstractFields(List<AbstractField> fields) {
 		this.fields = fields;
 	}
 
-	public void removeOverlaps() {
-		Set<AbstractField> removes = new HashSet<>();
-		for (AbstractField field : fields) {
-			List<AbstractField> overlaps = getOverlaps(field);
-			if (overlaps != null && !overlaps.isEmpty()) {
-				removes.addAll(tryMerge(field, overlaps));
-			}
-		}
-		// fields.removeAll(removes); // XXX: acts the same as emptying the list
-		// TODO: find an alternative way to remove the fields that are not needed anymore
+	protected abstract AbstractField getIntersection(AbstractField field1, AbstractField field2);
+
+	protected abstract AbstractField getUnion(AbstractField field1, AbstractField field2);
+
+	protected List<AbstractField> findMatchingFieldsWithConfidence(AbstractField field, double threshold) {
+		return oldFields.stream().filter(f -> f.overlapsMoreThanThresh(field.getRect(), threshold)).collect(Collectors.toList());
 	}
 
-	public List<AbstractField> getOverlaps(AbstractField targetField) {
-		List<AbstractField> overlaps = new ArrayList<>();
-		for (AbstractField field : fields) {
-			if (targetField.overlapsMoreThanThresh(field, 0.5)) {
-				overlaps.add(field);
-			}
-		}
-		System.out.println("overlaps size: " + overlaps.size());
-		return overlaps;
+	protected List<AbstractField> findContainingFields(AbstractField field) {
+		return stream().filter(f -> field.isIn(f)).collect(Collectors.toList());
 	}
 
-	public List<AbstractField> tryMerge(AbstractField targetField, List<AbstractField> overlaps) {
-		List<AbstractField> removes = new ArrayList<>();
-		if (targetField.getConsolidated().isPresent()) {
-			for (AbstractField field : overlaps) {
-				Optional<String> consolidatedTarget = targetField.getConsolidated();
-				Optional<String> consolidatedField = field.getConsolidated();
-				if (consolidatedField.isPresent()) {
-					if (consolidatedTarget.equals(consolidatedField)) {
-						targetField = getIntersection(targetField, field);
-						removes.add(field);
-					} else if (OCRPlasty.similarity(Arrays.asList(consolidatedTarget.get(), consolidatedField.get())) >= MIN_SIMILARITY) {
-						targetField = getUnion(targetField, field);
-						removes.add(field);
-					} else {
-						// XXX add an else if() condition to check whether the text in the smaller box is contained within the one in the larger box (word inside sentence, etc.)
-						// Do something?
-					}
-				} // else do nothing, since the field was not consolidated
-			}
-			return removes;
-		} // else do nothing, since the field was not consolidated
-		return Collections.emptyList();
+	protected List<AbstractField> findContainedFields(AbstractField field) {
+		return stream().filter(f -> f.isIn(field)).collect(Collectors.toList());
 	}
 
-	protected AbstractField getIntersection(AbstractField field1, AbstractField field2) {
-		Rect rect1 = field1.getRect();
-		Rect rect2 = field2.getRect();
-		Rect intersect = RectangleTools.getIntersection(rect1, rect2).orElseThrow(() -> new IllegalArgumentException("No intersecting rectangle was found"));
-		Field intersection = new Field(intersect);
-		intersection.merge(Arrays.asList(field1, field2));
-		return intersection;
-	}
-
-	protected AbstractField getUnion(AbstractField field1, AbstractField field2) {
-		Rect rect1 = field1.getRect();
-		Rect rect2 = field2.getRect();
-		Field union = new Field(RectangleTools.getUnion(rect1, rect2));
-		union.merge(Arrays.asList(field1, field2));
-		return union;
+	protected AbstractField findNewField(Point pt) {
+		return stream().filter(field -> field.contains(pt)).findFirst().orElse(null);
 	}
 
 	public void consolidateOcr(Img rootImg) {
-		stream().filter(AbstractField::needOcr).filter(f -> f.canBeOCR(rootImg)).forEach(f -> f.ocr(rootImg));
-		// if ((System.currentTimeMillis() - count) > 2_000) {
-		// removeOverlaps();
-		// count = System.currentTimeMillis();
-		// }
+		// stream().filter(AbstractField::needOcr).filter(f -> f.canBeOCR(rootImg)).forEach(f -> f.ocr(rootImg));
+		randomOcrStream().forEach(f -> f.ocr(rootImg));
 	}
 
 	public void drawOcrPerspectiveInverse(Img display, Mat homography, Scalar color, int thickness) {
@@ -112,12 +64,12 @@ public abstract class AbstractFields implements Iterable<AbstractField> {
 		consolidatedFieldStream().forEach(field -> field.draw(stabilizedDisplay));
 	}
 
-	public Stream<AbstractField> consolidatedFieldStream() {
-		return stream().filter(f -> f.isConsolidated());
+	public Stream<AbstractField> randomOcrStream() {
+		return stream().filter(f -> rand.nextBoolean());
 	}
 
-	public int size() {
-		return fields.size();
+	public Stream<AbstractField> consolidatedFieldStream() {
+		return stream().filter(f -> f.isConsolidated());
 	}
 
 	public Stream<AbstractField> stream() {
@@ -132,4 +84,63 @@ public abstract class AbstractFields implements Iterable<AbstractField> {
 	public Iterator<AbstractField> iterator() {
 		return fields.iterator();
 	}
+
+	public int size() {
+		return fields.size();
+	}
+
+	// public void mergeOverlaps() {
+	// mergeOverlaps(OVERLAP_CONFIDENCE);
+	// }
+	//
+	// public void mergeOverlaps(double confidence) {
+	// ListIterator<AbstractField> it = fields.listIterator();
+	// while (it.hasNext()) {
+	// AbstractField field = it.next();
+	// List<AbstractField> overlaps = findMatchingFieldsWithConfidence(field, confidence);
+	// if (overlaps != null && !overlaps.isEmpty()) {
+	// AbstractField newField = tryMerge(field, overlaps);
+	// if (newField != null)
+	// it.set(newField);
+	// }
+	// }
+	// }
+	//
+	// // XXX pb: overlapping elements don't get deleted
+	// public AbstractField tryMerge(AbstractField targetField, List<AbstractField> overlaps) {
+	// if (targetField.getConsolidated().isPresent()) {
+	// for (AbstractField field : overlaps) {
+	// Optional<String> consolidatedTarget = targetField.getConsolidated();
+	// Optional<String> consolidatedField = field.getConsolidated();
+	// if (consolidatedField.isPresent()) {
+	// String stringTarget = consolidatedTarget.get();
+	// String stringCurrent = consolidatedField.get();
+	// if (stringTarget.equals(stringCurrent)) {
+	// AbstractField intersect = getIntersection(targetField, field);
+	// return intersect;
+	// } else if (StringCompare.compare(stringCurrent, stringTarget, SIMILARITY.COSINE_WORD) >= MIN_SIMILARITY) {
+	// AbstractField union = getUnion(targetField, field);
+	// return union;
+	// } else {
+	// // XXX add an else if() condition to check whether the text in the smaller box is contained within the one in the larger box (word inside sentence, etc.)
+	// if (field.isIn(targetField)) {
+	// if (StringCompare.containsSubstring(stringTarget, stringCurrent)) {
+	// System.out.println(String.format("field.isIn(targetField), exact match (%s <=> %s)", stringTarget, stringCurrent));
+	// } else if (StringCompare.containsSubstring(stringTarget, stringCurrent, MIN_SIMILARITY, SIMILARITY.COSINE_CHAR)) {
+	// System.out.println(String.format("field.isIn(targetField), partial match (%s <=> %s)", stringTarget, stringCurrent));
+	// }
+	// } else if (targetField.isIn(field)) {
+	// if (StringCompare.containsSubstring(stringTarget, stringCurrent)) {
+	// System.out.println(String.format("targetField.isIn(field), exact match (%s <=> %s)", stringTarget, stringCurrent));
+	// } else if (StringCompare.containsSubstring(stringTarget, stringCurrent, MIN_SIMILARITY, SIMILARITY.COSINE_CHAR)) {
+	// System.out.println(String.format("targetField.isIn(field), partial match (%s <=> %s)", stringTarget, stringCurrent));
+	// }
+	// }
+	// }
+	// } // else do nothing, since the field was not consolidated
+	// }
+	// } // else do nothing, since the field was not consolidated
+	// return null;
+	// }
+
 }

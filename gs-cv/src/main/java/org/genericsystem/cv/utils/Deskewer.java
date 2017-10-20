@@ -353,7 +353,7 @@ public class Deskewer {
 					double error = 0;
 					for (RotatedRect rect : datas)
 						error += Math.pow(computeError(rect), 2);
-					return error;
+					return error / datas.size();
 				}
 
 				@Override
@@ -379,7 +379,7 @@ public class Deskewer {
 					double error = 0;
 					for (Line line : datas)
 						error += Math.pow(computeError(line), 2);
-					return error;
+					return error / datas.size();
 				}
 
 				@Override

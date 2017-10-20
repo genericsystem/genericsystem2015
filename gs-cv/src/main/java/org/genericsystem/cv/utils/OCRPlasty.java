@@ -43,17 +43,20 @@ public class OCRPlasty {
 	}
 
 	/**
-	 * Utility class used to return two results : an {@link Optional} string, representing the corrected string, and a {@link Set} strings, representing the outliers eliminated by the RANSAC.
+	 * Utility class used to return two results : an {@link Optional} string, representing the corrected string, a {@link Set} strings, representing the outliers eliminated by the RANSAC, and the confidence (percentage of similarity between inlier
+	 * strings).
 	 * 
 	 * @author Pierrik Lassalas
 	 */
 	public static class Tuple {
 		private final Optional<String> string;
 		private final Set<String> outliers;
+		private final double confidence;
 
-		public Tuple(Optional<String> string, Set<String> outliers) {
+		public Tuple(Optional<String> string, Set<String> outliers, double confidence) {
 			this.string = string;
 			this.outliers = outliers;
+			this.confidence = confidence;
 		}
 
 		public Optional<String> getString() {
@@ -62,6 +65,10 @@ public class OCRPlasty {
 
 		public Set<String> getOutliers() {
 			return outliers;
+		}
+
+		public double getConfidence() {
+			return confidence;
 		}
 	}
 
@@ -82,8 +89,15 @@ public class OCRPlasty {
 			System.out.println(option.name());
 			System.out.println(correctStrings(new ArrayList<>(labels), option).orElse("-- none --"));
 			// System.out.println(correctStringsAndGetOutliers(new ArrayList<>(labels), option));
-			System.out.println("similarity: " + similarity(labels));
+			for (StringCompare.SIMILARITY method : StringCompare.SIMILARITY.values()) {
+				System.out.println(String.format("Similarity (%s): %.3f", method.name(), StringCompare.similarity(labels, method)));
+			}
+
 		}
+	}
+
+	public static Optional<String> correctStrings(List<String> labels, OCRPlasty.RANSAC options) {
+		return correctStrings(labels, options, StringCompare.SIMILARITY.LEVENSHTEIN);
 	}
 
 	/**
@@ -91,11 +105,16 @@ public class OCRPlasty {
 	 * 
 	 * @param labels - the list of string that will be 'averaged'
 	 * @param options - one of the value of {@link RANSAC} enum, which represents the algorithm used to compute the error in the RANSAC model
+	 * @param method - the method to be used to compute string similarity
 	 * @return an {@link Optional} containing the string that reached the best consensus, otherwise an empty {@link Optional}
 	 */
-	public static Optional<String> correctStrings(List<String> labels, OCRPlasty.RANSAC options) {
-		Tuple res = doStringCorrection(labels, options, false);
+	public static Optional<String> correctStrings(List<String> labels, OCRPlasty.RANSAC options, StringCompare.SIMILARITY method) {
+		Tuple res = doStringCorrection(labels, options, method, false);
 		return res.getString();
+	}
+
+	public static Tuple correctStringsAndGetOutliers(List<String> labels, OCRPlasty.RANSAC options) {
+		return doStringCorrection(labels, options, StringCompare.SIMILARITY.LEVENSHTEIN, true);
 	}
 
 	/**
@@ -103,29 +122,11 @@ public class OCRPlasty {
 	 * 
 	 * @param labels - the list of string that will be 'averaged'
 	 * @param options - one of the value of {@link RANSAC} enum, which represents the algorithm used to compute the error in the RANSAC model
+	 * @param method - the method to be used to compute string similarity
 	 * @return a {@link Tuple} object with the results
 	 */
-	public static Tuple correctStringsAndGetOutliers(List<String> labels, OCRPlasty.RANSAC options) {
-		return doStringCorrection(labels, options, true);
-	}
-
-	/**
-	 * Compute the similarity between the members of a list of strings.
-	 * 
-	 * @param strings - the list of strings
-	 * @return a score between 0 and 1
-	 */
-	public static double similarity(List<String> strings) {
-		double sim = 0;
-		int n = strings.size();
-		if (n == 1)
-			return 1;
-		for (int i = 0; i < n; i++) {
-			for (int j = i + 1; j < n; j++) {
-				sim += Levenshtein.similarity(strings.get(i), strings.get(j));
-			}
-		}
-		return 2 * sim / (n * (n - 1)); // divide by the total number of distances
+	public static Tuple correctStringsAndGetOutliers(List<String> labels, OCRPlasty.RANSAC options, StringCompare.SIMILARITY method) {
+		return doStringCorrection(labels, options, method, true);
 	}
 
 	/**
@@ -133,22 +134,25 @@ public class OCRPlasty {
 	 * 
 	 * @param labels - the list of string that will be 'averaged'
 	 * @param options - one of the value of {@link RANSAC} enum, which represents the algorithm used to compute the error in the RANSAC model
+	 * @param method - the method to be used to compute string similarity
 	 * @param needOutliers - true if the list of outliers eliminated by the RANSAC is needed, false otherwise
 	 * @return a {@link Tuple} object with the results
 	 */
-	private static Tuple doStringCorrection(List<String> labels, OCRPlasty.RANSAC options, boolean needOutliers) {
+	private static Tuple doStringCorrection(List<String> labels, OCRPlasty.RANSAC options, StringCompare.SIMILARITY method, boolean needOutliers) {
 		// Trim all the elements of the list
 		List<String> trimmed = labels.stream().map(s -> s.trim()).filter(s -> s.length() > 0).collect(Collectors.toList());
 		// Initialize the parameters
 		Function<Collection<String>, Model<String>> modelProvider = null;
 		Set<String> outliers = Collections.emptySet();
 		Optional<String> result = Optional.empty();
+		double confidence = 0;
 		double error = 1;
 
 		switch (options) {
 		default:
 		case NONE:
 			result = ocrPlasty(trimmed);
+			confidence = StringCompare.similarity(trimmed, method);
 		case LCS:
 			modelProvider = getModelProviderMaxLcs();
 			error = 1d;
@@ -170,6 +174,7 @@ public class OCRPlasty {
 		if (modelProvider != null) { // One of the RANSAC methods has been called
 			List<String> inliers = getRansacInliers(trimmed, modelProvider, error);
 			Set<String> inliersSet = new HashSet<>(inliers); // Save a Set copy to be able to get the outliers if needed
+			confidence = StringCompare.similarity(inliers, method);
 			// Compute the string alignment
 			result = inliers.isEmpty() ? ocrPlasty(trimmed) : ocrPlasty(inliers);
 			// If no inliers were found or if we don't need the outliers, return an empty list
@@ -181,7 +186,7 @@ public class OCRPlasty {
 			}
 		}
 
-		return new Tuple(result, outliers);
+		return new Tuple(result, outliers, confidence);
 	}
 
 	/**
@@ -352,7 +357,7 @@ public class OCRPlasty {
 			for (String s : datas) {
 				globalError += Math.pow(computeError(s), 2d);
 			}
-			return globalError;
+			return globalError / datas.size();
 		}
 
 		/**

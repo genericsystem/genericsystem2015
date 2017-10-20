@@ -117,7 +117,9 @@ public class CamLiveRetriever extends AbstractApp {
 
 					if (stabilized != null) {
 						if (stabilizationHasChanged) {
-							fields.merge(detectRects(stabilized));
+							List<Rect> newRects = detectRects(stabilized);
+							fields.scanNewRects(stabilized, newRects);
+							fields.merge();
 							stabilizationHasChanged = false;
 						}
 						// layout.ocrTree(stabilized, 0.03, 0.1);
@@ -149,7 +151,6 @@ public class CamLiveRetriever extends AbstractApp {
 			fields.storeLastHomography(homography.inv());
 			fields.storeLastRotation(Imgproc.getRotationMatrix2D(new Point(frame.width() / 2, frame.height() / 2), angle, 1));
 		}
-
 		oldKeypoints = newKeypoints;
 		oldDescriptors = newDescriptors;
 		stabilizationHasChanged = true;

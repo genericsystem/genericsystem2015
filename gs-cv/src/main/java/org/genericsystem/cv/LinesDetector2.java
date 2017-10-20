@@ -162,7 +162,7 @@ public class LinesDetector2 extends AbstractApp {
 						double error = 0;
 						for (Line data : datas)
 							error += Math.pow(computeError(data), 2);
-						return error;
+						return error / datas.size();
 					}
 
 					@Override

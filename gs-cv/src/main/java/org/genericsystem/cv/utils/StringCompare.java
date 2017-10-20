@@ -13,7 +13,7 @@ import java.util.stream.Stream;
  * 
  * @author Pierrik Lassalas
  */
-public class StringsComparison {
+public class StringCompare {
 
 	private static final int DEFAULT_K = 3;
 	private static final Pattern SPACE_PATTERN = Pattern.compile("\\s+");
@@ -33,9 +33,13 @@ public class StringsComparison {
 		 */
 		LETTER_PAIRS,
 		/**
-		 * Use the cosine similarity
+		 * Use the cosine similarity to compare individual chars
 		 */
-		COSINE
+		COSINE_CHAR,
+		/**
+		 * Use the cosine similarity to compare individual words
+		 */
+		COSINE_WORD;
 	}
 
 	public static void main(String[] args) {
@@ -87,21 +91,52 @@ public class StringsComparison {
 		});
 	}
 
+	/**
+	 * Compute the similarity between two strings.
+	 * 
+	 * @param string1 - the first string
+	 * @param string2 - the second string
+	 * @param option - the method to be used for string comparison
+	 * @return a score between 0 and 1
+	 */
 	public static double compare(String string1, String string2, SIMILARITY option) {
 		double sim = 0;
 		switch (option) {
 		default:
 		case LEVENSHTEIN:
-			sim = Levenshtein.similarity(string1, string2);
+			sim = Levenshtein.similarity(string1.trim(), string2.trim());
 			break;
 		case LETTER_PAIRS:
-			sim = LetterPairSimilarity.compareStrings(string1, string2);
+			sim = LetterPairSimilarity.compareStrings(string1.trim(), string2.trim());
 			break;
-		case COSINE:
-			sim = CosineSimilarity.cosineSimilarity(string1, string2, CosineSimilarity.PATTERN.SINGLE_CHAR);
+		case COSINE_CHAR:
+			sim = CosineSimilarity.cosineSimilarity(string1.trim(), string2.trim(), CosineSimilarity.PATTERN.SINGLE_CHAR);
+			break;
+		case COSINE_WORD:
+			sim = CosineSimilarity.cosineSimilarity(string1.trim(), string2.trim(), CosineSimilarity.PATTERN.WORDS);
 			break;
 		}
 		return sim;
+	}
+
+	/**
+	 * Compute the similarity between the members of a list of strings.
+	 * 
+	 * @param strings - the list of strings
+	 * @param option - the method to be used for string comparison
+	 * @return a score between 0 and 1
+	 */
+	public static double similarity(List<String> strings, SIMILARITY option) {
+		double sim = 0;
+		int n = strings.size();
+		if (n == 1)
+			return 1;
+		for (int i = 0; i < n; i++) {
+			for (int j = i + 1; j < n; j++) {
+				sim += compare(strings.get(i), strings.get(j), option);
+			}
+		}
+		return 2 * sim / (n * (n - 1)); // divide by the total number of distances
 	}
 
 	/**
