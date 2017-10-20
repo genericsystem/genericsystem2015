@@ -42,8 +42,8 @@ public class LinesDetector3 extends AbstractApp {
 
 	private final VideoCapture capture = new VideoCapture(0);
 	private ScheduledExecutorService timer = Executors.newSingleThreadScheduledExecutor();
-	private Damper vpxDamper = new Damper(10);
-	private Damper vpyDamper = new Damper(10);
+	private Damper vpxDamper = new Damper(1);
+	private Damper vpyDamper = new Damper(1);
 
 	@Override
 	protected void fillGrid(GridPane mainGrid) {
@@ -141,36 +141,28 @@ public class LinesDetector3 extends AbstractApp {
 		Point AB2 = new Point(width / 2, 0);
 		Point CD2 = new Point(width / 2, height);
 
-		Point A_ = new Line(AB2, rotatedVp).intersection(0);
-		Point B__ = new Line(AB2, rotatedVp).intersection(width);
-		Point D_ = new Line(CD2, rotatedVp).intersection(0);
-		Point C__ = new Line(CD2, rotatedVp).intersection(width);
+		Point A_, B_, C_, D_;
+		if (rotatedVp.x >= width / 2) {
+			A_ = new Line(AB2, rotatedVp).intersection(0);
+			D_ = new Line(CD2, rotatedVp).intersection(0);
+			C_ = new Line(A_, bary).intersection(new Line(CD2, rotatedVp));
+			B_ = new Line(D_, bary).intersection(new Line(AB2, rotatedVp));
+		} else {
+			B_ = new Line(AB2, rotatedVp).intersection(width);
+			C_ = new Line(CD2, rotatedVp).intersection(width);
+			A_ = new Line(C_, bary).intersection(new Line(AB2, rotatedVp));
+			D_ = new Line(B_, bary).intersection(new Line(CD2, rotatedVp));
+		}
 
-		Point C_ = new Line(A_, bary).intersection(new Line(CD2, rotatedVp));
-		Point B_ = new Line(D_, bary).intersection(new Line(AB2, rotatedVp));
-		Point A__ = new Line(C__, bary).intersection(new Line(AB2, rotatedVp));
-		Point D__ = new Line(B__, bary).intersection(new Line(CD2, rotatedVp));
+		// System.out.println("vp : " + vp);
+		// System.out.println("rotated vp : " + rotatedVp);
+		// System.out.println("Alpha : " + alpha * 180 / Math.PI);
+		// System.out.println("A : " + A + " " + A_);
+		// System.out.println("B : " + B + " " + B_);
+		// System.out.println("C : " + C + " " + C_);
+		// System.out.println("D : " + D + " " + D_);
 
-		System.out.println("vp : " + vp);
-		System.out.println("rotated vp : " + rotatedVp);
-		System.out.println("Alpha : " + alpha * 180 / Math.PI);
-		System.out.println("A : " + A + " " + A_ + " " + A__);
-		System.out.println("B : " + B + " " + B_ + " " + B__);
-		System.out.println("C : " + C + " " + C_ + " " + C__);
-		System.out.println("D : " + D + " " + D_ + " " + D__);
-
-		Point A___ = rotatedVp.x >= width / 2 ? A_ : A__;
-		Point B___ = rotatedVp.x >= width / 2 ? B_ : B__;
-		Point C___ = rotatedVp.x >= width / 2 ? C_ : C__;
-		Point D___ = rotatedVp.x >= width / 2 ? D_ : D__;
-
-		Mat homography = Imgproc.getPerspectiveTransform(new MatOfPoint2f(rotate(bary, -alpha, A___, B___, C___, D___)), new MatOfPoint2f(A, B, C, D));
-
-		// MatOfPoint2f results = new MatOfPoint2f();
-		// Core.perspectiveTransform(new MatOfPoint2f(new Point(0, 0), bary, new Point(width, height)), results, homography);
-		// Point[] targets = results.toArray();
-		// System.out.println("Carré : " + Arrays.toString(targets));
-		return homography;
+		return Imgproc.getPerspectiveTransform(new MatOfPoint2f(rotate(bary, -alpha, A_, B_, C_, D_)), new MatOfPoint2f(A, B, C, D));
 	}
 
 	// private Mat findHomography(Point vp, Point bary, double width, double height) {
