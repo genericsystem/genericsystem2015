@@ -109,7 +109,8 @@ public class RectangleTools {
 			return 0;
 		Rect intersection = optional.get();
 		Rect union = getUnion(rect1, rect2);
-		return intersection.area() / union.area();
+		double area = intersection.area() / union.area();
+		return area;
 	}
 
 	/**

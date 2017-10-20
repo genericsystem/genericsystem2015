@@ -88,6 +88,17 @@ public class RectangleToolsTest {
 	}
 
 	@Test
+	public void inclusiveArea() {
+		Rect r1 = new Rect(0, 0, 100, 100);
+		Rect r2 = new Rect(49, 0, 50, 100);
+		Rect r3 = new Rect(100, 0, 100, 100);
+
+		assertEquals(RectangleTools.inclusiveArea(r1, r1), 1, 0.001);
+		assertEquals(RectangleTools.inclusiveArea(r1, r2), 0.5, 0.001);
+		assertEquals(RectangleTools.inclusiveArea(r1, r3), 0, 0.001);
+	}
+
+	@Test
 	public void getIntersection() {
 		Rect inter12 = new Rect(1, 1, 9, 9);
 
