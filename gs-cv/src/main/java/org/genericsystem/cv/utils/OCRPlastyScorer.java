@@ -12,6 +12,7 @@ import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 
 import org.genericsystem.cv.utils.OCRPlasty.RANSAC;
+import org.genericsystem.cv.utils.StringCompare.SIMILARITY;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -123,7 +124,7 @@ public class OCRPlastyScorer {
 	 * @return the similarity between the strings, between 0.0 and 1.0
 	 */
 	private static double getSimilarity(String string1, String string2) {
-		return OCRPlasty.similarity(Arrays.asList(string1, string2));
+		return StringCompare.similarity(Arrays.asList(string1, string2), SIMILARITY.LEVENSHTEIN);
 	}
 
 	/**

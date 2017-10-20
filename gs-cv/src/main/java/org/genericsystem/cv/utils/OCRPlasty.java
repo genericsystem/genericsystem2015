@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.genericsystem.cv.utils.Ransac.Model;
+import org.genericsystem.cv.utils.StringCompare.SIMILARITY;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,7 +90,7 @@ public class OCRPlasty {
 			System.out.println(option.name());
 			System.out.println(correctStrings(new ArrayList<>(labels), option).orElse("-- none --"));
 			// System.out.println(correctStringsAndGetOutliers(new ArrayList<>(labels), option));
-			System.out.println("similarity: " + similarity(labels));
+			System.out.println("similarity: " + StringCompare.similarity(labels, SIMILARITY.LEVENSHTEIN));
 		}
 	}
 
@@ -114,25 +115,6 @@ public class OCRPlasty {
 	 */
 	public static Tuple correctStringsAndGetOutliers(List<String> labels, OCRPlasty.RANSAC options) {
 		return doStringCorrection(labels, options, true);
-	}
-
-	/**
-	 * Compute the similarity between the members of a list of strings.
-	 * 
-	 * @param strings - the list of strings
-	 * @return a score between 0 and 1
-	 */
-	public static double similarity(List<String> strings) {
-		double sim = 0;
-		int n = strings.size();
-		if (n == 1)
-			return 1;
-		for (int i = 0; i < n; i++) {
-			for (int j = i + 1; j < n; j++) {
-				sim += Levenshtein.similarity(strings.get(i), strings.get(j));
-			}
-		}
-		return 2 * sim / (n * (n - 1)); // divide by the total number of distances
 	}
 
 	/**
@@ -178,7 +160,7 @@ public class OCRPlasty {
 		if (modelProvider != null) { // One of the RANSAC methods has been called
 			List<String> inliers = getRansacInliers(trimmed, modelProvider, error);
 			Set<String> inliersSet = new HashSet<>(inliers); // Save a Set copy to be able to get the outliers if needed
-			confidence = OCRPlasty.similarity(inliers);
+			confidence = StringCompare.similarity(inliers, SIMILARITY.LEVENSHTEIN);
 			// Compute the string alignment
 			result = inliers.isEmpty() ? ocrPlasty(trimmed) : ocrPlasty(inliers);
 			// If no inliers were found or if we don't need the outliers, return an empty list

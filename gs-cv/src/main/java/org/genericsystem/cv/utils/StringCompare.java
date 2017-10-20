@@ -91,6 +91,14 @@ public class StringCompare {
 		});
 	}
 
+	/**
+	 * Compute the similarity between two strings.
+	 * 
+	 * @param string1 - the first string
+	 * @param string2 - the second string
+	 * @param option - the method to be used for string comparison
+	 * @return a score between 0 and 1
+	 */
 	public static double compare(String string1, String string2, SIMILARITY option) {
 		double sim = 0;
 		switch (option) {
@@ -109,6 +117,26 @@ public class StringCompare {
 			break;
 		}
 		return sim;
+	}
+
+	/**
+	 * Compute the similarity between the members of a list of strings.
+	 * 
+	 * @param strings - the list of strings
+	 * @param option - the method to be used for string comparison
+	 * @return a score between 0 and 1
+	 */
+	public static double similarity(List<String> strings, SIMILARITY option) {
+		double sim = 0;
+		int n = strings.size();
+		if (n == 1)
+			return 1;
+		for (int i = 0; i < n; i++) {
+			for (int j = i + 1; j < n; j++) {
+				sim += compare(strings.get(i), strings.get(j), option);
+			}
+		}
+		return 2 * sim / (n * (n - 1)); // divide by the total number of distances
 	}
 
 	/**
