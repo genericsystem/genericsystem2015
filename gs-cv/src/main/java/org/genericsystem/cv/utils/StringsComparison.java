@@ -33,9 +33,13 @@ public class StringsComparison {
 		 */
 		LETTER_PAIRS,
 		/**
-		 * Use the cosine similarity
+		 * Use the cosine similarity to compare individual chars
 		 */
-		COSINE
+		COSINE_CHAR,
+		/**
+		 * Use the cosine similarity to compare individual words
+		 */
+		COSINE_WORD;
 	}
 
 	public static void main(String[] args) {
@@ -97,8 +101,11 @@ public class StringsComparison {
 		case LETTER_PAIRS:
 			sim = LetterPairSimilarity.compareStrings(string1, string2);
 			break;
-		case COSINE:
+		case COSINE_CHAR:
 			sim = CosineSimilarity.cosineSimilarity(string1, string2, CosineSimilarity.PATTERN.SINGLE_CHAR);
+			break;
+		case COSINE_WORD:
+			sim = CosineSimilarity.cosineSimilarity(string1, string2, CosineSimilarity.PATTERN.WORDS);
 			break;
 		}
 		return sim;
