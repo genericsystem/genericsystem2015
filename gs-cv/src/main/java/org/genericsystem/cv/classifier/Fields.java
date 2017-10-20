@@ -2,7 +2,6 @@ package org.genericsystem.cv.classifier;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -18,7 +17,6 @@ import org.opencv.utils.Converters;
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class Fields extends AbstractFields {
 
-	private static Random rand = new Random(System.currentTimeMillis());
 	private Mat lastHomography;
 	private Mat lastRotation;
 
@@ -57,8 +55,8 @@ public class Fields extends AbstractFields {
 					}
 				}
 			}
-			if (rand.nextBoolean())
-				mergeOverlaps();
+			// if (rand.nextBoolean())
+			// mergeOverlaps();
 		}
 	}
 
