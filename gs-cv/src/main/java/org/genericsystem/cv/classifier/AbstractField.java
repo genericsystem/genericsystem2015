@@ -49,13 +49,13 @@ public abstract class AbstractField {
 		this.confidence = 0;
 	}
 
-	// TODO: verify
 	public void merge(AbstractField field) {
 		field.getLabels().entrySet().forEach(entry -> labels.merge(entry.getKey(), entry.getValue(), Integer::sum));
 		attempts += field.getAttempts();
 		consolidateOcr();
 	}
 
+	// TODO: verify
 	public void merge(List<AbstractField> fields) {
 		fields.forEach(f -> this.merge(f));
 	}

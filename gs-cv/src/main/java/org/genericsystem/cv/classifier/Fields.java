@@ -2,14 +2,11 @@ package org.genericsystem.cv.classifier;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.utils.RectangleTools;
-import org.genericsystem.cv.utils.StringCompare;
-import org.genericsystem.cv.utils.StringCompare.SIMILARITY;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint2f;
@@ -24,40 +21,44 @@ public class Fields extends AbstractFields {
 	private Mat lastRotation;
 
 	public void scanNewRects(Img display, List<Rect> newRects) {
-		if (fields.isEmpty()) {
-			// First iteration
-			this.fields = newRects.stream().map(Field::new).collect(Collectors.toList());
-			fields.forEach(f -> f.ocr(display));
-		} else {
-			this.newFields = newRects.stream().map(Field::new).collect(Collectors.toList());
-			newFields.forEach(f -> f.ocr(display));
-		}
+		if (!fields.isEmpty())
+			oldFields = fields;
+		fields = newRects.stream().map(Field::new).collect(Collectors.toList());
+		randomOcrStream().forEach(f -> ((Field) f).ocr(display));
 	}
 
 	public void merge() {
 		if (lastHomography != null) {
-			fields = (List) transformFields();
-			System.out.println("fields transformed (" + fields.size() + ")");
+			oldFields = (List) restabilizeFields();
+
+			System.out.println("oldFields transformed (" + oldFields.size() + ")");
+
 			for (int i = 0; i < fields.size(); i++) {
-				if (fields.get(i).isConsolidated()) {
-					String currentText = fields.get(i).getConsolidated().get();
-					Field currentField = (Field) fields.get(i);
-					List<Field> matches = (List) findMatchingFieldsWithConfidence(currentField, 0.8); // Compare with fields in newFields
+				Field currentField = (Field) fields.get(i);
+				if (true || currentField.isConsolidated()) {
+					// String currentText = currentField.getConsolidated().get();
+					List<Field> matches = (List) findMatchingFieldsWithConfidence(currentField, 0.6); // Compare with fields in oldFields
+					System.out.println("matches.size() = " + matches.size());
 
 					if (!matches.isEmpty()) {
-						matches.removeIf(f -> {
-							// Remove the element from the list of matches if it was not consolidated, or if the text was not similar enough
-							Optional<String> optional = f.getConsolidated();
-							return optional.map(s -> !s.equals(currentText) && StringCompare.compare(s, currentText, SIMILARITY.COSINE_CHAR) <= MIN_SIMILARITY).orElse(true);
-						});
+						// matches.removeIf(f -> {
+						// // Remove the element from the list of matches if it was not consolidated, or if the text was not similar enough
+						// Optional<String> optional = f.getConsolidated();
+						// return optional.map(s -> !s.equals(currentText) && StringCompare.compare(s, currentText, SIMILARITY.COSINE_CHAR) <= MIN_SIMILARITY).orElse(true);
+						// });
 						System.out.println("Merge : " + currentField.getConsolidated());
 						matches.forEach(f -> currentField.merge(f));
-						newFields.removeAll(matches);
+						boolean ok = oldFields.removeAll(matches);
+						System.out.println("ok: " + ok);
 					} else {
-						System.out.println("No exact matches found");
+						System.out.println("No matches found");
 					}
+				} else {
+					System.out.print(" . ");
 				}
 			}
+			// At this stage, add all the remaining fields still in oldFields
+			fields.addAll(oldFields);
 		}
 
 		// List<Field> oldFields = (List) fields;
@@ -116,11 +117,12 @@ public class Fields extends AbstractFields {
 		return union;
 	}
 
-	private List<Field> transformFields() {
-		List<Rect> virtualRects = fields.stream().map(AbstractField::getRect).map(rect -> findNewRect(rect)).collect(Collectors.toList());
-		return IntStream.range(0, fields.size()).mapToObj(i -> {
+	private List<Field> restabilizeFields() {
+		// Apply the homography + rotation to the oldFields
+		List<Rect> virtualRects = oldFields.stream().map(AbstractField::getRect).map(rect -> findNewRect(rect)).collect(Collectors.toList());
+		return IntStream.range(0, oldFields.size()).mapToObj(i -> {
 			Field f = new Field(virtualRects.get(i));
-			f.merge(fields.get(i));
+			f.merge(oldFields.get(i));
 			return f;
 		}).collect(Collectors.toList());
 	}
