@@ -2,13 +2,20 @@ package org.genericsystem.cv.classifier;
 
 import java.lang.invoke.MethodHandles;
 import java.text.Normalizer;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.stream.IntStream;
 
 import org.genericsystem.cv.Img;
+import org.genericsystem.cv.Ocr;
+import org.genericsystem.cv.utils.OCRPlasty;
+import org.genericsystem.cv.utils.OCRPlasty.RANSAC;
+import org.genericsystem.cv.utils.OCRPlasty.Tuple;
 import org.genericsystem.cv.utils.RectangleTools;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
@@ -24,6 +31,7 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractField {
 
 	protected static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+	protected static final int MIN_SIZE_CONSOLIDATION = 5;
 
 	protected final Rect rect;
 	protected final Point center;
@@ -43,12 +51,54 @@ public abstract class AbstractField {
 
 	public void merge(AbstractField field) {
 		field.getLabels().entrySet().forEach(entry -> labels.merge(entry.getKey(), entry.getValue(), Integer::sum));
-		consolidated = field.getConsolidated(); // TODO: attempt to merge 2 optionals, or compute again the consolidated text from the labels
 		attempts += field.getAttempts();
+		consolidateOcr();
 	}
 
 	public void merge(List<AbstractField> fields) {
 		fields.forEach(f -> this.merge(f));
+	}
+
+	public void ocr(Img rootImg) {
+		Rect largeRect = getLargeRect(rootImg, 0.03, 0.1);
+		if (largeRect.empty() || largeRect.width < 3 || largeRect.height < 3)
+			return;
+		// Prevent OpenCV assertion failure
+		if (!(0 <= largeRect.y && largeRect.y <= largeRect.y + largeRect.height && largeRect.y + largeRect.height <= rootImg.getSrc().rows()))
+			return;
+		Mat roi = new Mat(rootImg.getSrc(), largeRect);
+		String ocr = Ocr.doWork(roi);
+		if (!ocr.isEmpty()) {
+			labels.merge(ocr, 1, Integer::sum);
+			attempts++;
+		}
+		roi.release();
+	}
+
+	protected void consolidateOcr() {
+		consolidateOcr(Integer.MAX_VALUE);
+	}
+
+	protected void consolidateOcr(int limit) {
+		int labelsSize = getLabelsSize();
+		if (labelsSize >= MIN_SIZE_CONSOLIDATION) {
+			List<String> strings;
+			if (Integer.MAX_VALUE == limit)
+				strings = labels.entrySet().stream().collect(ArrayList<String>::new, (list, e) -> IntStream.range(0, e.getValue()).forEach(count -> list.add(e.getKey())), List::addAll);
+			else
+				strings = labels.entrySet().stream().sorted(Entry.<String, Integer>comparingByValue().reversed()).limit(limit).collect(ArrayList<String>::new, (list, e) -> IntStream.range(0, e.getValue()).forEach(count -> list.add(e.getKey())),
+						List::addAll);
+			Tuple res = OCRPlasty.correctStringsAndGetOutliers(strings, RANSAC.NORM_LEVENSHTEIN);
+			this.consolidated = res.getString();
+			this.confidence = res.getConfidence();
+
+			if (labelsSize >= 2 * MIN_SIZE_CONSOLIDATION)
+				res.getOutliers().forEach(outlier -> labels.remove(outlier));
+		} else {
+			logger.trace("Not enough labels to consolidate OCR (current minimum = {})", MIN_SIZE_CONSOLIDATION);
+			this.consolidated = Optional.empty();
+			this.confidence = 0;
+		}
 	}
 
 	public void draw(Img stabilizedDisplay) {
@@ -133,16 +183,12 @@ public abstract class AbstractField {
 		return true;
 	}
 
-	public abstract void ocr(Img rootImg);
-
-	protected abstract void consolidateOcr();
+	public int getLabelsSize() {
+		return labels.entrySet().stream().mapToInt(entry -> entry.getValue()).sum();
+	}
 
 	public Map<String, Integer> getLabels() {
 		return labels;
-	}
-
-	public int getLabelsSize() {
-		return labels.entrySet().stream().mapToInt(entry -> entry.getValue()).sum();
 	}
 
 	public Optional<String> getConsolidated() {
