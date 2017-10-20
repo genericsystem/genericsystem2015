@@ -142,7 +142,13 @@ public class LinesDetector3 extends AbstractApp {
 		Point CD2 = new Point(width / 2, height);
 
 		Point A_, B_, C_, D_;
-		if (rotatedVp.x >= width / 2) {
+		if (Math.abs(rotatedVp.x - width / 2) > 1000) {
+			A_ = A;
+			B_ = B;
+			C_ = C;
+			D_ = D;
+			System.out.println("------------------only rotate----------------------------------");
+		} else if (rotatedVp.x >= width / 2) {
 			A_ = new Line(AB2, rotatedVp).intersection(0);
 			D_ = new Line(CD2, rotatedVp).intersection(0);
 			C_ = new Line(A_, bary).intersection(new Line(CD2, rotatedVp));
@@ -154,9 +160,9 @@ public class LinesDetector3 extends AbstractApp {
 			D_ = new Line(B_, bary).intersection(new Line(CD2, rotatedVp));
 		}
 
-		// System.out.println("vp : " + vp);
-		// System.out.println("rotated vp : " + rotatedVp);
-		// System.out.println("Alpha : " + alpha * 180 / Math.PI);
+		//System.out.println("vp : " + vp);
+		 System.out.println("rotated vp : " + rotatedVp);
+		 System.out.println("Alpha : " + alpha * 180 / Math.PI);
 		// System.out.println("A : " + A + " " + A_);
 		// System.out.println("B : " + B + " " + B_);
 		// System.out.println("C : " + C + " " + C_);
