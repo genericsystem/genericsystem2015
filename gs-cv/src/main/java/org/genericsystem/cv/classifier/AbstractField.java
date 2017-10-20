@@ -1,5 +1,6 @@
 package org.genericsystem.cv.classifier;
 
+import java.lang.invoke.MethodHandles;
 import java.text.Normalizer;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -17,12 +18,18 @@ import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class AbstractField {
+
+	protected static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
 	protected final Rect rect;
 	protected final Point center;
 	protected Map<String, Integer> labels;
 	protected Optional<String> consolidated;
+	protected double confidence;
 	protected long attempts;
 
 	public AbstractField(Rect rect) {
@@ -31,6 +38,7 @@ public abstract class AbstractField {
 		this.consolidated = Optional.empty();
 		this.center = new Point(rect.x + rect.width / 2, rect.y + rect.height / 2);
 		this.attempts = 0;
+		this.confidence = 0;
 	}
 
 	public void merge(AbstractField field) {
@@ -151,6 +159,10 @@ public abstract class AbstractField {
 
 	public Rect getRect() {
 		return rect;
+	}
+
+	public double getConfidence() {
+		return confidence;
 	}
 
 }
