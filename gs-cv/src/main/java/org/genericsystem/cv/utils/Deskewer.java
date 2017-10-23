@@ -46,8 +46,7 @@ public class Deskewer {
 	}
 
 	public enum METHOD {
-		ROTADED_RECTANGLES,
-		HOUGH_LINES
+		ROTADED_RECTANGLES, HOUGH_LINES
 	}
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -67,8 +66,10 @@ public class Deskewer {
 	/**
 	 * Deskew an image, and save it in the same folder as the original image.
 	 * 
-	 * @param imgPath - the Path to the image
-	 * @param method - the method to use for angle detection
+	 * @param imgPath
+	 *            - the Path to the image
+	 * @param method
+	 *            - the method to use for angle detection
 	 * @return the path of the newly saved image
 	 */
 	public static Path deskewAndSave(final Path imgPath, METHOD method) {
@@ -99,8 +100,10 @@ public class Deskewer {
 	/**
 	 * Deskew an image.
 	 * 
-	 * @param imgPath - the path to the image
-	 * @param method - the method to use for angle detection
+	 * @param imgPath
+	 *            - the path to the image
+	 * @param method
+	 *            - the method to use for angle detection
 	 * @return a new {@link Img}
 	 */
 	public static Img deskew(final Path imgPath, METHOD method) {
@@ -115,8 +118,10 @@ public class Deskewer {
 	/**
 	 * Deskew an image.
 	 * 
-	 * @param img - the source img
-	 * @param method - the method to use for angle detection
+	 * @param img
+	 *            - the source img
+	 * @param method
+	 *            - the method to use for angle detection
 	 * @return a rotated {@link Img}
 	 */
 	public static Img deskew(final Img img, METHOD method) {
@@ -129,9 +134,12 @@ public class Deskewer {
 	/**
 	 * Deskew an image with a specific binarization
 	 * 
-	 * @param img - the source image
-	 * @param closed - the binary image
-	 * @param method - the method to use for angle detection
+	 * @param img
+	 *            - the source image
+	 * @param closed
+	 *            - the binary image
+	 * @param method
+	 *            - the method to use for angle detection
 	 * @return a rotated {@link Img}
 	 */
 	public static Img deskew(final Img img, final Img closed, METHOD method) {
@@ -176,7 +184,8 @@ public class Deskewer {
 	/**
 	 * Get the binary image used to compute the deskew angle.
 	 * 
-	 * @param img - the source image
+	 * @param img
+	 *            - the source image
 	 * @return a binary image
 	 */
 	public static Img getBinary(final Img img) {
@@ -186,9 +195,12 @@ public class Deskewer {
 	/**
 	 * Draw the Rotated rectangles used to calculate the deskew angle.
 	 * 
-	 * @param img - the source image
-	 * @param scalar - the color used to draw the rectangles
-	 * @param thickness - the thickness
+	 * @param img
+	 *            - the source image
+	 * @param scalar
+	 *            - the color used to draw the rectangles
+	 * @param thickness
+	 *            - the thickness
 	 * @return - an annotated Img
 	 */
 	public static Img getRotatedRectanglesDrawn(final Img img, Scalar scalar, int thickness) {
@@ -205,9 +217,12 @@ public class Deskewer {
 	/**
 	 * Draw the Hough lines used to calculate the deskew angle.
 	 * 
-	 * @param img - the source image
-	 * @param scalar - the color used to draw the rectangles
-	 * @param thickness - the thickness
+	 * @param img
+	 *            - the source image
+	 * @param scalar
+	 *            - the color used to draw the rectangles
+	 * @param thickness
+	 *            - the thickness
 	 * @return - an annotated Img
 	 */
 	public static Img getLinesDrawn(final Img img, Scalar scalar, int thickness) {
@@ -224,8 +239,10 @@ public class Deskewer {
 	/**
 	 * Detect the deskew angle of an image using one of the methods defined in {@link METHOD}.
 	 * 
-	 * @param dilated - the closed (binary) image
-	 * @param method - the method to use for angle detection
+	 * @param dilated
+	 *            - the closed (binary) image
+	 * @param method
+	 *            - the method to use for angle detection
 	 * @return the rotation angle, in degree
 	 */
 	public static double detectAngle(final Mat dilated, METHOD method) {
@@ -299,9 +316,8 @@ public class Deskewer {
 
 		Map<Integer, RotatedRect> bestFit = new HashMap<>();
 		for (int i = 1, maxAttempts = 10; bestFit.size() <= 3 && i <= maxAttempts; ++i) {
-			Ransac<RotatedRect> ransac = new Ransac<>(data, getModelProviderRects(), n, k * i, t, d);
 			try {
-				ransac.compute();
+				Ransac<RotatedRect> ransac = new Ransac<>(data, getModelProviderRects(), n, k * i, t, d);
 				bestFit = ransac.getBestDataSet();
 				// bestFit.entrySet().forEach(entry -> logger.debug("key: {} | | value: {}", entry.getKey(), entry.getValue()));
 			} catch (Exception e) {
@@ -326,9 +342,8 @@ public class Deskewer {
 
 		Map<Integer, Line> bestFit = new HashMap<>();
 		for (int i = 1, maxAttempts = 10; bestFit.size() <= 3 && i <= maxAttempts; ++i) {
-			Ransac<Line> ransac = new Ransac<>(data.getLines(), getModelProviderLines(), n, k * i, t, d);
 			try {
-				ransac.compute();
+				Ransac<Line> ransac = new Ransac<>(data.getLines(), getModelProviderLines(), n, k * i, t, d);
 				bestFit = ransac.getBestDataSet();
 			} catch (Exception e) {
 				t *= 1.5;
@@ -349,9 +364,9 @@ public class Deskewer {
 				}
 
 				@Override
-				public double computeGlobalError(Collection<RotatedRect> datas) {
+				public double computeGlobalError(List<RotatedRect> datas, Collection<RotatedRect> consensusDatas) {
 					double error = 0;
-					for (RotatedRect rect : datas)
+					for (RotatedRect rect : consensusDatas)
 						error += Math.pow(computeError(rect), 2);
 					return error / datas.size();
 				}
@@ -375,9 +390,9 @@ public class Deskewer {
 				}
 
 				@Override
-				public double computeGlobalError(Collection<Line> datas) {
+				public double computeGlobalError(List<Line> datas, Collection<Line> consensusData) {
 					double error = 0;
-					for (Line line : datas)
+					for (Line line : consensusData)
 						error += Math.pow(computeError(line), 2);
 					return error / datas.size();
 				}

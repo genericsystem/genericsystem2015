@@ -2,10 +2,14 @@ package org.genericsystem.cv;
 
 import java.util.ArrayDeque;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
 
 import org.genericsystem.cv.utils.Line;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
@@ -21,9 +25,6 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
-
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
 
 public class LinesDetector extends AbstractApp {
 
@@ -144,7 +145,7 @@ public class LinesDetector extends AbstractApp {
 					}
 
 					@Override
-					public double computeGlobalError(Collection<Line> datas) {
+					public double computeGlobalError(List<Line> datas, Collection<Line> consensusData) {
 						double error = 0;
 						for (Line data : datas)
 							error += Math.pow(computeError(data), 2);
@@ -160,7 +161,6 @@ public class LinesDetector extends AbstractApp {
 			};
 
 			Ransac<Line> ransac = new Ransac<>(lines, modelProvider, 1, 200, 3 * Math.PI / 180, Double.valueOf(Math.floor(lines.size() * 0.6)).intValue());
-			ransac.compute(false);
 			// System.out.println("Error max : " + ransac.getBestError());
 			// System.out.println("----------------------");
 			// for (Line line : lines) {
@@ -190,18 +190,16 @@ public class LinesDetector extends AbstractApp {
 					}
 
 					@Override
-					public double computeGlobalError(Collection<Line> datas) {
+					public double computeGlobalError(List<Line> datas, Collection<Line> consensusData) {
 						double error = 0;
-						for (Line data : datas)
+						for (Line data : consensusData)
 							error += Math.pow(computeError(data), 2);
 						return error / datas.size();
 					}
 
 				};
 			};
-			Ransac<Line> ransac = new Ransac<>(lines, modelProvider, lines.size() / 8, 100, 25 * Math.PI / 180, lines.size() / 3);
-			ransac.compute();
-			return new Lines(ransac.getBestDataSet().values());
+			return new Lines(new Ransac<>(lines, modelProvider, lines.size() / 8, 100, 25 * Math.PI / 180, lines.size() / 3).getBestDataSet().values());
 		}
 	}
 

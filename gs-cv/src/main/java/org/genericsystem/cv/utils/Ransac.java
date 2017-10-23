@@ -34,14 +34,10 @@ public class Ransac<DATA> {
 		this.k = k;
 		this.d = d;
 		this.modelProvider = modelProvider;
-
+		compute();
 	}
 
-	public void compute() {
-		compute(true);
-	}
-
-	public void compute(boolean adjust) {
+	private void compute() {
 		for (int i = 0; i < k; i++) {
 			Map<Integer, DATA> randomDataMap = new HashMap<>();
 			for (int j = 0; j < n;) {
@@ -56,9 +52,8 @@ public class Ransac<DATA> {
 						randomDataMap.put(pt, datas.get(pt));
 
 			if (randomDataMap.size() >= d) {
-				if (adjust)
-					possibleModel = modelProvider.apply(randomDataMap.values());
-				double erreur = possibleModel.computeGlobalError(randomDataMap.values());
+				possibleModel = modelProvider.apply(randomDataMap.values());
+				double erreur = possibleModel.computeGlobalError(datas, randomDataMap.values());
 				if (erreur < bestError) {
 					bestModel = possibleModel;
 					bestDataMap = randomDataMap;
@@ -87,9 +82,9 @@ public class Ransac<DATA> {
 
 		public double computeError(DATA data);
 
-		public default double computeGlobalError(Collection<DATA> datas) {
+		public default double computeGlobalError(List<DATA> datas, Collection<DATA> consensusDatas) {
 			double error = 0;
-			for (DATA data : datas)
+			for (DATA data : consensusDatas)
 				error += computeError(data);
 			return error;
 		}

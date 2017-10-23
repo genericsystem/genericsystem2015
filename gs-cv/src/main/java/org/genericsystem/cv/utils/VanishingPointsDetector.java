@@ -27,7 +27,6 @@ public class VanishingPointsDetector {
 
 	private static float T_noise_squared = (float) 0.01623 * 2;
 	private static int min_iters = 5;
-	private static final int max_iters = Integer.MAX_VALUE;
 
 	// Parameters
 	int minimal_sample_set_dimension = 2;
@@ -143,8 +142,6 @@ public class VanishingPointsDetector {
 
 			int iter = 0;
 			int T_iter = Integer.MAX_VALUE;
-			int no_updates = 0;
-			int max_no_updates = Integer.MAX_VALUE;
 
 			// Define containers of CS (Consensus set): this.CS_best to store the best one, and this.CS_idx to evaluate a new candidate
 			int[] CS_best = new int[numLines];
@@ -165,10 +162,8 @@ public class VanishingPointsDetector {
 			Mat vp = new Mat(3, 1, CvType.CV_32F);
 
 			// RANSAC loop
-			while ((iter <= min_iters) || ((iter <= T_iter) && (iter <= max_iters) && (no_updates <= max_no_updates))) {
+			while ((iter <= min_iters) || ((iter <= T_iter))) {
 				iter++;
-				if (iter >= max_iters)
-					break;
 
 				// Hypothesize ------------------------
 				// Select MSS
