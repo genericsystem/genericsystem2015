@@ -107,6 +107,7 @@ public abstract class AbstractField {
 
 	public void drawOcrPerspectiveInverse(Img display, Mat homography, Scalar color, int thickness) {
 		if (isOnDisplay(display)) {
+			Scalar scalar = new Scalar(0, 64, 255);
 			List<Point> points = Arrays.asList(center, new Point(rect.x, rect.y), new Point(rect.x + rect.width - 1, rect.y), new Point(rect.x + rect.width - 1, rect.y + rect.height - 1), new Point(rect.x, rect.y + rect.height - 1));
 			MatOfPoint2f results = new MatOfPoint2f();
 			Core.perspectiveTransform(Converters.vector_Point2f_to_Mat(points), results, homography);
@@ -117,8 +118,8 @@ public abstract class AbstractField {
 			Imgproc.line(display.getSrc(), targets[4], targets[1], color, thickness);
 			Point topCenter = new Point((targets[1].x + targets[2].x) / 2, (targets[1].y + targets[2].y) / 2);
 			double l = Math.sqrt(Math.pow(targets[1].x - topCenter.x, 2) + Math.pow(targets[1].y - topCenter.y, 2));
-			Imgproc.line(display.getSrc(), new Point(topCenter.x, topCenter.y - 2), new Point(topCenter.x, topCenter.y - 20), new Scalar(0, 255, 0), 1);
-			Imgproc.putText(display.getSrc(), Normalizer.normalize(consolidated.orElse(""), Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", ""), new Point(topCenter.x - l, topCenter.y - 22), Core.FONT_HERSHEY_TRIPLEX, 0.45, new Scalar(0, 255, 0), 1);
+			Imgproc.line(display.getSrc(), new Point(topCenter.x, topCenter.y - 2), new Point(topCenter.x, topCenter.y - 20), scalar, 1);
+			Imgproc.putText(display.getSrc(), Normalizer.normalize(consolidated.orElse(""), Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", ""), new Point(topCenter.x - l, topCenter.y - 22), Core.FONT_HERSHEY_TRIPLEX, 0.45, scalar, 1);
 		}
 	}
 

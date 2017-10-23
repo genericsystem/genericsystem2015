@@ -64,13 +64,16 @@ public class CamLiveRetriever extends AbstractApp {
 	}
 
 	private final VideoCapture capture = new VideoCapture(0);
-	private final ScheduledExecutorService timer = Executors.newSingleThreadScheduledExecutor();
+	private final ScheduledExecutorService timerFields = Executors.newSingleThreadScheduledExecutor();
+	private final ScheduledExecutorService timerOcr = Executors.newSingleThreadScheduledExecutor();
 
 	@Override
 	public void stop() throws Exception {
 		super.stop();
-		timer.shutdown();
-		timer.awaitTermination(5000, TimeUnit.MILLISECONDS);
+		timerFields.shutdown();
+		timerFields.awaitTermination(5000, TimeUnit.MILLISECONDS);
+		timerOcr.shutdown();
+		timerOcr.awaitTermination(5000, TimeUnit.MILLISECONDS);
 		capture.release();
 		oldKeypoints.release();
 		newKeypoints.release();
@@ -86,34 +89,20 @@ public class CamLiveRetriever extends AbstractApp {
 		DescriptorExtractor extractor = DescriptorExtractor.create(DescriptorExtractor.ORB);
 		DescriptorMatcher matcher = DescriptorMatcher.create(DescriptorMatcher.BRUTEFORCE_HAMMING);
 		capture.read(frame);
+
 		ImageView src0 = new ImageView(Tools.mat2jfxImage(frame));
 		mainGrid.add(src0, 0, 0);
 
 		ImageView src1 = new ImageView(Tools.mat2jfxImage(frame));
-		// ImageView src2 = new ImageView(Tools.mat2jfxImage(frame));
-		// ImageView src3 = new ImageView(Tools.mat2jfxImage(frame));
-
 		mainGrid.add(src1, 0, 1);
 
-		// mainGrid.add(src2, 1, 0);
-		// mainGrid.add(src3, 0, 1);
 		oldKeypoints = new MatOfKeyPoint();
 		oldDescriptors = new Mat();
-		Mat stabilizedMat = new Mat();
-		timer.scheduleAtFixedRate(() -> {
+
+		timerFields.scheduleAtFixedRate(() -> {
 			synchronized (this) {
 				try {
-					capture.read(frame);
-					Img frameImg = new Img(frame, false).bilateralFilter(5, 100, 100);
-					Img deskewed_ = deskew(frameImg);
-					newKeypoints = detect(deskewed_);
-					newDescriptors = new Mat();
-					extractor.compute(deskewed_.getSrc(), newKeypoints, newDescriptors);
-					// Img deskiewedCopy = new Img(deskewed_.getSrc(), true);
-					// Img binary = deskewed_/* .cleanFaces(0.1, 0.26) */.adaptativeGaussianThreshold(17, 7).cleanTables(0.05);
-					// binary.buildLayout().draw(deskiewedCopy, new Scalar(0, 255, 0), 1);
-
-					Img stabilized = stabilize(stabilizedMat, matcher);
+					Img stabilized = getStabilized(frame, extractor, matcher);
 
 					if (stabilized != null) {
 						if (stabilizationHasChanged) {
@@ -121,19 +110,15 @@ public class CamLiveRetriever extends AbstractApp {
 							fields.merge(newRects);
 							stabilizationHasChanged = false;
 						}
-						// layout.ocrTree(stabilized, 0.03, 0.1);
 						Img display = new Img(frame, true);
-						// layout.drawOcrPerspectiveInverse(display, homography[0].inv(), new Scalar(0, 0, 255), 1);
-
 						Img stabilizedDisplay = new Img(stabilized.getSrc(), true);
 
-						fields.consolidateOcr(stabilized);
-						// fields.drawConsolidated(stabilizedDisplay);
-						fields.drawOcrPerspectiveInverse(display, homography.inv(), new Scalar(0, 0, 255), 1);
+						fields.drawOcrPerspectiveInverse(display, homography.inv(), new Scalar(0, 64, 255), 1);
 						src0.setImage(display.toJfxImage());
-						// src1.setImage(old.absDiff(new Img(frame, false)).adaptativeGaussianInvThreshold(17, 9).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(5, 5)).toJfxImage());// deskewed_.toJfxImage());
-						// src2.setImage(deskiewedCopy.toJfxImage());
 						src1.setImage(stabilizedDisplay.toJfxImage());
+
+						display.close();
+						stabilizedDisplay.close();
 					}
 				} catch (Throwable e) {
 					logger.warn("Exception while computing layout.", e);
@@ -141,7 +126,35 @@ public class CamLiveRetriever extends AbstractApp {
 			}
 		}, 500, 33, TimeUnit.MILLISECONDS);
 
-		timer.scheduleAtFixedRate(() -> onSpace(), 0, 110, TimeUnit.MILLISECONDS);
+		timerOcr.scheduleAtFixedRate(() -> {
+			synchronized (this) {
+				try {
+					Img stabilized = getStabilized(frame, extractor, matcher);
+					if (stabilized != null) {
+						fields.consolidateOcr(stabilized);
+					}
+				} catch (Throwable e) {
+					logger.warn("Exception while computing OCR", e);
+				}
+			}
+		}, 500, 500, TimeUnit.MILLISECONDS);
+
+		timerFields.scheduleAtFixedRate(() -> onSpace(), 0, 110, TimeUnit.MILLISECONDS);
+	}
+
+	private Img getStabilized(Mat frame, DescriptorExtractor extractor, DescriptorMatcher matcher) {
+		Mat stabilizedMat = new Mat();
+		capture.read(frame);
+		Img frameImg = new Img(frame, false);
+		frameImg = frameImg.bilateralFilter(5, 100, 100);
+		Img deskewed_ = deskew(frameImg);
+		newKeypoints = detect(deskewed_);
+		newDescriptors = new Mat();
+		extractor.compute(deskewed_.getSrc(), newKeypoints, newDescriptors);
+		Img stabilized = stabilize(stabilizedMat, matcher);
+		frameImg.close();
+		deskewed_.close();
+		return stabilized;
 	}
 
 	@Override

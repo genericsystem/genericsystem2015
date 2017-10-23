@@ -35,7 +35,7 @@ public class Fields extends AbstractFields {
 				Field currentOldField = it.next();
 				List<Field> matches = (List) findMatchingFieldsWithConfidence(currentOldField, 0.7);
 				if (!matches.isEmpty()) {
-					System.out.println("Merge : " + currentOldField.getConsolidated().orElse("--"));
+					currentOldField.getConsolidated().ifPresent(s -> System.out.println("Merged: " + s));
 					matches.forEach(f -> {
 						f.merge(currentOldField);
 						f.resetDeadCounter();
@@ -112,7 +112,7 @@ public class Fields extends AbstractFields {
 	public void consolidateOcr(Img rootImg) {
 		long TS = System.currentTimeMillis();
 		// XXX Replace needOCR with a random index
-		randomOcrStream().filter(f -> System.currentTimeMillis() - TS <= 200).forEach(f -> f.ocr(rootImg));
+		randomOcrStream().filter(f -> System.currentTimeMillis() - TS <= 100).forEach(f -> f.ocr(rootImg));
 	}
 
 }
