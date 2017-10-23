@@ -40,6 +40,10 @@ public class Levenshtein {
 	}
 
 	public static double similarity(String string1, String string2) {
-		return 1 - distance(string1, string2) / (double) Math.max(string1.length(), string2.length());
+		return 1 - normedDistance(string1, string2);
+	}
+
+	public static double normedDistance(String string1, String string2) {
+		return distance(string1, string2) / (double) Math.max(string1.length(), string2.length());
 	}
 }
