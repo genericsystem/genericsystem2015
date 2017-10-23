@@ -63,6 +63,7 @@ public class CamLiveRetriever extends AbstractApp {
 	}
 
 	private final VideoCapture capture = new VideoCapture(0);
+	private Img stabilized = null;
 	private final ScheduledExecutorService timerFields = Executors.newSingleThreadScheduledExecutor();
 	private final ScheduledExecutorService timerOcr = Executors.newSingleThreadScheduledExecutor();
 
@@ -101,8 +102,7 @@ public class CamLiveRetriever extends AbstractApp {
 		timerFields.scheduleAtFixedRate(() -> {
 			synchronized (this) {
 				try {
-					Img stabilized = getStabilized(frame, extractor, matcher);
-
+					stabilized = getStabilized(frame, extractor, matcher);
 					if (stabilized != null) {
 						if (stabilizationHasChanged) {
 							List<Rect> newRects = detectRects(stabilized);
@@ -128,7 +128,6 @@ public class CamLiveRetriever extends AbstractApp {
 		timerOcr.scheduleAtFixedRate(() -> {
 			synchronized (this) {
 				try {
-					Img stabilized = getStabilized(frame, extractor, matcher);
 					if (stabilized != null) {
 						fields.consolidateOcr(stabilized);
 					}
