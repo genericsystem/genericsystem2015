@@ -36,8 +36,8 @@ public abstract class AbstractField {
 	private static ThreadLocalRandom rand = ThreadLocalRandom.current();
 	protected static final int MIN_SIZE_CONSOLIDATION = 5;
 
-	protected final Rect rect;
-	protected final Point center;
+	protected Rect rect;
+	protected Point center;
 	protected Map<String, Integer> labels;
 	protected Optional<String> consolidated;
 	protected double confidence;
