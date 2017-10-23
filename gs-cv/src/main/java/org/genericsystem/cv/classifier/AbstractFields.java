@@ -47,7 +47,6 @@ public abstract class AbstractFields implements Iterable<AbstractField> {
 	}
 
 	public void consolidateOcr(Img rootImg) {
-		// stream().filter(AbstractField::needOcr).filter(f -> f.canBeOCR(rootImg)).forEach(f -> f.ocr(rootImg));
 		randomOcrStream().forEach(f -> f.ocr(rootImg));
 	}
 

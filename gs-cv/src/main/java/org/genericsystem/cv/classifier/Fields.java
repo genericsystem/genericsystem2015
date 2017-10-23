@@ -3,6 +3,7 @@ package org.genericsystem.cv.classifier;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -21,6 +22,7 @@ public class Fields extends AbstractFields {
 	private Mat lastHomography;
 	private Mat lastRotation;
 
+	private static ThreadLocalRandom rand = ThreadLocalRandom.current();
 	private static final int MAX_DELETE_UNMERGED = 5;
 
 	public void merge(List<Rect> newRects) {
@@ -111,8 +113,10 @@ public class Fields extends AbstractFields {
 	@Override
 	public void consolidateOcr(Img rootImg) {
 		long TS = System.currentTimeMillis();
-		// XXX Replace needOCR with a random index
-		randomOcrStream().filter(f -> System.currentTimeMillis() - TS <= 100).forEach(f -> f.ocr(rootImg));
+		while (System.currentTimeMillis() - TS <= 150) {
+			int idx = rand.nextInt(size());
+			fields.get(idx).ocr(rootImg);
+		}
 	}
 
 }

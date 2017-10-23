@@ -47,7 +47,6 @@ public class CamLiveRetriever extends AbstractApp {
 	private MatOfKeyPoint newKeypoints;
 	private Mat oldDescriptors;
 	private Mat newDescriptors;
-	// private Layout layout;
 	private final Fields fields = new Fields();
 	private boolean stabilizationHasChanged = true;
 
