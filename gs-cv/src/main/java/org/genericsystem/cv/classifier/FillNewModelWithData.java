@@ -66,7 +66,7 @@ public class FillNewModelWithData {
 
 	public static void main(String[] args) {
 		Path basePath = Paths.get(System.getenv("HOME") + "/genericsystem/gs-ir-files/");
-		Path filePath = basePath.resolve(Paths.get("converted-png", "image-1.png"));
+		Path filePath = basePath.resolve(Paths.get("converted-png", "image-1094900021964925380-0.png"));
 		Path deskewedPath = Deskewer.deskewAndSave(filePath, METHOD.HOUGH_LINES);
 		JsonObject jsonFields = detectFields(deskewedPath);
 		System.out.println(jsonFields.encodePrettily());
@@ -75,7 +75,6 @@ public class FillNewModelWithData {
 		Root engine = getEngine(gsPath);
 		saveOcrDataInModel(engine, data);
 		engine.close();
-
 	}
 
 	public static Root getEngine(String gsPath) {
@@ -166,7 +165,7 @@ public class FillNewModelWithData {
 		// Loop through each field, and do the OCR
 		Map<String, JsonObject> result = new ConcurrentHashMap<>(fields.size() + 1);
 		fields.forEach(field -> {
-			logger.info("Field {}", field.getNum());
+			logger.info("Field {}", ((DocField) field).getNum());
 			imgs.entrySet().forEach(entry -> {
 				if (!("reality".equals(entry.getKey()) || "best".equals(entry.getKey()))) {
 					// Do the ocr, and store the value in the "labels" Map
@@ -178,12 +177,12 @@ public class FillNewModelWithData {
 
 			// Store the field data in a json object
 			JsonObject json = new JsonObject();
-			json.put(FIELD_NUM, field.getNum());
+			json.put(FIELD_NUM, ((DocField) field).getNum());
 			json.put(CONSOLIDATED, field.getConsolidated().orElse(""));
 			json.put(RECT, JsonObject.mapFrom(field.getRect()));
 
 			// Add this to the result
-			result.put(field.getUid(), json);
+			result.put(((DocField) field).getUid(), json);
 		});
 		// Store the ocr in the JsonObject
 		jsonObject.put(ZONES, result);
