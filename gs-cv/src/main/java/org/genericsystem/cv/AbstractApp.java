@@ -76,6 +76,9 @@ public abstract class AbstractApp extends Application {
 		ImageView imageView = new ImageView(new Image(new ByteArrayInputStream(buffer.toArray())));
 		imageView.setPreserveRatio(true);
 		imageView.setFitWidth(displayWidth);
+		conv.release();
+		target.release();
+		buffer.release();
 		return imageView;
 	}
 
