@@ -9,12 +9,6 @@ public class Field extends AbstractField {
 		super(rect);
 	}
 
-	public Field saveForLater(Rect newRect) {
-		Field f = new Field(newRect);
-		f.merge(this);
-		return f;
-	}
-
 	@Override
 	public void ocr(Img rootImg) {
 		super.ocr(rootImg);

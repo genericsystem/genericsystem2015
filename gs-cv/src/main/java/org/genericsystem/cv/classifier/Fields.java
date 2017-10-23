@@ -21,6 +21,8 @@ public class Fields extends AbstractFields {
 	private Mat lastHomography;
 	private Mat lastRotation;
 
+	private static final int MAX_DELETE_UNMERGED = 5;
+
 	public void merge(List<Rect> newRects) {
 		List<Field> oldFields = restabilizeFields();
 		System.out.println("oldFields transformed (" + oldFields.size() + ")");
@@ -34,12 +36,18 @@ public class Fields extends AbstractFields {
 				List<Field> matches = (List) findMatchingFieldsWithConfidence(currentOldField, 0.7);
 				if (!matches.isEmpty()) {
 					System.out.println("Merge : " + currentOldField.getConsolidated().orElse("--"));
-					matches.forEach(f -> f.merge(currentOldField));
+					matches.forEach(f -> {
+						f.merge(currentOldField);
+						f.resetDeadCounter();
+					});
 					it.remove();
 				} else {
 					System.out.println("No matches found");
 				}
 			}
+			// Increment the deadCounter in old fields that were not merged
+			oldFields.forEach(f -> f.incrementDeadCounter());
+			oldFields.removeIf(f -> f.deadCounter >= MAX_DELETE_UNMERGED);
 			// At this stage, add all the remaining fields still in oldFields
 			fields.addAll(oldFields);
 		}
@@ -104,7 +112,7 @@ public class Fields extends AbstractFields {
 	public void consolidateOcr(Img rootImg) {
 		long TS = System.currentTimeMillis();
 		// XXX Replace needOCR with a random index
-		stream().filter(AbstractField::needOcr).filter(f -> System.currentTimeMillis() - TS <= 200).forEach(f -> f.ocr(rootImg));
+		randomOcrStream().filter(f -> System.currentTimeMillis() - TS <= 200).forEach(f -> f.ocr(rootImg));
 	}
 
 }

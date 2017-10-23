@@ -40,6 +40,8 @@ public abstract class AbstractField {
 	protected double confidence;
 	protected long attempts;
 
+	protected int deadCounter;
+
 	public AbstractField(Rect rect) {
 		this.rect = rect;
 		this.labels = new HashMap<>();
@@ -47,11 +49,13 @@ public abstract class AbstractField {
 		this.center = new Point(rect.x + rect.width / 2, rect.y + rect.height / 2);
 		this.attempts = 0;
 		this.confidence = 0;
+		this.deadCounter = 0;
 	}
 
 	public void merge(AbstractField field) {
 		field.getLabels().entrySet().forEach(entry -> labels.merge(entry.getKey(), entry.getValue(), Integer::sum));
 		attempts += field.getAttempts();
+		deadCounter += field.getDeadCounter();
 		consolidateOcr();
 	}
 
@@ -183,6 +187,14 @@ public abstract class AbstractField {
 		return true;
 	}
 
+	public void incrementDeadCounter() {
+		deadCounter++;
+	}
+
+	public void resetDeadCounter() {
+		deadCounter = 0;
+	}
+
 	public int getLabelsSize() {
 		return labels.entrySet().stream().mapToInt(entry -> entry.getValue()).sum();
 	}
@@ -209,6 +221,10 @@ public abstract class AbstractField {
 
 	public double getConfidence() {
 		return confidence;
+	}
+
+	public int getDeadCounter() {
+		return deadCounter;
 	}
 
 	@Override
