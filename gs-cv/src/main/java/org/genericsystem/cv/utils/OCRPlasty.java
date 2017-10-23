@@ -35,7 +35,11 @@ public class OCRPlasty {
 	 * @author Pierrik Lassalas
 	 */
 	public static enum RANSAC {
-		NONE, LCS, DIVERSITY, LEVENSHTEIN, NORM_LEVENSHTEIN
+		NONE,
+		LCS,
+		DIVERSITY,
+		LEVENSHTEIN,
+		NORM_LEVENSHTEIN
 	}
 
 	/**
@@ -99,12 +103,9 @@ public class OCRPlasty {
 	/**
 	 * Get a corrected String from a given list of strings.
 	 * 
-	 * @param labels
-	 *            - the list of string that will be 'averaged'
-	 * @param options
-	 *            - one of the value of {@link RANSAC} enum, which represents the algorithm used to compute the error in the RANSAC model
-	 * @param method
-	 *            - the method to be used to compute string similarity
+	 * @param labels - the list of string that will be 'averaged'
+	 * @param options - one of the value of {@link RANSAC} enum, which represents the algorithm used to compute the error in the RANSAC model
+	 * @param method - the method to be used to compute string similarity
 	 * @return an {@link Optional} containing the string that reached the best consensus, otherwise an empty {@link Optional}
 	 */
 	public static Optional<String> correctStrings(List<String> labels, OCRPlasty.RANSAC options, StringCompare.SIMILARITY method) {
@@ -119,12 +120,9 @@ public class OCRPlasty {
 	/**
 	 * Get a corrected String from a given list of strings, along with a {@link List} of outliers if a RANSAC method was used.
 	 * 
-	 * @param labels
-	 *            - the list of string that will be 'averaged'
-	 * @param options
-	 *            - one of the value of {@link RANSAC} enum, which represents the algorithm used to compute the error in the RANSAC model
-	 * @param method
-	 *            - the method to be used to compute string similarity
+	 * @param labels - the list of string that will be 'averaged'
+	 * @param options - one of the value of {@link RANSAC} enum, which represents the algorithm used to compute the error in the RANSAC model
+	 * @param method - the method to be used to compute string similarity
 	 * @return a {@link Tuple} object with the results
 	 */
 	public static Tuple correctStringsAndGetOutliers(List<String> labels, OCRPlasty.RANSAC options, StringCompare.SIMILARITY method) {
@@ -134,14 +132,10 @@ public class OCRPlasty {
 	/**
 	 * Performs the string correction.
 	 * 
-	 * @param labels
-	 *            - the list of string that will be 'averaged'
-	 * @param options
-	 *            - one of the value of {@link RANSAC} enum, which represents the algorithm used to compute the error in the RANSAC model
-	 * @param method
-	 *            - the method to be used to compute string similarity
-	 * @param needOutliers
-	 *            - true if the list of outliers eliminated by the RANSAC is needed, false otherwise
+	 * @param labels - the list of string that will be 'averaged'
+	 * @param options - one of the value of {@link RANSAC} enum, which represents the algorithm used to compute the error in the RANSAC model
+	 * @param method - the method to be used to compute string similarity
+	 * @param needOutliers - true if the list of outliers eliminated by the RANSAC is needed, false otherwise
 	 * @return a {@link Tuple} object with the results
 	 */
 	private static Tuple doStringCorrection(List<String> labels, OCRPlasty.RANSAC options, StringCompare.SIMILARITY method, boolean needOutliers) {
@@ -198,8 +192,7 @@ public class OCRPlasty {
 	/**
 	 * Attempt to provide a corrected string from a list of string candidates.
 	 * 
-	 * @param labels
-	 *            - the list of strings
+	 * @param labels - the list of strings
 	 * @return an {@link Optional} containing the string if it was found, otherwise an empty {@link Optional}
 	 */
 	private static Optional<String> ocrPlasty(List<String> labels) {
@@ -226,12 +219,9 @@ public class OCRPlasty {
 	/**
 	 * Compute a limited set of strings from a given list, eliminating the outliers using a RANSAC algorithm.
 	 * 
-	 * @param labels
-	 *            - the list of strings
-	 * @param modelProvider
-	 *            - the model provider (see {@link Ransac})
-	 * @param error
-	 *            - the error margin used in the RANSAC to determine whether a value is considered in the model
+	 * @param labels - the list of strings
+	 * @param modelProvider - the model provider (see {@link Ransac})
+	 * @param error - the error margin used in the RANSAC to determine whether a value is considered in the model
 	 * @return a new list of strings consisting without the outliers
 	 */
 	private static List<String> getRansacInliers(List<String> labels, Function<Collection<String>, Model<String>> modelProvider, double error) {
@@ -245,8 +235,8 @@ public class OCRPlasty {
 
 		Map<Integer, String> bestFit = new HashMap<>();
 		for (int i = 1, maxAttempts = 10; bestFit.size() <= 3 && i <= maxAttempts; ++i) {
-			Ransac<String> ransac = new Ransac<>(trimmed, modelProvider, 2, 10 * i, error, minSize);
 			try {
+				Ransac<String> ransac = new Ransac<>(trimmed, modelProvider, 2, 10 * i, error, minSize);
 				bestFit = ransac.getBestDataSet();
 				// bestFit.entrySet().forEach(entry -> logger.debug("key: {} | | value: {}", entry.getKey(), entry.getValue()));
 			} catch (Exception e) {
@@ -381,8 +371,7 @@ public class OCRPlasty {
 	/**
 	 * Select the best string candidate from a list.
 	 * 
-	 * @param candidates
-	 *            - the list of strings
+	 * @param candidates - the list of strings
 	 * @return the best candidate
 	 */
 	private static String selectBest(List<String> candidates) {
@@ -397,10 +386,8 @@ public class OCRPlasty {
 	/**
 	 * String between two consecutive elements of the LCS
 	 * 
-	 * @param string
-	 *            - the string in which the search is performed
-	 * @param c
-	 *            - the character in the LCS
+	 * @param string - the string in which the search is performed
+	 * @param c - the character in the LCS
 	 * @return a list with the cropped string as the first element, and the 'interstring' as the second element
 	 */
 	private static List<String> interString(String string, char c) {
@@ -418,8 +405,7 @@ public class OCRPlasty {
 	/**
 	 * String following the last element of the LCS
 	 * 
-	 * @param string
-	 *            - the string in which the search is performed
+	 * @param string - the string in which the search is performed
 	 * @return a list with an empty string as the first element, and the string as the second element
 	 */
 	private static List<String> endString(String string) { // string following the last element of the lcs
@@ -457,8 +443,7 @@ public class OCRPlasty {
 	/**
 	 * Compute the LCS distance between each element of a list
 	 * 
-	 * @param labels
-	 *            - a list of strings
+	 * @param labels - a list of strings
 	 * @return the LCS
 	 */
 	private static String longestCommonSubsequence(List<String> labels) {
@@ -473,10 +458,8 @@ public class OCRPlasty {
 	/**
 	 * Compute the LCS between two strings
 	 * 
-	 * @param stringX
-	 *            - the first string
-	 * @param stringY
-	 *            - the second string
+	 * @param stringX - the first string
+	 * @param stringY - the second string
 	 * @return the LCS
 	 */
 	private static String lcs(String stringX, String stringY) {
