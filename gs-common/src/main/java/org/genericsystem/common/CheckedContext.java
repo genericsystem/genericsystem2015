@@ -5,9 +5,14 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import org.genericsystem.api.core.ApiStatics;
+import org.genericsystem.api.core.FiltersBuilder;
+import org.genericsystem.api.core.IndexFilter;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.tools.Memoizer;
+import org.genericsystem.defaults.DefaultConfig.NonHeritableProperty;
 import org.genericsystem.defaults.DefaultContext;
+import org.genericsystem.defaults.tools.InheritanceComputer;
 
 import io.reactivex.Observable;
 
@@ -66,6 +71,10 @@ public abstract class CheckedContext implements DefaultContext<Generic> {
 		}
 	});
 
+	private final Function<Generic, Function<Generic, Snapshot<Generic>>> getAttributesM = Memoizer.memoize(this::computeGetAttributes);
+
+	private final Function<Generic, Function<Generic, Snapshot<Generic>>> getHoldersM = Memoizer.memoize(this::computeGetHolders);
+
 	protected CheckedContext(Root root) {
 		assert root != null;
 		this.root = root;
@@ -99,6 +108,70 @@ public abstract class CheckedContext implements DefaultContext<Generic> {
 	@Override
 	public Snapshot<Generic> getSubInheritings(Generic vertex) {
 		return getSubInheritingsM.apply(vertex);
+	}
+
+	private Function<Generic, Snapshot<Generic>> computeGetAttributes(Generic generic) {
+		return Memoizer.memoize(attribute -> {
+			return new Snapshot<Generic>() {
+
+				InheritanceComputer<Generic> inheritanceComputer = new InheritanceComputer<>(generic, attribute, ApiStatics.STRUCTURAL);
+
+				@Override
+				public Stream<Generic> unfilteredStream() {
+					Generic nonHeritableProperty = generic.getKey(NonHeritableProperty.class, ApiStatics.NO_POSITION);
+					if (nonHeritableProperty == null || attribute.inheritsFrom(nonHeritableProperty) || attribute.isInheritanceEnabled())
+						return inheritanceComputer.inheritanceStream();
+					return generic.getComposites().filter(new IndexFilter(FiltersBuilder.IS_SPECIALIZATION_OF, attribute)).filter(new IndexFilter(FiltersBuilder.HAS_LEVEL, ApiStatics.STRUCTURAL)).stream();
+				}
+
+				@Override
+				public Observable<Generic> getAdds() {
+					return inheritanceComputer.getAdds();
+				}
+
+				@Override
+				public Observable<Generic> getRemovals() {
+					return inheritanceComputer.getRemovals();
+				}
+			};
+		});
+	}
+
+	@Override
+	public Snapshot<Generic> getAttributes(Generic generic, Generic attribute) {
+		return getAttributesM.apply(generic).apply(attribute);
+	}
+
+	private Function<Generic, Snapshot<Generic>> computeGetHolders(Generic generic) {
+		return Memoizer.memoize(attribute -> {
+			return new Snapshot<Generic>() {
+
+				InheritanceComputer<Generic> inheritanceComputer = new InheritanceComputer<>(generic, attribute, ApiStatics.CONCRETE);
+
+				@Override
+				public Stream<Generic> unfilteredStream() {
+					Generic nonHeritableProperty = generic.getKey(NonHeritableProperty.class, ApiStatics.NO_POSITION);
+					if (nonHeritableProperty == null || attribute.inheritsFrom(nonHeritableProperty) || attribute.isInheritanceEnabled())
+						return inheritanceComputer.inheritanceStream();
+					return generic.getComposites().filter(new IndexFilter(FiltersBuilder.IS_SPECIALIZATION_OF, attribute)).filter(new IndexFilter(FiltersBuilder.HAS_LEVEL, ApiStatics.CONCRETE)).stream();
+				}
+
+				@Override
+				public Observable<Generic> getAdds() {
+					return inheritanceComputer.getAdds();
+				}
+
+				@Override
+				public Observable<Generic> getRemovals() {
+					return inheritanceComputer.getRemovals();
+				}
+			};
+		});
+	}
+
+	@Override
+	public Snapshot<Generic> getHolders(Generic generic, Generic attribute) {
+		return getHoldersM.apply(generic).apply(attribute);
 	}
 
 	public Generic get(Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {

@@ -8,4 +8,7 @@ package org.genericsystem.api.core;
  */
 public interface IContext<T extends IGeneric<T>> {
 
+	Snapshot<T> getAttributes(T generic, T attribute);
+
+	Snapshot<T> getHolders(T generic, T attribute);
 }

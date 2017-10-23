@@ -1,7 +1,6 @@
 package org.genericsystem.defaults.tools;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -24,7 +23,6 @@ import io.reactivex.Observable;
  */
 public class InheritanceComputer<T extends DefaultGeneric<T>> {
 
-	private final Map<T, Collection<T>> inheritingsCache = new HashMap<>();
 	private final Map<T, Observable<T>> addsCache = new HashMap<>();
 	private final Map<T, Observable<T>> removesCache = new HashMap<>();
 	private final Set<T> overridden = new HashSet<>();
@@ -54,11 +52,7 @@ public class InheritanceComputer<T extends DefaultGeneric<T>> {
 	}
 
 	private Stream<T> getInheritingsStream(T superVertex) {
-		Collection<T> result = inheritingsCache.get(superVertex);
-		if (result == null)
-			inheritingsCache.put(superVertex, result = buildInheritings(superVertex).inheritanceStream().collect(Collectors.toList()));
-		return result.stream();
-		// return new Inheritings(superVertex).inheritanceStream();
+		return buildInheritings(superVertex).inheritanceStream();
 	}
 
 	private Observable<T> getAdds(T superVertex) {

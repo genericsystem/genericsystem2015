@@ -7,13 +7,10 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.FiltersBuilder;
 import org.genericsystem.api.core.IGeneric;
 import org.genericsystem.api.core.IndexFilter;
 import org.genericsystem.api.core.Snapshot;
-import org.genericsystem.defaults.DefaultConfig.NonHeritableProperty;
-import org.genericsystem.defaults.tools.InheritanceComputer;
 
 import io.reactivex.Observable;
 
@@ -71,28 +68,7 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 	@SuppressWarnings("unchecked")
 	@Override
 	default Snapshot<T> getAttributes(T attribute) {
-		T nonHeritableProperty = getKey(NonHeritableProperty.class, ApiStatics.NO_POSITION);
-		if (nonHeritableProperty == null || attribute.inheritsFrom(nonHeritableProperty) || attribute.isInheritanceEnabled())
-			return new Snapshot<T>() {
-
-			InheritanceComputer<T> inheritanceComputer = new InheritanceComputer<>((T) DefaultCompositesInheritance.this, attribute, ApiStatics.STRUCTURAL);
-
-			@Override
-			public Stream<T> unfilteredStream() {
-				return inheritanceComputer.inheritanceStream();
-			}
-
-			@Override
-			public Observable<T> getAdds() {
-				return inheritanceComputer.getAdds();
-			}
-
-			@Override
-			public Observable<T> getRemovals() {
-				return inheritanceComputer.getRemovals();
-			}
-		};
-		return getComposites().filter(new IndexFilter(FiltersBuilder.IS_SPECIALIZATION_OF, attribute)).filter(new IndexFilter(FiltersBuilder.HAS_LEVEL, ApiStatics.STRUCTURAL));
+		return getCurrentCache().getAttributes((T) this, attribute);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -137,28 +113,7 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 	@SuppressWarnings("unchecked")
 	@Override
 	default Snapshot<T> getHolders(T attribute) {
-		T nonHeritableProperty = getKey(NonHeritableProperty.class, ApiStatics.NO_POSITION);
-		if (nonHeritableProperty == null || attribute.inheritsFrom(nonHeritableProperty) || attribute.isInheritanceEnabled())
-			return new Snapshot<T>() {
-
-			InheritanceComputer<T> inheritanceComputer = new InheritanceComputer<>((T) DefaultCompositesInheritance.this, attribute, ApiStatics.CONCRETE);
-
-			@Override
-			public Stream<T> unfilteredStream() {
-				return inheritanceComputer.inheritanceStream();
-			}
-
-			@Override
-			public Observable<T> getAdds() {
-				return inheritanceComputer.getAdds();
-			}
-
-			@Override
-			public Observable<T> getRemovals() {
-				return inheritanceComputer.getRemovals();
-			}
-		};
-		return DefaultCompositesInheritance.this.getComposites().filter(new IndexFilter(FiltersBuilder.IS_SPECIALIZATION_OF, attribute)).filter(new IndexFilter(FiltersBuilder.HAS_LEVEL, ApiStatics.CONCRETE));
+		return getCurrentCache().getHolders((T) this, attribute);
 	}
 
 	@SuppressWarnings("unchecked")
