@@ -59,11 +59,6 @@ public abstract class AbstractField {
 		consolidateOcr();
 	}
 
-	// TODO: verify
-	public void merge(List<AbstractField> fields) {
-		fields.forEach(f -> this.merge(f));
-	}
-
 	public void ocr(Img rootImg) {
 		Rect largeRect = getLargeRect(rootImg, 0.03, 0.1);
 		if (largeRect.empty() || largeRect.width < 3 || largeRect.height < 3)

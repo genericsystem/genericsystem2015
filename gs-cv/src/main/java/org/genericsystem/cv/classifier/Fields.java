@@ -59,7 +59,7 @@ public class Fields extends AbstractFields {
 		Rect rect2 = field2.getRect();
 		Rect intersect = RectangleTools.getIntersection(rect1, rect2).orElseThrow(() -> new IllegalArgumentException("No intersecting rectangle was found"));
 		Field intersection = new Field(intersect);
-		intersection.merge(Arrays.asList(field1, field2));
+		Arrays.asList(field1, field2).forEach(f -> intersection.merge(f));
 		return intersection;
 	}
 
@@ -68,7 +68,7 @@ public class Fields extends AbstractFields {
 		Rect rect1 = field1.getRect();
 		Rect rect2 = field2.getRect();
 		Field union = new Field(RectangleTools.getUnion(rect1, rect2));
-		union.merge(Arrays.asList(field1, field2));
+		Arrays.asList(field1, field2).forEach(f -> union.merge(f));
 		return union;
 	}
 
