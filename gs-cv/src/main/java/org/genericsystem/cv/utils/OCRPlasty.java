@@ -328,7 +328,7 @@ public class OCRPlasty {
 				public double computeError(String data) {
 					error = 0d;
 					for (String s : datas) {
-						error += Levenshtein.distance(data, s) / ((double) Math.max(s.length(), data.length()));
+						error += Levenshtein.normedDistance(data, s);
 					}
 					return error / datas.size();
 				}
@@ -351,12 +351,12 @@ public class OCRPlasty {
 		 * Compute the global error (sum of the square of each individual error)
 		 */
 		@Override
-		public double computeGlobalError(List<String> datas, Collection<String> consensusData) {
+		public double computeGlobalError(List<String> datas, Collection<String> consensusDatas) {
 			double globalError = 0d;
-			for (String s : consensusData) {
+			for (String s : consensusDatas) {
 				globalError += Math.pow(computeError(s), 2d);
 			}
-			return globalError / datas.size();
+			return Math.sqrt(globalError) / consensusDatas.size();
 		}
 
 		/**
