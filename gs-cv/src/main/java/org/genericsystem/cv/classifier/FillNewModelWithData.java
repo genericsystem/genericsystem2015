@@ -67,7 +67,7 @@ public class FillNewModelWithData {
 	public static void main(String[] args) {
 		Path basePath = Paths.get(System.getenv("HOME") + "/genericsystem/gs-ir-files/");
 		Path filePath = basePath.resolve(Paths.get("converted-png", "image-1.png"));
-		Path deskewedPath = Deskewer.deskewAndSave(filePath);
+		Path deskewedPath = Deskewer.deskewAndSave(filePath, METHOD.HOUGH_LINES);
 		JsonObject jsonFields = detectFields(deskewedPath);
 		System.out.println(jsonFields.encodePrettily());
 		JsonObject data = processFile(basePath.relativize(deskewedPath), basePath, jsonFields);
