@@ -8,12 +8,9 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
 
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.genericsystem.cv.utils.Ransac;
@@ -29,6 +26,9 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
 import org.opencv.videoio.VideoCapture;
+
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
 
 public class LinesDetector4 extends AbstractApp {
 
@@ -287,7 +287,7 @@ public class LinesDetector4 extends AbstractApp {
 					double epsilon = 1E-5; // less than 1º
 					// data_struct data(li_set, Lengths_set, mi_set, K);
 
-					BiConsumer<double[], Line> evaluateNieto = (params, line) -> {
+					BiFunction<double[], Line, Double> evaluateNieto = (params, line) -> {
 						// Cast to correct types
 
 						// IMPORTANT!!: the vanishing point has arrived here calibrated AND in spherical coordinates!
@@ -307,6 +307,8 @@ public class LinesDetector4 extends AbstractApp {
 							vp.put(1, 0, new float[] { Double.valueOf(vp.get(1, 0)[0] / vp.get(2, 0)[0]).floatValue() });
 							vp.put(2, 0, new float[] { 1 });
 						}
+
+						return distanceNieto(vp, getLineMat(line), line.size(), getLineMiMat(line));
 
 					};
 
@@ -351,41 +353,6 @@ public class LinesDetector4 extends AbstractApp {
 
 					}
 
-					private double distanceNieto(Mat vp, Mat lineSegment, double lengthLineSegment, Mat midPoint) {
-						// IMPORTANT: The vanishing point must arrive here uncalibrated and in Cartesian coordinates
-						// Line segment normal (2D)
-						double n0 = -lineSegment.get(1, 0)[0];
-						double n1 = lineSegment.get(0, 0)[0];
-						double nNorm = Math.sqrt(n0 * n0 + n1 * n1);
-
-						// Mid point
-						double c0 = midPoint.get(0, 0)[0];
-						double c1 = midPoint.get(1, 0)[0];
-						double c2 = midPoint.get(2, 0)[0];
-
-						// Vanishing point (uncalibrated)
-						double v0 = vp.get(0, 0)[0];
-						double v1 = vp.get(1, 0)[0];
-						double v2 = vp.get(2, 0)[0];
-
-						double r0, r1;
-						r0 = v1 * c2 - v2 * c1;
-						r1 = v2 * c0 - v0 * c2;
-						double rNorm = Math.sqrt(r0 * r0 + r1 * r1);
-
-						double num = (r0 * n0 + r1 * n1);
-						if (num < 0)
-							num = -num;
-
-						double d = 0;
-						if (nNorm != 0 && rNorm != 0)
-							d = num / (nNorm * rNorm);
-
-						// d *= lengthLineSegment;
-
-						return d;
-					}
-
 					@Override
 					public double computeGlobalError(List<Line> datas, Collection<Line> consensusDatas) {
 						double globalError = 0;
@@ -406,6 +373,41 @@ public class LinesDetector4 extends AbstractApp {
 				};
 			};
 			return new Ransac<>(lines, modelProvider, minimal_sample_set_dimension, 100, maxError, Double.valueOf(Math.floor(lines.size() * 0.7)).intValue());
+		}
+
+		private double distanceNieto(Mat vp, Mat lineSegment, double lengthLineSegment, Mat midPoint) {
+			// IMPORTANT: The vanishing point must arrive here uncalibrated and in Cartesian coordinates
+			// Line segment normal (2D)
+			double n0 = -lineSegment.get(1, 0)[0];
+			double n1 = lineSegment.get(0, 0)[0];
+			double nNorm = Math.sqrt(n0 * n0 + n1 * n1);
+
+			// Mid point
+			double c0 = midPoint.get(0, 0)[0];
+			double c1 = midPoint.get(1, 0)[0];
+			double c2 = midPoint.get(2, 0)[0];
+
+			// Vanishing point (uncalibrated)
+			double v0 = vp.get(0, 0)[0];
+			double v1 = vp.get(1, 0)[0];
+			double v2 = vp.get(2, 0)[0];
+
+			double r0, r1;
+			r0 = v1 * c2 - v2 * c1;
+			r1 = v2 * c0 - v0 * c2;
+			double rNorm = Math.sqrt(r0 * r0 + r1 * r1);
+
+			double num = (r0 * n0 + r1 * n1);
+			if (num < 0)
+				num = -num;
+
+			double d = 0;
+			if (nNorm != 0 && rNorm != 0)
+				d = num / (nNorm * rNorm);
+
+			// d *= lengthLineSegment;
+
+			return d;
 		}
 
 		public Lines rotate(Mat matrix) {
