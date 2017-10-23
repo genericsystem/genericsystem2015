@@ -211,4 +211,60 @@ public abstract class AbstractField {
 		return confidence;
 	}
 
+	@Override
+	public String toString() {
+		StringBuffer sb = new StringBuffer();
+		sb.append("AbstractField: ").append("\n").append(" -> rect: ").append(rect).append("\n").append(" -> labels size: ").append(labels.size()).append("\n").append(" -> consolidated: ").append(consolidated).append("\n").append(" -> confidence: ")
+				.append(confidence).append("\n");
+		return sb.toString();
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((center == null) ? 0 : center.hashCode());
+		long temp;
+		temp = Double.doubleToLongBits(confidence);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		result = prime * result + ((consolidated == null) ? 0 : consolidated.hashCode());
+		result = prime * result + ((labels == null) ? 0 : labels.hashCode());
+		result = prime * result + ((rect == null) ? 0 : rect.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		AbstractField other = (AbstractField) obj;
+		if (center == null) {
+			if (other.center != null)
+				return false;
+		} else if (!center.equals(other.center))
+			return false;
+		if (Double.doubleToLongBits(confidence) != Double.doubleToLongBits(other.confidence))
+			return false;
+		if (consolidated == null) {
+			if (other.consolidated != null)
+				return false;
+		} else if (!consolidated.equals(other.consolidated))
+			return false;
+		if (labels == null) {
+			if (other.labels != null)
+				return false;
+		} else if (!labels.equals(other.labels))
+			return false;
+		if (rect == null) {
+			if (other.rect != null)
+				return false;
+		} else if (!rect.equals(other.rect))
+			return false;
+		return true;
+	}
+
 }

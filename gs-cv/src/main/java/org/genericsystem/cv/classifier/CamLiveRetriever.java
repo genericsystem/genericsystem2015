@@ -118,8 +118,7 @@ public class CamLiveRetriever extends AbstractApp {
 					if (stabilized != null) {
 						if (stabilizationHasChanged) {
 							List<Rect> newRects = detectRects(stabilized);
-							fields.scanNewRects(stabilized, newRects);
-							fields.merge();
+							fields.merge(newRects);
 							stabilizationHasChanged = false;
 						}
 						// layout.ocrTree(stabilized, 0.03, 0.1);

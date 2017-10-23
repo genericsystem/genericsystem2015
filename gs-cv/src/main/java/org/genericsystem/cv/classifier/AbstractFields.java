@@ -16,7 +16,6 @@ public abstract class AbstractFields implements Iterable<AbstractField> {
 
 	private static ThreadLocalRandom rand = ThreadLocalRandom.current();
 	protected List<AbstractField> fields;
-	protected List<AbstractField> oldFields;
 	protected static final double MIN_SIMILARITY = 0.90;
 	protected static final double OVERLAP_THRESHOLD = 0.30;
 	protected static final double OVERLAP_CONFIDENCE = 0.90;
@@ -24,7 +23,6 @@ public abstract class AbstractFields implements Iterable<AbstractField> {
 
 	public AbstractFields() {
 		this.fields = new ArrayList<>();
-		this.oldFields = new ArrayList<>();
 	}
 
 	public AbstractFields(List<AbstractField> fields) {
@@ -36,7 +34,7 @@ public abstract class AbstractFields implements Iterable<AbstractField> {
 	protected abstract AbstractField getUnion(AbstractField field1, AbstractField field2);
 
 	protected List<AbstractField> findMatchingFieldsWithConfidence(AbstractField field, double threshold) {
-		return oldFields.stream().filter(f -> f.overlapsMoreThanThresh(field.getRect(), threshold)).collect(Collectors.toList());
+		return fields.stream().filter(f -> f.overlapsMoreThanThresh(field.getRect(), threshold)).collect(Collectors.toList());
 	}
 
 	protected List<AbstractField> findContainingFields(AbstractField field) {

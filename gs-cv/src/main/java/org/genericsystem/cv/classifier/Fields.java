@@ -2,6 +2,7 @@ package org.genericsystem.cv.classifier;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -20,82 +21,28 @@ public class Fields extends AbstractFields {
 	private Mat lastHomography;
 	private Mat lastRotation;
 
-	public void scanNewRects(Img display, List<Rect> newRects) {
-		if (!fields.isEmpty())
-			oldFields = fields;
+	public void merge(List<Rect> newRects) {
+		List<Field> oldFields = restabilizeFields();
+		System.out.println("oldFields transformed (" + oldFields.size() + ")");
+
 		fields = newRects.stream().map(Field::new).collect(Collectors.toList());
-		randomOcrStream().forEach(f -> ((Field) f).ocr(display));
-	}
 
-	public void merge() {
 		if (lastHomography != null) {
-			oldFields = (List) restabilizeFields();
-
-			System.out.println("oldFields transformed (" + oldFields.size() + ")");
-
-			for (int i = 0; i < fields.size(); i++) {
-				Field currentField = (Field) fields.get(i);
-				if (true || currentField.isConsolidated()) {
-					// String currentText = currentField.getConsolidated().get();
-					List<Field> matches = (List) findMatchingFieldsWithConfidence(currentField, 0.6); // Compare with fields in oldFields
-					System.out.println("matches.size() = " + matches.size());
-
-					if (!matches.isEmpty()) {
-						// matches.removeIf(f -> {
-						// // Remove the element from the list of matches if it was not consolidated, or if the text was not similar enough
-						// Optional<String> optional = f.getConsolidated();
-						// return optional.map(s -> !s.equals(currentText) && StringCompare.compare(s, currentText, SIMILARITY.COSINE_CHAR) <= MIN_SIMILARITY).orElse(true);
-						// });
-						System.out.println("Merge : " + currentField.getConsolidated());
-						matches.forEach(f -> currentField.merge(f));
-						boolean ok = oldFields.removeAll(matches);
-						System.out.println("ok: " + ok);
-					} else {
-						System.out.println("No matches found");
-					}
+			ListIterator<Field> it = oldFields.listIterator();
+			while (it.hasNext()) {
+				Field currentOldField = it.next();
+				List<Field> matches = (List) findMatchingFieldsWithConfidence(currentOldField, 0.7);
+				if (!matches.isEmpty()) {
+					System.out.println("Merge : " + currentOldField.getConsolidated().orElse("--"));
+					matches.forEach(f -> f.merge(currentOldField));
+					it.remove();
 				} else {
-					System.out.print(" . ");
+					System.out.println("No matches found");
 				}
 			}
 			// At this stage, add all the remaining fields still in oldFields
 			fields.addAll(oldFields);
 		}
-
-		// List<Field> oldFields = (List) fields;
-		// fields = rects.stream().map(Field::new).collect(Collectors.toList());
-		//
-		// if (lastHomography != null) {
-		// List<Field> virtualField = getVirtualFields(oldFields);
-		//
-		// for (int index = 0; index < virtualField.size(); index++) {
-		// if (virtualField.get(index).isConsolidated()) {
-		// Field virtualOldField = virtualField.get(index);
-		// List<Field> matches = (List) findMatchingFieldsWithConfidence(virtualOldField, 0.95);
-		//
-		// if (!matches.isEmpty()) {
-		// // TODO: if multiple matches are found, it might be better to remove the extra fields (NMS?)
-		// System.out.println("Merge : " + virtualOldField.getConsolidated());
-		// matches.forEach(f -> f.merge(virtualOldField));
-		// } else {
-		// System.out.println("No exact matches found");
-		// List<Field> containings = (List) findContainingFields(virtualOldField);
-		// if (!containings.isEmpty()) {
-		// // Check whether virtualOldField's text is found in the containing fields
-		// System.out.println("Found new fields containing the virtual old field");
-		// } else {
-		// System.out.println("No containing fields were found");
-		// List<Field> containeds = (List) findContainedFields(virtualOldField);
-		// if (!containeds.isEmpty()) {
-		// System.out.println("Found new fields contained in the virtual old field");
-		// } else {
-		// System.out.println("No contained fields were found");
-		// }
-		// fields.add(virtualOldField);
-		// }
-		// }
-		// }
-		// }
-		// }
 	}
 
 	@Override
@@ -119,10 +66,10 @@ public class Fields extends AbstractFields {
 
 	private List<Field> restabilizeFields() {
 		// Apply the homography + rotation to the oldFields
-		List<Rect> virtualRects = oldFields.stream().map(AbstractField::getRect).map(rect -> findNewRect(rect)).collect(Collectors.toList());
-		return IntStream.range(0, oldFields.size()).mapToObj(i -> {
+		List<Rect> virtualRects = fields.stream().map(AbstractField::getRect).map(rect -> findNewRect(rect)).collect(Collectors.toList());
+		return IntStream.range(0, fields.size()).mapToObj(i -> {
 			Field f = new Field(virtualRects.get(i));
-			f.merge(oldFields.get(i));
+			f.merge(fields.get(i));
 			return f;
 		}).collect(Collectors.toList());
 	}
