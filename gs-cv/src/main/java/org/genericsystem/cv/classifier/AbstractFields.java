@@ -3,7 +3,6 @@ package org.genericsystem.cv.classifier;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -14,7 +13,6 @@ import org.opencv.core.Scalar;
 
 public abstract class AbstractFields implements Iterable<AbstractField> {
 
-	private static ThreadLocalRandom rand = ThreadLocalRandom.current();
 	protected List<AbstractField> fields;
 	protected static final double MIN_SIMILARITY = 0.90;
 	protected static final double OVERLAP_THRESHOLD = 0.30;
@@ -62,7 +60,7 @@ public abstract class AbstractFields implements Iterable<AbstractField> {
 	}
 
 	public Stream<AbstractField> randomOcrStream() {
-		return stream().filter(f -> rand.nextBoolean());
+		return stream().filter(AbstractField::needOcr);
 	}
 
 	public Stream<AbstractField> consolidatedFieldStream() {

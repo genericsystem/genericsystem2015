@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 
 import org.genericsystem.cv.Img;
@@ -31,6 +32,8 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractField {
 
 	protected static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
+	private static ThreadLocalRandom rand = ThreadLocalRandom.current();
 	protected static final int MIN_SIZE_CONSOLIDATION = 5;
 
 	protected final Rect rect;
@@ -108,6 +111,9 @@ public abstract class AbstractField {
 	public void drawOcrPerspectiveInverse(Img display, Mat homography, Scalar color, int thickness) {
 		if (isOnDisplay(display)) {
 			Scalar scalar = new Scalar(0, 64, 255);
+			String text = consolidated.orElse("");
+			String conf = String.format("%.3f", confidence);
+
 			List<Point> points = Arrays.asList(center, new Point(rect.x, rect.y), new Point(rect.x + rect.width - 1, rect.y), new Point(rect.x + rect.width - 1, rect.y + rect.height - 1), new Point(rect.x, rect.y + rect.height - 1));
 			MatOfPoint2f results = new MatOfPoint2f();
 			Core.perspectiveTransform(Converters.vector_Point2f_to_Mat(points), results, homography);
@@ -119,7 +125,8 @@ public abstract class AbstractField {
 			Point topCenter = new Point((targets[1].x + targets[2].x) / 2, (targets[1].y + targets[2].y) / 2);
 			double l = Math.sqrt(Math.pow(targets[1].x - topCenter.x, 2) + Math.pow(targets[1].y - topCenter.y, 2));
 			Imgproc.line(display.getSrc(), new Point(topCenter.x, topCenter.y - 2), new Point(topCenter.x, topCenter.y - 20), scalar, 1);
-			Imgproc.putText(display.getSrc(), Normalizer.normalize(consolidated.orElse(""), Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", ""), new Point(topCenter.x - l, topCenter.y - 22), Core.FONT_HERSHEY_TRIPLEX, 0.45, scalar, 1);
+			Imgproc.putText(display.getSrc(), Normalizer.normalize(text, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", ""), new Point(topCenter.x - l, topCenter.y - 22), Core.FONT_HERSHEY_TRIPLEX, 0.45, scalar, 1);
+			Imgproc.putText(display.getSrc(), conf, new Point(topCenter.x - l, topCenter.y - 12), Core.FONT_HERSHEY_TRIPLEX, 0.35, scalar.conj());
 		}
 	}
 
@@ -162,25 +169,12 @@ public abstract class AbstractField {
 		return RectangleTools.isOverlapping(imgRect, this.rect);
 	}
 
-	public boolean needMoreAttempts() {
-		return getLabelsSize() < 20;
-	}
-
 	public boolean isConsolidated() {
 		return consolidated.isPresent();
 	}
 
 	public boolean needOcr() {
-		return !isConsolidated() || needMoreAttempts();
-	}
-
-	public boolean canBeOCR(Img display) {
-		Point[] points = RectangleTools.decomposeClockwise(rect);
-		for (int i = 0; i < points.length; ++i) {
-			if (points[i].x < 0 || points[i].y < 0 || points[i].x > display.width() || points[i].y > display.height())
-				return false;
-		}
-		return true;
+		return rand.nextBoolean();
 	}
 
 	public void incrementDeadCounter() {
