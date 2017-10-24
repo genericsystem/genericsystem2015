@@ -160,6 +160,10 @@ public abstract class AbstractField {
 		return RectangleTools.inclusiveArea(this.rect, otherRect) > overlapThreshold;
 	}
 
+	public boolean isClusteredWith(Rect otherRect, double epsilon) {
+		return RectangleTools.isInCluster(this.rect, otherRect, epsilon);
+	}
+
 	public boolean overlapsMoreThanThresh(AbstractField other, double overlapThreshold) {
 		return overlapsMoreThanThresh(other.getRect(), overlapThreshold);
 	}

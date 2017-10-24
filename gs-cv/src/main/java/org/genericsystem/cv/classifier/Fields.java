@@ -35,7 +35,9 @@ public class Fields extends AbstractFields {
 			ListIterator<Field> it = oldFields.listIterator();
 			while (it.hasNext()) {
 				Field currentOldField = it.next();
-				List<Field> matches = (List) findMatchingFieldsWithConfidence(currentOldField, 0.7);
+				// List<Field> matches = (List) findMatchingFieldsWithConfidence(currentOldField, 0.7);
+				List<Field> matches = (List) findClusteredFields(currentOldField, 0.1);
+
 				if (!matches.isEmpty()) {
 					currentOldField.getConsolidated().ifPresent(s -> System.out.println("Merged: " + s));
 					matches.forEach(f -> {

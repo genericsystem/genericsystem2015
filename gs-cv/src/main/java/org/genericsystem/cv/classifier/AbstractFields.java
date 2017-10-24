@@ -34,6 +34,10 @@ public abstract class AbstractFields implements Iterable<AbstractField> {
 		return fields.stream().filter(f -> f.overlapsMoreThanThresh(field.getRect(), threshold)).collect(Collectors.toList());
 	}
 
+	protected List<AbstractField> findClusteredFields(AbstractField field, double epsilon) {
+		return fields.stream().filter(f -> f.isClusteredWith(field.getRect(), epsilon)).collect(Collectors.toList());
+	}
+
 	protected List<AbstractField> findContainingFields(AbstractField field) {
 		return stream().filter(f -> field.isIn(f)).collect(Collectors.toList());
 	}
