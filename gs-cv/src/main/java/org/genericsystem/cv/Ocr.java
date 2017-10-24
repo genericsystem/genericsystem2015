@@ -76,7 +76,7 @@ public class Ocr {
 
 	private static GenericObjectPoolConfig buildPoolConfig() {
 		GenericObjectPoolConfig config = new GenericObjectPoolConfig();
-		config.setMaxTotal(2);
+		config.setMaxTotal(Runtime.getRuntime().availableProcessors());
 		config.setBlockWhenExhausted(true);
 		config.setMaxWaitMillis(30_000);
 		return config;
