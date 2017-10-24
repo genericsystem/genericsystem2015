@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -37,22 +38,59 @@ public class RectangleTools {
 
 		Rect r3 = new Rect(0, 0, 3, 4);
 
-		List<List<Rect>> rects = cluster(Arrays.asList(rect1, rect2, r1, r2, r3), DEFAULT_EPSILON);
-		System.out.println(rects);
-		System.out.println(groupRectangles(Arrays.asList(rect1, rect2, r1, r2, r3), DEFAULT_EPSILON, DEFAULT_GROUP_THRESHOLD));
+		System.out.println(groupRectangles(Arrays.asList(rect1, rect2, r1, r2, r3), MERGE_METHOD.MEAN));
 	}
 
-	public static List<Rect> groupRectangles(List<Rect> input, double eps, double groupThreshold) {
+	/**
+	 * Describe the method used to merge multiple rectangles.
+	 * 
+	 * @author Pierrik Lassalas
+	 */
+	public enum MERGE_METHOD {
+		UNION,
+		INTERSECTION,
+		MEAN;
+	}
+
+	/**
+	 * Group similar rectangles in a list in clusters, then attempt to remove the overlaps. This overloaded method use the default threshold values.<br>
+	 * See {@link #groupRectangles(List, double, double, MERGE_METHOD)}
+	 * 
+	 * @param input - the initial list of rectangles
+	 * @param method - the method used to merge the elements of a cluster into a single rectangle
+	 * @return - a simplified list of rectangles
+	 */
+	public static List<Rect> groupRectangles(List<Rect> input, MERGE_METHOD method) {
+		return groupRectangles(input, DEFAULT_EPSILON, DEFAULT_GROUP_THRESHOLD, method);
+	}
+
+	/**
+	 * Group similar rectangles in a list in clusters, then attempt to remove the overlaps.
+	 * 
+	 * @param input - the initial list of rectangles
+	 * @param eps - a coefficient (> 0) used to determine if two rectangles overlap
+	 * @param groupThreshold - a threshold used to eliminate small clusters of rectangles. In other words, a cluster is removed if its size is less than the threshold.
+	 * @param method - the method used to merge the elements of a cluster into a single rectangle
+	 * @return - a simplified list of rectangles
+	 */
+	public static List<Rect> groupRectangles(List<Rect> input, double eps, double groupThreshold, MERGE_METHOD method) {
 		List<List<Rect>> filtered = cluster(input, eps).stream().filter(sublist -> sublist.size() > groupThreshold).collect(Collectors.toList());
 		Map<Rect, Integer> map = new ConcurrentHashMap<>();
-		for (List<Rect> clustered : filtered) {
-			// XXX: define the reducing method
-			Rect union = clustered.size() <= 1 ? clustered.get(0) : clustered.stream().reduce(clustered.get(0), (r, total) -> getUnion(r, total));
-			// Rect intersection = clustered.size() <= 1 ? clustered.get(0) : clustered.stream().reduce(clustered.get(0), (r, total) -> getIntersection(r, total).orElse(total));
-			// Rect nms = clustered.size() <= 1 ? clustered.get(0) : nonMaximumSuppression(clustered, 0.8).stream().findFirst().orElseThrow(IllegalStateException::new);
-			// TODO: nms: return a list of rectangles: add multiple elements?
-			map.put(union, clustered.size());
+
+		final Function<List<Rect>, Rect> merge;
+		switch (method) {
+		case UNION:
+			merge = list -> list.size() <= 1 ? list.get(0) : list.stream().reduce(list.get(0), (r, total) -> getUnion(r, total));
+			break;
+		case INTERSECTION:
+			merge = list -> list.size() <= 1 ? list.get(0) : list.stream().reduce(list.get(0), (r, total) -> getIntersection(r, total).orElse(total));
+			break;
+		default:
+		case MEAN:
+			merge = list -> list.size() <= 1 ? list.get(0) : getMean(list);
+			break;
 		}
+		filtered.forEach(clustered -> map.put(merge.apply(clustered), clustered.size()));
 
 		Iterator<Entry<Rect, Integer>> outerIt = map.entrySet().iterator();
 		while (outerIt.hasNext()) {
@@ -62,9 +100,9 @@ public class RectangleTools {
 			while (innerIt.hasNext()) {
 				Entry<Rect, Integer> entry = innerIt.next();
 				if (!outer.equals(entry)) {
-					Optional<Rect> tmp = isGroupable(outer.getKey(), outer.getValue(), entry.getKey(), entry.getValue(), eps);
-					if (tmp.isPresent()) {
-						Rect rect = tmp.get();
+					Optional<Rect> match = group(outer.getKey(), outer.getValue(), entry.getKey(), entry.getValue(), eps);
+					if (match.isPresent()) {
+						Rect rect = match.get();
 						if (entry.getKey().equals(rect)) {
 							innerIt.remove();
 						} else {// <=> rect.equals(first.getKey())
@@ -79,6 +117,13 @@ public class RectangleTools {
 		return map.entrySet().stream().map(entry -> entry.getKey()).collect(Collectors.toList());
 	}
 
+	/**
+	 * Group the elements of a list of {@link Rect} in clusters, depending on their similarity.
+	 * 
+	 * @param input - the input list of rectangles
+	 * @param eps - a coefficient (> 0) used to determine if two rectangles overlap
+	 * @return a list of list of rectangles, grouped in clusters
+	 */
 	public static List<List<Rect>> cluster(List<Rect> input, double eps) {
 		List<Rect> copy = new ArrayList<>(input);
 		List<List<Rect>> output = new ArrayList<>();
@@ -96,16 +141,24 @@ public class RectangleTools {
 		return output;
 	}
 
+	/**
+	 * Check whether two rectangles can be considered as part of the same cluster.
+	 * 
+	 * @param rect1 - the first rectangle
+	 * @param rect2 - the second rectangle
+	 * @param eps - a coefficient used to determine the maximum tolerable delta between the two rectangles
+	 * @return true if the rectangles can be considered as part of the same cluster, false otherwise
+	 */
 	public static boolean isInCluster(Rect rect1, Rect rect2, double eps) {
 		double delta = getDelta(rect1, rect2, eps);
 		return Math.abs(rect1.tl().x - rect2.tl().x) <= delta && Math.abs(rect1.tl().y - rect2.tl().y) <= delta && Math.abs(rect1.br().x - rect2.br().x) <= delta && Math.abs(rect1.br().y - rect2.br().y) <= delta;
 	}
 
-	public static double getDelta(Rect rect1, Rect rect2, double eps) {
+	private static double getDelta(Rect rect1, Rect rect2, double eps) {
 		return eps * (Math.min(rect1.width, rect2.width) + Math.min(rect1.height, rect2.height)) / 2;
 	}
 
-	public static Optional<Rect> isGroupable(Rect rect1, int count1, Rect rect2, int count2, double eps) {
+	private static Optional<Rect> group(Rect rect1, int count1, Rect rect2, int count2, double eps) {
 		final Rect bigger, smaller;
 		final int biggerCount, smallerCount;
 		if (rect1.area() > rect2.area()) {
