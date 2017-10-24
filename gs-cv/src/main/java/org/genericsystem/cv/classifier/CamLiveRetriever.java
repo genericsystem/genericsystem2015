@@ -113,6 +113,7 @@ public class CamLiveRetriever extends AbstractApp {
 						Img stabilizedDisplay = new Img(stabilized.getSrc(), true);
 
 						fields.drawOcrPerspectiveInverse(display, homography.inv(), new Scalar(0, 64, 255), 1);
+						fields.drawConsolidated(stabilizedDisplay);
 						src0.setImage(display.toJfxImage());
 						src1.setImage(stabilizedDisplay.toJfxImage());
 
@@ -211,7 +212,6 @@ public class CamLiveRetriever extends AbstractApp {
 		Img closed = stabilized.adaptativeGaussianInvThreshold(7, 3).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(9, 1));
 		Imgproc.findContours(closed.getSrc(), contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 		List<Rect> res = contours.stream().filter(contour -> Imgproc.contourArea(contour) > 200).map(c -> Imgproc.boundingRect(c)).collect(Collectors.toList());
-		// res = RectangleTools.nonMaximumSuppression(res, 0.3).orElse(Collections.emptyList());
 		return res;
 	}
 
