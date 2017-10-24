@@ -63,11 +63,14 @@ public abstract class AbstractField {
 	}
 
 	public void ocr(Img rootImg) {
+		if (rootImg.getSrc().empty())
+			return;
+
 		Rect largeRect = getLargeRect(rootImg, 0.03, 0.1);
 		if (largeRect.empty() || largeRect.width < 3 || largeRect.height < 3)
 			return;
 		// Prevent OpenCV assertion failure
-		if (!(0 <= largeRect.y && largeRect.y <= largeRect.y + largeRect.height && largeRect.y + largeRect.height <= rootImg.getSrc().rows()))
+		if (!(0 <= largeRect.x && 0 <= largeRect.y && largeRect.x + largeRect.width < rootImg.getSrc().cols() && largeRect.y + largeRect.height < rootImg.getSrc().rows()))
 			return;
 		Mat roi = new Mat(rootImg.getSrc(), largeRect);
 		String ocr = Ocr.doWork(roi);
