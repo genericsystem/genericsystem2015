@@ -249,11 +249,8 @@ public class LinesDetector3 extends AbstractApp {
 					Core.gemm(dst, L, 1, new Mat(), 0, ATA);
 
 					// Obtain eigendecomposition
-					Mat w = new Mat();
-					Mat vt = new Mat();
 					Mat v = new Mat();
-
-					Core.SVDecomp(ATA, w, v, vt);
+					Core.SVDecomp(ATA, new Mat(), v, new Mat());
 
 					// Check eigenvecs after SVDecomp
 					if (v.rows() < 3)
