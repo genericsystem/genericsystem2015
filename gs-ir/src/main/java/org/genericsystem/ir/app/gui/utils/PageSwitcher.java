@@ -12,6 +12,7 @@ public class PageSwitcher {
 
 	public static final String PAGE = "page";
 	public static final String HOME_PAGE = "homePage";
+	public static final String CLASSIFIER_PAGE = "classifierPage";
 	public static final String FILTERS_STATISTICS = "filtersStatistics";
 
 	public static class HOME_PAGE implements TagSwitcher {
@@ -27,6 +28,14 @@ public class PageSwitcher {
 		public Observable<Boolean> apply(Context context, Tag tag) {
 			Property<String> pageProperty = tag.getContextProperty(PAGE, context);
 			return RxJavaHelpers.optionalValuesOf(pageProperty).map(opt -> opt.isPresent() && FILTERS_STATISTICS.equals(opt.get()));
+		}
+	}
+
+	public static class CLASSIFIER_PAGE implements TagSwitcher {
+		@Override
+		public Observable<Boolean> apply(Context context, Tag tag) {
+			Property<String> pageProperty = tag.getContextProperty(PAGE, context);
+			return RxJavaHelpers.optionalValuesOf(pageProperty).map(opt -> opt.isPresent() && CLASSIFIER_PAGE.equals(opt.get()));
 		}
 	}
 

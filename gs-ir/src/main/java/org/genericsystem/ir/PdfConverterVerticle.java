@@ -2,6 +2,7 @@ package org.genericsystem.ir;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import org.genericsystem.cv.PdfToPngConverter;
@@ -31,12 +32,13 @@ public class PdfConverterVerticle extends ActionVerticle {
 		future.complete(createdPngs);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	protected void handleResult(AsyncResult<Object> res, JsonObject task) {
 		if (res.succeeded()) {
 			for (Path newPng : (List<Path>) res.result()) {
-				// addTask(newPng.toString().replaceFirst(DistributedVerticle.BASE_PATH, ""), DeskewerVerticle.ACTION);
-				addTask(newPng.toString().replaceFirst(DistributedVerticle.BASE_PATH, ""), ClassifierVerticle.ACTION);
+				addTask(Paths.get(DistributedVerticle.BASE_PATH).relativize(newPng).toString(), DeskewerVerticle.ACTION);
+				// addTask(Paths.get(DistributedVerticle.BASE_PATH).relativize(newPng).toString(), ClassifierVerticle.ACTION);
 			}
 		} else {
 			throw new IllegalStateException("An error has occured while extracting images from PDF", res.cause());

@@ -1,15 +1,8 @@
 package org.genericsystem.ir.app.gui.utils;
 
-import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
-import org.genericsystem.cv.comparator.ComputeBestTextPerZone;
-import org.genericsystem.cv.comparator.ComputeTrainedScores;
-import org.genericsystem.cv.model.Doc.DocInstance;
-import org.genericsystem.cv.model.DocClass.DocClassInstance;
-import org.genericsystem.cv.utils.ModelTools;
-import org.genericsystem.ir.app.gui.pages.HomePageTable;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.EncryptionUtils;
 import org.genericsystem.reactor.Tag;
@@ -32,19 +25,27 @@ public class ContextActionCustom {
 	 * === PAGE NAVIGATION ===
 	 */
 
-	public static class CALL_STATISTICS_PAGE implements ContextAction {
-		@Override
-		public void accept(Context context, Tag tag) {
-			System.out.println("Redirecting to statistics page");
-			tag.setInheritedContextPropertyValue(PageSwitcher.PAGE, context, PageSwitcher.FILTERS_STATISTICS);
-		}
-	}
+	// public static class CALL_STATISTICS_PAGE implements ContextAction {
+	// @Override
+	// public void accept(Context context, Tag tag) {
+	// System.out.println("Redirecting to statistics page");
+	// tag.setInheritedContextPropertyValue(PageSwitcher.PAGE, context, PageSwitcher.FILTERS_STATISTICS);
+	// }
+	// }
 
 	public static class CALL_HOME_PAGE implements ContextAction {
 		@Override
 		public void accept(Context context, Tag tag) {
 			System.out.println("Redirecting to home page");
 			tag.setInheritedContextPropertyValue(PageSwitcher.PAGE, context, PageSwitcher.HOME_PAGE);
+		}
+	}
+
+	public static class CALL_CLASSIFIER_PAGE implements ContextAction {
+		@Override
+		public void accept(Context context, Tag tag) {
+			System.out.println("Redirecting to classifier page");
+			tag.setInheritedContextPropertyValue(PageSwitcher.PAGE, context, PageSwitcher.CLASSIFIER_PAGE);
 		}
 	}
 
@@ -88,20 +89,20 @@ public class ContextActionCustom {
 		}
 	}
 
-	public static class UPDATE_DOCCLASS implements ContextAction {
-		@Override
-		public void accept(Context context, Tag tag) {
-			DocInstance currentDoc = (DocInstance) context.getGeneric();
-			DocClassInstance currentDocClass = (DocClassInstance) context.getGenerics()[1];
-			DocClassInstance newdocClass = (DocClassInstance) tag.getContextProperty(HomePageTable.DOCCLASS_CONTEXT_PROPERTY, context).getValue();
-
-			if (newdocClass != null && newdocClass != currentDocClass) {
-				System.out.println("updating components...");
-				currentDoc = (DocInstance) currentDoc.updateComponent(newdocClass, ApiStatics.BASE_POSITION);
-				System.out.println("done!");
-			}
-		}
-	}
+	// public static class UPDATE_DOCCLASS implements ContextAction {
+	// @Override
+	// public void accept(Context context, Tag tag) {
+	// DocInstance currentDoc = (DocInstance) context.getGeneric();
+	// DocClassInstance currentDocClass = (DocClassInstance) context.getGenerics()[1];
+	// DocClassInstance newdocClass = (DocClassInstance) tag.getContextProperty(HomePageTable.DOCCLASS_CONTEXT_PROPERTY, context).getValue();
+	//
+	// if (newdocClass != null && newdocClass != currentDocClass) {
+	// System.out.println("updating components...");
+	// currentDoc = (DocInstance) currentDoc.updateComponent(newdocClass, ApiStatics.BASE_POSITION);
+	// System.out.println("done!");
+	// }
+	// }
+	// }
 
 	/*
 	 * === BEST OCR TEXT ===
@@ -111,33 +112,35 @@ public class ContextActionCustom {
 		@Override
 		public void accept(Context gsContext, Tag tag) {
 			System.out.println("Refreshing best text...");
-			Root root = gsContext.getGeneric().getRoot();
-			DocInstance docInstance = (DocInstance) gsContext.getGeneric();
-
-			WorkerVerticle worker = new WorkerVerticle(root) {
-				@Override
-				public void start() {
-					tag.addAttribute(gsContext, "disabled", "true");
-					gsContext.getCache().safeExecute(() -> {
-						try {
-							compute();
-							gsContext.getCache().flush();
-						} catch (Exception e) {
-							System.err.println("An error has occured, rollling back...");
-							e.printStackTrace();
-							gsContext.getCache().clear();
-						}
-					});
-					tag.addAttribute(gsContext, "disabled", "");
-					System.out.println("Done!");
-				}
-
-				private void compute() {
-					ComputeBestTextPerZone.computeOneFile(root, docInstance);
-					docInstance.setRefreshTimestamp(ModelTools.getCurrentDate());
-				}
-			};
-			worker.deployAsWorkerVerticle("Failed to execute the task");
+			System.err.println("NOT YET IMPLEMENTED!");
+			// TODO: re-launch the OCR process on this specific file in the background
+			// Root root = gsContext.getGeneric().getRoot();
+			// DocInstance docInstance = (DocInstance) gsContext.getGeneric();
+			//
+			// WorkerVerticle worker = new WorkerVerticle(root) {
+			// @Override
+			// public void start() {
+			// tag.addAttribute(gsContext, "disabled", "true");
+			// gsContext.getCache().safeExecute(() -> {
+			// try {
+			// compute();
+			// gsContext.getCache().flush();
+			// } catch (Exception e) {
+			// System.err.println("An error has occured, rollling back...");
+			// e.printStackTrace();
+			// gsContext.getCache().clear();
+			// }
+			// });
+			// tag.addAttribute(gsContext, "disabled", "");
+			// System.out.println("Done!");
+			// }
+			//
+			// private void compute() {
+			// ComputeBestTextPerZone.computeOneFile(root, docInstance);
+			// docInstance.setRefreshTimestamp(ModelTools.getCurrentDate());
+			// }
+			// };
+			// worker.deployAsWorkerVerticle("Failed to execute the task");
 		}
 	}
 
@@ -145,46 +148,46 @@ public class ContextActionCustom {
 	 * === STATISTICS ===
 	 */
 
-	public static class COMPUTE_STATS implements ContextAction {
-		@Override
-		public void accept(Context context, Tag tag) {
-			System.out.println("Computing scores...");
-			computeStatistics(context, tag, ComputeTrainedScores.BE_GENTLE);
-		}
-	}
-
-	public static class COMPUTE_STATS_STRICT implements ContextAction {
-		@Override
-		public void accept(Context context, Tag tag) {
-			System.out.println("Computing scores (using strict mode)...");
-			computeStatistics(context, tag, ComputeTrainedScores.BE_STRICT);
-		}
-	}
-
-	public static void computeStatistics(Context gsContext, Tag tag, boolean useStrict) {
-		DocClassInstance docClassInstance = (DocClassInstance) gsContext.getGeneric();
-		Root root = docClassInstance.getRoot();
-
-		WorkerVerticle worker = new WorkerVerticle() {
-			@Override
-			public void start() {
-				tag.addAttribute(gsContext, "disabled", "true");
-				gsContext.getCache().safeExecute(() -> {
-					try {
-						ComputeTrainedScores.compute(root, docClassInstance.getValue().toString(), useStrict);
-						gsContext.getCache().flush();
-					} catch (Exception e) {
-						System.err.println("An error has occured, rollling back...");
-						e.printStackTrace();
-						gsContext.getCache().clear();
-					}
-				});
-				tag.addAttribute(gsContext, "disabled", null);
-				System.out.println("Done computing scores!");
-			}
-		};
-		worker.deployAsWorkerVerticle("Failed to execute the task");
-	}
+	// public static class COMPUTE_STATS implements ContextAction {
+	// @Override
+	// public void accept(Context context, Tag tag) {
+	// System.out.println("Computing scores...");
+	// computeStatistics(context, tag, ComputeTrainedScores.BE_GENTLE);
+	// }
+	// }
+	//
+	// public static class COMPUTE_STATS_STRICT implements ContextAction {
+	// @Override
+	// public void accept(Context context, Tag tag) {
+	// System.out.println("Computing scores (using strict mode)...");
+	// computeStatistics(context, tag, ComputeTrainedScores.BE_STRICT);
+	// }
+	// }
+	//
+	// public static void computeStatistics(Context gsContext, Tag tag, boolean useStrict) {
+	// DocClassInstance docClassInstance = (DocClassInstance) gsContext.getGeneric();
+	// Root root = docClassInstance.getRoot();
+	//
+	// WorkerVerticle worker = new WorkerVerticle() {
+	// @Override
+	// public void start() {
+	// tag.addAttribute(gsContext, "disabled", "true");
+	// gsContext.getCache().safeExecute(() -> {
+	// try {
+	// ComputeTrainedScores.compute(root, docClassInstance.getValue().toString(), useStrict);
+	// gsContext.getCache().flush();
+	// } catch (Exception e) {
+	// System.err.println("An error has occured, rollling back...");
+	// e.printStackTrace();
+	// gsContext.getCache().clear();
+	// }
+	// });
+	// tag.addAttribute(gsContext, "disabled", null);
+	// System.out.println("Done computing scores!");
+	// }
+	// };
+	// worker.deployAsWorkerVerticle("Failed to execute the task");
+	// }
 
 	/*
 	 * === LOGIN ===

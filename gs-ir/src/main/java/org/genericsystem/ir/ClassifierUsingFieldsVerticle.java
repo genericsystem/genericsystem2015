@@ -42,9 +42,11 @@ public class ClassifierUsingFieldsVerticle extends ActionVerticle {
 			if (message == ERROR_MSG) {
 				// In case of failure, send the original file
 				addTask(task.getString(DistributedVerticle.FILENAME), NewClassCreatorVerticle.ACTION);
+			} else {
+				Path path = Paths.get(message);
+				Path relative = Paths.get(DistributedVerticle.BASE_PATH).relativize(path);
+				addTask(relative.toString(), AddImageToEngineVerticle.ACTION);
 			}
-			// else
-			// addTask(message.replaceFirst(DistributedVerticle.BASE_PATH, ""), AddImageToEngineVerticle.ACTION);
 		} else
 			throw new IllegalStateException("Error when deskewing the image " + task.getString(DistributedVerticle.FILENAME), res.cause());
 	}

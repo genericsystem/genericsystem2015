@@ -1,7 +1,13 @@
 package org.genericsystem.ir;
 
+import java.lang.invoke.MethodHandles;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import org.genericsystem.common.Root;
 import org.genericsystem.cv.classifier.FillNewModelWithData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -12,11 +18,13 @@ import io.vertx.core.json.JsonObject;
  * 
  * @author Pierrik Lassalas
  */
-public class OcrPersistenceVerticle extends ActionPersistentVerticle {
+public class LinkImgToDocClassVerticle extends ActionPersistentVerticle {
 
-	public static final String ACTION = "ocrPersist";
+	public static final String ACTION = "linkImgToDocClass";
 
-	public OcrPersistenceVerticle(Root engine) {
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
+	public LinkImgToDocClassVerticle(Root engine) {
 		super(engine);
 	}
 
@@ -27,9 +35,11 @@ public class OcrPersistenceVerticle extends ActionPersistentVerticle {
 
 	@Override
 	protected void handle(Future<Object> future, JsonObject task) {
-		JsonObject data = task.getJsonObject(DistributedVerticle.JSON_OBJECT);
+		Path filePath = Paths.get(DistributedVerticle.BASE_PATH + task.getString(DistributedVerticle.FILENAME));
+		String defaultClass = "unclassified";
+		logger.info("Classifying {} as {}", filePath.getFileName(), defaultClass);
 		try {
-			FillNewModelWithData.saveOcrDataInModel(engine, data);
+			FillNewModelWithData.linkImgToDocClass(engine, filePath, defaultClass);
 			future.complete();
 		} catch (RuntimeException e) {
 			future.fail(e);
@@ -40,8 +50,6 @@ public class OcrPersistenceVerticle extends ActionPersistentVerticle {
 	protected void handleResult(AsyncResult<Object> res, JsonObject task) {
 		if (res.failed())
 			throw new IllegalStateException("Exception in OcrPersistenceVerticle.", res.cause());
-		else
-			addTask(task.getString(DistributedVerticle.FILENAME), LinkImgToDocClassVerticle.ACTION);
 	}
 
 }

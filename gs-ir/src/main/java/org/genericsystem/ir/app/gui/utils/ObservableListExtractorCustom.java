@@ -6,16 +6,12 @@ import java.util.function.Predicate;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
-import org.genericsystem.cv.model.Doc;
-import org.genericsystem.cv.model.DocClass;
-import org.genericsystem.cv.model.DocClass.DocClassInstance;
-import org.genericsystem.cv.model.ImgFilter;
-import org.genericsystem.cv.model.Score;
-import org.genericsystem.cv.model.Score.ScoreInstance;
-import org.genericsystem.cv.model.ZoneGeneric;
-import org.genericsystem.cv.model.ZoneGeneric.ZoneInstance;
-import org.genericsystem.cv.model.ZoneText;
-import org.genericsystem.cv.model.ZoneText.ZoneTextInstance;
+import org.genericsystem.cv.newmodel.SimpleModel.DocClassType;
+import org.genericsystem.cv.newmodel.SimpleModel.ImgType;
+import org.genericsystem.cv.newmodel.SimpleModel.DocClassType.DocClassInstance;
+import org.genericsystem.cv.newmodel.SimpleModel.DocType.DocInstance;
+import org.genericsystem.cv.newmodel.SimpleModel.ImgType.ImgInstance;
+import org.genericsystem.cv.newmodel.SimpleModel.ZoneType.ZoneInstance;
 import org.genericsystem.reactor.context.ForEachExtractor;
 
 import io.reactivex.Observable;
@@ -25,6 +21,7 @@ import io.reactivex.Observable;
  * 
  * @author Pierrik Lassalas
  */
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class ObservableListExtractorCustom {
 
 	/*
@@ -35,8 +32,8 @@ public class ObservableListExtractorCustom {
 		@Override
 		public Observable<Snapshot<Generic>> apply(Generic[] generics) {
 			Root root = generics[0].getRoot();
-			DocClass docClass = root.find(DocClass.class);
-			Snapshot<Generic> docClassInstances = docClass.getInstances();
+			DocClassType docClass = root.find(DocClassType.class);
+			Snapshot<Generic> docClassInstances = (Snapshot) docClass.getAllDocClasses();
 			if (null == docClassInstances)
 				return Observable.just(Snapshot.empty());
 			return Observable.just(docClassInstances);
@@ -47,15 +44,22 @@ public class ObservableListExtractorCustom {
 		@Override
 		public Observable<Snapshot<Generic>> apply(Generic[] generics) {
 			DocClassInstance currentDocClass = (DocClassInstance) generics[0];
-			Doc doc = generics[0].getRoot().find(Doc.class);
-			if (null == currentDocClass)
+			Snapshot<DocInstance> docs = currentDocClass.getAllDocInstances();
+			if (null == docs)
 				return Observable.just(Snapshot.empty());
-			System.out.println("Current doc class : " + currentDocClass.info());
-			Snapshot<Generic> docInstances = currentDocClass.getHolders(doc);
-			if (null == docInstances)
-				return Observable.just(Snapshot.empty());
-			return Observable.just(docInstances);
+			return Observable.just((Snapshot) docs);
+		}
+	}
 
+	public static class IMG_SELECTOR implements ForEachExtractor {
+		@Override
+		public Observable<Snapshot<Generic>> apply(Generic[] generics) {
+			Root root = generics[0].getRoot();
+			ImgType imgType = root.find(ImgType.class);
+			Snapshot<Generic> imgInstances = (Snapshot) imgType.getImgInstances();
+			if (null == imgInstances)
+				return Observable.just(Snapshot.empty());
+			return Observable.just(imgInstances);
 		}
 	}
 
@@ -63,66 +67,64 @@ public class ObservableListExtractorCustom {
 	 * === ZONES ===
 	 */
 
-	public static class ZONE_SELECTOR implements ForEachExtractor {
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		@Override
-		public Observable<Snapshot<Generic>> apply(Generic[] generics) {
-			Generic currentDocClass = generics[0];
-			Root root = currentDocClass.getRoot();
-			System.out.println("Current docClass: " + currentDocClass.info());
-			Snapshot<ZoneInstance> zones = (Snapshot) currentDocClass.getHolders(root.find(ZoneGeneric.class));
-			if (zones == null)
-				return Observable.just(Snapshot.empty());
-			return Observable.just((Snapshot) zones.sorted());
-		}
-	}
+	// public static class ZONE_SELECTOR implements ForEachExtractor {
+	// @Override
+	// public Observable<Snapshot<Generic>> apply(Generic[] generics) {
+	// Generic currentDocClass = generics[0];
+	// Root root = currentDocClass.getRoot();
+	// System.out.println("Current docClass: " + currentDocClass.info());
+	// Snapshot<ZoneInstance> zones = (Snapshot) currentDocClass.getHolders(root.find(ZoneGeneric.class));
+	// if (zones == null)
+	// return Observable.just(Snapshot.empty());
+	// return Observable.just((Snapshot) zones.sorted());
+	// }
+	// }
 
 	public static class ZONE_SELECTOR_BEST implements ForEachExtractor {
-		@SuppressWarnings({ "unchecked", "rawtypes" })
 		@Override
 		public Observable<Snapshot<Generic>> apply(Generic[] generics) {
-			Generic currentDoc = generics[0];
-			Root root = currentDoc.getRoot();
-			System.out.println("Document: " + currentDoc.info());
-			Snapshot<ZoneTextInstance> zoneTextInstances = (Snapshot) currentDoc.getHolders(root.find(ZoneText.class));
-			if (zoneTextInstances == null)
+			ImgInstance currentImg = (ImgInstance) generics[0];
+			System.out.println("Document: " + currentImg.info());
+			Snapshot<ZoneInstance> zoneInstances = currentImg.getZoneInstances();
+			if (zoneInstances == null)
 				return Observable.just(Snapshot.empty());
-			return Observable.just((Snapshot) zoneTextInstances.filter(zt -> "best".equals(zt.getImgFilter().getValue())).sort((g1, g2) -> Integer.compare(g1.getZoneNum(), g2.getZoneNum())));
+			return Observable.just((Snapshot) zoneInstances.sort((g1, g2) -> Integer.compare(getNum(g1), getNum(g2))));
+		}
+
+		private int getNum(ZoneInstance zoneInstance) {
+			return Integer.valueOf(zoneInstance.getZoneNum().getValue().toString(), 10);
 		}
 	}
 
-	public static class ZONE_SELECTOR_REALITY implements ForEachExtractor {
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		@Override
-		public Observable<Snapshot<Generic>> apply(Generic[] generics) {
-			Generic currentDoc = generics[0];
-			Root root = currentDoc.getRoot();
-			System.out.println("Document: " + currentDoc.info());
-			Snapshot<ZoneTextInstance> zoneTextInstances = (Snapshot) currentDoc.getHolders(root.find(ZoneText.class));
-			if (zoneTextInstances == null)
-				return Observable.just(Snapshot.empty());
-			long start = System.nanoTime();
-			Snapshot<Generic> ol = (Snapshot) zoneTextInstances.filter(zt -> "reality".equals(zt.getImgFilter().getValue())).sort((g1, g2) -> Integer.compare(g1.getZoneNum(), g2.getZoneNum()));
-			long stop = System.nanoTime();
-			System.out.println("--------- zone selector: " + (stop - start) / 1_000_000 + "ms");
-			return Observable.just(ol);
-		}
-	}
+	// public static class ZONE_SELECTOR_REALITY implements ForEachExtractor {
+	// @Override
+	// public Observable<Snapshot<Generic>> apply(Generic[] generics) {
+	// Generic currentDoc = generics[0];
+	// Root root = currentDoc.getRoot();
+	// System.out.println("Document: " + currentDoc.info());
+	// Snapshot<ZoneTextInstance> zoneTextInstances = (Snapshot) currentDoc.getHolders(root.find(ZoneText.class));
+	// if (zoneTextInstances == null)
+	// return Observable.just(Snapshot.empty());
+	// long start = System.nanoTime();
+	// Snapshot<Generic> ol = (Snapshot) zoneTextInstances.filter(zt -> "reality".equals(zt.getImgFilter().getValue())).sort((g1, g2) -> Integer.compare(g1.getZoneNum(), g2.getZoneNum()));
+	// long stop = System.nanoTime();
+	// System.out.println("--------- zone selector: " + (stop - start) / 1_000_000 + "ms");
+	// return Observable.just(ol);
+	// }
+	// }
 
 	/*
 	 * === DATALIST ===
 	 */
 
 	public static class DATALIST_SELECTOR implements ForEachExtractor {
-		@SuppressWarnings({ "unchecked", "rawtypes" })
 		@Override
 		public Observable<Snapshot<Generic>> apply(Generic[] generics) {
-			ZoneTextInstance zti = (ZoneTextInstance) generics[0];
-			Generic currentDoc = generics[1];
-			Root root = currentDoc.getRoot();
-			Predicate<ZoneTextInstance> filterByZone = z -> z.getZoneNum() == zti.getZoneNum() && !z.getValue().toString().isEmpty();
-			Snapshot<ZoneTextInstance> zoneTextInstances = (Snapshot) currentDoc.getHolders(root.find(ZoneText.class));
-			return Observable.just((Snapshot) zoneTextInstances.filter(filterByZone).sort((g1, g2) -> Collator.getInstance().compare(g1.getValue(), g2.getValue())));
+			ZoneInstance zoneInstance = (ZoneInstance) generics[1];
+			ImgInstance currentImg = (ImgInstance) generics[2];
+			Predicate<ZoneInstance> filterByZone = z -> z.getZoneNum() == zoneInstance.getZoneNum() && !z.getValue().toString().isEmpty();
+			Snapshot<ZoneInstance> zoneInstances = currentImg.getZoneInstances();
+			return Observable.just((Snapshot) zoneInstances.filter(filterByZone).map(z -> z.getConsolidated()).sort((g1, g2) -> Collator.getInstance().compare(g1.getValue(), g2.getValue())));
 		}
 	}
 
@@ -130,34 +132,34 @@ public class ObservableListExtractorCustom {
 	 * === OCR TEXT ===
 	 */
 
-	public static class OCR_SELECTOR implements ForEachExtractor {
-		@Override
-		public Observable<Snapshot<Generic>> apply(Generic[] generics) {
-			Root root = generics[0].getRoot();
-			Snapshot<Generic> filters = root.find(ImgFilter.class).getInstances();
-			if (filters == null)
-				return Observable.just(Snapshot.empty());
-			return Observable.just(filters);
-		}
-	}
+	// public static class OCR_SELECTOR implements ForEachExtractor {
+	// @Override
+	// public Observable<Snapshot<Generic>> apply(Generic[] generics) {
+	// Root root = generics[0].getRoot();
+	// Snapshot<Generic> filters = root.find(ImgFilter.class).getInstances();
+	// if (filters == null)
+	// return Observable.just(Snapshot.empty());
+	// return Observable.just(filters);
+	// }
+	// }
 
 	/*
 	 * === SCORE ===
 	 */
 
-	public static class SCORE_SELECTOR implements ForEachExtractor {
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		@Override
-		public Observable<Snapshot<Generic>> apply(Generic[] generics) {
-			ZoneInstance zoneInstance = (ZoneInstance) generics[0];
-			Root root = zoneInstance.getRoot();
-			System.out.println("Current zone: " + zoneInstance.info());
-			Snapshot<ScoreInstance> scores = (Snapshot) zoneInstance.getHolders(root.find(Score.class));
-			// scores.forEach(g -> System.out.println(g.info()));
-			if (scores == null)
-				return Observable.just(Snapshot.empty());
-			return Observable.just((Snapshot) scores);
-		}
-	}
+	// public static class SCORE_SELECTOR implements ForEachExtractor {
+	// @SuppressWarnings({ "unchecked", "rawtypes" })
+	// @Override
+	// public Observable<Snapshot<Generic>> apply(Generic[] generics) {
+	// ZoneInstance zoneInstance = (ZoneInstance) generics[0];
+	// Root root = zoneInstance.getRoot();
+	// System.out.println("Current zone: " + zoneInstance.info());
+	// Snapshot<ScoreInstance> scores = (Snapshot) zoneInstance.getHolders(root.find(Score.class));
+	// // scores.forEach(g -> System.out.println(g.info()));
+	// if (scores == null)
+	// return Observable.just(Snapshot.empty());
+	// return Observable.just((Snapshot) scores);
+	// }
+	// }
 
 }

@@ -2,14 +2,13 @@ package org.genericsystem.cv.classifier;
 
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import org.genericsystem.cv.Img;
+import org.genericsystem.cv.utils.RectangleTools;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.slf4j.Logger;
@@ -19,24 +18,23 @@ import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
-public class DocFields implements Iterable<DocField> {
+@SuppressWarnings({ "unchecked", "rawtypes" })
+public class DocFields extends AbstractFields {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 	private static final String FIELDS = "fields";
-
-	private List<DocField> fields;
 
 	public DocFields() {
 		this.fields = new ArrayList<>();
 	}
 
 	public DocFields(List<DocField> fields) {
-		this.fields = fields;
+		super((List) fields);
 	}
 
 	public static DocFields of(List<Rect> rects) {
 		DocFields fields = new DocFields();
-		fields.addFields(rects);
+		fields.buildFields(rects);
 		return fields;
 	}
 
@@ -60,42 +58,49 @@ public class DocFields implements Iterable<DocField> {
 		return new JsonObject().put(FIELDS, fields);
 	}
 
-	public void addFields(List<Rect> rects) {
+	public void buildFields(List<Rect> rects) {
 		AtomicInteger counter = new AtomicInteger(0);
 		fields = rects.stream().map(rect -> new DocField(counter.incrementAndGet(), rect)).collect(Collectors.toList());
 	}
 
+	public Img annotateImage(final Img img, final double fontScale, final Scalar color, final int thickness) {
+		Img annotated = new Img(img.getSrc(), true);
+		stream().forEach(field -> ((DocField) field).annotateImage(annotated, fontScale, color, thickness));
+		return annotated;
+	}
+
 	public void drawOcrPerspectiveInverse(Img display, Scalar color, int thickness) {
-		consolidatedFieldStream().forEach(field -> field.drawOcrPerspectiveInverse(display, color, thickness));
-	}
-
-	public void drawConsolidated(Img stabilizedDisplay) {
-		consolidatedFieldStream().forEach(field -> field.draw(stabilizedDisplay));
-	}
-
-	public void consolidateOcr(Img rootImg) {
-		fields.stream().filter(DocField::needOcr).forEach(f -> f.ocr(rootImg));
-	}
-
-	public Stream<DocField> consolidatedFieldStream() {
-		return fields.stream().filter(f -> f.isConsolidated());
-	}
-
-	public int size() {
-		return fields.size();
-	}
-
-	public Stream<DocField> stream() {
-		return StreamSupport.stream(fields.spliterator(), false);
-	}
-
-	public Stream<DocField> parallelStream() {
-		return StreamSupport.stream(fields.spliterator(), true);
+		consolidatedFieldStream().forEach(field -> ((DocField) field).drawOcrPerspectiveInverse(display, color, thickness));
 	}
 
 	@Override
-	public Iterator<DocField> iterator() {
-		return fields.iterator();
+	public void drawConsolidated(Img stabilizedDisplay) {
+		consolidatedFieldStream().forEach(field -> ((DocField) field).drawRect(stabilizedDisplay, new Scalar(0, 0, 255), 2));
+	}
+
+	@Override
+	public void consolidateOcr(Img rootImg) {
+		// Need to process all fields for documents
+		stream().forEach(f -> f.ocr(rootImg));
+	}
+
+	@Override
+	protected Field getIntersection(AbstractField field1, AbstractField field2) {
+		Rect rect1 = field1.getRect();
+		Rect rect2 = field2.getRect();
+		Rect intersect = RectangleTools.getIntersection(rect1, rect2).orElseThrow(() -> new IllegalArgumentException("No intersecting rectangle was found"));
+		Field intersection = new Field(intersect);
+		Arrays.asList(field1, field2).forEach(f -> intersection.merge(f));
+		return intersection;
+	}
+
+	@Override
+	protected Field getUnion(AbstractField field1, AbstractField field2) {
+		Rect rect1 = field1.getRect();
+		Rect rect2 = field2.getRect();
+		Field union = new Field(RectangleTools.getUnion(rect1, rect2));
+		Arrays.asList(field1, field2).forEach(f -> union.merge(f));
+		return union;
 	}
 
 }

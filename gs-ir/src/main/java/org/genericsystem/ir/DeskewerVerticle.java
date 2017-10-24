@@ -39,9 +39,11 @@ public class DeskewerVerticle extends ActionVerticle {
 
 	@Override
 	protected void handleResult(AsyncResult<Object> res, JsonObject task) {
-		if (res.succeeded())
-			addTask(((String) res.result()).replaceFirst(DistributedVerticle.BASE_PATH, ""), ClassifierUsingFieldsVerticle.ACTION);
-		else
+		if (res.succeeded()) {
+			Path path = Paths.get((String) res.result());
+			Path relative = Paths.get(DistributedVerticle.BASE_PATH).relativize(path);
+			addTask(relative.toString(), ClassifierUsingFieldsVerticle.ACTION);
+		} else
 			throw new IllegalStateException("Error when deskewing the image " + task.getString(DistributedVerticle.FILENAME), res.cause());
 	}
 }

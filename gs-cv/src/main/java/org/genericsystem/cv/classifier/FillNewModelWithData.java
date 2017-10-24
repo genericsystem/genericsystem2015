@@ -1,32 +1,39 @@
 package org.genericsystem.cv.classifier;
 
+import java.io.IOException;
 import java.lang.invoke.MethodHandles;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.common.Root;
 import org.genericsystem.cv.Img;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.Consolidated;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.Consolidated.ConsolidatedInstance;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.Doc;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.Doc.DocInstance;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.DocPath;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.DocPath.DocPathInstance;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.DocTimestamp;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.DocTimestamp.DocTimestampInstance;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.ImgFilter;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.ImgFilter.ImgFilterInstance;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.Zone;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.Zone.ZoneInstance;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.ZoneNum;
-import org.genericsystem.cv.classifier.newmodel.SimpleModel.ZoneNum.ZoneNumInstance;
 import org.genericsystem.cv.comparator.FillModelWithData;
 import org.genericsystem.cv.comparator.ImgFilterFunction;
 import org.genericsystem.cv.comparator.ImgFunction;
+import org.genericsystem.cv.newmodel.SimpleModel.ConsolidatedType;
+import org.genericsystem.cv.newmodel.SimpleModel.DocClassType;
+import org.genericsystem.cv.newmodel.SimpleModel.DocClassType.DocClassInstance;
+import org.genericsystem.cv.newmodel.SimpleModel.DocType;
+import org.genericsystem.cv.newmodel.SimpleModel.DocType.DocInstance;
+import org.genericsystem.cv.newmodel.SimpleModel.ImgDocRel;
+import org.genericsystem.cv.newmodel.SimpleModel.ImgDocRel.ImgDocLink;
+import org.genericsystem.cv.newmodel.SimpleModel.ImgPathType;
+import org.genericsystem.cv.newmodel.SimpleModel.ImgRefreshTimestampType;
+import org.genericsystem.cv.newmodel.SimpleModel.ImgTimestampType;
+import org.genericsystem.cv.newmodel.SimpleModel.ImgType;
+import org.genericsystem.cv.newmodel.SimpleModel.ImgType.ImgInstance;
+import org.genericsystem.cv.newmodel.SimpleModel.LayoutType;
+import org.genericsystem.cv.newmodel.SimpleModel.SupervisedType;
+import org.genericsystem.cv.newmodel.SimpleModel.ZoneNumType;
+import org.genericsystem.cv.newmodel.SimpleModel.ZoneType;
+import org.genericsystem.cv.newmodel.SimpleModel.ZoneType.ZoneInstance;
 import org.genericsystem.cv.utils.ClassifierUsingFields;
 import org.genericsystem.cv.utils.Deskewer;
 import org.genericsystem.cv.utils.Deskewer.METHOD;
@@ -45,41 +52,65 @@ public class FillNewModelWithData {
 		NativeLibraryLoader.load();
 	}
 
-	public static final String DOC_PATH = "docPath";
-	public static final String FILENAME = "filename";
-	public static final String ENCODED_FILENAME = "encodedFilename";
-	public static final String DOC_TIMESTAMP = "docTimestamp";
-	public static final String ZONES = "zones";
-	public static final String FIELD_NUM = "fieldNum";
-	public static final String RECT = "rectangle";
-	public static final String CONSOLIDATED = "consolidated";
+	private static final String DOC_PATH = "docPath";
+	private static final String FILENAME = "filename";
+	private static final String ENCODED_FILENAME = "encodedFilename";
+	private static final String DOC_TIMESTAMP = "docTimestamp";
+	private static final String ZONES = "zones";
+	private static final String FIELD_NUM = "fieldNum";
+	private static final String RECT = "rectangle";
+	private static final String CONSOLIDATED = "consolidated";
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 	private static final String gsPath = System.getenv("HOME") + "/genericsystem/gs-cv-newmodel";
 
-	private static final String BASE_PATH = System.getenv("HOME") + "/genericsystem/gs-ir-files/";
-
 	public static void main(String[] args) {
-		Path filePath = Paths.get(BASE_PATH, "converted-png", "image-1.png");
-		Path deskewedPath = deskewFile(filePath);
+		Path basePath = Paths.get(System.getenv("HOME") + "/genericsystem/gs-ir-files/");
+		Path filePath = basePath.resolve(Paths.get("converted-png", "image-1094900021964925380-0.png"));
+		Path deskewedPath = Deskewer.deskewAndSave(filePath, METHOD.HOUGH_LINES);
 		JsonObject jsonFields = detectFields(deskewedPath);
 		System.out.println(jsonFields.encodePrettily());
-		JsonObject data = processFile(deskewedPath, jsonFields);
+		JsonObject data = processFile(basePath.relativize(deskewedPath), basePath, jsonFields);
 		System.out.println(data.encodePrettily());
 		Root engine = getEngine(gsPath);
 		saveOcrDataInModel(engine, data);
 		engine.close();
-
 	}
 
 	public static Root getEngine(String gsPath) {
-		return new Engine(gsPath, ImgFilter.class, ImgFilterInstance.class, Doc.class, DocInstance.class, Zone.class, ZoneInstance.class, ZoneNum.class, ZoneNumInstance.class, Consolidated.class, ConsolidatedInstance.class, DocPath.class,
-				DocPathInstance.class, DocTimestamp.class, DocTimestampInstance.class);
+		return new Engine(gsPath, DocClassType.class, LayoutType.class, ImgDocRel.class, DocType.class, ImgType.class, ZoneType.class, ZoneNumType.class, ConsolidatedType.class, ImgPathType.class, ImgTimestampType.class, ImgRefreshTimestampType.class,
+				SupervisedType.class);
 	}
 
-	public static Path deskewFile(Path imgPath) {
-		Path deskewed = Deskewer.deskewAndSave(imgPath, METHOD.ROTADED_RECTANGLES);
-		return deskewed;
+	// XXX: might need to refactor the code to be able to indicate whether the file already exists (or not) or if an error occurred at some point in the method
+	public static boolean registerNewFile(Root engine, Path relativeImgPath, Path basePath, Path resourcesFolder) {
+		logger.info("Adding a new image ({}) ", relativeImgPath.getFileName());
+		Path absolutePath = basePath.resolve(relativeImgPath);
+		String filenameExt = ModelTools.generateFileName(absolutePath);
+		ImgType imgType = engine.find(ImgType.class);
+		try {
+			ImgInstance imgInstance = imgType.addImg(filenameExt);
+			engine.getCurrentCache().flush();
+			if (null == imgInstance) {
+				logger.error("An error has occured while saving file {}", filenameExt);
+				return false;
+			} else {
+				imgInstance.setImgPath(relativeImgPath.toString());
+				imgInstance.setImgTimestamp(ModelTools.getCurrentDate());
+				engine.getCurrentCache().flush();
+				try {
+					Files.copy(absolutePath, resourcesFolder.resolve(filenameExt), StandardCopyOption.REPLACE_EXISTING);
+				} catch (IOException e) {
+					logger.error(String.format("An error has occured while copying image %s to resources folder", filenameExt), e);
+				}
+				return true;
+			}
+		} catch (RollbackException e) {
+			logger.warn("The image {} has already been saved in Generic System", relativeImgPath.getFileName());
+			return false;
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
 	}
 
 	public static JsonObject detectFields(Path imgPath) {
@@ -93,19 +124,20 @@ public class FillNewModelWithData {
 		}
 	}
 
-	public static JsonObject processFile(Path imgPath, JsonObject jsonFields) {
+	public static JsonObject processFile(Path relativeImgPath, Path basePath, JsonObject jsonFields) {
+		Path absolutePath = basePath.resolve(relativeImgPath);
 		// Create a JsonObject for the answer
 		JsonObject jsonObject = new JsonObject();
-		jsonObject.put(DOC_PATH, Paths.get(BASE_PATH).relativize(imgPath).toString());
-		jsonObject.put(FILENAME, imgPath.getFileName().toString());
-		jsonObject.put(ENCODED_FILENAME, ModelTools.generateFileName(imgPath));
+		jsonObject.put(FILENAME, relativeImgPath.getFileName().toString());
+		jsonObject.put(ENCODED_FILENAME, ModelTools.generateFileName(absolutePath));
 		jsonObject.put(DOC_TIMESTAMP, ModelTools.getCurrentDate());
+		jsonObject.put(DOC_PATH, relativeImgPath.toString());
 
 		// Get the doc fields
 		DocFields fields = DocFields.of(jsonFields);
 
 		// Get the imgFilterFunctions, and create a Map with the processed images
-		Img deskewed = new Img(imgPath.toString());
+		Img deskewed = new Img(absolutePath.toString());
 		final List<ImgFilterFunction> imgFilterFunctions = FillModelWithData.getFilterFunctions();
 		Map<String, Img> imgs = new ConcurrentHashMap<>(imgFilterFunctions.size() + 1);
 		imgFilterFunctions.forEach(entry -> {
@@ -116,7 +148,7 @@ public class FillNewModelWithData {
 
 			long start = System.nanoTime();
 			if ("original".equals(filtername) || "reality".equals(filtername)) {
-				img = deskewed;
+				img = new Img(deskewed.getSrc(), true);
 			} else {
 				img = function.apply(deskewed);
 			}
@@ -126,14 +158,14 @@ public class FillNewModelWithData {
 			if (null != img) {
 				imgs.put(filtername, img);
 			} else {
-				logger.error("An error as occured for image {} and filter {}", imgPath.getFileName(), filtername);
+				logger.error("An error as occured for image {} and filter {}", relativeImgPath.getFileName(), filtername);
 			}
 		});
 
 		// Loop through each field, and do the OCR
 		Map<String, JsonObject> result = new ConcurrentHashMap<>(fields.size() + 1);
 		fields.forEach(field -> {
-			logger.info("Field {}", field.getNum());
+			logger.info("Field {}", ((DocField) field).getNum());
 			imgs.entrySet().forEach(entry -> {
 				if (!("reality".equals(entry.getKey()) || "best".equals(entry.getKey()))) {
 					// Do the ocr, and store the value in the "labels" Map
@@ -145,12 +177,12 @@ public class FillNewModelWithData {
 
 			// Store the field data in a json object
 			JsonObject json = new JsonObject();
-			json.put(FIELD_NUM, field.getNum());
+			json.put(FIELD_NUM, ((DocField) field).getNum());
 			json.put(CONSOLIDATED, field.getConsolidated().orElse(""));
 			json.put(RECT, JsonObject.mapFrom(field.getRect()));
 
 			// Add this to the result
-			result.put(field.getUid(), json);
+			result.put(((DocField) field).getUid(), json);
 		});
 		// Store the ocr in the JsonObject
 		jsonObject.put(ZONES, result);
@@ -163,6 +195,7 @@ public class FillNewModelWithData {
 		return jsonObject;
 	}
 
+	// Update the return type to indicate whether the document was already known, if new zones were added, etc.
 	public static void saveOcrDataInModel(Root engine, JsonObject data) {
 		// Parse the data
 		String docPath = data.getString(DOC_PATH);
@@ -171,13 +204,20 @@ public class FillNewModelWithData {
 		JsonObject zonesResults = data.getJsonObject(ZONES);
 
 		// Get the generics
-		Doc doc = engine.find(Doc.class);
+		ImgType imgType = engine.find(ImgType.class);
 
 		// Set the doc instance and some attributes
-		DocInstance docInstance = doc.setDoc(filenameExt);
+		ImgInstance imgInstance;
 		try {
-			docInstance.setDocPath(docPath);
-			docInstance.setDocTimestamp(timestamp);
+			imgInstance = imgType.addImg(filenameExt);
+		} catch (RollbackException e1) {
+			logger.info(String.format("File %s has already been processed by the system. Retrieving the reference...", filenameExt));
+			imgInstance = imgType.getImg(filenameExt);
+		}
+		try {
+			imgInstance.setImgPath(docPath);
+			imgInstance.setImgTimestamp(timestamp);
+			imgInstance.setImgRefreshTimestamp(timestamp);
 		} catch (RollbackException e) {
 			logger.debug("Filename or timestamp have already been set. Resuming task...");
 		} catch (Exception e) {
@@ -185,18 +225,48 @@ public class FillNewModelWithData {
 		}
 
 		// Save the results for each field
-		zonesResults.forEach(entry -> {
+		for (Entry<String, Object> entry : zonesResults) {
 			logger.info("Current zone: {}", entry.getKey());
 			JsonObject field = (JsonObject) entry.getValue();
 			String ocr = field.getString(CONSOLIDATED);
-			JsonObject rect = field.getJsonObject(RECT);
-			ZoneInstance zoneInstance = docInstance.setZone(rect.encode());
+			String rect = field.getJsonObject(RECT).encode();
+			int num = field.getInteger(FIELD_NUM);
+			// Try to get Zone: override if exists, otherwise create a new one
+			ZoneInstance zoneInstance = imgInstance.getZone(rect);
+			if (null == zoneInstance) {
+				zoneInstance = imgInstance.addZone(rect);
+			} else {
+				logger.debug("Zone {} already known. Override consolidated ('{}' with '{}') and zone num ('{}' with '{}')", entry.getKey(), zoneInstance.getConsolidated(), ocr, zoneInstance.getZoneNum(), num);
+			}
 			zoneInstance.setConsolidated(ocr);
-			zoneInstance.setZoneNum(field.getInteger(FIELD_NUM));
-		});
-
+			if (zoneInstance.getSupervised() == null)
+				zoneInstance.setSupervised("");
+			zoneInstance.setZoneNum(num);
+		}
 		// Flush the cache
 		engine.getCurrentCache().flush();
+	}
+
+	public static void linkImgToDocClass(Root engine, Path filePath, String defaultClassName) {
+		String name = ModelTools.generateFileName(filePath);
+		DocClassType docClassType = engine.find(DocClassType.class);
+		ImgType imgType = engine.find(ImgType.class);
+
+		ImgInstance imgInstance = imgType.getImg(name);
+
+		DocClassInstance defaultDocClass = docClassType.getDocClass(defaultClassName);
+		if (null == defaultDocClass) {
+			logger.info("Default class {} does not exist. Creating...", defaultClassName);
+			defaultDocClass = docClassType.addDocClass(defaultClassName);
+		}
+
+		ImgDocLink imgDocLink = imgInstance.getImgDocLink();
+		if (null == imgDocLink) {
+			DocInstance docInstance = defaultDocClass.addDocInstance(name);
+			docInstance.addImgDocLink(name, imgInstance);
+		} else {
+			logger.info("Img {} is already in class {}", name, imgDocLink.getDocInstance().getDocClassInstance());
+		}
 	}
 
 }

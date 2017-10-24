@@ -1,6 +1,8 @@
 package org.genericsystem.ir;
 
-import org.genericsystem.cv.comparator.FillModelWithData;
+import java.nio.file.Paths;
+
+import org.genericsystem.cv.classifier.FillNewModelWithData;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -22,8 +24,8 @@ public class OcrWorkerVerticle extends ActionVerticle {
 
 	@Override
 	protected void handle(Future<Object> future, JsonObject task) {
-		JsonObject params = task.getJsonObject(DistributedVerticle.JSON_OBJECT);
-		JsonObject ocrData = FillModelWithData.processFile(params);
+		JsonObject fields = task.getJsonObject(DistributedVerticle.JSON_OBJECT);
+		JsonObject ocrData = FillNewModelWithData.processFile(Paths.get(task.getString(DistributedVerticle.FILENAME)), Paths.get(DistributedVerticle.BASE_PATH), fields);
 		if (null != ocrData)
 			future.complete(ocrData);
 		else

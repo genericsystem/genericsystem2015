@@ -1,20 +1,20 @@
 package org.genericsystem.ir.app;
 
 import org.genericsystem.common.Root;
-import org.genericsystem.cv.model.Doc;
-import org.genericsystem.cv.model.Doc.DocFilename;
-import org.genericsystem.cv.model.Doc.DocTimestamp;
-import org.genericsystem.cv.model.Doc.RefreshTimestamp;
-import org.genericsystem.cv.model.DocClass;
-import org.genericsystem.cv.model.ImgFilter;
-import org.genericsystem.cv.model.LevDistance;
-import org.genericsystem.cv.model.MeanLevenshtein;
-import org.genericsystem.cv.model.Score;
-import org.genericsystem.cv.model.ZoneGeneric;
-import org.genericsystem.cv.model.ZoneText;
-import org.genericsystem.cv.model.ZoneText.ZoneTimestamp;
+import org.genericsystem.cv.newmodel.SimpleModel.ConsolidatedType;
+import org.genericsystem.cv.newmodel.SimpleModel.DocClassType;
+import org.genericsystem.cv.newmodel.SimpleModel.DocType;
+import org.genericsystem.cv.newmodel.SimpleModel.ImgDocRel;
+import org.genericsystem.cv.newmodel.SimpleModel.ImgPathType;
+import org.genericsystem.cv.newmodel.SimpleModel.ImgRefreshTimestampType;
+import org.genericsystem.cv.newmodel.SimpleModel.ImgTimestampType;
+import org.genericsystem.cv.newmodel.SimpleModel.ImgType;
+import org.genericsystem.cv.newmodel.SimpleModel.LayoutType;
+import org.genericsystem.cv.newmodel.SimpleModel.SupervisedType;
+import org.genericsystem.cv.newmodel.SimpleModel.ZoneNumType;
+import org.genericsystem.cv.newmodel.SimpleModel.ZoneType;
 import org.genericsystem.ir.OcrEngineHolderVerticle;
-import org.genericsystem.ir.app.gui.pages.FiltersStatisticsPage;
+import org.genericsystem.ir.app.gui.pages.ClassifierPage;
 import org.genericsystem.ir.app.gui.pages.HomePage;
 import org.genericsystem.ir.app.gui.utils.PageSwitcher;
 import org.genericsystem.reactor.annotations.Children;
@@ -32,12 +32,13 @@ import org.genericsystem.security.model.UserRole;
  * 
  * @author Pierrik Lassalas
  */
-@DependsOnModel({ Role.class, User.class, UserRole.class, Doc.class, RefreshTimestamp.class, DocTimestamp.class, DocFilename.class, DocClass.class, ZoneGeneric.class, ZoneText.class, ZoneTimestamp.class, ImgFilter.class, LevDistance.class,
-		MeanLevenshtein.class, Score.class })
-@Children({ HomePage.class, FiltersStatisticsPage.class })
+@DependsOnModel({ Role.class, User.class, UserRole.class, DocClassType.class, LayoutType.class, ImgDocRel.class, DocType.class, ImgType.class, ZoneType.class, ZoneNumType.class, ConsolidatedType.class, ImgPathType.class, ImgTimestampType.class,
+		ImgRefreshTimestampType.class, SupervisedType.class })
+@Children({ HomePage.class, ClassifierPage.class })
 public class WatchApp extends RootTagImpl {
 
-	private static final String gsPath = "/gs-cv_model";
+	// private static final String gsPath = "/gs-cv_model3";
+	private static final String gsPath = "/gs-cv-newmodel";
 
 	@Override
 	public void init() {
@@ -47,7 +48,7 @@ public class WatchApp extends RootTagImpl {
 	public static void main(String[] mainArgs) {
 		ApplicationServer server = ApplicationServer.startSimpleGenericApp(mainArgs, WatchApp.class, gsPath);
 		Root root = server.getRoots().get(System.getenv("HOME") + "/genericsystem/" + gsPath);
-		deployVerticles(root);
+		// deployVerticles(root);
 	}
 
 	private static void deployVerticles(Root root) {
