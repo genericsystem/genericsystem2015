@@ -50,7 +50,7 @@ public class Fields extends AbstractFields {
 					});
 					it.remove();
 				} else {
-					System.out.println("No matches found");
+					System.out.print(".");
 				}
 			}
 			// Increment the deadCounter in old fields that were not merged

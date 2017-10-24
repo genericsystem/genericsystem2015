@@ -101,10 +101,10 @@ public class CamLiveRetriever extends AbstractApp {
 		oldDescriptors = new Mat();
 
 		// Stabilize the image
-		timerFields.scheduleAtFixedRate(() -> onSpace(), 0, 110, TimeUnit.MILLISECONDS);
+		timerFields.scheduleWithFixedDelay(() -> onSpace(), 0, 150, TimeUnit.MILLISECONDS);
 
 		// Detect the rectangles
-		timerFields.scheduleAtFixedRate(() -> {
+		timerFields.scheduleWithFixedDelay(() -> {
 			synchronized (this) {
 				try {
 					stabilized = getStabilized(frame, extractor, matcher);
@@ -132,7 +132,7 @@ public class CamLiveRetriever extends AbstractApp {
 		}, 500, 33, TimeUnit.MILLISECONDS);
 
 		// Perform the OCR
-		timerOcr.scheduleAtFixedRate(() -> consolidateOcr(), 1000, 200, TimeUnit.MILLISECONDS);
+		timerOcr.scheduleWithFixedDelay(() -> consolidateOcr(), 1000, 250, TimeUnit.MILLISECONDS);
 
 	}
 
