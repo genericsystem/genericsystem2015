@@ -1,13 +1,16 @@
 package org.genericsystem.cv.classifier;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.genericsystem.cv.Img;
+import org.genericsystem.cv.utils.ParallelTasks;
 import org.genericsystem.cv.utils.RectangleTools;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
@@ -24,6 +27,7 @@ public class Fields extends AbstractFields {
 
 	private static ThreadLocalRandom rand = ThreadLocalRandom.current();
 	private static final int MAX_DELETE_UNMERGED = 5;
+	private static final int OCR_TIMEOUT = 150;
 
 	public void merge(List<Rect> newRects) {
 		List<Field> oldFields = restabilizeFields();
@@ -115,9 +119,20 @@ public class Fields extends AbstractFields {
 	@Override
 	public void consolidateOcr(Img rootImg) {
 		long TS = System.currentTimeMillis();
-		while (System.currentTimeMillis() - TS <= 150) {
-			int idx = rand.nextInt(size());
-			fields.get(idx).ocr(rootImg);
+		while (System.currentTimeMillis() - TS <= OCR_TIMEOUT) {
+			ParallelTasks tasks = new ParallelTasks();
+			Set<Integer> indexes = new HashSet<>(tasks.getCounter());
+			while (indexes.size() < tasks.getCounter()) {
+				int idx = rand.nextInt(size());
+				if (indexes.add(idx))
+					tasks.add(() -> fields.get(idx).ocr(rootImg));
+			}
+			try {
+				tasks.run();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 
