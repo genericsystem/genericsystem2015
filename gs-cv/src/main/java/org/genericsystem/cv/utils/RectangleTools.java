@@ -225,6 +225,31 @@ public class RectangleTools {
 	}
 
 	/**
+	 * Compute a mean rectangle from a list of rectangles.
+	 * 
+	 * @param rects - a list of rectangles
+	 * @return the mean {@link Rect}
+	 */
+	public static Rect getMean(List<Rect> rects) {
+		if (rects == null || rects.isEmpty())
+			throw new IllegalArgumentException("Unable to compute mean on a null or empty list");
+		if (rects.size() == 1)
+			return rects.get(0);
+		double tlx = 0, tly = 0, brx = 0, bry = 0;
+		for (Rect r : rects) {
+			tlx += r.tl().x;
+			tly += r.tl().y;
+			brx += r.br().x;
+			bry += r.br().y;
+		}
+		tlx /= rects.size();
+		tly /= rects.size();
+		brx /= rects.size();
+		bry /= rects.size();
+		return new Rect(new Point(tlx, tly), new Point(brx, bry));
+	}
+
+	/**
 	 * Check whether two rectangles are overlapping. This method is inclusive, e.g. it will return true if the rectangles have only a side or an angle in common.
 	 * 
 	 * @param rect1 - the first rectangle
