@@ -1,9 +1,14 @@
 package org.genericsystem.cv.utils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -17,69 +22,119 @@ import org.opencv.core.Rect;
  */
 public class RectangleTools {
 
+	public static final double DEFAULT_EPSILON = 0.2;
+	public static final double DEFAULT_GROUP_THRESHOLD = 0;
+
 	public static void main(String[] args) {
 		Rect rect1 = new Rect(0, 0, 3, 3);
 		Rect rect2 = new Rect(1, 3, 3, 1);
 		System.out.println("Union: " + getUnion(rect1, rect2));
 		System.out.println("Intersection: " + getIntersection(rect1, rect2));
+
+		Rect r1 = new Rect(0, 0, 100, 200);
+		Rect r2 = new Rect(25, 25, 100, 200);
+		System.out.println(getDelta(r1, r2, 0.2));
+
+		Rect r3 = new Rect(0, 0, 3, 4);
+
+		List<List<Rect>> rects = cluster(Arrays.asList(rect1, rect2, r1, r2, r3), DEFAULT_EPSILON);
+		System.out.println(rects);
+		System.out.println(groupRectangles(Arrays.asList(rect1, rect2, r1, r2, r3), DEFAULT_EPSILON, DEFAULT_GROUP_THRESHOLD));
 	}
 
-	/**
-	 * Method to remove the overlapping {@link Rect}, relying on "non-maximum suppression" to ignore redundant, overlapping boxes.
-	 * 
-	 * @param boxes - the list of rectangles that need to be filtered
-	 * @param overlapThreshold - the overlapping threshold. If the common area between two rectangles is above this threshold, they will be considered as overlapping.
-	 * @return a List of non-overlapping {@link Rect}, or an empty List if none was found
-	 */
-	public static List<Rect> nonMaximumSuppression(List<Rect> boxes, double overlapThreshold) {
-		if (boxes == null || boxes.size() == 0)
-			return Collections.emptyList();
-
-		// Initialize a list of picked indexes
-		List<Integer> pick = new ArrayList<>();
-
-		// Get the coordinates of the boxes tl(x1, y1) and br(x2, y2)
-		List<Double> x1 = boxes.stream().map(rect -> rect.tl().x).collect(Collectors.toList());
-		List<Double> y1 = boxes.stream().map(rect -> rect.tl().y).collect(Collectors.toList());
-		List<Double> x2 = boxes.stream().map(rect -> rect.br().x).collect(Collectors.toList());
-		List<Double> y2 = boxes.stream().map(rect -> rect.br().y).collect(Collectors.toList());
-
-		// Compute the areas
-		List<Double> area = boxes.stream().map(rect -> rect.area()).collect(Collectors.toList());
-
-		// Get the indexes of the boxes sorted by the br() y coordinates (ascending)
-		List<Integer> indx = IntStream.range(0, y2.size()).boxed().sorted((i, j) -> Double.compare(y2.get(i), y2.get(j))).collect(Collectors.toList());
-
-		// Keep looping while some indexes remain in the indx list
-		long count = 0L; // TODO: fix an infinite loop problem
-		while (indx.size() > 0 && count++ < 10 * boxes.size()) {
-			// Grab the last index and add the value to the list of picked indexes
-			int last = indx.size() - 1;
-			int i = indx.get(last);
-			pick.add(i);
-
-			// Find the largest tl(xx1, yy1) coordinates for the start of the box, and the smallest br(xx2, yy2) coordinates for the end of the box
-			List<Double> xx1 = IntStream.range(0, x1.size()).filter(idx -> indx.contains(idx)).mapToObj(x1::get).map(x -> Math.max(x1.get(i), x)).collect(Collectors.toList());
-			List<Double> yy1 = IntStream.range(0, y1.size()).filter(idx -> indx.contains(idx)).mapToObj(y1::get).map(y -> Math.max(y1.get(i), y)).collect(Collectors.toList());
-			List<Double> xx2 = IntStream.range(0, x2.size()).filter(idx -> indx.contains(idx)).mapToObj(x2::get).map(x -> Math.min(x2.get(i), x)).collect(Collectors.toList());
-			List<Double> yy2 = IntStream.range(0, y2.size()).filter(idx -> indx.contains(idx)).mapToObj(y2::get).map(y -> Math.min(y2.get(i), y)).collect(Collectors.toList());
-
-			// Compute the width, height and area of the boxes
-			List<Double> width = new ArrayList<>();
-			List<Double> height = new ArrayList<>();
-			List<Double> overlap = new ArrayList<>();
-			List<Double> filteredArea = IntStream.range(0, area.size()).filter(idx -> indx.contains(idx)).mapToObj(area::get).collect(Collectors.toList());
-			for (int j = 0; j < xx1.size(); ++j) {
-				width.add(Math.max(0, xx2.get(j) - xx1.get(j) + 1));
-				height.add(Math.max(0, yy2.get(j) - yy1.get(j) + 1));
-				overlap.add((width.get(j) * height.get(j)) / filteredArea.get(j));
-			}
-			// Remove all indexes from the index list whose overlap is above the threshold
-			IntStream.range(0, overlap.size()).filter(idx -> overlap.get(idx) > overlapThreshold).boxed().forEach(idx -> indx.remove(idx));
-			// XXX this last part can cause an infinite loop when the remove() function fails => not caught in the unit tests!
+	public static List<Rect> groupRectangles(List<Rect> input, double eps, double groupThreshold) {
+		List<List<Rect>> filtered = cluster(input, eps).stream().filter(sublist -> sublist.size() > groupThreshold).collect(Collectors.toList());
+		Map<Rect, Integer> map = new ConcurrentHashMap<>();
+		for (List<Rect> clustered : filtered) {
+			// XXX: define the reducing method
+			Rect union = clustered.size() <= 1 ? clustered.get(0) : clustered.stream().reduce(clustered.get(0), (r, total) -> getUnion(r, total));
+			// Rect intersection = clustered.size() <= 1 ? clustered.get(0) : clustered.stream().reduce(clustered.get(0), (r, total) -> getIntersection(r, total).orElse(total));
+			// Rect nms = clustered.size() <= 1 ? clustered.get(0) : nonMaximumSuppression(clustered, 0.8).stream().findFirst().orElseThrow(IllegalStateException::new);
+			// TODO: nms: return a list of rectangles: add multiple elements?
+			map.put(union, clustered.size());
 		}
-		List<Rect> res = IntStream.range(0, boxes.size()).filter(idx -> pick.contains(idx)).mapToObj(boxes::get).collect(Collectors.toList());
-		return res;
+
+		Iterator<Entry<Rect, Integer>> outerIt = map.entrySet().iterator();
+		while (outerIt.hasNext()) {
+			Entry<Rect, Integer> outer = outerIt.next();
+
+			Iterator<Entry<Rect, Integer>> innerIt = map.entrySet().iterator();
+			while (innerIt.hasNext()) {
+				Entry<Rect, Integer> entry = innerIt.next();
+				if (!outer.equals(entry)) {
+					Optional<Rect> tmp = isGroupable(outer.getKey(), outer.getValue(), entry.getKey(), entry.getValue(), eps);
+					if (tmp.isPresent()) {
+						Rect rect = tmp.get();
+						if (entry.getKey().equals(rect)) {
+							innerIt.remove();
+						} else {// <=> rect.equals(first.getKey())
+							outerIt.remove();
+							break;
+						}
+					}
+				}
+			}
+		}
+
+		return map.entrySet().stream().map(entry -> entry.getKey()).collect(Collectors.toList());
+	}
+
+	public static List<List<Rect>> cluster(List<Rect> input, double eps) {
+		List<Rect> copy = new ArrayList<>(input);
+		List<List<Rect>> output = new ArrayList<>();
+		while (copy.size() > 0) {
+			Rect first = copy.get(0);
+			List<Rect> clustered = new ArrayList<>();
+			clustered.add(first);
+			for (Rect r : copy) {
+				if (!r.equals(first) && isInCluster(first, r, eps))
+					clustered.add(r);
+			}
+			output.add(clustered);
+			copy.removeAll(clustered);
+		}
+		return output;
+	}
+
+	public static boolean isInCluster(Rect rect1, Rect rect2, double eps) {
+		double delta = getDelta(rect1, rect2, eps);
+		return Math.abs(rect1.tl().x - rect2.tl().x) <= delta && Math.abs(rect1.tl().y - rect2.tl().y) <= delta && Math.abs(rect1.br().x - rect2.br().x) <= delta && Math.abs(rect1.br().y - rect2.br().y) <= delta;
+	}
+
+	public static double getDelta(Rect rect1, Rect rect2, double eps) {
+		return eps * (Math.min(rect1.width, rect2.width) + Math.min(rect1.height, rect2.height)) / 2;
+	}
+
+	public static Optional<Rect> isGroupable(Rect rect1, int count1, Rect rect2, int count2, double eps) {
+		final Rect bigger, smaller;
+		final int biggerCount, smallerCount;
+		if (rect1.area() > rect2.area()) {
+			bigger = rect1;
+			biggerCount = count1;
+			smaller = rect2;
+			smallerCount = count2;
+		} else {
+			bigger = rect2;
+			biggerCount = count2;
+			smaller = rect1;
+			smallerCount = count1;
+		}
+		double dx = eps * bigger.width;
+		double dy = eps * bigger.height;
+
+		boolean res = smaller.tl().x >= bigger.tl().x - dx;
+		res = res && smaller.tl().y >= bigger.tl().y - dy;
+		res = res && smaller.br().x <= bigger.br().x + dx;
+		res = res && smaller.br().y <= bigger.br().y + dy;
+		res = res && (biggerCount > Math.max(3, smallerCount) || smallerCount < 3);
+
+		if (res) {
+			// Smaller can be removed. Return smaller
+			return Optional.of(smaller);
+		} else {
+			// Smaller can't be removed. Return Optional.empty?
+			return Optional.empty();
+		}
 	}
 
 	/**
@@ -236,5 +291,63 @@ public class RectangleTools {
 	public static Point[] decomposeClockwise(Rect rect) {
 		Point[] points = new Point[] { rect.tl(), new Point(rect.br().x, rect.tl().y), rect.br(), new Point(rect.tl().x, rect.br().y) };
 		return points;
+	}
+
+	/**
+	 * Method to remove the overlapping {@link Rect}, relying on "non-maximum suppression" to ignore redundant, overlapping boxes.
+	 * 
+	 * @param boxes - the list of rectangles that need to be filtered
+	 * @param overlapThreshold - the overlapping threshold. If the common area between two rectangles is above this threshold, they will be considered as overlapping.
+	 * @return a List of non-overlapping {@link Rect}, or an empty List if none was found
+	 */
+	public static List<Rect> nonMaximumSuppression(List<Rect> boxes, double overlapThreshold) {
+		if (boxes == null || boxes.size() == 0)
+			return Collections.emptyList();
+
+		// Initialize a list of picked indexes
+		List<Integer> pick = new ArrayList<>();
+
+		// Get the coordinates of the boxes tl(x1, y1) and br(x2, y2)
+		List<Double> x1 = boxes.stream().map(rect -> rect.tl().x).collect(Collectors.toList());
+		List<Double> y1 = boxes.stream().map(rect -> rect.tl().y).collect(Collectors.toList());
+		List<Double> x2 = boxes.stream().map(rect -> rect.br().x).collect(Collectors.toList());
+		List<Double> y2 = boxes.stream().map(rect -> rect.br().y).collect(Collectors.toList());
+
+		// Compute the areas
+		List<Double> area = boxes.stream().map(rect -> rect.area()).collect(Collectors.toList());
+
+		// Get the indexes of the boxes sorted by the br() y coordinates (ascending)
+		List<Integer> indx = IntStream.range(0, y2.size()).boxed().sorted((i, j) -> Double.compare(y2.get(i), y2.get(j))).collect(Collectors.toList());
+
+		// Keep looping while some indexes remain in the indx list
+		long count = 0L; // TODO: fix an infinite loop problem
+		while (indx.size() > 0 && count++ < 10 * boxes.size()) {
+			// Grab the last index and add the value to the list of picked indexes
+			int last = indx.size() - 1;
+			int i = indx.get(last);
+			pick.add(i);
+
+			// Find the largest tl(xx1, yy1) coordinates for the start of the box, and the smallest br(xx2, yy2) coordinates for the end of the box
+			List<Double> xx1 = IntStream.range(0, x1.size()).filter(idx -> indx.contains(idx)).mapToObj(x1::get).map(x -> Math.max(x1.get(i), x)).collect(Collectors.toList());
+			List<Double> yy1 = IntStream.range(0, y1.size()).filter(idx -> indx.contains(idx)).mapToObj(y1::get).map(y -> Math.max(y1.get(i), y)).collect(Collectors.toList());
+			List<Double> xx2 = IntStream.range(0, x2.size()).filter(idx -> indx.contains(idx)).mapToObj(x2::get).map(x -> Math.min(x2.get(i), x)).collect(Collectors.toList());
+			List<Double> yy2 = IntStream.range(0, y2.size()).filter(idx -> indx.contains(idx)).mapToObj(y2::get).map(y -> Math.min(y2.get(i), y)).collect(Collectors.toList());
+
+			// Compute the width, height and area of the boxes
+			List<Double> width = new ArrayList<>();
+			List<Double> height = new ArrayList<>();
+			List<Double> overlap = new ArrayList<>();
+			List<Double> filteredArea = IntStream.range(0, area.size()).filter(idx -> indx.contains(idx)).mapToObj(area::get).collect(Collectors.toList());
+			for (int j = 0; j < xx1.size(); ++j) {
+				width.add(Math.max(0, xx2.get(j) - xx1.get(j) + 1));
+				height.add(Math.max(0, yy2.get(j) - yy1.get(j) + 1));
+				overlap.add((width.get(j) * height.get(j)) / filteredArea.get(j));
+			}
+			// Remove all indexes from the index list whose overlap is above the threshold
+			IntStream.range(0, overlap.size()).filter(idx -> overlap.get(idx) > overlapThreshold).boxed().forEach(idx -> indx.remove(idx));
+			// XXX this last part can cause an infinite loop when the remove() function fails => not caught in the unit tests!
+		}
+		List<Rect> res = IntStream.range(0, boxes.size()).filter(idx -> pick.contains(idx)).mapToObj(boxes::get).collect(Collectors.toList());
+		return res;
 	}
 }
