@@ -27,7 +27,7 @@ public class Fields extends AbstractFields {
 
 	private static ThreadLocalRandom rand = ThreadLocalRandom.current();
 	private static final int MAX_DELETE_UNMERGED = 5;
-	private static final int OCR_TIMEOUT = 150;
+	private static final int OCR_TIMEOUT = 100;
 
 	public void merge(List<Rect> newRects) {
 		List<Field> oldFields = restabilizeFields();
@@ -130,7 +130,6 @@ public class Fields extends AbstractFields {
 			try {
 				tasks.run();
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}

@@ -71,9 +71,9 @@ public class CamLiveRetriever extends AbstractApp {
 	public void stop() throws Exception {
 		super.stop();
 		timerFields.shutdown();
-		timerFields.awaitTermination(5000, TimeUnit.MILLISECONDS);
+		timerFields.awaitTermination(5, TimeUnit.SECONDS);
 		timerOcr.shutdown();
-		timerOcr.awaitTermination(5000, TimeUnit.MILLISECONDS);
+		timerOcr.awaitTermination(5, TimeUnit.SECONDS);
 		capture.release();
 		stabilized.close();
 		oldKeypoints.release();
