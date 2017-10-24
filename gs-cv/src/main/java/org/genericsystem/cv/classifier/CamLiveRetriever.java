@@ -75,6 +75,7 @@ public class CamLiveRetriever extends AbstractApp {
 		timerOcr.shutdown();
 		timerOcr.awaitTermination(5000, TimeUnit.MILLISECONDS);
 		capture.release();
+		stabilized.close();
 		oldKeypoints.release();
 		newKeypoints.release();
 		oldDescriptors.release();
@@ -99,6 +100,10 @@ public class CamLiveRetriever extends AbstractApp {
 		oldKeypoints = new MatOfKeyPoint();
 		oldDescriptors = new Mat();
 
+		// Stabilize the image
+		timerFields.scheduleAtFixedRate(() -> onSpace(), 0, 110, TimeUnit.MILLISECONDS);
+
+		// Detect the rectangles
 		timerFields.scheduleAtFixedRate(() -> {
 			synchronized (this) {
 				try {
@@ -126,19 +131,30 @@ public class CamLiveRetriever extends AbstractApp {
 			}
 		}, 500, 33, TimeUnit.MILLISECONDS);
 
-		timerOcr.scheduleAtFixedRate(() -> {
-			synchronized (this) {
-				try {
-					if (stabilized != null) {
-						fields.consolidateOcr(stabilized);
-					}
-				} catch (Throwable e) {
-					logger.warn("Exception while computing OCR", e);
-				}
-			}
-		}, 500, 500, TimeUnit.MILLISECONDS);
+		// Perform the OCR
+		timerOcr.scheduleAtFixedRate(() -> consolidateOcr(), 1000, 200, TimeUnit.MILLISECONDS);
 
-		timerFields.scheduleAtFixedRate(() -> onSpace(), 0, 110, TimeUnit.MILLISECONDS);
+	}
+
+	private synchronized void consolidateOcr() {
+		try {
+			if (stabilized != null) {
+				fields.consolidateOcr(stabilized);
+			}
+		} catch (Throwable e) {
+			logger.warn("Exception while computing OCR", e);
+		}
+	}
+
+	@Override
+	protected synchronized void onSpace() {
+		if (homography != null) {
+			fields.storeLastHomography(homography.inv());
+			fields.storeLastRotation(Imgproc.getRotationMatrix2D(new Point(frame.width() / 2, frame.height() / 2), angle, 1));
+		}
+		oldKeypoints = newKeypoints;
+		oldDescriptors = newDescriptors;
+		stabilizationHasChanged = true;
 	}
 
 	private Img getStabilized(Mat frame, DescriptorExtractor extractor, DescriptorMatcher matcher) {
@@ -154,17 +170,6 @@ public class CamLiveRetriever extends AbstractApp {
 		frameImg.close();
 		deskewed_.close();
 		return stabilized;
-	}
-
-	@Override
-	protected synchronized void onSpace() {
-		if (homography != null) {
-			fields.storeLastHomography(homography.inv());
-			fields.storeLastRotation(Imgproc.getRotationMatrix2D(new Point(frame.width() / 2, frame.height() / 2), angle, 1));
-		}
-		oldKeypoints = newKeypoints;
-		oldDescriptors = newDescriptors;
-		stabilizationHasChanged = true;
 	}
 
 	private Img stabilize(Mat stabilized, DescriptorMatcher matcher) {
