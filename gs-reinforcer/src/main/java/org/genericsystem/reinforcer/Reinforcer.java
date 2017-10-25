@@ -1,7 +1,10 @@
-package org.genericsystem.ir.reinforcer;
+package org.genericsystem.reinforcer;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.genericsystem.reinforcer.Template;
+import org.genericsystem.reinforcer.Unclassifiable;
 
 import io.reactivex.functions.Consumer;
 import io.reactivex.subjects.PublishSubject;
@@ -31,9 +34,17 @@ public class Reinforcer {
 	}
 
 	public void reinforce(Labels absoluteLabels) {
-		for (Template template : templates)
-			if (template.getMatchRate(absoluteLabels) > MATCHING_RATE)
-				template.reinforce(absoluteLabels);
+		double bestMatchRate = 0;
+		Template bestTemplate = null;
+		for (Template template : templates) {
+			double matchRate = template.getMatchRate(absoluteLabels);
+			if (matchRate > bestMatchRate) {
+				bestMatchRate = matchRate;
+				bestTemplate = template;
+			}
+		}
+		if (bestMatchRate > MATCHING_RATE)
+			bestTemplate.reinforce(absoluteLabels);
 		unclassifiable.reinforce(absoluteLabels);
 	}
 

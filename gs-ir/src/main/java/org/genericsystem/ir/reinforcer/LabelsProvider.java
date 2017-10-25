@@ -10,6 +10,8 @@ import org.genericsystem.cv.newmodel.SimpleModel.ConsolidatedType.ConsolidatedIn
 import org.genericsystem.cv.newmodel.SimpleModel.ImgType;
 import org.genericsystem.cv.newmodel.SimpleModel.ImgType.ImgInstance;
 import org.genericsystem.cv.newmodel.SimpleModel.ZoneType.ZoneInstance;
+import org.genericsystem.reinforcer.Label;
+import org.genericsystem.reinforcer.Labels;
 import org.opencv.core.Rect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
