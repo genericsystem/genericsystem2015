@@ -1,18 +1,18 @@
 package org.genericsystem.reinforcer;
 
-public class Point {
+public class GSPoint {
 	private double x, y;
 
-	public Point(double x, double y) {
+	public GSPoint(double x, double y) {
 		this.x = x;
 		this.y = y;
 	}
 
-	public Point() {
+	public GSPoint() {
 		this(0, 0);
 	}
 
-	public Point(double[] vals) {
+	public GSPoint(double[] vals) {
 		this();
 		set(vals);
 	}
@@ -28,11 +28,11 @@ public class Point {
 	}
 
 	@Override
-	public Point clone() {
-		return new Point(x, y);
+	public GSPoint clone() {
+		return new GSPoint(x, y);
 	}
 
-	public double dot(Point p) {
+	public double dot(GSPoint p) {
 		return x * p.x + y * p.y;
 	}
 
@@ -52,13 +52,13 @@ public class Point {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (!(obj instanceof Point))
+		if (!(obj instanceof GSPoint))
 			return false;
-		Point it = (Point) obj;
+		GSPoint it = (GSPoint) obj;
 		return x == it.x && y == it.y;
 	}
 
-	public boolean inside(Rect r) {
+	public boolean inside(GSRect r) {
 		return r.contains(this);
 	}
 

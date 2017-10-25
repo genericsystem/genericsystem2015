@@ -1,4 +1,4 @@
-package org.genericsystem.cv.utils;
+package org.genericsystem.reinforcer;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -9,55 +9,53 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import org.opencv.core.Point;
-import org.opencv.core.Rect;
 import org.testng.annotations.Test;
 
 public class RectangleToolsTest {
 
-	private Rect rect1 = new Rect(0, 0, 10, 10);
-	private Rect rect2 = new Rect(1, 1, 20, 10);
-	private Rect rect3 = new Rect(20, 10, 10, 10);
-	private Rect rect4 = new Rect(1, 1, 1, 1);
+	private GSRect rect1 = new GSRect(0, 0, 10, 10);
+	private GSRect rect2 = new GSRect(1, 1, 20, 10);
+	private GSRect rect3 = new GSRect(20, 10, 10, 10);
+	private GSRect rect4 = new GSRect(1, 1, 1, 1);
 
 	@Test
 	public void nonMaximumSuppression() {
 		// Test with empty / null
-		List<Rect> list = RectangleTools.nonMaximumSuppression(Collections.emptyList(), 0.3);
+		List<GSRect> list = RectangleTools.nonMaximumSuppression(Collections.emptyList(), 0.3);
 		assertTrue(list.isEmpty());
 		list = RectangleTools.nonMaximumSuppression(null, 0.3);
 		assertTrue(list.isEmpty());
 
 		// Test case 1: should return 1 rect
-		Rect r1 = new Rect(new Point(12, 84), new Point(140, 212));
-		Rect r2 = new Rect(new Point(24, 84), new Point(152, 212));
-		Rect r3 = new Rect(new Point(36, 84), new Point(164, 212));
-		Rect r4 = new Rect(new Point(12, 96), new Point(140, 224));
-		Rect r5 = new Rect(new Point(24, 96), new Point(152, 224));
-		Rect r6 = new Rect(new Point(24, 108), new Point(152, 236));
+		GSRect r1 = new GSRect(new GSPoint(12, 84), new GSPoint(140, 212));
+		GSRect r2 = new GSRect(new GSPoint(24, 84), new GSPoint(152, 212));
+		GSRect r3 = new GSRect(new GSPoint(36, 84), new GSPoint(164, 212));
+		GSRect r4 = new GSRect(new GSPoint(12, 96), new GSPoint(140, 224));
+		GSRect r5 = new GSRect(new GSPoint(24, 96), new GSPoint(152, 224));
+		GSRect r6 = new GSRect(new GSPoint(24, 108), new GSPoint(152, 236));
 
-		Rect simplified1 = new Rect(24, 108, 128, 128);
+		GSRect simplified1 = new GSRect(24, 108, 128, 128);
 		list = RectangleTools.nonMaximumSuppression(Arrays.asList(r1, r2, r3, r4, r5, r6), 0.3);
 		assertTrue(!list.isEmpty());
 		assertEquals(list, Arrays.asList(simplified1));
 
 		// Test 2: should return 1 rect
-		r1 = new Rect(new Point(114, 60), new Point(178, 124));
-		r2 = new Rect(new Point(120, 60), new Point(184, 124));
-		r3 = new Rect(new Point(114, 66), new Point(178, 130));
+		r1 = new GSRect(new GSPoint(114, 60), new GSPoint(178, 124));
+		r2 = new GSRect(new GSPoint(120, 60), new GSPoint(184, 124));
+		r3 = new GSRect(new GSPoint(114, 66), new GSPoint(178, 130));
 
-		Rect simplified2 = new Rect(114, 66, 64, 64);
+		GSRect simplified2 = new GSRect(114, 66, 64, 64);
 		list = RectangleTools.nonMaximumSuppression(Arrays.asList(r1, r2, r3), 0.3);
 		assertTrue(!list.isEmpty());
 		assertEquals(list, Arrays.asList(simplified2));
 
 		// Test case 3: should return 2 rects
-		r1 = new Rect(new Point(12, 30), new Point(76, 94));
-		r2 = new Rect(new Point(12, 36), new Point(76, 100));
-		r3 = new Rect(new Point(72, 36), new Point(200, 164));
-		r4 = new Rect(new Point(84, 48), new Point(212, 176));
-		Rect simplified31 = new Rect(12, 36, 64, 64);
-		Rect simplified32 = new Rect(84, 48, 128, 128);
+		r1 = new GSRect(new GSPoint(12, 30), new GSPoint(76, 94));
+		r2 = new GSRect(new GSPoint(12, 36), new GSPoint(76, 100));
+		r3 = new GSRect(new GSPoint(72, 36), new GSPoint(200, 164));
+		r4 = new GSRect(new GSPoint(84, 48), new GSPoint(212, 176));
+		GSRect simplified31 = new GSRect(12, 36, 64, 64);
+		GSRect simplified32 = new GSRect(84, 48, 128, 128);
 
 		list = RectangleTools.nonMaximumSuppression(Arrays.asList(r1, r2, r3, r4), 0.3);
 		assertTrue(!list.isEmpty());
@@ -89,9 +87,9 @@ public class RectangleToolsTest {
 
 	@Test
 	public void inclusiveArea() {
-		Rect r1 = new Rect(0, 0, 100, 100);
-		Rect r2 = new Rect(49, 0, 50, 100);
-		Rect r3 = new Rect(100, 0, 100, 100);
+		GSRect r1 = new GSRect(0, 0, 100, 100);
+		GSRect r2 = new GSRect(49, 0, 50, 100);
+		GSRect r3 = new GSRect(100, 0, 100, 100);
 
 		assertEquals(RectangleTools.inclusiveArea(r1, r1), 1, 0.001);
 		assertEquals(RectangleTools.inclusiveArea(r1, r2), 0.5, 0.001);
@@ -100,9 +98,9 @@ public class RectangleToolsTest {
 
 	@Test
 	public void getIntersection() {
-		Rect inter12 = new Rect(1, 1, 9, 9);
+		GSRect inter12 = new GSRect(1, 1, 9, 9);
 
-		Optional<Rect> inter = RectangleTools.getIntersection(rect1, rect1);
+		Optional<GSRect> inter = RectangleTools.getIntersection(rect1, rect1);
 		assertTrue(inter.isPresent());
 		assertEquals(inter.get(), rect1);
 
@@ -121,10 +119,10 @@ public class RectangleToolsTest {
 
 	@Test
 	public void getUnion() {
-		Rect union12 = new Rect(0, 0, 21, 11);
-		Rect union13 = new Rect(0, 0, 30, 20);
+		GSRect union12 = new GSRect(0, 0, 21, 11);
+		GSRect union13 = new GSRect(0, 0, 30, 20);
 
-		Rect union = RectangleTools.getUnion(rect1, rect1);
+		GSRect union = RectangleTools.getUnion(rect1, rect1);
 		assertEquals(union, rect1);
 
 		union = RectangleTools.getUnion(rect1, rect2);

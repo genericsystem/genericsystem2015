@@ -1,23 +1,23 @@
 package org.genericsystem.reinforcer;
 
-public class Size {
+public class GSSize {
 	private double width, height;
 
-	public Size(double width, double height) {
+	public GSSize(double width, double height) {
 		this.width = width;
 		this.height = height;
 	}
 
-	public Size() {
+	public GSSize() {
 		this(0, 0);
 	}
 
-	public Size(Point p) {
+	public GSSize(GSPoint p) {
 		width = p.getX();
 		height = p.getY();
 	}
 
-	public Size(double[] vals) {
+	public GSSize(double[] vals) {
 		set(vals);
 	}
 
@@ -40,8 +40,8 @@ public class Size {
 	}
 
 	@Override
-	public Size clone() {
-		return new Size(width, height);
+	public GSSize clone() {
+		return new GSSize(width, height);
 	}
 
 	@Override
@@ -60,9 +60,9 @@ public class Size {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (!(obj instanceof Size))
+		if (!(obj instanceof GSSize))
 			return false;
-		Size it = (Size) obj;
+		GSSize it = (GSSize) obj;
 		return width == it.width && height == it.height;
 	}
 

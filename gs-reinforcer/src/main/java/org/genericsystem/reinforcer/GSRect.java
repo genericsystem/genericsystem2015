@@ -1,31 +1,31 @@
 package org.genericsystem.reinforcer;
 
-public class Rect {
+public class GSRect {
 	private int x, y, width, height;
 
-	public Rect(int x, int y, int width, int height) {
+	public GSRect(int x, int y, int width, int height) {
 		this.x = x;
 		this.y = y;
 		this.width = width;
 		this.height = height;
 	}
 
-	public Rect() {
+	public GSRect() {
 		this(0, 0, 0, 0);
 	}
 
-	public Rect(Point p1, Point p2) {
+	public GSRect(GSPoint p1, GSPoint p2) {
 		x = (int) (p1.getX() < p2.getX() ? p1.getX() : p2.getX());
 		y = (int) (p1.getY() < p2.getY() ? p1.getY() : p2.getY());
 		width = (int) (p1.getX() > p2.getX() ? p1.getX() : p2.getX()) - x;
 		height = (int) (p1.getY() > p2.getY() ? p1.getY() : p2.getY()) - y;
 	}
 
-	public Rect(Point p, Size s) {
+	public GSRect(GSPoint p, GSSize s) {
 		this((int) p.getX(), (int) p.getY(), (int) s.getWidth(), (int) s.getHeight());
 	}
 
-	public Rect(double[] vals) {
+	public GSRect(double[] vals) {
 		set(vals);
 	}
 
@@ -44,20 +44,20 @@ public class Rect {
 	}
 
 	@Override
-	public Rect clone() {
-		return new Rect(x, y, width, height);
+	public GSRect clone() {
+		return new GSRect(x, y, width, height);
 	}
 
-	public Point tl() {
-		return new Point(x, y);
+	public GSPoint tl() {
+		return new GSPoint(x, y);
 	}
 
-	public Point br() {
-		return new Point(x + width, y + height);
+	public GSPoint br() {
+		return new GSPoint(x + width, y + height);
 	}
 
-	public Size size() {
-		return new Size(width, height);
+	public GSSize size() {
+		return new GSSize(width, height);
 	}
 
 	public double area() {
@@ -68,7 +68,7 @@ public class Rect {
 		return width <= 0 || height <= 0;
 	}
 
-	public boolean contains(Point p) {
+	public boolean contains(GSPoint p) {
 		return x <= p.getX() && p.getX() < x + width && y <= p.getY() && p.getY() < y + height;
 	}
 
@@ -92,9 +92,9 @@ public class Rect {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (!(obj instanceof Rect))
+		if (!(obj instanceof GSRect))
 			return false;
-		Rect it = (Rect) obj;
+		GSRect it = (GSRect) obj;
 		return x == it.x && y == it.y && width == it.width && height == it.height;
 	}
 
