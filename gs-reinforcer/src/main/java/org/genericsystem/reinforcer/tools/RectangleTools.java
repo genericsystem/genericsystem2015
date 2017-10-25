@@ -76,16 +76,16 @@ public class RectangleTools {
 
 		final Function<List<GSRect>, GSRect> merge;
 		switch (method) {
-			case UNION:
-				merge = list -> list.size() <= 1 ? list.get(0) : list.stream().reduce(list.get(0), (r, total) -> getUnion(r, total));
-				break;
-			case INTERSECTION:
-				merge = list -> list.size() <= 1 ? list.get(0) : list.stream().reduce(list.get(0), (r, total) -> getIntersection(r, total).orElse(total));
-				break;
-			default:
-			case MEAN:
-				merge = list -> list.size() <= 1 ? list.get(0) : getMean(list);
-				break;
+		case UNION:
+			merge = list -> list.size() <= 1 ? list.get(0) : list.stream().reduce(list.get(0), (r, total) -> getUnion(r, total));
+			break;
+		case INTERSECTION:
+			merge = list -> list.size() <= 1 ? list.get(0) : list.stream().reduce(list.get(0), (r, total) -> getIntersection(r, total).orElse(total));
+			break;
+		default:
+		case MEAN:
+			merge = list -> list.size() <= 1 ? list.get(0) : getMean(list);
+			break;
 		}
 		filtered.forEach(clustered -> map.put(merge.apply(clustered), clustered.size()));
 
