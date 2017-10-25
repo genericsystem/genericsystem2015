@@ -1,4 +1,4 @@
-package org.genericsystem.reinforcer;
+package org.genericsystem.reinforcer.tools;
 
 public class GSPoint {
 	private double x, y;

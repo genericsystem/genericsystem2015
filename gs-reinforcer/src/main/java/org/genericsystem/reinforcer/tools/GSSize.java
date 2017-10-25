@@ -1,4 +1,4 @@
-package org.genericsystem.reinforcer;
+package org.genericsystem.reinforcer.tools;
 
 public class GSSize {
 	private double width, height;

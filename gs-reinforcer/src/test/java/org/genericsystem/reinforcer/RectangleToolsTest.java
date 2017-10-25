@@ -9,6 +9,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import org.genericsystem.reinforcer.tools.GSPoint;
+import org.genericsystem.reinforcer.tools.GSRect;
+import org.genericsystem.reinforcer.tools.RectangleTools;
 import org.testng.annotations.Test;
 
 public class RectangleToolsTest {
