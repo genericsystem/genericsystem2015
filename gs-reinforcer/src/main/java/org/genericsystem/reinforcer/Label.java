@@ -1,6 +1,6 @@
-package org.genericsystem.ir.reinforcer;
+package org.genericsystem.reinforcer;
 
-public class Label {
+public class Label implements Comparable<Label> {
 	private final double tlx, tly, brx, bry;
 	private final String label;
 
@@ -51,11 +51,18 @@ public class Label {
 		return tlx < candidate.brx && candidate.tlx < brx && tly < candidate.bry && candidate.bry < bry;
 	}
 
-		// return !(tlx < candidate.brx && brx > candidate.tlx && tly > candidate.bry && bry < candidate.tly);
+	public NormalizedLabel normalize(double mintlx, double mintly, double width, double height) {
+		return new NormalizedLabel((tlx - mintlx) / width, (tly - mintly) / height, (brx - mintlx) / width, (bry - mintly) / height, label);
 	}
 
-	public Label normalize(double mintlx, double mintly, double width, double height) {
-		System.out.println(mintlx + " " + mintly + " " + width + " " + height);
-		return new Label((tlx - mintlx) / width, (tly - mintly) / height, (brx - mintlx) / width, (bry - mintly) / height, label);
+	@Override
+	public int compareTo(Label o) {
+		if (tlx != o.tlx)
+			return (int) Math.signum(o.tlx - tlx);
+		if (tly != o.tly)
+			return (int) Math.signum(o.tly - tly);
+		if (brx != o.brx)
+			return (int) Math.signum(o.brx - brx);
+		return (int) Math.signum(o.bry - bry);
 	}
 }

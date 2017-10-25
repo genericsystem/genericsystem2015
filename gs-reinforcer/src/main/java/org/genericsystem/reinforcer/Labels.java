@@ -1,15 +1,15 @@
-package org.genericsystem.ir.reinforcer;
+package org.genericsystem.reinforcer;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Stream;
 
 public class Labels implements Iterable<Label> {
 
-	private final Set<Label> labels = new HashSet<>();
+	private final Set<Label> labels = new TreeSet<>();
 
 	public boolean addLabel(double tlx, double tly, double brx, double bry, String candidateLabel) {
 		Label candidate = new Label(tlx, tly, brx, bry, candidateLabel);
