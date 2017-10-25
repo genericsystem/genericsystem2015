@@ -327,14 +327,18 @@ public class RectangleTools {
 		boolean isGSRect1InGSRect2 = true;
 
 		for (GSPoint p : points2) {
-			if (!contains(rect1, p))
+			if (!contains(rect1, p)) {
 				isGSRect2InGSRect1 = false;
+				break;
+			}
 		}
 
 		if (!isGSRect2InGSRect1) {
 			for (GSPoint p : points1) {
-				if (!contains(rect2, p))
+				if (!contains(rect2, p)) {
 					isGSRect1InGSRect2 = false;
+					break;
+				}
 			}
 			if (isGSRect1InGSRect2)
 				return Optional.of(rect1);
