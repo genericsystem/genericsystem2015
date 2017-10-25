@@ -128,8 +128,8 @@ public class LinesDetector extends AbstractApp {
 		public Ransac<Line> findPerspectiveMatrix(int width, int height) {
 			Function<Collection<Line>, Model<Line>> modelProvider = datas -> {
 				Line line = datas.iterator().next();
-				if (datas.size() > 1)
-					throw new IllegalStateException("" + datas.size());
+				// if (datas.size() > 1)
+				// throw new IllegalStateException("" + datas.size());
 				double a = (line.getY2() - line.getY1()) / (line.getX2() - line.getX1());
 				double b = (line.getY1() + line.getY2() - a * (line.getX1() + line.getX2())) / 2;
 				double newy = a * width / 2 + b;

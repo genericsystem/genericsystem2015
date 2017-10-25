@@ -110,8 +110,8 @@ public class LinesDetector2 extends AbstractApp {
 			Function<Collection<Line>, Model<Line>> modelProvider = datas -> {
 				Iterator<Line> it = datas.iterator();
 				Line line = it.next();
-				if (datas.size() > 2)
-					throw new IllegalStateException("" + datas.size());
+				// if (datas.size() > 2)
+				// throw new IllegalStateException("" + datas.size());
 				double a = (line.getY2() - line.getY1()) / (line.getX2() - line.getX1());
 				double b = (line.getY1() + line.getY2() - a * (line.getX1() + line.getX2())) / 2;
 
