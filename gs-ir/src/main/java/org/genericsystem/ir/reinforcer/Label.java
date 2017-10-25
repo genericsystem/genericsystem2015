@@ -48,12 +48,8 @@ public class Label {
 	}
 
 	public boolean intersectWith(Label candidate) {
-		double maxtlx = Math.max(tlx, candidate.tlx);
-		double maxtly = Math.max(tly, candidate.tly);
-		double minbrx = Math.min(brx, candidate.brx);
-		double minbry = Math.min(bry, candidate.bry);
-		return maxtlx <= minbrx || maxtly <= minbry;
-		// (maxtlx,maxtly) - (minbrx,minbry)
+		return tlx < candidate.brx && candidate.tlx < brx && tly < candidate.bry && candidate.bry < bry;
+	}
 
 		// return !(tlx < candidate.brx && brx > candidate.tlx && tly > candidate.bry && bry < candidate.tly);
 	}
