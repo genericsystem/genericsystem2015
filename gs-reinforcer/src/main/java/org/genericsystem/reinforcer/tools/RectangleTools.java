@@ -1,7 +1,6 @@
 package org.genericsystem.reinforcer.tools;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -22,21 +21,6 @@ public class RectangleTools {
 
 	public static final double DEFAULT_EPSILON = 0.2;
 	public static final double DEFAULT_GROUP_THRESHOLD = 0;
-
-	public static void main(String[] args) {
-		GSRect rect1 = new GSRect(0, 0, 3, 3);
-		GSRect rect2 = new GSRect(1, 3, 3, 1);
-		System.out.println("Union: " + getUnion(rect1, rect2));
-		System.out.println("Intersection: " + getIntersection(rect1, rect2));
-
-		GSRect r1 = new GSRect(0, 0, 100, 200);
-		GSRect r2 = new GSRect(25, 25, 100, 200);
-		System.out.println(getDelta(r1, r2, 0.2));
-
-		GSRect r3 = new GSRect(0, 0, 3, 4);
-
-		System.out.println(groupRectangles(Arrays.asList(rect1, rect2, r1, r2, r3), MERGE_METHOD.MEAN));
-	}
 
 	/**
 	 * Describe the method used to merge multiple rectangles.
