@@ -1,9 +1,9 @@
 package org.genericsystem.reinforcer.tools;
 
 public class GSRect {
-	private int x, y, width, height;
+	private double x, y, width, height;
 
-	public GSRect(int x, int y, int width, int height) {
+	public GSRect(double x, double y, double width, double height) {
 		this.x = x;
 		this.y = y;
 		this.width = width;
@@ -15,14 +15,14 @@ public class GSRect {
 	}
 
 	public GSRect(GSPoint p1, GSPoint p2) {
-		x = (int) (p1.getX() < p2.getX() ? p1.getX() : p2.getX());
-		y = (int) (p1.getY() < p2.getY() ? p1.getY() : p2.getY());
-		width = (int) (p1.getX() > p2.getX() ? p1.getX() : p2.getX()) - x;
-		height = (int) (p1.getY() > p2.getY() ? p1.getY() : p2.getY()) - y;
+		x = p1.getX() < p2.getX() ? p1.getX() : p2.getX();
+		y = p1.getY() < p2.getY() ? p1.getY() : p2.getY();
+		width = (p1.getX() > p2.getX() ? p1.getX() : p2.getX()) - x;
+		height = (p1.getY() > p2.getY() ? p1.getY() : p2.getY()) - y;
 	}
 
 	public GSRect(GSPoint p, GSSize s) {
-		this((int) p.getX(), (int) p.getY(), (int) s.getWidth(), (int) s.getHeight());
+		this(p.getX(), p.getY(), s.getWidth(), s.getHeight());
 	}
 
 	public GSRect(double[] vals) {
@@ -31,10 +31,10 @@ public class GSRect {
 
 	private void set(double[] vals) {
 		if (vals != null) {
-			x = vals.length > 0 ? (int) vals[0] : 0;
-			y = vals.length > 1 ? (int) vals[1] : 0;
-			width = vals.length > 2 ? (int) vals[2] : 0;
-			height = vals.length > 3 ? (int) vals[3] : 0;
+			x = vals.length > 0 ? vals[0] : 0;
+			y = vals.length > 1 ? vals[1] : 0;
+			width = vals.length > 2 ? vals[2] : 0;
+			height = vals.length > 3 ? vals[3] : 0;
 		} else {
 			x = 0;
 			y = 0;
@@ -103,19 +103,19 @@ public class GSRect {
 		return "{" + x + ", " + y + ", " + width + "x" + height + "}";
 	}
 
-	public int getX() {
+	public double getX() {
 		return x;
 	}
 
-	public int getY() {
+	public double getY() {
 		return y;
 	}
 
-	public int getWidth() {
+	public double getWidth() {
 		return width;
 	}
 
-	public int getHeight() {
+	public double getHeight() {
 		return height;
 	}
 }
