@@ -31,7 +31,7 @@ public final class RectToolsMapper {
 	}
 
 	private static Rect convert(GSRect gsRect) {
-		return new Rect(gsRect.getX(), gsRect.getY(), gsRect.getWidth(), gsRect.getHeight());
+		return new Rect((int) gsRect.getX(), (int) gsRect.getY(), (int) gsRect.getWidth(), (int) gsRect.getHeight());
 	}
 
 	private static Point convert(GSPoint gsPoint) {
