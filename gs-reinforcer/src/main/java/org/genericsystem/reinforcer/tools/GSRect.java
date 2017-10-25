@@ -2,7 +2,9 @@ package org.genericsystem.reinforcer.tools;
 
 import java.util.Optional;
 
-public class GSRect {
+import org.genericsystem.reinforcer.NormalizedRect;
+
+public class GSRect implements Comparable<GSRect> {
 	private double x, y, width, height;
 
 	public GSRect(double x, double y, double width, double height) {
@@ -201,11 +203,8 @@ public class GSRect {
 		return points;
 	}
 
-	public GSRect normalize(double mintlx, double mintly, double width, double height) {
-		System.out.println("before normalizing " + this);
-		GSRect result = new GSRect((x - mintlx) / width, (y - mintly) / height, this.width / width, this.height / height);
-		System.out.println("after normalizing " + result);
-		return result;
+	public NormalizedRect normalize(double mintlx, double mintly, double width, double height) {
+		return new NormalizedRect((x - mintlx) / width, (y - mintly) / height, this.width / width, this.height / height);
 	}
 
 	@Override
@@ -253,5 +252,16 @@ public class GSRect {
 
 	public double getHeight() {
 		return height;
+	}
+
+	@Override
+	public int compareTo(GSRect o) {
+		if (x != o.x)
+			return (int) Math.signum(x - o.x);
+		if (y != o.y)
+			return (int) Math.signum(y - o.y);
+		if (width != o.width)
+			return (int) Math.signum(width - o.width);
+		return (int) Math.signum(height - o.height);
 	}
 }

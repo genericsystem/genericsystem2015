@@ -35,6 +35,5 @@ public class RinforcerTest {
 		labels3.addLabel(3, 2, 72, 68, "Name.");
 		labels3.addLabel(75, 4, 262, 70, "Vader-Kenobi");
 		reinforcer.reinforce(labels3);
-
 	}
 }
