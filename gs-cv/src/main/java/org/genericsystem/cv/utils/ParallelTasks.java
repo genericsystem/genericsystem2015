@@ -50,6 +50,7 @@ public class ParallelTasks {
 	 */
 	public void run() throws InterruptedException {
 		final ExecutorService threads = Executors.newFixedThreadPool(counter);
+		// new ThreadPoolExecutor(counter, 2 * counter, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(), new ThreadPoolExecutor.DiscardOldestPolicy());
 		try {
 			final CountDownLatch latch = new CountDownLatch(tasks.size());
 			tasks.forEach(task -> threads.execute(() -> {
