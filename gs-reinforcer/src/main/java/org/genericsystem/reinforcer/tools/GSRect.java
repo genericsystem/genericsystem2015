@@ -236,7 +236,7 @@ public class GSRect {
 
 	@Override
 	public String toString() {
-		return "{" + x + ", " + y + ", " + width + "x" + height + "}";
+		return String.format("{GSRect, tlx: %,.1f, tly: %,.1f, width: %,.1f, height: %,.1f}", x, y, width, height);
 	}
 
 	public double getX() {
