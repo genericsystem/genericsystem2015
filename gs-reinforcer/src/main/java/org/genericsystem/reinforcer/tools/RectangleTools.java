@@ -353,7 +353,7 @@ public class RectangleTools {
 	 * @return true if <code>p</code> is contained in <code>rect</code>, false otherwise
 	 */
 	public static boolean contains(GSRect rect, GSPoint p) {
-		boolean res = rect.tl().getY() <= p.getX() && p.getX() <= rect.br().getX() && rect.tl().getY() <= p.getY() && p.getY() <= rect.br().getY();
+		boolean res = rect.tl().getX() <= p.getX() && p.getX() <= rect.br().getX() && rect.tl().getY() <= p.getY() && p.getY() <= rect.br().getY();
 		return res;
 	}
 
