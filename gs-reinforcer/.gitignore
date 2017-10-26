@@ -1,0 +1,15 @@
+/target/
+/pdf/
+/png/
+/adjusted/
+/ajusted/
+/templated/
+/aligned-*
+/ocr/
+/classes/
+/unclassified/
+/templates/
+/pdfs/
+/tmp/
+/bin/
+/test-output/

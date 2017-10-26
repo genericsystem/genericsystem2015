@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.genericsystem.cv.Img;
-import org.genericsystem.cv.utils.RectangleTools;
+import org.genericsystem.cv.utils.RectToolsMapper;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.slf4j.Logger;
@@ -88,7 +88,7 @@ public class DocFields extends AbstractFields {
 	protected Field getIntersection(AbstractField field1, AbstractField field2) {
 		Rect rect1 = field1.getRect();
 		Rect rect2 = field2.getRect();
-		Rect intersect = RectangleTools.getIntersection(rect1, rect2).orElseThrow(() -> new IllegalArgumentException("No intersecting rectangle was found"));
+		Rect intersect = RectToolsMapper.getIntersection(rect1, rect2).orElseThrow(() -> new IllegalArgumentException("No intersecting rectangle was found"));
 		Field intersection = new Field(intersect);
 		Arrays.asList(field1, field2).forEach(f -> intersection.merge(f));
 		return intersection;
@@ -98,7 +98,7 @@ public class DocFields extends AbstractFields {
 	protected Field getUnion(AbstractField field1, AbstractField field2) {
 		Rect rect1 = field1.getRect();
 		Rect rect2 = field2.getRect();
-		Field union = new Field(RectangleTools.getUnion(rect1, rect2));
+		Field union = new Field(RectToolsMapper.getUnion(rect1, rect2));
 		Arrays.asList(field1, field2).forEach(f -> union.merge(f));
 		return union;
 	}

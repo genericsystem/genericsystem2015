@@ -54,12 +54,16 @@ public abstract class AbstractFields implements Iterable<AbstractField> {
 		randomOcrStream().forEach(f -> f.ocr(rootImg));
 	}
 
+	public void drawRectsPerspective(Img display, Mat homography, Scalar color, int thickness) {
+		stream().forEach(field -> field.drawRectsPerspective(display, homography, color, thickness));
+	}
+
 	public void drawOcrPerspectiveInverse(Img display, Mat homography, Scalar color, int thickness) {
 		consolidatedFieldStream().forEach(field -> field.drawOcrPerspectiveInverse(display, homography, color, thickness));
 	}
 
 	public void drawConsolidated(Img stabilizedDisplay) {
-		consolidatedFieldStream().forEach(field -> field.draw(stabilizedDisplay));
+		consolidatedFieldStream().forEach(field -> field.draw(stabilizedDisplay, new Scalar(0, 0, 255)));
 	}
 
 	public Stream<AbstractField> randomOcrStream() {

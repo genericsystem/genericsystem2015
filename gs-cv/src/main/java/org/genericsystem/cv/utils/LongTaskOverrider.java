@@ -1,7 +1,6 @@
-package org.genericsystem.cv;
+package org.genericsystem.cv.utils;
 
 public class LongTaskOverrider {
-
 	private Runnable isRunning;
 	private Runnable waiting;
 
