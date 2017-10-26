@@ -10,8 +10,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.genericsystem.cv.Img;
-import org.genericsystem.cv.utils.RectToolsMapper;
 import org.genericsystem.cv.utils.ParallelTasks;
+import org.genericsystem.cv.utils.RectToolsMapper;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint2f;

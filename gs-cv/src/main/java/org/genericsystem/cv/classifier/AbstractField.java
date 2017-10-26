@@ -14,10 +14,10 @@ import java.util.stream.IntStream;
 
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.Ocr;
-import org.genericsystem.cv.utils.RectToolsMapper;
 import org.genericsystem.cv.utils.OCRPlasty;
 import org.genericsystem.cv.utils.OCRPlasty.RANSAC;
 import org.genericsystem.cv.utils.OCRPlasty.Tuple;
+import org.genericsystem.cv.utils.RectToolsMapper;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint2f;
@@ -109,6 +109,19 @@ public abstract class AbstractField {
 
 	public void draw(Img stabilizedDisplay) {
 		Imgproc.rectangle(stabilizedDisplay.getSrc(), rect.tl(), rect.br(), new Scalar(0, 0, 255));
+	}
+
+	public void drawRectsPerspective(Img display, Mat homography, Scalar color, int thickness) {
+		if (isOnDisplay(display)) {
+			List<Point> points = Arrays.asList(center, new Point(rect.x, rect.y), new Point(rect.x + rect.width - 1, rect.y), new Point(rect.x + rect.width - 1, rect.y + rect.height - 1), new Point(rect.x, rect.y + rect.height - 1));
+			MatOfPoint2f results = new MatOfPoint2f();
+			Core.perspectiveTransform(Converters.vector_Point2f_to_Mat(points), results, homography);
+			Point[] targets = results.toArray();
+			Imgproc.line(display.getSrc(), targets[1], targets[2], color, thickness);
+			Imgproc.line(display.getSrc(), targets[2], targets[3], color, thickness);
+			Imgproc.line(display.getSrc(), targets[3], targets[4], color, thickness);
+			Imgproc.line(display.getSrc(), targets[4], targets[1], color, thickness);
+		}
 	}
 
 	public void drawOcrPerspectiveInverse(Img display, Mat homography, Scalar color, int thickness) {
