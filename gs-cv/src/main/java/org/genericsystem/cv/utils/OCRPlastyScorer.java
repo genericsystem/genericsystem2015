@@ -12,7 +12,8 @@ import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 
 import org.genericsystem.cv.utils.OCRPlasty.RANSAC;
-import org.genericsystem.cv.utils.StringCompare.SIMILARITY;
+import org.genericsystem.reinforcer.tools.StringCompare;
+import org.genericsystem.reinforcer.tools.StringCompare.SIMILARITY;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
