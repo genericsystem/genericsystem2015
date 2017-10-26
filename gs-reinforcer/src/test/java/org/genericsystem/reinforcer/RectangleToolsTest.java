@@ -94,28 +94,28 @@ public class RectangleToolsTest {
 		GSRect r2 = new GSRect(49, 0, 50, 100);
 		GSRect r3 = new GSRect(100, 0, 100, 100);
 
-		assertEquals(RectangleTools.inclusiveArea(r1, r1), 1, 0.001);
-		assertEquals(RectangleTools.inclusiveArea(r1, r2), 0.5, 0.001);
-		assertEquals(RectangleTools.inclusiveArea(r1, r3), 0, 0.001);
+		assertEquals(r1.inclusiveArea(r1), 1, 0.001);
+		assertEquals(r1.inclusiveArea(r2), 0.5, 0.001);
+		assertEquals(r1.inclusiveArea(r3), 0, 0.001);
 	}
 
 	@Test
 	public void getIntersection() {
 		GSRect inter12 = new GSRect(1, 1, 9, 9);
 
-		Optional<GSRect> inter = RectangleTools.getIntersection(rect1, rect1);
+		Optional<GSRect> inter = rect1.getIntersection(rect1);
 		assertTrue(inter.isPresent());
 		assertEquals(inter.get(), rect1);
 
-		inter = RectangleTools.getIntersection(rect1, rect2);
+		inter = rect1.getIntersection(rect2);
 		assertTrue(inter.isPresent());
 		assertEquals(inter.get(), inter12);
 
-		inter = RectangleTools.getIntersection(rect1, rect3);
+		inter = rect1.getIntersection(rect3);
 		assertFalse(inter.isPresent());
 		assertTrue(Optional.empty().equals(inter));
 
-		inter = RectangleTools.getIntersection(rect1, rect4);
+		inter = rect1.getIntersection(rect4);
 		assertTrue(inter.isPresent());
 		assertEquals(inter.get(), rect4);
 	}
@@ -125,29 +125,29 @@ public class RectangleToolsTest {
 		GSRect union12 = new GSRect(0, 0, 21, 11);
 		GSRect union13 = new GSRect(0, 0, 30, 20);
 
-		GSRect union = RectangleTools.getUnion(rect1, rect1);
+		GSRect union = rect1.getUnion(rect1);
 		assertEquals(union, rect1);
 
-		union = RectangleTools.getUnion(rect1, rect2);
+		union = rect1.getUnion(rect2);
 		assertEquals(union, union12);
 
-		union = RectangleTools.getUnion(rect1, rect3);
+		union = rect1.getUnion(rect3);
 		assertEquals(union, union13);
 
-		union = RectangleTools.getUnion(rect1, rect4);
+		union = rect1.getUnion(rect4);
 		assertEquals(union, rect1);
 	}
 
 	@Test
 	public void isOverlapping() {
-		assertTrue(RectangleTools.isOverlapping(rect1, rect1));
-		assertTrue(RectangleTools.isOverlapping(rect1, rect2));
-		assertFalse(RectangleTools.isOverlapping(rect1, rect3));
-		assertTrue(RectangleTools.isOverlapping(rect1, rect4));
+		assertTrue(rect1.isOverlapping(rect1));
+		assertTrue(rect1.isOverlapping(rect2));
+		assertFalse(rect1.isOverlapping(rect3));
+		assertTrue(rect1.isOverlapping(rect4));
 	}
 
 	@Test(expectedExceptions = { IllegalArgumentException.class })
 	public void isOverlappingNull() {
-		RectangleTools.isOverlapping(null, null);
+		rect1.isOverlapping(null);
 	}
 }

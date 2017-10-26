@@ -1,7 +1,6 @@
 package org.genericsystem.reinforcer.tools;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -22,21 +21,6 @@ public class RectangleTools {
 
 	public static final double DEFAULT_EPSILON = 0.2;
 	public static final double DEFAULT_GROUP_THRESHOLD = 0;
-
-	public static void main(String[] args) {
-		GSRect rect1 = new GSRect(0, 0, 3, 3);
-		GSRect rect2 = new GSRect(1, 3, 3, 1);
-		System.out.println("Union: " + getUnion(rect1, rect2));
-		System.out.println("Intersection: " + getIntersection(rect1, rect2));
-
-		GSRect r1 = new GSRect(0, 0, 100, 200);
-		GSRect r2 = new GSRect(25, 25, 100, 200);
-		System.out.println(getDelta(r1, r2, 0.2));
-
-		GSRect r3 = new GSRect(0, 0, 3, 4);
-
-		System.out.println(groupRectangles(Arrays.asList(rect1, rect2, r1, r2, r3), MERGE_METHOD.MEAN));
-	}
 
 	/**
 	 * Describe the method used to merge multiple rectangles.
@@ -77,10 +61,10 @@ public class RectangleTools {
 		final Function<List<GSRect>, GSRect> merge;
 		switch (method) {
 			case UNION:
-				merge = list -> list.size() <= 1 ? list.get(0) : list.stream().reduce(list.get(0), (r, total) -> getUnion(r, total));
+				merge = list -> list.size() <= 1 ? list.get(0) : list.stream().reduce(list.get(0), (r, total) -> r.getUnion(total));
 				break;
 			case INTERSECTION:
-				merge = list -> list.size() <= 1 ? list.get(0) : list.stream().reduce(list.get(0), (r, total) -> getIntersection(r, total).orElse(total));
+				merge = list -> list.size() <= 1 ? list.get(0) : list.stream().reduce(list.get(0), (r, total) -> r.getIntersection(total).orElse(total));
 				break;
 			default:
 			case MEAN:
@@ -196,7 +180,7 @@ public class RectangleTools {
 	 */
 	public static double[] commonArea(GSRect rect1, GSRect rect2) {
 		double[] result = new double[2];
-		Optional<GSRect> intersection = getIntersection(rect1, rect2);
+		Optional<GSRect> intersection = rect1.getIntersection(rect2);
 		if (intersection.isPresent()) {
 			GSRect intersect = intersection.get();
 			result[0] = intersect.area() / rect1.area();
@@ -208,71 +192,6 @@ public class RectangleTools {
 		return result;
 	}
 
-	/**
-	 * Compute the inclusive area between two rectangles (intersection area / union area)
-	 * 
-	 * @param rect1 - the first rectangle
-	 * @param rect2 - the second rectangle
-	 * @return the percentage of overlap between the two rectangles, defined by <code>intersection.area() / union.area()</code>
-	 */
-	public static double inclusiveArea(GSRect rect1, GSRect rect2) {
-		Optional<GSRect> optional = getIntersection(rect1, rect2);
-		if (!optional.isPresent())
-			return 0;
-		GSRect intersection = optional.get();
-		GSRect union = getUnion(rect1, rect2);
-		double area = intersection.area() / union.area();
-		return area;
-	}
-
-	/**
-	 * Compute the intersection of two rectangles.
-	 * 
-	 * @param rect1 - the first rectangle
-	 * @param rect2 - the second rectangle
-	 * @return an {@link Optional} with the intersecting {@link GSRect}, or an empty Optional if no intersection was found
-	 */
-	public static Optional<GSRect> getIntersection(GSRect rect1, GSRect rect2) {
-		// First, check whether a rectangle is contained in the other
-		Optional<GSRect> insider = getInsider(rect1, rect2);
-		if (insider.isPresent())
-			return insider;
-
-		// If not, compute the intersection
-		double tlX = Math.max(rect1.tl().getX(), rect2.tl().getX());
-		double tlY = Math.max(rect1.tl().getY(), rect2.tl().getY());
-		double brX = Math.min(rect1.br().getX(), rect2.br().getX());
-		double brY = Math.min(rect1.br().getY(), rect2.br().getY());
-
-		if (brX - tlX <= 0 || brY - tlY <= 0) // XXX: swap tl and br if < 0?
-			return Optional.empty();
-		else
-			return Optional.of(new GSRect(new GSPoint(tlX, tlY), new GSPoint(brX, brY)));
-	}
-
-	/**
-	 * Compute the union of two rectangles.
-	 * 
-	 * @param rect1 - the first rectangle
-	 * @param rect2 - the second rectangle
-	 * @return the union {@link GSRect}
-	 */
-	public static GSRect getUnion(GSRect rect1, GSRect rect2) {
-		// First, check whether a rectangle is contained in the other
-		Optional<GSRect> inside = getInsider(rect1, rect2);
-		if (inside.isPresent()) {
-			GSRect insider = inside.get();
-			return insider.equals(rect1) ? rect2 : rect1;
-		}
-
-		// If not, compute the union
-		double tlX = Math.min(rect1.tl().getX(), rect2.tl().getX());
-		double tlY = Math.min(rect1.tl().getY(), rect2.tl().getY());
-		double brX = Math.max(rect1.br().getX(), rect2.br().getX());
-		double brY = Math.max(rect1.br().getY(), rect2.br().getY());
-
-		return new GSRect(new GSPoint(tlX, tlY), new GSPoint(brX, brY));
-	}
 
 	/**
 	 * Compute a mean rectangle from a list of rectangles.
@@ -297,75 +216,6 @@ public class RectangleTools {
 		brx /= rects.size();
 		bry /= rects.size();
 		return new GSRect(new GSPoint(tlx, tly), new GSPoint(brx, bry));
-	}
-
-	/**
-	 * Check whether two rectangles are overlapping. This method is inclusive, e.g. it will return true if the rectangles have only a side or an angle in common.
-	 * 
-	 * @param rect1 - the first rectangle
-	 * @param rect2 - the second rectangle
-	 * @return true is the rectangles overlap, false otherwise
-	 * @throws IllegalArgumentException if at least one of the rectangles is <code>null</code>
-	 */
-	public static boolean isOverlapping(GSRect rect1, GSRect rect2) throws IllegalArgumentException {
-		if (rect1 == null || rect2 == null)
-			throw new IllegalArgumentException("One of the rectangles is null");
-		return getIntersection(rect1, rect2).map(rect -> rect.area() > 0 ? true : false).orElse(false);
-	}
-
-	/**
-	 * Compare 2 rectangles, and returns the smaller rectangle if it is inside the other. Returns an empty {@link Optional} if no rectangles is contained in the other.
-	 * 
-	 * @param rect1 - the first rectangle
-	 * @param rect2 - the second rectangle
-	 * @return an {@link Optional} with the rectangle contained in the other, an empty Optional if no rectangles is contained in the other.
-	 */
-	public static Optional<GSRect> getInsider(GSRect rect1, GSRect rect2) {
-		GSPoint[] points1 = decomposeClockwise(rect1);
-		GSPoint[] points2 = decomposeClockwise(rect2);
-		boolean isGSRect2InGSRect1 = true;
-		boolean isGSRect1InGSRect2 = true;
-
-		for (GSPoint p : points2) {
-			if (!contains(rect1, p))
-				isGSRect2InGSRect1 = false;
-		}
-
-		if (!isGSRect2InGSRect1) {
-			for (GSPoint p : points1) {
-				if (!contains(rect2, p))
-					isGSRect1InGSRect2 = false;
-			}
-			if (isGSRect1InGSRect2)
-				return Optional.of(rect1);
-			else
-				return Optional.empty();
-		} else {
-			return Optional.of(rect2);
-		}
-	}
-
-	/**
-	 * Check if a {@link GSPoint} is contained in a {@link GSRect} (being inclusive).
-	 * 
-	 * @param rect - the rectangle
-	 * @param p - the point
-	 * @return true if <code>p</code> is contained in <code>rect</code>, false otherwise
-	 */
-	public static boolean contains(GSRect rect, GSPoint p) {
-		boolean res = rect.tl().getY() <= p.getX() && p.getX() <= rect.br().getX() && rect.tl().getY() <= p.getY() && p.getY() <= rect.br().getY();
-		return res;
-	}
-
-	/**
-	 * Decompose a {@link GSRect} in four points starting from tl(), clockwise.
-	 * 
-	 * @param rect - the rectangle
-	 * @return an array of {@link GSPoint} in the order tl, tr, br, bl
-	 */
-	public static GSPoint[] decomposeClockwise(GSRect rect) {
-		GSPoint[] points = new GSPoint[] { rect.tl(), new GSPoint(rect.br().getX(), rect.tl().getY()), rect.br(), new GSPoint(rect.tl().getX(), rect.br().getY()) };
-		return points;
 	}
 
 	/**
