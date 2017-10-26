@@ -22,8 +22,7 @@ import org.opencv.utils.Converters;
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class Fields extends AbstractFields {
 
-	private Mat lastHomography;
-	private Mat lastRotation;
+	private Mat lastHomographyInv;
 
 	private static ThreadLocalRandom rand = ThreadLocalRandom.current();
 	private static final int MAX_DELETE_UNMERGED = 5;
@@ -35,7 +34,7 @@ public class Fields extends AbstractFields {
 
 		fields = newRects.stream().map(Field::new).collect(Collectors.toList());
 
-		if (lastHomography != null) {
+		if (lastHomographyInv != null) {
 			ListIterator<Field> it = oldFields.listIterator();
 			while (it.hasNext()) {
 				Field currentOldField = it.next();
@@ -81,7 +80,7 @@ public class Fields extends AbstractFields {
 	}
 
 	private List<Field> restabilizeFields() {
-		// Apply the homography + rotation to the oldFields
+		// Apply the homography to the oldFields
 		List<Rect> virtualRects = fields.stream().map(AbstractField::getRect).map(rect -> findNewRect(rect)).collect(Collectors.toList());
 		return IntStream.range(0, fields.size()).mapToObj(i -> {
 			Field f = new Field(virtualRects.get(i));
@@ -98,22 +97,13 @@ public class Fields extends AbstractFields {
 	private List<Point> restabilize(List<Point> originals) {
 		Mat original = Converters.vector_Point2f_to_Mat(originals);
 		MatOfPoint2f results = new MatOfPoint2f();
-		Core.perspectiveTransform(original, results, lastHomography);
-		MatOfPoint2f rotated = new MatOfPoint2f();
-		Core.transform(results, rotated, lastRotation);
-		List<Point> res = rotated.toList();
-		original.release();
-		results.release();
-		rotated.release();
+		Core.perspectiveTransform(original, results, lastHomographyInv);
+		List<Point> res = results.toList();
 		return res;
 	}
 
-	public void storeLastHomography(Mat homography) {
-		this.lastHomography = homography;
-	}
-
-	public void storeLastRotation(Mat rotation) {
-		this.lastRotation = rotation;
+	public void storeLastHomographyInv(Mat homographyInv) {
+		this.lastHomographyInv = homographyInv;
 	}
 
 	@Override
