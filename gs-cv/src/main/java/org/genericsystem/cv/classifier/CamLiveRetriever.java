@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 
-@SuppressWarnings({ "unused", "resource" })
+@SuppressWarnings({ "resource" })
 public class CamLiveRetriever extends AbstractApp {
 
 	static {
@@ -95,16 +95,13 @@ public class CamLiveRetriever extends AbstractApp {
 		mainGrid.add(src0, 0, 0);
 
 		ImageView src1 = new ImageView(Tools.mat2jfxImage(frame));
-		mainGrid.add(src1, 0, 1);
-
-		ImageView src2 = new ImageView(Tools.mat2jfxImage(frame));
-		mainGrid.add(src2, 1, 1);
+		mainGrid.add(src1, 1, 0);
 
 		oldKeypoints = new MatOfKeyPoint();
 		oldDescriptors = new Mat();
 
 		// Perform the OCR
-		timerOcr.scheduleWithFixedDelay(() -> consolidateOcr(), 1000, OCR_DELAY, TimeUnit.MILLISECONDS);
+		timerOcr.scheduleWithFixedDelay(() -> consolidateOcr(), 500, OCR_DELAY, TimeUnit.MILLISECONDS);
 
 		// Stabilize the image
 		timerFields.scheduleWithFixedDelay(() -> onSpace(), 0, STABILIZATION_DELAY, TimeUnit.MILLISECONDS);
@@ -116,10 +113,6 @@ public class CamLiveRetriever extends AbstractApp {
 					capture.read(frame);
 					Img frameImg = new Img(frame, true);
 					Img deskewed = perspectiveTransform(frameImg.getSrc());
-
-					if (deskewed != null)
-						src2.setImage(deskewed.toJfxImage());
-
 					newKeypoints = detect(deskewed);
 					newDescriptors = new Mat();
 					extractor.compute(deskewed.getSrc(), newKeypoints, newDescriptors);
@@ -128,14 +121,17 @@ public class CamLiveRetriever extends AbstractApp {
 					if (stabilized != null) {
 						if (stabilizationHasChanged) {
 							List<Rect> newRects = detectRects(stabilized);
-							fields.merge(newRects);
+							fields.merge(stabilized, newRects);
 							stabilizationHasChanged = false;
 						}
 						Img display = new Img(frame, true);
 						Img stabilizedDisplay = new Img(stabilized.getSrc(), true);
 
+						// fields.drawRectsPerspective(display, homography.inv(), new Scalar(0, 0, 255), 1);
+						// fields.drawRectsPerspective(stabilizedDisplay, new Mat(3, 3, CvType.CV_64FC1), new Scalar(0, 255, 0), 1);
+
 						fields.drawOcrPerspectiveInverse(display, homography.inv(), new Scalar(0, 64, 128), 1);
-						// fields.drawConsolidated(stabilizedDisplay);
+						fields.drawConsolidated(stabilizedDisplay);
 
 						src0.setImage(display.toJfxImage());
 						src1.setImage(stabilizedDisplay.toJfxImage());
@@ -144,7 +140,7 @@ public class CamLiveRetriever extends AbstractApp {
 					logger.warn("Exception while computing layout.", e);
 				}
 			}
-		}, 500, FRAME_DELAY, TimeUnit.MILLISECONDS);
+		}, 400, FRAME_DELAY, TimeUnit.MILLISECONDS);
 
 	}
 
@@ -169,7 +165,7 @@ public class CamLiveRetriever extends AbstractApp {
 	private Img stabilize(Img frame, DescriptorMatcher matcher) {
 		MatOfDMatch matches = new MatOfDMatch();
 		if (oldDescriptors != null && !oldDescriptors.empty() && !newDescriptors.empty()) {
-			Mat stabilizedMat = new Mat();
+			Mat stabilizedMat = new Mat(); // frame.getSrc().clone();
 			matcher.match(oldDescriptors, newDescriptors, matches);
 			List<DMatch> goodMatches = new ArrayList<>();
 			for (DMatch dMatch : matches.toArray()) {
@@ -210,12 +206,12 @@ public class CamLiveRetriever extends AbstractApp {
 	}
 
 	private List<Rect> detectRects(Img stabilized) {
-		List<MatOfPoint> contours = new ArrayList<>();
 		Img closed = stabilized.adaptativeGaussianInvThreshold(7, 3).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(9, 1));
+		List<MatOfPoint> contours = new ArrayList<>();
 		Imgproc.findContours(closed.getSrc(), contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 		double minArea = 200;
 		List<Rect> res = contours.stream().filter(contour -> Imgproc.contourArea(contour) > minArea).map(c -> Imgproc.boundingRect(c)).collect(Collectors.toList());
-		res.forEach(rect -> Imgproc.rectangle(stabilized.getSrc(), rect.tl(), rect.br(), new Scalar(0, 64, 128)));
+		// res.forEach(rect -> Imgproc.rectangle(stabilized.getSrc(), rect.tl(), rect.br(), new Scalar(128, 0, 0)));
 		return res;
 	}
 

@@ -107,20 +107,19 @@ public abstract class AbstractField {
 		}
 	}
 
-	public void draw(Img stabilizedDisplay) {
-		Imgproc.rectangle(stabilizedDisplay.getSrc(), rect.tl(), rect.br(), new Scalar(0, 0, 255));
+	public void draw(Img stabilizedDisplay, Scalar color) {
+		Imgproc.rectangle(stabilizedDisplay.getSrc(), rect.tl(), rect.br(), color);
 	}
 
 	public void drawRectsPerspective(Img display, Mat homography, Scalar color, int thickness) {
 		if (isOnDisplay(display)) {
-			List<Point> points = Arrays.asList(center, new Point(rect.x, rect.y), new Point(rect.x + rect.width - 1, rect.y), new Point(rect.x + rect.width - 1, rect.y + rect.height - 1), new Point(rect.x, rect.y + rect.height - 1));
+			List<Point> points = Arrays.asList(new Point(rect.x, rect.y), new Point(rect.x + rect.width - 1, rect.y), new Point(rect.x + rect.width - 1, rect.y + rect.height - 1), new Point(rect.x, rect.y + rect.height - 1));
 			MatOfPoint2f results = new MatOfPoint2f();
 			Core.perspectiveTransform(Converters.vector_Point2f_to_Mat(points), results, homography);
 			Point[] targets = results.toArray();
-			Imgproc.line(display.getSrc(), targets[1], targets[2], color, thickness);
-			Imgproc.line(display.getSrc(), targets[2], targets[3], color, thickness);
-			Imgproc.line(display.getSrc(), targets[3], targets[4], color, thickness);
-			Imgproc.line(display.getSrc(), targets[4], targets[1], color, thickness);
+			for (int i = 0; i < 4; ++i) {
+				Imgproc.line(display.getSrc(), targets[i], targets[(i + 1) % 4], color, thickness);
+			}
 		}
 	}
 
@@ -130,14 +129,13 @@ public abstract class AbstractField {
 			String text = consolidated.orElse("");
 			String conf = String.format("%.3f", confidence);
 
-			List<Point> points = Arrays.asList(center, new Point(rect.x, rect.y), new Point(rect.x + rect.width - 1, rect.y), new Point(rect.x + rect.width - 1, rect.y + rect.height - 1), new Point(rect.x, rect.y + rect.height - 1));
+			List<Point> points = Arrays.asList(new Point(rect.x, rect.y), new Point(rect.x + rect.width - 1, rect.y), new Point(rect.x + rect.width - 1, rect.y + rect.height - 1), new Point(rect.x, rect.y + rect.height - 1));
 			MatOfPoint2f results = new MatOfPoint2f();
 			Core.perspectiveTransform(Converters.vector_Point2f_to_Mat(points), results, homography);
 			Point[] targets = results.toArray();
-			Imgproc.line(display.getSrc(), targets[1], targets[2], color, thickness);
-			Imgproc.line(display.getSrc(), targets[2], targets[3], color, thickness);
-			Imgproc.line(display.getSrc(), targets[3], targets[4], color, thickness);
-			Imgproc.line(display.getSrc(), targets[4], targets[1], color, thickness);
+			for (int i = 0; i < 4; ++i) {
+				Imgproc.line(display.getSrc(), targets[i], targets[(i + 1) % 4], color, thickness);
+			}
 			Point topCenter = new Point((targets[1].x + targets[2].x) / 2, (targets[1].y + targets[2].y) / 2);
 			double l = Math.sqrt(Math.pow(targets[1].x - topCenter.x, 2) + Math.pow(targets[1].y - topCenter.y, 2));
 			Imgproc.line(display.getSrc(), new Point(topCenter.x, topCenter.y - 2), new Point(topCenter.x, topCenter.y - 20), scalar, 1);

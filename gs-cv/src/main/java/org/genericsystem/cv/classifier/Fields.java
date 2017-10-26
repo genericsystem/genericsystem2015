@@ -17,6 +17,7 @@ import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
 import org.opencv.utils.Converters;
 
 @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -28,18 +29,21 @@ public class Fields extends AbstractFields {
 	private static final int MAX_DELETE_UNMERGED = 5;
 	private static final int OCR_TIMEOUT = 100;
 
-	public void merge(List<Rect> newRects) {
+	public void merge(Img stabilized, List<Rect> newRects) {
 		List<Field> oldFields = restabilizeFields();
 		System.out.println("oldFields transformed (" + oldFields.size() + ")");
-
 		fields = newRects.stream().map(Field::new).collect(Collectors.toList());
+
+		fields.forEach(f -> f.draw(stabilized, new Scalar(0, 0, 255)));
+		oldFields.forEach(f -> f.draw(stabilized, new Scalar(0, 255, 0)));
 
 		if (lastHomographyInv != null) {
 			ListIterator<Field> it = oldFields.listIterator();
 			while (it.hasNext()) {
 				Field currentOldField = it.next();
-				// List<Field> matches = (List) findMatchingFieldsWithConfidence(currentOldField, 0.7);
-				List<Field> matches = (List) findClusteredFields(currentOldField, 0.1);
+				List<Field> matches = (List) findMatchingFieldsWithConfidence(currentOldField, 0.6);
+				// List<Field> matches = (List) findClusteredFields(currentOldField, 0.1);
+				matches.forEach(f -> f.draw(stabilized, new Scalar(255, 0, 0)));
 
 				if (!matches.isEmpty()) {
 					currentOldField.getConsolidated().ifPresent(s -> System.out.println("Merged: " + s));
@@ -80,6 +84,7 @@ public class Fields extends AbstractFields {
 	}
 
 	private List<Field> restabilizeFields() {
+		// return (List) fields.stream().collect(Collectors.toList());
 		// Apply the homography to the oldFields
 		List<Rect> virtualRects = fields.stream().map(AbstractField::getRect).map(rect -> findNewRect(rect)).collect(Collectors.toList());
 		return IntStream.range(0, fields.size()).mapToObj(i -> {

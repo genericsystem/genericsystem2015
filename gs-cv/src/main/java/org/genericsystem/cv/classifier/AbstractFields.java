@@ -63,7 +63,7 @@ public abstract class AbstractFields implements Iterable<AbstractField> {
 	}
 
 	public void drawConsolidated(Img stabilizedDisplay) {
-		consolidatedFieldStream().forEach(field -> field.draw(stabilizedDisplay));
+		consolidatedFieldStream().forEach(field -> field.draw(stabilizedDisplay, new Scalar(0, 0, 255)));
 	}
 
 	public Stream<AbstractField> randomOcrStream() {
