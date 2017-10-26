@@ -54,7 +54,7 @@ public class CamLiveRetriever extends AbstractApp {
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	private static final int OCR_DELAY = 250;
-	private static final int STABILIZATION_DELAY = 110;
+	private static final int STABILIZATION_DELAY = 33; // 110
 	private static final int FRAME_DELAY = 33;
 
 	private MatOfKeyPoint oldKeypoints;
@@ -110,7 +110,7 @@ public class CamLiveRetriever extends AbstractApp {
 		oldDescriptors = new Mat();
 
 		// Perform the OCR
-		timerOcr.scheduleWithFixedDelay(() -> consolidateOcr(), 1000, OCR_DELAY, TimeUnit.MILLISECONDS);
+		// timerOcr.scheduleWithFixedDelay(() -> consolidateOcr(), 1000, OCR_DELAY, TimeUnit.MILLISECONDS);
 
 		// Stabilize the image
 		timerFields.scheduleWithFixedDelay(() -> onSpace(), 0, STABILIZATION_DELAY, TimeUnit.MILLISECONDS);
@@ -121,16 +121,17 @@ public class CamLiveRetriever extends AbstractApp {
 				try {
 					stabilized = getStabilized(frame, extractor, matcher);
 					if (stabilized != null) {
-						if (stabilizationHasChanged) {
-							List<Rect> newRects = detectRects(stabilized);
-							fields.merge(newRects);
-							stabilizationHasChanged = false;
-						}
+						// if (stabilizationHasChanged) {
+						// List<Rect> newRects = detectRects(stabilized);
+						// fields.merge(newRects);
+						// stabilizationHasChanged = false;
+						// }
 						Img display = new Img(frame, true);
 						Img stabilizedDisplay = new Img(stabilized.getSrc(), true);
 
-						fields.drawOcrPerspectiveInverse(display, homography.inv(), new Scalar(0, 64, 255), 1);
-						fields.drawConsolidated(stabilizedDisplay);
+						// fields.drawOcrPerspectiveInverse(display, homography.inv(), new Scalar(0, 64, 255), 1);
+						// fields.drawConsolidated(stabilizedDisplay);
+
 						src0.setImage(display.toJfxImage());
 						src1.setImage(stabilizedDisplay.toJfxImage());
 
@@ -167,28 +168,24 @@ public class CamLiveRetriever extends AbstractApp {
 	}
 
 	private Img getStabilized(Mat frame, DescriptorExtractor extractor, DescriptorMatcher matcher) {
-		Mat stabilizedMat = new Mat();
 		capture.read(frame);
 		Img frameImg = new Img(frame, false);
 		frameImg = frameImg.bilateralFilter(5, 100, 100);
 		// Img deskewed_ = deskew(frameImg);
-		Img deskewed_ = perspectiveTransform(frameImg);
-		if (deskewed_ != null) {
-			newKeypoints = detect(deskewed_);
-			newDescriptors = new Mat();
-			extractor.compute(deskewed_.getSrc(), newKeypoints, newDescriptors);
-			Img stabilized = stabilize(stabilizedMat, matcher);
-			frameImg.close();
-			deskewed_.close();
-			return stabilized;
-		} else {
-			return null;
-		}
+		Img deskewed_ = perspectiveTransform(frameImg.getSrc());
+		newKeypoints = detect(deskewed_);
+		newDescriptors = new Mat();
+		extractor.compute(deskewed_.getSrc(), newKeypoints, newDescriptors);
+		Img stabilized = stabilize(matcher);
+		frameImg.close();
+		deskewed_.close();
+		return stabilized;
 	}
 
-	private Img stabilize(Mat stabilized, DescriptorMatcher matcher) {
+	private Img stabilize(DescriptorMatcher matcher) {
 		MatOfDMatch matches = new MatOfDMatch();
-		if (oldDescriptors != null && !oldDescriptors.empty() && (!newDescriptors.empty())) {
+		if (oldDescriptors != null && !oldDescriptors.empty() && !newDescriptors.empty()) {
+			Mat stabilized = new Mat();
 			matcher.match(oldDescriptors, newDescriptors, matches);
 			List<DMatch> goodMatches = new ArrayList<>();
 			for (DMatch dMatch : matches.toArray()) {
@@ -210,8 +207,10 @@ public class CamLiveRetriever extends AbstractApp {
 			if (goodMatches.size() > 30) {
 				Mat goodNewPoints = Converters.vector_Point2f_to_Mat(goodNewKeypoints);
 				MatOfPoint2f originalNewPoints = new MatOfPoint2f();
-				Core.transform(goodNewPoints, originalNewPoints, Imgproc.getRotationMatrix2D(new Point(frame.size().width / 2, frame.size().height / 2), -angle, 1));
+				Mat rotationMatrix = Imgproc.getRotationMatrix2D(new Point(frame.size().width / 2, frame.size().height / 2), -angle, 1);
+				Core.transform(goodNewPoints, originalNewPoints, rotationMatrix);
 				homography = Calib3d.findHomography(originalNewPoints, new MatOfPoint2f(goodOldKeypoints.stream().toArray(Point[]::new)), Calib3d.RANSAC, 10);
+
 				Mat mask = new Mat(frame.size(), CvType.CV_8UC1, new Scalar(255));
 				Mat maskWarpped = new Mat();
 				Imgproc.warpPerspective(mask, maskWarpped, homography, frame.size());
@@ -260,12 +259,14 @@ public class CamLiveRetriever extends AbstractApp {
 		return new Img(rotated);
 	}
 
-	private Img perspectiveTransform(Img frame) {
-		Img grad = new Img(frame.getSrc(), false).morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_RECT, new Size(2, 2)).otsu();
+	private Img perspectiveTransform(Mat frame) {
+		Img grad = new Img(frame, false).morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_RECT, new Size(2, 2)).otsu();
 		Lines lines = new Lines(grad.houghLinesP(1, Math.PI / 180, 10, 100, 10));
 		grad.close();
 
 		if (lines.size() > 10) {
+			// lines.draw(frame, new Scalar(0, 0, 255));
+
 			Ransac<Line> ransac = lines.vanishingPointRansac(frame.width(), frame.height());
 			Mat vp_mat = (Mat) ransac.getBestModel().getParams()[0];
 			Point vp = new Point(vp_mat.get(0, 0)[0], vp_mat.get(1, 0)[0]);
@@ -273,22 +274,24 @@ public class CamLiveRetriever extends AbstractApp {
 			Mat homography = findHomography(new Point(vp.x, vp.y), bary, frame.width(), frame.height());
 			lines = Lines.of(ransac.getBestDataSet().values());
 			lines = Lines.of(lines.perspectivTransform(homography));
+			// System.err.println("homography: " + homography.dump());
 
 			Mat dePerspectived = new Mat(frame.size(), CvType.CV_8UC3, Scalar.all(255));
-			Mat dePerspectivedMasked = new Mat();
+			Mat tmp = new Mat();
 			Mat mask = new Mat(frame.size(), CvType.CV_8UC1, new Scalar(255));
 			Mat maskWarpped = new Mat();
 			Imgproc.warpPerspective(mask, maskWarpped, homography, frame.size());
-			Imgproc.warpPerspective(frame.getSrc(), dePerspectivedMasked, homography, frame.size(), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(255));
-			dePerspectivedMasked.copyTo(dePerspectived, maskWarpped);
-
-			lines.draw(dePerspectived, new Scalar(0, 255, 0));
+			Imgproc.warpPerspective(frame, tmp, homography, frame.size(), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(255));
+			tmp.copyTo(dePerspectived, maskWarpped);
 
 			vp_mat.release();
 			homography.release();
-			dePerspectivedMasked.release();
+			tmp.release();
 			mask.release();
 			maskWarpped.release();
+
+			// lines.draw(dePerspectived, new Scalar(0, 255, 0));
+
 			return new Img(dePerspectived, false);
 		} else {
 			logger.warn("Not enough lines to compute perspective transform");
@@ -390,7 +393,6 @@ public class CamLiveRetriever extends AbstractApp {
 			return li;
 		}
 
-		// @SuppressWarnings({ "rawtypes", "unchecked" })
 		public Ransac<Line> vanishingPointRansac(int width, int height) {
 			int minimal_sample_set_dimension = 2;
 			double maxError = (float) 0.01623 * 2;

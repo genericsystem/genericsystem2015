@@ -51,8 +51,8 @@ public class LinesDetector3 extends AbstractApp {
 
 		ImageView frameView = new ImageView(Tools.mat2jfxImage(frame));
 		mainGrid.add(frameView, 0, 0);
-		ImageView deskiewedView = new ImageView(Tools.mat2jfxImage(frame));
-		mainGrid.add(deskiewedView, 0, 1);
+		ImageView deskewedView = new ImageView(Tools.mat2jfxImage(frame));
+		mainGrid.add(deskewedView, 0, 1);
 		Mat dePerspectived = frame.clone();
 		timer.scheduleAtFixedRate(() -> {
 			try {
@@ -85,7 +85,7 @@ public class LinesDetector3 extends AbstractApp {
 					Imgproc.warpPerspective(frame, tmp, homography, frame.size(), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(255));
 					tmp.copyTo(dePerspectived, maskWarpped);
 					lines.draw(dePerspectived, new Scalar(0, 255, 0));
-					deskiewedView.setImage(Tools.mat2jfxImage(dePerspectived));
+					deskewedView.setImage(Tools.mat2jfxImage(dePerspectived));
 
 				} else
 					System.out.println("Not enough lines : " + lines.size());
