@@ -52,7 +52,7 @@ public class CamLiveRetriever extends AbstractApp {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-	private static final int OCR_DELAY = 250;
+	private static final int OCR_DELAY = 150;
 	private static final int STABILIZATION_DELAY = 110;
 	private static final int FRAME_DELAY = 33;
 
@@ -117,21 +117,23 @@ public class CamLiveRetriever extends AbstractApp {
 					newDescriptors = new Mat();
 					extractor.compute(deskewed.getSrc(), newKeypoints, newDescriptors);
 					stabilized = stabilize(frameImg, matcher);
+					fields.storeCurrentHomography(homography);
 
 					if (stabilized != null) {
 						if (stabilizationHasChanged) {
 							List<Rect> newRects = detectRects(stabilized);
-							fields.merge(stabilized, newRects);
+							fields.merge(newRects);
+							fields.draw(stabilized);
 							stabilizationHasChanged = false;
 						}
 						Img display = new Img(frame, true);
 						Img stabilizedDisplay = new Img(stabilized.getSrc(), true);
 
 						// fields.drawRectsPerspective(display, homography.inv(), new Scalar(0, 0, 255), 1);
-						// fields.drawRectsPerspective(stabilizedDisplay, new Mat(3, 3, CvType.CV_64FC1), new Scalar(0, 255, 0), 1);
+						// fields.drawRectsPerspective(stabilizedDisplay, homography, new Scalar(0, 255, 0), 1); // new Mat(3, 3, CvType.CV_64FC1)
 
-						fields.drawOcrPerspectiveInverse(display, homography.inv(), new Scalar(0, 64, 128), 1);
-						fields.drawConsolidated(stabilizedDisplay);
+						// fields.drawOcrPerspectiveInverse(display, homography.inv(), new Scalar(0, 64, 128), 1);
+						// fields.drawConsolidated(stabilizedDisplay);
 
 						src0.setImage(display.toJfxImage());
 						src1.setImage(stabilizedDisplay.toJfxImage());
@@ -155,8 +157,10 @@ public class CamLiveRetriever extends AbstractApp {
 
 	@Override
 	protected synchronized void onSpace() {
-		if (homography != null)
+		if (homography != null) {
+			fields.storeCurrentHomography(homography);
 			fields.storeLastHomographyInv(homography.inv());
+		}
 		oldKeypoints = newKeypoints;
 		oldDescriptors = newDescriptors;
 		stabilizationHasChanged = true;

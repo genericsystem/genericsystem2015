@@ -59,6 +59,7 @@ public abstract class AbstractField {
 		field.getLabels().entrySet().forEach(entry -> labels.merge(entry.getKey(), entry.getValue(), Integer::sum));
 		attempts += field.getAttempts();
 		deadCounter += field.getDeadCounter();
+		// if (consolidated.isPresent() || field.getConsolidated().isPresent())
 		consolidateOcr();
 	}
 
