@@ -14,10 +14,10 @@ import java.util.stream.IntStream;
 
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.Ocr;
+import org.genericsystem.cv.utils.RectToolsMapper;
 import org.genericsystem.cv.utils.OCRPlasty;
 import org.genericsystem.cv.utils.OCRPlasty.RANSAC;
 import org.genericsystem.cv.utils.OCRPlasty.Tuple;
-import org.genericsystem.cv.utils.RectangleTools;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint2f;
@@ -148,7 +148,7 @@ public abstract class AbstractField {
 	}
 
 	public boolean isOverlapping(Rect otherRect) {
-		return RectangleTools.isOverlapping(this.rect, otherRect);
+		return RectToolsMapper.isOverlapping(this.rect, otherRect);
 	}
 
 	public boolean isOverlapping(AbstractField other) {
@@ -156,15 +156,15 @@ public abstract class AbstractField {
 	}
 
 	public boolean isIn(AbstractField other) {
-		return RectangleTools.getInsider(rect, other.getRect()).map(r -> r.equals(rect) ? true : false).orElse(false);
+		return RectToolsMapper.getInsider(rect, other.getRect()).map(r -> r.equals(rect) ? true : false).orElse(false);
 	}
 
 	public boolean overlapsMoreThanThresh(Rect otherRect, double overlapThreshold) {
-		return RectangleTools.inclusiveArea(this.rect, otherRect) > overlapThreshold;
+		return RectToolsMapper.inclusiveArea(this.rect, otherRect) > overlapThreshold;
 	}
 
 	public boolean isClusteredWith(Rect otherRect, double epsilon) {
-		return RectangleTools.isInCluster(this.rect, otherRect, epsilon);
+		return RectToolsMapper.isInCluster(this.rect, otherRect, epsilon);
 	}
 
 	public boolean overlapsMoreThanThresh(AbstractField other, double overlapThreshold) {
@@ -173,7 +173,7 @@ public abstract class AbstractField {
 
 	public boolean isOnDisplay(Img display) {
 		Rect imgRect = new Rect(0, 0, display.width(), display.height());
-		return RectangleTools.isOverlapping(imgRect, this.rect);
+		return RectToolsMapper.isOverlapping(imgRect, this.rect);
 	}
 
 	public boolean isConsolidated() {
