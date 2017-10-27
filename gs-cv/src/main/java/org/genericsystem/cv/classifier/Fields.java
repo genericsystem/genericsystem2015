@@ -2,8 +2,8 @@ package org.genericsystem.cv.classifier;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
@@ -11,7 +11,6 @@ import java.util.stream.IntStream;
 
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.utils.ParallelTasks;
-import org.genericsystem.cv.utils.RectToolsMapper;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint2f;
@@ -20,8 +19,7 @@ import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.utils.Converters;
 
-@SuppressWarnings({ "unchecked", "rawtypes" })
-public class Fields extends AbstractFields {
+public class Fields extends AbstractFields<Field> {
 
 	private Mat perspectiveHomographyInv;
 	private Mat homographyFromStabilized;
@@ -31,16 +29,20 @@ public class Fields extends AbstractFields {
 	private static final int OCR_TIMEOUT = 100;
 
 	public void draw(Img stabilized) {
-		List<Field> oldFields = restabilizeFields(getFullHomography());
+		draw(stabilized, getFullHomography());
+	}
+
+	public void draw(Img stabilized, Mat homography) {
+		// List<Field> oldFields = restabilizeFields(homography);
 		fields.forEach(f -> f.draw(stabilized, new Scalar(0, 0, 255)));
-		oldFields.forEach(f -> f.draw(stabilized, new Scalar(0, 255, 0)));
+		fields.forEach(f -> f.draw(stabilized, new Scalar(0, 255, 0)));
 
 		if (homographyFromStabilized != null) {
-			ListIterator<Field> it = oldFields.listIterator();
+			Iterator<Field> it = fields.iterator();
 			while (it.hasNext()) {
 				Field currentOldField = it.next();
 				// List<Field> matches = (List) findMatchingFieldsWithConfidence(currentOldField, 0.7);
-				List<Field> matches = (List) findClusteredFields(currentOldField, 0.1);
+				List<Field> matches = findClusteredFields(currentOldField, 0.1);
 				matches.forEach(f -> f.draw(stabilized, new Scalar(255, 0, 0)));
 			}
 		}
@@ -52,11 +54,11 @@ public class Fields extends AbstractFields {
 		fields = newRects.stream().map(Field::new).collect(Collectors.toList());
 
 		if (homographyFromStabilized != null) {
-			ListIterator<Field> it = oldFields.listIterator();
+			Iterator<Field> it = oldFields.iterator();
 			while (it.hasNext()) {
 				Field currentOldField = it.next();
 				// List<Field> matches = (List) findMatchingFieldsWithConfidence(currentOldField, 0.7);
-				List<Field> matches = (List) findClusteredFields(currentOldField, 0.1);
+				List<Field> matches = findClusteredFields(currentOldField, 0.1);
 
 				if (!matches.isEmpty()) {
 					currentOldField.getConsolidated().ifPresent(s -> System.out.println("Merged: " + s));
@@ -75,25 +77,6 @@ public class Fields extends AbstractFields {
 			// At this stage, add all the remaining fields still in oldFields
 			fields.addAll(oldFields);
 		}
-	}
-
-	@Override
-	protected Field getIntersection(AbstractField field1, AbstractField field2) {
-		Rect rect1 = field1.getRect();
-		Rect rect2 = field2.getRect();
-		Rect intersect = RectToolsMapper.getIntersection(rect1, rect2).orElseThrow(() -> new IllegalArgumentException("No intersecting rectangle was found"));
-		Field intersection = new Field(intersect);
-		Arrays.asList(field1, field2).forEach(f -> intersection.merge(f));
-		return intersection;
-	}
-
-	@Override
-	protected Field getUnion(AbstractField field1, AbstractField field2) {
-		Rect rect1 = field1.getRect();
-		Rect rect2 = field2.getRect();
-		Field union = new Field(RectToolsMapper.getUnion(rect1, rect2));
-		Arrays.asList(field1, field2).forEach(f -> union.merge(f));
-		return union;
 	}
 
 	private List<Field> restabilizeFields(Mat homography) {
@@ -128,7 +111,7 @@ public class Fields extends AbstractFields {
 	}
 
 	public void updateFieldsWithHomography(Mat homography) {
-		fields = (List) restabilizeFields(homography);
+		fields = restabilizeFields(homography);
 	}
 
 	public Mat getFullHomography() {

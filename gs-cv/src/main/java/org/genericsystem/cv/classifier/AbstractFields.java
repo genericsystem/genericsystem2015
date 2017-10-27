@@ -11,9 +11,9 @@ import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 
-public abstract class AbstractFields implements Iterable<AbstractField> {
+public abstract class AbstractFields<F extends AbstractField> implements Iterable<F> {
 
-	protected List<AbstractField> fields;
+	protected List<F> fields;
 	protected static final double MIN_SIMILARITY = 0.90;
 	protected static final double OVERLAP_THRESHOLD = 0.30;
 	protected static final double OVERLAP_CONFIDENCE = 0.90;
@@ -22,31 +22,27 @@ public abstract class AbstractFields implements Iterable<AbstractField> {
 		this.fields = new ArrayList<>();
 	}
 
-	public AbstractFields(List<AbstractField> fields) {
+	public AbstractFields(List<F> fields) {
 		this.fields = fields;
 	}
 
-	protected abstract AbstractField getIntersection(AbstractField field1, AbstractField field2);
-
-	protected abstract AbstractField getUnion(AbstractField field1, AbstractField field2);
-
-	protected List<AbstractField> findMatchingFieldsWithConfidence(AbstractField field, double threshold) {
+	protected List<F> findMatchingFieldsWithConfidence(F field, double threshold) {
 		return fields.stream().filter(f -> f.overlapsMoreThanThresh(field.getRect(), threshold)).collect(Collectors.toList());
 	}
 
-	protected List<AbstractField> findClusteredFields(AbstractField field, double epsilon) {
+	protected List<F> findClusteredFields(F field, double epsilon) {
 		return fields.stream().filter(f -> f.isClusteredWith(field.getRect(), epsilon)).collect(Collectors.toList());
 	}
 
-	protected List<AbstractField> findContainingFields(AbstractField field) {
+	protected List<F> findContainingFields(F field) {
 		return stream().filter(f -> field.isIn(f)).collect(Collectors.toList());
 	}
 
-	protected List<AbstractField> findContainedFields(AbstractField field) {
+	protected List<F> findContainedFields(F field) {
 		return stream().filter(f -> f.isIn(field)).collect(Collectors.toList());
 	}
 
-	protected AbstractField findNewField(Point pt) {
+	protected F findNewField(Point pt) {
 		return stream().filter(field -> field.contains(pt)).findFirst().orElse(null);
 	}
 
@@ -66,24 +62,24 @@ public abstract class AbstractFields implements Iterable<AbstractField> {
 		consolidatedFieldStream().forEach(field -> field.draw(stabilizedDisplay, new Scalar(0, 0, 255)));
 	}
 
-	public Stream<AbstractField> randomOcrStream() {
-		return stream().filter(AbstractField::needOcr);
+	public Stream<F> randomOcrStream() {
+		return stream().filter(F::needOcr);
 	}
 
-	public Stream<AbstractField> consolidatedFieldStream() {
+	public Stream<F> consolidatedFieldStream() {
 		return stream().filter(f -> f.isConsolidated());
 	}
 
-	public Stream<AbstractField> stream() {
+	public Stream<F> stream() {
 		return fields.stream();
 	}
 
-	public Stream<AbstractField> parallelStream() {
+	public Stream<F> parallelStream() {
 		return fields.parallelStream();
 	}
 
 	@Override
-	public Iterator<AbstractField> iterator() {
+	public Iterator<F> iterator() {
 		return fields.iterator();
 	}
 
