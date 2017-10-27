@@ -1,5 +1,6 @@
 package org.genericsystem.cv.classifier;
 
+import java.lang.invoke.MethodHandles;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -16,41 +17,24 @@ import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
-import org.opencv.core.Scalar;
 import org.opencv.utils.Converters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Fields extends AbstractFields<Field> {
+
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	private Mat perspectiveHomographyInv;
 	private Mat homographyFromStabilized;
 
 	private static ThreadLocalRandom rand = ThreadLocalRandom.current();
-	private static final int MAX_DELETE_UNMERGED = 2;
-	private static final int OCR_TIMEOUT = 100;
-
-	public void draw(Img stabilized) {
-		draw(stabilized, getFullHomography());
-	}
-
-	public void draw(Img stabilized, Mat homography) {
-		// List<Field> oldFields = restabilizeFields(homography);
-		fields.forEach(f -> f.draw(stabilized, new Scalar(0, 0, 255)));
-		fields.forEach(f -> f.draw(stabilized, new Scalar(0, 255, 0)));
-
-		if (homographyFromStabilized != null) {
-			Iterator<Field> it = fields.iterator();
-			while (it.hasNext()) {
-				Field currentOldField = it.next();
-				// List<Field> matches = (List) findMatchingFieldsWithConfidence(currentOldField, 0.7);
-				List<Field> matches = findClusteredFields(currentOldField, 0.1);
-				matches.forEach(f -> f.draw(stabilized, new Scalar(255, 0, 0)));
-			}
-		}
-	}
+	private static final int MAX_DELETE_UNMERGED = 5;
+	private static final int OCR_TIMEOUT = 200;
 
 	public void merge(List<Rect> newRects) {
 		List<Field> oldFields = restabilizeFields(getFullHomography());
-		System.out.println("oldFields transformed (" + oldFields.size() + ")");
+		logger.info("oldFields transformed ({})", oldFields.size());
 		fields = newRects.stream().map(Field::new).collect(Collectors.toList());
 
 		if (homographyFromStabilized != null) {
@@ -80,7 +64,6 @@ public class Fields extends AbstractFields<Field> {
 	}
 
 	private List<Field> restabilizeFields(Mat homography) {
-		// Apply the homography to the oldFields
 		List<Rect> virtualRects = fields.stream().map(AbstractField::getRect).map(rect -> findNewRect(rect, homography)).collect(Collectors.toList());
 		return IntStream.range(0, fields.size()).mapToObj(i -> {
 			Field f = new Field(virtualRects.get(i));

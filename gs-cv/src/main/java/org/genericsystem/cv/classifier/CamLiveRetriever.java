@@ -52,8 +52,8 @@ public class CamLiveRetriever extends AbstractApp {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-	private static final int OCR_DELAY = 150;
-	private static final int STABILIZATION_DELAY = 10_000;
+	private static final int OCR_DELAY = 250;
+	private static final int STABILIZATION_DELAY = 5_000;
 	private static final int FRAME_DELAY = 15;
 
 	private final ScheduledExecutorService timerFields = Executors.newSingleThreadScheduledExecutor();
@@ -67,8 +67,8 @@ public class CamLiveRetriever extends AbstractApp {
 	private MatOfKeyPoint newKeypoints;
 	private Mat oldDescriptors;
 	private Mat newDescriptors;
-	private Mat homographyFromStabilized;
-	private Mat perspectiveHomography;
+	private Mat homographyFromStabilized = new Mat(3, 3, CvType.CV_64FC1);
+	private Mat perspectiveHomography = new Mat(3, 3, CvType.CV_64FC1);
 	private Mat frame = new Mat();
 
 	private Img stabilized;
@@ -148,7 +148,6 @@ public class CamLiveRetriever extends AbstractApp {
 						Img stabilizedDisplay = new Img(stabilized.getSrc(), true);
 
 						fields.drawOcrPerspectiveInverse(display, homographyFromStabilized.inv(), new Scalar(0, 64, 255), 1);
-						fields.draw(stabilizedDisplay);
 
 						src0.setImage(display.toJfxImage());
 						src1.setImage(stabilizedDisplay.toJfxImage());
@@ -181,9 +180,9 @@ public class CamLiveRetriever extends AbstractApp {
 		newKeypoints = detect(dePerspectived);
 		newDescriptors = new Mat();
 		extractor.compute(dePerspectived.getSrc(), newKeypoints, newDescriptors);
-		stabilized = stabilize(frameImg, matcher); // Compute and store homography from stabilized
-		if (homographyFromStabilized == null)
-			homographyFromStabilized = perspectiveHomography.clone();
+		Img img = stabilize(frameImg, matcher); // Compute and store homography from stabilized
+		if (img != null)
+			stabilized = img;
 		fields.storeHomographyFromStabilized(homographyFromStabilized);
 	}
 
@@ -222,11 +221,11 @@ public class CamLiveRetriever extends AbstractApp {
 				return new Img(stabilizedMat, false);
 			} else {
 				System.out.println("Not enough matches (" + goodMatches.size() + ")");
-				return frame;
+				return null;
 			}
 		}
 		System.out.println("No stabilized image");
-		return frame;
+		return null;
 	}
 
 	private List<Rect> detectRects(Img stabilized) {
@@ -235,7 +234,7 @@ public class CamLiveRetriever extends AbstractApp {
 		Imgproc.findContours(closed.getSrc(), contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 		double minArea = 200;
 		List<Rect> res = contours.stream().filter(contour -> Imgproc.contourArea(contour) > minArea).map(c -> Imgproc.boundingRect(c)).collect(Collectors.toList());
-		// res.forEach(rect -> Imgproc.rectangle(stabilized.getSrc(), rect.tl(), rect.br(), new Scalar(255, 0, 0)));
+		// res.forEach(rect -> Imgproc.rectangle(stabilized.getSrc(), rect.tl(), rect.br(), new Scalar(255, 200, 0)));
 		return res;
 	}
 
@@ -381,7 +380,7 @@ public class CamLiveRetriever extends AbstractApp {
 				K.put(1, 2, new float[] { height / 2 });
 				K.put(2, 2, new float[] { 1 });
 			}
-			return new Ransac<>(getLines(), getModelProvider(minimal_sample_set_dimension, maxError), minimal_sample_set_dimension, 100, maxError, Double.valueOf(Math.floor(this.size() * 0.7)).intValue());
+			return new Ransac<>(getLines(), getModelProvider(minimal_sample_set_dimension, maxError), minimal_sample_set_dimension, 200, maxError, Double.valueOf(Math.floor(this.size() * 0.7)).intValue());
 		}
 
 		private Function<Collection<Line>, Model<Line>> getModelProvider(int minimal_sample_set_dimension, double maxError) {
