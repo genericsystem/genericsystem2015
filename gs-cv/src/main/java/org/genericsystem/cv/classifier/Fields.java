@@ -10,32 +10,48 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.genericsystem.cv.Img;
-import org.genericsystem.cv.utils.RectToolsMapper;
 import org.genericsystem.cv.utils.ParallelTasks;
+import org.genericsystem.cv.utils.RectToolsMapper;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
 import org.opencv.utils.Converters;
 
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class Fields extends AbstractFields {
 
-	private Mat lastHomography;
-	private Mat lastRotation;
+	private Mat lastHomographyInv;
+	private Mat currentHomography;
 
 	private static ThreadLocalRandom rand = ThreadLocalRandom.current();
-	private static final int MAX_DELETE_UNMERGED = 5;
+	private static final int MAX_DELETE_UNMERGED = 2;
 	private static final int OCR_TIMEOUT = 100;
+
+	public void draw(Img stabilized) {
+		List<Field> oldFields = restabilizeFields();
+		fields.forEach(f -> f.draw(stabilized, new Scalar(0, 0, 255)));
+		oldFields.forEach(f -> f.draw(stabilized, new Scalar(0, 255, 0)));
+
+		if (lastHomographyInv != null) {
+			ListIterator<Field> it = oldFields.listIterator();
+			while (it.hasNext()) {
+				Field currentOldField = it.next();
+				// List<Field> matches = (List) findMatchingFieldsWithConfidence(currentOldField, 0.7);
+				List<Field> matches = (List) findClusteredFields(currentOldField, 0.1);
+				matches.forEach(f -> f.draw(stabilized, new Scalar(255, 0, 0)));
+			}
+		}
+	}
 
 	public void merge(List<Rect> newRects) {
 		List<Field> oldFields = restabilizeFields();
 		System.out.println("oldFields transformed (" + oldFields.size() + ")");
-
 		fields = newRects.stream().map(Field::new).collect(Collectors.toList());
 
-		if (lastHomography != null) {
+		if (lastHomographyInv != null) {
 			ListIterator<Field> it = oldFields.listIterator();
 			while (it.hasNext()) {
 				Field currentOldField = it.next();
@@ -81,7 +97,7 @@ public class Fields extends AbstractFields {
 	}
 
 	private List<Field> restabilizeFields() {
-		// Apply the homography + rotation to the oldFields
+		// Apply the homography to the oldFields
 		List<Rect> virtualRects = fields.stream().map(AbstractField::getRect).map(rect -> findNewRect(rect)).collect(Collectors.toList());
 		return IntStream.range(0, fields.size()).mapToObj(i -> {
 			Field f = new Field(virtualRects.get(i));
@@ -98,22 +114,19 @@ public class Fields extends AbstractFields {
 	private List<Point> restabilize(List<Point> originals) {
 		Mat original = Converters.vector_Point2f_to_Mat(originals);
 		MatOfPoint2f results = new MatOfPoint2f();
-		Core.perspectiveTransform(original, results, lastHomography);
-		MatOfPoint2f rotated = new MatOfPoint2f();
-		Core.transform(results, rotated, lastRotation);
-		List<Point> res = rotated.toList();
-		original.release();
-		results.release();
-		rotated.release();
+		Mat fullHomography = new Mat();
+		Core.gemm(currentHomography, lastHomographyInv, 1, new Mat(), 0, fullHomography);
+		Core.perspectiveTransform(original, results, fullHomography);
+		List<Point> res = results.toList();
 		return res;
 	}
 
-	public void storeLastHomography(Mat homography) {
-		this.lastHomography = homography;
+	public void storeLastHomographyInv(Mat homographyInv) {
+		this.lastHomographyInv = homographyInv;
 	}
 
-	public void storeLastRotation(Mat rotation) {
-		this.lastRotation = rotation;
+	public void storeCurrentHomography(Mat homography) {
+		this.currentHomography = homography;
 	}
 
 	@Override

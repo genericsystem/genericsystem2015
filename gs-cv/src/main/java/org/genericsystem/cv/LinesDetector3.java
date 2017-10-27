@@ -51,8 +51,8 @@ public class LinesDetector3 extends AbstractApp {
 
 		ImageView frameView = new ImageView(Tools.mat2jfxImage(frame));
 		mainGrid.add(frameView, 0, 0);
-		ImageView deskiewedView = new ImageView(Tools.mat2jfxImage(frame));
-		mainGrid.add(deskiewedView, 0, 1);
+		ImageView deskewedView = new ImageView(Tools.mat2jfxImage(frame));
+		mainGrid.add(deskewedView, 0, 1);
 		Mat dePerspectived = frame.clone();
 		timer.scheduleAtFixedRate(() -> {
 			try {
@@ -85,7 +85,7 @@ public class LinesDetector3 extends AbstractApp {
 					Imgproc.warpPerspective(frame, tmp, homography, frame.size(), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(255));
 					tmp.copyTo(dePerspectived, maskWarpped);
 					lines.draw(dePerspectived, new Scalar(0, 255, 0));
-					deskiewedView.setImage(Tools.mat2jfxImage(dePerspectived));
+					deskewedView.setImage(Tools.mat2jfxImage(dePerspectived));
 
 				} else
 					System.out.println("Not enough lines : " + lines.size());
@@ -183,23 +183,67 @@ public class LinesDetector3 extends AbstractApp {
 		private Mat getLineMat(Line line) {
 			Mat a = new Mat(3, 1, CvType.CV_32F);
 			Mat b = new Mat(3, 1, CvType.CV_32F);
-			a.put(0, 0, new float[] { Double.valueOf(line.getX1()).floatValue() });
-			a.put(1, 0, new float[] { Double.valueOf(line.getY1()).floatValue() });
-			a.put(2, 0, new float[] { Double.valueOf(1d).floatValue() });
-			b.put(0, 0, new float[] { Double.valueOf(line.getX2()).floatValue() });
-			b.put(1, 0, new float[] { Double.valueOf(line.getY2()).floatValue() });
-			b.put(2, 0, new float[] { Double.valueOf(1d).floatValue() });
-			Mat an = new Mat(3, 1, CvType.CV_32F);
-			Mat bn = new Mat(3, 1, CvType.CV_32F);
-			Core.gemm(K.inv(), a, 1, new Mat(), 0, an);
-			Core.gemm(K.inv(), b, 1, new Mat(), 0, bn);
-			Mat li = an.cross(bn);
-			Core.normalize(li, li);
+			a.put(0, 0, line.getX1());
+			a.put(1, 0, line.getY1());
+			a.put(2, 0, 1d);
+			b.put(0, 0, line.getX2());
+			b.put(1, 0, line.getY2());
+			b.put(2, 0, 1d);
+			Mat an = product(K.inv(), a, 1);
+			Mat bn = product(K.inv(), b, 1);
+			Mat li = calculateCrossProduct(an, bn);
+			li = normalize(li);
 			a.release();
 			b.release();
 			an.release();
 			bn.release();
 			return li;
+		}
+
+		public Mat product(Mat mat1, Mat mat2, double alpha) {
+
+			if (mat1.cols() != mat2.rows()) {
+				throw new IllegalArgumentException("matrix dimensions must agree");
+			}
+
+			Mat localMatrix = new Mat(mat1.rows(), mat2.cols(), CvType.CV_32F);
+
+			for (int i = 0; i < mat1.rows(); i++) {
+				for (int j = 0; j < mat2.cols(); j++) {
+					double d = 0.0D;
+					for (int k = 0; k < mat1.cols(); k++) {
+						d += mat1.get(i, k)[0] * mat2.get(k, j)[0];
+					}
+					localMatrix.put(i, j, d);
+				}
+			}
+			return localMatrix;
+		}
+
+		public Mat calculateCrossProduct(Mat mat1, Mat mat2) {
+
+			Mat a = new Mat(3, 1, CvType.CV_32F);
+
+			a.put(0, 0, mat1.get(1, 0)[0] * mat2.get(2, 0)[0] - mat1.get(2, 0)[0] * mat2.get(1, 0)[0]);
+			a.put(1, 0, mat1.get(2, 0)[0] * mat2.get(1, 0)[0] - mat1.get(0, 0)[0] * mat2.get(2, 0)[0]);
+			a.put(2, 0, mat1.get(0, 0)[0] * mat2.get(1, 0)[0] - mat1.get(1, 0)[0] * mat2.get(0, 0)[0]);
+
+			return a;
+		}
+
+		public Mat normalize(Mat mat) {
+
+			for (int i = 0; i < mat.cols(); i++) {
+				double d = 0.0D;
+				for (int j = 0; j < mat.rows(); j++) {
+					d += Math.pow(mat.get(j, i)[0], 2);
+				}
+				for (int j = 0; j < mat.rows(); j++) {
+					mat.get(j, i)[0] = mat.get(j, i)[0] / (Math.sqrt(d));
+				}
+			}
+
+			return mat;
 		}
 
 		// @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -223,8 +267,7 @@ public class LinesDetector3 extends AbstractApp {
 
 				if (datas.size() == minimal_sample_set_dimension) {
 					Iterator<Line> it = datas.iterator();
-					vp = getLineMat(it.next()).cross(getLineMat(it.next()));
-					Core.normalize(vp, vp);
+					vp = normalize(calculateCrossProduct(getLineMat(it.next()), getLineMat(it.next())));
 				} else {
 					// Extract the line segments corresponding to the indexes contained in the set
 					Mat li_set = new Mat(3, datas.size(), CvType.CV_32F);
@@ -240,15 +283,9 @@ public class LinesDetector3 extends AbstractApp {
 						i++;
 					}
 
-					// Least squares solution
-					// Generate the matrix ATA (from LSS_set=A)
-					Mat L = li_set.t();
-					Mat ATA = new Mat(3, 3, CvType.CV_32F);
-					Mat dst = new Mat();
-
-					Core.gemm(L.t(), tau.t(), 1, new Mat(), 0, dst);
-					Core.gemm(dst, tau, 1, new Mat(), 0, dst);
-					Core.gemm(dst, L, 1, new Mat(), 0, ATA);
+					Mat dst = product(li_set, tau.t(), 1);
+					dst = product(dst, tau, 1);
+					Mat ATA = product(dst, li_set.t(), 1);
 
 					// Obtain eigendecomposition
 					Mat v = new Mat();
@@ -269,9 +306,9 @@ public class LinesDetector3 extends AbstractApp {
 					Core.gemm(K, vp, 1, new Mat(), 0, vp);
 
 					if (vp.get(2, 0)[0] != 0) {
-						vp.put(0, 0, new float[] { Double.valueOf(vp.get(0, 0)[0] / vp.get(2, 0)[0]).floatValue() });
-						vp.put(1, 0, new float[] { Double.valueOf(vp.get(1, 0)[0] / vp.get(2, 0)[0]).floatValue() });
-						vp.put(2, 0, new float[] { 1 });
+						vp.put(0, 0, vp.get(0, 0)[0] / vp.get(2, 0)[0]);
+						vp.put(1, 0, vp.get(1, 0)[0] / vp.get(2, 0)[0]);
+						vp.put(2, 0, 1d);
 					} else {
 						// Since this is infinite, it is better to leave it calibrated
 						Core.gemm(K.inv(), vp, 1, new Mat(), 0, vp);
