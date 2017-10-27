@@ -16,6 +16,9 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.genericsystem.cv.utils.Ransac.Model;
+import org.genericsystem.reinforcer.tools.LetterPairSimilarity;
+import org.genericsystem.reinforcer.tools.Levenshtein;
+import org.genericsystem.reinforcer.tools.StringCompare;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

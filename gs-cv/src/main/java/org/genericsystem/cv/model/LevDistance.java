@@ -6,7 +6,7 @@ import org.genericsystem.api.core.annotations.SystemGeneric;
 import org.genericsystem.api.core.annotations.constraints.PropertyConstraint;
 import org.genericsystem.common.Generic;
 import org.genericsystem.cv.model.ZoneText.ZoneTextInstance;
-import org.genericsystem.cv.utils.Levenshtein;
+import org.genericsystem.reinforcer.tools.Levenshtein;
 import org.genericsystem.cv.model.LevDistance.LevDistanceInstance;
 
 /**

@@ -15,8 +15,8 @@ import org.genericsystem.cv.model.ZoneGeneric;
 import org.genericsystem.cv.model.ZoneGeneric.ZoneInstance;
 import org.genericsystem.cv.model.ZoneText;
 import org.genericsystem.cv.model.ZoneText.ZoneTextInstance;
-import org.genericsystem.cv.utils.Levenshtein;
 import org.genericsystem.kernel.Engine;
+import org.genericsystem.reinforcer.tools.Levenshtein;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

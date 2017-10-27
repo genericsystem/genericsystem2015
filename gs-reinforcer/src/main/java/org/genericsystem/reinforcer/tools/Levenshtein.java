@@ -1,4 +1,4 @@
-package org.genericsystem.cv.utils;
+package org.genericsystem.reinforcer.tools;
 
 public class Levenshtein {
 

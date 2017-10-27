@@ -2,6 +2,7 @@ package org.genericsystem.cv.utils;
 
 import static org.testng.Assert.assertEquals;
 
+import org.genericsystem.reinforcer.tools.Levenshtein;
 import org.testng.annotations.Test;
 
 public class LevenshteinTest {
