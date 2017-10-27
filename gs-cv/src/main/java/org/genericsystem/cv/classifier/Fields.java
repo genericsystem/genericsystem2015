@@ -31,7 +31,7 @@ public class Fields extends AbstractFields {
 	private static final int OCR_TIMEOUT = 100;
 
 	public void draw(Img stabilized) {
-		List<Field> oldFields = restabilizeFields();
+		List<Field> oldFields = restabilizeFields(getFullHomography());
 		fields.forEach(f -> f.draw(stabilized, new Scalar(0, 0, 255)));
 		oldFields.forEach(f -> f.draw(stabilized, new Scalar(0, 255, 0)));
 
@@ -47,7 +47,7 @@ public class Fields extends AbstractFields {
 	}
 
 	public void merge(List<Rect> newRects) {
-		List<Field> oldFields = restabilizeFields();
+		List<Field> oldFields = restabilizeFields(getFullHomography());
 		System.out.println("oldFields transformed (" + oldFields.size() + ")");
 		fields = newRects.stream().map(Field::new).collect(Collectors.toList());
 
@@ -96,9 +96,9 @@ public class Fields extends AbstractFields {
 		return union;
 	}
 
-	private List<Field> restabilizeFields() {
+	private List<Field> restabilizeFields(Mat homography) {
 		// Apply the homography to the oldFields
-		List<Rect> virtualRects = fields.stream().map(AbstractField::getRect).map(rect -> findNewRect(rect)).collect(Collectors.toList());
+		List<Rect> virtualRects = fields.stream().map(AbstractField::getRect).map(rect -> findNewRect(rect, homography)).collect(Collectors.toList());
 		return IntStream.range(0, fields.size()).mapToObj(i -> {
 			Field f = new Field(virtualRects.get(i));
 			f.merge(fields.get(i));
@@ -106,17 +106,15 @@ public class Fields extends AbstractFields {
 		}).collect(Collectors.toList());
 	}
 
-	private Rect findNewRect(Rect rect) {
-		List<Point> points = restabilize(Arrays.asList(rect.tl(), rect.br()));
+	private Rect findNewRect(Rect rect, Mat homography) {
+		List<Point> points = restabilize(Arrays.asList(rect.tl(), rect.br()), homography);
 		return new Rect(points.get(0), points.get(1));
 	}
 
-	private List<Point> restabilize(List<Point> originals) {
+	private List<Point> restabilize(List<Point> originals, Mat homography) {
 		Mat original = Converters.vector_Point2f_to_Mat(originals);
 		MatOfPoint2f results = new MatOfPoint2f();
-		Mat fullHomography = new Mat();
-		Core.gemm(homographyFromStabilized, perspectiveHomographyInv, 1, new Mat(), 0, fullHomography);
-		Core.perspectiveTransform(original, results, fullHomography);
+		Core.perspectiveTransform(original, results, homography);
 		List<Point> res = results.toList();
 		return res;
 	}
@@ -127,6 +125,16 @@ public class Fields extends AbstractFields {
 
 	public void storeHomographyFromStabilized(Mat homographyFromStabilized) {
 		this.homographyFromStabilized = homographyFromStabilized;
+	}
+
+	public void updateFieldsWithHomography(Mat homography) {
+		fields = (List) restabilizeFields(homography);
+	}
+
+	public Mat getFullHomography() {
+		Mat fullHomography = new Mat();
+		Core.gemm(homographyFromStabilized, perspectiveHomographyInv, 1, new Mat(), 0, fullHomography);
+		return fullHomography;
 	}
 
 	@Override

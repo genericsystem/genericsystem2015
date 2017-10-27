@@ -53,11 +53,13 @@ public class CamLiveRetriever extends AbstractApp {
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	private static final int OCR_DELAY = 150;
-	private static final int STABILIZATION_DELAY = 110;
-	private static final int FRAME_DELAY = 33;
+	private static final int STABILIZATION_DELAY = 10_000;
+	private static final int FRAME_DELAY = 15;
 
 	private final ScheduledExecutorService timerFields = Executors.newSingleThreadScheduledExecutor();
 	private final ScheduledExecutorService timerOcr = Executors.newSingleThreadScheduledExecutor();
+	private final DescriptorExtractor extractor = DescriptorExtractor.create(DescriptorExtractor.ORB);
+	private final DescriptorMatcher matcher = DescriptorMatcher.create(DescriptorMatcher.BRUTEFORCE_HAMMING);
 	private final VideoCapture capture = new VideoCapture(0);
 	private final Fields fields = new Fields();
 
@@ -87,10 +89,9 @@ public class CamLiveRetriever extends AbstractApp {
 
 	@Override
 	protected void fillGrid(GridPane mainGrid) {
-		DescriptorExtractor extractor = DescriptorExtractor.create(DescriptorExtractor.ORB);
-		DescriptorMatcher matcher = DescriptorMatcher.create(DescriptorMatcher.BRUTEFORCE_HAMMING);
 
 		capture.read(frame);
+		stabilized = new Img(frame, true);
 
 		ImageView src0 = new ImageView(Tools.mat2jfxImage(frame));
 		mainGrid.add(src0, 0, 0);
@@ -114,28 +115,40 @@ public class CamLiveRetriever extends AbstractApp {
 					capture.read(frame);
 					if (frame == null)
 						return;
-					Img frameImg = new Img(frame, true);
-					Img dePerspectived = dePerspectivate(frameImg.getSrc()); // Store homography in perspectiveHomography
-					newKeypoints = detect(dePerspectived);
-					newDescriptors = new Mat();
-					extractor.compute(dePerspectived.getSrc(), newKeypoints, newDescriptors);
-					stabilized = stabilize(frameImg, matcher); // Compute and store homography from stabilized
-					fields.storeHomographyFromStabilized(homographyFromStabilized);
+					buildStabilizedImg(frame);
 
 					if (stabilized != null) {
 						if (stabilizationHasChanged) {
+							// Store a copy of the last homographies
+							Mat lastPerspectiveHomography = perspectiveHomography.clone();
+							Mat lastHomographyFromStabilized = homographyFromStabilized.clone();
+							Mat fullHomography = new Mat();
+							Core.gemm(lastHomographyFromStabilized.inv(), lastPerspectiveHomography, 1, new Mat(), 0, fullHomography); // Inverse homography
+
+							// Store the last homographies
+							if (homographyFromStabilized != null)
+								fields.storeHomographyFromStabilized(homographyFromStabilized);
+							if (perspectiveHomography != null)
+								fields.storePerspectiveHomographyInv(perspectiveHomography.inv());
+
+							// Update the keypoints and descriptors
+							oldKeypoints = newKeypoints;
+							oldDescriptors = newDescriptors;
+
+							// Restabilize the image
+							buildStabilizedImg(frame);
+							fields.updateFieldsWithHomography(fullHomography);
+
+							// Detect the new fields and merge them
 							List<Rect> newRects = detectRects(stabilized);
 							fields.merge(newRects);
-							// fields.draw(stabilized);
 							stabilizationHasChanged = false;
 						}
 						Img display = new Img(frame, true);
 						Img stabilizedDisplay = new Img(stabilized.getSrc(), true);
 
-						fields.drawRectsPerspective(display, homographyFromStabilized.inv(), new Scalar(0, 0, 255), 1);
-
-						fields.drawOcrPerspectiveInverse(display, homographyFromStabilized.inv(), new Scalar(0, 64, 128), 1);
-						fields.drawConsolidated(stabilizedDisplay);
+						fields.drawOcrPerspectiveInverse(display, homographyFromStabilized.inv(), new Scalar(0, 64, 255), 1);
+						fields.draw(stabilizedDisplay);
 
 						src0.setImage(display.toJfxImage());
 						src1.setImage(stabilizedDisplay.toJfxImage());
@@ -159,15 +172,22 @@ public class CamLiveRetriever extends AbstractApp {
 
 	@Override
 	protected synchronized void onSpace() {
-		if (homographyFromStabilized != null) {
-			fields.storeHomographyFromStabilized(homographyFromStabilized);
-			fields.storePerspectiveHomographyInv(perspectiveHomography.inv());
-		}
-		oldKeypoints = newKeypoints;
-		oldDescriptors = newDescriptors;
 		stabilizationHasChanged = true;
 	}
 
+	private void buildStabilizedImg(Mat frame) {
+		Img frameImg = new Img(frame, true);
+		Img dePerspectived = dePerspectivate(frameImg.getSrc()); // Store homography in perspectiveHomography
+		newKeypoints = detect(dePerspectived);
+		newDescriptors = new Mat();
+		extractor.compute(dePerspectived.getSrc(), newKeypoints, newDescriptors);
+		stabilized = stabilize(frameImg, matcher); // Compute and store homography from stabilized
+		if (homographyFromStabilized == null)
+			homographyFromStabilized = perspectiveHomography.clone();
+		fields.storeHomographyFromStabilized(homographyFromStabilized);
+	}
+
+	// XXX see whether one want to return null or the original frame
 	private Img stabilize(Img frame, DescriptorMatcher matcher) {
 		MatOfDMatch matches = new MatOfDMatch();
 		if (oldDescriptors != null && !oldDescriptors.empty() && !newDescriptors.empty()) {
@@ -202,11 +222,11 @@ public class CamLiveRetriever extends AbstractApp {
 				return new Img(stabilizedMat, false);
 			} else {
 				System.out.println("Not enough matches (" + goodMatches.size() + ")");
-				return null;
+				return frame;
 			}
 		}
 		System.out.println("No stabilized image");
-		return null;
+		return frame;
 	}
 
 	private List<Rect> detectRects(Img stabilized) {
