@@ -56,6 +56,7 @@ public class CamLiveRetriever extends AbstractApp {
 	private static final int STABILIZATION_DELAY = 5_000;
 	private static final int FRAME_DELAY = 15;
 
+	// ScheduledExecutorService executorService = new ScheduledThreadPoolExecutor(1, new ThreadPoolExecutor.DiscardPolicy());
 	private final ScheduledExecutorService timerFields = Executors.newSingleThreadScheduledExecutor();
 	private final ScheduledExecutorService timerOcr = Executors.newSingleThreadScheduledExecutor();
 	private final DescriptorExtractor extractor = DescriptorExtractor.create(DescriptorExtractor.ORB);
