@@ -23,8 +23,8 @@ import org.opencv.utils.Converters;
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class Fields extends AbstractFields {
 
-	private Mat lastHomographyInv;
-	private Mat currentHomography;
+	private Mat perspectiveHomographyInv;
+	private Mat homographyFromStabilized;
 
 	private static ThreadLocalRandom rand = ThreadLocalRandom.current();
 	private static final int MAX_DELETE_UNMERGED = 2;
@@ -35,7 +35,7 @@ public class Fields extends AbstractFields {
 		fields.forEach(f -> f.draw(stabilized, new Scalar(0, 0, 255)));
 		oldFields.forEach(f -> f.draw(stabilized, new Scalar(0, 255, 0)));
 
-		if (lastHomographyInv != null) {
+		if (homographyFromStabilized != null) {
 			ListIterator<Field> it = oldFields.listIterator();
 			while (it.hasNext()) {
 				Field currentOldField = it.next();
@@ -51,7 +51,7 @@ public class Fields extends AbstractFields {
 		System.out.println("oldFields transformed (" + oldFields.size() + ")");
 		fields = newRects.stream().map(Field::new).collect(Collectors.toList());
 
-		if (lastHomographyInv != null) {
+		if (homographyFromStabilized != null) {
 			ListIterator<Field> it = oldFields.listIterator();
 			while (it.hasNext()) {
 				Field currentOldField = it.next();
@@ -115,18 +115,18 @@ public class Fields extends AbstractFields {
 		Mat original = Converters.vector_Point2f_to_Mat(originals);
 		MatOfPoint2f results = new MatOfPoint2f();
 		Mat fullHomography = new Mat();
-		Core.gemm(currentHomography, lastHomographyInv, 1, new Mat(), 0, fullHomography);
+		Core.gemm(homographyFromStabilized, perspectiveHomographyInv, 1, new Mat(), 0, fullHomography);
 		Core.perspectiveTransform(original, results, fullHomography);
 		List<Point> res = results.toList();
 		return res;
 	}
 
-	public void storeLastHomographyInv(Mat homographyInv) {
-		this.lastHomographyInv = homographyInv;
+	public void storePerspectiveHomographyInv(Mat perspectiveHomographyInv) {
+		this.perspectiveHomographyInv = perspectiveHomographyInv;
 	}
 
-	public void storeCurrentHomography(Mat homography) {
-		this.currentHomography = homography;
+	public void storeHomographyFromStabilized(Mat homographyFromStabilized) {
+		this.homographyFromStabilized = homographyFromStabilized;
 	}
 
 	@Override
