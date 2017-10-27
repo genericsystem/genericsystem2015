@@ -120,10 +120,8 @@ public class CamLiveRetriever extends AbstractApp {
 					if (stabilized != null) {
 						if (stabilizationHasChanged) {
 							// Store a copy of the last homographies
-							Mat lastPerspectiveHomography = perspectiveHomography.clone();
-							Mat lastHomographyFromStabilized = homographyFromStabilized.clone();
 							Mat fullHomography = new Mat();
-							Core.gemm(lastHomographyFromStabilized.inv(), lastPerspectiveHomography, 1, new Mat(), 0, fullHomography); // Inverse homography
+							Core.gemm(homographyFromStabilized.inv(), perspectiveHomography, 1, new Mat(), 0, fullHomography); // Inverse homography
 
 							// Store the last homographies
 							if (homographyFromStabilized != null)
@@ -177,6 +175,8 @@ public class CamLiveRetriever extends AbstractApp {
 	private void buildStabilizedImg(Mat frame) {
 		Img frameImg = new Img(frame, true);
 		Img dePerspectived = dePerspectivate(frameImg.getSrc()); // Store homography in perspectiveHomography
+		if (dePerspectived == null)
+			return;
 		newKeypoints = detect(dePerspectived);
 		newDescriptors = new Mat();
 		extractor.compute(dePerspectived.getSrc(), newKeypoints, newDescriptors);
@@ -220,12 +220,13 @@ public class CamLiveRetriever extends AbstractApp {
 				tmp.copyTo(stabilizedMat, maskWarpped);
 				return new Img(stabilizedMat, false);
 			} else {
-				System.out.println("Not enough matches (" + goodMatches.size() + ")");
+				logger.warn("Not enough matches ({})", goodMatches.size());
 				return null;
 			}
+		} else {
+			logger.warn("No stabilized image");
+			return null;
 		}
-		System.out.println("No stabilized image");
-		return null;
 	}
 
 	private List<Rect> detectRects(Img stabilized) {
