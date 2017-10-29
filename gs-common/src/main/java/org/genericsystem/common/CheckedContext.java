@@ -1,5 +1,7 @@
 package org.genericsystem.common;
 
+import io.reactivex.Observable;
+
 import java.io.Serializable;
 import java.util.List;
 import java.util.function.Function;
@@ -14,8 +16,6 @@ import org.genericsystem.defaults.DefaultConfig.NonHeritableProperty;
 import org.genericsystem.defaults.DefaultContext;
 import org.genericsystem.defaults.tools.InheritanceComputer;
 
-import io.reactivex.Observable;
-
 /**
  * @author Nicolas Feybesse
  *
@@ -25,12 +25,10 @@ public abstract class CheckedContext implements DefaultContext<Generic> {
 	private final Root root;
 	private final Checker checker;
 
-	private final Function<Generic, Snapshot<Generic>> getSubInheritingsM = Memoizer.memoize(generic -> new Snapshot<Generic>() {
-		private Observable<Generic> adds = Observable.merge(generic.getInheritings().getAdds(),
-				Observable.fromIterable(generic.getInheritings()).flatMap(g -> getSubInheritingsM.apply(g).getAdds()),
+	private final Function<Generic, Snapshot<Generic>> getSubInheritingsM = Memoizer.<Generic, Snapshot<Generic>> memoize(generic -> new Snapshot<Generic>() {
+		private Observable<Generic> adds = Observable.merge(generic.getInheritings().getAdds(), Observable.fromIterable(generic.getInheritings()).flatMap(g -> getSubInheritingsM.apply(g).getAdds()),
 				generic.getInheritings().getAdds().flatMap(g -> getSubInheritingsM.apply(g).getAdds())).share();
-		private Observable<Generic> removals = Observable.merge(generic.getInheritings().getRemovals(),
-				Observable.fromIterable(generic.getInheritings()).flatMap(g -> getSubInheritingsM.apply(g).getRemovals()),
+		private Observable<Generic> removals = Observable.merge(generic.getInheritings().getRemovals(), Observable.fromIterable(generic.getInheritings()).flatMap(g -> getSubInheritingsM.apply(g).getRemovals()),
 				generic.getInheritings().getAdds().flatMap(g -> getSubInheritingsM.apply(g).getRemovals())).share();
 
 		@Override
@@ -49,11 +47,9 @@ public abstract class CheckedContext implements DefaultContext<Generic> {
 		}
 	});
 
-	private final Function<Generic, Snapshot<Generic>> getSubInstancesM = Memoizer.memoize(generic -> new Snapshot<Generic>() {
-		private Observable<Generic> adds = Observable.merge(Observable.fromIterable(generic.getSubInheritings()).flatMap(g -> g.getInstances().getAdds()),
-				generic.getSubInheritings().getAdds().flatMap(g -> g.getInstances().getAdds())).share();
-		private Observable<Generic> removals = Observable.merge(Observable.fromIterable(generic.getSubInheritings()).flatMap(g -> g.getInstances().getRemovals()),
-				generic.getSubInheritings().getAdds().flatMap(g -> g.getInstances().getRemovals())).share();
+	private final Function<Generic, Snapshot<Generic>> getSubInstancesM = Memoizer.<Generic, Snapshot<Generic>> memoize(generic -> new Snapshot<Generic>() {
+		private Observable<Generic> adds = Observable.merge(Observable.fromIterable(generic.getSubInheritings()).flatMap(g -> g.getInstances().getAdds()), generic.getSubInheritings().getAdds().flatMap(g -> g.getInstances().getAdds())).share();
+		private Observable<Generic> removals = Observable.merge(Observable.fromIterable(generic.getSubInheritings()).flatMap(g -> g.getInstances().getRemovals()), generic.getSubInheritings().getAdds().flatMap(g -> g.getInstances().getRemovals())).share();
 
 		@Override
 		public Stream<Generic> unfilteredStream() {
@@ -111,7 +107,7 @@ public abstract class CheckedContext implements DefaultContext<Generic> {
 	}
 
 	private Function<Generic, Snapshot<Generic>> computeGetAttributes(Generic generic) {
-		return Memoizer.memoize(attribute -> {
+		return Memoizer.<Generic, Snapshot<Generic>> memoize(attribute -> {
 			return new Snapshot<Generic>() {
 
 				InheritanceComputer<Generic> inheritanceComputer = new InheritanceComputer<>(generic, attribute, ApiStatics.STRUCTURAL);
@@ -143,7 +139,7 @@ public abstract class CheckedContext implements DefaultContext<Generic> {
 	}
 
 	private Function<Generic, Snapshot<Generic>> computeGetHolders(Generic generic) {
-		return Memoizer.memoize(attribute -> {
+		return Memoizer.<Generic, Snapshot<Generic>> memoize(attribute -> {
 			return new Snapshot<Generic>() {
 
 				InheritanceComputer<Generic> inheritanceComputer = new InheritanceComputer<>(generic, attribute, ApiStatics.CONCRETE);

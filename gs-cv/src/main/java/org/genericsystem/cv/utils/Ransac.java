@@ -58,7 +58,9 @@ public class Ransac<DATA> {
 					bestModel = possibleModel;
 					bestDataMap = randomDataMap;
 					bestError = erreur;
-					System.out.println("Improved error : " + bestError);
+					// System.out.println("Improved error : " + bestError);
+					if (bestError == 0)
+						break;
 				}
 			}
 		}

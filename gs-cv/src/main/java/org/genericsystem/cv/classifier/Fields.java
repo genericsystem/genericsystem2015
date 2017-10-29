@@ -25,42 +25,34 @@ public class Fields extends AbstractFields<Field> {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-	private Mat perspectiveHomographyInv;
-	private Mat homographyFromStabilized;
-
 	private static ThreadLocalRandom rand = ThreadLocalRandom.current();
 	private static final int MAX_DELETE_UNMERGED = 5;
-	private static final int OCR_TIMEOUT = 200;
+	private static final int OCR_TIMEOUT = 100;
 
-	public void merge(List<Rect> newRects) {
-		List<Field> oldFields = restabilizeFields(getFullHomography());
+	public void merge(List<Rect> newRects, Mat fieldsHomography) {
+		List<Field> oldFields = restabilizeFields(fieldsHomography);
 		logger.info("oldFields transformed ({})", oldFields.size());
 		fields = newRects.stream().map(Field::new).collect(Collectors.toList());
 
-		if (homographyFromStabilized != null) {
-			Iterator<Field> it = oldFields.iterator();
-			while (it.hasNext()) {
-				Field currentOldField = it.next();
-				// List<Field> matches = (List) findMatchingFieldsWithConfidence(currentOldField, 0.7);
-				List<Field> matches = findClusteredFields(currentOldField, 0.1);
-
-				if (!matches.isEmpty()) {
-					currentOldField.getConsolidated().ifPresent(s -> System.out.println("Merged: " + s));
-					matches.forEach(f -> {
-						f.merge(currentOldField);
-						f.resetDeadCounter();
-					});
-					it.remove();
-				} else {
-					System.out.print(".");
-				}
+		Iterator<Field> it = oldFields.iterator();
+		while (it.hasNext()) {
+			Field currentOldField = it.next();
+			// List<Field> matches = (List) findMatchingFieldsWithConfidence(currentOldField, 0.7);
+			List<Field> matches = findClusteredFields(currentOldField, 0.1);
+			if (!matches.isEmpty()) {
+				currentOldField.getConsolidated().ifPresent(s -> System.out.println("Merged: " + s));
+				matches.forEach(f -> {
+					f.merge(currentOldField);
+					f.resetDeadCounter();
+				});
+				it.remove();
 			}
-			// Increment the deadCounter in old fields that were not merged
-			oldFields.forEach(f -> f.incrementDeadCounter());
-			oldFields.removeIf(f -> f.deadCounter >= MAX_DELETE_UNMERGED);
-			// At this stage, add all the remaining fields still in oldFields
-			fields.addAll(oldFields);
 		}
+		// Increment the deadCounter in old fields that were not merged
+		oldFields.forEach(f -> f.incrementDeadCounter());
+		oldFields.removeIf(f -> f.deadCounter >= MAX_DELETE_UNMERGED);
+		// At this stage, add all the remaining fields still in oldFields
+		fields.addAll(oldFields);
 	}
 
 	private List<Field> restabilizeFields(Mat homography) {
@@ -85,30 +77,12 @@ public class Fields extends AbstractFields<Field> {
 		return res;
 	}
 
-	public void storePerspectiveHomographyInv(Mat perspectiveHomographyInv) {
-		this.perspectiveHomographyInv = perspectiveHomographyInv;
-	}
-
-	public void storeHomographyFromStabilized(Mat homographyFromStabilized) {
-		this.homographyFromStabilized = homographyFromStabilized;
-	}
-
-	public void updateFieldsWithHomography(Mat homography) {
-		fields = restabilizeFields(homography);
-	}
-
-	public Mat getFullHomography() {
-		Mat fullHomography = new Mat();
-		Core.gemm(homographyFromStabilized, perspectiveHomographyInv, 1, new Mat(), 0, fullHomography);
-		return fullHomography;
-	}
-
 	@Override
 	public void consolidateOcr(Img rootImg) {
 		long TS = System.currentTimeMillis();
 		while (System.currentTimeMillis() - TS <= OCR_TIMEOUT) {
 			ParallelTasks tasks = new ParallelTasks();
-			Set<Integer> indexes = new HashSet<>(tasks.getCounter());
+			Set<Integer> indexes = new HashSet<>();
 			while (indexes.size() < tasks.getCounter()) {
 				int idx = rand.nextInt(size());
 				if (indexes.add(idx))

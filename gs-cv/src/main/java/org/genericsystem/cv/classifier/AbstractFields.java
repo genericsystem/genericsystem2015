@@ -74,10 +74,6 @@ public abstract class AbstractFields<F extends AbstractField> implements Iterabl
 		return fields.stream();
 	}
 
-	public Stream<F> parallelStream() {
-		return fields.parallelStream();
-	}
-
 	@Override
 	public Iterator<F> iterator() {
 		return fields.iterator();

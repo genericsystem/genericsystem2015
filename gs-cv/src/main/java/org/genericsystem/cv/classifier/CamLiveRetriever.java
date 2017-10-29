@@ -5,11 +5,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
 
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
@@ -18,14 +22,9 @@ import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.genericsystem.cv.utils.Ransac;
 import org.genericsystem.cv.utils.Ransac.Model;
 import org.genericsystem.cv.utils.Tools;
-import org.opencv.calib3d.Calib3d;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
-import org.opencv.core.DMatch;
-import org.opencv.core.KeyPoint;
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfDMatch;
-import org.opencv.core.MatOfKeyPoint;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
@@ -35,13 +34,9 @@ import org.opencv.core.Size;
 import org.opencv.features2d.DescriptorExtractor;
 import org.opencv.features2d.DescriptorMatcher;
 import org.opencv.imgproc.Imgproc;
-import org.opencv.utils.Converters;
 import org.opencv.videoio.VideoCapture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
 
 @SuppressWarnings({ "resource" })
 public class CamLiveRetriever extends AbstractApp {
@@ -50,30 +45,21 @@ public class CamLiveRetriever extends AbstractApp {
 		NativeLibraryLoader.load();
 	}
 
-	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+	static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-	private static final int OCR_DELAY = 250;
-	private static final int STABILIZATION_DELAY = 5_000;
-	private static final int FRAME_DELAY = 15;
+	private static final int STABILIZATION_DELAY = 500;
+	private static final int FRAME_DELAY = 100;
+	final static DescriptorExtractor EXTRACTOR = DescriptorExtractor.create(DescriptorExtractor.ORB);
+	final static DescriptorMatcher MATCHER = DescriptorMatcher.create(DescriptorMatcher.BRUTEFORCE_HAMMING);
 
-	// ScheduledExecutorService executorService = new ScheduledThreadPoolExecutor(1, new ThreadPoolExecutor.DiscardPolicy());
-	private final ScheduledExecutorService timerFields = Executors.newSingleThreadScheduledExecutor();
-	private final ScheduledExecutorService timerOcr = Executors.newSingleThreadScheduledExecutor();
-	private final DescriptorExtractor extractor = DescriptorExtractor.create(DescriptorExtractor.ORB);
-	private final DescriptorMatcher matcher = DescriptorMatcher.create(DescriptorMatcher.BRUTEFORCE_HAMMING);
+	private final ScheduledExecutorService timerFields = new ScheduledThreadPoolExecutor(1, new ThreadPoolExecutor.DiscardPolicy());
 	private final VideoCapture capture = new VideoCapture(0);
 	private final Fields fields = new Fields();
 
-	private MatOfKeyPoint oldKeypoints;
-	private MatOfKeyPoint newKeypoints;
-	private Mat oldDescriptors;
-	private Mat newDescriptors;
-	private Mat homographyFromStabilized = new Mat(3, 3, CvType.CV_64FC1);
-	private Mat perspectiveHomography = new Mat(3, 3, CvType.CV_64FC1);
+	private ImgDescriptor stabilizedImgDescriptor;
 	private Mat frame = new Mat();
-
-	private Img stabilized;
 	private boolean stabilizationHasChanged = true;
+	private int stabilizationErrors = 0;
 
 	public static void main(String[] args) {
 		launch(args);
@@ -84,15 +70,12 @@ public class CamLiveRetriever extends AbstractApp {
 		super.stop();
 		timerFields.shutdown();
 		timerFields.awaitTermination(5, TimeUnit.SECONDS);
-		timerOcr.shutdown();
-		timerOcr.awaitTermination(5, TimeUnit.SECONDS);
 	}
 
 	@Override
 	protected void fillGrid(GridPane mainGrid) {
 
 		capture.read(frame);
-		stabilized = new Img(frame, true);
 
 		ImageView src0 = new ImageView(Tools.mat2jfxImage(frame));
 		mainGrid.add(src0, 0, 0);
@@ -100,134 +83,64 @@ public class CamLiveRetriever extends AbstractApp {
 		ImageView src1 = new ImageView(Tools.mat2jfxImage(frame));
 		mainGrid.add(src1, 1, 0);
 
-		oldKeypoints = new MatOfKeyPoint();
-		oldDescriptors = new Mat();
-
-		// Perform the OCR
-		timerOcr.scheduleWithFixedDelay(() -> consolidateOcr(), 500, OCR_DELAY, TimeUnit.MILLISECONDS);
-
-		// Stabilize the image
-		timerFields.scheduleWithFixedDelay(() -> onSpace(), 0, STABILIZATION_DELAY, TimeUnit.MILLISECONDS);
+		timerFields.scheduleAtFixedRate(() -> onSpace(), 0, STABILIZATION_DELAY, TimeUnit.MILLISECONDS);
 
 		// Detect the rectangles
-		timerFields.scheduleWithFixedDelay(() -> {
-			synchronized (this) {
-				try {
-					capture.read(frame);
-					if (frame == null)
-						return;
-					buildStabilizedImg(frame);
+		timerFields.scheduleAtFixedRate(() -> {
 
-					if (stabilized != null) {
-						if (stabilizationHasChanged) {
-							// Store a copy of the last homographies
-							Mat fullHomography = new Mat();
-							Core.gemm(homographyFromStabilized.inv(), perspectiveHomography, 1, new Mat(), 0, fullHomography); // Inverse homography
-
-							// Store the last homographies
-							if (homographyFromStabilized != null)
-								fields.storeHomographyFromStabilized(homographyFromStabilized);
-							if (perspectiveHomography != null)
-								fields.storePerspectiveHomographyInv(perspectiveHomography.inv());
-
-							// Update the keypoints and descriptors
-							oldKeypoints = newKeypoints;
-							oldDescriptors = newDescriptors;
-
-							// Restabilize the image
-							buildStabilizedImg(frame);
-							fields.updateFieldsWithHomography(fullHomography);
-
-							// Detect the new fields and merge them
-							List<Rect> newRects = detectRects(stabilized);
-							fields.merge(newRects);
-							stabilizationHasChanged = false;
-						}
-						Img display = new Img(frame, true);
-						Img stabilizedDisplay = new Img(stabilized.getSrc(), true);
-
-						fields.drawOcrPerspectiveInverse(display, homographyFromStabilized.inv(), new Scalar(0, 64, 255), 1);
-
-						src0.setImage(display.toJfxImage());
-						src1.setImage(stabilizedDisplay.toJfxImage());
-					}
-				} catch (Throwable e) {
-					logger.warn("Exception while computing layout.", e);
+			try {
+				capture.read(frame);
+				if (frame == null) {
+					logger.warn("No frame !");
+					return;
 				}
-			}
-		}, 400, FRAME_DELAY, TimeUnit.MILLISECONDS);
-
-	}
-
-	private synchronized void consolidateOcr() {
-		try {
-			if (stabilized != null)
+				Mat deperspectivGraphy = computeFrameToDeperspectivedHomography(frame);
+				if (deperspectivGraphy == null) {
+					logger.warn("Unable to compute a valid deperspectivation");
+					return;
+				}
+				if (stabilizationErrors > 20) {
+					stabilizationErrors = 0;
+					stabilizedImgDescriptor = null;
+				}
+				if (stabilizedImgDescriptor == null) {
+					stabilizedImgDescriptor = new ImgDescriptor(frame, deperspectivGraphy);
+					return;
+				}
+				ImgDescriptor newImgDescriptor = new ImgDescriptor(frame, deperspectivGraphy);
+				Mat stabilizationHomography = stabilizedImgDescriptor.computeStabilizationGraphy(newImgDescriptor);
+				if (stabilizationHomography == null) {
+					stabilizationErrors++;
+					logger.warn("Unable to compute a valid stabilization (" + stabilizationErrors + " times)");
+					return;
+				}
+				Img stabilized = warpPerspective(frame, stabilizationHomography);
+				if (stabilizationHasChanged) {
+					Mat fieldsHomography = new Mat();
+					stabilized = newImgDescriptor.getDeperspectivedImg();
+					Core.gemm(stabilizationHomography.inv(), deperspectivGraphy, 1, new Mat(), 0, fieldsHomography);
+					fields.merge(detectRects(stabilized), fieldsHomography);
+					Img stabilized_ = stabilized;
+					fields.stream().forEach(f -> f.draw(stabilized_, f.getDeadCounter() == 0 ? new Scalar(0, 255, 0) : new Scalar(0, 0, 255)));
+					stabilizedImgDescriptor = newImgDescriptor;
+					stabilizationHomography = deperspectivGraphy;
+					stabilizationHasChanged = false;
+				}
+				Img display = new Img(frame, false);
 				fields.consolidateOcr(stabilized);
-		} catch (Throwable e) {
-			logger.warn("Exception while computing OCR", e);
-		}
+				fields.drawOcrPerspectiveInverse(display, stabilizationHomography.inv(), new Scalar(0, 255, 0), 1);
+				src0.setImage(display.toJfxImage());
+				src1.setImage(stabilized.toJfxImage());
+			} catch (Throwable e) {
+				logger.warn("Exception while computing layout.", e);
+			}
+		}, 50, FRAME_DELAY, TimeUnit.MILLISECONDS);
+
 	}
 
 	@Override
-	protected synchronized void onSpace() {
+	protected void onSpace() {
 		stabilizationHasChanged = true;
-	}
-
-	private void buildStabilizedImg(Mat frame) {
-		Img frameImg = new Img(frame, true);
-		Img dePerspectived = dePerspectivate(frameImg.getSrc()); // Store homography in perspectiveHomography
-		if (dePerspectived == null)
-			return;
-		newKeypoints = detect(dePerspectived);
-		newDescriptors = new Mat();
-		extractor.compute(dePerspectived.getSrc(), newKeypoints, newDescriptors);
-		Img img = stabilize(frameImg, matcher); // Compute and store homography from stabilized
-		if (img != null)
-			stabilized = img;
-		fields.storeHomographyFromStabilized(homographyFromStabilized);
-	}
-
-	// XXX see whether one want to return null or the original frame
-	private Img stabilize(Img frame, DescriptorMatcher matcher) {
-		MatOfDMatch matches = new MatOfDMatch();
-		if (oldDescriptors != null && !oldDescriptors.empty() && !newDescriptors.empty()) {
-			Mat stabilizedMat = new Mat(); // frame.getSrc().clone();
-			matcher.match(oldDescriptors, newDescriptors, matches);
-			List<DMatch> goodMatches = new ArrayList<>();
-			for (DMatch dMatch : matches.toArray()) {
-				if (dMatch.distance <= 40) {
-					goodMatches.add(dMatch);
-				}
-			}
-			List<KeyPoint> newKeypoints_ = newKeypoints.toList();
-			List<KeyPoint> oldKeypoints_ = oldKeypoints.toList();
-			List<Point> goodNewKeypoints = new ArrayList<>();
-			List<Point> goodOldKeypoints = new ArrayList<>();
-			for (DMatch goodMatch : goodMatches) {
-				goodNewKeypoints.add(newKeypoints_.get(goodMatch.trainIdx).pt);
-				goodOldKeypoints.add(oldKeypoints_.get(goodMatch.queryIdx).pt);
-			}
-
-			if (goodMatches.size() > 30) {
-				Mat goodNewPoints = Converters.vector_Point2f_to_Mat(goodNewKeypoints);
-				MatOfPoint2f originalNewPoints = new MatOfPoint2f();
-				Core.perspectiveTransform(goodNewPoints, originalNewPoints, perspectiveHomography.inv());
-				homographyFromStabilized = Calib3d.findHomography(originalNewPoints, new MatOfPoint2f(goodOldKeypoints.stream().toArray(Point[]::new)), Calib3d.RANSAC, 10);
-				Mat tmp = new Mat();
-				Mat mask = new Mat(frame.size(), CvType.CV_8UC1, new Scalar(255));
-				Mat maskWarpped = new Mat();
-				Imgproc.warpPerspective(mask, maskWarpped, homographyFromStabilized, frame.size());
-				Imgproc.warpPerspective(frame.getSrc(), tmp, homographyFromStabilized, frame.size(), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(255));
-				tmp.copyTo(stabilizedMat, maskWarpped);
-				return new Img(stabilizedMat, false);
-			} else {
-				logger.warn("Not enough matches ({})", goodMatches.size());
-				return null;
-			}
-		} else {
-			logger.warn("No stabilized image");
-			return null;
-		}
 	}
 
 	private List<Rect> detectRects(Img stabilized) {
@@ -240,45 +153,29 @@ public class CamLiveRetriever extends AbstractApp {
 		return res;
 	}
 
-	private MatOfKeyPoint detect(Img frame) {
-		Img closed = frame.adaptativeGaussianInvThreshold(17, 3).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(5, 5));
-		List<MatOfPoint> contours = new ArrayList<>();
-		Imgproc.findContours(closed.getSrc(), contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
-		double minArea = 100;
-		List<KeyPoint> keyPoints = new ArrayList<>();
-		contours.stream().filter(contour -> Imgproc.contourArea(contour) > minArea).map(Imgproc::boundingRect).forEach(rect -> {
-			keyPoints.add(new KeyPoint((float) rect.tl().x, (float) rect.tl().y, 6));
-			keyPoints.add(new KeyPoint((float) rect.tl().x, (float) rect.br().y, 6));
-			keyPoints.add(new KeyPoint((float) rect.br().x, (float) rect.tl().y, 6));
-			keyPoints.add(new KeyPoint((float) rect.br().x, (float) rect.br().y, 6));
-		});
-		return new MatOfKeyPoint(keyPoints.stream().toArray(KeyPoint[]::new));
+	static Img warpPerspective(Mat frame, Mat homography) {
+		Mat dePerspectived = new Mat(frame.size(), CvType.CV_8UC3, Scalar.all(255));
+		Mat tmp = new Mat();
+		Mat mask = new Mat(frame.size(), CvType.CV_8UC1, new Scalar(255));
+		Mat maskWarpped = new Mat();
+		Imgproc.warpPerspective(mask, maskWarpped, homography, frame.size());
+		Imgproc.warpPerspective(frame, tmp, homography, frame.size(), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(255));
+		tmp.copyTo(dePerspectived, maskWarpped);
+		return new Img(dePerspectived, false);
+
 	}
 
-	private Img dePerspectivate(Mat frame) {
-		Lines lines = getLines(frame);
-		if (lines.size() > 10) {
-			perspectiveHomography = computeHomography(frame, lines);
-			Mat dePerspectived = new Mat(frame.size(), CvType.CV_8UC3, Scalar.all(255));
-			Mat tmp = new Mat();
-			Mat mask = new Mat(frame.size(), CvType.CV_8UC1, new Scalar(255));
-			Mat maskWarpped = new Mat();
-			Imgproc.warpPerspective(mask, maskWarpped, perspectiveHomography, frame.size());
-			Imgproc.warpPerspective(frame, tmp, perspectiveHomography, frame.size(), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(255));
-			tmp.copyTo(dePerspectived, maskWarpped);
-			return new Img(dePerspectived, false);
-		} else {
-			logger.warn("Not enough lines to compute perspective transform");
-			return null;
-		}
-	}
-
-	private Lines getLines(Mat frame) {
+	private Lines houghlinesP(Mat frame) {
 		Img grad = new Img(frame, false).morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_RECT, new Size(2, 2)).otsu();
 		return new Lines(grad.houghLinesP(1, Math.PI / 180, 10, 100, 10));
 	}
 
-	private Mat computeHomography(Mat frame, Lines lines) {
+	private Mat computeFrameToDeperspectivedHomography(Mat frame) {
+		Lines lines = houghlinesP(frame);
+		if (lines.size() < 8) {
+			logger.warn("Not enough lines to compute perspective transformation + (" + lines.size());
+			return null;
+		}
 		Ransac<Line> ransac = lines.vanishingPointRansac(frame.width(), frame.height());
 		Mat vpMat = (Mat) ransac.getBestModel().getParams()[0];
 		Point vp = new Point(vpMat.get(0, 0)[0], vpMat.get(1, 0)[0]);
@@ -371,18 +268,18 @@ public class CamLiveRetriever extends AbstractApp {
 			return li;
 		}
 
-		public Ransac<Line> vanishingPointRansac(int width, int height) {
+		public Ransac<Line> vanishingPointRansac(double width, double height) {
 			int minimal_sample_set_dimension = 2;
 			double maxError = (float) 0.01623 * 2;
 			if (K == null) {
 				K = new Mat(3, 3, CvType.CV_32F, new Scalar(0));
-				K.put(0, 0, new float[] { width });
-				K.put(0, 2, new float[] { width / 2 });
-				K.put(1, 1, new float[] { height });
-				K.put(1, 2, new float[] { height / 2 });
+				K.put(0, 0, new float[] { Double.valueOf(width).floatValue() });
+				K.put(0, 2, new float[] { Double.valueOf(width / 2).floatValue() });
+				K.put(1, 1, new float[] { Double.valueOf(height).floatValue() });
+				K.put(1, 2, new float[] { Double.valueOf(height / 2).floatValue() });
 				K.put(2, 2, new float[] { 1 });
 			}
-			return new Ransac<>(getLines(), getModelProvider(minimal_sample_set_dimension, maxError), minimal_sample_set_dimension, 200, maxError, Double.valueOf(Math.floor(this.size() * 0.7)).intValue());
+			return new Ransac<>(getLines(), getModelProvider(minimal_sample_set_dimension, maxError), minimal_sample_set_dimension, 100, maxError, Double.valueOf(Math.floor(this.size() * 0.7)).intValue());
 		}
 
 		private Function<Collection<Line>, Model<Line>> getModelProvider(int minimal_sample_set_dimension, double maxError) {

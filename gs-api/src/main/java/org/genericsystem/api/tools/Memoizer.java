@@ -1,5 +1,7 @@
 package org.genericsystem.api.tools;
 
+import io.reactivex.Observable;
+
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -10,8 +12,6 @@ import java.util.stream.Stream;
 import org.genericsystem.api.core.IGeneric;
 import org.genericsystem.api.core.IndexFilter;
 import org.genericsystem.api.core.Snapshot;
-
-import io.reactivex.Observable;
 
 public class Memoizer {
 
@@ -30,7 +30,7 @@ public class Memoizer {
 	public static Function<Snapshot<?>, Function<IndexFilter, Snapshot<?>>> getIndexFilterM = memoize(snapshot -> indexFilter -> getSnapshotFilterM(snapshot).apply(indexFilter));
 
 	public static <T> Function<IndexFilter, Snapshot<T>> getSnapshotFilterM(Snapshot<T> parent) {
-		return memoize(filter -> new Snapshot<T>() {
+		return Memoizer.<IndexFilter, Snapshot<T>> memoize(filter -> new Snapshot<T>() {
 			private Observable<T> adds = getParent().getAdds().filter(g -> filter.test((IGeneric<?>) g)).share();
 			private Observable<T> removals = getParent().getRemovals().filter(g -> filter.test((IGeneric<?>) g)).share();
 
@@ -69,7 +69,7 @@ public class Memoizer {
 	public static Function<Snapshot<?>, Function<List<IndexFilter>, Snapshot<?>>> getIndexListFilterM = memoize(snapshot -> filters -> getSnapshotListFilterM(snapshot).apply(filters));
 
 	public static <T> Function<List<IndexFilter>, Snapshot<T>> getSnapshotListFilterM(Snapshot<T> parent) {
-		return memoize(filters -> new Snapshot<T>() {
+		return Memoizer.<List<IndexFilter>, Snapshot<T>> memoize(filters -> new Snapshot<T>() {
 			private Observable<T> adds = parent.getAdds().filter(g -> filters.stream().allMatch(filter -> filter.test((IGeneric<?>) g))).share();
 			private Observable<T> removals = parent.getRemovals().filter(g -> filters.stream().allMatch(filter -> filter.test((IGeneric<?>) g))).share();
 

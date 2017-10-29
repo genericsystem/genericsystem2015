@@ -1,5 +1,7 @@
 package org.genericsystem.kernel;
 
+import io.reactivex.Observable;
+
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.List;
@@ -17,8 +19,6 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.common.IDependencies;
 import org.genericsystem.common.IDifferential;
 import org.genericsystem.kernel.AbstractServer.RootServerHandler;
-
-import io.reactivex.Observable;
 
 /**
  * @author Nicolas Feybesse
@@ -84,7 +84,7 @@ public class Transaction extends CheckedContext implements IDifferential<Generic
 		set.stream().forEach(ancestor -> ((RootServerHandler) ancestor.getProxyHandler()).getDependencies().signalRemoval(generic));
 	}
 
-	private final Function<Generic, IDependencies<Generic>> depsM = Memoizer.memoize(ancestor -> {
+	private final Function<Generic, IDependencies<Generic>> depsM = Memoizer.<Generic, IDependencies<Generic>> memoize(ancestor -> {
 		assert ancestor != null;
 		return new IDependencies<Generic>() {
 

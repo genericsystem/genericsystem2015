@@ -1,10 +1,15 @@
 package org.genericsystem.common;
 
+import io.reactivex.Observable;
+
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
+
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 
 import org.genericsystem.api.core.FiltersBuilder;
 import org.genericsystem.api.core.IndexFilter;
@@ -16,10 +21,6 @@ import org.genericsystem.api.tools.Memoizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.reactivex.Observable;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-
 /**
  * @author Nicolas Feybesse
  *
@@ -30,13 +31,9 @@ public class Differential implements IDifferential<Generic> {
 	private final IDifferential<Generic> subDifferential;
 	protected final PseudoConcurrentCollection<Generic> adds = new PseudoConcurrentCollection<>();
 	protected final PseudoConcurrentCollection<Generic> removes = new PseudoConcurrentCollection<>();
-	private Function<Generic, Observable<Generic>> addsM = Memoizer.memoize(generic -> Observable.merge(getSubDifferential().getAdds(generic),
-			adds.getFilteredAdds(generic::isDirectAncestorOf),
-			removes.getFilteredRemoves(generic::isDirectAncestorOf))
+	private Function<Generic, Observable<Generic>> addsM = Memoizer.memoize(generic -> Observable.merge(getSubDifferential().getAdds(generic), adds.getFilteredAdds(generic::isDirectAncestorOf), removes.getFilteredRemoves(generic::isDirectAncestorOf))
 			.share());
-	private Function<Generic, Observable<Generic>> remsM = Memoizer.memoize(generic -> Observable.merge(getSubDifferential().getRemovals(generic),
-			removes.getFilteredAdds(generic::isDirectAncestorOf),
-			adds.getFilteredRemoves(generic::isDirectAncestorOf))
+	private Function<Generic, Observable<Generic>> remsM = Memoizer.memoize(generic -> Observable.merge(getSubDifferential().getRemovals(generic), removes.getFilteredAdds(generic::isDirectAncestorOf), adds.getFilteredRemoves(generic::isDirectAncestorOf))
 			.share());
 
 	public Differential(IDifferential<Generic> subDifferential) {
@@ -92,7 +89,7 @@ public class Differential implements IDifferential<Generic> {
 			removes.add(generic);
 	}
 
-	private final Function<Generic, Snapshot<Generic>> getDepsM = Memoizer.memoize(generic -> new Snapshot<Generic>() {
+	private final Function<Generic, Snapshot<Generic>> getDepsM = Memoizer.<Generic, Snapshot<Generic>> memoize(generic -> new Snapshot<Generic>() {
 		private Observable<Generic> addsObs = getDifferentialObservable().switchMap(diff -> diff.getAdds(generic).filter(g -> getCache().isAlive(g))).share();
 		private Observable<Generic> removalsObs = getDifferentialObservable().switchMap(diff -> diff.getRemovals(generic).filter(g -> !getCache().isAlive(g))).share();
 
