@@ -1,6 +1,7 @@
 package org.genericsystem.cv.classifier;
 
 import java.lang.invoke.MethodHandles;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -12,6 +13,7 @@ import java.util.stream.IntStream;
 
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.utils.ParallelTasks;
+import org.genericsystem.cv.utils.RectToolsMapper;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint2f;
@@ -29,19 +31,29 @@ public class Fields extends AbstractFields<Field> {
 	private static final int MAX_DELETE_UNMERGED = 5;
 	private static final int OCR_TIMEOUT = 100;
 
+	public void reset() {
+		fields = new ArrayList<>();
+	}
+
 	public void merge(List<Rect> newRects, Mat fieldsHomography) {
 		List<Field> oldFields = restabilizeFields(fieldsHomography);
 		logger.info("oldFields transformed ({})", oldFields.size());
-		fields = newRects.stream().map(Field::new).collect(Collectors.toList());
+		fields = buildNewFields(newRects, 0.5);
 
 		Iterator<Field> it = oldFields.iterator();
 		while (it.hasNext()) {
 			Field currentOldField = it.next();
-			// List<Field> matches = (List) findMatchingFieldsWithConfidence(currentOldField, 0.7);
+			// List<Field> matches = findMatchingFieldsWithConfidence(currentOldField, 0.7);
 			List<Field> matches = findClusteredFields(currentOldField, 0.1);
 			if (!matches.isEmpty()) {
-				currentOldField.getConsolidated().ifPresent(s -> System.out.println("Merged: " + s));
+				currentOldField.getConsolidated().ifPresent(s -> logger.info("Merged: {}", s));
+				// TODO: if more than one match, select only the best
+				if (matches.size() > 1)
+					logger.error("Multiple matches: {}", matches.size());
+
 				matches.forEach(f -> {
+					double mergeArea = RectToolsMapper.inclusiveArea(f.getRect(), currentOldField.getRect());
+					logger.info("Merging fields with {}% common area", String.format("%.1f", mergeArea * 100));
 					f.merge(currentOldField);
 					f.resetDeadCounter();
 				});
@@ -53,6 +65,12 @@ public class Fields extends AbstractFields<Field> {
 		oldFields.removeIf(f -> f.deadCounter >= MAX_DELETE_UNMERGED);
 		// At this stage, add all the remaining fields still in oldFields
 		fields.addAll(oldFields);
+	}
+
+	private List<Field> buildNewFields(List<Rect> rects, double thresholdFactor) {
+		double meanArea = rects.stream().mapToDouble(r -> r.area()).average().getAsDouble();
+		double sem = Math.sqrt(rects.stream().mapToDouble(r -> Math.pow(r.area() - meanArea, 2)).sum() / (rects.size() - 1));
+		return rects.stream().filter(r -> Math.abs(r.area() - meanArea) <= (sem * thresholdFactor)).map(Field::new).collect(Collectors.toList());
 	}
 
 	private List<Field> restabilizeFields(Mat homography) {
@@ -81,18 +99,28 @@ public class Fields extends AbstractFields<Field> {
 	public void consolidateOcr(Img rootImg) {
 		long TS = System.currentTimeMillis();
 		while (System.currentTimeMillis() - TS <= OCR_TIMEOUT) {
-			ParallelTasks tasks = new ParallelTasks();
-			Set<Integer> indexes = new HashSet<>();
-			while (indexes.size() < tasks.getCounter()) {
-				int idx = rand.nextInt(size());
-				if (indexes.add(idx))
-					tasks.add(() -> fields.get(idx).ocr(rootImg));
-			}
-			try {
-				tasks.run();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+			// runParallelOcr(rootImg);
+			runSequentialOcr(rootImg);
+		}
+	}
+
+	private void runSequentialOcr(Img rootImg) {
+		int idx = rand.nextInt(size());
+		fields.get(idx).ocr(rootImg);
+	}
+
+	private void runParallelOcr(Img rootImg) {
+		ParallelTasks tasks = new ParallelTasks();
+		Set<Integer> indexes = new HashSet<>();
+		while (indexes.size() < tasks.getCounter()) {
+			int idx = rand.nextInt(size());
+			if (indexes.add(idx))
+				tasks.add(() -> fields.get(idx).ocr(rootImg));
+		}
+		try {
+			tasks.run();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
 		}
 	}
 

@@ -15,10 +15,14 @@ import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Size;
+import org.opencv.features2d.DescriptorExtractor;
+import org.opencv.features2d.DescriptorMatcher;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
 
 public class ImgDescriptor {
+	private static final DescriptorExtractor EXTRACTOR = DescriptorExtractor.create(DescriptorExtractor.ORB);
+	private static final DescriptorMatcher MATCHER = DescriptorMatcher.create(DescriptorMatcher.BRUTEFORCE_HAMMING);
 	private final Img deperspectivedImg;
 	private final MatOfKeyPoint keypoints;
 	private final Mat descriptors;
@@ -29,7 +33,7 @@ public class ImgDescriptor {
 		keypoints = detect(deperspectivedImg);
 		assert keypoints != null && !keypoints.empty();
 		descriptors = new Mat();
-		CamLiveRetriever.EXTRACTOR.compute(deperspectivedImg.getSrc(), keypoints, descriptors);
+		EXTRACTOR.compute(deperspectivedImg.getSrc(), keypoints, descriptors);
 		this.homography = deperspectivGraphy;
 
 	}
@@ -68,7 +72,7 @@ public class ImgDescriptor {
 	Mat computeStabilizationGraphy(ImgDescriptor frameDescriptor) {
 		MatOfDMatch matches = new MatOfDMatch();
 
-		CamLiveRetriever.MATCHER.match(getDescriptors(), frameDescriptor.getDescriptors(), matches);
+		MATCHER.match(getDescriptors(), frameDescriptor.getDescriptors(), matches);
 		List<DMatch> goodMatches = new ArrayList<>();
 		for (DMatch dMatch : matches.toArray()) {
 			if (dMatch.distance <= 40) {

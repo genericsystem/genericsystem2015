@@ -135,7 +135,7 @@ public abstract class AbstractField {
 			Core.perspectiveTransform(Converters.vector_Point2f_to_Mat(points), results, homography);
 			Point[] targets = results.toArray();
 			for (int i = 0; i < 4; ++i) {
-				Imgproc.line(display.getSrc(), targets[i], targets[(i + 1) % 4], color, thickness);
+				Imgproc.line(display.getSrc(), targets[i], targets[(i + 1) % 4], deadCounter == 0 ? color : new Scalar(0, 0, 255), thickness);
 			}
 			Point topCenter = new Point((targets[0].x + targets[1].x) / 2, (targets[0].y + targets[1].y) / 2);
 			double l = Math.sqrt(Math.pow(targets[0].x - topCenter.x, 2) + Math.pow(targets[0].y - topCenter.y, 2));

@@ -1,5 +1,7 @@
 package org.genericsystem.cv;
 
+import java.util.Arrays;
+
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 
@@ -23,11 +25,17 @@ public class Matrix {
 	}
 	
 
-
 	public Matrix() {
 	
 	}
 
+	public Matrix(double[] array){
+		
+		A  = new double[][]{{array[0]},{array[1]},{array[2]}};
+		n = 1;
+		m = array.length;
+	}
+	
 	public void set(int i, int j, double value) {
 		A[i][j] = value;
 	}
@@ -106,12 +114,6 @@ public class Matrix {
 	 */
 	public Matrix normalize() {
 
-//		for (int i = 0; i < n; i++) {
-//			
-//			double d = 0.0D;
-//			for (int j = 0; j < m; j++) {
-//				d += A[j][i]*A[j][i];
-//			}
 		double d = this.norm();
 			if(d == 0.0D)
 				throw new IllegalStateException("norm is 0, cannot normalize");
@@ -255,5 +257,11 @@ public class Matrix {
 		return hash;
 		
 	}
+	
+	@Override
+	public String toString(){
+		return Arrays.deepToString(A);
+		
+	} 
 
 } 
