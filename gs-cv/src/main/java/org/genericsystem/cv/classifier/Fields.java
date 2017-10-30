@@ -1,6 +1,7 @@
 package org.genericsystem.cv.classifier;
 
 import java.lang.invoke.MethodHandles;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -29,6 +30,10 @@ public class Fields extends AbstractFields<Field> {
 	private static ThreadLocalRandom rand = ThreadLocalRandom.current();
 	private static final int MAX_DELETE_UNMERGED = 5;
 	private static final int OCR_TIMEOUT = 100;
+
+	public void reset() {
+		fields = new ArrayList<>();
+	}
 
 	public void merge(List<Rect> newRects, Mat fieldsHomography) {
 		List<Field> oldFields = restabilizeFields(fieldsHomography);

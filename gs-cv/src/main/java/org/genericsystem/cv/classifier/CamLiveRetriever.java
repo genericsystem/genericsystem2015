@@ -96,6 +96,8 @@ public class CamLiveRetriever extends AbstractApp {
 					return;
 				}
 				if (stabilizationErrors > 20) {
+					// TODO: clean fields
+					fields.reset();
 					stabilizationErrors = 0;
 					stabilizedImgDescriptor = null;
 				}
@@ -152,12 +154,7 @@ public class CamLiveRetriever extends AbstractApp {
 
 	static Img warpPerspective(Mat frame, Mat homography) {
 		Mat dePerspectived = new Mat(frame.size(), CvType.CV_8UC3, Scalar.all(255));
-		Mat tmp = new Mat();
-		Mat mask = new Mat(frame.size(), CvType.CV_8UC1, new Scalar(255));
-		Mat maskWarpped = new Mat();
-		Imgproc.warpPerspective(mask, maskWarpped, homography, frame.size());
-		Imgproc.warpPerspective(frame, tmp, homography, frame.size(), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(255));
-		tmp.copyTo(dePerspectived, maskWarpped);
+		Imgproc.warpPerspective(frame, dePerspectived, homography, frame.size(), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(255));
 		return new Img(dePerspectived, false);
 	}
 
@@ -210,9 +207,10 @@ public class CamLiveRetriever extends AbstractApp {
 			D_ = new Line(B_, bary).intersection(new Line(CD2, rotatedVp));
 		}
 
-		// System.out.println("vp : " + vp);
-		// System.out.println("rotated vp : " + rotatedVp);
-		// System.out.println("Alpha : " + alpha * 180 / Math.PI);
+		System.out.println("vp : " + vp);
+		System.out.println("rotated vp : " + rotatedVp);
+		System.out.println("Alpha : " + alpha * 180 / Math.PI);
+		System.out.println();
 		// System.out.println("A : " + A + " " + A_);
 		// System.out.println("B : " + B + " " + B_);
 		// System.out.println("C : " + C + " " + C_);
