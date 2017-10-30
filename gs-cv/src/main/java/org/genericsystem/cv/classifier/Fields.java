@@ -43,8 +43,8 @@ public class Fields extends AbstractFields<Field> {
 		Iterator<Field> it = oldFields.iterator();
 		while (it.hasNext()) {
 			Field currentOldField = it.next();
-			List<Field> matches = findMatchingFieldsWithConfidence(currentOldField, 0.7);
-			// List<Field> matches = findClusteredFields(currentOldField, 0.1);
+			// List<Field> matches = findMatchingFieldsWithConfidence(currentOldField, 0.7);
+			List<Field> matches = findClusteredFields(currentOldField, 0.1);
 			if (!matches.isEmpty()) {
 				currentOldField.getConsolidated().ifPresent(s -> logger.info("Merged: {}", s));
 				if (matches.size() > 1)
@@ -52,7 +52,7 @@ public class Fields extends AbstractFields<Field> {
 
 				matches.forEach(f -> {
 					double mergeArea = RectToolsMapper.inclusiveArea(f.getRect(), currentOldField.getRect());
-					logger.info("Merging two fields with {} common area", String.format("%.3f", mergeArea));
+					logger.info("Merging fields with {}% common area", String.format("%.1f", mergeArea * 100));
 					f.merge(currentOldField);
 					f.resetDeadCounter();
 				});
@@ -92,18 +92,28 @@ public class Fields extends AbstractFields<Field> {
 	public void consolidateOcr(Img rootImg) {
 		long TS = System.currentTimeMillis();
 		while (System.currentTimeMillis() - TS <= OCR_TIMEOUT) {
-			ParallelTasks tasks = new ParallelTasks();
-			Set<Integer> indexes = new HashSet<>();
-			while (indexes.size() < tasks.getCounter()) {
-				int idx = rand.nextInt(size());
-				if (indexes.add(idx))
-					tasks.add(() -> fields.get(idx).ocr(rootImg));
-			}
-			try {
-				tasks.run();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+			// runParallelOcr(rootImg);
+			runSequentialOcr(rootImg);
+		}
+	}
+
+	private void runSequentialOcr(Img rootImg) {
+		int idx = rand.nextInt(size());
+		fields.get(idx).ocr(rootImg);
+	}
+
+	private void runParallelOcr(Img rootImg) {
+		ParallelTasks tasks = new ParallelTasks();
+		Set<Integer> indexes = new HashSet<>();
+		while (indexes.size() < tasks.getCounter()) {
+			int idx = rand.nextInt(size());
+			if (indexes.add(idx))
+				tasks.add(() -> fields.get(idx).ocr(rootImg));
+		}
+		try {
+			tasks.run();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
 		}
 	}
 
