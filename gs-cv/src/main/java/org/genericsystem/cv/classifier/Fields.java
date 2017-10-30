@@ -38,7 +38,7 @@ public class Fields extends AbstractFields<Field> {
 	public void merge(List<Rect> newRects, Mat fieldsHomography) {
 		List<Field> oldFields = restabilizeFields(fieldsHomography);
 		logger.info("oldFields transformed ({})", oldFields.size());
-		fields = newRects.stream().map(Field::new).collect(Collectors.toList());
+		fields = buildNewFields(newRects, 0.5);
 
 		Iterator<Field> it = oldFields.iterator();
 		while (it.hasNext()) {
@@ -47,6 +47,7 @@ public class Fields extends AbstractFields<Field> {
 			List<Field> matches = findClusteredFields(currentOldField, 0.1);
 			if (!matches.isEmpty()) {
 				currentOldField.getConsolidated().ifPresent(s -> logger.info("Merged: {}", s));
+				// TODO: if more than one match, select only the best
 				if (matches.size() > 1)
 					logger.error("Multiple matches: {}", matches.size());
 
@@ -64,6 +65,12 @@ public class Fields extends AbstractFields<Field> {
 		oldFields.removeIf(f -> f.deadCounter >= MAX_DELETE_UNMERGED);
 		// At this stage, add all the remaining fields still in oldFields
 		fields.addAll(oldFields);
+	}
+
+	private List<Field> buildNewFields(List<Rect> rects, double thresholdFactor) {
+		double meanArea = rects.stream().mapToDouble(r -> r.area()).average().getAsDouble();
+		double sem = Math.sqrt(rects.stream().mapToDouble(r -> Math.pow(r.area() - meanArea, 2)).sum() / (rects.size() - 1));
+		return rects.stream().filter(r -> Math.abs(r.area() - meanArea) <= (sem * thresholdFactor)).map(Field::new).collect(Collectors.toList());
 	}
 
 	private List<Field> restabilizeFields(Mat homography) {
