@@ -1,13 +1,16 @@
 package org.genericsystem.cv;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import org.genericsystem.cv.lm.LMHostImpl;
 import org.genericsystem.cv.utils.Line;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.genericsystem.cv.utils.Ransac;
@@ -71,8 +74,33 @@ public class LinesDetector3 extends AbstractApp {
 					Ransac<Line> ransac = lines.vanishingPointRansac(frame.width(), frame.height());
 					Mat vp_mat = (Mat) ransac.getBestModel().getParams()[0];
 					Point vp = new Point(vp_mat.get(0, 0)[0], vp_mat.get(1, 0)[0]);
-					// vpxDamper.pushNewValue(vp.x);
-					// vpyDamper.pushNewValue(vp.y);
+
+					BiFunction<Line, double[], Double> error = (datas, params) -> {
+						Matrix lineMat = Matrix.convert(Lines.getLineMat(datas));
+						double di = params[0] * lineMat.get(0, 0) + params[1] * lineMat.get(1, 0) + params[2] * lineMat.get(2, 0);
+						// di /= (Core.norm(vp) * Core.norm(lineMat));
+						di /= (Math.sqrt(params[0] * params[0] + params[1] * params[1] + params[2] * params[2]) * lineMat.norm());
+						return di * di;
+					};
+
+					Matrix vpCalib = Matrix.convert(Lines.K.inv()).times(new Matrix(new double[][] { { vp.x }, { vp.y }, { 1d } }), 1);
+					double[] calibVp = new double[] { vpCalib.get(0, 0), vpCalib.get(1, 0), vpCalib.get(2, 0) };
+					LMHostImpl<Line> fitHost = new LMHostImpl<>(error, new ArrayList<>(ransac.getBestDataSet().values()), calibVp);
+					double[] newVp = fitHost.getParms();
+					Matrix result = Matrix.convert(Lines.K).times(new Matrix(new double[][] { { newVp[0] }, { newVp[1] }, { newVp[2] } }), 1);
+					if (result.get(2, 0) != 0) {
+						result.set(0, 0, result.get(0, 0) / result.get(2, 0));
+						result.set(1, 0, result.get(1, 0) / result.get(2, 0));
+						result.set(2, 0, 1d);
+					} else {
+						// Since this is infinite, it is better to leave it calibrated
+						// Core.gemm(K.inv(), vp, 1, new Mat(), 0, vp);
+						result = Matrix.convert(Lines.K).times(result, 1);
+					}
+					System.out.println("Old vp = " + vp);
+					System.out.println("New vp = " + result.get(0, 0) + " " + result.get(1, 0));
+					vp.x = result.get(0, 0);
+					vp.y = result.get(1, 0);
 					Point bary = new Point(frame.width() / 2, frame.height() / 2);
 					Mat homography = findHomography(new Point(vp.x, vp.y), bary, frame.width(), frame.height());
 					lines = Lines.of(ransac.getBestDataSet().values());
@@ -180,7 +208,7 @@ public class LinesDetector3 extends AbstractApp {
 			return new Lines(lines);
 		}
 
-		private Mat getLineMat(Line line) {
+		private static Mat getLineMat(Line line) {
 			Mat a = new Mat(3, 1, CvType.CV_32F);
 			Mat b = new Mat(3, 1, CvType.CV_32F);
 			a.put(0, 0, new float[] { Double.valueOf(line.getX1()).floatValue() });
