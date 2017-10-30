@@ -45,6 +45,8 @@ public class CamLiveRetriever extends AbstractApp {
 
 	static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
+	private static long counter = 0;
+
 	private static final int STABILIZATION_DELAY = 500;
 	private static final int FRAME_DELAY = 100;
 
@@ -85,6 +87,7 @@ public class CamLiveRetriever extends AbstractApp {
 		timerFields.scheduleAtFixedRate(() -> {
 
 			try {
+				Stats.beginTask("frame");
 				capture.read(frame);
 				if (frame == null) {
 					logger.warn("No frame !");
@@ -105,8 +108,12 @@ public class CamLiveRetriever extends AbstractApp {
 					stabilizedImgDescriptor = new ImgDescriptor(frame, deperspectivGraphy);
 					return;
 				}
+				Stats.beginTask("newImgDescriptor");
 				ImgDescriptor newImgDescriptor = new ImgDescriptor(frame, deperspectivGraphy);
+				Stats.endTask("newImgDescriptor");
+				Stats.beginTask("computeStabilizationGraphy");
 				Mat stabilizationHomography = stabilizedImgDescriptor.computeStabilizationGraphy(newImgDescriptor);
+				Stats.endTask("computeStabilizationGraphy");
 				if (stabilizationHomography == null) {
 					stabilizationErrors++;
 					logger.warn("Unable to compute a valid stabilization ({} times)", stabilizationErrors);
@@ -114,6 +121,7 @@ public class CamLiveRetriever extends AbstractApp {
 				}
 				Img stabilized = warpPerspective(frame, stabilizationHomography);
 				if (stabilizationHasChanged) {
+					Stats.beginTask("stabilizationHasChanged");
 					Mat fieldsHomography = new Mat();
 					stabilized = newImgDescriptor.getDeperspectivedImg();
 					// Core.gemm(stabilizationHomography.inv(), deperspectivGraphy, 1, new Mat(), 0, fieldsHomography);
@@ -124,12 +132,19 @@ public class CamLiveRetriever extends AbstractApp {
 					stabilizedImgDescriptor = newImgDescriptor;
 					stabilizationHomography = deperspectivGraphy;
 					stabilizationHasChanged = false;
+					Stats.endTask("stabilizationHasChanged");
 				}
 				Img display = new Img(frame, false);
 				fields.consolidateOcr(stabilized);
 				fields.drawOcrPerspectiveInverse(display, stabilizationHomography.inv(), new Scalar(0, 255, 0), 1);
 				src0.setImage(display.toJfxImage());
 				src1.setImage(stabilized.toJfxImage());
+				Stats.endTask("frame");
+
+				if (++counter % 10 == 0) {
+					System.out.println(Stats.getStatsAndReset());
+					counter = 0;
+				}
 			} catch (Throwable e) {
 				logger.warn("Exception while computing layout.", e);
 			}
@@ -153,8 +168,10 @@ public class CamLiveRetriever extends AbstractApp {
 	}
 
 	static Img warpPerspective(Mat frame, Mat homography) {
+		Stats.beginTask("warpPerspective");
 		Mat dePerspectived = new Mat(frame.size(), CvType.CV_8UC3, Scalar.all(255));
 		Imgproc.warpPerspective(frame, dePerspectived, homography, frame.size(), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(255));
+		Stats.endTask("warpPerspective");
 		return new Img(dePerspectived, false);
 	}
 
@@ -169,11 +186,16 @@ public class CamLiveRetriever extends AbstractApp {
 			logger.warn("Not enough lines to compute perspective transformation ({})", lines.size());
 			return null;
 		}
+		Stats.beginTask("ransac");
 		Ransac<Line> ransac = lines.vanishingPointRansac(frame.width(), frame.height());
+		Stats.endTask("ransac");
 		Mat vpMat = (Mat) ransac.getBestModel().getParams()[0];
 		Point vp = new Point(vpMat.get(0, 0)[0], vpMat.get(1, 0)[0]);
 		Point bary = new Point(frame.width() / 2, frame.height() / 2);
-		return findHomography(vp, bary, frame.width(), frame.height());
+		Stats.beginTask("findHomography");
+		Mat homo = findHomography(vp, bary, frame.width(), frame.height());
+		Stats.endTask("findHomography");
+		return homo;
 	}
 
 	private Mat findHomography(Point vp, Point bary, double width, double height) {
