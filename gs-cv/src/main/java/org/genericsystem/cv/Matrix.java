@@ -18,9 +18,11 @@ public class Matrix {
 
 	public Matrix(double[][] arrayDouble) {
 		A = arrayDouble;
-		n = arrayDouble.length;
-		m = arrayDouble[0].length;
+		n = arrayDouble[0].length;
+		m = arrayDouble.length;	
 	}
+	
+
 
 	public Matrix() {
 	
@@ -136,29 +138,17 @@ public class Matrix {
  * 
  * @return
  */
-
-//	public Matrix t() {
-//
-//		    double[][] arrayOfDouble = new double[m][n];
-//
-//		    for (int i = 0; i < n; i++) {
-//		      for (int j = 0; j < m; j++) {
-//		        arrayOfDouble[j][i] = A[i][j];
-//		      }
-//		    }
-//		    return new Matrix(arrayOfDouble);
-//	}
 	
 	public Matrix t() {
 		
 		 Matrix localMatrix = new Matrix(n, m);
 		    double[][] arrayOfDouble = localMatrix.getA();
 		    for (int i = 0; i < m; i++) {
-		      for (int j = 0; j < n; j++) {
+		      for (int j = 0; j < n; j++) {		   
 		        arrayOfDouble[j][i] = A[i][j];
 		      }
 		    }
-		    return localMatrix;
+		 return localMatrix;
 	}
 
 	
