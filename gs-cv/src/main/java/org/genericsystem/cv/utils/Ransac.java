@@ -53,11 +53,11 @@ public class Ransac<DATA> {
 
 			if (randomDataMap.size() >= d) {
 				possibleModel = modelProvider.apply(randomDataMap.values());
-				double erreur = possibleModel.computeGlobalError(datas, randomDataMap.values());
-				if (erreur < bestError) {
+				double error = possibleModel.computeGlobalError(datas, randomDataMap.values());
+				if (error < bestError) {
 					bestModel = possibleModel;
 					bestDataMap = randomDataMap;
-					bestError = erreur;
+					bestError = error;
 					// System.out.println("Improved error : " + bestError);
 					if (bestError == 0)
 						break;
