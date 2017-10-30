@@ -29,18 +29,15 @@ public class MatrixTest{
 	public void matConvertTest(){
 				
 		Mat opencvMat = new Mat(3,1,CvType.CV_32F);
-		opencvMat.put(0, 0, 1d);
-		opencvMat.put(1, 0, 2d);
-		opencvMat.put(2, 0, 0d);
+		opencvMat.put(0, 0, 0d);
+		opencvMat.put(1, 0, 1d);
+		opencvMat.put(2, 0, 2d);
 		
 		Matrix convertedMatrix = Matrix.convert(opencvMat);
+				
+		Matrix m = new Matrix(vector);		
 		
-		Matrix matrix = new Matrix(3,1);
-		matrix.set(0, 0, 1d);
-		matrix.set(1, 0, 2d);
-		matrix.set(2, 0, 0d);
-		
-		assertTrue(matrix.equals(convertedMatrix));
+		assertTrue(m.equals(convertedMatrix));
 	}
 	
 	
@@ -68,11 +65,9 @@ public class MatrixTest{
 	@Test
 	public void normTest(){
 		
-		Matrix m = new Matrix(3,1);
-		m.set(0, 0, 1);
-		m.set(1, 0, 2);
-		m.set(2, 0, 2);
-		
+		double[] array = {1,2,2};
+		Matrix m = new Matrix(array);
+
 		assertTrue(m.norm()==3);
 		
 	}
@@ -80,17 +75,15 @@ public class MatrixTest{
 	@Test
 	public void normalizeTest(){
 		
-		Matrix m = new Matrix(3,1);
-		m.set(0, 0, 1);
-		m.set(1, 0, 2);
-		m.set(2, 0, 2);
+		double[] array = {1,2,2};
+		Matrix m = new Matrix(array);		
 		
 		Matrix normalized = new Matrix(3,1);
-		m.set(0, 0, 1/3);
-		m.set(1, 0, 2/3);
-		m.set(2, 0, 2/3);		
+		normalized.set(0, 0, 1d/3);
+		normalized.set(1, 0, 2d/3);
+		normalized.set(2, 0, 2d/3);		
 		
-		assertTrue(m.equals(normalized));
+		assertTrue(m.normalize().equals(normalized));
 		
 	}
 	
@@ -176,8 +169,7 @@ public class MatrixTest{
 		Matrix m3 = new Matrix(3,1);
 		m3.set(0, 0, 27d);
 		m3.set(1, 0, 6d);
-		m3.set(2, 0, -13d);
-		
+		m3.set(2, 0, -13d);		
 		
 		assertTrue(Matrix.crossProduct(m1,m2).equals(m3));
 		
