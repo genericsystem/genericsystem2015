@@ -18,6 +18,8 @@ public class Matrix {
 
 	public Matrix(double[][] arrayDouble) {
 		A = arrayDouble;
+		n = arrayDouble.length;
+		m = arrayDouble[0].length;
 	}
 
 	public Matrix() {
@@ -83,7 +85,6 @@ public class Matrix {
 	 * @param mat2
 	 * @return
 	 */
-	// bof
 	public static Matrix crossProduct(Matrix mat1, Matrix mat2) {
 
 		if (mat1.getm() != 3 && mat2.getm() != 3 && mat1.getn() != 1 && mat2.getn() != 1) {
@@ -92,9 +93,10 @@ public class Matrix {
 
 		Matrix array = new Matrix(3,1);
 		array.set(0, 0, mat1.get(1, 0) * mat2.get(2, 0) - mat1.get(2, 0) * mat2.get(1, 0));
-		array.set(1, 0, mat1.get(2, 0) * mat2.get(1, 0) - mat1.get(0, 0) * mat2.get(2, 0));
+		array.set(1, 0, mat1.get(2, 0) * mat2.get(0, 0) - mat1.get(0, 0) * mat2.get(2, 0));
 		array.set(2, 0, mat1.get(0, 0) * mat2.get(1, 0) - mat1.get(1, 0) * mat2.get(0, 0));
 		return array;
+		
 	}
 
 	/**
@@ -135,6 +137,18 @@ public class Matrix {
  * @return
  */
 
+//	public Matrix t() {
+//
+//		    double[][] arrayOfDouble = new double[m][n];
+//
+//		    for (int i = 0; i < n; i++) {
+//		      for (int j = 0; j < m; j++) {
+//		        arrayOfDouble[j][i] = A[i][j];
+//		      }
+//		    }
+//		    return new Matrix(arrayOfDouble);
+//	}
+	
 	public Matrix t() {
 		
 		 Matrix localMatrix = new Matrix(n, m);
@@ -212,6 +226,44 @@ public class Matrix {
 			}
 		}
 		return Math.sqrt(d);
+	}
+	
+	@Override
+	public boolean equals(Object o){
+		
+		if (o == null)
+			return false;
+		
+		if(!(o instanceof Matrix))
+			return false;
+		
+		final Matrix matrix = (Matrix) o;
+		
+		for(int i =0; i<matrix.getm();i++){
+			for(int j = 0; j<matrix.getn();j++){
+				
+			if(matrix.get(i, j)!=this.get(i, j))
+				return false;				
+			}			
+		}
+		return true;
+		
+	}
+	
+	@Override
+	public int hashCode(){
+		
+		int hash = 3;
+		
+		for(int i =0; i<m;i++){
+			for(int j = 0; j<n;j++){
+				
+			hash+= (int) Math.floor(this.get(i, j))*7;
+				
+			}			
+		}		
+		return hash;
+		
 	}
 
 } 
