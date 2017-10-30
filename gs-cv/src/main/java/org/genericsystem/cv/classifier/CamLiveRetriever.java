@@ -135,12 +135,15 @@ public class CamLiveRetriever extends AbstractApp {
 					Stats.endTask("stabilizationHasChanged");
 				}
 				Img display = new Img(frame, false);
+				Stats.beginTask("consolidateOcr");
 				fields.consolidateOcr(stabilized);
+				Stats.endTask("consolidateOcr");
 				fields.drawOcrPerspectiveInverse(display, stabilizationHomography.inv(), new Scalar(0, 255, 0), 1);
 				src0.setImage(display.toJfxImage());
 				src1.setImage(stabilized.toJfxImage());
 				Stats.endTask("frame");
 
+				Stats.resetCumulative("RANSAC re-compute");
 				if (++counter % 10 == 0) {
 					System.out.println(Stats.getStatsAndReset());
 					counter = 0;
@@ -168,10 +171,8 @@ public class CamLiveRetriever extends AbstractApp {
 	}
 
 	static Img warpPerspective(Mat frame, Mat homography) {
-		Stats.beginTask("warpPerspective");
 		Mat dePerspectived = new Mat(frame.size(), CvType.CV_8UC3, Scalar.all(255));
 		Imgproc.warpPerspective(frame, dePerspectived, homography, frame.size(), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(255));
-		Stats.endTask("warpPerspective");
 		return new Img(dePerspectived, false);
 	}
 
@@ -192,10 +193,7 @@ public class CamLiveRetriever extends AbstractApp {
 		Mat vpMat = (Mat) ransac.getBestModel().getParams()[0];
 		Point vp = new Point(vpMat.get(0, 0)[0], vpMat.get(1, 0)[0]);
 		Point bary = new Point(frame.width() / 2, frame.height() / 2);
-		Stats.beginTask("findHomography");
-		Mat homo = findHomography(vp, bary, frame.width(), frame.height());
-		Stats.endTask("findHomography");
-		return homo;
+		return findHomography(vp, bary, frame.width(), frame.height());
 	}
 
 	private Mat findHomography(Point vp, Point bary, double width, double height) {
@@ -229,10 +227,10 @@ public class CamLiveRetriever extends AbstractApp {
 			D_ = new Line(B_, bary).intersection(new Line(CD2, rotatedVp));
 		}
 
-		System.out.println("vp : " + vp);
-		System.out.println("rotated vp : " + rotatedVp);
-		System.out.println("Alpha : " + alpha * 180 / Math.PI);
-		System.out.println();
+		// System.out.println("vp : " + vp);
+		// System.out.println("rotated vp : " + rotatedVp);
+		// System.out.println("Alpha : " + alpha * 180 / Math.PI);
+		// System.out.println();
 		// System.out.println("A : " + A + " " + A_);
 		// System.out.println("B : " + B + " " + B_);
 		// System.out.println("C : " + C + " " + C_);
@@ -307,6 +305,7 @@ public class CamLiveRetriever extends AbstractApp {
 					vp = getLineMat(it.next()).cross(getLineMat(it.next()));
 					Core.normalize(vp, vp);
 				} else {
+					Stats.beginCumulative("RANSAC re-compute");
 					// Extract the line segments corresponding to the indexes contained in the set
 					Mat li_set = new Mat(3, datas.size(), CvType.CV_32F);
 					Mat tau = new Mat(datas.size(), datas.size(), CvType.CV_32F, new Scalar(0, 0, 0));
@@ -357,7 +356,7 @@ public class CamLiveRetriever extends AbstractApp {
 						// Since this is infinite, it is better to leave it calibrated
 						Core.gemm(K.inv(), vp, 1, new Mat(), 0, vp);
 					}
-
+					Stats.endCumulative("RANSAC re-compute");
 				}
 
 				return new Model<Line>() {
