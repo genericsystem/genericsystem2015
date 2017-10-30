@@ -12,9 +12,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
-
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.utils.Line;
@@ -31,12 +28,13 @@ import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
-import org.opencv.features2d.DescriptorExtractor;
-import org.opencv.features2d.DescriptorMatcher;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
 
 @SuppressWarnings({ "resource" })
 public class CamLiveRetriever extends AbstractApp {
@@ -49,8 +47,6 @@ public class CamLiveRetriever extends AbstractApp {
 
 	private static final int STABILIZATION_DELAY = 500;
 	private static final int FRAME_DELAY = 100;
-	final static DescriptorExtractor EXTRACTOR = DescriptorExtractor.create(DescriptorExtractor.ORB);
-	final static DescriptorMatcher MATCHER = DescriptorMatcher.create(DescriptorMatcher.BRUTEFORCE_HAMMING);
 
 	private final ScheduledExecutorService timerFields = new ScheduledThreadPoolExecutor(1, new ThreadPoolExecutor.DiscardPolicy());
 	private final VideoCapture capture = new VideoCapture(0);
@@ -111,14 +107,15 @@ public class CamLiveRetriever extends AbstractApp {
 				Mat stabilizationHomography = stabilizedImgDescriptor.computeStabilizationGraphy(newImgDescriptor);
 				if (stabilizationHomography == null) {
 					stabilizationErrors++;
-					logger.warn("Unable to compute a valid stabilization (" + stabilizationErrors + " times)");
+					logger.warn("Unable to compute a valid stabilization ({} times)", stabilizationErrors);
 					return;
 				}
 				Img stabilized = warpPerspective(frame, stabilizationHomography);
 				if (stabilizationHasChanged) {
 					Mat fieldsHomography = new Mat();
 					stabilized = newImgDescriptor.getDeperspectivedImg();
-					Core.gemm(stabilizationHomography.inv(), deperspectivGraphy, 1, new Mat(), 0, fieldsHomography);
+					// Core.gemm(stabilizationHomography.inv(), deperspectivGraphy, 1, new Mat(), 0, fieldsHomography);
+					Core.gemm(deperspectivGraphy, stabilizationHomography.inv(), 1, new Mat(), 0, fieldsHomography);
 					fields.merge(detectRects(stabilized), fieldsHomography);
 					Img stabilized_ = stabilized;
 					fields.stream().forEach(f -> f.draw(stabilized_, f.getDeadCounter() == 0 ? new Scalar(0, 255, 0) : new Scalar(0, 0, 255)));
@@ -162,7 +159,6 @@ public class CamLiveRetriever extends AbstractApp {
 		Imgproc.warpPerspective(frame, tmp, homography, frame.size(), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(255));
 		tmp.copyTo(dePerspectived, maskWarpped);
 		return new Img(dePerspectived, false);
-
 	}
 
 	private Lines houghlinesP(Mat frame) {
@@ -173,7 +169,7 @@ public class CamLiveRetriever extends AbstractApp {
 	private Mat computeFrameToDeperspectivedHomography(Mat frame) {
 		Lines lines = houghlinesP(frame);
 		if (lines.size() < 8) {
-			logger.warn("Not enough lines to compute perspective transformation + (" + lines.size());
+			logger.warn("Not enough lines to compute perspective transformation ({})", lines.size());
 			return null;
 		}
 		Ransac<Line> ransac = lines.vanishingPointRansac(frame.width(), frame.height());

@@ -12,6 +12,7 @@ import java.util.stream.IntStream;
 
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.utils.ParallelTasks;
+import org.genericsystem.cv.utils.RectToolsMapper;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint2f;
@@ -37,11 +38,16 @@ public class Fields extends AbstractFields<Field> {
 		Iterator<Field> it = oldFields.iterator();
 		while (it.hasNext()) {
 			Field currentOldField = it.next();
-			// List<Field> matches = (List) findMatchingFieldsWithConfidence(currentOldField, 0.7);
-			List<Field> matches = findClusteredFields(currentOldField, 0.1);
+			List<Field> matches = findMatchingFieldsWithConfidence(currentOldField, 0.7);
+			// List<Field> matches = findClusteredFields(currentOldField, 0.1);
 			if (!matches.isEmpty()) {
-				currentOldField.getConsolidated().ifPresent(s -> System.out.println("Merged: " + s));
+				currentOldField.getConsolidated().ifPresent(s -> logger.info("Merged: {}", s));
+				if (matches.size() > 1)
+					logger.error("Multiple matches: {}", matches.size());
+
 				matches.forEach(f -> {
+					double mergeArea = RectToolsMapper.inclusiveArea(f.getRect(), currentOldField.getRect());
+					logger.info("Merging two fields with {} common area", String.format("%.3f", mergeArea));
 					f.merge(currentOldField);
 					f.resetDeadCounter();
 				});
