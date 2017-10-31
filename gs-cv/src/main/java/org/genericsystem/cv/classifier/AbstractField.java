@@ -46,10 +46,9 @@ public abstract class AbstractField {
 	protected int deadCounter;
 
 	public AbstractField(Rect rect) {
-		this.rect = rect;
+		updateRect(rect);
 		this.labels = new HashMap<>();
 		this.consolidated = Optional.empty();
-		this.center = new Point(rect.x + rect.width / 2, rect.y + rect.height / 2);
 		this.attempts = 0;
 		this.confidence = 0;
 		this.deadCounter = 0;
@@ -61,6 +60,11 @@ public abstract class AbstractField {
 		deadCounter += field.getDeadCounter();
 		// if (consolidated.isPresent() || field.getConsolidated().isPresent())
 		consolidateOcr();
+	}
+
+	void updateRect(Rect rect) {
+		this.rect = rect;
+		this.center = new Point(rect.x + rect.width / 2, rect.y + rect.height / 2);
 	}
 
 	public void ocr(Img rootImg) {
