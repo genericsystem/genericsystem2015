@@ -30,6 +30,7 @@ public class Fields extends AbstractFields<Field> {
 	private static ThreadLocalRandom rand = ThreadLocalRandom.current();
 	private static final int MAX_DELETE_UNMERGED = 5;
 	private static final int OCR_TIMEOUT = 100;
+	private static final double MIN_OVERLAP = 0.2;
 
 	public void reset() {
 		fields = new ArrayList<>();
@@ -43,16 +44,27 @@ public class Fields extends AbstractFields<Field> {
 		Iterator<Field> it = oldFields.iterator();
 		while (it.hasNext()) {
 			Field currentOldField = it.next();
-			// List<Field> matches = findMatchingFieldsWithConfidence(currentOldField, 0.7);
 			List<Field> matches = findClusteredFields(currentOldField, 0.1);
 			if (!matches.isEmpty()) {
-				currentOldField.getConsolidated().ifPresent(s -> logger.info("Merged: {}", s));
-				// TODO: if more than one match, select only the best
-				if (matches.size() > 1)
-					logger.error("Multiple matches: {}", matches.size());
-
+				// Remove the false positives
+				matches = matches.stream().filter(f -> RectToolsMapper.inclusiveArea(f.getRect(), currentOldField.getRect()) > MIN_OVERLAP / 10).collect(Collectors.toList());
+				// If there is more than one match, select only the best
+				if (matches.size() > 1) {
+					logger.info("Multiple matches ({}), removing false positives", matches.size());
+					// Remove the overlaps with less than 10% common area
+					matches = matches.stream().filter(f -> RectToolsMapper.inclusiveArea(f.getRect(), currentOldField.getRect()) >= MIN_OVERLAP).collect(Collectors.toList());
+					if (matches.size() > 1) {
+						logger.warn("Still multiple matches ({}), selecting the maximum overlap", matches.size());
+						matches = Arrays.asList(matches.stream().max((f1, f2) -> {
+							double area1 = RectToolsMapper.inclusiveArea(f1.getRect(), currentOldField.getRect());
+							double area2 = RectToolsMapper.inclusiveArea(f2.getRect(), currentOldField.getRect());
+							return Double.compare(area1, area2);
+						}).orElseThrow(IllegalStateException::new));
+					}
+				}
 				matches.forEach(f -> {
 					double mergeArea = RectToolsMapper.inclusiveArea(f.getRect(), currentOldField.getRect());
+					currentOldField.getConsolidated().ifPresent(s -> logger.info("Merged: {}", s));
 					logger.info("Merging fields with {}% common area", String.format("%.1f", mergeArea * 100));
 					f.merge(currentOldField);
 					f.resetDeadCounter();
