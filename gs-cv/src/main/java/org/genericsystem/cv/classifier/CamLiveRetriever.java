@@ -129,7 +129,8 @@ public class CamLiveRetriever extends AbstractApp {
 					stabilized = newImgDescriptor.getDeperspectivedImg();
 					// Core.gemm(stabilizationHomography.inv(), deperspectivGraphy, 1, new Mat(), 0, fieldsHomography);
 					Core.gemm(deperspectivGraphy, stabilizationHomography.inv(), 1, new Mat(), 0, fieldsHomography);
-					fields.merge(detectRects(stabilized), fieldsHomography);
+					fields.restabilizeFields(fieldsHomography);
+					fields.merge(detectRects(stabilized));
 					Img stabilized_ = stabilized;
 					fields.stream().forEach(f -> f.draw(stabilized_, f.getDeadCounter() == 0 ? new Scalar(0, 255, 0) : new Scalar(0, 0, 255)));
 					stabilizedImgDescriptor = newImgDescriptor;

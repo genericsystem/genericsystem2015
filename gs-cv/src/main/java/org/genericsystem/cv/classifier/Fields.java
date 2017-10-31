@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.utils.ParallelTasks;
@@ -36,9 +35,8 @@ public class Fields extends AbstractFields<Field> {
 		fields = new ArrayList<>();
 	}
 
-	public void merge(List<Rect> newRects, Mat fieldsHomography) {
-		List<Field> oldFields = restabilizeFields(fieldsHomography);
-		logger.info("oldFields transformed ({})", oldFields.size());
+	public void merge(List<Rect> newRects) {
+		List<Field> oldFields = fields;
 		fields = buildNewFields(newRects, 0.5);
 
 		Iterator<Field> it = oldFields.iterator();
@@ -85,13 +83,9 @@ public class Fields extends AbstractFields<Field> {
 		return rects.stream().filter(r -> Math.abs(r.area() - meanArea) <= (sem * thresholdFactor)).map(Field::new).collect(Collectors.toList());
 	}
 
-	private List<Field> restabilizeFields(Mat homography) {
-		List<Rect> virtualRects = fields.stream().map(AbstractField::getRect).map(rect -> findNewRect(rect, homography)).collect(Collectors.toList());
-		return IntStream.range(0, fields.size()).mapToObj(i -> {
-			Field f = new Field(virtualRects.get(i));
-			f.merge(fields.get(i));
-			return f;
-		}).collect(Collectors.toList());
+	public void restabilizeFields(Mat homography) {
+		fields.forEach(field -> field.updateRect(findNewRect(field.getRect(), homography)));
+		logger.info("Restabilized fields ({})", fields.size());
 	}
 
 	private Rect findNewRect(Rect rect, Mat homography) {
