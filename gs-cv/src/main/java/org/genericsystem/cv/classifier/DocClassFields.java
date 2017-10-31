@@ -33,7 +33,7 @@ public class DocClassFields {
 	}
 
 	public void consolidateOcr(Img img) {
-		fields.consolidateOcr(img);
+		fields.performOcr(img);
 	}
 
 	public void merge(Img img) {

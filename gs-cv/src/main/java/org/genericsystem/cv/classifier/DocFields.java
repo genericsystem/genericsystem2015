@@ -76,7 +76,7 @@ public class DocFields extends AbstractFields<DocField> {
 	}
 
 	@Override
-	public void consolidateOcr(Img rootImg) {
+	public void performOcr(Img rootImg) {
 		// Need to process all fields for documents
 		stream().forEach(f -> f.ocr(rootImg));
 	}

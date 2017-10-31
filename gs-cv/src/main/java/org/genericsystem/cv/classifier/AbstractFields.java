@@ -46,7 +46,7 @@ public abstract class AbstractFields<F extends AbstractField> implements Iterabl
 		return stream().filter(field -> field.contains(pt)).findFirst().orElse(null);
 	}
 
-	public void consolidateOcr(Img rootImg) {
+	public void performOcr(Img rootImg) {
 		randomOcrStream().forEach(f -> f.ocr(rootImg));
 	}
 

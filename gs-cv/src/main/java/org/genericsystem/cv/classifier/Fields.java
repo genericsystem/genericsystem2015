@@ -108,7 +108,7 @@ public class Fields extends AbstractFields<Field> {
 	}
 
 	@Override
-	public void consolidateOcr(Img rootImg) {
+	public void performOcr(Img rootImg) {
 		long TS = System.currentTimeMillis();
 		while (System.currentTimeMillis() - TS <= OCR_TIMEOUT) {
 			// runParallelOcr(rootImg);
