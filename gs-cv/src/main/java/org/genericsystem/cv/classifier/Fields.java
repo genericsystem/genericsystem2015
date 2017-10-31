@@ -28,7 +28,7 @@ public class Fields extends AbstractFields<Field> {
 
 	private static ThreadLocalRandom rand = ThreadLocalRandom.current();
 	private static final int MAX_DELETE_UNMERGED = 5;
-	private static final int OCR_TIMEOUT = 100;
+	private static final int OCR_TIMEOUT = 50;
 	private static final double MIN_OVERLAP = 0.2;
 
 	public void reset() {
