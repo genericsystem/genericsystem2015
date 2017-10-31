@@ -3,10 +3,13 @@ package org.genericsystem.cv.classifier;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -183,6 +186,10 @@ public class CamLiveRetriever extends AbstractApp {
 
 	private Mat computeFrameToDeperspectivedHomography(Mat frame) {
 		Lines lines = houghlinesP(frame);
+
+		if (lines.size() > 50)
+			lines = lines.reduce(0.15, 50);
+
 		if (lines.size() < 8) {
 			logger.warn("Not enough lines to compute perspective transformation ({})", lines.size());
 			return null;
@@ -262,6 +269,21 @@ public class CamLiveRetriever extends AbstractApp {
 
 		public static Lines of(Collection<Line> lines) {
 			return new Lines(lines);
+		}
+
+		public Lines reduce(double factor, int threshold) {
+			long target = Math.round(this.size() * factor);
+			if (target < threshold)
+				target = threshold;
+
+			List<Line> newLines = new ArrayList<>();
+			Set<Integer> indexes = new HashSet<>();
+			while (indexes.size() < target) {
+				int idx = ThreadLocalRandom.current().nextInt(this.size());
+				if (indexes.add(idx))
+					newLines.add(lines.get(idx));
+			}
+			return Lines.of(newLines);
 		}
 
 		private Mat getLineMat(Line line) {
