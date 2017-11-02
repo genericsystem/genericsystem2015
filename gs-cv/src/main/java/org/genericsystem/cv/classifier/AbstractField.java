@@ -35,6 +35,7 @@ public abstract class AbstractField {
 
 	private static ThreadLocalRandom rand = ThreadLocalRandom.current();
 	protected static final int MIN_SIZE_CONSOLIDATION = 5;
+	private static final int OCR_CONFIDENCE_THRESH = 5;
 
 	protected Rect rect;
 	protected Point center;
@@ -78,7 +79,7 @@ public abstract class AbstractField {
 		if (!(0 <= largeRect.x && 0 <= largeRect.y && largeRect.x + largeRect.width < rootImg.getSrc().cols() && largeRect.y + largeRect.height < rootImg.getSrc().rows()))
 			return;
 		Mat roi = new Mat(rootImg.getSrc(), largeRect);
-		String ocr = Ocr.doWork(roi);
+		String ocr = Ocr.doWork(roi, OCR_CONFIDENCE_THRESH);
 		if (!ocr.isEmpty()) {
 			labels.merge(ocr, 1, Integer::sum);
 			attempts++;
