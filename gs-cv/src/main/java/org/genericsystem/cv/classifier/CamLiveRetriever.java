@@ -125,19 +125,19 @@ public class CamLiveRetriever extends AbstractApp {
 					Mat fieldsHomography = new Mat();
 					stabilized = newImgDescriptor.getDeperspectivedImg();
 					stabilizedDisplay = new Img(stabilized.getSrc(), true);
-					// Core.gemm(stabilizationHomography.inv(), deperspectivGraphy, 1, new Mat(), 0, fieldsHomography);
 					Core.gemm(deperspectivGraphy, stabilizationHomography.inv(), 1, new Mat(), 0, fieldsHomography);
 					Stats.beginTask("restabilizeFields");
 					fields.restabilizeFields(fieldsHomography);
 					Stats.endTask("restabilizeFields");
 					Stats.beginTask("merge fields");
 					fields.merge(detectRects(stabilizedDisplay));
+					Stats.endTask("merge fields");
 
 					fields.removeOverlaps();
 
 					final Img stabilizedDisplay_ = stabilizedDisplay;
 					fields.stream().filter(f -> f.getDeadCounter() == 0).forEach(f -> f.draw(stabilizedDisplay_, f.getDeadCounter() == 0 ? new Scalar(0, 255, 0) : new Scalar(0, 0, 255)));
-					Stats.endTask("merge fields");
+
 					stabilizedImgDescriptor = newImgDescriptor;
 					stabilizationHomography = deperspectivGraphy;
 					stabilizationHasChanged = false;
@@ -149,6 +149,8 @@ public class CamLiveRetriever extends AbstractApp {
 				fields.performOcr(stabilized);
 				Stats.endTask("consolidateOcr");
 				fields.drawOcrPerspectiveInverse(display, stabilizationHomography.inv(), new Scalar(0, 255, 0), 1);
+
+				fields.drawIndestructible(display, stabilizationHomography.inv());
 
 				src0.setImage(display.toJfxImage());
 				src1.setImage(stabilizedDisplay.toJfxImage());

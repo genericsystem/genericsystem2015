@@ -68,6 +68,10 @@ public class Fields extends AbstractFields<Field> {
 		}
 	}
 
+	public void drawIndestructible(Img display, Mat homography) {
+		fields.forEach(field -> field.drawIndestructible(display, homography));
+	}
+
 	public void merge(List<Rect> newRects) {
 		List<Field> oldFields = fields;
 		fields = buildNewFields(newRects, 0.5);
@@ -109,7 +113,7 @@ public class Fields extends AbstractFields<Field> {
 		}
 		// Increment the deadCounter in old fields that were not merged
 		oldFields.forEach(f -> f.incrementDeadCounter());
-		oldFields.removeIf(f -> f.deadCounter >= MAX_DELETE_UNMERGED);
+		oldFields.removeIf(f -> !f.isIndestructible() && f.deadCounter >= MAX_DELETE_UNMERGED);
 		// At this stage, add all the remaining fields still in oldFields
 		fields.addAll(oldFields);
 	}
@@ -149,7 +153,9 @@ public class Fields extends AbstractFields<Field> {
 
 	private void runSequentialOcr(Img rootImg) {
 		int idx = rand.nextInt(size());
-		fields.get(idx).ocr(rootImg);
+		Field f = fields.get(idx);
+		if (!f.isIndestructible())
+			f.ocr(rootImg);
 	}
 
 	private void runParallelOcr(Img rootImg) {
@@ -157,8 +163,11 @@ public class Fields extends AbstractFields<Field> {
 		Set<Integer> indexes = new HashSet<>();
 		while (indexes.size() < tasks.getCounter()) {
 			int idx = rand.nextInt(size());
-			if (indexes.add(idx))
-				tasks.add(() -> fields.get(idx).ocr(rootImg));
+			if (indexes.add(idx)) {
+				Field f = fields.get(idx);
+				if (!f.isIndestructible())
+					tasks.add(() -> f.ocr(rootImg));
+			}
 		}
 		try {
 			tasks.run();
