@@ -132,6 +132,9 @@ public class CamLiveRetriever extends AbstractApp {
 					Stats.endTask("restabilizeFields");
 					Stats.beginTask("merge fields");
 					fields.merge(detectRects(stabilizedDisplay));
+
+					fields.removeOverlaps();
+
 					final Img stabilizedDisplay_ = stabilizedDisplay;
 					fields.stream().filter(f -> f.getDeadCounter() == 0).forEach(f -> f.draw(stabilizedDisplay_, f.getDeadCounter() == 0 ? new Scalar(0, 255, 0) : new Scalar(0, 0, 255)));
 					Stats.endTask("merge fields");

@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
@@ -33,6 +34,37 @@ public class Fields extends AbstractFields<Field> {
 
 	public void reset() {
 		fields = new ArrayList<>();
+	}
+
+	public void removeOverlaps() {
+		Iterator<Field> outerIt = fields.iterator();
+		while (outerIt.hasNext()) {
+			Field field1 = outerIt.next();
+			Iterator<Field> innerIt = fields.iterator();
+			while (innerIt.hasNext()) {
+				Field field2 = innerIt.next();
+				if (field1 != field2) {
+					Optional<Rect> optional = RectToolsMapper.getInsider(field1.getRect(), field2.getRect());
+					if (optional.isPresent()) {
+						if (optional.get().equals(field2.getRect())) {
+							double mergeArea = RectToolsMapper.inclusiveArea(field1.getRect(), field2.getRect());
+							if (mergeArea <= 0.5) {
+								// Not enough overlap => delete bigger rect
+								logger.warn("Removing field with {} common area -> {}, {}", String.format("%.1f%%", mergeArea * 100), field1.getRect(), field1.getLabels());
+							} else {
+								// Enough overlap => merge fields
+								logger.warn("Merging fields with {} common area -> {}, {}", String.format("%.1f%%", mergeArea * 100), field1.getLabels(), field2.getLabels());
+								Rect mean = RectToolsMapper.getMean(Arrays.asList(field1.getRect(), field2.getRect()));
+								field2.merge(field1);
+								field2.updateRect(mean);
+							}
+							outerIt.remove();
+							break;
+						}
+					}
+				}
+			}
+		}
 	}
 
 	public void merge(List<Rect> newRects) {
