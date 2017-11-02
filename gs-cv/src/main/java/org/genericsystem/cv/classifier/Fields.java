@@ -47,6 +47,7 @@ public class Fields extends AbstractFields<Field> {
 				// Remove the false positives
 				matches = matches.stream().filter(f -> RectToolsMapper.inclusiveArea(f.getRect(), currentOldField.getRect()) > MIN_OVERLAP / 10).collect(Collectors.toList());
 				// If there is more than one match, select only the best
+
 				if (matches.size() > 1) {
 					logger.info("Multiple matches ({}), removing false positives", matches.size());
 					// Remove the overlaps with less than 10% common area
@@ -60,6 +61,7 @@ public class Fields extends AbstractFields<Field> {
 						}).orElseThrow(IllegalStateException::new));
 					}
 				}
+
 				matches.forEach(f -> {
 					double mergeArea = RectToolsMapper.inclusiveArea(f.getRect(), currentOldField.getRect());
 					currentOldField.getConsolidated().ifPresent(s -> logger.info("Merged: {}", s));
@@ -68,7 +70,9 @@ public class Fields extends AbstractFields<Field> {
 					f.resetDeadCounter();
 				});
 				it.remove();
-			}
+			} else
+				logger.info("No match for : " + currentOldField.getLabels().keySet());
+
 		}
 		// Increment the deadCounter in old fields that were not merged
 		oldFields.forEach(f -> f.incrementDeadCounter());
@@ -80,7 +84,7 @@ public class Fields extends AbstractFields<Field> {
 	private List<Field> buildNewFields(List<Rect> rects, double thresholdFactor) {
 		double meanArea = rects.stream().mapToDouble(r -> r.area()).average().getAsDouble();
 		double sem = Math.sqrt(rects.stream().mapToDouble(r -> Math.pow(r.area() - meanArea, 2)).sum() / (rects.size() - 1));
-		return rects.stream().filter(r -> Math.abs(r.area() - meanArea) <= (sem * thresholdFactor)).map(Field::new).collect(Collectors.toList());
+		return rects.stream()/* .filter(r -> Math.abs(r.area() - meanArea) <= (sem * thresholdFactor)) */.map(Field::new).collect(Collectors.toList());
 	}
 
 	public void restabilizeFields(Mat homography) {
@@ -105,8 +109,8 @@ public class Fields extends AbstractFields<Field> {
 	public void performOcr(Img rootImg) {
 		long TS = System.currentTimeMillis();
 		while (System.currentTimeMillis() - TS <= OCR_TIMEOUT) {
-			// runParallelOcr(rootImg);
-			runSequentialOcr(rootImg);
+			runParallelOcr(rootImg);
+			// runSequentialOcr(rootImg);
 		}
 	}
 

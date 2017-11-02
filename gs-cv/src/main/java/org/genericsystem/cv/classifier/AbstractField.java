@@ -97,8 +97,8 @@ public abstract class AbstractField {
 			if (Integer.MAX_VALUE == limit)
 				strings = labels.entrySet().stream().collect(ArrayList<String>::new, (list, e) -> IntStream.range(0, e.getValue()).forEach(count -> list.add(e.getKey())), List::addAll);
 			else
-				strings = labels.entrySet().stream().sorted(Entry.<String, Integer>comparingByValue().reversed()).limit(limit).collect(ArrayList<String>::new, (list, e) -> IntStream.range(0, e.getValue()).forEach(count -> list.add(e.getKey())),
-						List::addAll);
+				strings = labels.entrySet().stream().sorted(Entry.<String, Integer> comparingByValue().reversed()).limit(limit)
+						.collect(ArrayList<String>::new, (list, e) -> IntStream.range(0, e.getValue()).forEach(count -> list.add(e.getKey())), List::addAll);
 			Tuple res = OCRPlasty.correctStringsAndGetOutliers(strings, RANSAC.NORM_LEVENSHTEIN);
 			this.consolidated = res.getString();
 			this.confidence = res.getConfidence();

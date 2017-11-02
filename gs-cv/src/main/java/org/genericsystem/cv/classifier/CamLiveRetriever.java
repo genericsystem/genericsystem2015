@@ -15,6 +15,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
+
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.utils.Line;
@@ -35,9 +38,6 @@ import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
 
 @SuppressWarnings({ "resource" })
 public class CamLiveRetriever extends AbstractApp {
@@ -103,59 +103,61 @@ public class CamLiveRetriever extends AbstractApp {
 				}
 				if (stabilizationErrors > 20) {
 					// TODO: clean fields
-					fields.reset();
-					stabilizationErrors = 0;
-					stabilizedImgDescriptor = null;
-				}
-				if (stabilizedImgDescriptor == null) {
-					stabilizedImgDescriptor = new ImgDescriptor(frame, deperspectivGraphy);
-					return;
-				}
-				Stats.beginTask("newImgDescriptor");
-				ImgDescriptor newImgDescriptor = new ImgDescriptor(frame, deperspectivGraphy);
-				Stats.endTask("newImgDescriptor");
-				Stats.beginTask("computeStabilizationGraphy");
-				Mat stabilizationHomography = stabilizedImgDescriptor.computeStabilizationGraphy(newImgDescriptor);
-				Stats.endTask("computeStabilizationGraphy");
-				if (stabilizationHomography == null) {
-					stabilizationErrors++;
-					logger.warn("Unable to compute a valid stabilization ({} times)", stabilizationErrors);
-					return;
-				}
-				Img stabilized = warpPerspective(frame, stabilizationHomography);
-				if (stabilizationHasChanged) {
-					Stats.beginTask("stabilizationHasChanged");
-					Mat fieldsHomography = new Mat();
-					stabilized = newImgDescriptor.getDeperspectivedImg();
-					// Core.gemm(stabilizationHomography.inv(), deperspectivGraphy, 1, new Mat(), 0, fieldsHomography);
-					Core.gemm(deperspectivGraphy, stabilizationHomography.inv(), 1, new Mat(), 0, fieldsHomography);
-					fields.restabilizeFields(fieldsHomography);
-					fields.merge(detectRects(stabilized));
-					Img stabilized_ = stabilized;
-					fields.stream().forEach(f -> f.draw(stabilized_, f.getDeadCounter() == 0 ? new Scalar(0, 255, 0) : new Scalar(0, 0, 255)));
-					stabilizedImgDescriptor = newImgDescriptor;
-					stabilizationHomography = deperspectivGraphy;
-					stabilizationHasChanged = false;
-					Stats.endTask("stabilizationHasChanged");
-				}
-				Img display = new Img(frame, false);
-				Stats.beginTask("consolidateOcr");
-				fields.performOcr(stabilized);
-				Stats.endTask("consolidateOcr");
-				fields.drawOcrPerspectiveInverse(display, stabilizationHomography.inv(), new Scalar(0, 255, 0), 1);
-				src0.setImage(display.toJfxImage());
-				src1.setImage(stabilized.toJfxImage());
-				Stats.endTask("frame");
-
-				Stats.resetCumulative("RANSAC re-compute");
-				if (++counter % 10 == 0) {
-					System.out.println(Stats.getStatsAndReset());
-					counter = 0;
-				}
-			} catch (Throwable e) {
-				logger.warn("Exception while computing layout.", e);
+				fields.reset();
+				stabilizationErrors = 0;
+				stabilizedImgDescriptor = null;
 			}
-		}, 50, FRAME_DELAY, TimeUnit.MILLISECONDS);
+			if (stabilizedImgDescriptor == null) {
+				stabilizedImgDescriptor = new ImgDescriptor(frame, deperspectivGraphy);
+				return;
+			}
+			Stats.beginTask("newImgDescriptor");
+			ImgDescriptor newImgDescriptor = new ImgDescriptor(frame, deperspectivGraphy);
+			Stats.endTask("newImgDescriptor");
+			Stats.beginTask("computeStabilizationGraphy");
+			Mat stabilizationHomography = stabilizedImgDescriptor.computeStabilizationGraphy(newImgDescriptor);
+			Stats.endTask("computeStabilizationGraphy");
+			if (stabilizationHomography == null) {
+				stabilizationErrors++;
+				logger.warn("Unable to compute a valid stabilization ({} times)", stabilizationErrors);
+				return;
+			}
+			Img stabilized = warpPerspective(frame, stabilizationHomography);
+			Img stabilizedDisplay = new Img(stabilized.getSrc(), true);
+			if (stabilizationHasChanged) {
+				Stats.beginTask("stabilizationHasChanged");
+				Mat fieldsHomography = new Mat();
+				stabilized = newImgDescriptor.getDeperspectivedImg();
+				stabilizedDisplay = new Img(stabilized.getSrc(), true);
+				// Core.gemm(stabilizationHomography.inv(), deperspectivGraphy, 1, new Mat(), 0, fieldsHomography);
+				Core.gemm(deperspectivGraphy, stabilizationHomography.inv(), 1, new Mat(), 0, fieldsHomography);
+				fields.restabilizeFields(fieldsHomography);
+				fields.merge(detectRects(stabilizedDisplay));
+				final Img stabilizedDisplay_ = stabilizedDisplay;
+				fields.stream().filter(f -> f.getDeadCounter() == 0).forEach(f -> f.draw(stabilizedDisplay_, f.getDeadCounter() == 0 ? new Scalar(0, 255, 0) : new Scalar(0, 0, 255)));
+				stabilizedImgDescriptor = newImgDescriptor;
+				stabilizationHomography = deperspectivGraphy;
+				stabilizationHasChanged = false;
+				Stats.endTask("stabilizationHasChanged");
+			}
+			Img display = new Img(frame, false);
+			Stats.beginTask("consolidateOcr");
+			fields.performOcr(stabilized);
+			Stats.endTask("consolidateOcr");
+			fields.drawOcrPerspectiveInverse(display, stabilizationHomography.inv(), new Scalar(0, 255, 0), 1);
+			src0.setImage(display.toJfxImage());
+			src1.setImage(stabilizedDisplay.toJfxImage());
+			Stats.endTask("frame");
+
+			Stats.resetCumulative("RANSAC re-compute");
+			if (++counter % 10 == 0) {
+				System.out.println(Stats.getStatsAndReset());
+				counter = 0;
+			}
+		} catch (Throwable e) {
+			logger.warn("Exception while computing layout.", e);
+		}
+	}, 50, FRAME_DELAY, TimeUnit.MILLISECONDS);
 
 	}
 
@@ -165,12 +167,13 @@ public class CamLiveRetriever extends AbstractApp {
 	}
 
 	private List<Rect> detectRects(Img stabilized) {
-		Img closed = stabilized.adaptativeGaussianInvThreshold(7, 3).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(9, 1));
+		// frameImg.bilateralFilter(10, 80, 80).bgr2Gray().adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY_INV, 11, 3).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(11, 3))
+		Img closed = stabilized.bilateralFilter(10, 80, 80).adaptativeGaussianInvThreshold(11, 3).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(11, 3));
 		List<MatOfPoint> contours = new ArrayList<>();
 		Imgproc.findContours(closed.getSrc(), contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 		double minArea = 200;
 		List<Rect> res = contours.stream().filter(contour -> Imgproc.contourArea(contour) > minArea).map(c -> Imgproc.boundingRect(c)).collect(Collectors.toList());
-		// res.forEach(rect -> Imgproc.rectangle(stabilized.getSrc(), rect.tl(), rect.br(), new Scalar(255, 200, 0)));
+		res.forEach(rect -> Imgproc.rectangle(stabilized.getSrc(), rect.tl(), rect.br(), new Scalar(255, 200, 0)));
 		return res;
 	}
 
@@ -181,15 +184,15 @@ public class CamLiveRetriever extends AbstractApp {
 	}
 
 	private Lines houghlinesP(Mat frame) {
-		Img grad = new Img(frame, false).morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_RECT, new Size(2, 2)).otsu();
+		Img grad = new Img(frame, false).morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_RECT, new Size(2, 2)).otsu().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(7, 7));
 		return new Lines(grad.houghLinesP(1, Math.PI / 180, 10, 100, 10));
 	}
 
 	private Mat computeFrameToDeperspectivedHomography(Mat frame) {
 		Lines lines = houghlinesP(frame);
 
-		if (lines.size() > 50)
-			lines = lines.reduce(0.15, 50);
+		// if (lines.size() > 50)
+		// lines = lines.reduce(0.15, 50);
 
 		if (lines.size() < 8) {
 			logger.warn("Not enough lines to compute perspective transformation ({})", lines.size());
