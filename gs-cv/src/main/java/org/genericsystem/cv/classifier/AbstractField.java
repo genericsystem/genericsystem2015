@@ -33,10 +33,10 @@ public abstract class AbstractField {
 
 	protected static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-	private static ThreadLocalRandom rand = ThreadLocalRandom.current();
 	protected static final int MIN_SIZE_CONSOLIDATION = 5;
 	private static final int OCR_CONFIDENCE_THRESH = 5;
 
+	protected ThreadLocalRandom rand = ThreadLocalRandom.current();
 	protected Rect rect;
 	protected Point center;
 	protected Map<String, Integer> labels;
