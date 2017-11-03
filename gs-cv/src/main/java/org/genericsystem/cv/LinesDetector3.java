@@ -109,6 +109,7 @@ public class LinesDetector3 extends AbstractApp {
 	public static Mat calibrate(Mat uncalibrated) {
 		Mat dst = new Mat();
 		Core.gemm(Lines.K.inv(), uncalibrated, 1, new Mat(), 0, dst);
+		Core.normalize(dst, dst);
 		return dst;
 	}
 
