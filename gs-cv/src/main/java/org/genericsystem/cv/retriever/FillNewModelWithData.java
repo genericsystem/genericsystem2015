@@ -1,4 +1,4 @@
-package org.genericsystem.cv.classifier;
+package org.genericsystem.cv.retriever;
 
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;

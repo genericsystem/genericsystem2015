@@ -1,4 +1,4 @@
-package org.genericsystem.cv.classifier;
+package org.genericsystem.cv.retriever;
 
 import org.genericsystem.cv.Img;
 import org.opencv.core.Mat;

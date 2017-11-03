@@ -1,7 +1,7 @@
 package org.genericsystem.ir.app;
 
 import org.genericsystem.common.Root;
-import org.genericsystem.cv.classifier.FillNewModelWithData;
+import org.genericsystem.cv.retriever.FillNewModelWithData;
 import org.genericsystem.ir.Dispatcher;
 import org.genericsystem.ir.DistributedVerticle;
 import org.genericsystem.ir.OcrEngineHolderVerticle;

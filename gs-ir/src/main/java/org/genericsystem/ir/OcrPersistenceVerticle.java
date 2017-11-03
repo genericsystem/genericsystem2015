@@ -1,7 +1,7 @@
 package org.genericsystem.ir;
 
 import org.genericsystem.common.Root;
-import org.genericsystem.cv.classifier.FillNewModelWithData;
+import org.genericsystem.cv.retriever.FillNewModelWithData;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;

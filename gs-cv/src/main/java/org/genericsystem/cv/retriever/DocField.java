@@ -1,4 +1,4 @@
-package org.genericsystem.cv.classifier;
+package org.genericsystem.cv.retriever;
 
 import java.text.Normalizer;
 import java.util.Map;
