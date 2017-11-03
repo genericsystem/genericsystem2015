@@ -117,18 +117,6 @@ public abstract class AbstractField {
 		Imgproc.rectangle(stabilizedDisplay.getSrc(), rect.tl(), rect.br(), color);
 	}
 
-	public void drawRectsPerspective(Img display, Mat homography, Scalar color, int thickness) {
-		if (isOnDisplay(display)) {
-			List<Point> points = Arrays.asList(new Point(rect.x, rect.y), new Point(rect.x + rect.width - 1, rect.y), new Point(rect.x + rect.width - 1, rect.y + rect.height - 1), new Point(rect.x, rect.y + rect.height - 1));
-			MatOfPoint2f results = new MatOfPoint2f();
-			Core.perspectiveTransform(Converters.vector_Point2f_to_Mat(points), results, homography);
-			Point[] targets = results.toArray();
-			for (int i = 0; i < 4; ++i) {
-				Imgproc.line(display.getSrc(), targets[i], targets[(i + 1) % 4], color, thickness);
-			}
-		}
-	}
-
 	public void drawOcrPerspectiveInverse(Img display, Mat homography, Scalar color, int thickness) {
 		if (isOnDisplay(display)) {
 			Scalar scalar = new Scalar(0, 64, 255);
