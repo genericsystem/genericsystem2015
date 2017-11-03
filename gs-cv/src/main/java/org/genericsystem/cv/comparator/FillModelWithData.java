@@ -32,6 +32,8 @@ import org.genericsystem.cv.model.ZoneGeneric.ZoneNum;
 import org.genericsystem.cv.model.ZoneText;
 import org.genericsystem.cv.model.ZoneText.ZoneTextInstance;
 import org.genericsystem.cv.model.ZoneText.ZoneTimestamp;
+import org.genericsystem.cv.utils.ImgFilterFunction;
+import org.genericsystem.cv.utils.ImgFunction;
 import org.genericsystem.cv.utils.ModelTools;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.genericsystem.kernel.Engine;

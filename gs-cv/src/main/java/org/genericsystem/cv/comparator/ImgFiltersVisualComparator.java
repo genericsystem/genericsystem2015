@@ -8,6 +8,7 @@ import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.Zone;
 import org.genericsystem.cv.Zones;
+import org.genericsystem.cv.utils.ImgFunction;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.genericsystem.cv.utils.Tools;
 import org.opencv.core.Core;
