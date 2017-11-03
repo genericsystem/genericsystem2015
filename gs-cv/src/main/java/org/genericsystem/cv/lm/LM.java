@@ -14,14 +14,12 @@ public class LM {
 	private final LMHost myH;
 	private final int nadj;
 	private final int npts;
-	private double[] delta; // local parm change
-	private double[] beta; // local
-	private double[][] alpha; // local
-	private double[][] amatrix; // local
+	private final double[] delta;
+	private final double[] beta;
+	private final double[][] alpha;
+	private final double[][] amatrix;
 
-	public LM(LMHost gH, int gnadj, int gnpts)
-	// Constructor sets up fields and drives iterations.
-	{
+	public LM(LMHost gH, int gnadj, int gnpts) {
 		myH = gH;
 		nadj = gnadj;
 		npts = gnpts;
@@ -59,7 +57,8 @@ public class LM {
 			for (int i = 0; i < npts; i++)
 				beta[k] -= myH.dGetResid(i) * myH.dGetJac(i, k);
 		}
-		for (int k = 0; k < nadj; k++) // get curvature matrix alpha
+		for (int k = 0; k < nadj; k++)
+			// get curvature matrix alpha
 			for (int j = 0; j < nadj; j++) {
 				alpha[j][k] = 0.0;
 				for (int i = 0; i < npts; i++)
@@ -68,7 +67,8 @@ public class LM {
 		double rrise = 0;
 		do // inner damping loop searches for one downhill step
 		{
-			for (int k = 0; k < nadj; k++) // copy and damp it
+			for (int k = 0; k < nadj; k++)
+				// copy and damp it
 				for (int j = 0; j < nadj; j++)
 					amatrix[j][k] = alpha[j][k] + ((j == k) ? lambda : 0.0);
 
@@ -91,7 +91,8 @@ public class LM {
 				lambda *= LMSHRINK; // shrink lambda
 				break; // leave lmInner.
 			}
-			for (int q = 0; q < nadj; q++) // reverse course!
+			for (int q = 0; q < nadj; q++)
+				// reverse course!
 				delta[q] *= -1.0;
 			myH.dNudge(delta); // sosprev should still be OK
 			if (rrise < LMTOL) // finished but keep prev parms
@@ -110,7 +111,8 @@ public class LM {
 		for (k = 0; k < N; k++) {
 			big = 0.0;
 			for (i = k; i < N; i++)
-				for (j = k; j < N; j++) // find biggest element
+				for (j = k; j < N; j++)
+					// find biggest element
 					if (Math.abs(big) <= Math.abs(a[i][j])) {
 						big = a[i][j];
 						ik[k] = i;
@@ -133,7 +135,8 @@ public class LM {
 					a[i][k] = a[i][j];
 					a[i][j] = -save;
 				}
-			for (i = 0; i < N; i++) // build the inverse
+			for (i = 0; i < N; i++)
+				// build the inverse
 				if (i != k)
 					a[i][k] = -a[i][k] / big;
 			for (i = 0; i < N; i++)
@@ -145,7 +148,7 @@ public class LM {
 					a[k][j] /= big;
 			a[k][k] = 1.0 / big;
 			det *= big; // bomb point
-		} // end k loop
+		}
 		for (L = 0; L < N; L++) {
 			k = N - L - 1;
 			j = ik[k];
@@ -165,4 +168,4 @@ public class LM {
 		}
 		return det;
 	}
-} // -----------end of class LM--------------------
+}
