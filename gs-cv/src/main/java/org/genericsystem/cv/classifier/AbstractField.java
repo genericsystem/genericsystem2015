@@ -113,38 +113,48 @@ public abstract class AbstractField {
 		}
 	}
 
-	public void draw(Img stabilizedDisplay, Scalar color) {
-		Imgproc.rectangle(stabilizedDisplay.getSrc(), rect.tl(), rect.br(), color);
-	}
-
 	public void drawOcrPerspectiveInverse(Img display, Mat homography, Scalar color, int thickness) {
 		if (isOnDisplay(display)) {
-			Scalar scalar = new Scalar(0, 64, 255);
-			String text = consolidated.orElse("");
-			String conf = String.format("%.3f", confidence);
+			Point[] targets = getRectPointsWithHomography(homography);
+			drawRect(display, targets, deadCounter == 0 ? color : new Scalar(0, 0, 255), thickness);
+			drawText(display, targets, new Scalar(0, 64, 255), thickness);
+		}
+	}
 
-			List<Point> points = Arrays.asList(new Point(rect.x, rect.y), new Point(rect.x + rect.width - 1, rect.y), new Point(rect.x + rect.width - 1, rect.y + rect.height - 1), new Point(rect.x, rect.y + rect.height - 1));
-			MatOfPoint2f results = new MatOfPoint2f();
-			Core.perspectiveTransform(Converters.vector_Point2f_to_Mat(points), results, homography);
-			Point[] targets = results.toArray();
-			for (int i = 0; i < 4; ++i) {
-				Imgproc.line(display.getSrc(), targets[i], targets[(i + 1) % 4], deadCounter == 0 ? color : new Scalar(0, 0, 255), thickness);
-			}
+	public void drawRect(Img stabilizedDisplay, Scalar color, int thickness) {
+		drawRect(stabilizedDisplay, RectToolsMapper.decomposeClockwise(rect), color, thickness);
+	}
+
+	public void drawRect(Img display, Point[] targets, Scalar color, int thickness) {
+		for (int i = 0; i < targets.length; ++i)
+			Imgproc.line(display.getSrc(), targets[i], targets[(i + 1) % targets.length], color, thickness);
+	}
+
+	public void drawText(Img display, Point[] targets, Scalar color, int thickness) {
+		consolidated.ifPresent(consolidated -> {
+			String text = Normalizer.normalize(consolidated, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", "");
+			String conf = String.format("%.3f", confidence);
+			// --- //
 			Point topCenter = new Point((targets[0].x + targets[1].x) / 2, (targets[0].y + targets[1].y) / 2);
 			double l = Math.sqrt(Math.pow(targets[0].x - topCenter.x, 2) + Math.pow(targets[0].y - topCenter.y, 2));
-			Imgproc.line(display.getSrc(), new Point(topCenter.x, topCenter.y - 2), new Point(topCenter.x, topCenter.y - 20), scalar, 1);
-			Imgproc.putText(display.getSrc(), Normalizer.normalize(text, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", ""), new Point(topCenter.x - l, topCenter.y - 22), Core.FONT_HERSHEY_TRIPLEX, 0.45, scalar, 1);
-			Imgproc.putText(display.getSrc(), conf, new Point(topCenter.x - l, topCenter.y - 12), Core.FONT_HERSHEY_TRIPLEX, 0.35, scalar.conj());
-		}
+			Imgproc.line(display.getSrc(), new Point(topCenter.x, topCenter.y - 2), new Point(topCenter.x, topCenter.y - 20), color, 1);
+			Imgproc.putText(display.getSrc(), text, new Point(topCenter.x - l, topCenter.y - 22), Core.FONT_HERSHEY_TRIPLEX, 0.45, color, 1);
+			Imgproc.putText(display.getSrc(), conf, new Point(topCenter.x - l, topCenter.y - 12), Core.FONT_HERSHEY_TRIPLEX, 0.35, color.conj());
+		});
+	}
+
+	protected Point[] getRectPointsWithHomography(Mat homography) {
+		List<Point> points = Arrays.asList(RectToolsMapper.decomposeClockwise(rect));
+		MatOfPoint2f results = new MatOfPoint2f();
+		Core.perspectiveTransform(Converters.vector_Point2f_to_Mat(points), results, homography);
+		return results.toArray();
 	}
 
 	public Rect getLargeRect(Img imgRoot, double deltaW, double deltaH) {
 		int adjustW = 3 + Double.valueOf(Math.floor(rect.width * deltaW)).intValue();
 		int adjustH = 3 + Double.valueOf(Math.floor(rect.height * deltaH)).intValue();
-
 		Point tl = new Point(rect.tl().x - adjustW > 0 ? rect.tl().x - adjustW : 0, rect.tl().y - adjustH > 0 ? rect.tl().y - adjustH : 0);
 		Point br = new Point(rect.br().x + adjustW > imgRoot.width() ? imgRoot.width() : rect.br().x + adjustW, rect.br().y + adjustH > imgRoot.height() ? imgRoot.height() : rect.br().y + adjustH);
-
 		return new Rect(tl, br);
 	}
 

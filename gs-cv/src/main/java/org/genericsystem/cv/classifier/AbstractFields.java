@@ -51,15 +51,15 @@ public abstract class AbstractFields<F extends AbstractField> implements Iterabl
 	}
 
 	public void drawOcrPerspectiveInverse(Img display, Mat homography, Scalar color, int thickness) {
-		stream().filter(field -> field.getDeadCounter() == 0).forEach(field -> field.drawOcrPerspectiveInverse(display, homography, color, thickness));
+		stream()./* filter(field -> field.getDeadCounter() == 0). */forEach(field -> field.drawOcrPerspectiveInverse(display, homography, color, thickness));
 	}
 
 	public void drawFieldsOnStabilized(Img stabilized) {
-		stream().filter(f -> f.getDeadCounter() == 0).forEach(f -> f.draw(stabilized, f.getDeadCounter() == 0 ? new Scalar(0, 255, 0) : new Scalar(0, 0, 255)));
+		stream().forEach(f -> f.drawRect(stabilized, f.getDeadCounter() == 0 ? new Scalar(0, 255, 0) : new Scalar(0, 0, 255), 1));
 	}
 
 	public void drawConsolidated(Img stabilizedDisplay) {
-		consolidatedFieldStream().forEach(field -> field.draw(stabilizedDisplay, new Scalar(0, 0, 255)));
+		consolidatedFieldStream().forEach(field -> field.drawRect(stabilizedDisplay, new Scalar(0, 0, 255), 1));
 	}
 
 	public Stream<F> randomOcrStream() {
