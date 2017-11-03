@@ -45,6 +45,10 @@ public abstract class AbstractField {
 
 	protected int deadCounter;
 
+	public AbstractField() {
+		this(new Rect());
+	}
+
 	public AbstractField(Rect rect) {
 		updateRect(rect);
 		this.labels = new HashMap<>();

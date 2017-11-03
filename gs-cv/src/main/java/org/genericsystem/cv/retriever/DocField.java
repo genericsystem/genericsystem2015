@@ -15,6 +15,10 @@ public class DocField extends AbstractField {
 	private int num;
 	private String uid;
 
+	public DocField() {
+		super();
+	}
+
 	public DocField(int num, Rect rect) {
 		super(rect);
 		this.num = num;
@@ -43,8 +47,7 @@ public class DocField extends AbstractField {
 	// The private setters are needed by Jackson to serialize/de-serialize the JSON objects
 
 	protected void setRect(Rect rect) {
-		this.rect = rect;
-		this.center = new Point(rect.x + rect.width / 2, rect.y + rect.height / 2);
+		updateRect(rect);
 		this.uid = ModelTools.generateZoneUID(rect);
 	}
 
@@ -74,6 +77,14 @@ public class DocField extends AbstractField {
 
 	protected void setDeadCounter(int counter) {
 		this.deadCounter = counter;
+	}
+
+	protected void setLabelsSize(int size) {
+		// Do nothing
+	}
+
+	protected void setCenter(Point center) {
+		this.center = center;
 	}
 
 }
