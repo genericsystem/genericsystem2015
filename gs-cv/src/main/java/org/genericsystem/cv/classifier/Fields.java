@@ -68,8 +68,8 @@ public class Fields extends AbstractFields<Field> {
 		}
 	}
 
-	public void drawIndestructible(Img display, Mat homography) {
-		fields.forEach(field -> field.drawIndestructible(display, homography));
+	public void drawLockedFields(Img display, Mat homography) {
+		fields.forEach(field -> field.drawLockedField(display, homography));
 	}
 
 	public void merge(List<Rect> newRects) {
@@ -113,7 +113,7 @@ public class Fields extends AbstractFields<Field> {
 		}
 		// Increment the deadCounter in old fields that were not merged
 		oldFields.forEach(f -> f.incrementDeadCounter());
-		oldFields.removeIf(f -> !f.isIndestructible() && f.deadCounter >= MAX_DELETE_UNMERGED);
+		oldFields.removeIf(f -> !f.isLocked() && f.deadCounter >= MAX_DELETE_UNMERGED);
 		// At this stage, add all the remaining fields still in oldFields
 		fields.addAll(oldFields);
 	}
@@ -154,7 +154,7 @@ public class Fields extends AbstractFields<Field> {
 	private void runSequentialOcr(Img rootImg) {
 		int idx = rand.nextInt(size());
 		Field f = fields.get(idx);
-		if (!f.isIndestructible())
+		if (!f.isLocked())
 			f.ocr(rootImg);
 	}
 
@@ -165,7 +165,7 @@ public class Fields extends AbstractFields<Field> {
 			int idx = rand.nextInt(size());
 			if (indexes.add(idx)) {
 				Field f = fields.get(idx);
-				if (!f.isIndestructible())
+				if (!f.isLocked())
 					tasks.add(() -> f.ocr(rootImg));
 			}
 		}

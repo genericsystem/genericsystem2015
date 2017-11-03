@@ -17,7 +17,7 @@ public class Field extends AbstractField {
 
 	private static final int LABELS_SIZE_THRESHOLD = 20;
 	private static final double CONFIDENCE_THRESHOLD = 0.95;
-	private boolean indestructible = false;
+	private boolean locked = false;
 
 	public Field(Rect rect) {
 		super(rect);
@@ -37,8 +37,8 @@ public class Field extends AbstractField {
 			setFinal();
 	}
 
-	public void drawIndestructible(Img display, Mat homography) {
-		if (indestructible) {
+	public void drawLockedField(Img display, Mat homography) {
+		if (locked) {
 			List<Point> points = Arrays.asList(new Point(rect.x, rect.y), new Point(rect.x + rect.width - 1, rect.y), new Point(rect.x + rect.width - 1, rect.y + rect.height - 1), new Point(rect.x, rect.y + rect.height - 1));
 			MatOfPoint2f results = new MatOfPoint2f();
 			Core.perspectiveTransform(Converters.vector_Point2f_to_Mat(points), results, homography);
@@ -50,12 +50,12 @@ public class Field extends AbstractField {
 	}
 
 	public void setFinal() {
-		if (!indestructible)
+		if (!locked)
 			if (getLabelsSize() > LABELS_SIZE_THRESHOLD && getConfidence() > CONFIDENCE_THRESHOLD)
-				this.indestructible = true;
+				this.locked = true;
 	}
 
-	public boolean isIndestructible() {
-		return indestructible;
+	public boolean isLocked() {
+		return locked;
 	}
 }
