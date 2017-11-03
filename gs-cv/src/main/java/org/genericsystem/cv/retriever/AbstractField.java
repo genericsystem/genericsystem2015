@@ -60,7 +60,7 @@ public abstract class AbstractField {
 		attempts += field.getAttempts();
 		deadCounter += field.getDeadCounter();
 		if (consolidated.isPresent() || field.getConsolidated().isPresent())
-			consolidateOcr();
+			consolidateOcr(false);
 	}
 
 	void updateRect(Rect rect) {
@@ -87,13 +87,13 @@ public abstract class AbstractField {
 		roi.release();
 	}
 
-	protected void consolidateOcr() {
-		consolidateOcr(Integer.MAX_VALUE);
+	public void consolidateOcr(boolean force) {
+		consolidateOcr(Integer.MAX_VALUE, force);
 	}
 
-	protected void consolidateOcr(int limit) {
+	protected void consolidateOcr(int limit, boolean force) {
 		int labelsSize = getLabelsSize();
-		if (labelsSize >= MIN_SIZE_CONSOLIDATION) {
+		if (force || labelsSize >= MIN_SIZE_CONSOLIDATION) {
 			List<String> strings;
 			if (Integer.MAX_VALUE == limit)
 				strings = labels.entrySet().stream().collect(ArrayList<String>::new, (list, e) -> IntStream.range(0, e.getValue()).forEach(count -> list.add(e.getKey())), List::addAll);

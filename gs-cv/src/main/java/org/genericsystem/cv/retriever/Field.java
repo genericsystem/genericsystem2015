@@ -19,7 +19,7 @@ public class Field extends AbstractField {
 	public void ocr(Img rootImg) {
 		super.ocr(rootImg);
 		if (attempts <= 3 || attempts % 5 == 0)
-			consolidateOcr();
+			consolidateOcr(false);
 	}
 
 	@Override

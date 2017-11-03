@@ -2,7 +2,7 @@ package org.genericsystem.ir;
 
 import java.nio.file.Paths;
 
-import org.genericsystem.cv.retriever.FillNewModelWithData;
+import org.genericsystem.cv.newmodel.FillNewModelWithData;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;

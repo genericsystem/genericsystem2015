@@ -38,6 +38,7 @@ public class DocField extends AbstractField {
 		results.release();
 	}
 
+	@Override
 	public void drawRect(Img img, Scalar color, int thickness) {
 		Imgproc.rectangle(img.getSrc(), rect.tl(), rect.br(), color, thickness);
 	}

@@ -5,7 +5,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.genericsystem.common.Root;
-import org.genericsystem.cv.retriever.FillNewModelWithData;
+import org.genericsystem.cv.newmodel.FillNewModelWithData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
