@@ -99,7 +99,8 @@ public class Fields extends AbstractFields<Field> {
 					double mergeArea = RectToolsMapper.inclusiveArea(f.getRect(), currentOldField.getRect());
 					StringBuffer sb = new StringBuffer();
 					sb.append(String.format("Merging fields with %.1f%% common area", mergeArea * 100));
-					currentOldField.getConsolidated().ifPresent(s -> sb.append(String.format(" -> %s", s)));
+					if (currentOldField.getConsolidated() != null)
+						sb.append(String.format(" -> %s", currentOldField.getConsolidated()));
 					logger.info(sb.toString());
 					f.merge(currentOldField);
 					f.resetDeadCounter();

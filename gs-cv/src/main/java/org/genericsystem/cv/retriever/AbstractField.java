@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 
@@ -39,7 +38,7 @@ public abstract class AbstractField {
 	protected Rect rect;
 	protected Point center;
 	protected Map<String, Integer> labels;
-	protected Optional<String> consolidated;
+	protected String consolidated;
 	protected double confidence;
 	protected long attempts;
 
@@ -52,7 +51,7 @@ public abstract class AbstractField {
 	public AbstractField(Rect rect) {
 		updateRect(rect);
 		this.labels = new HashMap<>();
-		this.consolidated = Optional.empty();
+		this.consolidated = null;
 		this.attempts = 0;
 		this.confidence = 0;
 		this.deadCounter = 0;
@@ -62,7 +61,7 @@ public abstract class AbstractField {
 		field.getLabels().entrySet().forEach(entry -> labels.merge(entry.getKey(), entry.getValue(), Integer::sum));
 		attempts += field.getAttempts();
 		deadCounter += field.getDeadCounter();
-		if (consolidated.isPresent() || field.getConsolidated().isPresent())
+		if (consolidated != null)
 			consolidateOcr(false);
 	}
 
@@ -104,14 +103,14 @@ public abstract class AbstractField {
 				strings = labels.entrySet().stream().sorted(Entry.<String, Integer>comparingByValue().reversed()).limit(limit).collect(ArrayList<String>::new, (list, e) -> IntStream.range(0, e.getValue()).forEach(count -> list.add(e.getKey())),
 						List::addAll);
 			Tuple res = OCRPlasty.correctStringsAndGetOutliers(strings, RANSAC.NORM_LEVENSHTEIN);
-			this.consolidated = res.getString();
+			this.consolidated = res.getString().orElse(null);
 			this.confidence = res.getConfidence();
 
 			if (labelsSize >= 2 * MIN_SIZE_CONSOLIDATION)
 				res.getOutliers().forEach(outlier -> labels.remove(outlier));
 		} else {
 			logger.trace("Not enough labels to consolidate OCR (current minimum = {})", MIN_SIZE_CONSOLIDATION);
-			this.consolidated = Optional.empty();
+			this.consolidated = null;
 			this.confidence = 0;
 		}
 	}
@@ -134,7 +133,7 @@ public abstract class AbstractField {
 	}
 
 	public void drawText(Img display, Point[] targets, Scalar color, int thickness) {
-		consolidated.ifPresent(consolidated -> {
+		if (consolidated != null) {
 			String text = Normalizer.normalize(consolidated, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", "");
 			String conf = String.format("%.3f", confidence);
 			// --- //
@@ -143,7 +142,7 @@ public abstract class AbstractField {
 			Imgproc.line(display.getSrc(), new Point(topCenter.x, topCenter.y - 2), new Point(topCenter.x, topCenter.y - 20), color, 1);
 			Imgproc.putText(display.getSrc(), text, new Point(topCenter.x - l, topCenter.y - 22), Core.FONT_HERSHEY_TRIPLEX, 0.45, color, 1);
 			Imgproc.putText(display.getSrc(), conf, new Point(topCenter.x - l, topCenter.y - 12), Core.FONT_HERSHEY_TRIPLEX, 0.35, color.conj());
-		});
+		}
 	}
 
 	protected Point[] getRectPointsWithHomography(Mat homography) {
@@ -195,7 +194,7 @@ public abstract class AbstractField {
 	}
 
 	public boolean isConsolidated() {
-		return consolidated.isPresent();
+		return consolidated != null;
 	}
 
 	public boolean needOcr() {
@@ -218,7 +217,7 @@ public abstract class AbstractField {
 		return labels;
 	}
 
-	public Optional<String> getConsolidated() {
+	public String getConsolidated() {
 		return consolidated;
 	}
 

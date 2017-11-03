@@ -179,7 +179,7 @@ public class FillNewModelWithData {
 			// Store the field data in a json object
 			JsonObject json = new JsonObject();
 			json.put(FIELD_NUM, field.getNum());
-			json.put(CONSOLIDATED, field.getConsolidated().orElse(""));
+			json.put(CONSOLIDATED, field.getConsolidated()); // TODO: maybe pass an empty string if consolidated is null?
 			json.put(RECT, JsonObject.mapFrom(field.getRect()));
 
 			// Add this to the result

@@ -1,7 +1,6 @@
 package org.genericsystem.cv.retriever;
 
 import java.util.Map;
-import java.util.Optional;
 
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.utils.ModelTools;
@@ -63,7 +62,7 @@ public class DocField extends AbstractField {
 		this.labels = labels;
 	}
 
-	protected void setConsolidated(Optional<String> consolidated) {
+	protected void setConsolidated(String consolidated) {
 		this.consolidated = consolidated;
 	}
 
