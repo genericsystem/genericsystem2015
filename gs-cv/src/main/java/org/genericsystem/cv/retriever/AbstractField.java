@@ -36,7 +36,6 @@ public abstract class AbstractField {
 	protected static final int MIN_SIZE_CONSOLIDATION = 5;
 	private static final int OCR_CONFIDENCE_THRESH = 5;
 
-	protected ThreadLocalRandom rand = ThreadLocalRandom.current();
 	protected Rect rect;
 	protected Point center;
 	protected Map<String, Integer> labels;
@@ -196,7 +195,7 @@ public abstract class AbstractField {
 	}
 
 	public boolean needOcr() {
-		return rand.nextBoolean();
+		return ThreadLocalRandom.current().nextBoolean();
 	}
 
 	public void incrementDeadCounter() {

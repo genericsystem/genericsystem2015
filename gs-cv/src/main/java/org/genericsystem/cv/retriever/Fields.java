@@ -30,8 +30,6 @@ public class Fields extends AbstractFields<Field> {
 	private static final int OCR_TIMEOUT = 50;
 	private static final double MIN_OVERLAP = 0.2;
 
-	private ThreadLocalRandom rand = ThreadLocalRandom.current();
-
 	public void reset() {
 		fields = new ArrayList<>();
 	}
@@ -152,7 +150,7 @@ public class Fields extends AbstractFields<Field> {
 	}
 
 	private void runSequentialOcr(Img rootImg) {
-		int idx = rand.nextInt(size());
+		int idx = ThreadLocalRandom.current().nextInt(size());
 		Field f = fields.get(idx);
 		if (!f.isLocked())
 			f.ocr(rootImg);
@@ -162,7 +160,7 @@ public class Fields extends AbstractFields<Field> {
 		ParallelTasks tasks = new ParallelTasks();
 		Set<Integer> indexes = new HashSet<>();
 		while (indexes.size() < tasks.getCounter()) {
-			int idx = rand.nextInt(size());
+			int idx = ThreadLocalRandom.current().nextInt(size());
 			if (indexes.add(idx)) {
 				Field f = fields.get(idx);
 				if (!f.isLocked())
