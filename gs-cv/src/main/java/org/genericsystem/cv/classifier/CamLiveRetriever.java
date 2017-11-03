@@ -122,9 +122,9 @@ public class CamLiveRetriever extends AbstractApp {
 				Img stabilizedDisplay = new Img(stabilized.getSrc(), true);
 				if (stabilizationHasChanged) {
 					Stats.beginTask("stabilizationHasChanged");
-					Mat fieldsHomography = new Mat();
 					stabilized = newImgDescriptor.getDeperspectivedImg();
 					stabilizedDisplay = new Img(stabilized.getSrc(), true);
+					Mat fieldsHomography = new Mat();
 					Core.gemm(deperspectivGraphy, stabilizationHomography.inv(), 1, new Mat(), 0, fieldsHomography);
 					Stats.beginTask("restabilizeFields");
 					fields.restabilizeFields(fieldsHomography);
@@ -135,8 +135,7 @@ public class CamLiveRetriever extends AbstractApp {
 
 					fields.removeOverlaps();
 
-					final Img stabilizedDisplay_ = stabilizedDisplay;
-					fields.stream().filter(f -> f.getDeadCounter() == 0).forEach(f -> f.draw(stabilizedDisplay_, f.getDeadCounter() == 0 ? new Scalar(0, 255, 0) : new Scalar(0, 0, 255)));
+					fields.drawFieldsOnStabilized(stabilizedDisplay);
 
 					stabilizedImgDescriptor = newImgDescriptor;
 					stabilizationHomography = deperspectivGraphy;
