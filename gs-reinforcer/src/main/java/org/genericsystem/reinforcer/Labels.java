@@ -1,10 +1,8 @@
 package org.genericsystem.reinforcer;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -12,7 +10,7 @@ import org.genericsystem.reinforcer.tools.GSRect;
 
 public class Labels implements Iterable<Label> {
 
-	private final Set<Label> labels = new TreeSet<>();
+	private final Set<Label> labels = new HashSet<>();
 
 	public boolean addLabel(double tlx, double tly, double brx, double bry, String candidateLabel) {
 		Label candidate = new Label(tlx, tly, brx, bry, candidateLabel);
@@ -21,7 +19,7 @@ public class Labels implements Iterable<Label> {
 
 	public boolean addLabel(Label candidate) {
 		for (Label label : labels)
-			if (label.getRect().isOverlapping(candidate.getRect()))
+			if (label.getRect().isOverlappingStrict(candidate.getRect()))
 				throw new IllegalStateException(label + " intersect with : " + candidate);
 		return labels.add(candidate);
 	}
@@ -43,7 +41,7 @@ public class Labels implements Iterable<Label> {
 		return labels.hashCode();
 	}
 
-	public List<Label> normalizeLabels() {
+	public Labels normalizeLabels() {
 		double mintlx = Double.MAX_VALUE, mintly = Double.MAX_VALUE, maxbrx = 0, maxbry = 0;
 		for (GSRect rect : labels.stream().map(l -> l.getRect()).collect(Collectors.toList())) {
 			if (rect.getX() < mintlx)
@@ -57,9 +55,9 @@ public class Labels implements Iterable<Label> {
 		}
 		double width = maxbrx - mintlx;
 		double height = maxbry - mintly;
-		List<Label> normalized = new ArrayList<>();
+		Labels normalized = new Labels();
 		for (Label label : labels)
-			normalized.add(label.normalize(mintlx, mintly, width, height));
+			normalized.addLabel(label.normalize(mintlx, mintly, width, height));
 		return normalized;
 	}
 
@@ -70,5 +68,9 @@ public class Labels implements Iterable<Label> {
 
 	public Stream<Label> stream() {
 		return labels.stream();
+	}
+
+	public int size() {
+		return labels.size();
 	}
 }

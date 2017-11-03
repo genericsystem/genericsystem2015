@@ -7,6 +7,10 @@ public class Unclassifiable extends Template {
 		return 1;
 	}
 
+	public Unclassifiable() {
+		super(new Labels());
+	}
+
 	@Override
 	public void reinforce(Labels al) {
 		boolean result = contents.add(al);

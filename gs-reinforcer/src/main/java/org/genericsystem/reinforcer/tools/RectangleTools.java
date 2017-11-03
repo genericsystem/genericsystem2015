@@ -301,4 +301,9 @@ public class RectangleTools {
 		List<GSRect> res = IntStream.range(0, boxes.size()).filter(idx -> pick.contains(idx)).mapToObj(boxes::get).collect(Collectors.toList());
 		return res;
 	}
+
+	public static GSRect linearCombination(GSRect rect1, double n1, GSRect rect2, double n2) {
+		return new GSRect(n1 * rect1.getX() + n2 * rect2.getX(), n1 * rect1.getY() + n2 * rect2.getY(),
+				n1 * rect1.getWidth() + n2 * rect2.getWidth(), n1 * rect1.getHeight() + n2 * rect2.getHeight());
+	}
 }

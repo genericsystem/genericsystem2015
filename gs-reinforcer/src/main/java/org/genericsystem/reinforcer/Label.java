@@ -1,15 +1,13 @@
 package org.genericsystem.reinforcer;
 
-import java.text.Collator;
-
 import org.genericsystem.reinforcer.tools.GSRect;
 
-public class Label implements Comparable<Label> {
+public class Label {
 	private final GSRect rect;
 	private final String label;
 
 	public Label(double tlx, double tly, double brx, double bry, String label) {
-		assert tlx < brx && tly < bry;
+		assert tlx < brx && tly < bry : "tlx: " + tlx + ", brx: " + brx + ", tly: " + tly + ", bry: " + bry;
 		rect = new GSRect(tlx, tly, brx - tlx, bry - tly);
 		this.label = label;
 	}
@@ -41,15 +39,11 @@ public class Label implements Comparable<Label> {
 		return rect;
 	}
 
-	public Label normalize(double mintlx, double mintly, double width, double height) {
-		return new Label(rect.normalize(mintlx, mintly, width, height), label);
+	public String getText() {
+		return label;
 	}
 
-	@Override
-	public int compareTo(Label o) {
-		int res = rect.compareTo(o.rect);
-		if (res != 0)
-			return res;
-		return Collator.getInstance().compare(label, o.label);
+	public Label normalize(double mintlx, double mintly, double width, double height) {
+		return new Label(rect.normalize(mintlx, mintly, width, height), label);
 	}
 }

@@ -4,7 +4,7 @@ import java.util.Optional;
 
 import org.genericsystem.reinforcer.NormalizedRect;
 
-public class GSRect implements Comparable<GSRect> {
+public class GSRect {
 	private double x, y, width, height;
 
 	public GSRect(double x, double y, double width, double height) {
@@ -163,6 +163,19 @@ public class GSRect implements Comparable<GSRect> {
 	}
 
 	/**
+	 * Check whether this rectangle overlaps with the given rectangle. This method is exclusive, e.g. it will return false if the rectangles have only a side or a vertex in common.
+	 * 
+	 * @param other - the second rectangle
+	 * @return true is the rectangles overlap, false otherwise
+	 * @throws IllegalArgumentException if at least one of the rectangles is <code>null</code>
+	 */
+	public boolean isOverlappingStrict(GSRect other) throws IllegalArgumentException {
+		if (other == null)
+			throw new IllegalArgumentException("One of the rectangles is null");
+		return x < other.br().getX() && other.tl().getX() < br().getX() && y < other.br().getY() && other.tl().getY() < br().getY();
+	}
+
+	/**
 	 * Compare this rectangle with another rectangle, and returns the smaller rectangle if it is inside the other. Returns an empty {@link Optional} if no rectangles is contained in the other.
 	 * 
 	 * @param rect2 - the second rectangle
@@ -201,6 +214,14 @@ public class GSRect implements Comparable<GSRect> {
 	public GSPoint[] decomposeClockwise() {
 		GSPoint[] points = new GSPoint[] { tl(), new GSPoint(br().getX(), tl().getY()), br(), new GSPoint(tl().getX(), br().getY()) };
 		return points;
+	}
+
+	public double diffWith(GSRect rect2, double eps) {
+		return Math.max(Math.max(Math.abs(x - rect2.tl().getX()), Math.abs(y - rect2.tl().getY())), Math.max(Math.abs(br().getX() - rect2.br().getX()), Math.abs(br().getY() - rect2.br().getY())));
+	}
+
+	private double getDelta(GSRect rect2, double eps) {
+		return eps * (Math.min(width, rect2.width) + Math.min(height, rect2.height)) / 2;
 	}
 
 	public NormalizedRect normalize(double mintlx, double mintly, double width, double height) {
@@ -252,16 +273,5 @@ public class GSRect implements Comparable<GSRect> {
 
 	public double getHeight() {
 		return height;
-	}
-
-	@Override
-	public int compareTo(GSRect o) {
-		if (x != o.x)
-			return (int) Math.signum(x - o.x);
-		if (y != o.y)
-			return (int) Math.signum(y - o.y);
-		if (width != o.width)
-			return (int) Math.signum(width - o.width);
-		return (int) Math.signum(height - o.height);
 	}
 }
