@@ -1,5 +1,6 @@
 package org.genericsystem.cv;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -7,9 +8,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
-
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
 
 import org.genericsystem.cv.lm.LMHostImpl;
 import org.genericsystem.cv.utils.Line;
@@ -25,7 +23,11 @@ import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.utils.Converters;
 import org.opencv.videoio.VideoCapture;
+
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
 
 public class LinesDetector3 extends AbstractApp {
 
@@ -64,28 +66,23 @@ public class LinesDetector3 extends AbstractApp {
 					Ransac<Line> ransac = lines.vanishingPointRansac(frame.width(), frame.height());
 					Mat vp_mat = (Mat) ransac.getBestModel().getParams()[0];
 					Point vp = new Point(vp_mat.get(0, 0)[0], vp_mat.get(1, 0)[0]);
-					Matrix vpCalib = Matrix.convert(Lines.K.inv()).times(new Matrix(new double[][] { { vp.x }, { vp.y }, { 1d } }), 1);
+					// Matrix vpCalib = Matrix.convert(Lines.K.inv()).times(new Matrix(new double[][] { { vp.x }, { vp.y }, { 1d } }), 1);
+					Mat vpCalib = calibrate(Converters.vector_double_to_Mat(Arrays.asList(vp.x, vp.y, 1d))); // replace with vp_mat directly?
+
 					LMHostImpl<Line> fitHost = new LMHostImpl<>((datas, params) -> {
-						Matrix lineMat = Matrix.convert(Lines.getLineMat(datas));
-						double di = params[0] * lineMat.get(0, 0) + params[1] * lineMat.get(1, 0) + params[2] * lineMat.get(2, 0);
-						di /= (Math.sqrt(params[0] * params[0] + params[1] * params[1] + params[2] * params[2]) * lineMat.norm());
+						Mat lineMat = Lines.getLineMat(datas);
+						double di = params[0] * lineMat.get(0, 0)[0] + params[1] * lineMat.get(1, 0)[0] + params[2] * lineMat.get(2, 0)[0];
+						di /= (Math.sqrt(params[0] * params[0] + params[1] * params[1] + params[2] * params[2]) * Core.norm(lineMat, Core.NORM_L2));
 						return di * di;
-					}, ransac.getBestDataSet().values(), new double[] { vpCalib.get(0, 0), vpCalib.get(1, 0), vpCalib.get(2, 0) });
+					}, ransac.getBestDataSet().values(), new double[] { vpCalib.get(0, 0)[0], vpCalib.get(1, 0)[0], vpCalib.get(2, 0)[0] });
 					double[] newVp = fitHost.getParms();
-					Matrix result = Matrix.convert(Lines.K).times(new Matrix(new double[][] { { newVp[0] }, { newVp[1] }, { newVp[2] } }), 1);
-					if (result.get(2, 0) != 0) {
-						result.set(0, 0, result.get(0, 0) / result.get(2, 0));
-						result.set(1, 0, result.get(1, 0) / result.get(2, 0));
-						result.set(2, 0, 1d);
-					} else {
-						// Since this is infinite, it is better to leave it calibrated
-						// Core.gemm(K.inv(), vp, 1, new Mat(), 0, vp);
-						result = Matrix.convert(Lines.K).times(result, 1);
-					}
+					// Matrix result = Matrix.convert(Lines.K).times(new Matrix(new double[][] { { newVp[0] }, { newVp[1] }, { newVp[2] } }), 1);
+					Mat result = unCalibrate(Converters.vector_double_to_Mat(Arrays.asList(newVp[0], newVp[1], newVp[2])));
+
 					System.out.println("Old vp = " + vp);
-					System.out.println("New vp = " + result.get(0, 0) + " " + result.get(1, 0));
+					System.out.println("New vp = " + Arrays.toString(result.get(0, 0)) + " " + Arrays.toString(result.get(1, 0)));
 					Point bary = new Point(frame.width() / 2, frame.height() / 2);
-					Mat homography = findHomography(new Point(vp.x, vp.y), bary, frame.width(), frame.height());
+					Mat homography = findHomography(vp, bary, frame.width(), frame.height());
 					lines = Lines.of(ransac.getBestDataSet().values());
 					lines = Lines.of(lines.perspectivTransform(homography));
 
@@ -107,6 +104,23 @@ public class LinesDetector3 extends AbstractApp {
 
 		}, 33, 250, TimeUnit.MILLISECONDS);
 
+	}
+
+	public static Mat calibrate(Mat uncalibrated) {
+		Mat dst = new Mat();
+		Core.gemm(Lines.K.inv(), uncalibrated, 1, new Mat(), 0, dst);
+		return dst;
+	}
+
+	public static Mat unCalibrate(Mat calibrated) {
+		Mat dst = new Mat();
+		Core.gemm(Lines.K, calibrated, 1, new Mat(), 0, dst);
+		if (dst.get(2, 0)[0] != 0) {
+			dst.put(0, 0, dst.get(0, 0)[0] / dst.get(2, 0)[0]);
+			dst.put(1, 0, dst.get(1, 0)[0] / dst.get(2, 0)[0]);
+			dst.put(2, 0, 1d);
+		}
+		return dst;
 	}
 
 	public Point[] rotate(Point bary, double alpha, Point... p) {

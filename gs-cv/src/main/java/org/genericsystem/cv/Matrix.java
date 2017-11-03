@@ -10,7 +10,7 @@ public class Matrix {
 	private int m;
 	private int n;
 	private double[][] A;
-//	private Mat openCVmat;
+	// private Mat openCVmat;
 
 	public Matrix(int i, int j) {
 		this.m = i;
@@ -21,47 +21,45 @@ public class Matrix {
 	public Matrix(double[][] arrayDouble) {
 		A = arrayDouble;
 		n = arrayDouble[0].length;
-		m = arrayDouble.length;	
+		m = arrayDouble.length;
 	}
-	
 
 	public Matrix() {
-	
+
 	}
 
-	public Matrix(double[] array){
-		
-		A  = new double[][]{{array[0]},{array[1]},{array[2]}};
+	public Matrix(double[] array) {
+
+		A = new double[][] { { array[0] }, { array[1] }, { array[2] } };
 		n = 1;
 		m = array.length;
 	}
-	
+
 	public void set(int i, int j, double value) {
 		A[i][j] = value;
 	}
 
 	/**
 	 * Realise the product of matrices
-	 * 
 	 */
 	public Matrix times(Matrix matrix, double alpha) {
 
-		if(matrix==null)
+		if (matrix == null)
 			throw new IllegalArgumentException("matrix is null");
 		if (n != matrix.getm()) {
 			throw new IllegalArgumentException("Matrix inner dimensions must agree. (" + m + "," + n + ")" + " vs (" + (matrix.getm() + "," + matrix.getn() + ")"));
 		}
 
 		Matrix localMatrix = new Matrix(m, matrix.getn());
-		
+
 		for (int i = 0; i < m; i++) {
-			for (int j = 0; j < matrix.getn(); j++) {			
-				
+			for (int j = 0; j < matrix.getn(); j++) {
+
 				double d = 0.0D;
 				for (int k = 0; k < matrix.getm(); k++) {
 					d += A[i][k] * matrix.get(k, j);
 				}
-				localMatrix.set(i, j, d*alpha);
+				localMatrix.set(i, j, d * alpha);
 			}
 		}
 		return localMatrix;
@@ -101,12 +99,12 @@ public class Matrix {
 			throw new IllegalArgumentException("matrix dimension must be (3,1)");
 		}
 
-		Matrix array = new Matrix(3,1);
+		Matrix array = new Matrix(3, 1);
 		array.set(0, 0, mat1.get(1, 0) * mat2.get(2, 0) - mat1.get(2, 0) * mat2.get(1, 0));
 		array.set(1, 0, mat1.get(2, 0) * mat2.get(0, 0) - mat1.get(0, 0) * mat2.get(2, 0));
 		array.set(2, 0, mat1.get(0, 0) * mat2.get(1, 0) - mat1.get(1, 0) * mat2.get(0, 0));
 		return array;
-		
+
 	}
 
 	/**
@@ -115,74 +113,72 @@ public class Matrix {
 	public Matrix normalize() {
 
 		double d = this.norm();
-			if(d == 0.0D)
-				throw new IllegalStateException("norm is 0, cannot normalize");
-			for (int i = 0; i < n; i++) {
-				for (int j = 0; j < m; j++) {
-					A[j][i] = A[j][i] / d;
-				}
+		if (d == 0.0D)
+			throw new IllegalStateException("norm is 0, cannot normalize");
+		for (int i = 0; i < n; i++) {
+			for (int j = 0; j < m; j++) {
+				A[j][i] = A[j][i] / d;
 			}
+		}
 		return this;
 	}
-	
-	
+
 	/**
-	 * inverse the matrix. openCV inversion implementation is used so matrix needs to be converted first, inversed, then converted back 
+	 * inverse the matrix. openCV inversion implementation is used so matrix needs to be converted first, inversed, then converted back
 	 * 
 	 * @return
 	 */
-	public Matrix inv(){		
-		return convert(this.convert().inv());		
-	}
-	
-/**
- * transpose the matrix
- * 
- * @return
- */
-	
-	public Matrix t() {
-		
-		 Matrix localMatrix = new Matrix(n, m);
-		    double[][] arrayOfDouble = localMatrix.getA();
-		    for (int i = 0; i < m; i++) {
-		      for (int j = 0; j < n; j++) {		   
-		        arrayOfDouble[j][i] = A[i][j];
-		      }
-		    }
-		 return localMatrix;
+	public Matrix inv() {
+		return convert(this.convert().inv());
 	}
 
-	
+	/**
+	 * transpose the matrix
+	 * 
+	 * @return
+	 */
+
+	public Matrix t() {
+
+		Matrix localMatrix = new Matrix(n, m);
+		double[][] arrayOfDouble = localMatrix.getA();
+		for (int i = 0; i < m; i++) {
+			for (int j = 0; j < n; j++) {
+				arrayOfDouble[j][i] = A[i][j];
+			}
+		}
+		return localMatrix;
+	}
+
 	/**
 	 * convert org.genericsystem.cv.Matrix to org.opencv.core.Mat
 	 * 
 	 * @return
 	 */
 	public Mat convert() {
-		
-		Mat convertedMat = new Mat(m,n,CvType.CV_64F);
-		for(int i = 0; i<m; i++){
-			for(int j = 0; j<n;j++){
+
+		Mat convertedMat = new Mat(m, n, CvType.CV_64F);
+		for (int i = 0; i < m; i++) {
+			for (int j = 0; j < n; j++) {
 				convertedMat.put(i, j, A[i][j]);
 			}
-		}		
+		}
 		return convertedMat;
 	}
 
 	/**
-	 * convert org.opencv.core.Mat to org.genericsystem.cv.Matrix   
+	 * convert org.opencv.core.Mat to org.genericsystem.cv.Matrix
 	 * 
 	 * @return
 	 */
 	public static Matrix convert(Mat mat) {
-		
+
 		Matrix matrix = new Matrix(mat.rows(), mat.cols());
-		for(int i = 0; i<mat.rows(); i++){
-			for(int j = 0; j<mat.cols();j++){
+		for (int i = 0; i < mat.rows(); i++) {
+			for (int j = 0; j < mat.cols(); j++) {
 				matrix.set(i, j, mat.get(i, j)[0]);
 			}
-		}	
+		}
 		return matrix;
 	}
 
@@ -193,75 +189,76 @@ public class Matrix {
 	 * @return
 	 */
 	public double dot(Matrix matrix) {
-		if (m != matrix.getm()  && n != matrix.getn()) {
+		if (m != matrix.getm() && n != matrix.getn()) {
 			throw new IllegalArgumentException("vectors dimensions must be the same");
 		}
 		double d = 0.0D;
-		for(int i =0;i<m;i++){
-			for(int j=0;j<n;j++){
-				d+=A[i][j]*matrix.get(i, j);
+		for (int i = 0; i < m; i++) {
+			for (int j = 0; j < n; j++) {
+				d += A[i][j] * matrix.get(i, j);
 			}
-		}		
+		}
 		return d;
 	}
 
 	/**
 	 * Calculate the norm (norm type = L2) of the matrix
+	 * 
 	 * @return
 	 */
 	public double norm() {
-		
+
 		double d = 0.0D;
-		for (int i = 0; i < n; i++) {			
+		for (int i = 0; i < n; i++) {
 			for (int j = 0; j < m; j++) {
-				d += A[j][i]*A[j][i];
+				d += A[j][i] * A[j][i];
 			}
 		}
 		return Math.sqrt(d);
 	}
-	
+
 	@Override
-	public boolean equals(Object o){
-		
+	public boolean equals(Object o) {
+
 		if (o == null)
 			return false;
-		
-		if(!(o instanceof Matrix))
+
+		if (!(o instanceof Matrix))
 			return false;
-		
+
 		final Matrix matrix = (Matrix) o;
-		
-		for(int i =0; i<matrix.getm();i++){
-			for(int j = 0; j<matrix.getn();j++){
-				
-			if(matrix.get(i, j)!=this.get(i, j))
-				return false;				
-			}			
+
+		for (int i = 0; i < matrix.getm(); i++) {
+			for (int j = 0; j < matrix.getn(); j++) {
+
+				if (matrix.get(i, j) != this.get(i, j))
+					return false;
+			}
 		}
 		return true;
-		
-	}
-	
-	@Override
-	public int hashCode(){
-		
-		int hash = 3;
-		
-		for(int i =0; i<m;i++){
-			for(int j = 0; j<n;j++){
-				
-			hash+= (int) Math.floor(this.get(i, j))*7;
-				
-			}			
-		}		
-		return hash;
-		
-	}
-	
-	@Override
-	public String toString(){
-		return Arrays.deepToString(A);
-		
-	} 
 
-} 
+	}
+
+	@Override
+	public int hashCode() {
+
+		int hash = 3;
+
+		for (int i = 0; i < m; i++) {
+			for (int j = 0; j < n; j++) {
+
+				hash += (int) Math.floor(this.get(i, j)) * 7;
+
+			}
+		}
+		return hash;
+
+	}
+
+	@Override
+	public String toString() {
+		return Arrays.deepToString(A);
+
+	}
+
+}
