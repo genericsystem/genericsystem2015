@@ -1,14 +1,15 @@
 package org.genericsystem.cv;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BiFunction;
 import java.util.function.Function;
+
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
 
 import org.genericsystem.cv.lm.LMHostImpl;
 import org.genericsystem.cv.utils.Line;
@@ -26,9 +27,6 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
 
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
-
 public class LinesDetector3 extends AbstractApp {
 
 	static {
@@ -42,16 +40,10 @@ public class LinesDetector3 extends AbstractApp {
 	private final VideoCapture capture = new VideoCapture(0);
 	private ScheduledExecutorService timer = Executors.newSingleThreadScheduledExecutor();
 
-	// private Damper vpxDamper = new Damper(1);
-	// private Damper vpyDamper = new Damper(1);
-
 	@Override
 	protected void fillGrid(GridPane mainGrid) {
-		// vpxDamper.pushNewValue(0);
-		// vpyDamper.pushNewValue(0);
 		Mat frame = new Mat();
 		capture.read(frame);
-
 		ImageView frameView = new ImageView(Tools.mat2jfxImage(frame));
 		mainGrid.add(frameView, 0, 0);
 		ImageView deskewedView = new ImageView(Tools.mat2jfxImage(frame));
@@ -60,32 +52,25 @@ public class LinesDetector3 extends AbstractApp {
 		timer.scheduleAtFixedRate(() -> {
 			try {
 				capture.read(frame);
-				Img grad = new Img(frame, false).morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_RECT, new Size(2, 2)).otsu();
+				Img grad = new Img(frame, false).morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(2, 2)).otsu().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(7, 7));
 				// Img grad = new Img(frame, false).canny(60, 180);
-				// Img grad = new Img(frame, false).bilateralFilter(20, 80, 80).bgr2Gray().adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY_INV, 11, 3).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(11,
-				// 3));
+				// Img grad = new Img(frame, false).bilateralFilter(20, 120, 120).bgr2Gray().adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY_INV, 11, 3)
+				// .morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(5, 5));
 				Lines lines = new Lines(grad.houghLinesP(1, Math.PI / 180, 10, 100, 10));
 				System.out.println("Average angle: " + lines.getMean() / Math.PI * 180);
 				if (lines.size() > 10) {
 					lines.draw(frame, new Scalar(0, 0, 255));
-
 					frameView.setImage(Tools.mat2jfxImage(frame));
-					// Mat dePerspectived = new Mat(frame.size(), CvType.CV_8UC3, new Scalar(255, 255, 255));
 					Ransac<Line> ransac = lines.vanishingPointRansac(frame.width(), frame.height());
 					Mat vp_mat = (Mat) ransac.getBestModel().getParams()[0];
 					Point vp = new Point(vp_mat.get(0, 0)[0], vp_mat.get(1, 0)[0]);
-
-					BiFunction<Line, double[], Double> error = (datas, params) -> {
+					Matrix vpCalib = Matrix.convert(Lines.K.inv()).times(new Matrix(new double[][] { { vp.x }, { vp.y }, { 1d } }), 1);
+					LMHostImpl<Line> fitHost = new LMHostImpl<>((datas, params) -> {
 						Matrix lineMat = Matrix.convert(Lines.getLineMat(datas));
 						double di = params[0] * lineMat.get(0, 0) + params[1] * lineMat.get(1, 0) + params[2] * lineMat.get(2, 0);
-						// di /= (Core.norm(vp) * Core.norm(lineMat));
 						di /= (Math.sqrt(params[0] * params[0] + params[1] * params[1] + params[2] * params[2]) * lineMat.norm());
 						return di * di;
-					};
-
-					Matrix vpCalib = Matrix.convert(Lines.K.inv()).times(new Matrix(new double[][] { { vp.x }, { vp.y }, { 1d } }), 1);
-					double[] calibVp = new double[] { vpCalib.get(0, 0), vpCalib.get(1, 0), vpCalib.get(2, 0) };
-					LMHostImpl<Line> fitHost = new LMHostImpl<>(error, new ArrayList<>(ransac.getBestDataSet().values()), calibVp);
+					}, ransac.getBestDataSet().values(), new double[] { vpCalib.get(0, 0), vpCalib.get(1, 0), vpCalib.get(2, 0) });
 					double[] newVp = fitHost.getParms();
 					Matrix result = Matrix.convert(Lines.K).times(new Matrix(new double[][] { { newVp[0] }, { newVp[1] }, { newVp[2] } }), 1);
 					if (result.get(2, 0) != 0) {
@@ -99,8 +84,6 @@ public class LinesDetector3 extends AbstractApp {
 					}
 					System.out.println("Old vp = " + vp);
 					System.out.println("New vp = " + result.get(0, 0) + " " + result.get(1, 0));
-					vp.x = result.get(0, 0);
-					vp.y = result.get(1, 0);
 					Point bary = new Point(frame.width() / 2, frame.height() / 2);
 					Mat homography = findHomography(new Point(vp.x, vp.y), bary, frame.width(), frame.height());
 					lines = Lines.of(ransac.getBestDataSet().values());
@@ -126,27 +109,11 @@ public class LinesDetector3 extends AbstractApp {
 
 	}
 
-	public void print(Mat m) {
-		for (int row = 0; row < m.rows(); row++) {
-			System.out.print("(");
-			for (int col = 0; col < m.cols() - 1; col++) {
-				System.out.print(m.get(row, col)[0] + ",");
-			}
-			System.out.println(m.get(row, m.cols() - 1)[0] + ")");
-		}
-		System.out.println("---------------");
-
-	}
-
 	public Point[] rotate(Point bary, double alpha, Point... p) {
 		Mat matrix = Imgproc.getRotationMatrix2D(bary, alpha / Math.PI * 180, 1);
 		MatOfPoint2f results = new MatOfPoint2f();
 		Core.transform(new MatOfPoint2f(p), results, matrix);
 		return results.toArray();
-	}
-
-	public Point center(Point a, Point b) {
-		return new Point((a.x + b.x) / 2, (a.y + b.y) / 2);
 	}
 
 	private Mat findHomography(Point vp, Point bary, double width, double height) {
@@ -208,17 +175,33 @@ public class LinesDetector3 extends AbstractApp {
 			return new Lines(lines);
 		}
 
+		public static void calibrate(Mat uncalibrate) {
+			Core.gemm(Lines.K.inv(), uncalibrate, 1, new Mat(), 0, uncalibrate);
+			Core.normalize(uncalibrate, uncalibrate);
+		}
+
+		public static Mat uncalibrate(Mat calibrated) {
+			Mat uncalibrate = new Mat(3, 1, CvType.CV_64FC1);
+			Core.gemm(Lines.K, calibrated, 1, new Mat(), 0, uncalibrate);
+			if (uncalibrate.get(2, 0)[0] != 0) {
+				uncalibrate.put(0, 0, uncalibrate.get(0, 0)[0] / uncalibrate.get(2, 0)[0]);
+				uncalibrate.put(1, 0, uncalibrate.get(1, 0)[0] / uncalibrate.get(2, 0)[0]);
+				uncalibrate.put(2, 0, 1);
+			}
+			return uncalibrate;
+		}
+
 		private static Mat getLineMat(Line line) {
-			Mat a = new Mat(3, 1, CvType.CV_32F);
-			Mat b = new Mat(3, 1, CvType.CV_32F);
-			a.put(0, 0, new float[] { Double.valueOf(line.getX1()).floatValue() });
-			a.put(1, 0, new float[] { Double.valueOf(line.getY1()).floatValue() });
-			a.put(2, 0, new float[] { Double.valueOf(1d).floatValue() });
-			b.put(0, 0, new float[] { Double.valueOf(line.getX2()).floatValue() });
-			b.put(1, 0, new float[] { Double.valueOf(line.getY2()).floatValue() });
-			b.put(2, 0, new float[] { Double.valueOf(1d).floatValue() });
-			Mat an = new Mat(3, 1, CvType.CV_32F);
-			Mat bn = new Mat(3, 1, CvType.CV_32F);
+			Mat a = new Mat(3, 1, CvType.CV_64FC1);
+			Mat b = new Mat(3, 1, CvType.CV_64FC1);
+			a.put(0, 0, line.getX1());
+			a.put(1, 0, line.getY1());
+			a.put(2, 0, 1d);
+			b.put(0, 0, line.getX2());
+			b.put(1, 0, line.getY2());
+			b.put(2, 0, 1d);
+			Mat an = new Mat(3, 1, CvType.CV_64FC1);
+			Mat bn = new Mat(3, 1, CvType.CV_64FC1);
 			Core.gemm(K.inv(), a, 1, new Mat(), 0, an);
 			Core.gemm(K.inv(), b, 1, new Mat(), 0, bn);
 			Mat li = an.cross(bn);
@@ -230,34 +213,31 @@ public class LinesDetector3 extends AbstractApp {
 			return li;
 		}
 
-		// @SuppressWarnings({ "rawtypes", "unchecked" })
-		public Ransac<Line> vanishingPointRansac(int width, int height) {
+		public Ransac<Line> vanishingPointRansac(double width, double height) {
 			int minimal_sample_set_dimension = 2;
 			double maxError = (float) 0.01623 * 2;
 			if (K == null) {
-				K = new Mat(3, 3, CvType.CV_32F, new Scalar(0));
-				K.put(0, 0, new float[] { width });
-				K.put(0, 2, new float[] { width / 2 });
-				K.put(1, 1, new float[] { height });
-				K.put(1, 2, new float[] { height / 2 });
-				K.put(2, 2, new float[] { 1 });
+				K = new Mat(3, 3, CvType.CV_64FC1, new Scalar(0));
+				K.put(0, 0, width);
+				K.put(0, 2, width / 2);
+				K.put(1, 1, height);
+				K.put(1, 2, height / 2);
+				K.put(2, 2, 1d);
 			}
 			return new Ransac<>(getLines(), getModelProvider(minimal_sample_set_dimension, maxError), minimal_sample_set_dimension, 100, maxError, Double.valueOf(Math.floor(this.size() * 0.7)).intValue());
 		}
 
 		private Function<Collection<Line>, Model<Line>> getModelProvider(int minimal_sample_set_dimension, double maxError) {
 			return datas -> {
-				Mat vp;
-
+				Mat[] vp = new Mat[1];
 				if (datas.size() == minimal_sample_set_dimension) {
 					Iterator<Line> it = datas.iterator();
-					vp = getLineMat(it.next()).cross(getLineMat(it.next()));
-					Core.normalize(vp, vp);
+					vp[0] = getLineMat(it.next()).cross(getLineMat(it.next()));
+					Core.normalize(vp[0], vp[0]);
 				} else {
 					// Extract the line segments corresponding to the indexes contained in the set
-					Mat li_set = new Mat(3, datas.size(), CvType.CV_32F);
-					Mat tau = new Mat(datas.size(), datas.size(), CvType.CV_32F, new Scalar(0, 0, 0));
-
+					Mat li_set = new Mat(3, datas.size(), CvType.CV_64FC1);
+					Mat tau = new Mat(datas.size(), datas.size(), CvType.CV_64FC1, new Scalar(0, 0, 0));
 					int i = 0;
 					for (Line line : datas) {
 						Mat li = getLineMat(line);
@@ -271,7 +251,7 @@ public class LinesDetector3 extends AbstractApp {
 					// Least squares solution
 					// Generate the matrix ATA (from LSS_set=A)
 					Mat L = li_set.t();
-					Mat ATA = new Mat(3, 3, CvType.CV_32F);
+					Mat ATA = new Mat(3, 3, CvType.CV_64FC1);
 					Mat dst = new Mat();
 
 					Core.gemm(L.t(), tau.t(), 1, new Mat(), 0, dst);
@@ -287,32 +267,20 @@ public class LinesDetector3 extends AbstractApp {
 						throw new IllegalStateException();
 
 					// Assign the result (the last column of v, corresponding to the eigenvector with lowest eigenvalue)
-					vp = new Mat(3, 1, CvType.CV_32F);
-					vp.put(0, 0, v.get(0, 2));
-					vp.put(1, 0, v.get(1, 2));
-					vp.put(2, 0, v.get(2, 2));
-
-					Core.normalize(vp, vp);
-
-					Core.gemm(K, vp, 1, new Mat(), 0, vp);
-
-					if (vp.get(2, 0)[0] != 0) {
-						vp.put(0, 0, new float[] { Double.valueOf(vp.get(0, 0)[0] / vp.get(2, 0)[0]).floatValue() });
-						vp.put(1, 0, new float[] { Double.valueOf(vp.get(1, 0)[0] / vp.get(2, 0)[0]).floatValue() });
-						vp.put(2, 0, new float[] { 1 });
-					} else {
-						// Since this is infinite, it is better to leave it calibrated
-						Core.gemm(K.inv(), vp, 1, new Mat(), 0, vp);
-					}
-
+					vp[0] = new Mat(3, 1, CvType.CV_64FC1);
+					vp[0].put(0, 0, v.get(0, 2));
+					vp[0].put(1, 0, v.get(1, 2));
+					vp[0].put(2, 0, v.get(2, 2));
+					Core.normalize(vp[0], vp[0]);
+					vp[0] = uncalibrate(vp[0]);
 				}
 
 				return new Model<Line>() {
 					@Override
 					public double computeError(Line line) {
 						Mat lineMat = getLineMat(line);
-						double di = vp.dot(lineMat);
-						di /= (Core.norm(vp) * Core.norm(lineMat));
+						double di = vp[0].dot(lineMat);
+						di /= (Core.norm(vp[0]) * Core.norm(lineMat));
 						return di * di;
 					}
 
@@ -331,7 +299,7 @@ public class LinesDetector3 extends AbstractApp {
 
 					@Override
 					public Object[] getParams() {
-						return new Object[] { vp };
+						return new Object[] { vp[0] };
 					}
 
 				};

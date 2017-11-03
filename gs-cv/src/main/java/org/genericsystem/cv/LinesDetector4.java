@@ -8,9 +8,11 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
 
 import org.genericsystem.cv.lm.LMHostImpl;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
@@ -28,9 +30,6 @@ import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
 import org.opencv.videoio.VideoCapture;
 
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
-
 public class LinesDetector4 extends AbstractApp {
 
 	static {
@@ -45,13 +44,8 @@ public class LinesDetector4 extends AbstractApp {
 	private ScheduledExecutorService timer = Executors.newSingleThreadScheduledExecutor();
 	private Point vp = new Point(0, 0);
 
-	// private Damper vpxDamper = new Damper(1);
-	// private Damper vpyDamper = new Damper(1);
-
 	@Override
 	protected void fillGrid(GridPane mainGrid) {
-		// vpxDamper.pushNewValue(0);
-		// vpyDamper.pushNewValue(0);
 		Mat frame = new Mat();
 		capture.read(frame);
 
@@ -63,34 +57,23 @@ public class LinesDetector4 extends AbstractApp {
 		timer.scheduleAtFixedRate(() -> {
 			try {
 				capture.read(frame);
-				Img grad = new Img(frame, false).morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_RECT, new Size(2, 2)).otsu();
+				Img grad = new Img(frame, false).morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(2, 2)).otsu().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(7, 7));
 				// Img grad = new Img(frame, false).canny(60, 180);
 				// Img grad = new Img(frame, false).bilateralFilter(20, 80, 80).bgr2Gray().adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY_INV, 11, 3).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(11,
 				// 3));
 				Lines lines = new Lines(grad.houghLinesP(1, Math.PI / 180, 10, 100, 10));
-				System.out.println("Average angle: " + lines.getMean() / Math.PI * 180);
 				if (lines.size() > 10) {
 					lines.draw(frame, new Scalar(0, 0, 255));
-
 					frameView.setImage(Tools.mat2jfxImage(frame));
-					// Mat dePerspectived = new Mat(frame.size(), CvType.CV_8UC3, new Scalar(255, 255, 255));
 					Ransac<Line> ransac = lines.vanishingPointRansac(frame.width(), frame.height());
 					Mat vp_mat = (Mat) ransac.getBestModel().getParams()[0];
 					Mat uncalibrate = uncalibrate(vp_mat);
 					vp = new Point(uncalibrate.get(0, 0)[0], uncalibrate.get(1, 0)[0]);
 					System.out.println("Vanishing point : " + vp);
-					// vpxDamper.pushNewValue(vp.x);
-					// vpyDamper.pushNewValue(vp.y);
 					Point bary = new Point(frame.width() / 2, frame.height() / 2);
-					Mat homography = findHomography(new Point(vp.x, vp.y), bary, frame.width(), frame.height());
+					Mat homography = findHomography(vp, bary, frame.width(), frame.height());
 					lines = new Lines(ransac.getBestDataSet().values()).perspectivTransform(homography);
-
-					Mat mask = new Mat(frame.size(), CvType.CV_8UC1, new Scalar(255));
-					Mat maskWarpped = new Mat();
-					Imgproc.warpPerspective(mask, maskWarpped, homography, frame.size());
-					Mat tmp = new Mat();
-					Imgproc.warpPerspective(frame, tmp, homography, frame.size(), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(255));
-					tmp.copyTo(dePerspectived, maskWarpped);
+					Imgproc.warpPerspective(frame, dePerspectived, homography, frame.size(), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(255));
 					lines.draw(dePerspectived, new Scalar(0, 255, 0));
 					deskiewedView.setImage(Tools.mat2jfxImage(dePerspectived));
 
@@ -105,27 +88,20 @@ public class LinesDetector4 extends AbstractApp {
 
 	}
 
-	public Mat uncalibrate(Mat calibrated) {
-		Mat uncalibrate = new Mat(3, 1, CvType.CV_32F);
-		Core.gemm(Lines.K, calibrated, 1, new Mat(), 0, uncalibrate);
-		if (uncalibrate.get(2, 0)[0] != 0) {
-			uncalibrate.put(0, 0, new float[] { Double.valueOf(uncalibrate.get(0, 0)[0] / uncalibrate.get(2, 0)[0]).floatValue() });
-			uncalibrate.put(1, 0, new float[] { Double.valueOf(uncalibrate.get(1, 0)[0] / uncalibrate.get(2, 0)[0]).floatValue() });
-			uncalibrate.put(2, 0, new float[] { 1 });
-		}
-		return uncalibrate;
+	public static void calibrate(Mat uncalibrate) {
+		Core.gemm(Lines.K.inv(), uncalibrate, 1, new Mat(), 0, uncalibrate);
+		Core.normalize(uncalibrate, uncalibrate);
 	}
 
-	public void print(Mat m) {
-		for (int row = 0; row < m.rows(); row++) {
-			System.out.print("(");
-			for (int col = 0; col < m.cols() - 1; col++) {
-				System.out.print(m.get(row, col)[0] + ",");
-			}
-			System.out.println(m.get(row, m.cols() - 1)[0] + ")");
+	public static Mat uncalibrate(Mat calibrated) {
+		Mat uncalibrate = new Mat(3, 1, CvType.CV_64FC1);
+		Core.gemm(Lines.K, calibrated, 1, new Mat(), 0, uncalibrate);
+		if (uncalibrate.get(2, 0)[0] != 0) {
+			uncalibrate.put(0, 0, uncalibrate.get(0, 0)[0] / uncalibrate.get(2, 0)[0]);
+			uncalibrate.put(1, 0, uncalibrate.get(1, 0)[0] / uncalibrate.get(2, 0)[0]);
+			uncalibrate.put(2, 0, 1);
 		}
-		System.out.println("---------------");
-
+		return uncalibrate;
 	}
 
 	public Point[] rotate(Point bary, double alpha, Point... p) {
@@ -179,150 +155,97 @@ public class LinesDetector4 extends AbstractApp {
 
 	public static class Lines {
 
-		private final List<Line> lines = new ArrayList<>();
-		private final double mean;
+		private final List<Line> lines;
 		private static Mat K;
 
 		public Lines(Mat src) {
-			double mean = 0;
+			lines = new ArrayList<Line>();
 			for (int i = 0; i < src.rows(); i++) {
 				double[] val = src.get(i, 0);
 				Line line = new Line(val[0], val[1], val[2], val[3]);
 				lines.add(line);
-				mean += line.getAngle();
 			}
-			this.mean = mean / src.rows();
+		}
+
+		public Lines(Collection<Line> lines) {
+			this.lines = new ArrayList<Line>(lines);
 		}
 
 		private Mat getLineMat(Line line) {
-			Mat a = new Mat(3, 1, CvType.CV_32F);
-			Mat b = new Mat(3, 1, CvType.CV_32F);
-			a.put(0, 0, new float[] { Double.valueOf(line.x1).floatValue() });
-			a.put(1, 0, new float[] { Double.valueOf(line.y1).floatValue() });
-			a.put(2, 0, new float[] { Double.valueOf(1d).floatValue() });
-			b.put(0, 0, new float[] { Double.valueOf(line.x2).floatValue() });
-			b.put(1, 0, new float[] { Double.valueOf(line.y2).floatValue() });
-			b.put(2, 0, new float[] { Double.valueOf(1d).floatValue() });
-			// Mat an = new Mat(3, 1, CvType.CV_32F);
-			// Mat bn = new Mat(3, 1, CvType.CV_32F);
-			// Core.gemm(K.inv(), a, 1, new Mat(), 0, an);
-			// Core.gemm(K.inv(), b, 1, new Mat(), 0, bn);
+			Mat a = new Mat(3, 1, CvType.CV_64FC1);
+			Mat b = new Mat(3, 1, CvType.CV_64FC1);
+			a.put(0, 0, line.x1);
+			a.put(1, 0, line.y1);
+			a.put(2, 0, 1d);
+			b.put(0, 0, line.x2);
+			b.put(1, 0, line.y2);
+			b.put(2, 0, 1d);
 			Mat li = a.cross(b);
 			Core.normalize(li, li);
 			return li;
 		}
 
 		private Mat getLineMiMat(Line line) {
-			Mat a = new Mat(3, 1, CvType.CV_32F);
-			Mat b = new Mat(3, 1, CvType.CV_32F);
-			a.put(0, 0, new float[] { Double.valueOf(line.x1).floatValue() });
-			a.put(1, 0, new float[] { Double.valueOf(line.y1).floatValue() });
-			a.put(2, 0, new float[] { Double.valueOf(1d).floatValue() });
-			b.put(0, 0, new float[] { Double.valueOf(line.x2).floatValue() });
-			b.put(1, 0, new float[] { Double.valueOf(line.y2).floatValue() });
-			b.put(2, 0, new float[] { Double.valueOf(1d).floatValue() });
-			Mat c = new Mat(3, 1, CvType.CV_32F);
+			Mat a = new Mat(3, 1, CvType.CV_64FC1);
+			Mat b = new Mat(3, 1, CvType.CV_64FC1);
+			a.put(0, 0, line.x1);
+			a.put(1, 0, line.y1);
+			a.put(2, 0, 1d);
+			b.put(0, 0, line.x2);
+			b.put(1, 0, line.y2);
+			b.put(2, 0, 1d);
+			Mat c = new Mat(3, 1, CvType.CV_64FC1);
 			Core.addWeighted(a, 0.5, b, 0.5, 0, c);
 			return c;
 		}
 
-		public Ransac<Line> vanishingPointRansac(int width, int height) {
+		public Ransac<Line> vanishingPointRansac(double width, double height) {
 
 			int minimal_sample_set_dimension = 2;
-			double maxError = (float) 0.01623 * 2;
+			double maxError = 0.01623 * 2;
 			if (K == null) {
-				K = new Mat(3, 3, CvType.CV_32F, new Scalar(0));
-				K.put(0, 0, new float[] { width });
-				K.put(0, 2, new float[] { width / 2 });
-				K.put(1, 1, new float[] { height });
-				K.put(1, 2, new float[] { height / 2 });
-				K.put(2, 2, new float[] { 1 });
+				K = new Mat(3, 3, CvType.CV_64FC1, new Scalar(0));
+				K.put(0, 0, width);
+				K.put(0, 2, width / 2);
+				K.put(1, 1, height);
+				K.put(1, 2, height / 2);
+				K.put(2, 2, 1);
 			}
 			Mat[] vp = new Mat[1];
 			Function<Collection<Line>, Model<Line>> modelProvider = datas -> {
-
 				if (datas.size() == minimal_sample_set_dimension) {
 					Iterator<Line> it = datas.iterator();
 					vp[0] = getLineMat(it.next()).cross(getLineMat(it.next()));
-					// System.out.println("Vanishing point : " + vp[0].get(0, 0)[0] + "," + vp[0].get(1, 0)[0] + "," + vp[0].get(2, 0)[0]);
-					Core.gemm(K.inv(), vp[0], 1, new Mat(), 0, vp[0]);
-					Core.normalize(vp[0], vp[0]);
-					// System.out.println("Vanishing point calibrated : " + vp[0].get(0, 0)[0] + "," + vp[0].get(1, 0)[0] + "," + vp[0].get(2, 0)[0]);
+					calibrate(vp[0]);
 				} else {
-
-					// The starting point is the provided vp which is already calibrated
-
-					// Convert to spherical coordinates to move on the sphere surface (restricted to r=1)
-					double x = vp[0].get(0, 0)[0];
-					double y = vp[0].get(1, 0)[0];
-					double z = vp[0].get(2, 0)[0];
 					double r = Core.norm(vp[0]);
-					double theta = Math.acos(z / r);
-					double phi = Math.atan2(y, x);
-					System.out.println("Initial Cal.VP (x,y,z) = (" + x + "," + y + "," + z + ")");
-
-					System.out.println("Initial Cal.VP (Spherical) = (" + theta + "," + phi + "," + r + ")");
-
-					BiFunction<Line, double[], Double> evaluateNieto = (line, params) -> {
-
-						Mat vn = new Mat(3, 1, CvType.CV_32F);
-						vn.put(0, 0, new double[] { Math.cos(params[1]) * Math.sin(params[0]) });
-						vn.put(1, 0, new double[] { Math.sin(params[1]) * Math.sin(params[0]) });
-						vn.put(2, 0, new double[] { Math.cos(params[0]) });
-						Core.gemm(K, vn, 1, new Mat(), 0, vn);
-						if (vn.get(2, 0)[0] != 0) {
-							vn.put(0, 0, new float[] { Double.valueOf(vn.get(0, 0)[0] / vn.get(2, 0)[0]).floatValue() });
-							vn.put(1, 0, new float[] { Double.valueOf(vn.get(1, 0)[0] / vn.get(2, 0)[0]).floatValue() });
-							vn.put(2, 0, new float[] { 1 });
-						}
-
-						return distanceNieto(vn, line);
-
-					};
-
-					LMHostImpl<Line> fitHost = new LMHostImpl<>(evaluateNieto, new ArrayList<>(datas), new double[] { theta, phi });
-					double[] params = fitHost.getParms();
-
-					// Store into vp
-					// 1) From spherical to cartesian
-					theta = params[0];
-					phi = params[1];
-					x = r * Math.cos(phi) * Math.sin(theta);
-					y = r * Math.sin(phi) * Math.sin(theta);
-					z = r * Math.cos(theta);
-					System.out.println("Converged Cal.VP (x,y,z) = (" + x + "," + y + "," + z + ")");
-					System.out.println("Converged Cal.VP (Spherical) = " + "(" + theta + "," + phi + "," + r + ")");
-
-					vp[0].put(0, 0, new float[] { Double.valueOf(x).floatValue() });
-					vp[0].put(1, 0, new float[] { Double.valueOf(y).floatValue() });
-					vp[0].put(2, 0, new float[] { Double.valueOf(z).floatValue() });
-
+					double theta = Math.acos(vp[0].get(2, 0)[0] / r);
+					double phi = Math.atan2(vp[0].get(1, 0)[0], vp[0].get(0, 0)[0]);
+					double[] parameters = new LMHostImpl<>((line, params) -> {
+						Mat vn = new Mat(3, 1, CvType.CV_64FC1);
+						vn.put(0, 0, Math.cos(params[1]) * Math.sin(params[0]));
+						vn.put(1, 0, Math.sin(params[1]) * Math.sin(params[0]));
+						vn.put(2, 0, Math.cos(params[0]));
+						return distance(uncalibrate(vn), line);
+					}, datas, new double[] { theta, phi }).getParms();
+					vp[0].put(0, 0, r * Math.cos(parameters[1]) * Math.sin(parameters[0]));
+					vp[0].put(1, 0, r * Math.sin(parameters[1]) * Math.sin(parameters[0]));
+					vp[0].put(2, 0, r * Math.cos(parameters[0]));
 				}
 
 				return new Model<Line>() {
 
 					@Override
 					public double computeError(Line line) {
-
-						// The vp arrives here calibrated, need to uncalibrate (check it anyway)
-						Mat vn = new Mat(3, 1, CvType.CV_32F);
-						if (Math.abs(Core.norm(vp[0]) - 1) < 0.001) {
-							Core.gemm(K, vp[0], 1, new Mat(), 0, vn);
-							if (vn.get(2, 0)[0] != 0) {
-								vn.put(0, 0, new float[] { Double.valueOf(vn.get(0, 0)[0] / vn.get(2, 0)[0]).floatValue() });
-								vn.put(1, 0, new float[] { Double.valueOf(vn.get(1, 0)[0] / vn.get(2, 0)[0]).floatValue() });
-								vn.put(2, 0, new float[] { 1 });
-							}
-						}
-						double di = distanceNieto(vn, line);
+						assert Math.abs(Core.norm(vp[0]) - 1) < 0.001;
+						double di = distance(uncalibrate(vp[0]), line);
 						return di * di;
-
 					}
 
 					@Override
 					public double computeGlobalError(List<Line> datas, Collection<Line> consensusDatas) {
 						double globalError = 0;
-						for (Line line : consensusDatas) {
+						for (Line line : datas) {
 							double error = computeError(line);
 							if (error > maxError)
 								error = maxError;
@@ -339,10 +262,10 @@ public class LinesDetector4 extends AbstractApp {
 
 				};
 			};
-			return new Ransac<>(lines, modelProvider, minimal_sample_set_dimension, 100, maxError, Double.valueOf(Math.floor(lines.size() * 0.5)).intValue());
+			return new Ransac<>(lines, modelProvider, minimal_sample_set_dimension, 100, maxError, Double.valueOf(Math.floor(lines.size() * 0.6)).intValue());
 		}
 
-		private double distanceNieto(Mat vp, Line line) {
+		private double distance(Mat vp, Line line) {
 
 			Mat lineSegment = getLineMat(line);
 			double n0 = -lineSegment.get(1, 0)[0];
@@ -390,24 +313,9 @@ public class LinesDetector4 extends AbstractApp {
 			lines.forEach(line -> line.draw(frame, color));
 		}
 
-		public Lines(Collection<Line> lines) {
-			double mean = 0;
-			for (Line line : lines) {
-				this.lines.add(line);
-				mean += line.getAngle();
-			}
-			this.mean = mean / lines.size();
-
-		}
-
 		public int size() {
 			return lines.size();
 		}
-
-		public double getMean() {
-			return mean;
-		}
-
 	}
 
 	public static class Line {
