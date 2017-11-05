@@ -30,9 +30,9 @@ public class LMHostImpl<T> implements LMHost {
 		this.jac = new double[NPTS][NPARMS];
 		this.error = error;
 
-		listParms("Start Parms", parms);
+		// listParms("Start Parms", parms);
 		LM myLM = new LM(this, NPARMS, NPTS);
-		listParms("Fitted Parms", parms);
+		// listParms("Fitted Parms", parms);
 	}
 
 	public static void main(String args[]) {
@@ -145,7 +145,7 @@ public class LMHostImpl<T> implements LMHost {
 		return jac[i][j];
 	}
 
-	public double[] getParms() {
+	public double[] getParams() {
 		return parms;
 	}
 }

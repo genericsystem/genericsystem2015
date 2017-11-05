@@ -12,7 +12,7 @@ import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 
 public class Lines implements Iterable<Line> {
-	protected final List<Line> lines = new ArrayList<>();
+	public final List<Line> lines = new ArrayList<>();
 	protected final double mean;
 
 	public Lines(Mat src) {

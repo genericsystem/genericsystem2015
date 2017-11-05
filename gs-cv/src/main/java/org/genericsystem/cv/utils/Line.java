@@ -11,7 +11,8 @@ import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
 
 public class Line {
-	protected final double x1, y1, x2, y2, angle;
+	public final double x1, y1, x2, y2;
+	protected final double angle;
 
 	public Line(Point p1, Point p2) {
 		this(p1.x, p1.y, p2.x, p2.y);
@@ -103,22 +104,4 @@ public class Line {
 	public double getY2() {
 		return y2;
 	}
-
-	// public double distance(Point p) {
-	// return Math.abs(geta() * p.x - p.y + getb()) / Math.sqrt(1 + Math.pow(geta(), 2));
-	// }
-
-	// public Point intersection(double a, double b) {
-	// double x = (b - getb()) / (geta() - a);
-	// double y = a * x + b;
-	// return new Point(x, y);
-	// }
-
-	// public double getOrthoa() {
-	// return (x2 - x1) / (y1 - y2);
-	// }
-	//
-	// public double getOrthob(Point p) {
-	// return p.y - getOrthoa() * p.x;
-	// }
 }

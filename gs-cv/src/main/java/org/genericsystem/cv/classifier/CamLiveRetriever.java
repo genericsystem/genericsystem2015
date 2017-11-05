@@ -4,23 +4,24 @@ import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
+
 import org.genericsystem.cv.AbstractApp;
+import org.genericsystem.cv.Calibrated.AngleCalibrated;
 import org.genericsystem.cv.Img;
+import org.genericsystem.cv.lm.LMHostImpl;
 import org.genericsystem.cv.utils.Line;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
-import org.genericsystem.cv.utils.Ransac;
-import org.genericsystem.cv.utils.Ransac.Model;
 import org.genericsystem.cv.utils.Tools;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
@@ -35,9 +36,6 @@ import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
 
 @SuppressWarnings({ "resource" })
 public class CamLiveRetriever extends AbstractApp {
@@ -61,6 +59,8 @@ public class CamLiveRetriever extends AbstractApp {
 	private Mat frame = new Mat();
 	private boolean stabilizationHasChanged = true;
 	private int stabilizationErrors = 0;
+	private Point vp = new Point(0, 0);
+	private AngleCalibrated calibrated;
 
 	public static void main(String[] args) {
 		launch(args);
@@ -86,6 +86,8 @@ public class CamLiveRetriever extends AbstractApp {
 
 		timerFields.scheduleAtFixedRate(() -> onSpace(), 0, STABILIZATION_DELAY, TimeUnit.MILLISECONDS);
 
+		AngleCalibrated.calibrate(frame.width(), frame.height());
+		calibrated = new AngleCalibrated(vp);
 		// Detect the rectangles
 		timerFields.scheduleAtFixedRate(() -> {
 			try {
@@ -103,68 +105,68 @@ public class CamLiveRetriever extends AbstractApp {
 				}
 				if (stabilizationErrors > 20) {
 					// TODO: clean fields
-					fields.reset();
-					stabilizationErrors = 0;
-					stabilizedImgDescriptor = null;
-				}
-				if (stabilizedImgDescriptor == null) {
-					stabilizedImgDescriptor = new ImgDescriptor(frame, deperspectivGraphy);
-					return;
-				}
-				ImgDescriptor newImgDescriptor = new ImgDescriptor(frame, deperspectivGraphy);
-				Mat stabilizationHomography = stabilizedImgDescriptor.computeStabilizationGraphy(newImgDescriptor);
-				if (stabilizationHomography == null) {
-					stabilizationErrors++;
-					logger.warn("Unable to compute a valid stabilization ({} times)", stabilizationErrors);
-					return;
-				}
-				Img stabilized = warpPerspective(frame, stabilizationHomography);
-				Img stabilizedDisplay = new Img(stabilized.getSrc(), true);
-				if (stabilizationHasChanged) {
-					Stats.beginTask("stabilizationHasChanged");
-					Mat fieldsHomography = new Mat();
-					stabilized = newImgDescriptor.getDeperspectivedImg();
-					stabilizedDisplay = new Img(stabilized.getSrc(), true);
-					Core.gemm(deperspectivGraphy, stabilizationHomography.inv(), 1, new Mat(), 0, fieldsHomography);
-					Stats.beginTask("restabilizeFields");
-					fields.restabilizeFields(fieldsHomography);
-					Stats.endTask("restabilizeFields");
-					Stats.beginTask("merge fields");
-					fields.merge(detectRects(stabilizedDisplay));
-					Stats.endTask("merge fields");
-
-					fields.removeOverlaps();
-
-					final Img stabilizedDisplay_ = stabilizedDisplay;
-					fields.stream().filter(f -> f.getDeadCounter() == 0).forEach(f -> f.draw(stabilizedDisplay_, f.getDeadCounter() == 0 ? new Scalar(0, 255, 0) : new Scalar(0, 0, 255)));
-
-					stabilizedImgDescriptor = newImgDescriptor;
-					stabilizationHomography = deperspectivGraphy;
-					stabilizationHasChanged = false;
-					Stats.endTask("stabilizationHasChanged");
-				}
-				Img display = new Img(frame, false);
-
-				Stats.beginTask("consolidateOcr");
-				fields.performOcr(stabilized);
-				Stats.endTask("consolidateOcr");
-				fields.drawOcrPerspectiveInverse(display, stabilizationHomography.inv(), new Scalar(0, 255, 0), 1);
-
-				fields.drawIndestructible(display, stabilizationHomography.inv());
-
-				src0.setImage(display.toJfxImage());
-				src1.setImage(stabilizedDisplay.toJfxImage());
-				Stats.endTask("frame");
-
-				Stats.resetCumulative("RANSAC re-compute");
-				if (++counter % 10 == 0) {
-					System.out.println(Stats.getStatsAndReset());
-					counter = 0;
-				}
-			} catch (Throwable e) {
-				logger.warn("Exception while computing layout.", e);
+				fields.reset();
+				stabilizationErrors = 0;
+				stabilizedImgDescriptor = null;
 			}
-		}, 50, FRAME_DELAY, TimeUnit.MILLISECONDS);
+			if (stabilizedImgDescriptor == null) {
+				stabilizedImgDescriptor = new ImgDescriptor(frame, deperspectivGraphy);
+				return;
+			}
+			ImgDescriptor newImgDescriptor = new ImgDescriptor(frame, deperspectivGraphy);
+			Mat stabilizationHomography = stabilizedImgDescriptor.computeStabilizationGraphy(newImgDescriptor);
+			if (stabilizationHomography == null) {
+				stabilizationErrors++;
+				logger.warn("Unable to compute a valid stabilization ({} times)", stabilizationErrors);
+				return;
+			}
+			Img stabilized = warpPerspective(frame, stabilizationHomography);
+			Img stabilizedDisplay = new Img(stabilized.getSrc(), true);
+			if (stabilizationHasChanged) {
+				Stats.beginTask("stabilizationHasChanged");
+				Mat fieldsHomography = new Mat();
+				stabilized = newImgDescriptor.getDeperspectivedImg();
+				stabilizedDisplay = new Img(stabilized.getSrc(), true);
+				Core.gemm(deperspectivGraphy, stabilizationHomography.inv(), 1, new Mat(), 0, fieldsHomography);
+				Stats.beginTask("restabilizeFields");
+				fields.restabilizeFields(fieldsHomography);
+				Stats.endTask("restabilizeFields");
+				Stats.beginTask("merge fields");
+				fields.merge(detectRects(stabilizedDisplay));
+				Stats.endTask("merge fields");
+
+				fields.removeOverlaps();
+
+				final Img stabilizedDisplay_ = stabilizedDisplay;
+				fields.stream().filter(f -> f.getDeadCounter() == 0).forEach(f -> f.draw(stabilizedDisplay_, f.getDeadCounter() == 0 ? new Scalar(0, 255, 0) : new Scalar(0, 0, 255)));
+
+				stabilizedImgDescriptor = newImgDescriptor;
+				stabilizationHomography = deperspectivGraphy;
+				stabilizationHasChanged = false;
+				Stats.endTask("stabilizationHasChanged");
+			}
+			Img display = new Img(frame, false);
+
+			Stats.beginTask("consolidateOcr");
+			fields.performOcr(stabilized);
+			Stats.endTask("consolidateOcr");
+			fields.drawOcrPerspectiveInverse(display, stabilizationHomography.inv(), new Scalar(0, 255, 0), 1);
+
+			fields.drawIndestructible(display, stabilizationHomography.inv());
+
+			src0.setImage(display.toJfxImage());
+			src1.setImage(stabilizedDisplay.toJfxImage());
+			Stats.endTask("frame");
+
+			Stats.resetCumulative("RANSAC re-compute");
+			if (++counter % 10 == 0) {
+				System.out.println(Stats.getStatsAndReset());
+				counter = 0;
+			}
+		} catch (Throwable e) {
+			logger.warn("Exception while computing layout.", e);
+		}
+	}, 50, FRAME_DELAY, TimeUnit.MILLISECONDS);
 
 	}
 
@@ -190,31 +192,73 @@ public class CamLiveRetriever extends AbstractApp {
 	}
 
 	private Lines houghlinesP(Mat frame) {
-		Img grad = new Img(frame, false).morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_RECT, new Size(2, 2)).otsu().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(7, 7));
+		Img grad = new Img(frame, false).morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_RECT, new Size(2, 2)).otsu().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(3, 3));
 		return new Lines(grad.houghLinesP(1, Math.PI / 180, 10, 100, 10));
 	}
 
 	private Mat computeFrameToDeperspectivedHomography(Mat frame) {
 		Lines lines = houghlinesP(frame);
-
-		if (lines.size() > 50)
-			lines = lines.reduce(0.25, 50);
-		System.err.println("lines: " + lines.size());
-
-		if (lines.size() < 8) {
-			logger.warn("Not enough lines to compute perspective transformation ({})", lines.size());
+		if (lines.size() > 10) {
+			lines = lines.reduce(20);
+			// lines.draw(frame, new Scalar(0, 0, 255));
+			lines = lines.filter(line -> distance(vp, line) < 0.48);
+			// lines.draw(frame, new Scalar(0, 255, 0));
+			lines = lines.reduce(10);
+			Stats.beginTask("ransac");
+			double[] newThetaPhi = new LMHostImpl<>((line, params) -> distance(new AngleCalibrated(params).uncalibrate(), line), lines.lines, calibrated.getTethaPhi()).getParams();
+			calibrated = calibrated.dump(newThetaPhi, 1);
+			vp = calibrated.uncalibrate();
+			Stats.endTask("ransac");
+			// System.out.println("Vanishing point : " + vp);
+			return findHomography(vp, frame.width(), frame.height());
+		} else {
+			System.out.println("Not enough lines : " + lines.size());
 			return null;
 		}
-		Stats.beginTask("ransac");
-		Ransac<Line> ransac = lines.vanishingPointRansac(frame.width(), frame.height());
-		Stats.endTask("ransac");
-		Mat vpMat = (Mat) ransac.getBestModel().getParams()[0];
-		Point vp = new Point(vpMat.get(0, 0)[0], vpMat.get(1, 0)[0]);
-		Point bary = new Point(frame.width() / 2, frame.height() / 2);
-		return findHomography(vp, bary, frame.width(), frame.height());
+
+		// Stats.beginTask("ransac");
+		// Ransac<Line> ransac = lines.vanishingPointRansac(frame.width(), frame.height());
+		// Stats.endTask("ransac");
+		// Mat vpMat = (Mat) ransac.getBestModel().getParams()[0];
+		// Point vp = new Point(vpMat.get(0, 0)[0], vpMat.get(1, 0)[0]);
+		// return findHomography(vp, frame.width(), frame.height());
 	}
 
-	private Mat findHomography(Point vp, Point bary, double width, double height) {
+	private double distance(Point vp, Line line) {
+		double[] lineSegment = getNormalizedLine(line);
+		double n0 = -lineSegment[1];
+		double n1 = lineSegment[0];
+		double nNorm = Math.sqrt(n0 * n0 + n1 * n1);
+		double[] midPoint = getMiLine(line);
+		double r0, r1;
+		r0 = vp.y * midPoint[2] - midPoint[1];
+		r1 = midPoint[0] - vp.x * midPoint[2];
+		double rNorm = Math.sqrt(r0 * r0 + r1 * r1);
+		double num = (r0 * n0 + r1 * n1);
+		if (num < 0)
+			num = -num;
+
+		double d = 0;
+		if (nNorm != 0 && rNorm != 0)
+			d = num / (nNorm * rNorm);
+		// d *= line.size();
+		return d;
+	}
+
+	private double[] getNormalizedLine(Line line) {
+		double a = line.y1 - line.y2;
+		double b = line.x2 - line.x1;
+		double c = line.y1 * line.x2 - line.x1 * line.y2;
+		double norm = Math.sqrt(a * a + b * b + c * c);
+		return new double[] { a / norm, b / norm, c / norm };
+	}
+
+	private double[] getMiLine(Line line) {
+		return new double[] { (line.x1 + line.x2) / 2, (line.y1 + line.y2) / 2, 1d };
+	}
+
+	private Mat findHomography(Point vp, double width, double height) {
+		Point bary = new Point(width / 2, height / 2);
 		double alpha_ = Math.atan2((vp.y - bary.y), (vp.x - bary.x));
 		if (alpha_ < -Math.PI / 2 && alpha_ > -Math.PI)
 			alpha_ = alpha_ + Math.PI;
@@ -282,146 +326,144 @@ public class CamLiveRetriever extends AbstractApp {
 			return new Lines(lines);
 		}
 
-		public Lines reduce(double factor, int threshold) {
-			long target = Math.round(this.size() * factor);
-			if (target < threshold)
-				target = threshold;
-
-			List<Line> newLines = new ArrayList<>();
-			Set<Integer> indexes = new HashSet<>();
-			while (indexes.size() < target) {
-				int idx = ThreadLocalRandom.current().nextInt(this.size());
-				if (indexes.add(idx))
-					newLines.add(lines.get(idx));
-			}
-			return Lines.of(newLines);
+		public Lines filter(Predicate<Line> predicate) {
+			return new Lines(lines.stream().filter(predicate).collect(Collectors.toList()));
 		}
 
-		private Mat getLineMat(Line line) {
-			Mat a = new Mat(3, 1, CvType.CV_32F);
-			Mat b = new Mat(3, 1, CvType.CV_32F);
-			a.put(0, 0, new float[] { Double.valueOf(line.getX1()).floatValue() });
-			a.put(1, 0, new float[] { Double.valueOf(line.getY1()).floatValue() });
-			a.put(2, 0, new float[] { Double.valueOf(1d).floatValue() });
-			b.put(0, 0, new float[] { Double.valueOf(line.getX2()).floatValue() });
-			b.put(1, 0, new float[] { Double.valueOf(line.getY2()).floatValue() });
-			b.put(2, 0, new float[] { Double.valueOf(1d).floatValue() });
-			Mat an = new Mat(3, 1, CvType.CV_32F);
-			Mat bn = new Mat(3, 1, CvType.CV_32F);
-			Core.gemm(K.inv(), a, 1, new Mat(), 0, an);
-			Core.gemm(K.inv(), b, 1, new Mat(), 0, bn);
-			Mat li = an.cross(bn);
-			Core.normalize(li, li);
-			return li;
+		public Lines reduce(int max) {
+			if (lines.size() <= max)
+				return this;
+			Set<Line> newLines = new HashSet<>();
+			while (newLines.size() < max)
+				newLines.add(lines.get((int) (Math.random() * size())));
+			return new Lines((newLines));
 		}
 
-		public Ransac<Line> vanishingPointRansac(double width, double height) {
-			int minimal_sample_set_dimension = 2;
-			double maxError = (float) 0.01623 * 2;
-			if (K == null) {
-				K = new Mat(3, 3, CvType.CV_32F, new Scalar(0));
-				K.put(0, 0, new float[] { Double.valueOf(width).floatValue() });
-				K.put(0, 2, new float[] { Double.valueOf(width / 2).floatValue() });
-				K.put(1, 1, new float[] { Double.valueOf(height).floatValue() });
-				K.put(1, 2, new float[] { Double.valueOf(height / 2).floatValue() });
-				K.put(2, 2, new float[] { 1 });
-			}
-			return new Ransac<>(getLines(), getModelProvider(minimal_sample_set_dimension, maxError), minimal_sample_set_dimension, 100, maxError, Double.valueOf(Math.floor(this.size() * 0.7)).intValue());
-		}
+		// private Mat getLineMat(Line line) {
+		// Mat a = new Mat(3, 1, CvType.CV_32F);
+		// Mat b = new Mat(3, 1, CvType.CV_32F);
+		// a.put(0, 0, new float[] { Double.valueOf(line.getX1()).floatValue() });
+		// a.put(1, 0, new float[] { Double.valueOf(line.getY1()).floatValue() });
+		// a.put(2, 0, new float[] { Double.valueOf(1d).floatValue() });
+		// b.put(0, 0, new float[] { Double.valueOf(line.getX2()).floatValue() });
+		// b.put(1, 0, new float[] { Double.valueOf(line.getY2()).floatValue() });
+		// b.put(2, 0, new float[] { Double.valueOf(1d).floatValue() });
+		// Mat an = new Mat(3, 1, CvType.CV_32F);
+		// Mat bn = new Mat(3, 1, CvType.CV_32F);
+		// Core.gemm(K.inv(), a, 1, new Mat(), 0, an);
+		// Core.gemm(K.inv(), b, 1, new Mat(), 0, bn);
+		// Mat li = an.cross(bn);
+		// Core.normalize(li, li);
+		// return li;
+		// }
 
-		private Function<Collection<Line>, Model<Line>> getModelProvider(int minimal_sample_set_dimension, double maxError) {
-			return datas -> {
-				Mat vp;
+		// public Ransac<Line> vanishingPointRansac(double width, double height) {
+		// int minimal_sample_set_dimension = 2;
+		// double maxError = (float) 0.01623 * 2;
+		// if (K == null) {
+		// K = new Mat(3, 3, CvType.CV_32F, new Scalar(0));
+		// K.put(0, 0, new float[] { Double.valueOf(width).floatValue() });
+		// K.put(0, 2, new float[] { Double.valueOf(width / 2).floatValue() });
+		// K.put(1, 1, new float[] { Double.valueOf(height).floatValue() });
+		// K.put(1, 2, new float[] { Double.valueOf(height / 2).floatValue() });
+		// K.put(2, 2, new float[] { 1 });
+		// }
+		// return new Ransac<>(getLines(), getModelProvider(minimal_sample_set_dimension, maxError), minimal_sample_set_dimension, 100, maxError, Double.valueOf(Math.floor(this.size() * 0.7)).intValue());
+		// }
 
-				if (datas.size() == minimal_sample_set_dimension) {
-					Iterator<Line> it = datas.iterator();
-					vp = getLineMat(it.next()).cross(getLineMat(it.next()));
-					Core.normalize(vp, vp);
-				} else {
-					Stats.beginCumulative("RANSAC re-compute");
-					// Extract the line segments corresponding to the indexes contained in the set
-					Mat li_set = new Mat(3, datas.size(), CvType.CV_32F);
-					Mat tau = new Mat(datas.size(), datas.size(), CvType.CV_32F, new Scalar(0, 0, 0));
-
-					int i = 0;
-					for (Line line : datas) {
-						Mat li = getLineMat(line);
-						li_set.put(0, i, li.get(0, 0));
-						li_set.put(1, i, li.get(1, 0));
-						li_set.put(2, i, li.get(2, 0));
-						tau.put(i, i, line.size());
-						i++;
-					}
-
-					// Least squares solution
-					// Generate the matrix ATA (from LSS_set=A)
-					Mat L = li_set.t();
-					Mat ATA = new Mat(3, 3, CvType.CV_32F);
-					Mat dst = new Mat();
-
-					Core.gemm(L.t(), tau.t(), 1, new Mat(), 0, dst);
-					Core.gemm(dst, tau, 1, new Mat(), 0, dst);
-					Core.gemm(dst, L, 1, new Mat(), 0, ATA);
-
-					// Obtain eigendecomposition
-					Mat v = new Mat();
-					Core.SVDecomp(ATA, new Mat(), v, new Mat());
-
-					// Check eigenvecs after SVDecomp
-					if (v.rows() < 3)
-						throw new IllegalStateException();
-
-					// Assign the result (the last column of v, corresponding to the eigenvector with lowest eigenvalue)
-					vp = new Mat(3, 1, CvType.CV_32F);
-					vp.put(0, 0, v.get(0, 2));
-					vp.put(1, 0, v.get(1, 2));
-					vp.put(2, 0, v.get(2, 2));
-
-					Core.normalize(vp, vp);
-
-					Core.gemm(K, vp, 1, new Mat(), 0, vp);
-
-					if (vp.get(2, 0)[0] != 0) {
-						vp.put(0, 0, new float[] { Double.valueOf(vp.get(0, 0)[0] / vp.get(2, 0)[0]).floatValue() });
-						vp.put(1, 0, new float[] { Double.valueOf(vp.get(1, 0)[0] / vp.get(2, 0)[0]).floatValue() });
-						vp.put(2, 0, new float[] { 1 });
-					} else {
-						// Since this is infinite, it is better to leave it calibrated
-						Core.gemm(K.inv(), vp, 1, new Mat(), 0, vp);
-					}
-					Stats.endCumulative("RANSAC re-compute");
-				}
-
-				return new Model<Line>() {
-					@Override
-					public double computeError(Line line) {
-						Mat lineMat = getLineMat(line);
-						double di = vp.dot(lineMat);
-						di /= (Core.norm(vp) * Core.norm(lineMat));
-						return di * di;
-					}
-
-					@Override
-					public double computeGlobalError(List<Line> datas, Collection<Line> consensusDatas) {
-						double globalError = 0;
-						for (Line line : datas) {
-							double error = computeError(line);
-							if (error > maxError)
-								error = maxError;
-							globalError += error;
-						}
-						globalError = globalError / datas.size();
-						return globalError;
-					}
-
-					@Override
-					public Object[] getParams() {
-						return new Object[] { vp };
-					}
-
-				};
-			};
-		}
+		// private Function<Collection<Line>, Model<Line>> getModelProvider(int minimal_sample_set_dimension, double maxError) {
+		// return datas -> {
+		// Mat vp;
+		//
+		// if (datas.size() == minimal_sample_set_dimension) {
+		// Iterator<Line> it = datas.iterator();
+		// vp = getLineMat(it.next()).cross(getLineMat(it.next()));
+		// Core.normalize(vp, vp);
+		// } else {
+		// Stats.beginCumulative("RANSAC re-compute");
+		// // Extract the line segments corresponding to the indexes contained in the set
+		// Mat li_set = new Mat(3, datas.size(), CvType.CV_32F);
+		// Mat tau = new Mat(datas.size(), datas.size(), CvType.CV_32F, new Scalar(0, 0, 0));
+		//
+		// int i = 0;
+		// for (Line line : datas) {
+		// Mat li = getLineMat(line);
+		// li_set.put(0, i, li.get(0, 0));
+		// li_set.put(1, i, li.get(1, 0));
+		// li_set.put(2, i, li.get(2, 0));
+		// tau.put(i, i, line.size());
+		// i++;
+		// }
+		//
+		// // Least squares solution
+		// // Generate the matrix ATA (from LSS_set=A)
+		// Mat L = li_set.t();
+		// Mat ATA = new Mat(3, 3, CvType.CV_32F);
+		// Mat dst = new Mat();
+		//
+		// Core.gemm(L.t(), tau.t(), 1, new Mat(), 0, dst);
+		// Core.gemm(dst, tau, 1, new Mat(), 0, dst);
+		// Core.gemm(dst, L, 1, new Mat(), 0, ATA);
+		//
+		// // Obtain eigendecomposition
+		// Mat v = new Mat();
+		// Core.SVDecomp(ATA, new Mat(), v, new Mat());
+		//
+		// // Check eigenvecs after SVDecomp
+		// if (v.rows() < 3)
+		// throw new IllegalStateException();
+		//
+		// // Assign the result (the last column of v, corresponding to the eigenvector with lowest eigenvalue)
+		// vp = new Mat(3, 1, CvType.CV_32F);
+		// vp.put(0, 0, v.get(0, 2));
+		// vp.put(1, 0, v.get(1, 2));
+		// vp.put(2, 0, v.get(2, 2));
+		//
+		// Core.normalize(vp, vp);
+		//
+		// Core.gemm(K, vp, 1, new Mat(), 0, vp);
+		//
+		// if (vp.get(2, 0)[0] != 0) {
+		// vp.put(0, 0, new float[] { Double.valueOf(vp.get(0, 0)[0] / vp.get(2, 0)[0]).floatValue() });
+		// vp.put(1, 0, new float[] { Double.valueOf(vp.get(1, 0)[0] / vp.get(2, 0)[0]).floatValue() });
+		// vp.put(2, 0, new float[] { 1 });
+		// } else {
+		// // Since this is infinite, it is better to leave it calibrated
+		// Core.gemm(K.inv(), vp, 1, new Mat(), 0, vp);
+		// }
+		// Stats.endCumulative("RANSAC re-compute");
+		// }
+		//
+		// return new Model<Line>() {
+		// @Override
+		// public double computeError(Line line) {
+		// Mat lineMat = getLineMat(line);
+		// double di = vp.dot(lineMat);
+		// di /= (Core.norm(vp) * Core.norm(lineMat));
+		// return di * di;
+		// }
+		//
+		// @Override
+		// public double computeGlobalError(List<Line> datas, Collection<Line> consensusDatas) {
+		// double globalError = 0;
+		// for (Line line : datas) {
+		// double error = computeError(line);
+		// if (error > maxError)
+		// error = maxError;
+		// globalError += error;
+		// }
+		// globalError = globalError / datas.size();
+		// return globalError;
+		// }
+		//
+		// @Override
+		// public Object[] getParams() {
+		// return new Object[] { vp };
+		// }
+		//
+		// };
+		// };
+		// }
 	}
 
 }

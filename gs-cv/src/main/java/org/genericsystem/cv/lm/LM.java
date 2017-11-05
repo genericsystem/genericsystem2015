@@ -1,12 +1,12 @@
 package org.genericsystem.cv.lm;
 
 public class LM {
-	private final int LMITER = 100; // max number of L-M iterations
+	private final int LMITER = 6; // max number of L-M iterations
 	private final double LMBOOST = 2.0; // damping increase per failed step
 	private final double LMSHRINK = 0.10; // damping decrease per successful step
 	private final double LAMBDAZERO = 0.001; // initial damping
 	private final double LAMBDAMAX = 1E9; // max damping
-	private final double LMTOL = 1E-12; // exit tolerance
+	private final double LMTOL = 1E-5; // exit tolerance
 	private final double BIGVAL = 9e99; // trouble flag
 
 	private double sos, sosprev, lambda;
@@ -46,7 +46,7 @@ public class LM {
 		}
 		sosprev = sos;
 
-		System.out.println("  bLMiter..SumOfSquares= " + sos);
+		// System.out.println("  bLMiter..SumOfSquares= " + sos);
 		if (!myH.bBuildJacobian()) {
 			System.out.println("  bLMiter finds bBuildJacobian()=false");
 			return false;

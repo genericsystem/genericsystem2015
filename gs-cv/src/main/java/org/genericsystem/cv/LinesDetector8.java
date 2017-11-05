@@ -15,11 +15,11 @@ import java.util.stream.Collectors;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 
-import org.genericsystem.cv.Calibrated.AngleCalibrated;
 import org.genericsystem.cv.lm.LMHostImpl;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.genericsystem.cv.utils.Tools;
 import org.opencv.core.Core;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
@@ -29,7 +29,7 @@ import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
 import org.opencv.videoio.VideoCapture;
 
-public class LinesDetector7 extends AbstractApp {
+public class LinesDetector8 extends AbstractApp {
 
 	static {
 		NativeLibraryLoader.load();
@@ -42,7 +42,7 @@ public class LinesDetector7 extends AbstractApp {
 	private final VideoCapture capture = new VideoCapture(0);
 	private ScheduledExecutorService timer = Executors.newSingleThreadScheduledExecutor();
 	private Point vp = new Point(0, 0);
-	private AngleCalibrated calibrated;
+	private Calibrated calibrated;
 
 	@Override
 	protected void fillGrid(GridPane mainGrid) {
@@ -54,8 +54,8 @@ public class LinesDetector7 extends AbstractApp {
 		ImageView deskiewedView = new ImageView(Tools.mat2jfxImage(frame));
 		mainGrid.add(deskiewedView, 0, 1);
 		Mat dePerspectived = frame.clone();
-		AngleCalibrated.calibrate(frame.width(), frame.height());
-		calibrated = new AngleCalibrated(vp);
+		Calibrated.calibrate(frame.width(), frame.height());
+		calibrated = new Calibrated(vp);
 
 		timer.scheduleAtFixedRate(() -> {
 			try {
@@ -65,12 +65,13 @@ public class LinesDetector7 extends AbstractApp {
 				if (lines.size() > 10) {
 					lines = lines.reduce(20);
 					lines.draw(frame, new Scalar(0, 0, 255));
-					lines = lines.filter(line -> distance(vp, line) < 0.48);
+					lines = lines.filter(line -> distance(calibrated.getCalibratexyz(), line) < 0.48);
 					lines.draw(frame, new Scalar(0, 255, 0));
 					frameView.setImage(Tools.mat2jfxImage(frame));
 					lines = lines.reduce(10);
-					double[] newThetaPhi = new LMHostImpl<>((line, params) -> distance(new AngleCalibrated(params).uncalibrate(), line), lines.lines, calibrated.getTethaPhi()).getParams();
-					calibrated = calibrated.dump(newThetaPhi, 3);
+
+					double[] newVp = new LMHostImpl<>((line, params) -> distance(params, line), lines.lines, calibrated.getCalibratexyz()).getParams();
+					calibrated = calibrated.dump(newVp, 5);
 					vp = calibrated.uncalibrate();
 					System.out.println("Vanishing point : " + vp);
 					Mat homography = findHomography(vp, frame.width(), frame.height());
@@ -87,37 +88,29 @@ public class LinesDetector7 extends AbstractApp {
 
 	}
 
-	private double distance(Point vp, Line line) {
-		double[] lineSegment = getNormalizedLine(line);
-		double n0 = -lineSegment[1];
-		double n1 = lineSegment[0];
-		double nNorm = Math.sqrt(n0 * n0 + n1 * n1);
-		double[] midPoint = getMiLine(line);
-		double r0, r1;
-		r0 = vp.y * midPoint[2] - midPoint[1];
-		r1 = midPoint[0] - vp.x * midPoint[2];
-		double rNorm = Math.sqrt(r0 * r0 + r1 * r1);
-		double num = (r0 * n0 + r1 * n1);
-		if (num < 0)
-			num = -num;
-
-		double d = 0;
-		if (nNorm != 0 && rNorm != 0)
-			d = num / (nNorm * rNorm);
-		// d *= line.size();
-		return d;
+	private double distance(double[] calibratedxyz, Line line) {
+		Mat lineMat = getLineMat(line);
+		double di = calibratedxyz[0] * lineMat.get(0, 0)[0] + calibratedxyz[1] * lineMat.get(1, 0)[0] + calibratedxyz[2] * lineMat.get(2, 0)[0];
+		di /= (Math.sqrt(calibratedxyz[0] * calibratedxyz[0] + calibratedxyz[1] * calibratedxyz[1] + calibratedxyz[2] * calibratedxyz[2]) * Core.norm(lineMat));
+		return di * di;
 	}
 
-	private double[] getNormalizedLine(Line line) {
-		double a = line.y1 - line.y2;
-		double b = line.x2 - line.x1;
-		double c = line.y1 * line.x2 - line.x1 * line.y2;
-		double norm = Math.sqrt(a * a + b * b + c * c);
-		return new double[] { a / norm, b / norm, c / norm };
-	}
-
-	private double[] getMiLine(Line line) {
-		return new double[] { (line.x1 + line.x2) / 2, (line.y1 + line.y2) / 2, 1d };
+	private static Mat getLineMat(Line line) {
+		Mat a = new Mat(3, 1, CvType.CV_64FC1);
+		Mat b = new Mat(3, 1, CvType.CV_64FC1);
+		a.put(0, 0, line.x1);
+		a.put(1, 0, line.y1);
+		a.put(2, 0, 1d);
+		b.put(0, 0, line.x2);
+		b.put(1, 0, line.y2);
+		b.put(2, 0, 1d);
+		Mat an = new Mat(3, 1, CvType.CV_64FC1);
+		Mat bn = new Mat(3, 1, CvType.CV_64FC1);
+		Core.gemm(Calibrated.Kinv, a, 1, new Mat(), 0, an);
+		Core.gemm(Calibrated.Kinv, b, 1, new Mat(), 0, bn);
+		Mat li = an.cross(bn);
+		Core.normalize(li, li);
+		return li;
 	}
 
 	public Point[] rotate(Point bary, double alpha, Point... p) {
