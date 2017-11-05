@@ -3,7 +3,7 @@ package org.genericsystem.cv.utils;
 import java.nio.file.Path;
 
 import org.genericsystem.cv.Img;
-import org.genericsystem.cv.classifier.DocFields;
+import org.genericsystem.cv.retriever.DocFields;
 import org.opencv.core.Scalar;
 import org.opencv.imgcodecs.Imgcodecs;
 

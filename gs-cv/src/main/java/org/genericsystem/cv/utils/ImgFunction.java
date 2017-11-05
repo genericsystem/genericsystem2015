@@ -1,4 +1,4 @@
-package org.genericsystem.cv.comparator;
+package org.genericsystem.cv.utils;
 
 import java.io.Serializable;
 import java.util.function.Function;

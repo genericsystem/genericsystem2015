@@ -1,4 +1,4 @@
-package org.genericsystem.cv.classifier;
+package org.genericsystem.cv.newmodel;
 
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
@@ -15,8 +15,6 @@ import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.common.Root;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.comparator.FillModelWithData;
-import org.genericsystem.cv.comparator.ImgFilterFunction;
-import org.genericsystem.cv.comparator.ImgFunction;
 import org.genericsystem.cv.newmodel.SimpleModel.ConsolidatedType;
 import org.genericsystem.cv.newmodel.SimpleModel.DocClassType;
 import org.genericsystem.cv.newmodel.SimpleModel.DocClassType.DocClassInstance;
@@ -34,9 +32,12 @@ import org.genericsystem.cv.newmodel.SimpleModel.SupervisedType;
 import org.genericsystem.cv.newmodel.SimpleModel.ZoneNumType;
 import org.genericsystem.cv.newmodel.SimpleModel.ZoneType;
 import org.genericsystem.cv.newmodel.SimpleModel.ZoneType.ZoneInstance;
+import org.genericsystem.cv.retriever.DocFields;
 import org.genericsystem.cv.utils.ClassifierUsingFields;
 import org.genericsystem.cv.utils.Deskewer;
 import org.genericsystem.cv.utils.Deskewer.METHOD;
+import org.genericsystem.cv.utils.ImgFilterFunction;
+import org.genericsystem.cv.utils.ImgFunction;
 import org.genericsystem.cv.utils.ModelTools;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.genericsystem.kernel.Engine;
@@ -165,7 +166,7 @@ public class FillNewModelWithData {
 		// Loop through each field, and do the OCR
 		Map<String, JsonObject> result = new ConcurrentHashMap<>(fields.size() + 1);
 		fields.forEach(field -> {
-			logger.info("Field {}", ((DocField) field).getNum());
+			logger.info("Field {}", field.getNum());
 			imgs.entrySet().forEach(entry -> {
 				if (!("reality".equals(entry.getKey()) || "best".equals(entry.getKey()))) {
 					// Do the ocr, and store the value in the "labels" Map
@@ -173,16 +174,16 @@ public class FillNewModelWithData {
 				}
 			});
 			// Loop through the "labels" Map and choose the best text
-			field.consolidateOcr();
+			field.consolidateOcr(true);
 
 			// Store the field data in a json object
 			JsonObject json = new JsonObject();
-			json.put(FIELD_NUM, ((DocField) field).getNum());
-			json.put(CONSOLIDATED, field.getConsolidated().orElse(""));
+			json.put(FIELD_NUM, field.getNum());
+			json.put(CONSOLIDATED, field.getConsolidated()); // TODO: maybe pass an empty string if consolidated is null?
 			json.put(RECT, JsonObject.mapFrom(field.getRect()));
 
 			// Add this to the result
-			result.put(((DocField) field).getUid(), json);
+			result.put(field.getUid(), json);
 		});
 		// Store the ocr in the JsonObject
 		jsonObject.put(ZONES, result);

@@ -3,7 +3,7 @@ package org.genericsystem.ir;
 import java.nio.file.Paths;
 
 import org.genericsystem.common.Root;
-import org.genericsystem.cv.classifier.FillNewModelWithData;
+import org.genericsystem.cv.newmodel.FillNewModelWithData;
 import org.genericsystem.kernel.Engine;
 
 import io.vertx.core.AsyncResult;

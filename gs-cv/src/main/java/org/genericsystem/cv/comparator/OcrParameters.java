@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.genericsystem.cv.Zone;
 import org.genericsystem.cv.Zones;
+import org.genericsystem.cv.utils.ImgFilterFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

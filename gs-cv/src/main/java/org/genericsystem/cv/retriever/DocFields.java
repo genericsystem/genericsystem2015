@@ -1,12 +1,13 @@
-package org.genericsystem.cv.classifier;
+package org.genericsystem.cv.retriever;
 
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.genericsystem.cv.Img;
+import org.genericsystem.cv.utils.ParallelTasks;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.slf4j.Logger;
@@ -22,7 +23,7 @@ public class DocFields extends AbstractFields<DocField> {
 	private static final String FIELDS = "fields";
 
 	public DocFields() {
-		this.fields = new ArrayList<>();
+		super();
 	}
 
 	public DocFields(List<DocField> fields) {
@@ -56,8 +57,8 @@ public class DocFields extends AbstractFields<DocField> {
 	}
 
 	public void buildFields(List<Rect> rects) {
-		AtomicInteger counter = new AtomicInteger(0);
-		fields = rects.stream().map(rect -> new DocField(counter.incrementAndGet(), rect)).collect(Collectors.toList());
+		int[] counter = new int[] { 0 };
+		fields = rects.stream().map(rect -> new DocField(counter[0]++, rect)).collect(Collectors.toList());
 	}
 
 	public Img annotateImage(final Img img, final double fontScale, final Scalar color, final int thickness) {
@@ -66,19 +67,21 @@ public class DocFields extends AbstractFields<DocField> {
 		return annotated;
 	}
 
-	public void drawOcrPerspectiveInverse(Img display, Scalar color, int thickness) {
-		consolidatedFieldStream().forEach(field -> field.drawOcrPerspectiveInverse(display, color, thickness));
-	}
-
-	@Override
-	public void drawConsolidated(Img stabilizedDisplay) {
-		consolidatedFieldStream().forEach(field -> field.drawRect(stabilizedDisplay, new Scalar(0, 0, 255), 2));
-	}
-
 	@Override
 	public void performOcr(Img rootImg) {
 		// Need to process all fields for documents
-		stream().forEach(f -> f.ocr(rootImg));
+		Iterator<DocField> it = fields.iterator();
+		while (it.hasNext()) {
+			ParallelTasks tasks = new ParallelTasks();
+			for (int i = 0; i < tasks.getCounter(); ++i)
+				if (it.hasNext())
+					tasks.add(() -> it.next().ocr(rootImg));
+			try {
+				tasks.run();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 }

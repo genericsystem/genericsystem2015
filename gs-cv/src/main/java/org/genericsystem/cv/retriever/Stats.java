@@ -1,4 +1,4 @@
-package org.genericsystem.cv.classifier;
+package org.genericsystem.cv.retriever;
 
 import java.util.ArrayList;
 import java.util.List;

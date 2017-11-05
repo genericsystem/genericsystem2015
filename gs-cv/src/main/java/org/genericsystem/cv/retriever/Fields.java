@@ -1,4 +1,4 @@
-package org.genericsystem.cv.classifier;
+package org.genericsystem.cv.retriever;
 
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
@@ -31,8 +30,6 @@ public class Fields extends AbstractFields<Field> {
 	private static final int OCR_TIMEOUT = 50;
 	private static final double MIN_OVERLAP = 0.2;
 
-	private ThreadLocalRandom rand = ThreadLocalRandom.current();
-
 	public void reset() {
 		fields = new ArrayList<>();
 	}
@@ -45,31 +42,32 @@ public class Fields extends AbstractFields<Field> {
 			while (innerIt.hasNext()) {
 				Field field2 = innerIt.next();
 				if (field1 != field2) {
-					Optional<Rect> optional = RectToolsMapper.getInsider(field1.getRect(), field2.getRect());
-					if (optional.isPresent()) {
-						if (optional.get().equals(field2.getRect())) {
-							double mergeArea = RectToolsMapper.inclusiveArea(field1.getRect(), field2.getRect());
-							if (mergeArea <= 0.5) {
-								// Not enough overlap => delete bigger rect
-								logger.warn("Removing field with {} common area -> {}, {}", String.format("%.1f%%", mergeArea * 100), field1.getRect(), field1.getLabels());
-							} else {
-								// Enough overlap => merge fields
-								logger.warn("Merging fields with {} common area -> {}, {}", String.format("%.1f%%", mergeArea * 100), field1.getLabels(), field2.getLabels());
-								Rect mean = RectToolsMapper.getMean(Arrays.asList(field1.getRect(), field2.getRect()));
-								field2.merge(field1);
-								field2.updateRect(mean);
-							}
+					// Optional<Rect> optional = RectToolsMapper.getInsider(field1.getRect(), field2.getRect());
+					double mergeArea = RectToolsMapper.inclusiveArea(field1.getRect(), field2.getRect());
+					if (mergeArea != 0) {
+						if (mergeArea <= 0.5) {
+							// Not enough overlap => delete bigger rect
+							logger.warn("Removing field with {} common area -> {}, {}", String.format("%.1f%%", mergeArea * 100), field1.getRect(), field1.getLabels());
+						} else {
+							// Enough overlap => merge fields
+							logger.warn("Merging fields with {} common area -> {}, {}", String.format("%.1f%%", mergeArea * 100), field1.getLabels(), field2.getLabels());
+							Rect mean = RectToolsMapper.getMean(Arrays.asList(field1.getRect(), field2.getRect()));
+							field2.merge(field1);
+							field2.updateRect(mean);
+						}
+						if (!field1.isLocked()) {
 							outerIt.remove();
 							break;
-						}
+						} else
+							System.err.println(" >>> unable to delete locked field");
 					}
 				}
 			}
 		}
 	}
 
-	public void drawIndestructible(Img display, Mat homography) {
-		fields.forEach(field -> field.drawIndestructible(display, homography));
+	public void drawLockedFields(Img display, Mat homography) {
+		fields.forEach(field -> field.drawLockedField(display, homography));
 	}
 
 	public void merge(List<Rect> newRects) {
@@ -101,7 +99,8 @@ public class Fields extends AbstractFields<Field> {
 					double mergeArea = RectToolsMapper.inclusiveArea(f.getRect(), currentOldField.getRect());
 					StringBuffer sb = new StringBuffer();
 					sb.append(String.format("Merging fields with %.1f%% common area", mergeArea * 100));
-					currentOldField.getConsolidated().ifPresent(s -> sb.append(String.format(" -> %s", s)));
+					if (currentOldField.getConsolidated() != null)
+						sb.append(String.format(" -> %s", currentOldField.getConsolidated()));
 					logger.info(sb.toString());
 					f.merge(currentOldField);
 					f.resetDeadCounter();
@@ -113,7 +112,7 @@ public class Fields extends AbstractFields<Field> {
 		}
 		// Increment the deadCounter in old fields that were not merged
 		oldFields.forEach(f -> f.incrementDeadCounter());
-		oldFields.removeIf(f -> !f.isIndestructible() && f.deadCounter >= MAX_DELETE_UNMERGED);
+		oldFields.removeIf(f -> !f.isLocked() && f.deadCounter >= MAX_DELETE_UNMERGED);
 		// At this stage, add all the remaining fields still in oldFields
 		fields.addAll(oldFields);
 	}
@@ -152,9 +151,9 @@ public class Fields extends AbstractFields<Field> {
 	}
 
 	private void runSequentialOcr(Img rootImg) {
-		int idx = rand.nextInt(size());
+		int idx = ThreadLocalRandom.current().nextInt(size());
 		Field f = fields.get(idx);
-		if (!f.isIndestructible())
+		if (!f.isLocked())
 			f.ocr(rootImg);
 	}
 
@@ -162,10 +161,10 @@ public class Fields extends AbstractFields<Field> {
 		ParallelTasks tasks = new ParallelTasks();
 		Set<Integer> indexes = new HashSet<>();
 		while (indexes.size() < tasks.getCounter()) {
-			int idx = rand.nextInt(size());
+			int idx = ThreadLocalRandom.current().nextInt(size());
 			if (indexes.add(idx)) {
 				Field f = fields.get(idx);
-				if (!f.isIndestructible())
+				if (!f.isLocked())
 					tasks.add(() -> f.ocr(rootImg));
 			}
 		}

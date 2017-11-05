@@ -5,8 +5,8 @@ import java.util.stream.Stream;
 
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Root;
-import org.genericsystem.cv.classifier.FillNewModelWithData;
 import org.genericsystem.cv.newmodel.SimpleModel.ConsolidatedType.ConsolidatedInstance;
+import org.genericsystem.cv.newmodel.FillNewModelWithData;
 import org.genericsystem.cv.newmodel.SimpleModel.ImgType;
 import org.genericsystem.cv.newmodel.SimpleModel.ImgType.ImgInstance;
 import org.genericsystem.cv.newmodel.SimpleModel.ZoneType.ZoneInstance;
