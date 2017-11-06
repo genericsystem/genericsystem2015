@@ -140,8 +140,8 @@ public class Fields extends AbstractFields<Field> {
 			return;
 		long TS = System.currentTimeMillis();
 		while (System.currentTimeMillis() - TS <= OCR_TIMEOUT) {
-			// runParallelOcr(rootImg);
-			runSequentialOcr(rootImg);
+			runParallelOcr(rootImg);
+			// runSequentialOcr(rootImg);
 		}
 	}
 
@@ -152,6 +152,7 @@ public class Fields extends AbstractFields<Field> {
 			f.ocr(rootImg);
 	}
 
+	// TODO: verify if this method lead to an unwanted thread lock
 	private void runParallelOcr(Img rootImg) {
 		ParallelTasks tasks = new ParallelTasks();
 		Set<Integer> indexes = new HashSet<>();
