@@ -124,6 +124,7 @@ public class CamLiveRetriever extends AbstractApp {
 				}
 				Img stabilized = warpPerspective(frame, stabilizationHomography);
 				Img stabilizedDisplay = new Img(stabilized.getSrc(), true);
+
 				if (stabilizationHasChanged) {
 					Stats.beginTask("stabilizationHasChanged");
 					stabilized = newImgDescriptor.getDeperspectivedImg();
@@ -136,7 +137,7 @@ public class CamLiveRetriever extends AbstractApp {
 					Stats.beginTask("merge fields");
 					fields.merge(detectRects(stabilizedDisplay));
 					Stats.endTask("merge fields");
-					// fields.removeOverlaps();
+					fields.removeOverlaps();
 					fields.drawFieldsOnStabilized(stabilizedDisplay);
 					stabilizedImgDescriptor = newImgDescriptor;
 					stabilizationHomography = deperspectivGraphy;
