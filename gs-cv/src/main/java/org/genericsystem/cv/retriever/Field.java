@@ -35,6 +35,12 @@ public class Field extends AbstractField {
 			setFinal();
 	}
 
+	@Override
+	public void resetDeadCounter() {
+		super.resetDeadCounter();
+		setFinal();
+	}
+
 	public void drawLockedField(Img display, Mat homography) {
 		if (locked)
 			drawRect(display, getRectPointsWithHomography(homography), new Scalar(255, 172, 0), 2);

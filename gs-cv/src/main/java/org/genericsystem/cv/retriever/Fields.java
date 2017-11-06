@@ -102,11 +102,8 @@ public class Fields extends AbstractFields<Field> {
 					if (f.getConsolidated() != null)
 						sb.append(String.format(" -> %s", f.getConsolidated()));
 					logger.info(sb.toString());
-					Field merged = new Field(f);
-					merged.updateRect(rect);
-					merged.resetDeadCounter();
-					fields.add(merged);
-					fields.remove(f);
+					f.updateRect(rect);
+					f.resetDeadCounter();
 				});
 			} else {
 				logger.info("No match for {}. Creating a new Field", rect);
