@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 import org.genericsystem.cv.Img;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
+import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 
 public abstract class AbstractFields<F extends AbstractField> implements Iterable<F> {
@@ -32,6 +33,10 @@ public abstract class AbstractFields<F extends AbstractField> implements Iterabl
 
 	protected List<F> findClusteredFields(F field, double epsilon) {
 		return fields.stream().filter(f -> f.isClusteredWith(field.getRect(), epsilon)).collect(Collectors.toList());
+	}
+
+	protected List<F> findPossibleMatches(Rect rect, double epsilon) {
+		return fields.stream().filter(f -> f.isClusteredWith(rect, epsilon)).collect(Collectors.toList());
 	}
 
 	protected List<F> findContainingFields(F field) {

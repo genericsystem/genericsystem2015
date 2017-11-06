@@ -71,57 +71,56 @@ public class Fields extends AbstractFields<Field> {
 	}
 
 	public void merge(List<Rect> newRects) {
-		List<Field> oldFields = new ArrayList<Field>(fields);
-		fields = buildNewFields(newRects, 0.5);
-
-		Iterator<Field> it = oldFields.iterator();
-		while (it.hasNext()) {
-			Field currentOldField = it.next();
-			List<Field> matches = findClusteredFields(currentOldField, 0.1);
+		// Increment the dead counter of each field
+		fields.forEach(f -> f.incrementDeadCounter());
+		// Filter out the rectangles to remove the bigger ones
+		List<Rect> rects = filterRects(newRects, 0.5);
+		// Loop over all the rectangles and try to find any matching field
+		for (Rect rect : rects) {
+			List<Field> matches = findPossibleMatches(rect, 0.1);
+			// Remove the false positives
+			matches = matches.stream().filter(f -> RectToolsMapper.inclusiveArea(f.getRect(), rect) > MIN_OVERLAP / 10).collect(Collectors.toList());
 			if (!matches.isEmpty()) {
-				// Remove the false positives
-				matches = matches.stream().filter(f -> RectToolsMapper.inclusiveArea(f.getRect(), currentOldField.getRect()) > MIN_OVERLAP / 10).collect(Collectors.toList());
 				// If there is more than one match, select only the best
 				if (matches.size() > 1) {
 					logger.info("Multiple matches ({}), removing false positives", matches.size());
 					// Remove the overlaps with less than 10% common area
-					matches = matches.stream().filter(f -> RectToolsMapper.inclusiveArea(f.getRect(), currentOldField.getRect()) >= MIN_OVERLAP).collect(Collectors.toList());
+					matches = matches.stream().filter(f -> RectToolsMapper.inclusiveArea(f.getRect(), rect) >= MIN_OVERLAP).collect(Collectors.toList());
 					if (matches.size() > 1) {
 						logger.warn("Still multiple matches ({}), selecting the maximum overlap", matches.size());
 						matches = Arrays.asList(matches.stream().max((f1, f2) -> {
-							double area1 = RectToolsMapper.inclusiveArea(f1.getRect(), currentOldField.getRect());
-							double area2 = RectToolsMapper.inclusiveArea(f2.getRect(), currentOldField.getRect());
+							double area1 = RectToolsMapper.inclusiveArea(f1.getRect(), rect);
+							double area2 = RectToolsMapper.inclusiveArea(f2.getRect(), rect);
 							return Double.compare(area1, area2);
 						}).orElseThrow(IllegalStateException::new));
 					}
 				}
 				matches.forEach(f -> {
-					double mergeArea = RectToolsMapper.inclusiveArea(f.getRect(), currentOldField.getRect());
+					double mergeArea = RectToolsMapper.inclusiveArea(f.getRect(), rect);
 					StringBuffer sb = new StringBuffer();
 					sb.append(String.format("Merging fields with %.1f%% common area", mergeArea * 100));
-					if (currentOldField.getConsolidated() != null)
-						sb.append(String.format(" -> %s", currentOldField.getConsolidated()));
+					if (f.getConsolidated() != null)
+						sb.append(String.format(" -> %s", f.getConsolidated()));
 					logger.info(sb.toString());
-					f.merge(currentOldField);
-					f.resetDeadCounter();
+					Field merged = new Field(f);
+					merged.updateRect(rect);
+					merged.resetDeadCounter();
+					fields.add(merged);
+					fields.remove(f);
 				});
 			} else {
-				it.remove();
-				logger.info("No match for : " + currentOldField.getLabels().keySet());
+				logger.info("No match for {}. Creating a new Field", rect);
+				fields.add(new Field(rect));
 			}
-
 		}
-		// Increment the deadCounter in old fields that were not merged
-		oldFields.forEach(f -> f.incrementDeadCounter());
-		oldFields.removeIf(f -> !f.isLocked() && f.deadCounter >= MAX_DELETE_UNMERGED);
-		// At this stage, add all the remaining fields still in oldFields
-		fields.addAll(oldFields);
+		// Remove the rectangles that could not be merged too many times
+		fields.removeIf(f -> !f.isLocked() && f.deadCounter >= MAX_DELETE_UNMERGED);
 	}
 
-	private List<Field> buildNewFields(List<Rect> rects, double thresholdFactor) {
+	private List<Rect> filterRects(List<Rect> rects, double thresholdFactor) {
 		double meanArea = rects.stream().mapToDouble(r -> r.area()).average().getAsDouble();
 		double sem = Math.sqrt(rects.stream().mapToDouble(r -> Math.pow(r.area() - meanArea, 2)).sum() / (rects.size() - 1));
-		return rects.stream().filter(r -> (r.area() - meanArea) <= (sem * thresholdFactor)).map(Field::new).collect(Collectors.toList());
+		return rects.stream().filter(r -> (r.area() - meanArea) <= (sem * thresholdFactor)).collect(Collectors.toList());
 	}
 
 	public void restabilizeFields(Mat homography) {
@@ -144,6 +143,8 @@ public class Fields extends AbstractFields<Field> {
 
 	@Override
 	public void performOcr(Img rootImg) {
+		if (size() <= 0)
+			return;
 		long TS = System.currentTimeMillis();
 		while (System.currentTimeMillis() - TS <= OCR_TIMEOUT) {
 			runParallelOcr(rootImg);

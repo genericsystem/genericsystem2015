@@ -56,10 +56,22 @@ public abstract class AbstractField {
 		this.deadCounter = 0;
 	}
 
+	public AbstractField(AbstractField other) {
+		updateRect(other.getRect());
+		this.labels = other.getLabels();
+		this.consolidated = other.getConsolidated();
+		this.attempts = other.getAttempts();
+		this.confidence = other.getConfidence();
+		this.deadCounter = other.getDeadCounter();
+	}
+
 	public void merge(AbstractField field) {
-		labels.putAll(field.getLabels());
-		attempts = field.getAttempts();
-		deadCounter = field.getDeadCounter();
+		field.getLabels().entrySet().forEach(entry -> labels.merge(entry.getKey(), entry.getValue(), Integer::sum));
+		attempts += field.getAttempts();
+		deadCounter += field.getDeadCounter();
+		// labels.putAll(field.getLabels());
+		// attempts = field.getAttempts();
+		// deadCounter = field.getDeadCounter();
 		if (consolidated != null)
 			consolidateOcr(false);
 	}
@@ -99,8 +111,8 @@ public abstract class AbstractField {
 			if (Integer.MAX_VALUE == limit)
 				strings = labels.entrySet().stream().collect(ArrayList<String>::new, (list, e) -> IntStream.range(0, e.getValue()).forEach(count -> list.add(e.getKey())), List::addAll);
 			else
-				strings = labels.entrySet().stream().sorted(Entry.<String, Integer> comparingByValue().reversed()).limit(limit)
-						.collect(ArrayList<String>::new, (list, e) -> IntStream.range(0, e.getValue()).forEach(count -> list.add(e.getKey())), List::addAll);
+				strings = labels.entrySet().stream().sorted(Entry.<String, Integer>comparingByValue().reversed()).limit(limit).collect(ArrayList<String>::new, (list, e) -> IntStream.range(0, e.getValue()).forEach(count -> list.add(e.getKey())),
+						List::addAll);
 			Tuple res = OCRPlasty.correctStringsAndGetOutliers(strings, RANSAC.NORM_LEVENSHTEIN);
 			this.consolidated = res.getString().orElse(null);
 			this.confidence = res.getConfidence();

@@ -15,6 +15,10 @@ public class Field extends AbstractField {
 		super(rect);
 	}
 
+	public Field(Field other) {
+		super(other);
+	}
+
 	@Override
 	public void ocr(Img rootImg) {
 		super.ocr(rootImg);
