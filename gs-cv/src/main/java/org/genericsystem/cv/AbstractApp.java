@@ -54,6 +54,8 @@ public abstract class AbstractApp extends Application {
 		scene.setOnKeyPressed(event -> {
 			if (event.getCode() == KeyCode.SPACE)
 				onSpace();
+			if (event.getCode() == KeyCode.R)
+				onR();
 		});
 		stage.setScene(scene);
 		stage.show();
@@ -62,6 +64,10 @@ public abstract class AbstractApp extends Application {
 	// hook
 	protected void onSpace() {
 		System.out.println("space pressed");
+	}
+
+	protected void onR() {
+		System.out.println("r pressed");
 	}
 
 	protected abstract void fillGrid(GridPane mainGrid);

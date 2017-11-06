@@ -170,6 +170,11 @@ public class CamLiveRetriever extends AbstractApp {
 		stabilizationHasChanged = true;
 	}
 
+	@Override
+	protected void onR() {
+		fields.reset();
+	}
+
 	private List<Rect> detectRects(Img stabilized) {
 		Img closed = stabilized.bilateralFilter(5, 80, 80).adaptativeGaussianInvThreshold(11, 3).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(11, 3));
 		List<MatOfPoint> contours = new ArrayList<>();
