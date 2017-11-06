@@ -46,25 +46,23 @@ public abstract class AbstractFields<F extends AbstractField> implements Iterabl
 		return stream().filter(field -> field.contains(pt)).findFirst().orElse(null);
 	}
 
-	public void performOcr(Img rootImg) {
-		randomOcrStream().forEach(f -> f.ocr(rootImg));
-	}
+	public abstract void performOcr(Img rootImg);
 
 	public void drawOcrPerspectiveInverse(Img display, Mat homography, Scalar color, int thickness) {
 		stream()./* filter(field -> field.getDeadCounter() == 0). */forEach(field -> field.drawOcrPerspectiveInverse(display, homography, color, thickness));
 	}
 
 	public void drawFieldsOnStabilized(Img stabilized) {
-		stream().forEach(f -> f.drawRect(stabilized, f.getDeadCounter() == 0 ? new Scalar(0, 255, 0) : new Scalar(0, 0, 255), 1));
+		stream().forEach(f -> f.drawRect(stabilized, f.getDeadCounter() < 1 ? new Scalar(0, 255, 0) : new Scalar(0, 0, 255), 1));
 	}
 
 	public void drawConsolidated(Img stabilizedDisplay) {
 		consolidatedFieldStream().forEach(field -> field.drawRect(stabilizedDisplay, new Scalar(0, 255, 0), 1));
 	}
 
-	public Stream<F> randomOcrStream() {
-		return stream().filter(F::needOcr);
-	}
+	// public Stream<F> randomOcrStream() {
+	// return stream().filter(F::needOcr);
+	// }
 
 	public Stream<F> consolidatedFieldStream() {
 		return stream().filter(f -> f.isConsolidated());

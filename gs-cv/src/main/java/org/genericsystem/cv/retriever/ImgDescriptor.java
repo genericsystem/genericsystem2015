@@ -69,7 +69,7 @@ public class ImgDescriptor {
 		return new MatOfKeyPoint(keyPoints.stream().toArray(KeyPoint[]::new));
 	}
 
-	Mat computeStabilizationGraphy(ImgDescriptor frameDescriptor) {
+	public Mat computeStabilizationGraphy(ImgDescriptor frameDescriptor) {
 		MatOfDMatch matches = new MatOfDMatch();
 
 		MATCHER.match(getDescriptors(), frameDescriptor.getDescriptors(), matches);

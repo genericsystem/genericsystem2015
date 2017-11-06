@@ -227,7 +227,7 @@ public class LinesDetector4 extends AbstractApp {
 						vn.put(1, 0, Math.sin(params[1]) * Math.sin(params[0]));
 						vn.put(2, 0, Math.cos(params[0]));
 						return distance(uncalibrate(vn), line);
-					}, datas, new double[] { theta, phi }).getParms();
+					}, datas, new double[] { theta, phi }).getParams();
 					vp[0].put(0, 0, r * Math.cos(parameters[1]) * Math.sin(parameters[0]));
 					vp[0].put(1, 0, r * Math.sin(parameters[1]) * Math.sin(parameters[0]));
 					vp[0].put(2, 0, r * Math.cos(parameters[0]));

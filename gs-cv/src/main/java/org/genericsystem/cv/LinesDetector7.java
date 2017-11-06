@@ -63,27 +63,27 @@ public class LinesDetector7 extends AbstractApp {
 				Img grad = new Img(frame, false).morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(2, 2)).otsu().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(3, 3));
 				Lines lines = new Lines(grad.houghLinesP(1, Math.PI / 180, 10, 100, 10));
 				if (lines.size() > 10) {
-					lines = lines.reduce(20);
 					lines.draw(frame, new Scalar(0, 0, 255));
-					lines = lines.filter(line -> distance(vp, line) < 0.48);
+					lines = lines.filter(line -> distance(vp, line) < 0.5);
+					lines = lines.reduce(20);
 					lines.draw(frame, new Scalar(0, 255, 0));
 					frameView.setImage(Tools.mat2jfxImage(frame));
-					lines = lines.reduce(10);
-					double[] newThetaPhi = new LMHostImpl<>((line, params) -> distance(new AngleCalibrated(params).uncalibrate(), line), lines.lines, calibrated.getTethaPhi()).getParams();
-					calibrated = calibrated.dump(newThetaPhi, 3);
-					vp = calibrated.uncalibrate();
-					System.out.println("Vanishing point : " + vp);
-					Mat homography = findHomography(vp, frame.width(), frame.height());
-					Imgproc.warpPerspective(frame, dePerspectived, homography, frame.size(), Imgproc.INTER_LINEAR, Core.BORDER_CONSTANT, Scalar.all(0));
-					deskiewedView.setImage(Tools.mat2jfxImage(dePerspectived));
-				} else
-					System.out.println("Not enough lines : " + lines.size());
+					// lines = lines.reduce(10);
+				double[] newThetaPhi = new LMHostImpl<>((line, params) -> distance(new AngleCalibrated(params).uncalibrate(), line), lines.lines, calibrated.getTethaPhi()).getParams();
+				calibrated = calibrated.dump(newThetaPhi, 1);
+				vp = calibrated.uncalibrate();
+				System.out.println("Vanishing point : " + vp);
+				Mat homography = findHomography(vp, frame.width(), frame.height());
+				Imgproc.warpPerspective(frame, dePerspectived, homography, frame.size(), Imgproc.INTER_LINEAR, Core.BORDER_CONSTANT, Scalar.all(0));
+				deskiewedView.setImage(Tools.mat2jfxImage(dePerspectived));
+			} else
+				System.out.println("Not enough lines : " + lines.size());
 
-			} catch (Throwable e) {
-				e.printStackTrace();
-			}
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
 
-		}, 30, 10, TimeUnit.MILLISECONDS);
+	}, 30, 10, TimeUnit.MILLISECONDS);
 
 	}
 

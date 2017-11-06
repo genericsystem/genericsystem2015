@@ -8,6 +8,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
+
 import org.genericsystem.cv.utils.Line;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.genericsystem.cv.utils.Ransac;
@@ -22,9 +25,6 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
-
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
 
 public class LinesDetector extends AbstractApp {
 
@@ -59,13 +59,6 @@ public class LinesDetector extends AbstractApp {
 				capture.read(frame);
 				Img grad = new Img(frame, false).morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_RECT, new Size(2, 2)).otsu();
 				Lines lines = new Lines(grad.houghLinesP(1, Math.PI / 180, 100, 100, 10));
-				// List<List<Point[]>> lineSegmentsClusters = new ArrayList<>();
-				// List<Integer> numInliers = new ArrayList<>();
-				// List<Mat> vps = new ArrayList<>();
-				// VanishingPointsDetector vpd = new VanishingPointsDetector(frame.size(), true);
-				// vpd.multipleVPEstimation(lines.toLinesSegments(), lineSegmentsClusters, numInliers, vps, 1);
-				// vpd.drawCS(frame, lineSegmentsClusters, vps);
-				System.out.println("Average angle: " + lines.getMean() / Math.PI * 180);
 				if (lines.size() > 16) {
 					lines.draw(frame, new Scalar(0, 0, 255));
 					lines = lines.ransacMean();

@@ -9,6 +9,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
+
 import org.genericsystem.cv.lm.LMHostImpl;
 import org.genericsystem.cv.utils.Line;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
@@ -25,9 +28,6 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
 import org.opencv.videoio.VideoCapture;
-
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
 
 public class LinesDetector6 extends AbstractApp {
 
@@ -77,7 +77,7 @@ public class LinesDetector6 extends AbstractApp {
 						di /= (Math.sqrt(params[0] * params[0] + params[1] * params[1] + params[2] * params[2]) * Core.norm(lineMat));
 						return di * di;
 					}, lines.getLines(), new double[] { vpCalib.get(0, 0)[0], vpCalib.get(1, 0)[0], vpCalib.get(2, 0)[0] });
-					double[] newVp = fitHost.getParms();
+					double[] newVp = fitHost.getParams();
 					Mat result = unCalibrate(Converters.vector_double_to_Mat(Arrays.asList(newVp[0], newVp[1], newVp[2])));
 					vp = new Point(result.get(0, 0)[0], result.get(1, 0)[0]);
 

@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 
 import org.genericsystem.cv.Img;
@@ -33,7 +32,7 @@ public abstract class AbstractField {
 	protected static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	protected static final int MIN_SIZE_CONSOLIDATION = 5;
-	private static final int OCR_CONFIDENCE_THRESH = 5;
+	private static final int OCR_CONFIDENCE_THRESH = 0;
 
 	protected Rect rect;
 	protected Point center;
@@ -58,9 +57,9 @@ public abstract class AbstractField {
 	}
 
 	public void merge(AbstractField field) {
-		field.getLabels().entrySet().forEach(entry -> labels.merge(entry.getKey(), entry.getValue(), Integer::sum));
-		attempts += field.getAttempts();
-		deadCounter += field.getDeadCounter();
+		labels.putAll(field.getLabels());
+		attempts = field.getAttempts();
+		deadCounter = field.getDeadCounter();
 		if (consolidated != null)
 			consolidateOcr(false);
 	}
@@ -100,8 +99,8 @@ public abstract class AbstractField {
 			if (Integer.MAX_VALUE == limit)
 				strings = labels.entrySet().stream().collect(ArrayList<String>::new, (list, e) -> IntStream.range(0, e.getValue()).forEach(count -> list.add(e.getKey())), List::addAll);
 			else
-				strings = labels.entrySet().stream().sorted(Entry.<String, Integer>comparingByValue().reversed()).limit(limit).collect(ArrayList<String>::new, (list, e) -> IntStream.range(0, e.getValue()).forEach(count -> list.add(e.getKey())),
-						List::addAll);
+				strings = labels.entrySet().stream().sorted(Entry.<String, Integer> comparingByValue().reversed()).limit(limit)
+						.collect(ArrayList<String>::new, (list, e) -> IntStream.range(0, e.getValue()).forEach(count -> list.add(e.getKey())), List::addAll);
 			Tuple res = OCRPlasty.correctStringsAndGetOutliers(strings, RANSAC.NORM_LEVENSHTEIN);
 			this.consolidated = res.getString().orElse(null);
 			this.confidence = res.getConfidence();
@@ -197,9 +196,9 @@ public abstract class AbstractField {
 		return consolidated != null;
 	}
 
-	public boolean needOcr() {
-		return ThreadLocalRandom.current().nextBoolean();
-	}
+	// public boolean needOcr() {
+	// return ThreadLocalRandom.current().nextBoolean();
+	// }
 
 	public void incrementDeadCounter() {
 		deadCounter++;
@@ -249,52 +248,52 @@ public abstract class AbstractField {
 		return sb.toString();
 	}
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((center == null) ? 0 : center.hashCode());
-		long temp;
-		temp = Double.doubleToLongBits(confidence);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		result = prime * result + ((consolidated == null) ? 0 : consolidated.hashCode());
-		result = prime * result + ((labels == null) ? 0 : labels.hashCode());
-		result = prime * result + ((rect == null) ? 0 : rect.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		AbstractField other = (AbstractField) obj;
-		if (center == null) {
-			if (other.center != null)
-				return false;
-		} else if (!center.equals(other.center))
-			return false;
-		if (Double.doubleToLongBits(confidence) != Double.doubleToLongBits(other.confidence))
-			return false;
-		if (consolidated == null) {
-			if (other.consolidated != null)
-				return false;
-		} else if (!consolidated.equals(other.consolidated))
-			return false;
-		if (labels == null) {
-			if (other.labels != null)
-				return false;
-		} else if (!labels.equals(other.labels))
-			return false;
-		if (rect == null) {
-			if (other.rect != null)
-				return false;
-		} else if (!rect.equals(other.rect))
-			return false;
-		return true;
-	}
+	// @Override
+	// public int hashCode() {
+	// final int prime = 31;
+	// int result = 1;
+	// result = prime * result + ((center == null) ? 0 : center.hashCode());
+	// long temp;
+	// temp = Double.doubleToLongBits(confidence);
+	// result = prime * result + (int) (temp ^ (temp >>> 32));
+	// result = prime * result + ((consolidated == null) ? 0 : consolidated.hashCode());
+	// result = prime * result + ((labels == null) ? 0 : labels.hashCode());
+	// result = prime * result + ((rect == null) ? 0 : rect.hashCode());
+	// return result;
+	// }
+	//
+	// @Override
+	// public boolean equals(Object obj) {
+	// if (this == obj)
+	// return true;
+	// if (obj == null)
+	// return false;
+	// if (getClass() != obj.getClass())
+	// return false;
+	// AbstractField other = (AbstractField) obj;
+	// if (center == null) {
+	// if (other.center != null)
+	// return false;
+	// } else if (!center.equals(other.center))
+	// return false;
+	// if (Double.doubleToLongBits(confidence) != Double.doubleToLongBits(other.confidence))
+	// return false;
+	// if (consolidated == null) {
+	// if (other.consolidated != null)
+	// return false;
+	// } else if (!consolidated.equals(other.consolidated))
+	// return false;
+	// if (labels == null) {
+	// if (other.labels != null)
+	// return false;
+	// } else if (!labels.equals(other.labels))
+	// return false;
+	// if (rect == null) {
+	// if (other.rect != null)
+	// return false;
+	// } else if (!rect.equals(other.rect))
+	// return false;
+	// return true;
+	// }
 
 }

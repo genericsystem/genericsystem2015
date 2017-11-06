@@ -13,10 +13,16 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
+
 import org.genericsystem.cv.AbstractApp;
+import org.genericsystem.cv.Calibrated.AngleCalibrated;
 import org.genericsystem.cv.Img;
+import org.genericsystem.cv.lm.LMHostImpl;
 import org.genericsystem.cv.utils.Line;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.genericsystem.cv.utils.Ransac;
@@ -35,9 +41,6 @@ import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
 
 @SuppressWarnings({ "resource" })
 public class CamLiveRetriever extends AbstractApp {
@@ -61,6 +64,8 @@ public class CamLiveRetriever extends AbstractApp {
 	private Mat frame = new Mat();
 	private boolean stabilizationHasChanged = true;
 	private int stabilizationErrors = 0;
+	private Point vp = new Point(0, 0);
+	private AngleCalibrated calibrated;
 
 	public static void main(String[] args) {
 		launch(args);
@@ -77,6 +82,9 @@ public class CamLiveRetriever extends AbstractApp {
 	protected void fillGrid(GridPane mainGrid) {
 
 		capture.read(frame);
+
+		AngleCalibrated.calibrate(frame.width(), frame.height());
+		calibrated = new AngleCalibrated(vp);
 
 		ImageView src0 = new ImageView(Tools.mat2jfxImage(frame));
 		mainGrid.add(src0, 0, 0);
@@ -103,67 +111,63 @@ public class CamLiveRetriever extends AbstractApp {
 				}
 				if (stabilizationErrors > 20) {
 					// TODO: clean fields
-					fields.reset();
-					stabilizationErrors = 0;
-					stabilizedImgDescriptor = null;
-				}
-				if (stabilizedImgDescriptor == null) {
-					stabilizedImgDescriptor = new ImgDescriptor(frame, deperspectivGraphy);
-					return;
-				}
-				ImgDescriptor newImgDescriptor = new ImgDescriptor(frame, deperspectivGraphy);
-				Mat stabilizationHomography = stabilizedImgDescriptor.computeStabilizationGraphy(newImgDescriptor);
-				if (stabilizationHomography == null) {
-					stabilizationErrors++;
-					logger.warn("Unable to compute a valid stabilization ({} times)", stabilizationErrors);
-					return;
-				}
-				Img stabilized = warpPerspective(frame, stabilizationHomography);
-				Img stabilizedDisplay = new Img(stabilized.getSrc(), true);
-				if (stabilizationHasChanged) {
-					Stats.beginTask("stabilizationHasChanged");
-					stabilized = newImgDescriptor.getDeperspectivedImg();
-					stabilizedDisplay = new Img(stabilized.getSrc(), true);
-					Mat fieldsHomography = new Mat();
-					Core.gemm(deperspectivGraphy, stabilizationHomography.inv(), 1, new Mat(), 0, fieldsHomography);
-					Stats.beginTask("restabilizeFields");
-					fields.restabilizeFields(fieldsHomography);
-					Stats.endTask("restabilizeFields");
-					Stats.beginTask("merge fields");
-					fields.merge(detectRects(stabilizedDisplay));
-					Stats.endTask("merge fields");
-
-					fields.removeOverlaps();
-
-					fields.drawFieldsOnStabilized(stabilizedDisplay);
-
-					stabilizedImgDescriptor = newImgDescriptor;
-					stabilizationHomography = deperspectivGraphy;
-					stabilizationHasChanged = false;
-					Stats.endTask("stabilizationHasChanged");
-				}
-				Img display = new Img(frame, false);
-
-				Stats.beginTask("consolidateOcr");
-				fields.performOcr(stabilized);
-				Stats.endTask("consolidateOcr");
-				fields.drawOcrPerspectiveInverse(display, stabilizationHomography.inv(), new Scalar(0, 255, 0), 1);
-
-				fields.drawLockedFields(display, stabilizationHomography.inv());
-
-				src0.setImage(display.toJfxImage());
-				src1.setImage(stabilizedDisplay.toJfxImage());
-				Stats.endTask("frame");
-
-				Stats.resetCumulative("RANSAC re-compute");
-				if (++counter % 10 == 0) {
-					System.out.println(Stats.getStatsAndReset());
-					counter = 0;
-				}
-			} catch (Throwable e) {
-				logger.warn("Exception while computing layout.", e);
+				fields.reset();
+				stabilizationErrors = 0;
+				stabilizedImgDescriptor = null;
 			}
-		}, 50, FRAME_DELAY, TimeUnit.MILLISECONDS);
+			if (stabilizedImgDescriptor == null) {
+				stabilizedImgDescriptor = new ImgDescriptor(frame, deperspectivGraphy);
+				return;
+			}
+			ImgDescriptor newImgDescriptor = new ImgDescriptor(frame, deperspectivGraphy);
+			Mat stabilizationHomography = stabilizedImgDescriptor.computeStabilizationGraphy(newImgDescriptor);
+			if (stabilizationHomography == null) {
+				stabilizationErrors++;
+				logger.warn("Unable to compute a valid stabilization ({} times)", stabilizationErrors);
+				return;
+			}
+			Img stabilized = warpPerspective(frame, stabilizationHomography);
+			Img stabilizedDisplay = new Img(stabilized.getSrc(), true);
+			if (stabilizationHasChanged) {
+				Stats.beginTask("stabilizationHasChanged");
+				stabilized = newImgDescriptor.getDeperspectivedImg();
+				stabilizedDisplay = new Img(stabilized.getSrc(), true);
+				Mat fieldsHomography = new Mat();
+				Core.gemm(deperspectivGraphy, stabilizationHomography.inv(), 1, new Mat(), 0, fieldsHomography);
+				Stats.beginTask("restabilizeFields");
+				fields.restabilizeFields(fieldsHomography);
+				Stats.endTask("restabilizeFields");
+				Stats.beginTask("merge fields");
+				fields.merge(detectRects(stabilizedDisplay));
+				Stats.endTask("merge fields");
+				fields.removeOverlaps();
+				fields.drawFieldsOnStabilized(stabilizedDisplay);
+				stabilizedImgDescriptor = newImgDescriptor;
+				stabilizationHomography = deperspectivGraphy;
+				stabilizationHasChanged = false;
+				Stats.endTask("stabilizationHasChanged");
+			}
+			Img display = new Img(frame, false);
+			Stats.beginTask("consolidateOcr");
+			logger.warn("before perform ocr");
+			fields.performOcr(stabilized);
+			logger.warn("after perform ocr");
+			Stats.endTask("consolidateOcr");
+			fields.drawOcrPerspectiveInverse(display, stabilizationHomography.inv(), new Scalar(0, 255, 0), 1);
+			fields.drawLockedFields(display, stabilizationHomography.inv());
+			src0.setImage(display.toJfxImage());
+			src1.setImage(stabilizedDisplay.toJfxImage());
+			Stats.endTask("frame");
+
+			// Stats.resetCumulative("RANSAC re-compute");
+			if (++counter % 10 == 0) {
+				System.out.println(Stats.getStatsAndReset());
+				counter = 0;
+			}
+		} catch (Throwable e) {
+			logger.warn("Exception while computing layout.", e);
+		}
+	}, 100, FRAME_DELAY, TimeUnit.MILLISECONDS);
 
 	}
 
@@ -189,7 +193,7 @@ public class CamLiveRetriever extends AbstractApp {
 	}
 
 	private Lines houghlinesP(Mat frame) {
-		Img grad = new Img(frame, false).morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_RECT, new Size(2, 2)).otsu().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(7, 7));
+		Img grad = new Img(frame, false).morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_RECT, new Size(2, 2)).otsu().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(3, 3));
 		return new Lines(grad.houghLinesP(1, Math.PI / 180, 10, 100, 10));
 	}
 
@@ -204,16 +208,60 @@ public class CamLiveRetriever extends AbstractApp {
 			logger.warn("Not enough lines to compute perspective transformation ({})", lines.size());
 			return null;
 		}
-		Stats.beginTask("ransac");
-		Ransac<Line> ransac = lines.vanishingPointRansac(frame.width(), frame.height());
-		Stats.endTask("ransac");
-		Mat vpMat = (Mat) ransac.getBestModel().getParams()[0];
-		Point vp = new Point(vpMat.get(0, 0)[0], vpMat.get(1, 0)[0]);
-		Point bary = new Point(frame.width() / 2, frame.height() / 2);
-		return findHomography(vp, bary, frame.width(), frame.height());
+		// Stats.beginTask("ransac");
+		// Ransac<Line> ransac = lines.vanishingPointRansac(frame.width(), frame.height());
+		// Stats.endTask("ransac");
+		// Mat vpMat = (Mat) ransac.getBestModel().getParams()[0];
+		// vp = new Point(vpMat.get(0, 0)[0], vpMat.get(1, 0)[0]);
+		// System.out.println("Ransac vp : " + vp);
+		lines = lines.filter(line -> distance(vp, line) < 0.48);
+		lines = lines.reduce(10);
+		// lines = new Lines(new ArrayList<>(ransac.getBestDataSet().values()));
+		Stats.beginTask("levenberg");
+		double[] newThetaPhi = new LMHostImpl<>((line, params) -> distance(new AngleCalibrated(params).uncalibrate(), line), lines.lines, calibrated.getTethaPhi()).getParams();
+		Stats.endTask("levenberg");
+		calibrated = calibrated.dump(newThetaPhi, 3);
+		vp = calibrated.uncalibrate();
+		System.out.println("Levenberg vp : " + vp);
+		// System.out.println("Vanishing point : " + vp);
+		return findHomography(vp, frame.width(), frame.height());
 	}
 
-	private Mat findHomography(Point vp, Point bary, double width, double height) {
+	private double distance(Point vp, Line line) {
+		double[] lineSegment = getNormalizedLine(line);
+		double n0 = -lineSegment[1];
+		double n1 = lineSegment[0];
+		double nNorm = Math.sqrt(n0 * n0 + n1 * n1);
+		double[] midPoint = getMiLine(line);
+		double r0, r1;
+		r0 = vp.y * midPoint[2] - midPoint[1];
+		r1 = midPoint[0] - vp.x * midPoint[2];
+		double rNorm = Math.sqrt(r0 * r0 + r1 * r1);
+		double num = (r0 * n0 + r1 * n1);
+		if (num < 0)
+			num = -num;
+
+		double d = 0;
+		if (nNorm != 0 && rNorm != 0)
+			d = num / (nNorm * rNorm);
+		// d *= line.size();
+		return d;
+	}
+
+	private double[] getNormalizedLine(Line line) {
+		double a = line.y1 - line.y2;
+		double b = line.x2 - line.x1;
+		double c = line.y1 * line.x2 - line.x1 * line.y2;
+		double norm = Math.sqrt(a * a + b * b + c * c);
+		return new double[] { a / norm, b / norm, c / norm };
+	}
+
+	private double[] getMiLine(Line line) {
+		return new double[] { (line.x1 + line.x2) / 2, (line.y1 + line.y2) / 2, 1d };
+	}
+
+	private Mat findHomography(Point vp, double width, double height) {
+		Point bary = new Point(frame.width() / 2, frame.height() / 2);
 		double alpha_ = Math.atan2((vp.y - bary.y), (vp.x - bary.x));
 		if (alpha_ < -Math.PI / 2 && alpha_ > -Math.PI)
 			alpha_ = alpha_ + Math.PI;
@@ -279,6 +327,19 @@ public class CamLiveRetriever extends AbstractApp {
 
 		public static Lines of(Collection<Line> lines) {
 			return new Lines(lines);
+		}
+
+		public Lines filter(Predicate<Line> predicate) {
+			return new Lines(lines.stream().filter(predicate).collect(Collectors.toList()));
+		}
+
+		public Lines reduce(int max) {
+			if (lines.size() <= max)
+				return this;
+			Set<Line> newLines = new HashSet<>();
+			while (newLines.size() < max)
+				newLines.add(lines.get((int) (Math.random() * size())));
+			return new Lines((newLines));
 		}
 
 		public Lines reduce(double factor, int threshold) {

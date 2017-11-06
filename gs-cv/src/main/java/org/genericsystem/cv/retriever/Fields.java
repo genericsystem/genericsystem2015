@@ -71,7 +71,7 @@ public class Fields extends AbstractFields<Field> {
 	}
 
 	public void merge(List<Rect> newRects) {
-		List<Field> oldFields = fields;
+		List<Field> oldFields = new ArrayList<Field>(fields);
 		fields = buildNewFields(newRects, 0.5);
 
 		Iterator<Field> it = oldFields.iterator();
@@ -105,9 +105,10 @@ public class Fields extends AbstractFields<Field> {
 					f.merge(currentOldField);
 					f.resetDeadCounter();
 				});
+			} else {
 				it.remove();
-			} else
 				logger.info("No match for : " + currentOldField.getLabels().keySet());
+			}
 
 		}
 		// Increment the deadCounter in old fields that were not merged
