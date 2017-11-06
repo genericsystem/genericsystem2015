@@ -136,7 +136,7 @@ public class CamLiveRetriever extends AbstractApp {
 					Stats.beginTask("merge fields");
 					fields.merge(detectRects(stabilizedDisplay));
 					Stats.endTask("merge fields");
-					fields.removeOverlaps();
+					// fields.removeOverlaps();
 					fields.drawFieldsOnStabilized(stabilizedDisplay);
 					stabilizedImgDescriptor = newImgDescriptor;
 					stabilizationHomography = deperspectivGraphy;

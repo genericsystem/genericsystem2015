@@ -26,7 +26,7 @@ public class Fields extends AbstractFields<Field> {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-	private static final int MAX_DELETE_UNMERGED = 5;
+	private static final int MAX_DELETE_UNMERGED = 20;
 	private static final int OCR_TIMEOUT = 50;
 	private static final double MIN_OVERLAP = 0.2;
 
@@ -77,7 +77,7 @@ public class Fields extends AbstractFields<Field> {
 		List<Rect> rects = filterRects(newRects, 0.5);
 		// Loop over all the rectangles and try to find any matching field
 		for (Rect rect : rects) {
-			List<Field> matches = findPossibleMatches(rect, 0.1);
+			List<Field> matches = findPossibleMatches(rect, 0.2);
 			// Remove the false positives
 			matches = matches.stream().filter(f -> RectToolsMapper.inclusiveArea(f.getRect(), rect) > MIN_OVERLAP / 10).collect(Collectors.toList());
 			if (!matches.isEmpty()) {
@@ -147,8 +147,8 @@ public class Fields extends AbstractFields<Field> {
 			return;
 		long TS = System.currentTimeMillis();
 		while (System.currentTimeMillis() - TS <= OCR_TIMEOUT) {
-			runParallelOcr(rootImg);
-			// runSequentialOcr(rootImg);
+			// runParallelOcr(rootImg);
+			runSequentialOcr(rootImg);
 		}
 	}
 

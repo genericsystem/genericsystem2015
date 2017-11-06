@@ -17,6 +17,8 @@ public class Field extends AbstractField {
 
 	public Field(Field other) {
 		super(other);
+		if (other instanceof Field)
+			setFinal();
 	}
 
 	@Override
