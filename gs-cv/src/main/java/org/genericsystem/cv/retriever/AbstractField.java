@@ -195,6 +195,10 @@ public abstract class AbstractField {
 		return RectToolsMapper.isInCluster(this.rect, otherRect, epsilon);
 	}
 
+	public boolean isClusteredWith(Rect otherRect, double epsilon, int sides) {
+		return RectToolsMapper.isInCluster(this.rect, otherRect, epsilon, sides);
+	}
+
 	public boolean overlapsMoreThanThresh(AbstractField other, double overlapThreshold) {
 		return overlapsMoreThanThresh(other.getRect(), overlapThreshold);
 	}

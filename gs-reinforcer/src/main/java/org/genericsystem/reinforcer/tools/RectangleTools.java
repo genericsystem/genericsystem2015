@@ -60,16 +60,16 @@ public class RectangleTools {
 
 		final Function<List<GSRect>, GSRect> merge;
 		switch (method) {
-			case UNION:
-				merge = list -> list.size() <= 1 ? list.get(0) : list.stream().reduce(list.get(0), (r, total) -> r.getUnion(total));
-				break;
-			case INTERSECTION:
-				merge = list -> list.size() <= 1 ? list.get(0) : list.stream().reduce(list.get(0), (r, total) -> r.getIntersection(total).orElse(total));
-				break;
-			default:
-			case MEAN:
-				merge = list -> list.size() <= 1 ? list.get(0) : getMean(list);
-				break;
+		case UNION:
+			merge = list -> list.size() <= 1 ? list.get(0) : list.stream().reduce(list.get(0), (r, total) -> r.getUnion(total));
+			break;
+		case INTERSECTION:
+			merge = list -> list.size() <= 1 ? list.get(0) : list.stream().reduce(list.get(0), (r, total) -> r.getIntersection(total).orElse(total));
+			break;
+		default:
+		case MEAN:
+			merge = list -> list.size() <= 1 ? list.get(0) : getMean(list);
+			break;
 		}
 		filtered.forEach(clustered -> map.put(merge.apply(clustered), clustered.size()));
 
@@ -128,11 +128,38 @@ public class RectangleTools {
 	 * @param rect1 - the first rectangle
 	 * @param rect2 - the second rectangle
 	 * @param eps - a coefficient used to determine the maximum tolerable delta between the two rectangles
+	 * @param sides - the number of sides that need to match to consider the rectangles to be part of the same cluster
+	 * @return true if the rectangles can be considered as part of the same cluster, false otherwise
+	 */
+	public static boolean isInCluster(GSRect rect1, GSRect rect2, double eps, int sides) {
+		double delta = getDelta(rect1, rect2, eps);
+		boolean left = Math.abs(rect1.tl().getX() - rect2.tl().getX()) <= delta;
+		boolean top = Math.abs(rect1.tl().getY() - rect2.tl().getY()) <= delta;
+		boolean right = Math.abs(rect1.br().getX() - rect2.br().getX()) <= delta;
+		boolean bottom = Math.abs(rect1.br().getY() - rect2.br().getY()) <= delta;
+		switch (sides) {
+		default:
+		case 4:
+			return left && top && right && bottom;
+		case 3:
+			return (left && top && right) || (left && top && bottom) || (right && bottom && left) || (right && bottom && top);
+		case 2:
+			return (left && top) || (left && right) || (left && bottom) || (top && right) || (top && bottom) || (right && bottom);
+		case 1:
+			return left || top || right || bottom;
+		}
+	}
+
+	/**
+	 * Same as {@link #isInCluster(GSRect, GSRect, double, int)} using the default value for <code>sides</code> (4).
+	 * 
+	 * @param rect1 - the first rectangle
+	 * @param rect2 - the second rectangle
+	 * @param eps - a coefficient used to determine the maximum tolerable delta between the two rectangles
 	 * @return true if the rectangles can be considered as part of the same cluster, false otherwise
 	 */
 	public static boolean isInCluster(GSRect rect1, GSRect rect2, double eps) {
-		double delta = getDelta(rect1, rect2, eps);
-		return Math.abs(rect1.tl().getX() - rect2.tl().getX()) <= delta && Math.abs(rect1.tl().getY() - rect2.tl().getY()) <= delta && Math.abs(rect1.br().getX() - rect2.br().getX()) <= delta && Math.abs(rect1.br().getY() - rect2.br().getY()) <= delta;
+		return isInCluster(rect1, rect2, eps, 4);
 	}
 
 	private static double getDelta(GSRect rect1, GSRect rect2, double eps) {
@@ -191,7 +218,6 @@ public class RectangleTools {
 		}
 		return result;
 	}
-
 
 	/**
 	 * Compute a mean rectangle from a list of rectangles.

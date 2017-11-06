@@ -39,6 +39,11 @@ public abstract class AbstractFields<F extends AbstractField> implements Iterabl
 		return fields.stream().filter(f -> f.isClusteredWith(rect, epsilon)).collect(Collectors.toList());
 	}
 
+	// like findPossibleMatches(Rect, double) but will match only a number of sides (e.g., 3 instead of 4 sides)
+	protected List<F> findPossibleMatches(Rect rect, double epsilon, int sides) {
+		return fields.stream().filter(f -> f.isClusteredWith(rect, epsilon, sides)).collect(Collectors.toList());
+	}
+
 	protected List<F> findContainingFields(F field) {
 		return stream().filter(f -> field.isIn(f)).collect(Collectors.toList());
 	}

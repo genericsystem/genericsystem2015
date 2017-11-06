@@ -66,6 +66,12 @@ public final class RectToolsMapper {
 		return RectangleTools.isInCluster(r1, r2, eps);
 	}
 
+	public static boolean isInCluster(Rect rect1, Rect rect2, double eps, int sides) {
+		GSRect r1 = convert(rect1);
+		GSRect r2 = convert(rect2);
+		return RectangleTools.isInCluster(r1, r2, eps, sides);
+	}
+
 	public static double[] commonArea(Rect rect1, Rect rect2) {
 		GSRect r1 = convert(rect1);
 		GSRect r2 = convert(rect2);
