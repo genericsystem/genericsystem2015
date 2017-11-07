@@ -199,7 +199,7 @@ public class VanishingPointsDetector {
 						double q = 0;
 						if (minimal_sample_set_dimension > N_I_best) {
 							// Error!
-							new IllegalStateException("The number of inliers must be higher than minimal sample set");
+							throw new IllegalStateException("The number of inliers must be higher than minimal sample set");
 						}
 						if (numLines == N_I_best) {
 							q = 1;
@@ -242,7 +242,7 @@ public class VanishingPointsDetector {
 			}
 
 			// Vector containing indexes for current vp
-			List<Integer> ind_CS = new ArrayList<Integer>();
+			List<Integer> ind_CS = new ArrayList<>();
 
 			// Fill ind_CS with this.CS_best
 			List<Point[]> lineSegmentsCurrent = new ArrayList<>();
@@ -354,7 +354,7 @@ public class VanishingPointsDetector {
 		else if (this.mode == MODE_NIETO)
 			;// estimateNIETO(Li, Mi, Lengths, MSS, 2, vp);
 		else
-			new IllegalStateException("ERROR: mode not supported. Please use {LS, LIEB, NIETO}");
+			throw new IllegalStateException("ERROR: mode not supported. Please use {LS, LIEB, NIETO}");
 	}
 
 	private float getConsensusSet(int vpNum, Mat Li, Mat Lengths, Mat Mi, Mat vp, float[] E, int[] CS_counter) {
@@ -370,7 +370,7 @@ public class VanishingPointsDetector {
 		else if (this.mode == MODE_NIETO)
 			;// J = errorNIETO(vpNum, Li, Lengths, Mi, vp, E, CS_counter);
 		else
-			new IllegalStateException("ERROR: mode not supported, please use {LS, LIEB, NIETO}\n");
+			throw new IllegalStateException("ERROR: mode not supported, please use {LS, LIEB, NIETO}\n");
 
 		return J;
 	}
@@ -398,8 +398,7 @@ public class VanishingPointsDetector {
 
 			return;
 		} else if (set_length < minimal_sample_set_dimension) {
-			new IllegalStateException("Error: at least 2 line-segments are required");
-			return;
+			throw new IllegalStateException("Error: at least 2 line-segments are required");
 		}
 
 		// Extract the line segments corresponding to the indexes contained in the set
