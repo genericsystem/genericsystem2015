@@ -3,6 +3,7 @@ package org.genericsystem.cv.retriever;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -73,24 +74,9 @@ public class Fields extends AbstractFields<Field> {
 		List<Rect> rects = filterRects(newRects, 0.5);
 		// Loop over all the rectangles and try to find any matching field
 		for (Rect rect : rects) {
-			List<Field> matches = findPossibleMatches(rect, 0.2);
-			// Remove the false positives
-			matches = matches.stream().filter(f -> RectToolsMapper.inclusiveArea(f.getRect(), rect) > MIN_OVERLAP / 10).collect(Collectors.toList());
+			List<Field> matches = findPossibleMatches(rect, 0.1);
+			matches = cleanMatches(matches, rect);
 			if (!matches.isEmpty()) {
-				// If there is more than one match, select only the best
-				if (matches.size() > 1) {
-					logger.info("Multiple matches ({}), removing false positives", matches.size());
-					// Remove the overlaps with less than 10% common area
-					matches = matches.stream().filter(f -> RectToolsMapper.inclusiveArea(f.getRect(), rect) >= MIN_OVERLAP).collect(Collectors.toList());
-					if (matches.size() > 1) {
-						logger.warn("Still multiple matches ({}), selecting the maximum overlap", matches.size());
-						matches = Arrays.asList(matches.stream().max((f1, f2) -> {
-							double area1 = RectToolsMapper.inclusiveArea(f1.getRect(), rect);
-							double area2 = RectToolsMapper.inclusiveArea(f2.getRect(), rect);
-							return Double.compare(area1, area2);
-						}).orElseThrow(IllegalStateException::new));
-					}
-				}
 				matches.forEach(f -> {
 					double mergeArea = RectToolsMapper.inclusiveArea(f.getRect(), rect);
 					StringBuffer sb = new StringBuffer();
@@ -114,6 +100,31 @@ public class Fields extends AbstractFields<Field> {
 		double meanArea = rects.stream().mapToDouble(r -> r.area()).average().getAsDouble();
 		double sem = Math.sqrt(rects.stream().mapToDouble(r -> Math.pow(r.area() - meanArea, 2)).sum() / (rects.size() - 1));
 		return rects.stream().filter(r -> (r.area() - meanArea) <= (sem * thresholdFactor)).collect(Collectors.toList());
+	}
+
+	private List<Field> cleanMatches(List<Field> matches, Rect rect) {
+		List<Field> copy = new ArrayList<>(matches);
+		// Remove the false positives
+		copy = copy.stream().filter(f -> RectToolsMapper.inclusiveArea(f.getRect(), rect) > MIN_OVERLAP / 10).collect(Collectors.toList());
+		if (copy.isEmpty()) {
+			return Collections.emptyList();
+		} else {
+			// If there is more than one match, select only the best
+			if (copy.size() > 1) {
+				logger.info("Multiple matches ({}), removing false positives", copy.size());
+				// Remove the overlaps with less than 10% common area
+				copy = copy.stream().filter(f -> RectToolsMapper.inclusiveArea(f.getRect(), rect) >= MIN_OVERLAP).collect(Collectors.toList());
+				if (copy.size() > 1) {
+					logger.warn("Still multiple matches ({}), selecting the maximum overlap", copy.size());
+					copy = Arrays.asList(copy.stream().max((f1, f2) -> {
+						double area1 = RectToolsMapper.inclusiveArea(f1.getRect(), rect);
+						double area2 = RectToolsMapper.inclusiveArea(f2.getRect(), rect);
+						return Double.compare(area1, area2);
+					}).orElseThrow(IllegalStateException::new));
+				}
+			}
+			return copy;
+		}
 	}
 
 	public void restabilizeFields(Mat homography) {
