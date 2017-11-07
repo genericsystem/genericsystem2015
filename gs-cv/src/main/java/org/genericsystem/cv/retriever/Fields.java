@@ -152,11 +152,11 @@ public class Fields extends AbstractFields<Field> {
 			f.ocr(rootImg);
 	}
 
-	// TODO: verify if this method lead to an unwanted thread lock
 	private void runParallelOcr(Img rootImg) {
 		ParallelTasks tasks = new ParallelTasks();
+		int limit = tasks.getCounter() * 2;
 		Set<Integer> indexes = new HashSet<>();
-		while (indexes.size() < tasks.getCounter()) {
+		while (indexes.size() < limit && indexes.size() < size()) {
 			int idx = ThreadLocalRandom.current().nextInt(size());
 			if (indexes.add(idx)) {
 				Field f = fields.get(idx);
