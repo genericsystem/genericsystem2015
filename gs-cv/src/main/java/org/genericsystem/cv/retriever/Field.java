@@ -1,5 +1,8 @@
 package org.genericsystem.cv.retriever;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.genericsystem.cv.Img;
 import org.opencv.core.Mat;
 import org.opencv.core.Rect;
@@ -7,18 +10,26 @@ import org.opencv.core.Scalar;
 
 public class Field extends AbstractField {
 
+	private Field parent;
+	private List<Field> children;
+
 	private static final int LABELS_SIZE_THRESHOLD = 15;
 	private static final double CONFIDENCE_THRESHOLD = 0.92;
 	private boolean locked = false;
 
 	public Field(Rect rect) {
 		super(rect);
+		this.parent = null;
+		this.children = new ArrayList<>();
 	}
 
 	public Field(Field other) {
 		super(other);
-		if (other instanceof Field)
+		if (other instanceof Field) {
+			this.parent = other.parent;
+			this.children = other.children;
 			setFinal();
+		}
 	}
 
 	@Override
@@ -54,5 +65,29 @@ public class Field extends AbstractField {
 
 	public boolean isLocked() {
 		return locked;
+	}
+
+	public void setChildren(List<Field> children) {
+		this.children = children;
+	}
+
+	public void addChild(Field child) {
+		children.add(child);
+	}
+
+	public List<Field> getChildren() {
+		return children;
+	}
+
+	public void addChildren(List<Field> children) {
+		children.addAll(children);
+	}
+
+	public Field getParent() {
+		return parent;
+	}
+
+	public void setParent(Field parent) {
+		this.parent = parent;
 	}
 }
