@@ -24,10 +24,8 @@ import org.genericsystem.cv.utils.Tools;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
-import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
@@ -135,7 +133,10 @@ public class CamLiveRetriever extends AbstractApp {
 					fields.restabilizeFields(fieldsHomography);
 					Stats.endTask("restabilizeFields");
 					Stats.beginTask("merge fields");
-					fields.merge(detectRects(stabilizedDisplay));
+
+					RectDetector rd = new RectDetector(stabilizedDisplay);
+					fields.merge(rd.getRects());
+
 					Stats.endTask("merge fields");
 					fields.removeOverlaps();
 					fields.drawFieldsOnStabilized(stabilizedDisplay);
@@ -173,16 +174,6 @@ public class CamLiveRetriever extends AbstractApp {
 	@Override
 	protected void onR() {
 		fields.reset();
-	}
-
-	private List<Rect> detectRects(Img stabilized) {
-		Img closed = stabilized.bilateralFilter(5, 80, 80).adaptativeGaussianInvThreshold(11, 3).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(11, 3));
-		List<MatOfPoint> contours = new ArrayList<>();
-		Imgproc.findContours(closed.getSrc(), contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
-		double minArea = 200;
-		List<Rect> res = contours.stream().filter(contour -> Imgproc.contourArea(contour) > minArea).map(c -> Imgproc.boundingRect(c)).collect(Collectors.toList());
-		res.forEach(rect -> Imgproc.rectangle(stabilized.getSrc(), rect.tl(), rect.br(), new Scalar(255, 200, 0)));
-		return res;
 	}
 
 	static Img warpPerspective(Mat frame, Mat homography) {
