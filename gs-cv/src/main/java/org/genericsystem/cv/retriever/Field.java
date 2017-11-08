@@ -98,7 +98,7 @@ public class Field extends AbstractField {
 		this.children = children;
 	}
 
-	public boolean addChild(Field child) {
+	public boolean addChildIfNotPresent(Field child) {
 		if (!this.equals(child) && !overlapsMoreThanThresh(child, 0.95) && !containsChild(child))
 			return children.add(child);
 		return false;

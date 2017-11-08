@@ -173,7 +173,6 @@ public class CamLiveRetriever extends AbstractApp {
 
 	@Override
 	protected void onR() {
-		fields.displayFieldsTree();
 		fields.reset();
 	}
 
