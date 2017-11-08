@@ -1,8 +1,10 @@
 package org.genericsystem.cv.retriever;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.utils.RectToolsMapper;
@@ -124,12 +126,22 @@ public class Field extends AbstractField {
 		return parent;
 	}
 
+	public Set<Field> getSiblings() {
+		if (isOrphan())
+			return Collections.emptySet();
+		return getParent().getChildren().stream().filter(child -> !this.equals(child)).collect(Collectors.toSet());
+	}
+
 	public void setParent(Field parent) {
 		this.parent = parent;
 	}
 
 	public boolean hasChildren() {
 		return !children.isEmpty();
+	}
+
+	public boolean hasSiblings() {
+		return !getSiblings().isEmpty();
 	}
 
 	public boolean isOrphan() {
