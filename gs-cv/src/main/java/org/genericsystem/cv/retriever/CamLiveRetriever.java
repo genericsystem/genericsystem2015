@@ -135,10 +135,10 @@ public class CamLiveRetriever extends AbstractApp {
 					Stats.beginTask("merge fields");
 
 					RectDetector rd = new RectDetector(stabilizedDisplay);
-					fields.merge(rd.getRects());
+					fields.merge(rd);
 
 					Stats.endTask("merge fields");
-					fields.removeOverlaps();
+					// fields.removeOverlaps();
 					fields.drawFieldsOnStabilized(stabilizedDisplay);
 					stabilizedImgDescriptor = newImgDescriptor;
 					stabilizationHomography = deperspectivGraphy;

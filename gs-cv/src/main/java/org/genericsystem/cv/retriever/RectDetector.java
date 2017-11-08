@@ -20,6 +20,14 @@ public class RectDetector {
 		this.img = img;
 	}
 
+	public List<Rect> getFilteredRects(double thresholdFactor) {
+		return filterRects(getRects(), thresholdFactor);
+	}
+
+	public List<Rect> getFilteredRects2(double thresholdFactor) {
+		return filterRects(getRects2(), thresholdFactor);
+	}
+
 	public List<Rect> getRects() {
 		return getRects(getClosed(), MIN_AREA);
 	}
@@ -40,5 +48,11 @@ public class RectDetector {
 
 	private Img getClosed2() {
 		return img.bilateralFilter(5, 80, 80).adaptativeGaussianInvThreshold(17, 3).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(7, 3));
+	}
+
+	private List<Rect> filterRects(List<Rect> rects, double thresholdFactor) {
+		double meanArea = rects.stream().mapToDouble(r -> r.area()).average().getAsDouble();
+		double sem = Math.sqrt(rects.stream().mapToDouble(r -> Math.pow(r.area() - meanArea, 2)).sum() / (rects.size() - 1));
+		return rects.stream().filter(r -> (r.area() - meanArea) <= (sem * thresholdFactor)).collect(Collectors.toList());
 	}
 }

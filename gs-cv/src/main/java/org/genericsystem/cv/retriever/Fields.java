@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
@@ -18,6 +19,7 @@ import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
 import org.opencv.utils.Converters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +36,7 @@ public class Fields extends AbstractFields<Field> {
 		fields = new ArrayList<>();
 	}
 
+	// TODO: compare the consolidated text before merging?
 	public void removeOverlaps() {
 		for (Field field : new ArrayList<>(fields)) {
 			List<Field> matches = findPossibleMatches(field.getRect(), 0.1, 3).stream().filter(f -> !field.equals(f)).collect(Collectors.toList());
@@ -65,13 +68,62 @@ public class Fields extends AbstractFields<Field> {
 
 	public void drawLockedFields(Img display, Mat homography) {
 		fields.forEach(field -> field.drawLockedField(display, homography));
+		fields.stream().filter(field -> field.isChild()).forEach(field -> field.drawRect(display, field.getRectPointsWithHomography(homography), new Scalar(255, 128, 255), 1));
 	}
 
-	public void merge(List<Rect> newRects) {
+	public void mergeChildren(List<Rect> children) {
+		List<Rect> fieldsRects = fields.stream().map(f -> f.getRect()).collect(Collectors.toList());
+		fieldsRects.forEach(rect -> {
+			List<Rect> possibleChildren = findChildren(children, rect);
+			if (!possibleChildren.isEmpty()) {
+				logger.warn("Found possible child(ren) for {}: {}", rect, possibleChildren);
+				possibleChildren.forEach(child -> {
+					List<Field> matches = findPossibleMatches(child, 0.1); // TODO: filter the matches to remove those that are too big?
+					if (!matches.isEmpty()) {
+						matches.forEach(f -> {
+							double mergeArea = RectToolsMapper.inclusiveArea(f.getRect(), child);
+							StringBuffer sb = new StringBuffer();
+							sb.append(String.format("Merging %s with %s (%.1f%% common area)", f.getRect(), child, mergeArea * 100));
+							if (f.getConsolidated() != null)
+								sb.append(String.format(" -> %s", f.getConsolidated()));
+							logger.warn(sb.toString());
+							f.updateRect(child);
+							f.setChild(true);
+							f.resetDeadCounter();
+						});
+					} else {
+						logger.warn("No match for child {}. Creating a new Field", child);
+						Field f = new Field(child);
+						f.setChild(true);
+						fields.add(f);
+					}
+					children.remove(child);
+				});
+			}
+		});
+	}
+
+	private List<Rect> findChildren(List<Rect> children, Rect putativeParent) {
+		return children.stream().filter(child -> RectToolsMapper.commonArea(child, putativeParent)[0] > 0.9).collect(Collectors.toList());
+	}
+
+	public void merge(RectDetector rectDetector) {
+		// Get the lists of rectangles
+		List<Rect> rects = rectDetector.getFilteredRects(0.5);
+		List<Rect> children = rectDetector.getFilteredRects2(0.5);
+
+		// Remove the duplicates of rects in children
+		rects.forEach(rect -> {
+			Iterator<Rect> it = children.iterator();
+			while (it.hasNext()) {
+				if (RectToolsMapper.isInCluster(rect, it.next(), 0.1))
+					it.remove();
+			}
+		});
+
 		// Increment the dead counter of each field
 		fields.forEach(f -> f.incrementDeadCounter());
-		// Filter out the rectangles to remove the bigger ones
-		List<Rect> rects = filterRects(newRects, 0.5);
+
 		// Loop over all the rectangles and try to find any matching field
 		for (Rect rect : rects) {
 			List<Field> matches = findPossibleMatches(rect, 0.1);
@@ -93,13 +145,15 @@ public class Fields extends AbstractFields<Field> {
 			}
 		}
 		// Remove the rectangles that could not be merged too many times
-		fields.removeIf(f -> !f.isLocked() && f.deadCounter >= MAX_DELETE_UNMERGED);
+		removeUnmergedFields();
+
+		// Merge the potential children
+		mergeChildren(children);
 	}
 
-	private List<Rect> filterRects(List<Rect> rects, double thresholdFactor) {
-		double meanArea = rects.stream().mapToDouble(r -> r.area()).average().getAsDouble();
-		double sem = Math.sqrt(rects.stream().mapToDouble(r -> Math.pow(r.area() - meanArea, 2)).sum() / (rects.size() - 1));
-		return rects.stream().filter(r -> (r.area() - meanArea) <= (sem * thresholdFactor)).collect(Collectors.toList());
+	private void removeUnmergedFields() {
+		// XXX elaborate a new strategy to deal with the parents/children
+		fields.removeIf(f -> !f.isLocked() && f.deadCounter >= MAX_DELETE_UNMERGED);
 	}
 
 	private List<Field> cleanMatches(List<Field> matches, Rect rect) {

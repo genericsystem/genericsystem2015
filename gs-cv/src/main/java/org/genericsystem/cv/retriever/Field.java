@@ -17,6 +17,16 @@ public class Field extends AbstractField {
 	private static final double CONFIDENCE_THRESHOLD = 0.92;
 	private boolean locked = false;
 
+	private boolean child;
+
+	public boolean isChild() {
+		return child;
+	}
+
+	public void setChild(boolean child) {
+		this.child = child;
+	}
+
 	public Field(Rect rect) {
 		super(rect);
 		this.parent = null;
