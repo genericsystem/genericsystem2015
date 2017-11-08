@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.genericsystem.cv.Img;
+import org.genericsystem.cv.utils.RectToolsMapper;
 import org.opencv.core.Mat;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
@@ -17,16 +18,6 @@ public class Field extends AbstractField {
 	private static final int LABELS_SIZE_THRESHOLD = 15;
 	private static final double CONFIDENCE_THRESHOLD = 0.92;
 	private boolean locked = false;
-
-	private boolean child;
-
-	public boolean isChild() {
-		return child;
-	}
-
-	public void setChild(boolean child) {
-		this.child = child;
-	}
 
 	public Field(Rect rect) {
 		super(rect);
@@ -108,7 +99,7 @@ public class Field extends AbstractField {
 	}
 
 	public boolean addChild(Field child) {
-		if (!rect.equals(child.getRect()))
+		if (!this.equals(child) && !overlapsMoreThanThresh(child, 0.95) && !containsChild(child))
 			return children.add(child);
 		return false;
 	}
@@ -118,7 +109,7 @@ public class Field extends AbstractField {
 	}
 
 	public boolean containsChild(Field field) {
-		return children.contains(field);
+		return children.stream().anyMatch(child -> RectToolsMapper.inclusiveArea(child.getRect(), field.getRect()) > 0.95);
 	}
 
 	public boolean addChildren(Collection<Field> children) {

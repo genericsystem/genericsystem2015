@@ -68,7 +68,7 @@ public class Fields extends AbstractFields<Field> {
 
 	public void drawLockedFields(Img display, Mat homography) {
 		fields.forEach(field -> field.drawLockedField(display, homography));
-		fields.stream().filter(field -> field.isChild()).forEach(field -> field.drawRect(display, field.getRectPointsWithHomography(homography), new Scalar(255, 128, 255), 1));
+		fields.stream().filter(field -> field.getParent() != null).forEach(field -> field.drawRect(display, field.getRectPointsWithHomography(homography), new Scalar(255, 128, 255), 1));
 	}
 
 	public void displayFieldsTree() {
@@ -95,26 +95,18 @@ public class Fields extends AbstractFields<Field> {
 					List<Field> matches = findPossibleMatches(child, 0.1); // TODO: filter the matches to remove those that are too big?
 					if (!matches.isEmpty()) {
 						matches.forEach(f -> {
-							double mergeArea = RectToolsMapper.inclusiveArea(f.getRect(), child);
-							StringBuffer sb = new StringBuffer();
-							sb.append(String.format("Merging %s with %s (%.1f%% common area)", f.getRect(), child, mergeArea * 100));
-							if (f.getConsolidated() != null)
-								sb.append(String.format(" -> %s", f.getConsolidated()));
-							logger.warn(sb.toString());
-
-							f.updateRect(child);
-							f.setChild(true);
+							logger.warn(formatLog(f, child));
 
 							// XXX shouldn't it be already set?
 							f.setParent(parent);
 							parent.addChild(f);
 
+							f.updateRect(child);
 							f.resetDeadCounter();
 						});
 					} else {
 						logger.warn("No match for child {}. Creating a new Field", child);
 						Field f = new Field(child);
-						f.setChild(true);
 
 						f.setParent(parent);
 						parent.addChild(f);
@@ -125,6 +117,15 @@ public class Fields extends AbstractFields<Field> {
 				});
 			}
 		}
+	}
+
+	private String formatLog(Field f, Rect child) {
+		double mergeArea = RectToolsMapper.inclusiveArea(f.getRect(), child);
+		StringBuffer sb = new StringBuffer();
+		sb.append(String.format("Merging %s with %s (%.1f%% common area)", f.getRect(), child, mergeArea * 100));
+		if (f.getConsolidated() != null)
+			sb.append(String.format(" -> %s", f.getConsolidated()));
+		return sb.toString();
 	}
 
 	private List<Rect> findChildren(List<Rect> children, Rect putativeParent) {
@@ -160,12 +161,14 @@ public class Fields extends AbstractFields<Field> {
 					if (f.getConsolidated() != null)
 						sb.append(String.format(" -> %s", f.getConsolidated()));
 					logger.info(sb.toString());
+
 					f.updateRect(rect);
 					f.resetDeadCounter();
 				});
 			} else {
 				logger.info("No match for {}. Creating a new Field", rect);
-				fields.add(new Field(rect));
+				Field f = new Field(rect);
+				fields.add(f);
 			}
 		}
 		// Remove the rectangles that could not be merged too many times
