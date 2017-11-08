@@ -39,7 +39,7 @@ public class Fields extends AbstractFields<Field> {
 
 	public void drawLockedFields(Img display, Mat homography) {
 		fields.forEach(field -> field.drawLockedField(display, homography));
-		fields.stream().filter(field -> field.getParent() != null).forEach(field -> field.drawRect(display, field.getRectPointsWithHomography(homography), new Scalar(255, 128, 255), 1));
+		fields.stream().filter(field -> !field.isOrphan()).forEach(field -> field.drawRect(display, field.getRectPointsWithHomography(homography), new Scalar(255, 128, 255), 1));
 	}
 
 	public void displayFieldsTree() {
@@ -131,7 +131,7 @@ public class Fields extends AbstractFields<Field> {
 			if (!f.isLocked() && f.deadCounter >= MAX_DELETE_UNMERGED) {
 				for (Field child : f.getChildren())
 					child.setParent(null);
-				if (f.getParent() != null)
+				if (f.isOrphan())
 					f.getParent().removeChild(f);
 				it.remove();
 			}

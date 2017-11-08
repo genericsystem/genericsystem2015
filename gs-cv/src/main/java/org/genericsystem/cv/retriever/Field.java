@@ -94,10 +94,6 @@ public class Field extends AbstractField {
 		return locked;
 	}
 
-	public void setChildren(Set<Field> children) {
-		this.children = children;
-	}
-
 	public boolean addChildIfNotPresent(Field child) {
 		if (!this.equals(child) && !overlapsMoreThanThresh(child, 0.95) && !containsChild(child))
 			return children.add(child);
@@ -116,6 +112,10 @@ public class Field extends AbstractField {
 		return this.children.addAll(children);
 	}
 
+	public void setChildren(Set<Field> children) {
+		this.children = children;
+	}
+
 	public Set<Field> getChildren() {
 		return children;
 	}
@@ -126,6 +126,14 @@ public class Field extends AbstractField {
 
 	public void setParent(Field parent) {
 		this.parent = parent;
+	}
+
+	public boolean hasChildren() {
+		return !children.isEmpty();
+	}
+
+	public boolean isOrphan() {
+		return parent == null;
 	}
 
 }
