@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.genericsystem.cv.Img;
@@ -28,13 +29,19 @@ public class Fields extends AbstractFields<Field> {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-	private static final int MAX_DELETE_UNMERGED = 20;
+	private static final int MAX_DELETE_UNMERGED = 5;
 	private static final int OCR_TIMEOUT = 50;
 	private static final double MIN_OVERLAP = 0.2;
 
 	public void reset() {
 		displayFieldsTree();
 		fields = new ArrayList<>();
+	}
+
+	@Override
+	public void drawOcrPerspectiveInverse(Img display, Mat homography, Scalar color, int thickness) {
+		// Only draw orphan fields
+		stream().filter(field -> field.isOrphan()).forEach(field -> field.drawOcrPerspectiveInverse(display, homography, color, thickness));
 	}
 
 	public void drawLockedFields(Img display, Mat homography) {
@@ -123,19 +130,64 @@ public class Fields extends AbstractFields<Field> {
 	}
 
 	private void removeUnmergedFields() {
-		// XXX elaborate a new strategy to deal with the parents/children
-		// fields.removeIf(f -> !f.isLocked() && f.deadCounter >= MAX_DELETE_UNMERGED);
-		Iterator<Field> it = fields.iterator();
-		while (it.hasNext()) {
-			Field f = it.next();
-			if (!f.isLocked() && f.deadCounter >= MAX_DELETE_UNMERGED) {
-				for (Field child : f.getChildren())
-					child.setParent(null);
-				if (f.isOrphan())
-					f.getParent().removeChild(f);
-				it.remove();
+		// Iterator<Field> it = fields.iterator();
+		// while (it.hasNext()) {
+		// Field f = it.next();
+		// if (!f.isLocked() && f.getDeadCounter() >= MAX_DELETE_UNMERGED) {
+		// for (Field child : f.getChildren())
+		// child.setParent(null);
+		// if (f.isOrphan())
+		// f.getParent().removeChild(f);
+		// it.remove();
+		// }
+		// }
+		initDeleteRecursive();
+	}
+
+	private void initDeleteRecursive() {
+		Predicate<Field> predicate = f -> !f.isLocked() && f.getDeadCounter() >= MAX_DELETE_UNMERGED;
+
+		// Clean the fields recursively from the 'root' of each tree
+		Set<Field> removes = new HashSet<>();
+		fields.stream().filter(field -> field.isOrphan()).forEach(field -> removes.addAll(deleteRecursive(field, predicate)));
+		removes.forEach(field -> {
+			if (field.hasChildren())
+				field.getChildren().forEach(child -> child.setParent(null));
+			if (!field.isOrphan())
+				field.getParent().removeChild(field);
+			fields.remove(field);
+		});
+	}
+
+	private Set<Field> deleteRecursive(Field field, Predicate<Field> predicate) {
+		Set<Field> removes = new HashSet<>();
+		if (predicate.test(field)) {
+			if (field.hasChildren()) {
+				// Call the method recursively
+				field.getChildren().forEach(f -> {
+					removes.addAll(deleteRecursive(f, predicate));
+				});
+				if (!field.isOrphan()) {
+					// attempt to merge text from child in parent (only if parent is not going to be deleted)
+				}
+			} else {
+				if (!field.isOrphan()) {
+					// attempt to merge text from child in parent (only if parent is not going to be deleted)
+					if (!predicate.test(field.getParent())) {
+						// check siblings to see if they need to be removed
+						if (field.hasSiblings()) {
+							// if all the siblings are removed, merge them all in the parent
+							// Set<Field> siblings = field.getSiblings();
+						} else {
+							// attempt to merge directly in parent
+						}
+					} // else parent gets deleted, so we don't care
+				}
+				removes.add(field);
 			}
-		}
+		} else
+			System.out.print(". ");
+		return removes;
 	}
 
 	private void setLinks(Field parent, Field child) {
