@@ -43,6 +43,31 @@ public class Field extends AbstractField {
 		}
 	}
 
+	public String recursiveToString() {
+		StringBuffer sb = new StringBuffer();
+		recursiveToString(this, sb, 0);
+		sb.append("\n");
+		return sb.toString();
+	}
+
+	private void recursiveToString(Field field, StringBuffer sb, int depth) {
+		if (depth > 8)
+			return;
+		sb.append("depth: ").append(depth).append(": ");
+		sb.append(field.getRect());
+		if (field.isConsolidated())
+			sb.append(" -> ").append(field.getConsolidated());
+		if (!field.getChildren().isEmpty()) {
+			depth++;
+			for (Field child : field.getChildren()) {
+				sb.append("\n");
+				for (int i = 0; i < depth; ++i)
+					sb.append("  ");
+				recursiveToString(child, sb, depth);
+			}
+		}
+	}
+
 	@Override
 	public void ocr(Img rootImg) {
 		super.ocr(rootImg);

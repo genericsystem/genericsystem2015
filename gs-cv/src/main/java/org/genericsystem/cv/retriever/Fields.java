@@ -71,10 +71,24 @@ public class Fields extends AbstractFields<Field> {
 		fields.stream().filter(field -> field.isChild()).forEach(field -> field.drawRect(display, field.getRectPointsWithHomography(homography), new Scalar(255, 128, 255), 1));
 	}
 
+	public void displayFieldsTree() {
+		StringBuffer sb = new StringBuffer();
+		sb.append("\n").append("--- FIELDS ---").append("\n");
+		fields.forEach(field -> {
+			sb.append(field.recursiveToString());
+		});
+		sb.append("\n").append("--- /FIELDS ---").append("\n");
+		System.out.println(sb.toString());
+	}
+
 	public void mergeChildren(List<Rect> children) {
 		List<Rect> fieldsRects = fields.stream().map(f -> f.getRect()).collect(Collectors.toList());
-		fieldsRects.forEach(rect -> {
+		for (int i = 0; i < fieldsRects.size(); ++i) {
+			Field parent = fields.get(i);
+			Rect rect = fieldsRects.get(i);
+
 			List<Rect> possibleChildren = findChildren(children, rect);
+
 			if (!possibleChildren.isEmpty()) {
 				logger.warn("Found possible child(ren) for {}: {}", rect, possibleChildren);
 				possibleChildren.forEach(child -> {
@@ -87,20 +101,30 @@ public class Fields extends AbstractFields<Field> {
 							if (f.getConsolidated() != null)
 								sb.append(String.format(" -> %s", f.getConsolidated()));
 							logger.warn(sb.toString());
+
 							f.updateRect(child);
 							f.setChild(true);
+
+							// XXX shouldn't it be already set?
+							f.setParent(parent);
+							parent.addChild(f);
+
 							f.resetDeadCounter();
 						});
 					} else {
 						logger.warn("No match for child {}. Creating a new Field", child);
 						Field f = new Field(child);
 						f.setChild(true);
+
+						f.setParent(parent);
+						parent.addChild(f);
+
 						fields.add(f);
 					}
 					children.remove(child);
 				});
 			}
-		});
+		}
 	}
 
 	private List<Rect> findChildren(List<Rect> children, Rect putativeParent) {
@@ -153,7 +177,18 @@ public class Fields extends AbstractFields<Field> {
 
 	private void removeUnmergedFields() {
 		// XXX elaborate a new strategy to deal with the parents/children
-		fields.removeIf(f -> !f.isLocked() && f.deadCounter >= MAX_DELETE_UNMERGED);
+		// fields.removeIf(f -> !f.isLocked() && f.deadCounter >= MAX_DELETE_UNMERGED);
+		Iterator<Field> it = fields.iterator();
+		while (it.hasNext()) {
+			Field f = it.next();
+			if (!f.isLocked() && f.deadCounter >= MAX_DELETE_UNMERGED) {
+				for (Field child : f.getChildren())
+					child.setParent(null);
+				if (f.getParent() != null)
+					f.getParent().removeChild(f);
+				it.remove();
+			}
+		}
 	}
 
 	private List<Field> cleanMatches(List<Field> matches, Rect rect) {
