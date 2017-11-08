@@ -1,7 +1,8 @@
 package org.genericsystem.cv.retriever;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.genericsystem.cv.Img;
 import org.opencv.core.Mat;
@@ -11,7 +12,7 @@ import org.opencv.core.Scalar;
 public class Field extends AbstractField {
 
 	private Field parent;
-	private List<Field> children;
+	private Set<Field> children;
 
 	private static final int LABELS_SIZE_THRESHOLD = 15;
 	private static final double CONFIDENCE_THRESHOLD = 0.92;
@@ -30,7 +31,7 @@ public class Field extends AbstractField {
 	public Field(Rect rect) {
 		super(rect);
 		this.parent = null;
-		this.children = new ArrayList<>();
+		this.children = new HashSet<>();
 	}
 
 	public Field(Field other) {
@@ -77,28 +78,30 @@ public class Field extends AbstractField {
 		return locked;
 	}
 
-	public void setChildren(List<Field> children) {
+	public void setChildren(Set<Field> children) {
 		this.children = children;
 	}
 
-	public void addChild(Field child) {
-		children.add(child);
+	public boolean addChild(Field child) {
+		if (!rect.equals(child.getRect()))
+			return children.add(child);
+		return false;
 	}
 
-	public void removeChild(Field child) {
-		children.remove(child);
+	public boolean removeChild(Field child) {
+		return children.remove(child);
 	}
 
 	public boolean containsChild(Field field) {
 		return children.contains(field);
 	}
 
-	public List<Field> getChildren() {
-		return children;
+	public boolean addChildren(Collection<Field> children) {
+		return this.children.addAll(children);
 	}
 
-	public void addChildren(List<Field> children) {
-		children.addAll(children);
+	public Set<Field> getChildren() {
+		return children;
 	}
 
 	public Field getParent() {
