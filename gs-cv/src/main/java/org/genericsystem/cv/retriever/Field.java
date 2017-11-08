@@ -75,6 +75,14 @@ public class Field extends AbstractField {
 		children.add(child);
 	}
 
+	public void removeChild(Field child) {
+		children.remove(child);
+	}
+
+	public boolean containsChild(Field field) {
+		return children.contains(field);
+	}
+
 	public List<Field> getChildren() {
 		return children;
 	}
@@ -90,4 +98,5 @@ public class Field extends AbstractField {
 	public void setParent(Field parent) {
 		this.parent = parent;
 	}
+
 }
