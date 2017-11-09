@@ -61,8 +61,8 @@ public class Fields extends AbstractFields<Field> {
 
 	public void merge(RectDetector rectDetector) {
 		// Get the lists of rectangles
-		List<Rect> rects = rectDetector.getFilteredRects(0.5);
-		List<Rect> children = rectDetector.getFilteredRects2(0.5);
+		List<Rect> rects = rectDetector.getFilteredRects(1d);
+		List<Rect> children = rectDetector.getFilteredRects2(1d);
 
 		// Remove the duplicates of rects in children
 		rects.forEach(rect -> {
@@ -130,21 +130,6 @@ public class Fields extends AbstractFields<Field> {
 	}
 
 	private void removeUnmergedFields() {
-		// Iterator<Field> it = fields.iterator();
-		// while (it.hasNext()) {
-		// Field f = it.next();
-		// if (!f.isLocked() && f.getDeadCounter() >= MAX_DELETE_UNMERGED) {
-		// for (Field child : f.getChildren())
-		// child.setParent(null);
-		// if (f.isOrphan())
-		// f.getParent().removeChild(f);
-		// it.remove();
-		// }
-		// }
-		initDeleteRecursive();
-	}
-
-	private void initDeleteRecursive() {
 		Predicate<Field> predicate = f -> !f.isLocked() && f.getDeadCounter() >= MAX_DELETE_UNMERGED;
 
 		// Clean the fields recursively from the 'root' of each tree
@@ -169,7 +154,9 @@ public class Fields extends AbstractFields<Field> {
 				});
 				if (!field.isOrphan()) {
 					// attempt to merge text from child in parent (only if parent is not going to be deleted)
+					// siblings?
 				}
+				// add remove here to delete parent?
 			} else {
 				if (!field.isOrphan()) {
 					// attempt to merge text from child in parent (only if parent is not going to be deleted)
@@ -265,8 +252,10 @@ public class Fields extends AbstractFields<Field> {
 	}
 
 	public void restabilizeFields(Mat homography) {
+		long start = System.nanoTime();
 		fields.forEach(field -> field.updateRect(findNewRect(field.getRect(), homography)));
-		logger.info("Restabilized fields ({})", fields.size());
+		long stop = System.nanoTime();
+		logger.info("Restabilized {} fields in {} ms", fields.size(), String.format("%.3f", ((double) (stop - start)) / 1_000_000));
 	}
 
 	private Rect findNewRect(Rect rect, Mat homography) {
