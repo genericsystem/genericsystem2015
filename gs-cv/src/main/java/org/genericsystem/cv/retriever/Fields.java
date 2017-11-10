@@ -98,25 +98,62 @@ public class Fields extends AbstractFields<Field> {
 				fields.add(f);
 			}
 		}
-		// Remove the rectangles that could not be merged too many times
-		removeUnmergedFields();
-
-		// Merge the potential children
 		mergeChildren(children);
-
-		// Adjust the position of the parent's rects if no matches were found, based upon the mean shift of its children
+		removeUnmergedFields();
 		adjustUnmergedParents();
 	}
 
-	public void mergeChildren(List<GSRect> childrenRect) {
+	private void mergeChildren(List<GSRect> childrenRect) {
+		List<GSRect> list = mergeKnownChildren(childrenRect);
+		mergeNewChildren(list);
+	}
+
+	private List<GSRect> mergeKnownChildren(List<GSRect> childrenRect) {
+		if (childrenRect.isEmpty())
+			return Collections.emptyList();
+
+		fields.stream().filter(field -> field.hasChildren()).forEach(parent -> {
+			// Get the list of children for all parent fields
+			Set<Field> children = parent.getChildren();
+
+			// For each child, try to find a match in the list of childrenRect
+			children.forEach(child -> {
+				List<GSRect> matchingRects = childrenRect.stream().filter(rect -> child.isClusteredWith(rect, 0.1)).collect(Collectors.toList());
+				if (!matchingRects.isEmpty()) {
+					if (matchingRects.size() > 1) {
+						// Reduce to one element
+						matchingRects = Arrays.asList(matchingRects.stream().max((r1, r2) -> {
+							double area1 = r1.inclusiveArea(child.getRect());
+							double area2 = r2.inclusiveArea(child.getRect());
+							return Double.compare(area1, area2);
+						}).orElseThrow(IllegalStateException::new));
+					}
+					// Update the coordinates of the child with the new rect
+					GSRect newRect = matchingRects.get(0);
+					logger.warn(formatLog(child, newRect));
+					child.registerShift(RectangleTools.getShift(child.getRect(), newRect));
+					child.updateRect(newRect);
+					child.resetDeadCounter();
+					// Delete the rect from the children list
+					childrenRect.remove(newRect);
+				}
+			});
+
+		});
+		return childrenRect;
+	}
+
+	private void mergeNewChildren(List<GSRect> childrenRect) {
+		if (childrenRect.isEmpty())
+			return;
+
 		List<GSRect> fieldsRects = fields.stream().map(f -> f.getRect()).collect(Collectors.toList());
 		for (int i = 0; i < fieldsRects.size(); ++i) {
 			Field parent = fields.get(i);
-			GSRect rect = fieldsRects.get(i);
 
-			List<GSRect> possibleChildrenRects = findChildrenRects(childrenRect, rect, 0.95);
+			List<GSRect> possibleChildrenRects = findChildrenRects(childrenRect, parent.getRect(), 0.95);
 			if (!possibleChildrenRects.isEmpty()) {
-				logger.info("Found possible child(ren) for {}: {}", rect, possibleChildrenRects);
+				logger.info("Found possible child(ren) for {}: {}", parent.getRect(), possibleChildrenRects);
 				possibleChildrenRects.forEach(childRect -> {
 					List<Field> matches = findPossibleMatches(childRect, 0.1);
 					if (!matches.isEmpty()) {
@@ -141,6 +178,15 @@ public class Fields extends AbstractFields<Field> {
 
 	private List<GSRect> findChildrenRects(List<GSRect> children, GSRect putativeParent, double minArea) {
 		return children.stream().filter(child -> RectangleTools.commonArea(child, putativeParent)[0] > minArea).collect(Collectors.toList());
+	}
+
+	private void setLinks(Field parent, Field child) {
+		if (!child.isOrphan() && !child.getParent().equals(parent))
+			logger.error("\nchild's parent:\n{}\nparent:\n{}", child.getParent(), parent);
+		if (!parent.equals(child)) {
+			child.setParent(parent);
+			parent.addChildIfNotPresent(child);
+		}
 	}
 
 	private void adjustUnmergedParents() {
@@ -212,16 +258,8 @@ public class Fields extends AbstractFields<Field> {
 				}
 				removes.add(field);
 			}
-		} else
-			System.out.print(". ");
+		}
 		return removes;
-	}
-
-	private void setLinks(Field parent, Field child) {
-		if (!child.isOrphan() && !child.getParent().equals(parent))
-			logger.error("child's parent:\n" + child.getParent() + "\nparent:\n" + parent);
-		child.setParent(parent);
-		parent.addChildIfNotPresent(child);
 	}
 
 	// TODO: compare the consolidated text before merging?
@@ -235,7 +273,7 @@ public class Fields extends AbstractFields<Field> {
 					if (field.getRect().area() < f.getRect().area()) {
 						if (!f.isLocked()) {
 							boolean ok = fields.remove(f);
-							System.err.println("removed field (" + ok + ")" + "\n" + f);
+							// System.err.println("removed field (" + ok + ")" + "\n" + f);
 						}
 					}
 				}
@@ -247,7 +285,7 @@ public class Fields extends AbstractFields<Field> {
 					logger.warn("{}", f.getRect());
 					if (!f.isLocked()) {
 						boolean ok = fields.remove(f);
-						System.err.println("removed field (" + ok + ")" + "\n" + f);
+						// System.err.println("removed field (" + ok + ")" + "\n" + f);
 					}
 				}
 			}
