@@ -18,6 +18,7 @@ import javax.xml.bind.DatatypeConverter;
 
 import org.apache.commons.io.FilenameUtils;
 import org.genericsystem.cv.Zone;
+import org.genericsystem.reinforcer.tools.GSRect;
 import org.opencv.core.Rect;
 
 /**
@@ -210,6 +211,22 @@ public class ModelTools {
 	 * @return a String representing the rectangle's unique ID
 	 */
 	public static String generateZoneUID(Rect rect) {
+		try {
+			byte[] bytes = rect.toString().getBytes(Charset.forName("UTF8"));
+			String zoneUID = ModelTools.getHashFromBytes(bytes, "sha-256");
+			return zoneUID;
+		} catch (RuntimeException e) {
+			throw new RuntimeException("An error has occured during the generation of the hashcode from zone", e);
+		}
+	}
+
+	/**
+	 * Generate a unique ID for a given {@link GSRect}.
+	 * 
+	 * @param rect - the {@link GSRect} for which a label has to be generated
+	 * @return a String representing the rectangle's unique ID
+	 */
+	public static String generateZoneUID(GSRect rect) {
 		try {
 			byte[] bytes = rect.toString().getBytes(Charset.forName("UTF8"));
 			String zoneUID = ModelTools.getHashFromBytes(bytes, "sha-256");

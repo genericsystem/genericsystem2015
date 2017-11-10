@@ -16,6 +16,8 @@ import org.genericsystem.cv.utils.OCRPlasty;
 import org.genericsystem.cv.utils.OCRPlasty.RANSAC;
 import org.genericsystem.cv.utils.OCRPlasty.Tuple;
 import org.genericsystem.cv.utils.RectToolsMapper;
+import org.genericsystem.reinforcer.tools.GSRect;
+import org.genericsystem.reinforcer.tools.RectangleTools;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint2f;
@@ -34,7 +36,7 @@ public abstract class AbstractField {
 	protected static final int MIN_SIZE_CONSOLIDATION = 5;
 	private static final int OCR_CONFIDENCE_THRESH = 0;
 
-	protected Rect rect;
+	protected GSRect rect;
 	protected Point center;
 	protected Map<String, Integer> labels;
 	protected String consolidated;
@@ -44,10 +46,10 @@ public abstract class AbstractField {
 	protected int deadCounter;
 
 	public AbstractField() {
-		this(new Rect());
+		this(new GSRect());
 	}
 
-	public AbstractField(Rect rect) {
+	public AbstractField(GSRect rect) {
 		updateRect(rect);
 		this.labels = new HashMap<>();
 		this.consolidated = null;
@@ -65,20 +67,9 @@ public abstract class AbstractField {
 		this.deadCounter = other.getDeadCounter();
 	}
 
-	public void merge(AbstractField field) {
-		field.getLabels().entrySet().forEach(entry -> labels.merge(entry.getKey(), entry.getValue(), Integer::sum));
-		attempts += field.getAttempts();
-		deadCounter += field.getDeadCounter();
-		// labels.putAll(field.getLabels());
-		// attempts = field.getAttempts();
-		// deadCounter = field.getDeadCounter();
-		if (consolidated != null)
-			consolidateOcr(false);
-	}
-
-	void updateRect(Rect rect) {
+	void updateRect(GSRect rect) {
 		this.rect = rect;
-		this.center = new Point(rect.x + rect.width / 2, rect.y + rect.height / 2);
+		this.center = new Point(rect.getX() + rect.getWidth() / 2, rect.getY() + rect.getHeight() / 2);
 	}
 
 	public void ocr(Img rootImg) {
@@ -135,7 +126,8 @@ public abstract class AbstractField {
 	}
 
 	public void drawRect(Img stabilizedDisplay, Scalar color, int thickness) {
-		drawRect(stabilizedDisplay, RectToolsMapper.decomposeClockwise(rect), color, thickness);
+		Point[] points = RectToolsMapper.gsPointToPoint(Arrays.asList(rect.decomposeClockwise())).toArray(new Point[0]);
+		drawRect(stabilizedDisplay, points, color, thickness);
 	}
 
 	public void drawRect(Img display, Point[] targets, Scalar color, int thickness) {
@@ -157,17 +149,17 @@ public abstract class AbstractField {
 	}
 
 	protected Point[] getRectPointsWithHomography(Mat homography) {
-		List<Point> points = Arrays.asList(RectToolsMapper.decomposeClockwise(rect));
+		List<Point> points = RectToolsMapper.gsPointToPoint(Arrays.asList(rect.decomposeClockwise()));
 		MatOfPoint2f results = new MatOfPoint2f();
 		Core.perspectiveTransform(Converters.vector_Point2f_to_Mat(points), results, homography);
 		return results.toArray();
 	}
 
 	public Rect getLargeRect(Img imgRoot, double deltaW, double deltaH) {
-		int adjustW = 3 + Double.valueOf(Math.floor(rect.width * deltaW)).intValue();
-		int adjustH = 3 + Double.valueOf(Math.floor(rect.height * deltaH)).intValue();
-		Point tl = new Point(rect.tl().x - adjustW > 0 ? rect.tl().x - adjustW : 0, rect.tl().y - adjustH > 0 ? rect.tl().y - adjustH : 0);
-		Point br = new Point(rect.br().x + adjustW > imgRoot.width() ? imgRoot.width() : rect.br().x + adjustW, rect.br().y + adjustH > imgRoot.height() ? imgRoot.height() : rect.br().y + adjustH);
+		int adjustW = 3 + Double.valueOf(Math.floor(rect.getWidth() * deltaW)).intValue();
+		int adjustH = 3 + Double.valueOf(Math.floor(rect.getHeight() * deltaH)).intValue();
+		Point tl = new Point(rect.tl().getX() - adjustW > 0 ? rect.tl().getX() - adjustW : 0, rect.tl().getY() - adjustH > 0 ? rect.tl().getY() - adjustH : 0);
+		Point br = new Point(rect.br().getX() + adjustW > imgRoot.width() ? imgRoot.width() : rect.br().getX() + adjustW, rect.br().getY() + adjustH > imgRoot.height() ? imgRoot.height() : rect.br().getY() + adjustH);
 		return new Rect(tl, br);
 	}
 
@@ -175,8 +167,8 @@ public abstract class AbstractField {
 		return Math.sqrt(Math.pow(this.center.x - center.x, 2) + Math.pow(this.center.y - center.y, 2)) <= 10;
 	}
 
-	public boolean isOverlapping(Rect otherRect) {
-		return RectToolsMapper.isOverlapping(this.rect, otherRect);
+	public boolean isOverlapping(GSRect otherRect) {
+		return this.rect.isOverlapping(otherRect);
 	}
 
 	public boolean isOverlapping(AbstractField other) {
@@ -184,19 +176,19 @@ public abstract class AbstractField {
 	}
 
 	public boolean isIn(AbstractField other) {
-		return RectToolsMapper.getInsider(rect, other.getRect()).map(r -> r.equals(rect) ? true : false).orElse(false);
+		return rect.getInsider(other.getRect()).map(r -> r.equals(rect) ? true : false).orElse(false);
 	}
 
-	public boolean overlapsMoreThanThresh(Rect otherRect, double overlapThreshold) {
-		return RectToolsMapper.inclusiveArea(this.rect, otherRect) > overlapThreshold;
+	public boolean overlapsMoreThanThresh(GSRect otherRect, double overlapThreshold) {
+		return this.rect.inclusiveArea(otherRect) > overlapThreshold;
 	}
 
-	public boolean isClusteredWith(Rect otherRect, double epsilon) {
-		return RectToolsMapper.isInCluster(this.rect, otherRect, epsilon);
+	public boolean isClusteredWith(GSRect otherRect, double epsilon) {
+		return RectangleTools.isInCluster(this.rect, otherRect, epsilon);
 	}
 
-	public boolean isClusteredWith(Rect otherRect, double epsilon, int sides) {
-		return RectToolsMapper.isInCluster(this.rect, otherRect, epsilon, sides);
+	public boolean isClusteredWith(GSRect otherRect, double epsilon, int sides) {
+		return RectangleTools.isInCluster(this.rect, otherRect, epsilon, sides);
 	}
 
 	public boolean overlapsMoreThanThresh(AbstractField other, double overlapThreshold) {
@@ -204,17 +196,13 @@ public abstract class AbstractField {
 	}
 
 	public boolean isOnDisplay(Img display) {
-		Rect imgRect = new Rect(0, 0, display.width(), display.height());
-		return RectToolsMapper.isOverlapping(imgRect, this.rect);
+		GSRect imgRect = new GSRect(0, 0, display.width(), display.height());
+		return imgRect.isOverlapping(this.rect);
 	}
 
 	public boolean isConsolidated() {
 		return consolidated != null;
 	}
-
-	// public boolean needOcr() {
-	// return ThreadLocalRandom.current().nextBoolean();
-	// }
 
 	public void incrementDeadCounter() {
 		deadCounter++;
@@ -244,7 +232,7 @@ public abstract class AbstractField {
 		return center;
 	}
 
-	public Rect getRect() {
+	public GSRect getRect() {
 		return rect;
 	}
 

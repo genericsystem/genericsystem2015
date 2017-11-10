@@ -40,8 +40,9 @@ import org.genericsystem.cv.utils.ImgFilterFunction;
 import org.genericsystem.cv.utils.ImgFunction;
 import org.genericsystem.cv.utils.ModelTools;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
+import org.genericsystem.cv.utils.RectToolsMapper;
 import org.genericsystem.kernel.Engine;
-import org.opencv.core.Rect;
+import org.genericsystem.reinforcer.tools.GSRect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -116,7 +117,7 @@ public class FillNewModelWithData {
 
 	public static JsonObject detectFields(Path imgPath) {
 		try (Img deskewed = new Img(imgPath.toString())) {
-			List<Rect> rects = ClassifierUsingFields.detectRects(deskewed);
+			List<GSRect> rects = RectToolsMapper.rectToGSRect(ClassifierUsingFields.detectRects(deskewed));
 			DocFields fields = DocFields.of(rects);
 			JsonObject result = fields.toJsonObject();
 			return result;

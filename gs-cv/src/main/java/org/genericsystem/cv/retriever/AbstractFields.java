@@ -7,9 +7,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.genericsystem.cv.Img;
+import org.genericsystem.reinforcer.tools.GSRect;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
-import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 
 public abstract class AbstractFields<F extends AbstractField> implements Iterable<F> {
@@ -35,12 +35,12 @@ public abstract class AbstractFields<F extends AbstractField> implements Iterabl
 		return fields.stream().filter(f -> f.isClusteredWith(field.getRect(), epsilon)).collect(Collectors.toList());
 	}
 
-	protected List<F> findPossibleMatches(Rect rect, double epsilon) {
+	protected List<F> findPossibleMatches(GSRect rect, double epsilon) {
 		return fields.stream().filter(f -> f.isClusteredWith(rect, epsilon)).collect(Collectors.toList());
 	}
 
 	// like findPossibleMatches(Rect, double) but will match only a number of sides (e.g., 3 instead of 4 sides)
-	protected List<F> findPossibleMatches(Rect rect, double epsilon, int sides) {
+	protected List<F> findPossibleMatches(GSRect rect, double epsilon, int sides) {
 		return fields.stream().filter(f -> f.isClusteredWith(rect, epsilon, sides)).collect(Collectors.toList());
 	}
 
@@ -59,7 +59,7 @@ public abstract class AbstractFields<F extends AbstractField> implements Iterabl
 	public abstract void performOcr(Img rootImg);
 
 	public void drawOcrPerspectiveInverse(Img display, Mat homography, Scalar color, int thickness) {
-		stream()./* filter(field -> field.getDeadCounter() == 0). */forEach(field -> field.drawOcrPerspectiveInverse(display, homography, color, thickness));
+		stream().forEach(field -> field.drawOcrPerspectiveInverse(display, homography, color, thickness));
 	}
 
 	public void drawFieldsOnStabilized(Img stabilized) {
@@ -69,10 +69,6 @@ public abstract class AbstractFields<F extends AbstractField> implements Iterabl
 	public void drawConsolidated(Img stabilizedDisplay) {
 		consolidatedFieldStream().forEach(field -> field.drawRect(stabilizedDisplay, new Scalar(0, 255, 0), 1));
 	}
-
-	// public Stream<F> randomOcrStream() {
-	// return stream().filter(F::needOcr);
-	// }
 
 	public Stream<F> consolidatedFieldStream() {
 		return stream().filter(f -> f.isConsolidated());

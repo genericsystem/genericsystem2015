@@ -98,6 +98,9 @@ public class CamLiveRetriever extends AbstractApp {
 					return;
 				}
 
+				// Make the frame symmetric
+				frame = frame.submat(0, frame.rows() - 1, 0, frame.cols() - 1);
+
 				Mat deperspectivGraphy = computeFrameToDeperspectivedHomography(frame);
 				if (deperspectivGraphy == null) {
 					logger.warn("Unable to compute a valid deperspectivation");
@@ -135,10 +138,10 @@ public class CamLiveRetriever extends AbstractApp {
 					Stats.beginTask("merge fields");
 
 					RectDetector rd = new RectDetector(stabilizedDisplay);
-					fields.merge(rd.getRects());
+					fields.merge(rd);
 
 					Stats.endTask("merge fields");
-					fields.removeOverlaps();
+					// fields.removeOverlaps();
 					fields.drawFieldsOnStabilized(stabilizedDisplay);
 					stabilizedImgDescriptor = newImgDescriptor;
 					stabilizationHomography = deperspectivGraphy;
