@@ -83,7 +83,7 @@ public class Field extends AbstractField {
 
 	public void setFinal() {
 		if (!locked)
-			if (getLabelsSize() > LABELS_SIZE_THRESHOLD && getConfidence() > CONFIDENCE_THRESHOLD)
+			if (getLabelsSize() > LABELS_SIZE_THRESHOLD && getConfidence() > CONFIDENCE_THRESHOLD && isOrphan())
 				this.locked = true;
 	}
 
