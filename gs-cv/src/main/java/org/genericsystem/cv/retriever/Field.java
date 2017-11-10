@@ -1,8 +1,10 @@
 package org.genericsystem.cv.retriever;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -16,6 +18,7 @@ public class Field extends AbstractField {
 
 	private Field parent;
 	private Set<Field> children;
+	private List<double[]> shifts;
 
 	private static final int LABELS_SIZE_THRESHOLD = 15;
 	private static final double CONFIDENCE_THRESHOLD = 0.92;
@@ -25,15 +28,7 @@ public class Field extends AbstractField {
 		super(rect);
 		this.parent = null;
 		this.children = new HashSet<>();
-	}
-
-	public Field(Field other) {
-		super(other);
-		if (other instanceof Field) {
-			this.parent = other.parent;
-			this.children = other.children;
-			setFinal();
-		}
+		this.shifts = new ArrayList<>();
 	}
 
 	public String recursiveToString() {
@@ -146,6 +141,24 @@ public class Field extends AbstractField {
 
 	public boolean isOrphan() {
 		return parent == null;
+	}
+
+	public List<double[]> getShifts() {
+		return shifts;
+	}
+
+	public boolean registerShift(double[] delta) {
+		if (!isOrphan())
+			return parent.addShift(delta);
+		return false;
+	}
+
+	private boolean addShift(double[] delta) {
+		return shifts.add(delta);
+	}
+
+	public void clearShifts() {
+		shifts.clear();
 	}
 
 }

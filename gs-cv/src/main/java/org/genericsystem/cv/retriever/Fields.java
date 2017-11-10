@@ -3,17 +3,21 @@ package org.genericsystem.cv.retriever;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.utils.ParallelTasks;
+import org.genericsystem.cv.utils.Ransac;
+import org.genericsystem.cv.utils.Ransac.Model;
 import org.genericsystem.cv.utils.RectToolsMapper;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
@@ -82,6 +86,7 @@ public class Fields extends AbstractFields<Field> {
 			if (!matches.isEmpty()) {
 				matches.forEach(f -> {
 					logger.info(formatLog(f, rect));
+					f.registerShift(getShift(f.getRect(), rect));
 					f.updateRect(rect);
 					f.resetDeadCounter();
 				});
@@ -96,6 +101,17 @@ public class Fields extends AbstractFields<Field> {
 
 		// Merge the potential children
 		mergeChildren(children);
+
+		// Adjust the position of the parent's rects if no matches were found, based upon the mean shift of its children
+		adjustUnmergedParents();
+	}
+
+	public static double[] getShift(Rect oldRect, Rect newRect) {
+		double tlX = newRect.tl().x - oldRect.tl().x;
+		double tlY = newRect.tl().y - oldRect.tl().y;
+		double brX = newRect.br().x - oldRect.br().x;
+		double brY = newRect.br().y - oldRect.br().y;
+		return new double[] { tlX, tlY, brX, brY };
 	}
 
 	public void mergeChildren(List<Rect> children) {
@@ -107,25 +123,94 @@ public class Fields extends AbstractFields<Field> {
 			List<Rect> possibleChildren = findChildren(children, rect);
 			if (!possibleChildren.isEmpty()) {
 				logger.warn("Found possible child(ren) for {}: {}", rect, possibleChildren);
-				possibleChildren.forEach(child -> {
-					List<Field> matches = findPossibleMatches(child, 0.1); // TODO: filter the matches to remove those that are too big?
+				possibleChildren.forEach(childRect -> {
+					List<Field> matches = findPossibleMatches(childRect, 0.1); // TODO: filter the matches to remove those that are too big?
 					if (!matches.isEmpty()) {
 						matches.forEach(f -> {
-							logger.warn(formatLog(f, child));
+							logger.warn(formatLog(f, childRect));
+							f.registerShift(getShift(f.getRect(), childRect));
 							setLinks(parent, f);
-							f.updateRect(child);
+							f.updateRect(childRect);
 							f.resetDeadCounter();
 						});
 					} else {
-						logger.warn("No match for child {}. Creating a new Field", child);
-						Field f = new Field(child);
+						logger.warn("No match for child {}. Creating a new Field", childRect);
+						Field f = new Field(childRect);
 						setLinks(parent, f);
 						fields.add(f);
 					}
-					children.remove(child);
+					children.remove(childRect);
 				});
 			}
 		}
+	}
+
+	private void adjustUnmergedParents() {
+		fields.stream().filter(f -> f.hasChildren() && f.getDeadCounter() != 0).forEach(field -> {
+			List<double[]> shifts = field.getShifts();
+			if (!shifts.isEmpty()) {
+				double[] mean = getMean(shifts);
+				System.out.println("mean before Ransac: " + Arrays.toString(mean));
+				if (shifts.size() > 3) {
+					try {
+						Ransac<double[]> ransac = new Ransac<>(shifts, getModelProvider(), 3, 50, 2, shifts.size() * 2 / 3);
+						List<double[]> newShifts = ransac.getBestDataSet().values().stream().collect(Collectors.toList());
+						mean = getMean(newShifts);
+						System.out.println("mean after Ransac: " + Arrays.toString(mean));
+					} catch (Exception e) {
+						System.err.println("unable to compute ransac, using mean instead");
+					}
+				}
+				Rect rect = field.getRect();
+				Point tl = new Point(rect.tl().x - mean[0], rect.tl().y - mean[1]);
+				Point br = new Point(rect.br().x - mean[2], rect.br().y - mean[3]);
+				field.updateRect(new Rect(tl, br));
+				System.out.println("updated rect from " + rect + " to " + field.getRect());
+				field.clearShifts();
+			} else
+				System.out.println("empty shifts");
+		});
+	}
+
+	private Function<Collection<double[]>, Model<double[]>> getModelProvider() {
+		return datas -> {
+			double[] mean = getMean(datas);
+
+			return new Model<double[]>() {
+				@Override
+				public double computeError(double[] data) {
+					double error = 0;
+					for (int i = 0; i < mean.length; ++i)
+						error += Math.pow(mean[i] - data[i], 2);
+					return Math.sqrt(error);
+				}
+
+				@Override
+				public double computeGlobalError(List<double[]> datas, Collection<double[]> consensusDatas) {
+					double globalError = 0d;
+					for (double[] data : datas)
+						globalError += Math.pow(computeError(data), 2);
+					return Math.sqrt(globalError) / datas.size();
+				}
+
+				@Override
+				public Object[] getParams() {
+					return new Object[] { mean };
+				}
+			};
+		};
+	}
+
+	private double[] getMean(Collection<double[]> values) {
+		if (values.isEmpty())
+			return null;
+		double[] mean = new double[values.stream().findFirst().get().length];
+		for (double[] value : values)
+			for (int i = 0; i < mean.length; ++i)
+				mean[i] += value[i];
+		for (int i = 0; i < mean.length; ++i)
+			mean[i] /= values.size();
+		return mean;
 	}
 
 	private void removeUnmergedFields() {
@@ -177,6 +262,8 @@ public class Fields extends AbstractFields<Field> {
 	}
 
 	private void setLinks(Field parent, Field child) {
+		// if (!child.isOrphan() && !child.getParent().equals(parent))
+		// log.error("child's parent:\n" + child.getParent() + "\nparent:\n" + parent);
 		child.setParent(parent);
 		parent.addChildIfNotPresent(child);
 	}
