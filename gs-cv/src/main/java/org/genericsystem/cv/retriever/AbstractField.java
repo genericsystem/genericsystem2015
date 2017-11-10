@@ -65,17 +65,6 @@ public abstract class AbstractField {
 		this.deadCounter = other.getDeadCounter();
 	}
 
-	public void merge(AbstractField field) {
-		field.getLabels().entrySet().forEach(entry -> labels.merge(entry.getKey(), entry.getValue(), Integer::sum));
-		attempts += field.getAttempts();
-		deadCounter += field.getDeadCounter();
-		// labels.putAll(field.getLabels());
-		// attempts = field.getAttempts();
-		// deadCounter = field.getDeadCounter();
-		if (consolidated != null)
-			consolidateOcr(false);
-	}
-
 	void updateRect(Rect rect) {
 		this.rect = rect;
 		this.center = new Point(rect.x + rect.width / 2, rect.y + rect.height / 2);

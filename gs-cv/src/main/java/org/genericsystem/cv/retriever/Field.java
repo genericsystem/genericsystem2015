@@ -64,13 +64,6 @@ public class Field extends AbstractField {
 	}
 
 	@Override
-	public void merge(AbstractField field) {
-		super.merge(field);
-		if (field instanceof Field)
-			setFinal();
-	}
-
-	@Override
 	public void resetDeadCounter() {
 		super.resetDeadCounter();
 		setFinal();
