@@ -245,6 +245,21 @@ public class RectangleTools {
 	}
 
 	/**
+	 * Compute the shift from a rectangle to another.
+	 * 
+	 * @param oldRect - the old rectangle, from which the comparison is done
+	 * @param newRect - the new rectangle
+	 * @return an <code>double[]</code> with the shift in coordinates from <code>oldRect</code> to <code>newRect</code> (tl.x, tl.y, br.x, br.y)
+	 */
+	public static double[] getShift(GSRect oldRect, GSRect newRect) {
+		double tlX = newRect.tl().getX() - oldRect.tl().getX();
+		double tlY = newRect.tl().getY() - oldRect.tl().getY();
+		double brX = newRect.br().getX() - oldRect.br().getX();
+		double brY = newRect.br().getY() - oldRect.br().getY();
+		return new double[] { tlX, tlY, brX, brY };
+	}
+
+	/**
 	 * Method to remove the overlapping {@link GSRect}, relying on "non-maximum suppression" to ignore redundant, overlapping boxes.
 	 * 
 	 * @param boxes - the list of rectangles that need to be filtered

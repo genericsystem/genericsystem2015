@@ -88,7 +88,7 @@ public class Fields extends AbstractFields<Field> {
 			if (!matches.isEmpty()) {
 				matches.forEach(f -> {
 					logger.info(formatLog(f, rect));
-					f.registerShift(getShift(f.getRect(), rect));
+					f.registerShift(RectangleTools.getShift(f.getRect(), rect));
 					f.updateRect(rect);
 					f.resetDeadCounter();
 				});
@@ -108,111 +108,65 @@ public class Fields extends AbstractFields<Field> {
 		adjustUnmergedParents();
 	}
 
-	public static double[] getShift(GSRect oldRect, GSRect newRect) {
-		double tlX = newRect.tl().getX() - oldRect.tl().getX();
-		double tlY = newRect.tl().getY() - oldRect.tl().getY();
-		double brX = newRect.br().getX() - oldRect.br().getX();
-		double brY = newRect.br().getY() - oldRect.br().getY();
-		return new double[] { tlX, tlY, brX, brY };
-	}
-
-	public void mergeChildren(List<GSRect> children) {
+	public void mergeChildren(List<GSRect> childrenRect) {
 		List<GSRect> fieldsRects = fields.stream().map(f -> f.getRect()).collect(Collectors.toList());
 		for (int i = 0; i < fieldsRects.size(); ++i) {
 			Field parent = fields.get(i);
 			GSRect rect = fieldsRects.get(i);
 
-			List<GSRect> possibleChildren = findChildren(children, rect);
-			if (!possibleChildren.isEmpty()) {
-				logger.warn("Found possible child(ren) for {}: {}", rect, possibleChildren);
-				possibleChildren.forEach(childRect -> {
-					List<Field> matches = findPossibleMatches(childRect, 0.1); // TODO: filter the matches to remove those that are too big?
+			List<GSRect> possibleChildrenRects = findChildrenRects(childrenRect, rect, 0.95);
+			if (!possibleChildrenRects.isEmpty()) {
+				logger.info("Found possible child(ren) for {}: {}", rect, possibleChildrenRects);
+				possibleChildrenRects.forEach(childRect -> {
+					List<Field> matches = findPossibleMatches(childRect, 0.1);
 					if (!matches.isEmpty()) {
 						matches.forEach(f -> {
-							logger.warn(formatLog(f, childRect));
-							f.registerShift(getShift(f.getRect(), childRect));
+							logger.info(formatLog(f, childRect));
+							f.registerShift(RectangleTools.getShift(f.getRect(), childRect));
 							setLinks(parent, f);
 							f.updateRect(childRect);
 							f.resetDeadCounter();
 						});
 					} else {
-						logger.warn("No match for child {}. Creating a new Field", childRect);
+						logger.info("No match for child {}. Creating a new Field", childRect);
 						Field f = new Field(childRect);
 						setLinks(parent, f);
 						fields.add(f);
 					}
-					children.remove(childRect);
+					childrenRect.remove(childRect);
 				});
 			}
 		}
 	}
 
+	private List<GSRect> findChildrenRects(List<GSRect> children, GSRect putativeParent, double minArea) {
+		return children.stream().filter(child -> RectangleTools.commonArea(child, putativeParent)[0] > minArea).collect(Collectors.toList());
+	}
+
 	private void adjustUnmergedParents() {
-		fields.stream().filter(f -> f.hasChildren() && f.getDeadCounter() != 0).forEach(field -> {
+		fields.stream().filter(field -> field.hasChildren() && field.getDeadCounter() != 0).forEach(field -> {
 			List<double[]> shifts = field.getShifts();
 			if (!shifts.isEmpty()) {
 				double[] mean = getMean(shifts);
-				System.out.println("mean before Ransac: " + Arrays.toString(mean));
+				logger.debug("Mean before Ransac: {}", Arrays.toString(mean));
 				if (shifts.size() > 3) {
 					try {
 						Ransac<double[]> ransac = new Ransac<>(shifts, getModelProvider(), 3, 50, 2, shifts.size() * 2 / 3);
 						List<double[]> newShifts = ransac.getBestDataSet().values().stream().collect(Collectors.toList());
 						mean = getMean(newShifts);
-						System.out.println("mean after Ransac: " + Arrays.toString(mean));
+						logger.debug("Mean after Ransac: {}", Arrays.toString(mean));
 					} catch (Exception e) {
-						System.err.println("unable to compute ransac, using mean instead");
+						logger.info("Unable to compute ransac on shifts for {}", field.getRect());
 					}
 				}
 				GSRect rect = field.getRect();
 				GSPoint tl = new GSPoint(rect.tl().getX() - mean[0], rect.tl().getY() - mean[1]);
 				GSPoint br = new GSPoint(rect.br().getX() - mean[2], rect.br().getY() - mean[3]);
 				field.updateRect(new GSRect(tl, br));
-				System.out.println("updated rect from " + rect + " to " + field.getRect());
+				logger.info("Updated rect from {} to {}", rect, field.getRect());
 				field.clearShifts();
-			} else
-				System.out.println("empty shifts");
+			}
 		});
-	}
-
-	private Function<Collection<double[]>, Model<double[]>> getModelProvider() {
-		return datas -> {
-			double[] mean = getMean(datas);
-
-			return new Model<double[]>() {
-				@Override
-				public double computeError(double[] data) {
-					double error = 0;
-					for (int i = 0; i < mean.length; ++i)
-						error += Math.pow(mean[i] - data[i], 2);
-					return Math.sqrt(error);
-				}
-
-				@Override
-				public double computeGlobalError(List<double[]> datas, Collection<double[]> consensusDatas) {
-					double globalError = 0d;
-					for (double[] data : datas)
-						globalError += Math.pow(computeError(data), 2);
-					return Math.sqrt(globalError) / datas.size();
-				}
-
-				@Override
-				public Object[] getParams() {
-					return new Object[] { mean };
-				}
-			};
-		};
-	}
-
-	private double[] getMean(Collection<double[]> values) {
-		if (values.isEmpty())
-			return null;
-		double[] mean = new double[values.stream().findFirst().get().length];
-		for (double[] value : values)
-			for (int i = 0; i < mean.length; ++i)
-				mean[i] += value[i];
-		for (int i = 0; i < mean.length; ++i)
-			mean[i] /= values.size();
-		return mean;
 	}
 
 	private void removeUnmergedFields() {
@@ -264,8 +218,8 @@ public class Fields extends AbstractFields<Field> {
 	}
 
 	private void setLinks(Field parent, Field child) {
-		// if (!child.isOrphan() && !child.getParent().equals(parent))
-		// log.error("child's parent:\n" + child.getParent() + "\nparent:\n" + parent);
+		if (!child.isOrphan() && !child.getParent().equals(parent))
+			logger.error("child's parent:\n" + child.getParent() + "\nparent:\n" + parent);
 		child.setParent(parent);
 		parent.addChildIfNotPresent(child);
 	}
@@ -309,11 +263,6 @@ public class Fields extends AbstractFields<Field> {
 		return sb.toString();
 	}
 
-	private List<GSRect> findChildren(List<GSRect> children, GSRect putativeParent) {
-		double minArea = 0.95;
-		return children.stream().filter(child -> RectangleTools.commonArea(child, putativeParent)[0] > minArea).collect(Collectors.toList());
-	}
-
 	private List<Field> cleanMatches(List<Field> matches, GSRect rect) {
 		List<Field> copy = new ArrayList<>(matches);
 		// Remove the false positives
@@ -323,7 +272,7 @@ public class Fields extends AbstractFields<Field> {
 		} else {
 			// If there is more than one match, select only the best
 			if (copy.size() > 1) {
-				logger.info("Multiple matches ({}), removing false positives", copy.size());
+				logger.debug("Multiple matches ({}), removing false positives", copy.size());
 				// Remove the overlaps with less than 10% common area
 				copy = copy.stream().filter(f -> f.getRect().inclusiveArea(rect) >= MIN_OVERLAP).collect(Collectors.toList());
 				if (copy.size() > 1) {
@@ -396,6 +345,47 @@ public class Fields extends AbstractFields<Field> {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private Function<Collection<double[]>, Model<double[]>> getModelProvider() {
+		return datas -> {
+			double[] mean = getMean(datas);
+
+			return new Model<double[]>() {
+				@Override
+				public double computeError(double[] data) {
+					double error = 0;
+					for (int i = 0; i < mean.length; ++i)
+						error += Math.pow(mean[i] - data[i], 2);
+					return Math.sqrt(error);
+				}
+
+				@Override
+				public double computeGlobalError(List<double[]> datas, Collection<double[]> consensusDatas) {
+					double globalError = 0d;
+					for (double[] data : datas)
+						globalError += Math.pow(computeError(data), 2);
+					return Math.sqrt(globalError) / datas.size();
+				}
+
+				@Override
+				public Object[] getParams() {
+					return new Object[] { mean };
+				}
+			};
+		};
+	}
+
+	private double[] getMean(Collection<double[]> values) {
+		if (values.isEmpty())
+			return null;
+		double[] mean = new double[values.stream().findFirst().get().length];
+		for (double[] value : values)
+			for (int i = 0; i < mean.length; ++i)
+				mean[i] += value[i];
+		for (int i = 0; i < mean.length; ++i)
+			mean[i] /= values.size();
+		return mean;
 	}
 
 }
