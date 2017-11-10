@@ -80,17 +80,32 @@ public class Fields extends AbstractFields<Field> {
 
 		// Increment the dead counter of each field
 		fields.forEach(f -> f.incrementDeadCounter());
-
+		
+		/* tronquage
+		List<GSRect> truncatedRects = rects.stream().filter(r -> isTruncatedRect(r, width)).collect(Collectors.toList());
+		 */
 		// Loop over all the rectangles and try to find any matching field
 		for (GSRect rect : rects) {
 			List<Field> matches = findPossibleMatches(rect, 0.1);
 			matches = cleanMatches(matches, rect);
 			if (!matches.isEmpty()) {
 				matches.forEach(f -> {
+					
+					/*tonquage
+					 * f.setTruncated(false);
+					if(truncatedRects.contains(rect))
+						f.setTruncated(true);
+					 */
+					
 					logger.info(formatLog(f, rect));
 					f.registerShift(RectangleTools.getShift(f.getRect(), rect));
 					f.updateRect(rect);
 					f.resetDeadCounter();
+					
+					/*
+					 * if(!f.isTruncated)
+						f.resetDeadCounter();
+						*/
 				});
 			} else {
 				logger.info("No match for {}. Creating a new Field", rect);
@@ -101,6 +116,10 @@ public class Fields extends AbstractFields<Field> {
 		mergeChildren(children);
 		removeUnmergedFields();
 		adjustUnmergedParents();
+	}
+	
+	private boolean isTruncatedRect(GSRect rect, int width) {
+		return rect.tl().getX()==0d ||rect.br().getX()==width;
 	}
 
 	private void mergeChildren(List<GSRect> childrenRect) {
