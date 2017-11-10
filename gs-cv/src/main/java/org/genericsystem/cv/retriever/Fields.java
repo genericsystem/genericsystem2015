@@ -220,7 +220,18 @@ public class Fields extends AbstractFields<Field> {
 
 		// Clean the fields recursively from the 'root' of each tree
 		Set<Field> removes = new HashSet<>();
-		fields.stream().filter(field -> field.isOrphan()).forEach(field -> removes.addAll(deleteRecursive(field, predicate)));
+
+		fields.stream().filter(field -> field.isOrphan()).forEach(field -> {
+			if (deadTree(field, predicate))
+				removes.addAll(killTree(field));
+		});
+		removes.forEach(field -> {
+			System.out.println("removing: " + field.getRect());
+			fields.remove(field);
+		});
+
+		// fields.stream().filter(field -> field.isOrphan()).forEach(field -> removes.addAll(deleteRecursive(field, predicate)));
+		fields.stream().filter(field -> field.isOrphan()).forEach(field -> removes.addAll(alternateDeleteRecursive(field, predicate)));
 		removes.forEach(field -> {
 			if (field.hasChildren())
 				field.getChildren().forEach(child -> child.setParent(null));
@@ -230,9 +241,27 @@ public class Fields extends AbstractFields<Field> {
 		});
 	}
 
+	private boolean deadTree(Field root, Predicate<Field> predicate) {
+		if (!root.hasChildren()) // Single element in the tree, use the predicate
+			return predicate.test(root);
+		for (Field child : root.getChildren())
+			if (!deadTree(child, predicate)) // Return false one of the element does not match the predicate
+				return false;
+		return true; // If false was not returned at this stage, the tree is dead
+	}
+
+	private Set<Field> killTree(Field root) {
+		Set<Field> res = new HashSet<>();
+		res.add(root);
+		if (root.hasChildren())
+			for (Field child : root.getChildren())
+				res.addAll(killTree(child));
+		return res;
+	}
+
 	private Set<Field> deleteRecursive(Field field, Predicate<Field> predicate) {
 		Set<Field> removes = new HashSet<>();
-		if (predicate.test(field)) {
+		if (predicate.test(field)) { // FIXME: this test should be moved downwards
 			if (field.hasChildren()) {
 				// Call the method recursively
 				field.getChildren().forEach(f -> {
@@ -256,9 +285,46 @@ public class Fields extends AbstractFields<Field> {
 						}
 					} // else parent gets deleted, so we don't care
 				}
-				removes.add(field);
+			}
+			removes.add(field);
+		}
+		return removes;
+	}
+
+	/**
+	 * 1. If a field has children, it can't be removed <br>
+	 * 2. If a field has a parent, it can't be removed <br>
+	 * 3. A parent always contains its children <br>
+	 * 4. Children are always enclosed in their parent <br>
+	 */
+	private Set<Field> alternateDeleteRecursive(Field field, Predicate<Field> predicate) {
+		Set<Field> removes = new HashSet<>();
+
+		if (field.hasChildren()) {
+			field.getChildren().forEach(f -> {
+				removes.addAll(alternateDeleteRecursive(f, predicate));
+			});
+			if (predicate.test(field)) {
+				// Update the field's coordinates to encompass all the children
+				List<GSRect> rects = field.getChildren().stream().map(f -> f.getRect()).collect(Collectors.toList());
+				GSRect union = rects.stream().reduce(rects.get(0), (r, total) -> r.getUnion(total));
+				field.updateRect(union);
+			}
+		} else {
+			if (field.isOrphan()) {
+				if (predicate.test(field))
+					removes.add(field);
+			} else {
+				if (predicate.test(field)) {
+					double[] area = RectangleTools.commonArea(field.getRect(), field.getParent().getRect());
+					if (area[0] < 0.90) // Need to adjust the size of the child
+						logger.error("area mismatch: {}", Arrays.toString(area));
+					// else
+					// logger.info("area ok: {}", Arrays.toString(area));
+				}
 			}
 		}
+
 		return removes;
 	}
 
