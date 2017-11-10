@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.utils.ParallelTasks;
-import org.opencv.core.Rect;
+import org.genericsystem.reinforcer.tools.GSRect;
 import org.opencv.core.Scalar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +30,7 @@ public class DocFields extends AbstractFields<DocField> {
 		super(fields);
 	}
 
-	public static DocFields of(List<Rect> rects) {
+	public static DocFields of(List<GSRect> rects) {
 		DocFields fields = new DocFields();
 		fields.buildFields(rects);
 		return fields;
@@ -56,7 +56,7 @@ public class DocFields extends AbstractFields<DocField> {
 		return new JsonObject().put(FIELDS, fields);
 	}
 
-	public void buildFields(List<Rect> rects) {
+	public void buildFields(List<GSRect> rects) {
 		int[] counter = new int[] { 0 };
 		fields = rects.stream().map(rect -> new DocField(counter[0]++, rect)).collect(Collectors.toList());
 	}

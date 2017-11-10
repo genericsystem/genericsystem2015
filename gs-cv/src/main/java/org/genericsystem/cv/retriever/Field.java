@@ -9,9 +9,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.genericsystem.cv.Img;
-import org.genericsystem.cv.utils.RectToolsMapper;
+import org.genericsystem.reinforcer.tools.GSRect;
 import org.opencv.core.Mat;
-import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 
 public class Field extends AbstractField {
@@ -24,7 +23,7 @@ public class Field extends AbstractField {
 	private static final double CONFIDENCE_THRESHOLD = 0.92;
 	private boolean locked = false;
 
-	public Field(Rect rect) {
+	public Field(GSRect rect) {
 		super(rect);
 		this.parent = null;
 		this.children = new HashSet<>();
@@ -95,7 +94,7 @@ public class Field extends AbstractField {
 	}
 
 	public boolean containsChild(Field field) {
-		return children.stream().anyMatch(child -> RectToolsMapper.inclusiveArea(child.getRect(), field.getRect()) > 0.95);
+		return children.stream().anyMatch(child -> child.getRect().inclusiveArea(field.getRect()) > 0.95);
 	}
 
 	public boolean addChildren(Collection<Field> children) {

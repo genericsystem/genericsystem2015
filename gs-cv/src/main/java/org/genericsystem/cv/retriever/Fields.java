@@ -19,10 +19,12 @@ import org.genericsystem.cv.utils.ParallelTasks;
 import org.genericsystem.cv.utils.Ransac;
 import org.genericsystem.cv.utils.Ransac.Model;
 import org.genericsystem.cv.utils.RectToolsMapper;
+import org.genericsystem.reinforcer.tools.GSPoint;
+import org.genericsystem.reinforcer.tools.GSRect;
+import org.genericsystem.reinforcer.tools.RectangleTools;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
-import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.utils.Converters;
 import org.slf4j.Logger;
@@ -64,14 +66,14 @@ public class Fields extends AbstractFields<Field> {
 
 	public void merge(RectDetector rectDetector) {
 		// Get the lists of rectangles
-		List<Rect> rects = rectDetector.getFilteredRects(1d);
-		List<Rect> children = rectDetector.getFilteredRects2(1d);
+		List<GSRect> rects = RectToolsMapper.rectToGSRect(rectDetector.getFilteredRects(1d));
+		List<GSRect> children = RectToolsMapper.rectToGSRect(rectDetector.getFilteredRects2(1d));
 
 		// Remove the duplicates of rects in children
 		rects.forEach(rect -> {
-			Iterator<Rect> it = children.iterator();
+			Iterator<GSRect> it = children.iterator();
 			while (it.hasNext()) {
-				if (RectToolsMapper.isInCluster(rect, it.next(), 0.1))
+				if (RectangleTools.isInCluster(rect, it.next(), 0.1))
 					it.remove();
 			}
 		});
@@ -80,7 +82,7 @@ public class Fields extends AbstractFields<Field> {
 		fields.forEach(f -> f.incrementDeadCounter());
 
 		// Loop over all the rectangles and try to find any matching field
-		for (Rect rect : rects) {
+		for (GSRect rect : rects) {
 			List<Field> matches = findPossibleMatches(rect, 0.1);
 			matches = cleanMatches(matches, rect);
 			if (!matches.isEmpty()) {
@@ -106,21 +108,21 @@ public class Fields extends AbstractFields<Field> {
 		adjustUnmergedParents();
 	}
 
-	public static double[] getShift(Rect oldRect, Rect newRect) {
-		double tlX = newRect.tl().x - oldRect.tl().x;
-		double tlY = newRect.tl().y - oldRect.tl().y;
-		double brX = newRect.br().x - oldRect.br().x;
-		double brY = newRect.br().y - oldRect.br().y;
+	public static double[] getShift(GSRect oldRect, GSRect newRect) {
+		double tlX = newRect.tl().getX() - oldRect.tl().getX();
+		double tlY = newRect.tl().getY() - oldRect.tl().getY();
+		double brX = newRect.br().getX() - oldRect.br().getX();
+		double brY = newRect.br().getY() - oldRect.br().getY();
 		return new double[] { tlX, tlY, brX, brY };
 	}
 
-	public void mergeChildren(List<Rect> children) {
-		List<Rect> fieldsRects = fields.stream().map(f -> f.getRect()).collect(Collectors.toList());
+	public void mergeChildren(List<GSRect> children) {
+		List<GSRect> fieldsRects = fields.stream().map(f -> f.getRect()).collect(Collectors.toList());
 		for (int i = 0; i < fieldsRects.size(); ++i) {
 			Field parent = fields.get(i);
-			Rect rect = fieldsRects.get(i);
+			GSRect rect = fieldsRects.get(i);
 
-			List<Rect> possibleChildren = findChildren(children, rect);
+			List<GSRect> possibleChildren = findChildren(children, rect);
 			if (!possibleChildren.isEmpty()) {
 				logger.warn("Found possible child(ren) for {}: {}", rect, possibleChildren);
 				possibleChildren.forEach(childRect -> {
@@ -161,10 +163,10 @@ public class Fields extends AbstractFields<Field> {
 						System.err.println("unable to compute ransac, using mean instead");
 					}
 				}
-				Rect rect = field.getRect();
-				Point tl = new Point(rect.tl().x - mean[0], rect.tl().y - mean[1]);
-				Point br = new Point(rect.br().x - mean[2], rect.br().y - mean[3]);
-				field.updateRect(new Rect(tl, br));
+				GSRect rect = field.getRect();
+				GSPoint tl = new GSPoint(rect.tl().getX() - mean[0], rect.tl().getY() - mean[1]);
+				GSPoint br = new GSPoint(rect.br().getX() - mean[2], rect.br().getY() - mean[3]);
+				field.updateRect(new GSRect(tl, br));
 				System.out.println("updated rect from " + rect + " to " + field.getRect());
 				field.clearShifts();
 			} else
@@ -298,8 +300,8 @@ public class Fields extends AbstractFields<Field> {
 		}
 	}
 
-	private String formatLog(Field field, Rect rect) {
-		double mergeArea = RectToolsMapper.inclusiveArea(field.getRect(), rect);
+	private String formatLog(Field field, GSRect rect) {
+		double mergeArea = field.getRect().inclusiveArea(rect);
 		StringBuffer sb = new StringBuffer();
 		sb.append(String.format("Merging %s with %s (%.1f%% common area)", field.getRect(), rect, mergeArea * 100));
 		if (field.getConsolidated() != null)
@@ -307,15 +309,15 @@ public class Fields extends AbstractFields<Field> {
 		return sb.toString();
 	}
 
-	private List<Rect> findChildren(List<Rect> children, Rect putativeParent) {
+	private List<GSRect> findChildren(List<GSRect> children, GSRect putativeParent) {
 		double minArea = 0.95;
-		return children.stream().filter(child -> RectToolsMapper.commonArea(child, putativeParent)[0] > minArea).collect(Collectors.toList());
+		return children.stream().filter(child -> RectangleTools.commonArea(child, putativeParent)[0] > minArea).collect(Collectors.toList());
 	}
 
-	private List<Field> cleanMatches(List<Field> matches, Rect rect) {
+	private List<Field> cleanMatches(List<Field> matches, GSRect rect) {
 		List<Field> copy = new ArrayList<>(matches);
 		// Remove the false positives
-		copy = copy.stream().filter(f -> RectToolsMapper.inclusiveArea(f.getRect(), rect) > MIN_OVERLAP / 10).collect(Collectors.toList());
+		copy = copy.stream().filter(f -> f.getRect().inclusiveArea(rect) > MIN_OVERLAP / 10).collect(Collectors.toList());
 		if (copy.isEmpty()) {
 			return Collections.emptyList();
 		} else {
@@ -323,12 +325,12 @@ public class Fields extends AbstractFields<Field> {
 			if (copy.size() > 1) {
 				logger.info("Multiple matches ({}), removing false positives", copy.size());
 				// Remove the overlaps with less than 10% common area
-				copy = copy.stream().filter(f -> RectToolsMapper.inclusiveArea(f.getRect(), rect) >= MIN_OVERLAP).collect(Collectors.toList());
+				copy = copy.stream().filter(f -> f.getRect().inclusiveArea(rect) >= MIN_OVERLAP).collect(Collectors.toList());
 				if (copy.size() > 1) {
 					logger.warn("Still multiple matches ({}), selecting the maximum overlap", copy.size());
 					copy = Arrays.asList(copy.stream().max((f1, f2) -> {
-						double area1 = RectToolsMapper.inclusiveArea(f1.getRect(), rect);
-						double area2 = RectToolsMapper.inclusiveArea(f2.getRect(), rect);
+						double area1 = f1.getRect().inclusiveArea(rect);
+						double area2 = f2.getRect().inclusiveArea(rect);
 						return Double.compare(area1, area2);
 					}).orElseThrow(IllegalStateException::new));
 				}
@@ -344,9 +346,10 @@ public class Fields extends AbstractFields<Field> {
 		logger.info("Restabilized {} fields in {} ms", fields.size(), String.format("%.3f", ((double) (stop - start)) / 1_000_000));
 	}
 
-	private Rect findNewRect(Rect rect, Mat homography) {
-		List<Point> points = restabilize(Arrays.asList(rect.tl(), rect.br()), homography);
-		return new Rect(points.get(0), points.get(1));
+	private GSRect findNewRect(GSRect rect, Mat homography) {
+		List<Point> originals = RectToolsMapper.gsPointToPoint(Arrays.asList(rect.tl(), rect.br()));
+		List<GSPoint> points = RectToolsMapper.pointToGSPoint(restabilize(originals, homography));
+		return new GSRect(points.get(0), points.get(1));
 	}
 
 	private List<Point> restabilize(List<Point> originals, Mat homography) {

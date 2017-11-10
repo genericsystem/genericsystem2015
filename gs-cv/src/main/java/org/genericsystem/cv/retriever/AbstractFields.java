@@ -7,9 +7,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.genericsystem.cv.Img;
+import org.genericsystem.reinforcer.tools.GSRect;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
-import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 
 public abstract class AbstractFields<F extends AbstractField> implements Iterable<F> {
@@ -35,12 +35,12 @@ public abstract class AbstractFields<F extends AbstractField> implements Iterabl
 		return fields.stream().filter(f -> f.isClusteredWith(field.getRect(), epsilon)).collect(Collectors.toList());
 	}
 
-	protected List<F> findPossibleMatches(Rect rect, double epsilon) {
+	protected List<F> findPossibleMatches(GSRect rect, double epsilon) {
 		return fields.stream().filter(f -> f.isClusteredWith(rect, epsilon)).collect(Collectors.toList());
 	}
 
 	// like findPossibleMatches(Rect, double) but will match only a number of sides (e.g., 3 instead of 4 sides)
-	protected List<F> findPossibleMatches(Rect rect, double epsilon, int sides) {
+	protected List<F> findPossibleMatches(GSRect rect, double epsilon, int sides) {
 		return fields.stream().filter(f -> f.isClusteredWith(rect, epsilon, sides)).collect(Collectors.toList());
 	}
 

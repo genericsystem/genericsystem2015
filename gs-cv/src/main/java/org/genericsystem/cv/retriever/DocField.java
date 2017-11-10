@@ -4,9 +4,9 @@ import java.util.Map;
 
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.utils.ModelTools;
+import org.genericsystem.reinforcer.tools.GSRect;
 import org.opencv.core.Core;
 import org.opencv.core.Point;
-import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
@@ -18,14 +18,14 @@ public class DocField extends AbstractField {
 		super();
 	}
 
-	public DocField(int num, Rect rect) {
+	public DocField(int num, GSRect rect) {
 		super(rect);
 		this.num = num;
 		this.uid = ModelTools.generateZoneUID(rect);
 	}
 
 	public void writeNum(Img img, String text, double fontScale, Scalar color, int thickness) {
-		Imgproc.putText(img.getSrc(), text, new Point(rect.tl().x, rect.br().y), Core.FONT_HERSHEY_PLAIN, fontScale, color, thickness);
+		Imgproc.putText(img.getSrc(), text, new Point(rect.tl().getX(), rect.br().getY()), Core.FONT_HERSHEY_PLAIN, fontScale, color, thickness);
 	}
 
 	public void annotateImage(Img annotated, double fontScale, Scalar color, int thickness) {
@@ -45,7 +45,7 @@ public class DocField extends AbstractField {
 
 	// The private setters are needed by Jackson to serialize/de-serialize the JSON objects
 
-	protected void setRect(Rect rect) {
+	protected void setRect(GSRect rect) {
 		updateRect(rect);
 		this.uid = ModelTools.generateZoneUID(rect);
 	}
