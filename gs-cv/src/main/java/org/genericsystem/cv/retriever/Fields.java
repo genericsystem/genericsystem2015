@@ -17,7 +17,6 @@ import org.genericsystem.cv.utils.ParallelTasks;
 import org.genericsystem.cv.utils.RectToolsMapper;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
@@ -264,10 +263,11 @@ public class Fields extends AbstractFields<Field> {
 	}
 
 	private List<Point> restabilize(List<Point> originals, Mat homography) {
-		Mat original = Converters.vector_Point2f_to_Mat(originals);
-		MatOfPoint2f results = new MatOfPoint2f();
+		Mat original = Converters.vector_Point2d_to_Mat(originals);
+		Mat results = new Mat();
 		Core.perspectiveTransform(original, results, homography);
-		List<Point> res = results.toList();
+		List<Point> res = new ArrayList<>();
+		Converters.Mat_to_vector_Point2d(results, res);
 		return res;
 	}
 
