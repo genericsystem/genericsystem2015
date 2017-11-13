@@ -68,6 +68,7 @@ public abstract class AbstractField {
 	}
 
 	void updateRect(GSRect rect) {
+		// TODO only update the coordinates that are on display (see truncated rectangles)
 		this.rect = rect;
 		this.center = new Point(rect.getX() + rect.getWidth() / 2, rect.getY() + rect.getHeight() / 2);
 	}

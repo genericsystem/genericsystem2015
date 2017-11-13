@@ -51,6 +51,7 @@ public class RectDetector {
 	}
 
 	private List<Rect> filterRects(List<Rect> rects, double thresholdFactor) {
+		// TODO Delete overlapping rects (bottom up)
 		double meanArea = rects.stream().mapToDouble(r -> r.area()).average().getAsDouble();
 		double sem = Math.sqrt(rects.stream().mapToDouble(r -> Math.pow(r.area() - meanArea, 2)).sum() / (rects.size() - 1));
 		return rects.stream().filter(r -> (r.area() - meanArea) <= (sem * thresholdFactor)).collect(Collectors.toList());
