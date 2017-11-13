@@ -1,7 +1,9 @@
 package org.genericsystem.cv.retriever;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.genericsystem.cv.Img;
@@ -22,10 +24,12 @@ public class RectDetector {
 
 	public List<Rect> getFilteredRects(double thresholdFactor) {
 		return filterRects(getRects(), thresholdFactor);
+		// return filter(getRects());
 	}
 
 	public List<Rect> getFilteredRects2(double thresholdFactor) {
 		return filterRects(getRects2(), thresholdFactor);
+		// return filter(getRects2());
 	}
 
 	public List<Rect> getRects() {
@@ -55,5 +59,23 @@ public class RectDetector {
 		double meanArea = rects.stream().mapToDouble(r -> r.area()).average().getAsDouble();
 		double sem = Math.sqrt(rects.stream().mapToDouble(r -> Math.pow(r.area() - meanArea, 2)).sum() / (rects.size() - 1));
 		return rects.stream().filter(r -> (r.area() - meanArea) <= (sem * thresholdFactor)).collect(Collectors.toList());
+	}
+
+	private List<Rect> filter(List<Rect> rects) {
+		List<Rect> newRects = new ArrayList<>(rects);
+		StringBuffer sb = new StringBuffer();
+		sb.append("size before: ").append(rects.size());
+
+		Iterator<Rect> it = newRects.iterator();
+		while (it.hasNext()) {
+			Rect rect = it.next();
+			Predicate<Rect> predicate = other -> rect.tl().x < other.br().x && other.tl().x < rect.br().x && rect.tl().y < other.br().y && other.tl().y < rect.br().y;
+			boolean ok = rects.stream().filter(r -> !r.equals(rect)).anyMatch(predicate);
+			if (ok)
+				it.remove();
+		}
+		sb.append(" | size after: ").append(newRects.size());
+		System.err.println(sb.toString());
+		return newRects;
 	}
 }
