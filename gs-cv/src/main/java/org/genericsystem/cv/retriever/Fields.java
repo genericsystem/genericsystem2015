@@ -100,8 +100,7 @@ public class Fields extends AbstractFields<Field> {
 	}
 
 	private void doWork(List<GSRect> rects, int width, int height) {
-		// TODO Auto-generated method stub
-		// TODO identify truncated rectangles
+		
 		List<GSRect> truncateds = identifyTruncated(rects, width, height);
 		mergeRect(truncateds);
 		
@@ -146,7 +145,7 @@ public class Fields extends AbstractFields<Field> {
 	}
 
 	private boolean isTruncatedRect(GSRect rect, int width, int height) {
-		return rect.tl().getX() == 0d || rect.br().getX() == width;
+		return rect.tl().getX() == 0d || rect.br().getX() == width || rect.tl().getY() == 0d || rect.br().getY() == height;
 	}
 
 	private void mergeChildren(List<GSRect> childrenRect) {
