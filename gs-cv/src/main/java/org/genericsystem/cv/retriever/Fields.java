@@ -110,12 +110,9 @@ public class Fields extends AbstractFields<Field> {
 
 	private void placeRect(GSRect rect) {
 		// TODO find the new location of the field (in the tree)
-
-		// old method
-		List<Field> matches = findPossibleMatches(rect, 0.1);
-		matches = cleanMatches(matches, rect);
-		if (!matches.isEmpty()) {
-			matches.forEach(f -> updateNode(rect, f));
+		Field match = cleanMatches(rect, 0.1);
+		if (match != null) {
+			updateNode(rect, match);
 		} else {
 			createNode(rect, null);
 		}
@@ -411,28 +408,28 @@ public class Fields extends AbstractFields<Field> {
 		return sb.toString();
 	}
 
-	private List<Field> cleanMatches(List<Field> matches, GSRect rect) {
-		List<Field> copy = new ArrayList<>(matches);
+	private Field cleanMatches(GSRect rect, double eps) {
+		List<Field> matches = findPossibleMatches(rect, eps);
 		// Remove the false positives
-		copy = copy.stream().filter(f -> f.getRect().inclusiveArea(rect) > MIN_OVERLAP / 10).collect(Collectors.toList());
-		if (copy.isEmpty()) {
-			return Collections.emptyList();
+		matches.removeIf(f -> f.getRect().inclusiveArea(rect) <= MIN_OVERLAP / 10);
+		if (matches.isEmpty()) {
+			return null;
 		} else {
 			// If there is more than one match, select only the best
-			if (copy.size() > 1) {
-				logger.debug("Multiple matches ({}), removing false positives", copy.size());
+			if (matches.size() > 1) {
+				logger.debug("Multiple matches ({}), removing false positives", matches.size());
 				// Remove the overlaps with less than 10% common area
-				copy = copy.stream().filter(f -> f.getRect().inclusiveArea(rect) >= MIN_OVERLAP).collect(Collectors.toList());
-				if (copy.size() > 1) {
-					logger.warn("Still multiple matches ({}), selecting the maximum overlap", copy.size());
-					copy = Arrays.asList(copy.stream().max((f1, f2) -> {
+				matches.removeIf(f -> f.getRect().inclusiveArea(rect) < MIN_OVERLAP);
+				if (matches.size() > 1) {
+					logger.warn("Still multiple matches ({}), selecting the maximum overlap", matches.size());
+					matches = Arrays.asList(matches.stream().max((f1, f2) -> {
 						double area1 = f1.getRect().inclusiveArea(rect);
 						double area2 = f2.getRect().inclusiveArea(rect);
 						return Double.compare(area1, area2);
 					}).orElseThrow(IllegalStateException::new));
 				}
 			}
-			return copy;
+			return matches.get(0);
 		}
 	}
 
