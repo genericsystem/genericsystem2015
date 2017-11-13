@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
@@ -64,9 +63,8 @@ public class Fields extends AbstractFields<Field> {
 		System.out.println(sb.toString());
 	}
 
-	private List<GSRect> identifyTruncated(List<GSRect> rects, int width, int height) {				
+	private List<GSRect> identifyTruncated(List<GSRect> rects, int width, int height) {
 		return rects.stream().filter(r -> isTruncatedRect(r, width, height)).collect(Collectors.toList());
-		
 	}
 
 	public void merge(RectDetector rectDetector, int frameWidth, int frameHeight) {
@@ -75,13 +73,7 @@ public class Fields extends AbstractFields<Field> {
 		List<GSRect> children = RectToolsMapper.rectToGSRect(rectDetector.getFilteredRects2(1d));
 
 		// Remove the duplicates of rects in children
-		rects.forEach(rect -> {
-			Iterator<GSRect> it = children.iterator();
-			while (it.hasNext()) {
-				if (RectangleTools.isInCluster(rect, it.next(), 0.1))
-					it.remove();
-			}
-		});
+		children.removeIf(child -> rects.stream().anyMatch(parent -> RectangleTools.isInCluster(parent, child, 0.1)));
 
 		// Increment the dead counter of each field
 		fields.forEach(f -> f.incrementDeadCounter());
@@ -100,48 +92,55 @@ public class Fields extends AbstractFields<Field> {
 	}
 
 	private void doWork(List<GSRect> rects, int width, int height) {
-		
 		List<GSRect> truncateds = identifyTruncated(rects, width, height);
 		mergeRect(truncateds);
-		
-		// Loop over all the rectangles and try to find any matching field
-		// TODO remove the truncated from rects
-		mergeRect(rects);
 
+		// TODO remove the truncated from rects
+		rects.removeIf(rect -> truncateds.contains(rect));
+
+		mergeRect(rects);
 	}
 
 	private void mergeRect(List<GSRect> rects) {
+		// Loop over all the rectangles and try to find any matching field
 		for (GSRect rect : rects) {
-			// TODO create a function that will place the rect in the correct sub-tree
 			placeRect(rect);
 		}
 	}
 
 	private void placeRect(GSRect rect) {
 		// TODO find the new location of the field (in the tree)
+
+		// old method
 		List<Field> matches = findPossibleMatches(rect, 0.1);
 		matches = cleanMatches(matches, rect);
 		if (!matches.isEmpty()) {
-			matches.forEach(f -> {
-
-				/*
-				 * tonquage f.setTruncated(false); if(truncatedRects.contains(rect)) f.setTruncated(true);
-				 */
-
-				logger.info(formatLog(f, rect));
-				f.registerShift(RectangleTools.getShift(f.getRect(), rect));
-				f.updateRect(rect);
-				f.resetDeadCounter();
-
-				/*
-				 * if(!f.isTruncated) f.resetDeadCounter();
-				 */
-			});
+			matches.forEach(f -> updateNode(rect, f));
 		} else {
-			logger.info("No match for {}. Creating a new Field", rect);
-			Field f = new Field(rect);
-			fields.add(f);
+			createNode(rect, null);
 		}
+	}
+
+	private void createNode(GSRect rect, Field parent) {
+		logger.info("Creating a new node for {}", rect);
+		Field f = new Field(rect);
+		if (parent != null)
+			f.setParent(parent);
+		fields.add(f);
+	}
+
+	private void updateNode(GSRect rect, Field field) {
+		logger.info("Updating node {} with {}", field.getRect(), rect);
+		logger.info(formatLog(field, rect));
+		/*
+		 * tonquage f.setTruncated(false); if(truncatedRects.contains(rect)) f.setTruncated(true);
+		 */
+		field.registerShift(RectangleTools.getShift(field.getRect(), rect));
+		field.updateRect(rect);
+		field.resetDeadCounter();
+		/*
+		 * if(!f.isTruncated) f.resetDeadCounter();
+		 */
 	}
 
 	private boolean isTruncatedRect(GSRect rect, int width, int height) {
