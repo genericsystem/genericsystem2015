@@ -63,6 +63,10 @@ public class Fields extends AbstractFields<Field> {
 		System.out.println(sb.toString());
 	}
 
+	public List<Field> getRoots() {
+		return fields.stream().filter(field -> field.isOrphan()).collect(Collectors.toList());
+	}
+
 	private List<GSRect> identifyTruncated(List<GSRect> rects, int width, int height) {
 		return rects.stream().filter(r -> isTruncatedRect(r, width, height)).collect(Collectors.toList());
 	}
@@ -79,7 +83,7 @@ public class Fields extends AbstractFields<Field> {
 		fields.forEach(f -> f.incrementDeadCounter());
 
 		doWork(rects, frameWidth, frameHeight);
-		doWork(children, frameWidth, frameHeight); // mergeChildren(children); // TODO move to mergeRect()
+		// doWork(children, frameWidth, frameHeight); // mergeChildren(children); // TODO move to mergeRect()
 
 		removeUnmergedFields();
 		// adjustUnmergedParents(); // TODO remove?
@@ -112,23 +116,47 @@ public class Fields extends AbstractFields<Field> {
 		// TODO find the new location of the field (in the tree)
 		Field match = cleanMatches(rect, 0.1);
 		if (match != null) {
+			// We found a match, we can merge
 			updateNode(rect, match);
 		} else {
+			for (Field root : getRoots()) {
+				Field parent = findParentRecursive(rect, root);
+				if (parent != null) {
+					createNode(rect, parent);
+					return;
+				}
+			}
 			createNode(rect, null);
 		}
 	}
 
-	private void createNode(GSRect rect, Field parent) {
+	private Field findParentRecursive(GSRect rect, Field root) {
+		if (rect.getInsider(root.getRect()).map(r -> r.equals(rect)).orElse(false)) {
+			if (root.hasChildren()) {
+				for (Field child : root.getChildren()) {
+					Field candidate = findParentRecursive(rect, child);
+					if (candidate != null)
+						return candidate;
+				}
+				return root;
+			} else
+				return root;
+		}
+		return null;
+	}
+
+	private Field createNode(GSRect rect, Field parent) {
 		logger.info("Creating a new node for {}", rect);
 		Field f = new Field(rect);
 		if (parent != null)
 			f.setParent(parent);
 		fields.add(f);
+		return f;
 	}
 
 	private void updateNode(GSRect rect, Field field) {
 		logger.info("Updating node {} with {}", field.getRect(), rect);
-		logger.info(formatLog(field, rect));
+		// logger.info(formatLog(field, rect));
 		/*
 		 * tonquage f.setTruncated(false); if(truncatedRects.contains(rect)) f.setTruncated(true);
 		 */
