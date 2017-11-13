@@ -64,12 +64,12 @@ public class Fields extends AbstractFields<Field> {
 		System.out.println(sb.toString());
 	}
 
-	private List<GSRect> identifyTruncated(List<GSRect> rects) {
-		// TODO return the list?
-		return null;
+	private List<GSRect> identifyTruncated(List<GSRect> rects, int width, int height) {				
+		return rects.stream().filter(r -> isTruncatedRect(r, width, height)).collect(Collectors.toList());
+		
 	}
 
-	public void merge(RectDetector rectDetector) {
+	public void merge(RectDetector rectDetector, int frameWidth, int frameHeight) {
 		// Get the lists of rectangles
 		List<GSRect> rects = RectToolsMapper.rectToGSRect(rectDetector.getFilteredRects(1d));
 		List<GSRect> children = RectToolsMapper.rectToGSRect(rectDetector.getFilteredRects2(1d));
@@ -86,8 +86,8 @@ public class Fields extends AbstractFields<Field> {
 		// Increment the dead counter of each field
 		fields.forEach(f -> f.incrementDeadCounter());
 
-		doWork(rects);
-		doWork(children); // mergeChildren(children); // TODO move to mergeRect()
+		doWork(rects, frameWidth, frameHeight);
+		doWork(children, frameWidth, frameHeight); // mergeChildren(children); // TODO move to mergeRect()
 
 		removeUnmergedFields();
 		// adjustUnmergedParents(); // TODO remove?
@@ -99,15 +99,12 @@ public class Fields extends AbstractFields<Field> {
 
 	}
 
-	private void doWork(List<GSRect> rects) {
+	private void doWork(List<GSRect> rects, int width, int height) {
 		// TODO Auto-generated method stub
 		// TODO identify truncated rectangles
-		List<GSRect> truncateds = identifyTruncated(rects);
+		List<GSRect> truncateds = identifyTruncated(rects, width, height);
 		mergeRect(truncateds);
-
-		/*
-		 * tronquage List<GSRect> truncatedRects = rects.stream().filter(r -> isTruncatedRect(r, width)).collect(Collectors.toList());
-		 */
+		
 		// Loop over all the rectangles and try to find any matching field
 		// TODO remove the truncated from rects
 		mergeRect(rects);
@@ -148,7 +145,7 @@ public class Fields extends AbstractFields<Field> {
 		}
 	}
 
-	private boolean isTruncatedRect(GSRect rect, int width) {
+	private boolean isTruncatedRect(GSRect rect, int width, int height) {
 		return rect.tl().getX() == 0d || rect.br().getX() == width;
 	}
 
