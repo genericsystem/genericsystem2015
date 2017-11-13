@@ -120,7 +120,17 @@ public class Field extends AbstractField {
 	}
 
 	public void setParent(Field parent) {
-		this.parent = parent;
+		if (parent == null)
+			return;
+
+		if (parent.getChildren().stream().noneMatch(field -> rect.isOverlappingStrict(field.getRect()))) {
+			if (this.parent != null)
+				throw new IllegalStateException("Child already has a parent:\n" + this + "\nParent:\n" + this.parent);
+			this.parent = parent;
+			parent.addChildIfNotPresent(this); // TODO can this method be called here, or it should be handled separately?
+			logger.info("Added {} as parent of {}", parent.getRect(), this.getRect());
+		} else
+			throw new IllegalStateException("New child overlaps with future siblings:\n" + this + "\nSiblings:\n" + parent.getChildren());
 	}
 
 	public boolean hasChildren() {
