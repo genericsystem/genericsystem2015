@@ -7,6 +7,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.genericsystem.cv.Img;
+import org.genericsystem.reinforcer.tools.GSRect;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.Rect;
@@ -23,13 +24,13 @@ public class RectDetector {
 	}
 
 	public List<Rect> getFilteredRects(double thresholdFactor) {
-		return filterRects(getRects(), thresholdFactor);
-		// return filter(getRects());
+		// return filterRects(getRects(), thresholdFactor);
+		return applyConstraint(getRects());
 	}
 
 	public List<Rect> getFilteredRects2(double thresholdFactor) {
-		return filterRects(getRects2(), thresholdFactor);
-		// return filter(getRects2());
+		// return filterRects(getRects2(), thresholdFactor);
+		return applyConstraint(getRects2());
 	}
 
 	public List<Rect> getRects() {
@@ -77,5 +78,31 @@ public class RectDetector {
 		sb.append(" | size after: ").append(newRects.size());
 		System.err.println(sb.toString());
 		return newRects;
+	}
+
+	private List<Rect> applyConstraint(List<Rect> rects) {
+		System.err.println("initial size: " + rects.size());
+		List<Rect> result = new ArrayList<>();
+		for (int i = rects.size() - 1; i > 0; --i) {
+			Rect rect = rects.get(i);
+			boolean brokenCosntraint = false;
+			for (int j = i - 1; j > 0; --j) {
+				Rect r = rects.get(j);
+				if (isOverlappingStrict(r, rect)) {
+					brokenCosntraint = true;
+					break;
+				}
+			}
+			if (!brokenCosntraint)
+				result.add(rect);
+		}
+		System.err.println("after applyConstraint: " + result.size());
+		return result;
+	}
+
+	private boolean isOverlappingStrict(Rect rect1, Rect rect2) {
+		GSRect gr1 = new GSRect(rect1.x, rect1.y, rect1.width, rect1.height);
+		GSRect gr2 = new GSRect(rect2.x, rect2.y, rect2.width, rect2.height);
+		return gr1.isOverlappingStrict(gr2);
 	}
 }
