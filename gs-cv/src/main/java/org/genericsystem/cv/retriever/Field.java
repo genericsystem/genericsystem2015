@@ -1,10 +1,8 @@
 package org.genericsystem.cv.retriever;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -18,7 +16,6 @@ public class Field extends AbstractField {
 
 	private Field parent;
 	private Set<Field> children;
-	private List<double[]> shifts;
 
 	private final Predicate<Field> outsideParent = field -> rect.getInsider(field.getRect()).map(r -> !r.equals(field.getRect())).orElse(true);
 	private final Predicate<Field> overlapWithSiblings = field -> field.getSiblings().stream().filter(f -> !f.equals(field)).anyMatch(sibling -> field.getRect().isOverlapping(sibling.getRect()));
@@ -31,7 +28,6 @@ public class Field extends AbstractField {
 		super(rect);
 		this.parent = null;
 		this.children = new HashSet<>();
-		this.shifts = new ArrayList<>();
 		checkConstraints();
 	}
 
@@ -160,24 +156,6 @@ public class Field extends AbstractField {
 
 	public boolean isOrphan() {
 		return parent == null;
-	}
-
-	public List<double[]> getShifts() {
-		return shifts;
-	}
-
-	public boolean registerShift(double[] delta) {
-		if (!isOrphan())
-			return parent.addShift(delta);
-		return false;
-	}
-
-	private boolean addShift(double[] delta) {
-		return shifts.add(delta);
-	}
-
-	public void clearShifts() {
-		shifts.clear();
 	}
 
 	@Override

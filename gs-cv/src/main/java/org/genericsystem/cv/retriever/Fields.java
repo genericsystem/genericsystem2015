@@ -3,19 +3,15 @@ package org.genericsystem.cv.retriever;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.utils.ParallelTasks;
-import org.genericsystem.cv.utils.Ransac;
-import org.genericsystem.cv.utils.Ransac.Model;
 import org.genericsystem.cv.utils.RectToolsMapper;
 import org.genericsystem.reinforcer.tools.GSPoint;
 import org.genericsystem.reinforcer.tools.GSRect;
@@ -80,8 +76,8 @@ public class Fields extends AbstractFields<Field> {
 
 	public void merge(RectDetector rectDetector, int frameWidth, int frameHeight) {
 		// Get the lists of rectangles
-		List<GSRect> rects = RectToolsMapper.rectToGSRect(rectDetector.getFilteredRects(1d));
-		List<GSRect> children = RectToolsMapper.rectToGSRect(rectDetector.getFilteredRects2(1d));
+		List<GSRect> rects = RectToolsMapper.rectToGSRect(rectDetector.getRects());
+		List<GSRect> children = RectToolsMapper.rectToGSRect(rectDetector.getRects2());
 
 		// Remove the duplicates of rects in children
 		children.removeIf(child -> rects.stream().anyMatch(parent -> RectangleTools.isInCluster(parent, child, 0.1)));
@@ -92,8 +88,7 @@ public class Fields extends AbstractFields<Field> {
 		doWork(rects, frameWidth, frameHeight);
 		// doWork(children, frameWidth, frameHeight);
 
-		removeUnmergedFields();
-		// adjustUnmergedParents(); // TODO remove?
+		removeDeadTrees();
 		cleanRelationships();
 	}
 
@@ -161,169 +156,39 @@ public class Fields extends AbstractFields<Field> {
 
 	private void updateNode(GSRect rect, Field field) {
 		logger.info("Updating node {} with {}", field.getRect(), rect);
-		// logger.info(formatLog(field, rect));
-
 		field.setTruncated(false);
 		if (rect.isTruncated())
 			field.setTruncated(true);
-
-		field.registerShift(field.getRect().getShift(rect));
 		field.updateRect(rect);
 		field.resetDeadCounter();
-		/*
-		 * if(!f.isTruncated) f.resetDeadCounter();
-		 */
 	}
 
-	private void removeNode(Field field, boolean removeRelations) {
+	private void removeNode(Field field) {
 		logger.info("Removing node: {}", field.getRect());
-		if (removeRelations) {
-			if (!field.isOrphan())
-				field.getParent().removeChild(field);
-			if (field.hasChildren())
-				for (Field child : field.getChildren())
-					child.setParent(null);
-		}
 		fields.remove(field);
 	}
 
-	private void adjustUnmergedParents() {
-		fields.stream().filter(field -> field.hasChildren() && field.getDeadCounter() != 0).forEach(field -> {
-			List<double[]> shifts = field.getShifts();
-			if (!shifts.isEmpty()) {
-				double[] mean = getMean(shifts);
-				logger.debug("Mean before Ransac: {}", Arrays.toString(mean));
-				if (shifts.size() > 3) {
-					try {
-						Ransac<double[]> ransac = new Ransac<>(shifts, getModelProvider(), 3, 50, 2, shifts.size() * 2 / 3);
-						List<double[]> newShifts = ransac.getBestDataSet().values().stream().collect(Collectors.toList());
-						mean = getMean(newShifts);
-						logger.debug("Mean after Ransac: {}", Arrays.toString(mean));
-					} catch (Exception e) {
-						logger.info("Unable to compute ransac on shifts for {}", field.getRect());
-					}
-				}
-				GSRect rect = field.getRect();
-				GSPoint tl = new GSPoint(rect.tl().getX() - mean[0], rect.tl().getY() - mean[1]);
-				GSPoint br = new GSPoint(rect.br().getX() - mean[2], rect.br().getY() - mean[3]);
-				field.updateRect(new GSRect(tl, br));
-				logger.info("Updated rect from {} to {}", rect, field.getRect());
-				field.clearShifts();
-			}
-		});
-	}
-
-	private void removeUnmergedFields() {
+	private void removeDeadTrees() {
 		Predicate<Field> predicate = f -> !f.isLocked() && f.getDeadCounter() >= MAX_DELETE_UNMERGED;
-		Set<Field> removes = new HashSet<>();
-
-		// Delete each dead tree
-		for (Field field : getRoots()) {
-			if (deadTree(field, predicate))
-				removes.addAll(killTree(field));
-		}
-		removes.forEach(field -> removeNode(field, false));
-
-		// Clean the fields recursively from the 'root' of each tree
-		getRoots().forEach(field -> removes.addAll(alternateDeleteRecursive(field, predicate)));
-		removes.forEach(field -> removeNode(field, true));
+		getRoots().stream().filter(field -> isDeadTree(field, predicate)).flatMap(field -> cutDownTree(field).stream()).forEach(field -> removeNode(field));
 	}
 
-	private boolean deadTree(Field root, Predicate<Field> predicate) {
+	private boolean isDeadTree(Field root, Predicate<Field> predicate) {
 		if (!root.hasChildren()) // Single element in the tree, use the predicate
 			return predicate.test(root);
 		for (Field child : root.getChildren())
-			if (!deadTree(child, predicate)) // Return false if one of the element does not match the predicate
+			if (!isDeadTree(child, predicate)) // Return false if one of the element does not match the predicate
 				return false;
 		return true; // If false was not returned at this stage, the tree is dead
 	}
 
-	private Set<Field> killTree(Field root) {
+	private Set<Field> cutDownTree(Field root) {
 		Set<Field> res = new HashSet<>();
 		res.add(root);
 		if (root.hasChildren())
 			for (Field child : root.getChildren())
-				res.addAll(killTree(child));
+				res.addAll(cutDownTree(child));
 		return res;
-	}
-
-	private Set<Field> deleteRecursive(Field field, Predicate<Field> predicate) {
-		Set<Field> removes = new HashSet<>();
-		if (predicate.test(field)) { // FIXME: this test should be moved downwards
-			if (field.hasChildren()) {
-				// Call the method recursively
-				field.getChildren().forEach(f -> {
-					removes.addAll(deleteRecursive(f, predicate));
-				});
-				if (!field.isOrphan()) {
-					// attempt to merge text from child in parent (only if parent is not going to be deleted)
-					// siblings?
-				}
-				// add remove here to delete parent?
-			} else {
-				if (!field.isOrphan()) {
-					// attempt to merge text from child in parent (only if parent is not going to be deleted)
-					if (!predicate.test(field.getParent())) {
-						// check siblings to see if they need to be removed
-						if (field.hasSiblings()) {
-							// if all the siblings are removed, merge them all in the parent
-							// Set<Field> siblings = field.getSiblings();
-						} else {
-							// attempt to merge directly in parent
-						}
-					} // else parent gets deleted, so we don't care
-				}
-			}
-			removes.add(field);
-		}
-		return removes;
-	}
-
-	/**
-	 * 1. If a field has children, it can't be removed <br>
-	 * 2. If a field has a parent, it can't be removed <br>
-	 * 3. A parent always contains its children <br>
-	 * 4. Children are always enclosed in their parent <br>
-	 */
-	private Set<Field> alternateDeleteRecursive(Field field, Predicate<Field> predicate) {
-		Set<Field> removes = new HashSet<>();
-
-		if (field.hasChildren()) {
-			field.getChildren().forEach(f -> {
-				removes.addAll(alternateDeleteRecursive(f, predicate));
-			});
-			if (predicate.test(field)) {
-				// Update the field's coordinates to encompass all the children
-				List<GSRect> rects = field.getChildren().stream().map(f -> f.getRect()).collect(Collectors.toList());
-				GSRect union = field.getRect().getUnion(rects.stream().reduce(rects.get(0), (r, total) -> total.getUnion(r)));
-				logger.warn("Updating parent rect with union: {} -> {}", field.getRect(), union);
-				field.updateRect(union);
-			}
-		} else {
-			if (field.isOrphan()) {
-				if (predicate.test(field))
-					removes.add(field);
-			} else {
-				if (predicate.test(field)) {
-					double[] area = RectangleTools.commonArea(field.getRect(), field.getParent().getRect());
-					if (area[0] < 0.90) // Need to adjust the size of the child
-						logger.error("area mismatch: {}", Arrays.toString(area));
-					// else
-					// logger.info("area ok: {}", Arrays.toString(area));
-				}
-			}
-		}
-
-		return removes;
-	}
-
-	private String formatLog(Field field, GSRect rect) {
-		double mergeArea = field.getRect().inclusiveArea(rect);
-		StringBuffer sb = new StringBuffer();
-		sb.append(String.format("Merging %s with %s (%.1f%% common area)", field.getRect(), rect, mergeArea * 100));
-		if (field.getConsolidated() != null)
-			sb.append(String.format(" -> %s", field.getConsolidated()));
-		return sb.toString();
 	}
 
 	private Field cleanMatches(GSRect rect, double eps) {
@@ -408,47 +273,6 @@ public class Fields extends AbstractFields<Field> {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-	}
-
-	private Function<Collection<double[]>, Model<double[]>> getModelProvider() {
-		return datas -> {
-			double[] mean = getMean(datas);
-
-			return new Model<double[]>() {
-				@Override
-				public double computeError(double[] data) {
-					double error = 0;
-					for (int i = 0; i < mean.length; ++i)
-						error += Math.pow(mean[i] - data[i], 2);
-					return Math.sqrt(error);
-				}
-
-				@Override
-				public double computeGlobalError(List<double[]> datas, Collection<double[]> consensusDatas) {
-					double globalError = 0d;
-					for (double[] data : datas)
-						globalError += Math.pow(computeError(data), 2);
-					return Math.sqrt(globalError) / datas.size();
-				}
-
-				@Override
-				public Object[] getParams() {
-					return new Object[] { mean };
-				}
-			};
-		};
-	}
-
-	private double[] getMean(Collection<double[]> values) {
-		if (values.isEmpty())
-			return null;
-		double[] mean = new double[values.stream().findFirst().get().length];
-		for (double[] value : values)
-			for (int i = 0; i < mean.length; ++i)
-				mean[i] += value[i];
-		for (int i = 0; i < mean.length; ++i)
-			mean[i] /= values.size();
-		return mean;
 	}
 
 }

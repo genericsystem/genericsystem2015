@@ -30,17 +30,8 @@ public abstract class AbstractFields<F extends AbstractField> implements Iterabl
 		return fields.stream().filter(f -> f.overlapsMoreThanThresh(field.getRect(), threshold)).collect(Collectors.toList());
 	}
 
-	protected List<F> findClusteredFields(F field, double epsilon) {
-		return fields.stream().filter(f -> f.isClusteredWith(field.getRect(), epsilon)).collect(Collectors.toList());
-	}
-
 	protected List<F> findPossibleMatches(GSRect rect, double epsilon) {
 		return fields.stream().filter(f -> f.isClusteredWith(rect, epsilon)).collect(Collectors.toList());
-	}
-
-	// like findPossibleMatches(Rect, double) but will match only a number of sides (e.g., 3 instead of 4 sides)
-	protected List<F> findPossibleMatches(GSRect rect, double epsilon, int sides) {
-		return fields.stream().filter(f -> f.isClusteredWith(rect, epsilon, sides)).collect(Collectors.toList());
 	}
 
 	protected List<F> findContainingFields(F field) {

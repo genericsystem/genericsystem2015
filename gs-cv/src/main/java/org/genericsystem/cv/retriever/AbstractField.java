@@ -208,10 +208,6 @@ public abstract class AbstractField {
 		return this.rect.isOverlapping(otherRect);
 	}
 
-	public boolean isOverlapping(AbstractField other) {
-		return isOverlapping(other.getRect());
-	}
-
 	public boolean isIn(AbstractField other) {
 		return rect.getInsider(other.getRect()).map(r -> r.equals(rect) ? true : false).orElse(false);
 	}
@@ -226,10 +222,6 @@ public abstract class AbstractField {
 
 	public boolean isClusteredWith(GSRect otherRect, double epsilon, int sides) {
 		return RectangleTools.isInCluster(this.rect, otherRect, epsilon, sides);
-	}
-
-	public boolean overlapsMoreThanThresh(AbstractField other, double overlapThreshold) {
-		return overlapsMoreThanThresh(other.getRect(), overlapThreshold);
 	}
 
 	public boolean isOnDisplay(Img display) {
@@ -280,7 +272,7 @@ public abstract class AbstractField {
 	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
-		sb.append("AbstractField: ").append("\n").append(" -> rect: ").append(rect).append("\n").append(" -> labels size: ").append(labels.size()).append("\n").append(" -> consolidated: ").append(consolidated).append("\n").append(" -> confidence: ")
+		sb.append("AbstractField: ").append("\n").append(" -> rect: ").append(rect).append("\n").append(" -> labels size: ").append(getLabelsSize()).append("\n").append(" -> consolidated: ").append(consolidated).append("\n").append(" -> confidence: ")
 				.append(confidence).append("\n");
 		return sb.toString();
 	}
