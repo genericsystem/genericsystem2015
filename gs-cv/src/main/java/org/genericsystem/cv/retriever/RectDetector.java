@@ -85,15 +85,15 @@ public class RectDetector {
 		List<Rect> result = new ArrayList<>();
 		for (int i = rects.size() - 1; i > 0; --i) {
 			Rect rect = rects.get(i);
-			boolean brokenCosntraint = false;
+			boolean brokenConstraint = false;
 			for (int j = i - 1; j > 0; --j) {
 				Rect r = rects.get(j);
 				if (isOverlappingStrict(r, rect)) {
-					brokenCosntraint = true;
+					brokenConstraint = true;
 					break;
 				}
 			}
-			if (!brokenCosntraint)
+			if (!brokenConstraint)
 				result.add(rect);
 		}
 		System.err.println("after applyConstraint: " + result.size());
