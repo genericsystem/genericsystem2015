@@ -16,7 +16,6 @@ import org.genericsystem.cv.utils.OCRPlasty;
 import org.genericsystem.cv.utils.OCRPlasty.RANSAC;
 import org.genericsystem.cv.utils.OCRPlasty.Tuple;
 import org.genericsystem.cv.utils.RectToolsMapper;
-import org.genericsystem.reinforcer.tools.GSPoint;
 import org.genericsystem.reinforcer.tools.GSRect;
 import org.genericsystem.reinforcer.tools.RectangleTools;
 import org.opencv.core.Core;
@@ -38,7 +37,6 @@ public abstract class AbstractField {
 	private static final int OCR_CONFIDENCE_THRESH = 0;
 
 	protected GSRect rect;
-	protected Point center;
 	protected Map<String, Integer> labels;
 	protected String consolidated;
 	protected double confidence;
@@ -78,51 +76,49 @@ public abstract class AbstractField {
 	}
 
 	void updateRect(GSRect rect) {
-		
-		if(rect.isTruncated() && this.rect!=null){
-			
+
+		if (rect.isTruncated() && this.rect != null) {
+
 			GSRect newRect = new GSRect();
-		
-			switch(rect.getTruncateDirection()){
-				case GSRect.UP :
-					newRect.setX(rect.getX());
-					newRect.setY(this.rect.getY());
-					newRect.setWidth(rect.getWidth());
-					newRect.setHeight(this.rect.getHeight());
-					this.rect = newRect;
-					break;
-				case GSRect.LEFT :
-					newRect.setX(rect.getX());
-					newRect.setY(rect.getY());
-					newRect.setWidth(this.rect.getWidth());
-					newRect.setHeight(rect.getHeight());
-					this.rect = newRect;
-					break;
-				case GSRect.RIGHT :					
-					newRect.setX(this.rect.getX());
-					newRect.setY(rect.getY());
-					newRect.setWidth(this.rect.getWidth());
-					newRect.setHeight(rect.getHeight());
-					this.rect = newRect;
-					break;
-				case GSRect.BOTTOM :
-					newRect.setX(rect.getX());
-					newRect.setY(rect.getY());
-					newRect.setWidth(rect.getWidth());
-					newRect.setHeight(this.rect.getHeight());
-					this.rect = newRect;
-					break;
-				
-				default:
-					this.rect=rect; 					
+
+			switch (rect.getTruncateDirection()) {
+			case GSRect.UP:
+				newRect.setX(rect.getX());
+				newRect.setY(this.rect.getY());
+				newRect.setWidth(rect.getWidth());
+				newRect.setHeight(this.rect.getHeight());
+				this.rect = newRect;
+				break;
+			case GSRect.LEFT:
+				newRect.setX(rect.getX());
+				newRect.setY(rect.getY());
+				newRect.setWidth(this.rect.getWidth());
+				newRect.setHeight(rect.getHeight());
+				this.rect = newRect;
+				break;
+			case GSRect.RIGHT:
+				newRect.setX(this.rect.getX());
+				newRect.setY(rect.getY());
+				newRect.setWidth(this.rect.getWidth());
+				newRect.setHeight(rect.getHeight());
+				this.rect = newRect;
+				break;
+			case GSRect.BOTTOM:
+				newRect.setX(rect.getX());
+				newRect.setY(rect.getY());
+				newRect.setWidth(rect.getWidth());
+				newRect.setHeight(this.rect.getHeight());
+				this.rect = newRect;
+				break;
+
+			default:
+				this.rect = rect;
 			}
-		}
-		else{
+		} else {
 			this.rect = rect;
-			this.center = new Point(rect.getX() + rect.getWidth() / 2, rect.getY() + rect.getHeight() / 2);
 		}
 	}
-	
+
 	public void ocr(Img rootImg) {
 		if (rootImg.getSrc().empty())
 			return;
@@ -214,10 +210,6 @@ public abstract class AbstractField {
 		return new Rect(tl, br);
 	}
 
-	public boolean contains(Point center) {
-		return Math.sqrt(Math.pow(this.center.x - center.x, 2) + Math.pow(this.center.y - center.y, 2)) <= 10;
-	}
-
 	public boolean isOverlapping(GSRect otherRect) {
 		return this.rect.isOverlapping(otherRect);
 	}
@@ -279,10 +271,6 @@ public abstract class AbstractField {
 		return attempts;
 	}
 
-	public Point getCenter() {
-		return center;
-	}
-
 	public GSRect getRect() {
 		return rect;
 	}
@@ -308,7 +296,6 @@ public abstract class AbstractField {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + (int) (attempts ^ (attempts >>> 32));
-		result = prime * result + ((center == null) ? 0 : center.hashCode());
 		long temp;
 		temp = Double.doubleToLongBits(confidence);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
@@ -316,6 +303,7 @@ public abstract class AbstractField {
 		result = prime * result + deadCounter;
 		result = prime * result + ((labels == null) ? 0 : labels.hashCode());
 		result = prime * result + ((rect == null) ? 0 : rect.hashCode());
+		result = prime * result + (truncated ? 1231 : 1237);
 		return result;
 	}
 
@@ -329,11 +317,6 @@ public abstract class AbstractField {
 			return false;
 		AbstractField other = (AbstractField) obj;
 		if (attempts != other.attempts)
-			return false;
-		if (center == null) {
-			if (other.center != null)
-				return false;
-		} else if (!center.equals(other.center))
 			return false;
 		if (Double.doubleToLongBits(confidence) != Double.doubleToLongBits(other.confidence))
 			return false;
@@ -353,6 +336,8 @@ public abstract class AbstractField {
 			if (other.rect != null)
 				return false;
 		} else if (!rect.equals(other.rect))
+			return false;
+		if (truncated != other.truncated)
 			return false;
 		return true;
 	}

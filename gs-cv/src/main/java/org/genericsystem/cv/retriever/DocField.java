@@ -82,8 +82,4 @@ public class DocField extends AbstractField {
 		// Do nothing
 	}
 
-	protected void setCenter(Point center) {
-		this.center = center;
-	}
-
 }

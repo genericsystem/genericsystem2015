@@ -9,7 +9,6 @@ import java.util.stream.Stream;
 import org.genericsystem.cv.Img;
 import org.genericsystem.reinforcer.tools.GSRect;
 import org.opencv.core.Mat;
-import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 
 public abstract class AbstractFields<F extends AbstractField> implements Iterable<F> {
@@ -50,10 +49,6 @@ public abstract class AbstractFields<F extends AbstractField> implements Iterabl
 
 	protected List<F> findContainedFields(F field) {
 		return stream().filter(f -> f.isIn(field)).collect(Collectors.toList());
-	}
-
-	protected F findNewField(Point pt) {
-		return stream().filter(field -> field.contains(pt)).findFirst().orElse(null);
 	}
 
 	public abstract void performOcr(Img rootImg);
