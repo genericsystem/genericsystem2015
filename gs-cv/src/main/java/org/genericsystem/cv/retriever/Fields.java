@@ -72,7 +72,7 @@ public class Fields extends AbstractFields<Field> {
 	}
 
 	private List<GSRect> identifyTruncated(List<GSRect> rects, int frameWidth, int frameHeight) {
-		List<GSRect> truncatedList = rects.stream().filter(r -> isTruncatedRect(r, frameWidth, frameHeight)).collect(Collectors.toList());
+		List<GSRect> truncatedList = rects.stream().filter(r -> r.isTruncatedRect(frameWidth, frameHeight)).collect(Collectors.toList());
 		truncatedList.stream().forEach(r -> r.setTruncated(true));
 		return truncatedList;
 
@@ -130,41 +130,6 @@ public class Fields extends AbstractFields<Field> {
 			}
 			createNode(rect, null);
 		}
-	}
-
-	private boolean isTruncatedRect(GSRect rect, int width, int height) {
-		if (rect.tl().getX() <= 0d) {
-			rect.setTruncateDirection(GSRect.RIGHT);
-			return true;
-		} else if (rect.tl().getY() <= 0d) {
-			rect.setTruncateDirection(GSRect.UP);
-			return true;
-		} else if (rect.br().getX() >= width) {
-			rect.setTruncateDirection(GSRect.LEFT);
-			return true;
-		} else if (rect.br().getY() >= height) {
-			rect.setTruncateDirection(GSRect.BOTTOM);
-			return true;
-		}
-		else if(rect.tl().getX() <= 0d && rect.tl().getY() <= 0d){
-			rect.setTruncateDirection(GSRect.UP_RIGHT);
-			return true;
-		}		
-		else if(rect.br().getX() >= width && rect.br().getY() >= height){
-			rect.setTruncateDirection(GSRect.BOTTOM_LEFT);
-			return true;
-		}
-		else if(rect.tl().getX() <= 0d && rect.br().getY() >= height){
-			rect.setTruncateDirection(GSRect.BOTTOM_RIGHT);
-			return true;
-		}
-		else if(rect.br().getX() >= width && rect.tl().getY() <= 0d){
-			rect.setTruncateDirection(GSRect.UP_LEFT);
-			return true;
-		}		
-			
-		 else
-			return false;
 	}
 
 	private Field findParentRecursive(GSRect rect, Field root) {
