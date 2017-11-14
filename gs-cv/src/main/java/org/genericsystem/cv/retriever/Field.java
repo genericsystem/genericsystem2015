@@ -21,7 +21,7 @@ public class Field extends AbstractField {
 	private List<double[]> shifts;
 
 	private final Predicate<Field> outsideParent = field -> rect.getInsider(field.getRect()).map(r -> !r.equals(field.getRect())).orElse(true);
-	private final Predicate<Field> overlapWithSiblings = field -> field.getSiblings().stream().filter(f -> !f.equals(field)).anyMatch(sibling -> field.getRect().isOverlappingStrict(sibling.getRect()));
+	private final Predicate<Field> overlapWithSiblings = field -> field.getSiblings().stream().filter(f -> !f.equals(field)).anyMatch(sibling -> field.getRect().isOverlapping(sibling.getRect()));
 
 	private static final int LABELS_SIZE_THRESHOLD = 15;
 	private static final double CONFIDENCE_THRESHOLD = 0.92;
@@ -135,7 +135,7 @@ public class Field extends AbstractField {
 			this.parent.removeChild(this); // TODO can this method be called here, or should it be handled separately?
 			this.parent = null;
 		} else {
-			if (getSiblings().stream().noneMatch(field -> rect.isOverlappingStrict(field.getRect()))) {
+			if (!overlapWithSiblings.test(this)) {
 				if (this.parent != null)
 					logger.error("Child already has a parent:\n{}\nParent:\n{}", this, this.parent);
 				this.parent = parent;

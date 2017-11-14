@@ -88,7 +88,7 @@ public class RectDetector {
 			boolean brokenConstraint = false;
 			for (int j = i - 1; j > 0; --j) {
 				Rect r = rects.get(j);
-				if (isOverlappingStrict(r, rect)) {
+				if (isOverlapping(r, rect)) {
 					brokenConstraint = true;
 					break;
 				}
@@ -100,9 +100,9 @@ public class RectDetector {
 		return result;
 	}
 
-	private boolean isOverlappingStrict(Rect rect1, Rect rect2) {
+	private boolean isOverlapping(Rect rect1, Rect rect2) {
 		GSRect gr1 = new GSRect(rect1.x, rect1.y, rect1.width, rect1.height);
 		GSRect gr2 = new GSRect(rect2.x, rect2.y, rect2.width, rect2.height);
-		return gr1.isOverlappingStrict(gr2);
+		return gr1.isOverlapping(gr2);
 	}
 }
