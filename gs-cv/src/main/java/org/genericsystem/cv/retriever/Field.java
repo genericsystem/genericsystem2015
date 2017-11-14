@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.genericsystem.cv.Img;
@@ -19,6 +20,9 @@ public class Field extends AbstractField {
 	private Set<Field> children;
 	private List<double[]> shifts;
 
+	private final Predicate<Field> outsideParent = field -> rect.getInsider(field.getRect()).map(r -> !r.equals(field.getRect())).orElse(true);
+	private final Predicate<Field> overlapWithSiblings = field -> field.getSiblings().stream().filter(f -> !f.equals(field)).anyMatch(sibling -> field.getRect().isOverlappingStrict(sibling.getRect()));
+
 	private static final int LABELS_SIZE_THRESHOLD = 15;
 	private static final double CONFIDENCE_THRESHOLD = 0.92;
 	private boolean locked = false;
@@ -28,6 +32,7 @@ public class Field extends AbstractField {
 		this.parent = null;
 		this.children = new HashSet<>();
 		this.shifts = new ArrayList<>();
+		checkConstraints();
 	}
 
 	public String recursiveToString() {
@@ -73,6 +78,11 @@ public class Field extends AbstractField {
 			drawRect(display, getRectPointsWithHomography(homography), new Scalar(255, 172, 0), 2);
 	}
 
+	public void drawTruncatedField(Img display, Mat homography) {
+		if (truncated)
+			drawRect(display, getRectPointsWithHomography(homography), new Scalar(0, 0, 51), 2);
+	}
+
 	public void setFinal() {
 		if (!locked)
 			if (getLabelsSize() > LABELS_SIZE_THRESHOLD && getConfidence() > CONFIDENCE_THRESHOLD && isOrphan())
@@ -84,9 +94,7 @@ public class Field extends AbstractField {
 	}
 
 	public boolean addChildIfNotPresent(Field child) {
-		if (!this.equals(child) && !overlapsMoreThanThresh(child, 0.95) && !containsChild(child))
-			return children.add(child);
-		return false;
+		return children.add(child);
 	}
 
 	public boolean removeChild(Field child) {
@@ -120,11 +128,30 @@ public class Field extends AbstractField {
 	}
 
 	public void setParent(Field parent) {
-		this.parent = parent;
+		if (parent == null) {
+			if (this.parent == null)
+				return;
+			logger.info("Resetting parent for field: {}", this.rect);
+			this.parent.removeChild(this); // TODO can this method be called here, or should it be handled separately?
+			this.parent = null;
+		} else {
+			if (getSiblings().stream().noneMatch(field -> rect.isOverlappingStrict(field.getRect()))) {
+				if (this.parent != null)
+					logger.error("Child already has a parent:\n{}\nParent:\n{}", this, this.parent);
+				this.parent = parent;
+				if (parent.addChildIfNotPresent(this)) // TODO can this method be called here, or should it be handled separately?
+					logger.info("Added {} as parent of {}", parent.getRect(), this.getRect());
+				else {
+					logger.error("Unable to add {} as a parent of {}, reverting", parent.getRect(), this.getRect());
+					this.parent = null;
+				}
+			} else
+				logger.error("New child overlaps with future siblings:\n{}\nSiblings:\n{}", this, this.getSiblings());
+		}
 	}
 
 	public boolean hasChildren() {
-		return !children.isEmpty();
+		return children != null && !children.isEmpty();
 	}
 
 	public boolean hasSiblings() {
@@ -151,6 +178,39 @@ public class Field extends AbstractField {
 
 	public void clearShifts() {
 		shifts.clear();
+	}
+
+	@Override
+	void updateRect(GSRect rect) {
+		super.updateRect(rect);
+		checkConstraints();
+	}
+
+	private boolean checkConstraints() {
+		boolean ok = isOrphan() ? this.checkConstraintsRecursive() : parent.checkConstraintsRecursive();
+		if (!ok)
+			logger.error("Invalid constraint for:\n{}Tree:\n{}", this, isOrphan() ? this.recursiveToString() : this.parent.recursiveToString());
+		return ok;
+	}
+
+	private boolean checkConstraintsRecursive() {
+		// If the field is orphan and has no children, it validates the constraints
+		if (isOrphan() && !hasChildren())
+			return true;
+		// If the field has children, they must meet the constraint
+		if (hasChildren()) {
+			for (Field child : children) {
+				if (outsideParent.test(child) && overlapWithSiblings.test(child))
+					return false;
+			}
+			// If false was not returned, apply the function to the children
+			for (Field child : children) {
+				if (!child.checkConstraintsRecursive())
+					return false;
+			}
+		}
+		// At this stage, all the constraints should be verified
+		return true;
 	}
 
 }

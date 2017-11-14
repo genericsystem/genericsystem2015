@@ -16,6 +16,7 @@ import org.genericsystem.cv.utils.OCRPlasty;
 import org.genericsystem.cv.utils.OCRPlasty.RANSAC;
 import org.genericsystem.cv.utils.OCRPlasty.Tuple;
 import org.genericsystem.cv.utils.RectToolsMapper;
+import org.genericsystem.reinforcer.tools.GSPoint;
 import org.genericsystem.reinforcer.tools.GSRect;
 import org.genericsystem.reinforcer.tools.RectangleTools;
 import org.opencv.core.Core;
@@ -44,6 +45,15 @@ public abstract class AbstractField {
 	protected long attempts;
 
 	protected int deadCounter;
+	protected boolean truncated = false;
+
+	public boolean isTruncated() {
+		return truncated;
+	}
+
+	public void setTruncated(boolean truncated) {
+		this.truncated = truncated;
+	}
 
 	public AbstractField() {
 		this(new GSRect());
@@ -68,10 +78,51 @@ public abstract class AbstractField {
 	}
 
 	void updateRect(GSRect rect) {
-		this.rect = rect;
-		this.center = new Point(rect.getX() + rect.getWidth() / 2, rect.getY() + rect.getHeight() / 2);
+		
+		if(rect.isTruncated() && this.rect!=null){
+			
+			GSRect newRect = new GSRect();
+		
+			switch(rect.getTruncateDirection()){
+				case GSRect.UP :
+					newRect.setX(rect.getX());
+					newRect.setY(this.rect.getY());
+					newRect.setWidth(rect.getWidth());
+					newRect.setHeight(this.rect.getHeight());
+					this.rect = newRect;
+					break;
+				case GSRect.LEFT :
+					newRect.setX(rect.getX());
+					newRect.setY(rect.getY());
+					newRect.setWidth(this.rect.getWidth());
+					newRect.setHeight(rect.getHeight());
+					this.rect = newRect;
+					break;
+				case GSRect.RIGHT :					
+					newRect.setX(this.rect.getX());
+					newRect.setY(rect.getY());
+					newRect.setWidth(this.rect.getWidth());
+					newRect.setHeight(rect.getHeight());
+					this.rect = newRect;
+					break;
+				case GSRect.BOTTOM :
+					newRect.setX(rect.getX());
+					newRect.setY(rect.getY());
+					newRect.setWidth(rect.getWidth());
+					newRect.setHeight(this.rect.getHeight());
+					this.rect = newRect;
+					break;
+				
+				default:
+					this.rect=rect; 					
+			}
+		}
+		else{
+			this.rect = rect;
+			this.center = new Point(rect.getX() + rect.getWidth() / 2, rect.getY() + rect.getHeight() / 2);
+		}
 	}
-
+	
 	public void ocr(Img rootImg) {
 		if (rootImg.getSrc().empty())
 			return;

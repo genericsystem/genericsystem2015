@@ -1,12 +1,24 @@
 package org.genericsystem.reinforcer.tools;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.genericsystem.reinforcer.NormalizedRect;
 
 public class GSRect {
-	private double x, y, width, height;
+	
 
+	private double x, y, width, height;	
+	
+	private boolean truncated = false;
+	private String truncateDirection;
+		
+	public static final String UP = "UP";
+	public static final String LEFT = "LEFT";
+	public static final String BOTTOM = "BOTTOM";
+	public static final String RIGHT = "RIGHT";
+		
+	
 	public GSRect(double x, double y, double width, double height) {
 		this.x = x;
 		this.y = y;
@@ -224,6 +236,20 @@ public class GSRect {
 		return eps * (Math.min(width, rect2.width) + Math.min(height, rect2.height)) / 2;
 	}
 
+	/**
+	 * Compute the shift from this rectangle to <code>other</code>.
+	 * 
+	 * @param other - the other rectangle
+	 * @return an <code>double[]</code> with the shift in coordinates from <code>this</code> to <code>other</code> (tl.x, tl.y, br.x, br.y)
+	 */
+	public double[] getShift(GSRect other) {
+		double tlX = other.tl().getX() - this.tl().getX();
+		double tlY = other.tl().getY() - this.tl().getY();
+		double brX = other.br().getX() - this.br().getX();
+		double brY = other.br().getY() - this.br().getY();
+		return new double[] { tlX, tlY, brX, brY };
+	}
+
 	public NormalizedRect normalize(double mintlx, double mintly, double width, double height) {
 		return new NormalizedRect((x - mintlx) / width, (y - mintly) / height, this.width / width, this.height / height);
 	}
@@ -274,4 +300,38 @@ public class GSRect {
 	public double getHeight() {
 		return height;
 	}
+	
+
+	public void setX(double x) {
+		this.x = x;
+	}
+
+	public void setY(double y) {
+		this.y = y;
+	}
+
+	public void setWidth(double width) {
+		this.width = width;
+	}
+
+	public void setHeight(double height) {
+		this.height = height;
+	}
+
+	public boolean isTruncated() {
+		return truncated;
+	}
+
+	public void setTruncated(boolean truncated) {
+		this.truncated = truncated;
+	}
+
+	public String getTruncateDirection() {
+		return truncateDirection;
+	}
+
+	public void setTruncateDirection(String truncateDirection) {
+		this.truncateDirection = truncateDirection;
+	}
+
 }

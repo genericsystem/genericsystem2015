@@ -245,21 +245,6 @@ public class RectangleTools {
 	}
 
 	/**
-	 * Compute the shift from a rectangle to another.
-	 * 
-	 * @param oldRect - the old rectangle, from which the comparison is done
-	 * @param newRect - the new rectangle
-	 * @return an <code>double[]</code> with the shift in coordinates from <code>oldRect</code> to <code>newRect</code> (tl.x, tl.y, br.x, br.y)
-	 */
-	public static double[] getShift(GSRect oldRect, GSRect newRect) {
-		double tlX = newRect.tl().getX() - oldRect.tl().getX();
-		double tlY = newRect.tl().getY() - oldRect.tl().getY();
-		double brX = newRect.br().getX() - oldRect.br().getX();
-		double brY = newRect.br().getY() - oldRect.br().getY();
-		return new double[] { tlX, tlY, brX, brY };
-	}
-
-	/**
 	 * Method to remove the overlapping {@link GSRect}, relying on "non-maximum suppression" to ignore redundant, overlapping boxes.
 	 * 
 	 * @param boxes - the list of rectangles that need to be filtered
@@ -318,7 +303,6 @@ public class RectangleTools {
 	}
 
 	public static GSRect linearCombination(GSRect rect1, double n1, GSRect rect2, double n2) {
-		return new GSRect(n1 * rect1.getX() + n2 * rect2.getX(), n1 * rect1.getY() + n2 * rect2.getY(),
-				n1 * rect1.getWidth() + n2 * rect2.getWidth(), n1 * rect1.getHeight() + n2 * rect2.getHeight());
+		return new GSRect(n1 * rect1.getX() + n2 * rect2.getX(), n1 * rect1.getY() + n2 * rect2.getY(), n1 * rect1.getWidth() + n2 * rect2.getWidth(), n1 * rect1.getHeight() + n2 * rect2.getHeight());
 	}
 }
