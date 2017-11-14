@@ -168,6 +168,18 @@ public class Fields extends AbstractFields<Field> {
 		 */
 	}
 
+	private void removeNode(Field field, boolean removeRelations) {
+		logger.info("Removing node: {}", field.getRect());
+		if (removeRelations) {
+			if (!field.isOrphan())
+				field.getParent().removeChild(field);
+			if (field.hasChildren())
+				for (Field child : field.getChildren())
+					child.setParent(null);
+		}
+		fields.remove(field);
+	}
+
 	private boolean isTruncatedRect(GSRect rect, int width, int height) {
 		return rect.tl().getX() == 0d || rect.br().getX() == width || rect.tl().getY() == 0d || rect.br().getY() == height;
 	}
@@ -290,17 +302,14 @@ public class Fields extends AbstractFields<Field> {
 		// Clean the fields recursively from the 'root' of each tree
 		Set<Field> removes = new HashSet<>();
 
-		fields.stream().filter(field -> field.isOrphan()).forEach(field -> {
+		getRoots().forEach(field -> {
 			if (deadTree(field, predicate))
 				removes.addAll(killTree(field));
 		});
-		removes.forEach(field -> {
-			System.out.println("removing: " + field.getRect());
-			fields.remove(field);
-		});
+		removes.forEach(field -> removeNode(field, false));
 
 		// fields.stream().filter(field -> field.isOrphan()).forEach(field -> removes.addAll(deleteRecursive(field, predicate)));
-		fields.stream().filter(field -> field.isOrphan()).forEach(field -> removes.addAll(alternateDeleteRecursive(field, predicate)));
+		getRoots().forEach(field -> removes.addAll(alternateDeleteRecursive(field, predicate)));
 		removes.forEach(field -> {
 			if (field.hasChildren())
 				field.getChildren().forEach(child -> child.setParent(null));

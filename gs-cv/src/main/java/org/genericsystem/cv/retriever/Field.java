@@ -84,9 +84,10 @@ public class Field extends AbstractField {
 	}
 
 	public boolean addChildIfNotPresent(Field child) {
-		if (!this.equals(child) && !overlapsMoreThanThresh(child, 0.95) && !containsChild(child))
-			return children.add(child);
-		return false;
+		// TODO add a constraint check, remove the check on the surface
+		// if (!this.equals(child) && !overlapsMoreThanThresh(child, 0.95) && !containsChild(child))
+		return children.add(child);
+		// return false;
 	}
 
 	public boolean removeChild(Field child) {
@@ -120,17 +121,22 @@ public class Field extends AbstractField {
 	}
 
 	public void setParent(Field parent) {
-		if (parent == null)
-			return;
-
-		if (parent.getChildren().stream().noneMatch(field -> rect.isOverlappingStrict(field.getRect()))) {
-			if (this.parent != null)
-				throw new IllegalStateException("Child already has a parent:\n" + this + "\nParent:\n" + this.parent);
-			this.parent = parent;
-			parent.addChildIfNotPresent(this); // TODO can this method be called here, or it should be handled separately?
-			logger.info("Added {} as parent of {}", parent.getRect(), this.getRect());
-		} else
-			throw new IllegalStateException("New child overlaps with future siblings:\n" + this + "\nSiblings:\n" + parent.getChildren());
+		if (parent == null) {
+			if (this.parent == null)
+				return;
+			logger.info("Resetting parent for field: {}", this.rect);
+			this.parent.removeChild(this); // TODO can this method be called here, or should it be handled separately?
+			this.parent = null;
+		} else {
+			if (getSiblings().stream().noneMatch(field -> rect.isOverlappingStrict(field.getRect()))) {
+				if (this.parent != null)
+					logger.error("Child already has a parent:\n{}\nParent:\n{}", this, this.parent);
+				this.parent = parent;
+				parent.addChildIfNotPresent(this); // TODO can this method be called here, or should it be handled separately?
+				logger.info("Added {} as parent of {}", parent.getRect(), this.getRect());
+			} else
+				logger.error("New child overlaps with future siblings:\n{}\nSiblings:\n{}", this, this.getSiblings());
+		}
 	}
 
 	public boolean hasChildren() {
