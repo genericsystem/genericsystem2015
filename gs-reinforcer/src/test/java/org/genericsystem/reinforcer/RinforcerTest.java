@@ -5,24 +5,8 @@ import org.testng.annotations.Test;
 @Test
 public class RinforcerTest {
 
-	public void test001() {
-		Reinforcer reinforcer = new Reinforcer();
-		Labels labels = new Labels();
-		labels.addLabel(0, 0, 5, 5, "First Label");
-		labels.addLabel(10, 10, 15, 15, "Second Label");
-		//		reinforcer.reinforce(labels);
-		//		assert reinforcer.getUnclassifiable().contains(labels);
-		//		reinforcer.reinforce(labels);
-		//		assert reinforcer.getUnclassifiable().contains(labels);
-		//		reinforcer.reinforce(labels);
-
-		System.out.println(labels.normalizeLabels());
-
-		//		assert reinforcer.getUnclassifiable().contains(labels);
-	}
-
 	// 4 labels at the same places in 4 all images, 2 classes depending on text.
-	public void test002() {
+	public void test001() {
 		Reinforcer reinforcer = new Reinforcer();
 		Labels labels1 = new Labels();
 		labels1.addLabel(1, 1, 50, 20, "Surname;");
@@ -82,7 +66,7 @@ public class RinforcerTest {
 	}
 
 	// 4 labels at roughly the same places in all images, 2 classes depending on text.
-	public void test003() {
+	public void test002() {
 		Reinforcer reinforcer = new Reinforcer();
 		Labels labels1 = new Labels();
 		labels1.addLabel(5, 2, 50, 21, "Surname;");
