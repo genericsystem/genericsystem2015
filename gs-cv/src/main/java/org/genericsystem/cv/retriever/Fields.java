@@ -145,7 +145,25 @@ public class Fields extends AbstractFields<Field> {
 		} else if (rect.br().getY() >= height) {
 			rect.setTruncateDirection(GSRect.BOTTOM);
 			return true;
-		} else
+		}
+		else if(rect.tl().getX() <= 0d && rect.tl().getY() <= 0d){
+			rect.setTruncateDirection(GSRect.UP_RIGHT);
+			return true;
+		}		
+		else if(rect.br().getX() >= width && rect.br().getY() >= height){
+			rect.setTruncateDirection(GSRect.BOTTOM_LEFT);
+			return true;
+		}
+		else if(rect.tl().getX() <= 0d && rect.br().getY() >= height){
+			rect.setTruncateDirection(GSRect.BOTTOM_RIGHT);
+			return true;
+		}
+		else if(rect.br().getX() >= width && rect.tl().getY() <= 0d){
+			rect.setTruncateDirection(GSRect.UP_LEFT);
+			return true;
+		}		
+			
+		 else
 			return false;
 	}
 

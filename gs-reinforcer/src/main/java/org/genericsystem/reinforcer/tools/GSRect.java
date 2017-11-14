@@ -17,6 +17,10 @@ public class GSRect {
 	public static final String LEFT = "LEFT";
 	public static final String BOTTOM = "BOTTOM";
 	public static final String RIGHT = "RIGHT";
+	public static final String UP_RIGHT = "UP_RIGHT";
+	public static final String UP_LEFT = "UP_LEFT";
+	public static final String BOTTOM_RIGHT = "BOTTOM_RIGHT";
+	public static final String BOTTOM_LEFT = "BOTTOM_LEFT";
 		
 	
 	public GSRect(double x, double y, double width, double height) {

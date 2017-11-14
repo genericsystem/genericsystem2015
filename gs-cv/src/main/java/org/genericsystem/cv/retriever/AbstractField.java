@@ -79,36 +79,30 @@ public abstract class AbstractField {
 
 		if (rect.isTruncated() && this.rect != null) {
 
-			GSRect newRect = new GSRect();
-
 			switch (rect.getTruncateDirection()) {
 			case GSRect.UP:
-				newRect.setX(rect.getX());
-				newRect.setY(this.rect.getY());
-				newRect.setWidth(rect.getWidth());
-				newRect.setHeight(this.rect.getHeight());
-				this.rect = newRect;
+				this.rect = new GSRect(rect.getX(), this.rect.getY(), rect.getWidth(), this.rect.getHeight());
 				break;
-			case GSRect.LEFT:
-				newRect.setX(rect.getX());
-				newRect.setY(rect.getY());
-				newRect.setWidth(this.rect.getWidth());
-				newRect.setHeight(rect.getHeight());
-				this.rect = newRect;
+			case GSRect.LEFT:				
+				this.rect = new GSRect(rect.getX(), rect.getY(), this.rect.getWidth(), rect.getHeight());
 				break;
-			case GSRect.RIGHT:
-				newRect.setX(this.rect.getX());
-				newRect.setY(rect.getY());
-				newRect.setWidth(this.rect.getWidth());
-				newRect.setHeight(rect.getHeight());
-				this.rect = newRect;
+			case GSRect.RIGHT:				
+				this.rect = new GSRect(this.rect.getX(), rect.getY(), this.rect.getWidth(), rect.getHeight());
 				break;
 			case GSRect.BOTTOM:
-				newRect.setX(rect.getX());
-				newRect.setY(rect.getY());
-				newRect.setWidth(rect.getWidth());
-				newRect.setHeight(this.rect.getHeight());
-				this.rect = newRect;
+				this.rect = new GSRect(rect.getX(), rect.getY(), rect.getWidth(), this.rect.getHeight());
+				break;
+			case GSRect.BOTTOM_LEFT:
+				this.rect = new GSRect(rect.getX(), rect.getY(), this.rect.getWidth(), this.rect.getHeight());
+				break;
+			case GSRect.BOTTOM_RIGHT :
+				this.rect = new GSRect(this.rect.getX(), rect.getY(), this.rect.getWidth(), this.rect.getHeight());
+				break;
+			case GSRect.UP_LEFT :
+				this.rect = new GSRect(rect.getX(), this.rect.getY(), this.rect.getWidth(), this.rect.getHeight());
+				break;
+			case GSRect.UP_RIGHT :
+				this.rect = new GSRect(this.rect.getX(), this.rect.getY(), this.rect.getWidth(), this.rect.getHeight());
 				break;
 
 			default:
