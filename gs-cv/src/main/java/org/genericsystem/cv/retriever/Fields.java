@@ -53,7 +53,7 @@ public class Fields extends AbstractFields<Field> {
 	}
 	
 	public void drawTruncatedFields(Img display, Mat homography) {
-		fields.forEach(field -> field.drawLockedField(display, homography));
+		fields.stream().filter(f -> f.isTruncated()).forEach(field -> field.drawTruncatedField(display, homography));
 		fields.stream().filter(field -> field.isTruncated()).forEach(field -> field.drawRect(display, field.getRectPointsWithHomography(homography), new Scalar(255, 128, 255), 1));
 	}
 
@@ -179,6 +179,8 @@ public class Fields extends AbstractFields<Field> {
 	private Field createNode(GSRect rect, Field parent) {
 		logger.info("Creating a new node for {}", rect);
 		Field f = new Field(rect);
+		if(rect.isTruncated())
+			f.setTruncated(true);
 		if (parent != null)
 			f.setParent(parent);
 		fields.add(f);
@@ -188,9 +190,11 @@ public class Fields extends AbstractFields<Field> {
 	private void updateNode(GSRect rect, Field field) {
 		logger.info("Updating node {} with {}", field.getRect(), rect);
 		// logger.info(formatLog(field, rect));
-		/*
-		 * tonquage f.setTruncated(false); if(truncatedRects.contains(rect)) f.setTruncated(true);
-		 */
+		
+		 field.setTruncated(false); 
+		 if(rect.isTruncated()) 
+			 field.setTruncated(true);		 
+		
 		field.registerShift(field.getRect().getShift(rect));
 		field.updateRect(rect);
 		field.resetDeadCounter();
@@ -376,7 +380,7 @@ public class Fields extends AbstractFields<Field> {
 
 	public void restabilizeFields(Mat homography) {		
 		long start = System.nanoTime();
-		fields.forEach(field -> field.stabilizeFieldRect(findNewRect(field.getRect(), homography)));
+		fields.forEach(field -> field.updateRect(findNewRect(field.getRect(), homography)));
 		long stop = System.nanoTime();
 		logger.info("Restabilized {} fields in {} ms", fields.size(), String.format("%.3f", ((double) (stop - start)) / 1_000_000));
 	}
