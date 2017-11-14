@@ -90,25 +90,21 @@ public class Fields extends AbstractFields<Field> {
 		fields.forEach(f -> f.incrementDeadCounter());
 
 		doWork(rects, frameWidth, frameHeight);
-		// doWork(children, frameWidth, frameHeight); // mergeChildren(children); // TODO move to mergeRect()
+		// doWork(children, frameWidth, frameHeight);
 
 		removeUnmergedFields();
 		// adjustUnmergedParents(); // TODO remove?
 		cleanRelationships();
 	}
 
+	// TODO re-arrange the fields to match all the constraints (no overlap, children strictly contained in parents)
 	private void cleanRelationships() {
-		// TODO re-arrange the fields to match all the constraints (no overlap, children strictly contained in parents)
-
 	}
 
 	private void doWork(List<GSRect> rects, int width, int height) {
 		List<GSRect> truncateds = identifyTruncated(rects, width, height);
 		mergeRect(truncateds);
-
-		// TODO remove the truncated from rects
 		rects.removeIf(rect -> truncateds.contains(rect));
-
 		mergeRect(rects);
 	}
 
@@ -120,8 +116,6 @@ public class Fields extends AbstractFields<Field> {
 	}
 
 	private void placeRect(GSRect rect) {
-		// TODO find the new location of the field (in the tree)
-
 		Field match = cleanMatches(rect, 0.1);
 		if (match != null) {
 			// We found a match, we can merge
@@ -132,7 +126,6 @@ public class Fields extends AbstractFields<Field> {
 				if (parent != null) {
 					createNode(rect, parent);
 					return;
-
 				}
 			}
 			createNode(rect, null);
@@ -174,7 +167,7 @@ public class Fields extends AbstractFields<Field> {
 	private Field createNode(GSRect rect, Field parent) {
 		logger.info("Creating a new node for {}", rect);
 		Field f = new Field(rect);
-		if(rect.isTruncated())
+		if (rect.isTruncated())
 			f.setTruncated(true);
 		if (parent != null)
 			f.setParent(parent);
@@ -185,11 +178,11 @@ public class Fields extends AbstractFields<Field> {
 	private void updateNode(GSRect rect, Field field) {
 		logger.info("Updating node {} with {}", field.getRect(), rect);
 		// logger.info(formatLog(field, rect));
-		
-		 field.setTruncated(false); 
-		 if(rect.isTruncated()) 
-			 field.setTruncated(true);		 
-		
+
+		field.setTruncated(false);
+		if (rect.isTruncated())
+			field.setTruncated(true);
+
 		field.registerShift(field.getRect().getShift(rect));
 		field.updateRect(rect);
 		field.resetDeadCounter();
@@ -318,7 +311,8 @@ public class Fields extends AbstractFields<Field> {
 			if (predicate.test(field)) {
 				// Update the field's coordinates to encompass all the children
 				List<GSRect> rects = field.getChildren().stream().map(f -> f.getRect()).collect(Collectors.toList());
-				GSRect union = rects.stream().reduce(rects.get(0), (r, total) -> r.getUnion(total));
+				GSRect union = field.getRect().getUnion(rects.stream().reduce(rects.get(0), (r, total) -> total.getUnion(r)));
+				logger.warn("Updating parent rect with union: {} -> {}", field.getRect(), union);
 				field.updateRect(union);
 			}
 		} else {
