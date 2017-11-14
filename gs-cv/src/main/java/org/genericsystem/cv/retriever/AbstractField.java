@@ -114,21 +114,15 @@ public abstract class AbstractField {
 					break;
 				
 				default:
-					this.rect=rect; 
-					
+					this.rect=rect; 					
 			}
 		}
-		
-		this.rect = rect;
-		this.center = new Point(rect.getX() + rect.getWidth() / 2, rect.getY() + rect.getHeight() / 2);
-		
+		else{
+			this.rect = rect;
+			this.center = new Point(rect.getX() + rect.getWidth() / 2, rect.getY() + rect.getHeight() / 2);
+		}
 	}
 	
-	public void stabilizeFieldRect(GSRect rect){
-		this.rect = rect;
-		this.center = new Point(rect.getX() + rect.getWidth() / 2, rect.getY() + rect.getHeight() / 2);		
-	}
-
 	public void ocr(Img rootImg) {
 		if (rootImg.getSrc().empty())
 			return;

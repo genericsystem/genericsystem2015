@@ -78,9 +78,9 @@ public class Field extends AbstractField {
 			drawRect(display, getRectPointsWithHomography(homography), new Scalar(255, 172, 0), 2);
 	}
 
-	public void drawTruncatedField(Img display, Mat homography) {
+	public void drawTruncatedField(Img display, Mat homography) {		
 		if (truncated)
-			drawRect(display, getRectPointsWithHomography(homography), new Scalar(0, 172, 255), 1);
+			drawRect(display, getRectPointsWithHomography(homography), new Scalar(0, 0, 51), 2);
 	}
 
 	public void setFinal() {
