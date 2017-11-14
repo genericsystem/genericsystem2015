@@ -1,6 +1,6 @@
 package org.genericsystem.reinforcer.tools;
 
-public class GSPoint {
+public class GSPoint implements Comparable<GSPoint> {
 	private double x, y;
 
 	public GSPoint(double x, double y) {
@@ -73,5 +73,15 @@ public class GSPoint {
 
 	public double getY() {
 		return y;
+	}
+
+	@Override
+	public int compareTo(GSPoint o) {
+		if (y != o.y)
+			return (int) Math.signum(o.y - y);
+		else if (x != o.x)
+			return (int) Math.signum(o.x - x);
+		else
+			return 0;
 	}
 }

@@ -5,9 +5,8 @@ import java.util.Optional;
 
 import org.genericsystem.reinforcer.NormalizedRect;
 
-public class GSRect {
+public class GSRect implements Comparable<GSRect> {
 	
-
 	private double x, y, width, height;	
 	
 	private boolean truncated = false;
@@ -340,7 +339,6 @@ public class GSRect {
 		return height;
 	}
 	
-
 	public void setX(double x) {
 		this.x = x;
 	}
@@ -373,4 +371,12 @@ public class GSRect {
 		this.truncateDirection = truncateDirection;
 	}
 
+	public GSPoint getCenter() {
+		return new GSPoint(x + width / 2, y + height / 2);
+	}
+
+	@Override
+	public int compareTo(GSRect o) {
+		return getCenter().compareTo(o.getCenter());
+	}
 }

@@ -119,6 +119,10 @@ public class StringCompare {
 		return sim;
 	}
 
+	public static boolean similar(String string1, String string2, SIMILARITY option) {
+		return compare(string1, string2, option) >= .7;
+	}
+
 	/**
 	 * Compute the similarity between the members of a list of strings.
 	 * 
