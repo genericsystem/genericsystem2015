@@ -32,7 +32,7 @@ public class Field extends AbstractField {
 		this.parent = null;
 		this.children = new HashSet<>();
 		this.shifts = new ArrayList<>();
-		checkOutsideParentConstraint();
+		checkConstraints();
 	}
 
 	public String recursiveToString() {
@@ -94,10 +94,7 @@ public class Field extends AbstractField {
 	}
 
 	public boolean addChildIfNotPresent(Field child) {
-		// TODO add a constraint check, remove the check on the surface
-		// if (!this.equals(child) && !overlapsMoreThanThresh(child, 0.95) && !containsChild(child))
 		return children.add(child);
-		// return false;
 	}
 
 	public boolean removeChild(Field child) {
@@ -142,8 +139,12 @@ public class Field extends AbstractField {
 				if (this.parent != null)
 					logger.error("Child already has a parent:\n{}\nParent:\n{}", this, this.parent);
 				this.parent = parent;
-				parent.addChildIfNotPresent(this); // TODO can this method be called here, or should it be handled separately?
-				logger.info("Added {} as parent of {}", parent.getRect(), this.getRect());
+				if (parent.addChildIfNotPresent(this)) // TODO can this method be called here, or should it be handled separately?
+					logger.info("Added {} as parent of {}", parent.getRect(), this.getRect());
+				else {
+					logger.error("Unable to add {} as a parent of {}, reverting", parent.getRect(), this.getRect());
+					this.parent = null;
+				}
 			} else
 				logger.error("New child overlaps with future siblings:\n{}\nSiblings:\n{}", this, this.getSiblings());
 		}
@@ -182,28 +183,29 @@ public class Field extends AbstractField {
 	@Override
 	void updateRect(GSRect rect) {
 		super.updateRect(rect);
-		checkOutsideParentConstraint();
+		checkConstraints();
 	}
 
-	private void checkOutsideParentConstraint() {
-		boolean ok = isOrphan() ? this.checkConstraint(outsideParent) : parent.checkConstraint(outsideParent);
+	private boolean checkConstraints() {
+		boolean ok = isOrphan() ? this.checkConstraintsRecursive() : parent.checkConstraintsRecursive();
 		if (!ok)
-			logger.error("Invalid constraint for:\n{}", this);
+			logger.error("Invalid constraint for:\n{}Tree:\n{}", this, isOrphan() ? this.recursiveToString() : this.parent.recursiveToString());
+		return ok;
 	}
 
-	private boolean checkConstraint(Predicate<Field> constraint) {
+	private boolean checkConstraintsRecursive() {
 		// If the field is orphan and has no children, it validates the constraints
 		if (isOrphan() && !hasChildren())
 			return true;
 		// If the field has children, they must meet the constraint
 		if (hasChildren()) {
 			for (Field child : children) {
-				if (constraint.test(child))
+				if (outsideParent.test(child) && overlapWithSiblings.test(child))
 					return false;
 			}
 			// If false was not returned, apply the function to the children
 			for (Field child : children) {
-				if (!child.checkConstraint(constraint))
+				if (!child.checkConstraintsRecursive())
 					return false;
 			}
 		}
