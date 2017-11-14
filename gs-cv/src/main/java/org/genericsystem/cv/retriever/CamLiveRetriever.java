@@ -154,6 +154,7 @@ public class CamLiveRetriever extends AbstractApp {
 				Stats.endTask("consolidateOcr");
 				fields.drawOcrPerspectiveInverse(display, stabilizationHomography.inv(), new Scalar(0, 255, 0), 1);
 				fields.drawLockedFields(display, stabilizationHomography.inv());
+				fields.drawTruncatedFields(display, stabilizationHomography.inv());
 				src0.setImage(display.toJfxImage());
 				src1.setImage(stabilizedDisplay.toJfxImage());
 				Stats.endTask("frame");

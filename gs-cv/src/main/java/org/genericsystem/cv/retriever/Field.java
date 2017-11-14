@@ -22,6 +22,7 @@ public class Field extends AbstractField {
 	private static final int LABELS_SIZE_THRESHOLD = 15;
 	private static final double CONFIDENCE_THRESHOLD = 0.92;
 	private boolean locked = false;
+	
 
 	public Field(GSRect rect) {
 		super(rect);
@@ -71,6 +72,11 @@ public class Field extends AbstractField {
 	public void drawLockedField(Img display, Mat homography) {
 		if (locked)
 			drawRect(display, getRectPointsWithHomography(homography), new Scalar(255, 172, 0), 2);
+	}
+	
+	public void drawTruncatedField(Img display, Mat homography) {
+		if (truncated)
+			drawRect(display, getRectPointsWithHomography(homography), new Scalar(0, 172, 255), 1);
 	}
 
 	public void setFinal() {

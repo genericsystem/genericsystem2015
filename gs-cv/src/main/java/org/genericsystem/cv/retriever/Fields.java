@@ -51,6 +51,11 @@ public class Fields extends AbstractFields<Field> {
 		fields.forEach(field -> field.drawLockedField(display, homography));
 		fields.stream().filter(field -> !field.isOrphan()).forEach(field -> field.drawRect(display, field.getRectPointsWithHomography(homography), new Scalar(255, 128, 255), 1));
 	}
+	
+	public void drawTruncatedFields(Img display, Mat homography) {
+		fields.forEach(field -> field.drawLockedField(display, homography));
+		fields.stream().filter(field -> field.isTruncated()).forEach(field -> field.drawRect(display, field.getRectPointsWithHomography(homography), new Scalar(255, 128, 255), 1));
+	}
 
 	public void displayFieldsTree() {
 		StringBuffer sb = new StringBuffer();
@@ -62,12 +67,16 @@ public class Fields extends AbstractFields<Field> {
 		System.out.println(sb.toString());
 	}
 
+
 	public List<Field> getRoots() {
 		return fields.stream().filter(field -> field.isOrphan()).collect(Collectors.toList());
 	}
 
-	private List<GSRect> identifyTruncated(List<GSRect> rects, int width, int height) {
-		return rects.stream().filter(r -> isTruncatedRect(r, width, height)).collect(Collectors.toList());
+	private List<GSRect> identifyTruncated(List<GSRect> rects, int frameWidth, int frameHeight) {
+		List<GSRect> truncatedList = rects.stream().filter(r -> isTruncatedRect(r, frameWidth, frameHeight)).collect(Collectors.toList());
+		truncatedList.stream().forEach(r -> r.setTruncated(true));
+		return truncatedList;		
+
 	}
 
 	public void merge(RectDetector rectDetector, int frameWidth, int frameHeight) {
@@ -113,6 +122,7 @@ public class Fields extends AbstractFields<Field> {
 
 	private void placeRect(GSRect rect) {
 		// TODO find the new location of the field (in the tree)
+
 		Field match = cleanMatches(rect, 0.1);
 		if (match != null) {
 			// We found a match, we can merge
@@ -123,11 +133,33 @@ public class Fields extends AbstractFields<Field> {
 				if (parent != null) {
 					createNode(rect, parent);
 					return;
+
 				}
 			}
 			createNode(rect, null);
 		}
 	}
+
+	private boolean isTruncatedRect(GSRect rect, int width, int height) {
+		if(rect.tl().getX() <= 0d){
+			rect.setTruncateDirection(GSRect.RIGHT);
+			return true;
+		}
+		else if(rect.tl().getY() <= 0d){
+			rect.setTruncateDirection(GSRect.UP);
+			return true;
+		}
+		else if(rect.br().getX() >= width){
+			rect.setTruncateDirection(GSRect.LEFT);
+			return true;
+		}
+		else if(rect.br().getY() >= height){
+			rect.setTruncateDirection(GSRect.BOTTOM);
+			return true;
+		}		
+		else return false;
+	}
+
 
 	private Field findParentRecursive(GSRect rect, Field root) {
 		if (rect.getInsider(root.getRect()).map(r -> r.equals(rect)).orElse(false)) {
@@ -177,10 +209,6 @@ public class Fields extends AbstractFields<Field> {
 					child.setParent(null);
 		}
 		fields.remove(field);
-	}
-
-	private boolean isTruncatedRect(GSRect rect, int width, int height) {
-		return rect.tl().getX() == 0d || rect.br().getX() == width || rect.tl().getY() == 0d || rect.br().getY() == height;
 	}
 
 	private void adjustUnmergedParents() {
@@ -346,14 +374,14 @@ public class Fields extends AbstractFields<Field> {
 		}
 	}
 
-	public void restabilizeFields(Mat homography) {
+	public void restabilizeFields(Mat homography) {		
 		long start = System.nanoTime();
-		fields.forEach(field -> field.updateRect(findNewRect(field.getRect(), homography)));
+		fields.forEach(field -> field.stabilizeFieldRect(findNewRect(field.getRect(), homography)));
 		long stop = System.nanoTime();
 		logger.info("Restabilized {} fields in {} ms", fields.size(), String.format("%.3f", ((double) (stop - start)) / 1_000_000));
 	}
 
-	private GSRect findNewRect(GSRect rect, Mat homography) {
+	private GSRect findNewRect(GSRect rect, Mat homography) {		
 		List<Point> originals = RectToolsMapper.gsPointToPoint(Arrays.asList(rect.tl(), rect.br()));
 		List<GSPoint> points = RectToolsMapper.pointToGSPoint(restabilize(originals, homography));
 		return new GSRect(points.get(0), points.get(1));
