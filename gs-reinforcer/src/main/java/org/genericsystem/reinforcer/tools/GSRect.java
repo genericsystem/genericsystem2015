@@ -1,17 +1,16 @@
 package org.genericsystem.reinforcer.tools;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.genericsystem.reinforcer.NormalizedRect;
 
 public class GSRect implements Comparable<GSRect> {
-	
+
 	private double x, y, width, height;	
-	
+
 	private boolean truncated = false;
 	private String truncateDirection;
-		
+
 	public static final String UP = "UP";
 	public static final String LEFT = "LEFT";
 	public static final String BOTTOM = "BOTTOM";
@@ -20,8 +19,7 @@ public class GSRect implements Comparable<GSRect> {
 	public static final String UP_LEFT = "UP_LEFT";
 	public static final String BOTTOM_RIGHT = "BOTTOM_RIGHT";
 	public static final String BOTTOM_LEFT = "BOTTOM_LEFT";
-		
-	
+
 	public GSRect(double x, double y, double width, double height) {
 		this.x = x;
 		this.y = y;
@@ -189,7 +187,7 @@ public class GSRect implements Comparable<GSRect> {
 			throw new IllegalArgumentException("One of the rectangles is null");
 		return x < other.br().getX() && other.tl().getX() < br().getX() && y < other.br().getY() && other.tl().getY() < br().getY();
 	}
-	
+
 	public boolean isTruncatedRect(int width, int height) {
 		if (this.tl().getX() <= 0d) {
 			this.setTruncateDirection(GSRect.RIGHT);
@@ -220,8 +218,8 @@ public class GSRect implements Comparable<GSRect> {
 			this.setTruncateDirection(GSRect.UP_LEFT);
 			return true;
 		}		
-			
-		 else
+
+		else
 			return false;
 	}
 
@@ -268,10 +266,6 @@ public class GSRect implements Comparable<GSRect> {
 
 	public double diffWith(GSRect rect2, double eps) {
 		return Math.max(Math.max(Math.abs(x - rect2.tl().getX()), Math.abs(y - rect2.tl().getY())), Math.max(Math.abs(br().getX() - rect2.br().getX()), Math.abs(br().getY() - rect2.br().getY())));
-	}
-
-	private double getDelta(GSRect rect2, double eps) {
-		return eps * (Math.min(width, rect2.width) + Math.min(height, rect2.height)) / 2;
 	}
 
 	/**
@@ -338,7 +332,7 @@ public class GSRect implements Comparable<GSRect> {
 	public double getHeight() {
 		return height;
 	}
-	
+
 	public void setX(double x) {
 		this.x = x;
 	}
