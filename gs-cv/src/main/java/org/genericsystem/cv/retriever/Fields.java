@@ -160,7 +160,7 @@ public class Fields extends AbstractFields<Field> {
 		/*
 		 * tonquage f.setTruncated(false); if(truncatedRects.contains(rect)) f.setTruncated(true);
 		 */
-		field.registerShift(RectangleTools.getShift(field.getRect(), rect));
+		field.registerShift(field.getRect().getShift(rect));
 		field.updateRect(rect);
 		field.resetDeadCounter();
 		/*
@@ -212,7 +212,7 @@ public class Fields extends AbstractFields<Field> {
 					// Update the coordinates of the child with the new rect
 					GSRect newRect = matchingRects.get(0);
 					logger.warn(formatLog(child, newRect));
-					child.registerShift(RectangleTools.getShift(child.getRect(), newRect));
+					child.registerShift(child.getRect().getShift(newRect));
 					child.updateRect(newRect);
 					child.resetDeadCounter();
 					// Delete the rect from the children list
@@ -240,7 +240,7 @@ public class Fields extends AbstractFields<Field> {
 					if (!matches.isEmpty()) {
 						matches.forEach(f -> {
 							logger.info(formatLog(f, childRect));
-							f.registerShift(RectangleTools.getShift(f.getRect(), childRect));
+							f.registerShift(f.getRect().getShift(childRect));
 							setLinks(parent, f);
 							f.updateRect(childRect);
 							f.resetDeadCounter();

@@ -224,6 +224,20 @@ public class GSRect {
 		return eps * (Math.min(width, rect2.width) + Math.min(height, rect2.height)) / 2;
 	}
 
+	/**
+	 * Compute the shift from this rectangle to <code>other</code>.
+	 * 
+	 * @param other - the other rectangle
+	 * @return an <code>double[]</code> with the shift in coordinates from <code>this</code> to <code>other</code> (tl.x, tl.y, br.x, br.y)
+	 */
+	public double[] getShift(GSRect other) {
+		double tlX = other.tl().getX() - this.tl().getX();
+		double tlY = other.tl().getY() - this.tl().getY();
+		double brX = other.br().getX() - this.br().getX();
+		double brY = other.br().getY() - this.br().getY();
+		return new double[] { tlX, tlY, brX, brY };
+	}
+
 	public NormalizedRect normalize(double mintlx, double mintly, double width, double height) {
 		return new NormalizedRect((x - mintlx) / width, (y - mintly) / height, this.width / width, this.height / height);
 	}
