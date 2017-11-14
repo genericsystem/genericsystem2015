@@ -342,7 +342,7 @@ public class Fields extends AbstractFields<Field> {
 					}).orElseThrow(IllegalStateException::new));
 				}
 			}
-			return matches.get(0);
+			return matches.isEmpty() ? null : matches.get(0);
 		}
 	}
 
