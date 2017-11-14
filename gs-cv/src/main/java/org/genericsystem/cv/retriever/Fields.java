@@ -4,7 +4,6 @@ import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -184,92 +183,6 @@ public class Fields extends AbstractFields<Field> {
 		return rect.tl().getX() == 0d || rect.br().getX() == width || rect.tl().getY() == 0d || rect.br().getY() == height;
 	}
 
-	private void mergeChildren(List<GSRect> childrenRect) {
-		List<GSRect> list = mergeKnownChildren(childrenRect);
-		mergeNewChildren(list);
-	}
-
-	private List<GSRect> mergeKnownChildren(List<GSRect> childrenRect) {
-		if (childrenRect.isEmpty())
-			return Collections.emptyList();
-
-		fields.stream().filter(field -> field.hasChildren()).forEach(parent -> {
-			// Get the list of children for all parent fields
-			Set<Field> children = parent.getChildren();
-
-			// For each child, try to find a match in the list of childrenRect
-			children.forEach(child -> {
-				List<GSRect> matchingRects = childrenRect.stream().filter(rect -> child.isClusteredWith(rect, 0.1)).collect(Collectors.toList());
-				if (!matchingRects.isEmpty()) {
-					if (matchingRects.size() > 1) {
-						// Reduce to one element
-						matchingRects = Arrays.asList(matchingRects.stream().max((r1, r2) -> {
-							double area1 = r1.inclusiveArea(child.getRect());
-							double area2 = r2.inclusiveArea(child.getRect());
-							return Double.compare(area1, area2);
-						}).orElseThrow(IllegalStateException::new));
-					}
-					// Update the coordinates of the child with the new rect
-					GSRect newRect = matchingRects.get(0);
-					logger.warn(formatLog(child, newRect));
-					child.registerShift(child.getRect().getShift(newRect));
-					child.updateRect(newRect);
-					child.resetDeadCounter();
-					// Delete the rect from the children list
-					childrenRect.remove(newRect);
-				}
-			});
-
-		});
-		return childrenRect;
-	}
-
-	private void mergeNewChildren(List<GSRect> childrenRect) {
-		if (childrenRect.isEmpty())
-			return;
-
-		List<GSRect> fieldsRects = fields.stream().map(f -> f.getRect()).collect(Collectors.toList());
-		for (int i = 0; i < fieldsRects.size(); ++i) {
-			Field parent = fields.get(i);
-
-			List<GSRect> possibleChildrenRects = findChildrenRects(childrenRect, parent.getRect(), 0.95);
-			if (!possibleChildrenRects.isEmpty()) {
-				logger.info("Found possible child(ren) for {}: {}", parent.getRect(), possibleChildrenRects);
-				possibleChildrenRects.forEach(childRect -> {
-					List<Field> matches = findPossibleMatches(childRect, 0.1);
-					if (!matches.isEmpty()) {
-						matches.forEach(f -> {
-							logger.info(formatLog(f, childRect));
-							f.registerShift(f.getRect().getShift(childRect));
-							setLinks(parent, f);
-							f.updateRect(childRect);
-							f.resetDeadCounter();
-						});
-					} else {
-						logger.info("No match for child {}. Creating a new Field", childRect);
-						Field f = new Field(childRect);
-						setLinks(parent, f);
-						fields.add(f);
-					}
-					childrenRect.remove(childRect);
-				});
-			}
-		}
-	}
-
-	private List<GSRect> findChildrenRects(List<GSRect> children, GSRect putativeParent, double minArea) {
-		return children.stream().filter(child -> RectangleTools.commonArea(child, putativeParent)[0] > minArea).collect(Collectors.toList());
-	}
-
-	private void setLinks(Field parent, Field child) {
-		if (!child.isOrphan() && !child.getParent().equals(parent))
-			logger.error("\nchild's parent:\n{}\nparent:\n{}", child.getParent(), parent);
-		if (!parent.equals(child)) {
-			child.setParent(parent);
-			parent.addChildIfNotPresent(child);
-		}
-	}
-
 	private void adjustUnmergedParents() {
 		fields.stream().filter(field -> field.hasChildren() && field.getDeadCounter() != 0).forEach(field -> {
 			List<double[]> shifts = field.getShifts();
@@ -298,32 +211,25 @@ public class Fields extends AbstractFields<Field> {
 
 	private void removeUnmergedFields() {
 		Predicate<Field> predicate = f -> !f.isLocked() && f.getDeadCounter() >= MAX_DELETE_UNMERGED;
-
-		// Clean the fields recursively from the 'root' of each tree
 		Set<Field> removes = new HashSet<>();
 
-		getRoots().forEach(field -> {
+		// Delete each dead tree
+		for (Field field : getRoots()) {
 			if (deadTree(field, predicate))
 				removes.addAll(killTree(field));
-		});
+		}
 		removes.forEach(field -> removeNode(field, false));
 
-		// fields.stream().filter(field -> field.isOrphan()).forEach(field -> removes.addAll(deleteRecursive(field, predicate)));
+		// Clean the fields recursively from the 'root' of each tree
 		getRoots().forEach(field -> removes.addAll(alternateDeleteRecursive(field, predicate)));
-		removes.forEach(field -> {
-			if (field.hasChildren())
-				field.getChildren().forEach(child -> child.setParent(null));
-			if (!field.isOrphan())
-				field.getParent().removeChild(field);
-			fields.remove(field);
-		});
+		removes.forEach(field -> removeNode(field, true));
 	}
 
 	private boolean deadTree(Field root, Predicate<Field> predicate) {
 		if (!root.hasChildren()) // Single element in the tree, use the predicate
 			return predicate.test(root);
 		for (Field child : root.getChildren())
-			if (!deadTree(child, predicate)) // Return false one of the element does not match the predicate
+			if (!deadTree(child, predicate)) // Return false if one of the element does not match the predicate
 				return false;
 		return true; // If false was not returned at this stage, the tree is dead
 	}
@@ -404,36 +310,6 @@ public class Fields extends AbstractFields<Field> {
 		}
 
 		return removes;
-	}
-
-	// TODO: compare the consolidated text before merging?
-	public void removeOverlaps() {
-		for (Field field : new ArrayList<>(fields)) {
-			List<Field> matches = findPossibleMatches(field.getRect(), 0.1, 3).stream().filter(f -> !field.equals(f)).collect(Collectors.toList());
-			if (!matches.isEmpty()) {
-				logger.warn("Found {} matche(s) for {}", matches.size(), field.getRect());
-				for (Field f : matches) {
-					logger.warn("{}", f.getRect());
-					if (field.getRect().area() < f.getRect().area()) {
-						if (!f.isLocked()) {
-							boolean ok = fields.remove(f);
-							// System.err.println("removed field (" + ok + ")" + "\n" + f);
-						}
-					}
-				}
-			}
-			matches = findContainingFields(field).stream().filter(f -> !field.equals(f)).collect(Collectors.toList());
-			if (!matches.isEmpty()) {
-				logger.warn("Found {} inside {} other field(s)", field.getRect(), matches.size());
-				for (Field f : matches) {
-					logger.warn("{}", f.getRect());
-					if (!f.isLocked()) {
-						boolean ok = fields.remove(f);
-						// System.err.println("removed field (" + ok + ")" + "\n" + f);
-					}
-				}
-			}
-		}
 	}
 
 	private String formatLog(Field field, GSRect rect) {
