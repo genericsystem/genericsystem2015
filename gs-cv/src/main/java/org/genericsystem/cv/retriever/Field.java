@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.genericsystem.cv.Img;
@@ -19,16 +20,19 @@ public class Field extends AbstractField {
 	private Set<Field> children;
 	private List<double[]> shifts;
 
+	private final Predicate<Field> outsideParent = field -> rect.getInsider(field.getRect()).map(r -> !r.equals(field.getRect())).orElse(true);
+	private final Predicate<Field> overlapWithSiblings = field -> field.getSiblings().stream().filter(f -> !f.equals(field)).anyMatch(sibling -> field.getRect().isOverlappingStrict(sibling.getRect()));
+
 	private static final int LABELS_SIZE_THRESHOLD = 15;
 	private static final double CONFIDENCE_THRESHOLD = 0.92;
 	private boolean locked = false;
-	
 
 	public Field(GSRect rect) {
 		super(rect);
 		this.parent = null;
 		this.children = new HashSet<>();
 		this.shifts = new ArrayList<>();
+		checkOutsideParentConstraint();
 	}
 
 	public String recursiveToString() {
@@ -73,7 +77,7 @@ public class Field extends AbstractField {
 		if (locked)
 			drawRect(display, getRectPointsWithHomography(homography), new Scalar(255, 172, 0), 2);
 	}
-	
+
 	public void drawTruncatedField(Img display, Mat homography) {
 		if (truncated)
 			drawRect(display, getRectPointsWithHomography(homography), new Scalar(0, 172, 255), 1);
@@ -146,7 +150,7 @@ public class Field extends AbstractField {
 	}
 
 	public boolean hasChildren() {
-		return !children.isEmpty();
+		return children != null && !children.isEmpty();
 	}
 
 	public boolean hasSiblings() {
@@ -173,6 +177,38 @@ public class Field extends AbstractField {
 
 	public void clearShifts() {
 		shifts.clear();
+	}
+
+	@Override
+	void updateRect(GSRect rect) {
+		super.updateRect(rect);
+		checkOutsideParentConstraint();
+	}
+
+	private void checkOutsideParentConstraint() {
+		boolean ok = isOrphan() ? this.checkConstraint(outsideParent) : parent.checkConstraint(outsideParent);
+		if (!ok)
+			logger.error("Invalid constraint for:\n{}", this);
+	}
+
+	private boolean checkConstraint(Predicate<Field> constraint) {
+		// If the field is orphan and has no children, it validates the constraints
+		if (isOrphan() && !hasChildren())
+			return true;
+		// If the field has children, they must meet the constraint
+		if (hasChildren()) {
+			for (Field child : children) {
+				if (constraint.test(child))
+					return false;
+			}
+			// If false was not returned, apply the function to the children
+			for (Field child : children) {
+				if (!child.checkConstraint(constraint))
+					return false;
+			}
+		}
+		// At this stage, all the constraints should be verified
+		return true;
 	}
 
 }
