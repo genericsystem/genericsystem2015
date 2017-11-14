@@ -164,15 +164,16 @@ public class Fields extends AbstractFields<Field> {
 		return null;
 	}
 
-	private Field createNode(GSRect rect, Field parent) {
+	private void createNode(GSRect rect, Field parent) {
+		//truncated rects don't trigger field creation
+		if (rect.isTruncated())
+			return;
 		logger.info("Creating a new node for {}", rect);
 		Field f = new Field(rect);
-		if (rect.isTruncated())
-			f.setTruncated(true);
+		
 		if (parent != null)
 			f.setParent(parent);
 		fields.add(f);
-		return f;
 	}
 
 	private void updateNode(GSRect rect, Field field) {
