@@ -140,7 +140,6 @@ public class Fields extends AbstractFields<Field> {
 		}
 	}
 
-
 	private boolean isTruncatedRect(GSRect rect, int width, int height) {
 		if(rect.tl().getX() <= 0d){
 			rect.setTruncateDirection(GSRect.RIGHT);
@@ -210,10 +209,6 @@ public class Fields extends AbstractFields<Field> {
 					child.setParent(null);
 		}
 		fields.remove(field);
-	}
-
-	private boolean isTruncatedRect(GSRect rect, int width, int height) {
-		return rect.tl().getX() == 0d || rect.br().getX() == width || rect.tl().getY() == 0d || rect.br().getY() == height;
 	}
 
 	private void adjustUnmergedParents() {
