@@ -189,6 +189,12 @@ public class Labels implements Iterable<Label> {
 		List<Label> ll = toList();
 		if (ll.isEmpty())
 			return new ArrayList<>();
+		Collections.sort(ll, (l1, l2) -> {
+			if (alignment == Alignment.LEFT)
+				return Double.compare(l1.getRect().getX(), l2.getRect().getX());
+			else
+				return Double.compare(l1.getRect().br().getX(), l2.getRect().br().getX());
+		});
 		List<List<Label>> result = new ArrayList<>();
 		List<Label> currentGroup = new ArrayList<>(Arrays.asList(ll.get(0)));
 		for (int i = 1; i < ll.size(); i++) {
