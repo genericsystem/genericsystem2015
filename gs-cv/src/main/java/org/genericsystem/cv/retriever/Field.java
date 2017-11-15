@@ -3,6 +3,7 @@ package org.genericsystem.cv.retriever;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -188,7 +189,14 @@ public class Field extends AbstractField {
 	@Override
 	void updateRect(GSRect rect) {
 		super.updateRect(rect);
-		checkConstraints();
+		boolean ok = checkConstraints();
+		if (!ok) {
+			if (isOrphan()) {
+				this.repairTree();
+			} else {
+				parent.repairTree();
+			}
+		}
 	}
 
 	private boolean checkConstraints() {
@@ -216,6 +224,44 @@ public class Field extends AbstractField {
 		}
 		// At this stage, all the constraints should be verified
 		return true;
+	}
+
+	public void repairTree() {
+		if (isOrphan() && !hasChildren()) {
+			logger.error("Unable to repair a single-membered tree");
+			return;
+		}
+		for (Field child : children) {
+			if (outsideParent.test(child)) {
+				if (child.getParent().getDeadCounter() == 0)
+					child.fitInParent();
+				else
+					child.getParent().accomodate(child);
+			}
+			if (child.hasChildren())
+				child.repairTree();
+		}
+	}
+
+	protected void adjustRect(GSRect rect) {
+		logger.warn("replaced {} => {}", this.rect, rect);
+		this.rect = rect;
+	}
+
+	private void accomodate(Field child) {
+		if (!hasChildren())
+			return;
+		GSRect union = rect.getUnion(child.getRect());
+		logger.warn("need union");
+		adjustRect(union);
+	}
+
+	private void fitInParent() {
+		if (isOrphan())
+			return;
+		Optional<GSRect> intersection = rect.getIntersection(parent.getRect());
+		logger.warn("need intersection");
+		intersection.ifPresent(intersect -> adjustRect(intersect));
 	}
 
 }
