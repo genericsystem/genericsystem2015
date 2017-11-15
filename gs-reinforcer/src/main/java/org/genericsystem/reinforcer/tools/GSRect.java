@@ -6,7 +6,7 @@ import org.genericsystem.reinforcer.NormalizedRect;
 
 public class GSRect implements Comparable<GSRect> {
 
-	private double x, y, width, height;	
+	private double x, y, width, height;
 
 	private boolean truncated = false;
 	private String truncateDirection;
@@ -201,23 +201,19 @@ public class GSRect implements Comparable<GSRect> {
 		} else if (this.br().getY() >= height) {
 			this.setTruncateDirection(GSRect.BOTTOM);
 			return true;
-		}
-		else if(this.tl().getX() <= 0d && this.tl().getY() <= 0d){
+		} else if (this.tl().getX() <= 0d && this.tl().getY() <= 0d) {
 			this.setTruncateDirection(GSRect.UP_RIGHT);
 			return true;
-		}		
-		else if(this.br().getX() >= width && this.br().getY() >= height){
+		} else if (this.br().getX() >= width && this.br().getY() >= height) {
 			this.setTruncateDirection(GSRect.BOTTOM_LEFT);
 			return true;
-		}
-		else if(this.tl().getX() <= 0d && this.br().getY() >= height){
+		} else if (this.tl().getX() <= 0d && this.br().getY() >= height) {
 			this.setTruncateDirection(GSRect.BOTTOM_RIGHT);
 			return true;
-		}
-		else if(this.br().getX() >= width && this.tl().getY() <= 0d){
+		} else if (this.br().getX() >= width && this.tl().getY() <= 0d) {
 			this.setTruncateDirection(GSRect.UP_LEFT);
 			return true;
-		}		
+		}
 
 		else
 			return false;
@@ -266,20 +262,6 @@ public class GSRect implements Comparable<GSRect> {
 
 	public double diffWith(GSRect rect2, double eps) {
 		return Math.max(Math.max(Math.abs(x - rect2.tl().getX()), Math.abs(y - rect2.tl().getY())), Math.max(Math.abs(br().getX() - rect2.br().getX()), Math.abs(br().getY() - rect2.br().getY())));
-	}
-
-	/**
-	 * Compute the shift from this rectangle to <code>other</code>.
-	 * 
-	 * @param other - the other rectangle
-	 * @return an <code>double[]</code> with the shift in coordinates from <code>this</code> to <code>other</code> (tl.x, tl.y, br.x, br.y)
-	 */
-	public double[] getShift(GSRect other) {
-		double tlX = other.tl().getX() - this.tl().getX();
-		double tlY = other.tl().getY() - this.tl().getY();
-		double brX = other.br().getX() - this.br().getX();
-		double brY = other.br().getY() - this.br().getY();
-		return new double[] { tlX, tlY, brX, brY };
 	}
 
 	public NormalizedRect normalize(double mintlx, double mintly, double width, double height) {
