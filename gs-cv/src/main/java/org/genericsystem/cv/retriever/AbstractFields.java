@@ -48,10 +48,6 @@ public abstract class AbstractFields<F extends AbstractField> implements Iterabl
 		stream().forEach(field -> field.drawOcrPerspectiveInverse(display, homography, color, thickness));
 	}
 
-	public void drawFieldsOnStabilized(Img stabilized) {
-		stream().forEach(f -> f.drawRect(stabilized, f.getDeadCounter() < 1 ? new Scalar(0, 255, 0) : new Scalar(0, 0, 255), 1));
-	}
-
 	public void drawConsolidated(Img stabilizedDisplay) {
 		consolidatedFieldStream().forEach(field -> field.drawRect(stabilizedDisplay, new Scalar(0, 255, 0), 1));
 	}

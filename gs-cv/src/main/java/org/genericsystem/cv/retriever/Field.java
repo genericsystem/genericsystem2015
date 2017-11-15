@@ -41,8 +41,7 @@ public class Field extends AbstractField {
 	private void recursiveToString(Field field, StringBuffer sb, int depth) {
 		if (depth > 8)
 			return;
-		sb.append("depth: ").append(depth).append(": ");
-		sb.append(field.getRect());
+		sb.append("depth: ").append(depth).append(": ").append(field.getRect());
 		if (field.isConsolidated())
 			sb.append(" -> ").append(field.getConsolidated());
 		if (!field.getChildren().isEmpty()) {
@@ -69,14 +68,42 @@ public class Field extends AbstractField {
 		setFinal();
 	}
 
-	public void drawLockedField(Img display, Mat homography) {
-		if (locked)
-			drawRect(display, getRectPointsWithHomography(homography), new Scalar(255, 172, 0), 2);
+	public void draw(Img display, Mat homography, Scalar color, int thickness) {
+		Scalar scalar = selectColor(color);
+		if (needRect())
+			drawRect(display, getRectPointsWithHomography(homography), deadCounter == 0 ? scalar : new Scalar(0, 0, 255), thickness);
+		if (needText())
+			drawText(display, getRectPointsWithHomography(homography), new Scalar(0, 64, 255), thickness);
 	}
 
-	public void drawTruncatedField(Img display, Mat homography) {
-		if (truncated)
-			drawRect(display, getRectPointsWithHomography(homography), new Scalar(0, 0, 51), 2);
+	private Scalar selectColor(Scalar defaultColor) {
+		if (drawAsTruncated())
+			return new Scalar(0, 0, 51);
+		if (drawAsLocked())
+			return new Scalar(255, 172, 0);
+		if (drawAsChild())
+			return new Scalar(255, 0, 0);
+		return defaultColor;
+	}
+
+	private boolean drawAsChild() {
+		return !isOrphan() && parent.deadCounter != 0;
+	}
+
+	private boolean drawAsLocked() {
+		return (deadCounter == 0 && isOrphan()) || (!isOrphan() && parent.getDeadCounter() != 0) ? this.locked : false;
+	}
+
+	private boolean drawAsTruncated() {
+		return this.truncated;
+	}
+
+	private boolean needRect() {
+		return !isOrphan() && parent.getDeadCounter() == 0 ? false : true;
+	}
+
+	private boolean needText() {
+		return deadCounter == 0 && !truncated && needRect();
 	}
 
 	public void setFinal() {

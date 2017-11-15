@@ -135,13 +135,9 @@ public class CamLiveRetriever extends AbstractApp {
 					Stats.beginTask("restabilizeFields");
 					fields.restabilizeFields(fieldsHomography);
 					Stats.endTask("restabilizeFields");
-					Stats.beginTask("merge fields");
-
+					Stats.beginTask("consolidate fields");
 					fields.consolidate(stabilizedDisplay);
-
-					Stats.endTask("merge fields");
-					// fields.removeOverlaps();
-					fields.drawFieldsOnStabilized(stabilizedDisplay);
+					Stats.endTask("consolidate fields");
 					stabilizedImgDescriptor = newImgDescriptor;
 					stabilizationHomography = deperspectivGraphy;
 					stabilizationHasChanged = false;
@@ -151,9 +147,10 @@ public class CamLiveRetriever extends AbstractApp {
 				Stats.beginTask("consolidateOcr");
 				fields.performOcr(stabilized);
 				Stats.endTask("consolidateOcr");
+
 				fields.drawOcrPerspectiveInverse(display, stabilizationHomography.inv(), new Scalar(0, 255, 0), 1);
-				fields.drawLockedFields(display, stabilizationHomography.inv());
-				fields.drawTruncatedFields(display, stabilizationHomography.inv());
+				fields.drawFieldsOnStabilized(stabilizedDisplay);
+
 				src0.setImage(display.toJfxImage());
 				src1.setImage(stabilizedDisplay.toJfxImage());
 				Stats.endTask("frame");

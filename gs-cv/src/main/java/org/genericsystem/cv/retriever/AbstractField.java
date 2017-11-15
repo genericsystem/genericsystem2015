@@ -158,11 +158,9 @@ public abstract class AbstractField {
 	}
 
 	public void drawOcrPerspectiveInverse(Img display, Mat homography, Scalar color, int thickness) {
-		if (isOnDisplay(display)) {
-			Point[] targets = getRectPointsWithHomography(homography);
-			drawRect(display, targets, deadCounter == 0 ? color : new Scalar(0, 0, 255), thickness);
-			drawText(display, targets, new Scalar(0, 64, 255), thickness);
-		}
+		Point[] targets = getRectPointsWithHomography(homography);
+		drawRect(display, targets, deadCounter == 0 ? color : new Scalar(0, 0, 255), thickness);
+		drawText(display, targets, new Scalar(0, 64, 255), thickness);
 	}
 
 	public void drawRect(Img stabilizedDisplay, Scalar color, int thickness) {

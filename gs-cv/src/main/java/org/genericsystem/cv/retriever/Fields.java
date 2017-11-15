@@ -40,26 +40,17 @@ public class Fields extends AbstractFields<Field> {
 
 	@Override
 	public void drawOcrPerspectiveInverse(Img display, Mat homography, Scalar color, int thickness) {
-		// Only draw orphan fields
-		stream().filter(field -> field.isOrphan()).forEach(field -> field.drawOcrPerspectiveInverse(display, homography, color, thickness));
+		stream().forEach(field -> field.draw(display, homography, color, thickness));
 	}
 
-	public void drawLockedFields(Img display, Mat homography) {
-		fields.forEach(field -> field.drawLockedField(display, homography));
-		fields.stream().filter(field -> !field.isOrphan()).forEach(field -> field.drawRect(display, field.getRectPointsWithHomography(homography), new Scalar(255, 128, 255), 1));
-	}
-
-	public void drawTruncatedFields(Img display, Mat homography) {
-		fields.stream().filter(f -> f.isTruncated()).forEach(field -> field.drawTruncatedField(display, homography));
-		fields.stream().filter(field -> field.isTruncated()).forEach(field -> field.drawRect(display, field.getRectPointsWithHomography(homography), new Scalar(255, 128, 255), 1));
+	public void drawFieldsOnStabilized(Img stabilized) {
+		stream().forEach(f -> f.drawRect(stabilized, f.getDeadCounter() == 0 ? new Scalar(0, 255, 0) : new Scalar(0, 0, 255), 1));
 	}
 
 	public void displayFieldsTree() {
 		StringBuffer sb = new StringBuffer();
 		sb.append("\n").append("--- FIELDS ---").append("\n");
-		fields.forEach(field -> {
-			sb.append(field.recursiveToString());
-		});
+		fields.forEach(field -> sb.append(field.recursiveToString()));
 		sb.append("\n").append("--- /FIELDS ---").append("\n");
 		System.out.println(sb.toString());
 	}
