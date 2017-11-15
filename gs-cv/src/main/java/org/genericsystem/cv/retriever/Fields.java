@@ -20,6 +20,7 @@ import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.utils.Converters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,84 +72,90 @@ public class Fields extends AbstractFields<Field> {
 		List<GSRect> truncatedList = rects.stream().filter(r -> r.isTruncatedRect(frameWidth, frameHeight)).collect(Collectors.toList());
 		truncatedList.stream().forEach(r -> r.setTruncated(true));
 		return truncatedList;
-
 	}
 
-	public void merge(RectDetector rectDetector, int frameWidth, int frameHeight) {
-		// Get the lists of rectangles
-		List<GSRect> rects = RectToolsMapper.rectToGSRect(rectDetector.getRects());
-		List<GSRect> children = RectToolsMapper.rectToGSRect(rectDetector.getRects2());
-
-		// Remove the duplicates of rects in children
-		children.removeIf(child -> rects.stream().anyMatch(parent -> RectangleTools.isInCluster(parent, child, 0.1)));
+	public void consolidate(Img img) {
+		RectMerger rm = new RectMerger(img);
+		List<GSRect> rects = rm.mergeRectsList();
 
 		// Increment the dead counter of each field
-		fields.forEach(f -> f.incrementDeadCounter());
+		fields.forEach(Field::incrementDeadCounter);
 
-		doWork(rects, frameWidth, frameHeight);
-		// doWork(children, frameWidth, frameHeight);
+		mergeRects(rects, img.width(), img.height());
 
 		removeDeadTrees();
 		cleanRelationships();
 	}
 
+	private static class RectMerger {
+		private RectDetector rd;
+
+		public RectMerger(Img img) {
+			this.rd = new RectDetector(img);
+		}
+
+		public List<GSRect> mergeRectsList() {
+			List<GSRect> rects = RectToolsMapper.rectToGSRect(rd.getRects(200, 11, 3, new Size(11, 3)));
+			List<GSRect> children = RectToolsMapper.rectToGSRect(rd.getRects(40, 17, 3, new Size(7, 3)));
+			// Remove the duplicates of rects in children
+			children.removeIf(child -> rects.stream().anyMatch(parent -> RectangleTools.isInCluster(parent, child, 0.1)));
+			rects.addAll(children);
+			return rects;
+		}
+	}
+
 	// TODO re-arrange the fields to match all the constraints (no overlap, children strictly contained in parents)
 	private void cleanRelationships() {
+		// // 1. Each tree must validate the constraints
+		// for (Field parent : getRoots()) {
+		// if (!parent.checkConstraints()) {
+		// System.err.println(parent.recursiveToString());
+		// parent.repairTree();
+		// }
+		// }
+		// // 2. Two overlapping trees can't coexist and must be merged
 	}
 
-	private void doWork(List<GSRect> rects, int width, int height) {
-		List<GSRect> truncateds = identifyTruncated(rects, width, height);
-		mergeRect(truncateds);
-		rects.removeIf(rect -> truncateds.contains(rect));
-		mergeRect(rects);
-	}
-
-	private void mergeRect(List<GSRect> rects) {
-		// Loop over all the rectangles and try to find any matching field
+	private void mergeRects(List<GSRect> rects, int width, int height) {
+		// List<GSRect> truncateds = identifyTruncated(rects, width, height);
+		// mergeRect(truncateds);
+		// rects.removeIf(rect -> truncateds.contains(rect));
 		for (GSRect rect : rects) {
-			placeRect(rect);
+			Field match = findMatch(rect, 0.1);
+			if (match != null)
+				updateNode(rect, match);
+			else
+				createNode(rect, findPotentialParent(rect, getRoots()));
 		}
 	}
 
-	private void placeRect(GSRect rect) {
-		Field match = cleanMatches(rect, 0.1);
-		if (match != null) {
-			// We found a match, we can merge
-			updateNode(rect, match);
-		} else {
-			for (Field root : getRoots()) {
-				Field parent = findParentRecursive(rect, root);
-				if (parent != null) {
-					createNode(rect, parent);
-					return;
-				}
-			}
-			createNode(rect, null);
-		}
-	}
-
-	private Field findParentRecursive(GSRect rect, Field root) {
-		if (rect.getInsider(root.getRect()).map(r -> r.equals(rect)).orElse(false)) {
-			if (root.hasChildren()) {
-				for (Field child : root.getChildren()) {
-					Field candidate = findParentRecursive(rect, child);
-					if (candidate != null)
-						return candidate;
-				}
-				return root;
-			} else
-				return root;
+	private Field findPotentialParent(GSRect rect, List<Field> roots) {
+		for (Field root : getRoots()) {
+			Field parent = findPotentialParent(rect, root);
+			if (parent != null)
+				return parent;
 		}
 		return null;
 	}
 
+	private Field findPotentialParent(GSRect rect, Field root) {
+		if (!rect.getInsider(root.getRect()).map(r -> r.equals(rect)).orElse(false))
+			return null;
+		for (Field child : root.getChildren()) {
+			Field candidate = findPotentialParent(rect, child);
+			if (candidate != null)
+				return candidate;
+		}
+		return root;
+	}
+
 	private void createNode(GSRect rect, Field parent) {
-		//truncated rects don't trigger field creation
+		// truncated rects don't trigger field creation
 		if (rect.isTruncated())
 			return;
 		logger.info("Creating a new node for {}", rect);
 		Field f = new Field(rect);
-		
+
 		if (parent != null)
 			f.setParent(parent);
 		fields.add(f);
@@ -170,7 +177,7 @@ public class Fields extends AbstractFields<Field> {
 
 	private void removeDeadTrees() {
 		Predicate<Field> predicate = f -> !f.isLocked() && f.getDeadCounter() >= MAX_DELETE_UNMERGED;
-		getRoots().stream().filter(field -> isDeadTree(field, predicate)).flatMap(field -> cutDownTree(field).stream()).forEach(field -> removeNode(field));
+		getRoots().stream().filter(field -> isDeadTree(field, predicate)).flatMap(field -> listTree(field).stream()).forEach(this::removeNode);
 	}
 
 	private boolean isDeadTree(Field root, Predicate<Field> predicate) {
@@ -182,16 +189,15 @@ public class Fields extends AbstractFields<Field> {
 		return true; // If false was not returned at this stage, the tree is dead
 	}
 
-	private Set<Field> cutDownTree(Field root) {
-		Set<Field> res = new HashSet<>();
+	private List<Field> listTree(Field root) {
+		List<Field> res = new ArrayList<>();
 		res.add(root);
-		if (root.hasChildren())
-			for (Field child : root.getChildren())
-				res.addAll(cutDownTree(child));
+		for (Field child : root.getChildren())
+			res.addAll(listTree(child));
 		return res;
 	}
 
-	private Field cleanMatches(GSRect rect, double eps) {
+	private Field findMatch(GSRect rect, double eps) {
 		List<Field> matches = findPossibleMatches(rect, eps);
 		// Remove the false positives
 		matches.removeIf(f -> f.getRect().inclusiveArea(rect) <= MIN_OVERLAP / 10);

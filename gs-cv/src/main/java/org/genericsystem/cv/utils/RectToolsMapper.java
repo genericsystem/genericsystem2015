@@ -1,8 +1,8 @@
 package org.genericsystem.cv.utils;
 
 import java.util.List;
-import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.genericsystem.reinforcer.tools.GSPoint;
 import org.genericsystem.reinforcer.tools.GSRect;
@@ -17,11 +17,6 @@ import org.opencv.core.Size;
  * @author Pierrik Lassalas
  */
 public final class RectToolsMapper {
-
-	private static final Function<? super Rect, ? extends GSRect> rectToGSRect = rect -> convert(rect);
-	private static final Function<? super GSRect, ? extends Rect> gsRectToRect = gsRect -> convert(gsRect);
-	private static final Function<? super Point, ? extends GSPoint> pointToGSPoint = point -> convert(point);
-	private static final Function<? super GSPoint, ? extends Point> gsPointToPoint = gsPoint -> convert(gsPoint);
 
 	private static GSRect convert(Rect rect) {
 		return new GSRect(rect.x, rect.y, rect.width, rect.height);
@@ -40,19 +35,35 @@ public final class RectToolsMapper {
 	}
 
 	public static List<Rect> gsRectToRect(List<GSRect> gsRects) {
-		return gsRects.stream().map(gsRectToRect).collect(Collectors.toList());
+		return gsRectToRectStream(gsRects).collect(Collectors.toList());
+	}
+
+	public static Stream<Rect> gsRectToRectStream(List<GSRect> gsRects) {
+		return gsRects.stream().map(RectToolsMapper::convert);
 	}
 
 	public static List<GSRect> rectToGSRect(List<Rect> rects) {
-		return rects.stream().map(rectToGSRect).collect(Collectors.toList());
+		return rectToGSRectStream(rects).collect(Collectors.toList());
+	}
+
+	public static Stream<GSRect> rectToGSRectStream(List<Rect> rects) {
+		return rects.stream().map(RectToolsMapper::convert);
 	}
 
 	public static List<Point> gsPointToPoint(List<GSPoint> gsPoints) {
-		return gsPoints.stream().map(gsPointToPoint).collect(Collectors.toList());
+		return gsPointToPointStream(gsPoints).collect(Collectors.toList());
+	}
+
+	public static Stream<Point> gsPointToPointStream(List<GSPoint> gsPoints) {
+		return gsPoints.stream().map(RectToolsMapper::convert);
 	}
 
 	public static List<GSPoint> pointToGSPoint(List<Point> points) {
-		return points.stream().map(pointToGSPoint).collect(Collectors.toList());
+		return pointToGSPointStream(points).collect(Collectors.toList());
+	}
+
+	public static Stream<GSPoint> pointToGSPointStream(List<Point> points) {
+		return points.stream().map(RectToolsMapper::convert);
 	}
 
 }

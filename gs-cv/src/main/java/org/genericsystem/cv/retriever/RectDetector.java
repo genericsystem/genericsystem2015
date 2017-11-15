@@ -14,27 +14,17 @@ import org.opencv.imgproc.Imgproc;
 
 public class RectDetector {
 	private Img img;
-	private static final int MIN_AREA = 200;
-	private static final int MIN_AREA_SMALL = 40;
 
 	public RectDetector(Img img) {
 		this.img = img;
 	}
 
-	public List<Rect> getRects() {
-		return applyConstraint(getRects(getClosed(), MIN_AREA));
+	public List<Rect> getRects(int minArea, int blockSize, double c, Size close) {
+		return applyNoOverlapsConstraint(getRects(getClosed(blockSize, c, close), minArea));
 	}
 
-	public List<Rect> getRects2() {
-		return applyConstraint(getRects(getClosed2(), MIN_AREA_SMALL));
-	}
-
-	private Img getClosed() {
-		return img.bilateralFilter(5, 80, 80).adaptativeGaussianInvThreshold(11, 3).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(11, 3));
-	}
-
-	private Img getClosed2() {
-		return img.bilateralFilter(5, 80, 80).adaptativeGaussianInvThreshold(17, 3).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(7, 3));
+	private Img getClosed(int blockSize, double c, Size close) {
+		return img.bilateralFilter(5, 80, 80).adaptativeGaussianInvThreshold(blockSize, c).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, close);
 	}
 
 	private List<Rect> getRects(Img closed, int minArea) {
@@ -43,7 +33,7 @@ public class RectDetector {
 		return contours.stream().filter(contour -> Imgproc.contourArea(contour) > minArea).map(c -> Imgproc.boundingRect(c)).collect(Collectors.toList());
 	}
 
-	private List<Rect> applyConstraint(List<Rect> rects) {
+	private List<Rect> applyNoOverlapsConstraint(List<Rect> rects) {
 		List<Rect> result = new ArrayList<>();
 		for (int i = rects.size() - 1; i > 0; --i) {
 			Rect rect = rects.get(i);

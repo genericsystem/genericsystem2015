@@ -83,10 +83,10 @@ public abstract class AbstractField {
 			case GSRect.UP:
 				this.rect = new GSRect(rect.getX(), this.rect.getY(), rect.getWidth(), this.rect.getHeight());
 				break;
-			case GSRect.LEFT:				
+			case GSRect.LEFT:
 				this.rect = new GSRect(rect.getX(), rect.getY(), this.rect.getWidth(), rect.getHeight());
 				break;
-			case GSRect.RIGHT:				
+			case GSRect.RIGHT:
 				this.rect = new GSRect(this.rect.getX(), rect.getY(), this.rect.getWidth(), rect.getHeight());
 				break;
 			case GSRect.BOTTOM:
@@ -95,13 +95,13 @@ public abstract class AbstractField {
 			case GSRect.BOTTOM_LEFT:
 				this.rect = new GSRect(rect.getX(), rect.getY(), this.rect.getWidth(), this.rect.getHeight());
 				break;
-			case GSRect.BOTTOM_RIGHT :
+			case GSRect.BOTTOM_RIGHT:
 				this.rect = new GSRect(this.rect.getX(), rect.getY(), this.rect.getWidth(), this.rect.getHeight());
 				break;
-			case GSRect.UP_LEFT :
+			case GSRect.UP_LEFT:
 				this.rect = new GSRect(rect.getX(), this.rect.getY(), this.rect.getWidth(), this.rect.getHeight());
 				break;
-			case GSRect.UP_RIGHT :
+			case GSRect.UP_RIGHT:
 				this.rect = new GSRect(this.rect.getX(), this.rect.getY(), this.rect.getWidth(), this.rect.getHeight());
 				break;
 
@@ -114,11 +114,10 @@ public abstract class AbstractField {
 	}
 
 	public void ocr(Img rootImg) {
-		if (rootImg.getSrc().empty())
+		if (rootImg.getSrc().empty() || rootImg.getSrc().width() <= 3 || rootImg.getSrc().height() <= 3)
 			return;
-
 		Rect largeRect = getLargeRect(rootImg, 0.03, 0.1);
-		if (largeRect.empty() || largeRect.width < 3 || largeRect.height < 3)
+		if (largeRect.empty() || largeRect.width <= 3 || largeRect.height <= 3)
 			return;
 		// Prevent OpenCV assertion failure
 		if (!(0 <= largeRect.x && 0 <= largeRect.y && largeRect.x + largeRect.width < rootImg.getSrc().cols() && largeRect.y + largeRect.height < rootImg.getSrc().rows()))
