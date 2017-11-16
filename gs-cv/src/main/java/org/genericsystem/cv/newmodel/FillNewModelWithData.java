@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -14,7 +15,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.common.Root;
 import org.genericsystem.cv.Img;
-import org.genericsystem.cv.comparator.FillModelWithData;
 import org.genericsystem.cv.newmodel.SimpleModel.ConsolidatedType;
 import org.genericsystem.cv.newmodel.SimpleModel.DocClassType;
 import org.genericsystem.cv.newmodel.SimpleModel.DocClassType.DocClassInstance;
@@ -140,7 +140,7 @@ public class FillNewModelWithData {
 
 		// Get the imgFilterFunctions, and create a Map with the processed images
 		Img deskewed = new Img(absolutePath.toString());
-		final List<ImgFilterFunction> imgFilterFunctions = FillModelWithData.getFilterFunctions();
+		final List<ImgFilterFunction> imgFilterFunctions = FillNewModelWithData.getFilterFunctions();
 		Map<String, Img> imgs = new ConcurrentHashMap<>(imgFilterFunctions.size() + 1);
 		imgFilterFunctions.forEach(entry -> {
 			String filtername = entry.getName();
@@ -269,6 +269,15 @@ public class FillNewModelWithData {
 		} else {
 			logger.info("Img {} is already in class {}", name, imgDocLink.getDocInstance().getDocClassInstance());
 		}
+	}
+
+	public static List<ImgFilterFunction> getFilterFunctions() {
+		final List<ImgFilterFunction> filterList = new ArrayList<>();
+		for (ImgFilterFunction iff : ImgFilterFunction.values()) {
+			logger.info("Adding: {}", iff);
+			filterList.add(iff);
+		}
+		return filterList;
 	}
 
 }

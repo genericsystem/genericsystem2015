@@ -13,8 +13,6 @@ import io.vertx.core.shareddata.SharedData;
 
 /**
  * This class is used to deploy only a specific number of instance of a Verticle on a cluster. If a second instance of the Verticle is deployed, the deployment will be rolled back.
- * 
- * @author Pierrik Lassalas
  */
 public abstract class AbstractMultitonVerticle extends AbstractVerticle {
 
@@ -142,8 +140,6 @@ public abstract class AbstractMultitonVerticle extends AbstractVerticle {
 
 	/**
 	 * Deploys only a single instance of a Verticle.
-	 * 
-	 * @author Pierrik Lassalas
 	 */
 	public static abstract class AbstractSingletonVerticle extends AbstractMultitonVerticle {
 		@Override

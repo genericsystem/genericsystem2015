@@ -29,8 +29,6 @@ import org.genericsystem.security.model.UserRole;
  * This application can be used to deploy the verticles of gs-watch to automatically process the documents sent to a specific email address.
  * <p>
  * The main view shows a list of documents for each document's class. Each record can be visualized, and supervised (provided that it was OCR'r first).
- * 
- * @author Pierrik Lassalas
  */
 @DependsOnModel({ Role.class, User.class, UserRole.class, DocClassType.class, LayoutType.class, ImgDocRel.class, DocType.class, ImgType.class, ZoneType.class, ZoneNumType.class, ConsolidatedType.class, ImgPathType.class, ImgTimestampType.class,
 		ImgRefreshTimestampType.class, SupervisedType.class })

@@ -10,8 +10,6 @@ import io.vertx.core.json.JsonObject;
 
 /**
  * The OcrWorkerVerticle computes the OCR for a given file, and send the results as a {@link JsonObject} to the event bus.
- * 
- * @author Pierrik Lassalas
  */
 public class OcrWorkerVerticle extends ActionVerticle {
 

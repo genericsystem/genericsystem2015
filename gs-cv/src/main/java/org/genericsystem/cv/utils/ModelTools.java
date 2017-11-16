@@ -23,8 +23,6 @@ import org.opencv.core.Rect;
 
 /**
  * This class contains only static methods, which can be used as general purpose tools.
- * 
- * @author Pierrik Lassalas
  */
 public class ModelTools {
 

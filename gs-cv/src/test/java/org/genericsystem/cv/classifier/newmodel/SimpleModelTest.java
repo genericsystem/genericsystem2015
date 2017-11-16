@@ -11,28 +11,28 @@ import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.cv.newmodel.SimpleModel;
 import org.genericsystem.cv.newmodel.SimpleModel.ConsolidatedType;
-import org.genericsystem.cv.newmodel.SimpleModel.DocClassType;
-import org.genericsystem.cv.newmodel.SimpleModel.DocType;
-import org.genericsystem.cv.newmodel.SimpleModel.ImgDocRel;
-import org.genericsystem.cv.newmodel.SimpleModel.ImgPathType;
-import org.genericsystem.cv.newmodel.SimpleModel.ImgRefreshTimestampType;
-import org.genericsystem.cv.newmodel.SimpleModel.ImgTimestampType;
-import org.genericsystem.cv.newmodel.SimpleModel.ImgType;
-import org.genericsystem.cv.newmodel.SimpleModel.LayoutType;
-import org.genericsystem.cv.newmodel.SimpleModel.SupervisedType;
-import org.genericsystem.cv.newmodel.SimpleModel.ZoneNumType;
-import org.genericsystem.cv.newmodel.SimpleModel.ZoneType;
 import org.genericsystem.cv.newmodel.SimpleModel.ConsolidatedType.ConsolidatedInstance;
+import org.genericsystem.cv.newmodel.SimpleModel.DocClassType;
 import org.genericsystem.cv.newmodel.SimpleModel.DocClassType.DocClassInstance;
+import org.genericsystem.cv.newmodel.SimpleModel.DocType;
 import org.genericsystem.cv.newmodel.SimpleModel.DocType.DocInstance;
+import org.genericsystem.cv.newmodel.SimpleModel.ImgDocRel;
 import org.genericsystem.cv.newmodel.SimpleModel.ImgDocRel.ImgDocLink;
+import org.genericsystem.cv.newmodel.SimpleModel.ImgPathType;
 import org.genericsystem.cv.newmodel.SimpleModel.ImgPathType.ImgPathInstance;
+import org.genericsystem.cv.newmodel.SimpleModel.ImgRefreshTimestampType;
 import org.genericsystem.cv.newmodel.SimpleModel.ImgRefreshTimestampType.ImgRefreshTimestampInstance;
+import org.genericsystem.cv.newmodel.SimpleModel.ImgTimestampType;
 import org.genericsystem.cv.newmodel.SimpleModel.ImgTimestampType.ImgTimestampInstance;
+import org.genericsystem.cv.newmodel.SimpleModel.ImgType;
 import org.genericsystem.cv.newmodel.SimpleModel.ImgType.ImgInstance;
+import org.genericsystem.cv.newmodel.SimpleModel.LayoutType;
 import org.genericsystem.cv.newmodel.SimpleModel.LayoutType.LayoutInstance;
+import org.genericsystem.cv.newmodel.SimpleModel.SupervisedType;
 import org.genericsystem.cv.newmodel.SimpleModel.SupervisedType.SupervisedInstance;
+import org.genericsystem.cv.newmodel.SimpleModel.ZoneNumType;
 import org.genericsystem.cv.newmodel.SimpleModel.ZoneNumType.ZoneNumInstance;
+import org.genericsystem.cv.newmodel.SimpleModel.ZoneType;
 import org.genericsystem.cv.newmodel.SimpleModel.ZoneType.ZoneInstance;
 import org.genericsystem.kernel.Engine;
 import org.opencv.core.Rect;
@@ -43,8 +43,6 @@ import org.testng.annotations.Test;
 
 /**
  * Simple test class to test the {@link SimpleModel} definitions.
- * 
- * @author Pierrik Lassalas
  */
 public class SimpleModelTest {
 

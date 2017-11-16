@@ -13,8 +13,6 @@ import io.vertx.core.Future;
 
 /**
  * This class extends {@link AbstractVerticle} in order to provide a worker verticle. One must override the default {@link #start()} or {@link #start(io.vertx.core.Future)} methods.
- * 
- * @author Pierrik Lassalas
  */
 @SuppressWarnings("unused")
 public abstract class WorkerVerticle extends AbstractVerticle {

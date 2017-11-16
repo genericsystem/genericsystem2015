@@ -8,8 +8,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Helper class to wrap OpenCV native library loading.
- * 
- * @author Pierrik Lassalas
  */
 public class NativeLibraryLoader {
 

@@ -10,8 +10,6 @@ import java.util.stream.Stream;
 
 /**
  * This class contains various methods that can be used to compare {@link String} objects.
- * 
- * @author Pierrik Lassalas
  */
 public class StringCompare {
 
@@ -20,8 +18,6 @@ public class StringCompare {
 
 	/**
 	 * Describe the method used to compute the similarity
-	 * 
-	 * @author Pierrik Lassalas
 	 */
 	public enum SIMILARITY {
 		/**

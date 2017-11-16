@@ -31,8 +31,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Simple Model to store the data extracted from documents in Generic System.
- * 
- * @author Pierrik Lassalas
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class SimpleModel {
@@ -41,8 +39,6 @@ public class SimpleModel {
 
 	/**
 	 * DocClassType represents the type of all the classes.
-	 * 
-	 * @author Pierrik Lassalas
 	 */
 	@SystemGeneric
 	@InstanceClass(DocClassInstance.class)
@@ -106,8 +102,6 @@ public class SimpleModel {
 	/**
 	 * LayoutType represents the type of the attribute Layout on the {@link DocClassType}. Each element of the layout is a holder of type LayoutType. </br>
 	 * The children/parents relationships are mapped using inheritance.
-	 * 
-	 * @author Pierrik Lassalas
 	 */
 	@SystemGeneric
 	@Components(DocClassType.class)
@@ -126,8 +120,6 @@ public class SimpleModel {
 
 	/**
 	 * ImgDocRel represents the relation (many to one) between an abstract {@link DocType} and a concrete {@link ImgType}.
-	 * 
-	 * @author Pierrik Lassalas
 	 */
 	@SystemGeneric
 	@Components({ ImgType.class, DocType.class })
@@ -162,8 +154,6 @@ public class SimpleModel {
 
 	/**
 	 * A DocType represents the "abstract" document, which can be linked to one or more {@link ImgType} through {@link ImgDocRel}. At this stage, duplicates of ImgType are removed.
-	 * 
-	 * @author Pierrik Lassalas
 	 */
 	@SystemGeneric
 	@Components(DocClassType.class)
@@ -198,8 +188,6 @@ public class SimpleModel {
 
 	/**
 	 * An ImgType represents the actual image of the processed document. Duplicates of the same document can exist as multiple instances of this class.
-	 * 
-	 * @author Pierrik Lassalas
 	 */
 	@SystemGeneric
 	@InstanceClass(ImgInstance.class)

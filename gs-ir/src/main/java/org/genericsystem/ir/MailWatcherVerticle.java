@@ -32,8 +32,6 @@ import io.vertx.core.json.JsonObject;
 /**
  * The MailWatcherVerticle connects to an email account. For each unread mail each new mail received afterwards, the PDF attachments are extracted and stored locally. A message is then sent to the event bus to the {@link PdfConverterVerticle} to extract
  * each page of these files as PNG files.
- * 
- * @author middleware
  */
 public class MailWatcherVerticle extends AbstractVerticle {
 

@@ -8,9 +8,6 @@ import java.util.concurrent.Executors;
 
 /**
  * Utility class that can be used to run multiple tasks in parallel.
- * 
- * @author Nicolas Feybesse
- * @author Pierrik Lassalas
  */
 public class ParallelTasks {
 	private final List<Runnable> tasks;

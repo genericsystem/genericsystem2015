@@ -13,8 +13,6 @@ import org.opencv.core.Size;
 
 /**
  * This is an adapter class for gs-reinforcer {@link RectangleTools}, that provides translation between OpenCV's {@link Rect}, {@link Point} and {@link Size} and their GS counterparts.
- * 
- * @author Pierrik Lassalas
  */
 public final class RectToolsMapper {
 

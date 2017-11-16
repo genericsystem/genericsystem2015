@@ -21,8 +21,6 @@ import org.slf4j.LoggerFactory;
  * OCRPlastyScorer can be used to compute the efficiency of OCRPlasty, depending on the RANSAC method applied to the list of strings given as argument. <br>
  * It uses a list of strings (see {@link #getReferenceStrings()}) that are randomly modified to generate a list of potential candidates (similar to what one get after OCR of the same field across several images). These lists are then submitted to
  * {@link OCRPlasty} to get a corrected string, which is compared to the one used to generate the random list. The results store the similarity between the two strings, and the duration of the computation.
- * 
- * @author Pierrik Lassalas
  */
 public class OCRPlastyScorer {
 
@@ -165,8 +163,6 @@ public class OCRPlastyScorer {
 
 	/**
 	 * Utility class used to store the results of the computations.
-	 * 
-	 * @author Pierrik Lassalas
 	 */
 	public static class Results {
 		private long duration;
@@ -221,8 +217,6 @@ public class OCRPlastyScorer {
 
 	/**
 	 * Utility class used to compute some basic statistics of a {@link List<Double>}
-	 * 
-	 * @author Pierrik Lassalas
 	 */
 	public static class Statistics {
 		private List<Double> values;

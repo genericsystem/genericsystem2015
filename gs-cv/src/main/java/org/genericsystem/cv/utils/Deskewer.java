@@ -34,9 +34,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This class contains static methods that can be used to deskew an {@link Img}.
- * 
- * @author Nicolas Feybesse
- * @author Pierrik Lassalas
  */
 public class Deskewer {
 

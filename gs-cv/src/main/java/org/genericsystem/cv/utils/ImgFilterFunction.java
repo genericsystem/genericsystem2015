@@ -4,8 +4,6 @@ import org.genericsystem.cv.Img;
 
 /**
  * This <code>enum</code> provides a list of filters that will be applied to the {@link Img} before going through OCR.
- * 
- * @author Pierrik Lassalas
  */
 public enum ImgFilterFunction {
 	ORIGINAL("original", i -> i),
