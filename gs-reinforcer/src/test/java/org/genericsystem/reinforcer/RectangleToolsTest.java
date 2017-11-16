@@ -2,12 +2,13 @@ package org.genericsystem.reinforcer;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import org.genericsystem.reinforcer.tools.GSPoint;
 import org.genericsystem.reinforcer.tools.GSRect;
@@ -103,21 +104,20 @@ public class RectangleToolsTest {
 	public void getIntersection() {
 		GSRect inter12 = new GSRect(1, 1, 9, 9);
 
-		Optional<GSRect> inter = rect1.getIntersection(rect1);
-		assertTrue(inter.isPresent());
-		assertEquals(inter.get(), rect1);
+		GSRect inter = rect1.getIntersection(rect1);
+		assertNotNull(inter);
+		assertEquals(inter, rect1);
 
 		inter = rect1.getIntersection(rect2);
-		assertTrue(inter.isPresent());
-		assertEquals(inter.get(), inter12);
+		assertNotNull(inter);
+		assertEquals(inter, inter12);
 
 		inter = rect1.getIntersection(rect3);
-		assertFalse(inter.isPresent());
-		assertTrue(Optional.empty().equals(inter));
+		assertNull(inter);
 
 		inter = rect1.getIntersection(rect4);
-		assertTrue(inter.isPresent());
-		assertEquals(inter.get(), rect4);
+		assertNotNull(inter);
+		assertEquals(inter, rect4);
 	}
 
 	@Test
