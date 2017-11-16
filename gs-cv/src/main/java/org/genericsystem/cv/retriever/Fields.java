@@ -87,7 +87,7 @@ public class Fields extends AbstractFields<Field> implements OverlapConstraint {
 		for (GSRect rect : rects) {
 			Field match = findMatch(rect, 0.6, width, height);
 			if (match != null)
-				updateNode(rect, match);
+				updateNode(rect, match, width, height);
 			else
 				createNode(rect, findPotentialParent(rect));
 		}
@@ -124,9 +124,9 @@ public class Fields extends AbstractFields<Field> implements OverlapConstraint {
 	}
 
 	@Override
-	public void updateNodeImpl(GSRect rect, Field field) {
-		logger.info("Updating node {} with {}", field.getRect(), rect);
-		field.updateRect(rect);
+	public void updateNodeImpl(GSRect rect, Field field, int width, int height) {
+		logger.info("Updating node {} with {}", field.getRect(), rect);//
+		field.updateRect(rect, width, height);
 		field.resetDeadCounter();
 	}
 
@@ -180,10 +180,8 @@ public class Fields extends AbstractFields<Field> implements OverlapConstraint {
 	private Field findMatch(GSRect rect, double areaOverlap, int width, int height) {
 		GSRect frameRect = new GSRect(0, 0, width, height);
 		List<Field> matches = fields.stream().filter(f -> rect.inclusiveArea(f.getRect().getIntersection(frameRect)) > areaOverlap).collect(Collectors.toList());
-		if (matches.isEmpty()) {
-			System.out.println("AAAAAAAAAAAAAAA");
+		if (matches.isEmpty())
 			return null;
-		}
 		if (matches.size() > 1) {
 			StringBuilder sb = new StringBuilder(matches.size() + " matches were detected.\n");
 			for (Field field : matches) {
@@ -192,7 +190,6 @@ public class Fields extends AbstractFields<Field> implements OverlapConstraint {
 			// throw new IllegalStateException(sb.toString());
 			logger.warn(sb.toString());
 		}
-		System.out.println("ZZZZZZZZZZZZZZZZZZZ");
 		return matches.get(0);
 	}
 
@@ -254,5 +251,4 @@ public class Fields extends AbstractFields<Field> implements OverlapConstraint {
 			e.printStackTrace();
 		}
 	}
-
 }

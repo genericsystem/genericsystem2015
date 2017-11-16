@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.genericsystem.cv.Img;
+import org.genericsystem.reinforcer.tools.GSPoint;
 import org.genericsystem.reinforcer.tools.GSRect;
 import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
@@ -24,7 +25,7 @@ public class Field extends AbstractField {
 		super(rect);
 		this.parent = null;
 		this.children = new ArrayList<>();
-		checkConstraints();
+		// checkConstraints();
 	}
 
 	public String recursiveToString() {
@@ -158,44 +159,52 @@ public class Field extends AbstractField {
 		return parent == null;
 	}
 
-	@Override
-	void updateRect(GSRect rect) {
-		super.updateRect(rect);
-		checkConstraints();
+	void updateRect(GSRect rect, int width, int height) {
+		GSRect truncatedRect = getRect().getIntersection(new GSRect(0, 0, width, height));
+		if (truncatedRect != this.rect) {
+			double tlX = truncatedRect.getX();
+			double tlY = truncatedRect.getY();
+			double brX = tlX + truncatedRect.getWidth();
+			double brY = tlY + truncatedRect.getHeight();
+
+			this.rect = new GSRect(new GSPoint(tlX <= 0 ? this.rect.tl().getX() : rect.tl().getX(), tlY <= 0 ? this.rect.tl().getY() : rect.tl().getY()),
+					new GSPoint(brX >= width ? this.rect.br().getX() : rect.br().getX(), brY >= height ? this.rect.br().getY() : rect.br().getY()));
+		} else
+			this.rect = rect;
 	}
 
-	private boolean checkConstraints() {
-		boolean ok = isOrphan() ? this.checkConstraintsRecursive() : parent.checkConstraintsRecursive();
-		// if (!ok)
-		// logger.error("Invalid constraint for:\n{}Tree:\n{}", this, isOrphan() ? this.recursiveToString() : this.parent.recursiveToString());
-		return ok;
-	}
-
-	private boolean checkConstraintsRecursive() {
-		// If the field is orphan and has no children, it validates the constraints
-		if (isOrphan() && !hasChildren())
-			return true;
-		// If the field has children, they must meet the constraint
-		if (hasChildren()) {
-			for (Field child : children)
-				if (child.isOutsideParent() || child.isOverlappingSiblings())
-					return false;
-
-			// If false was not returned, apply the function to the children
-			for (Field child : children)
-				if (!child.checkConstraintsRecursive())
-					return false;
-		}
-		// At this stage, all the constraints should be verified
-		return true;
-	}
-
-	private boolean isOutsideParent() {
-		return !rect.equals(rect.isInsider(getParent().getRect()));
-	}
-
-	private boolean isOverlappingSiblings() {
-		return getSiblings().stream().anyMatch(sibling -> rect.isOverlapping(sibling.getRect()));
-	}
+	// private boolean checkConstraints() {
+	// boolean ok = isOrphan() ? this.checkConstraintsRecursive() : parent.checkConstraintsRecursive();
+	// if (!ok)
+	// logger.error("Invalid constraint for:\n{}Tree:\n{}", this, isOrphan() ? this.recursiveToString() : this.parent.recursiveToString());
+	// return ok;
+	// }
+	//
+	// private boolean checkConstraintsRecursive() {
+	// // If the field is orphan and has no children, it validates the constraints
+	// if (isOrphan() && !hasChildren())
+	// return true;
+	// // If the field has children, they must meet the constraint
+	// if (hasChildren()) {
+	// for (Field child : children)
+	// if (child.isOutsideParent() || child.isOverlappingSiblings())
+	// return false;
+	//
+	// // If false was not returned, apply the function to the children
+	// for (Field child : children)
+	// if (!child.checkConstraintsRecursive())
+	// return false;
+	// }
+	// // At this stage, all the constraints should be verified
+	// return true;
+	// }
+	//
+	// private boolean isOutsideParent() {
+	// return !rect.equals(rect.isInsider(getParent().getRect()));
+	// }
+	//
+	// private boolean isOverlappingSiblings() {
+	// return getSiblings().stream().anyMatch(sibling -> rect.isOverlapping(sibling.getRect()));
+	// }
 
 }

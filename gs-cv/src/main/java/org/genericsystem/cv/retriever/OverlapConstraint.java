@@ -9,14 +9,14 @@ public interface OverlapConstraint {
 			createNodeImpl(rect, parent);
 	}
 
-	default void updateNode(GSRect rect, Field field) {
+	default void updateNode(GSRect rect, Field field, int width, int height) {
 		if (checkOverlapConstraint(rect, field))
-			updateNodeImpl(rect, field);
+			updateNodeImpl(rect, field, width, height);
 	}
 
 	void createNodeImpl(GSRect rect, Field parent);
 
-	void updateNodeImpl(GSRect rect, Field field);
+	void updateNodeImpl(GSRect rect, Field field, int width, int height);
 
 	void removeNode(Field field);
 
