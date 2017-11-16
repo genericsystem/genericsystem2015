@@ -37,18 +37,21 @@ public class RectDetector {
 		List<Rect> result = new ArrayList<>();
 		for (int i = rects.size() - 1; i > 0; --i) {
 			Rect rect = rects.get(i);
-			boolean brokenConstraint = false;
-			for (int j = i - 1; j > 0; --j) {
-				Rect r = rects.get(j);
-				if (isOverlapping(r, rect)) {
-					brokenConstraint = true;
-					break;
-				}
-			}
-			if (!brokenConstraint)
+			if (!hasOverlapsAfterIdx(rects, i))
 				result.add(rect);
 		}
 		return result;
+	}
+
+	private boolean hasOverlapsAfterIdx(List<Rect> rects, int idx) {
+		Rect rect = rects.get(idx);
+		for (int j = idx - 1; j > 0; --j) {
+			Rect r = rects.get(j);
+			if (isOverlapping(r, rect)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private boolean isOverlapping(Rect rect1, Rect rect2) {
