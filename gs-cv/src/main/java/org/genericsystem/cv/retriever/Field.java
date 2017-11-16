@@ -68,13 +68,11 @@ public class Field extends AbstractField {
 		Scalar scalar = selectColor(color);
 		if (needRect())
 			drawRect(display, getRectPointsWithHomography(homography), deadCounter == 0 ? scalar : new Scalar(0, 0, 255), thickness);
-//		if (needText())
-//			drawText(display, getRectPointsWithHomography(homography), new Scalar(0, 64, 255), thickness);
+		if (needText())
+			drawText(display, getRectPointsWithHomography(homography), new Scalar(0, 64, 255), thickness);
 	}
 
 	private Scalar selectColor(Scalar defaultColor) {
-//		if (drawAsTruncated())
-//			return new Scalar(0, 0, 51);
 		if (drawAsLocked())
 			return new Scalar(255, 172, 0);
 		if (drawAsChild())
@@ -87,20 +85,16 @@ public class Field extends AbstractField {
 	}
 
 	private boolean drawAsLocked() {
-		return (deadCounter == 0 && isOrphan()) || (!isOrphan() && parent.getDeadCounter() != 0) ? this.locked : false;
+		return isOrphan() || (!isOrphan() && parent.getDeadCounter() != 0) ? this.locked : false;
 	}
-
-//	private boolean drawAsTruncated() {
-//		return this.truncated;
-//	}
 
 	private boolean needRect() {
-		return !isOrphan() && parent.getDeadCounter() == 0 ? false : true;
+		return !isOrphan() && parent.getDeadCounter() == 0 ? false : isLocked() ? true : deadCounter == 0;
 	}
 
-//	private boolean needText() {
-//		return deadCounter == 0 && !truncated && needRect();
-//	}
+	private boolean needText() {
+		return deadCounter == 0 && needRect();
+	}
 
 	public void setFinal() {
 		if (!locked)
@@ -141,32 +135,15 @@ public class Field extends AbstractField {
 	}
 
 	public List<Field> getSiblings() {
-		if(getParent()==null)
+		if (parent == null)
 			return Collections.emptyList();
-		return getParent().getChildren().stream().filter(child -> this!=child).collect(Collectors.toList());
+		return parent.getChildren().stream().filter(child -> this != child).collect(Collectors.toList());
 	}
 
 	public void setParent(Field parent) {
-		if (parent == null) {
-			if (this.parent == null)
-				return;
-			logger.info("Resetting parent for field: {}", this.rect);
-			this.parent.removeChild(this); // TODO can this method be called here, or should it be handled separately?
-			this.parent = null;
-		} else {
-			if (this.isOverlappingSiblings()) {
-				if (this.parent != null)
-					logger.error("Child already has a parent:\n{}\nParent:\n{}", this, this.parent);
-				this.parent = parent;
-				if (parent.addChildIfNotPresent(this)) // TODO can this method be called here, or should it be handled separately?
-					logger.info("Added {} as parent of {}", parent.getRect(), this.getRect());
-				else {
-					logger.error("Unable to add {} as a parent of {}, reverting", parent.getRect(), this.getRect());
-					this.parent = null;
-				}
-			} else
-				logger.error("New child overlaps with future siblings:\n{}\nSiblings:\n{}", this, this.getSiblings());
-		}
+		this.parent = parent;
+		if (parent != null)
+			this.parent.addChildIfNotPresent(this);
 	}
 
 	public boolean hasChildren() {
@@ -184,20 +161,13 @@ public class Field extends AbstractField {
 	@Override
 	void updateRect(GSRect rect) {
 		super.updateRect(rect);
-		boolean ok = checkConstraints();
-		if (!ok) {
-			if (isOrphan()) {
-				this.repairTree();
-			} else {
-				parent.repairTree();
-			}
-		}
+		checkConstraints();
 	}
 
 	private boolean checkConstraints() {
 		boolean ok = isOrphan() ? this.checkConstraintsRecursive() : parent.checkConstraintsRecursive();
-		//if (!ok)
-		//	logger.error("Invalid constraint for:\n{}Tree:\n{}", this, isOrphan() ? this.recursiveToString() : this.parent.recursiveToString());
+		// if (!ok)
+		// logger.error("Invalid constraint for:\n{}Tree:\n{}", this, isOrphan() ? this.recursiveToString() : this.parent.recursiveToString());
 		return ok;
 	}
 
@@ -207,68 +177,25 @@ public class Field extends AbstractField {
 			return true;
 		// If the field has children, they must meet the constraint
 		if (hasChildren()) {
-			for (Field child : children) 
-				if(child.isOutsideParent() || child.isOverlappingSiblings())
+			for (Field child : children)
+				if (child.isOutsideParent() || child.isOverlappingSiblings())
 					return false;
-			
+
 			// If false was not returned, apply the function to the children
-			for (Field child : children) 
+			for (Field child : children)
 				if (!child.checkConstraintsRecursive())
-					return false;			
+					return false;
 		}
 		// At this stage, all the constraints should be verified
 		return true;
 	}
-	
-	private boolean isOutsideParent() {		
-		return !rect.equals(rect.isInsider(getParent().getRect()));	
+
+	private boolean isOutsideParent() {
+		return !rect.equals(rect.isInsider(getParent().getRect()));
 	}
 
-		
 	private boolean isOverlappingSiblings() {
-		return getSiblings().stream().anyMatch(sibling -> getRect().isOverlapping(sibling.getRect()));		
-	}
-
-	
-
-
-	public void repairTree() {
-		if (isOrphan() && !hasChildren()) {
-			logger.error("Unable to repair a single-membered tree");
-			return;
-		}
-		for (Field child : children) {
-			if (child.isOutsideParent()) {
-				if (child.getParent().getDeadCounter() == 0)
-					child.fitInParent();
-				else if (child.getDeadCounter() == 0)
-					child.getParent().accomodate(child);
-			}
-			if (child.hasChildren())
-				child.repairTree();
-		}
-	}
-
-	protected void adjustRect(GSRect rect) {
-		logger.warn("replaced {} => {}", this.rect, rect);
-		this.rect = rect;
-	}
-
-	private void accomodate(Field child) {
-		if (!hasChildren())
-			return;
-		logger.warn("need union");
-		adjustRect(rect.getUnion(child.getRect()));
-	}
-
-	private void fitInParent() {
-		if (isOrphan())
-			return;
-		GSRect intersection = rect.getIntersection(parent.getRect());
-		logger.warn("need intersection");
-		if(intersection!=null)
-			adjustRect(intersection);
-
+		return getSiblings().stream().anyMatch(sibling -> rect.isOverlapping(sibling.getRect()));
 	}
 
 }

@@ -15,7 +15,6 @@ import org.genericsystem.cv.utils.ParallelTasks;
 import org.genericsystem.cv.utils.RectToolsMapper;
 import org.genericsystem.reinforcer.tools.GSPoint;
 import org.genericsystem.reinforcer.tools.GSRect;
-import org.genericsystem.reinforcer.tools.RectangleTools;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
@@ -25,7 +24,7 @@ import org.opencv.utils.Converters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Fields extends AbstractFields<Field> {
+public class Fields extends AbstractFields<Field> implements OverlapConstraint {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
@@ -62,12 +61,8 @@ public class Fields extends AbstractFields<Field> {
 	public void consolidate(Img img) {
 		RectMerger rm = new RectMerger(img);
 		List<GSRect> rects = rm.mergeRectsList();
-
-		// Increment the dead counter of each field
 		fields.forEach(Field::incrementDeadCounter);
-
 		mergeRects(rects, img.width(), img.height());
-
 		removeDeadTrees();
 	}
 
@@ -82,7 +77,7 @@ public class Fields extends AbstractFields<Field> {
 			List<GSRect> rects = RectToolsMapper.rectToGSRect(rd.getRects(200, 11, 3, new Size(11, 3)));
 			List<GSRect> children = RectToolsMapper.rectToGSRect(rd.getRects(40, 17, 3, new Size(7, 3)));
 			// Remove the duplicates of rects in children
-			children.removeIf(child -> rects.stream().anyMatch(parent -> RectangleTools.isInCluster(parent, child, 0.1)));
+			children.removeIf(child -> rects.stream().anyMatch(parent -> child.inclusiveArea(parent) > 0.90)); // RectangleTools.isInCluster(parent, child, 0.1)
 			rects.addAll(children);
 			return rects;
 		}
@@ -119,7 +114,8 @@ public class Fields extends AbstractFields<Field> {
 		return root;
 	}
 
-	private void createNode(GSRect rect, Field parent) {	
+	@Override
+	public void createNodeImpl(GSRect rect, Field parent) {
 		logger.info("Creating a new node for {}", rect);
 		Field f = new Field(rect);
 		if (parent != null)
@@ -127,13 +123,34 @@ public class Fields extends AbstractFields<Field> {
 		fields.add(f);
 	}
 
-	private void updateNode(GSRect rect, Field field) {
+	@Override
+	public void updateNodeImpl(GSRect rect, Field field) {
 		logger.info("Updating node {} with {}", field.getRect(), rect);
 		field.updateRect(rect);
 		field.resetDeadCounter();
 	}
 
-	private void removeNode(Field field) {
+	@Override
+	public boolean checkOverlapConstraint(GSRect rect) {
+		for (Field field : fields)
+			if (field.isOverlapping(rect))
+				if (rect.isInsider(field.getRect()) == null)
+					return false;
+		return true;
+	}
+
+	@Override
+	public boolean checkOverlapConstraint(GSRect rect, Field target) {
+		for (Field field : fields)
+			if (field != target)
+				if (field.isOverlapping(rect))
+					if (rect.isInsider(field.getRect()) == null)
+						return false;
+		return true;
+	}
+
+	@Override
+	public void removeNode(Field field) {
 		logger.info("Removing node: {}", field.getRect());
 		fields.remove(field);
 	}
@@ -178,30 +195,6 @@ public class Fields extends AbstractFields<Field> {
 		System.out.println("ZZZZZZZZZZZZZZZZZZZ");
 		return matches.get(0);
 	}
-
-	// private Field findMatch(GSRect rect, double eps, int width, int height) {
-	// List<Field> matches = findPossibleMatches(rect, eps);
-	// // Remove the false positives
-	// matches.removeIf(f -> f.getRect().inclusiveArea(rect) <= MIN_OVERLAP / 10);
-	// if (matches.isEmpty())
-	// return null;
-	// // If there is more than one match, select only the best
-	// if (matches.size() > 1) {
-	// logger.debug("Multiple matches ({}), removing false positives", matches.size());
-	// // Remove the overlaps with less than 10% common area
-	// matches.removeIf(f -> f.getRect().inclusiveArea(rect) < MIN_OVERLAP);
-	// if (matches.size() > 1) {
-	// logger.warn("Still multiple matches ({}), selecting the maximum overlap", matches.size());
-	// matches = Arrays.asList(matches.stream().max((f1, f2) -> {
-	// double area1 = f1.getRect().inclusiveArea(rect);
-	// double area2 = f2.getRect().inclusiveArea(rect);
-	// return Double.compare(area1, area2);
-	// }).orElseThrow(IllegalStateException::new));
-	// }
-	// }
-	// return matches.isEmpty() ? null : matches.get(0);
-	//
-	// }
 
 	public void restabilizeFields(Mat homography) {
 		long start = System.nanoTime();
