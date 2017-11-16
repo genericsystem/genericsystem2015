@@ -3,7 +3,6 @@ package org.genericsystem.cv.retriever;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -235,7 +234,7 @@ public class Field extends AbstractField {
 			if (outsideParent.test(child)) {
 				if (child.getParent().getDeadCounter() == 0)
 					child.fitInParent();
-				else
+				else if (child.getDeadCounter() == 0)
 					child.getParent().accomodate(child);
 			}
 			if (child.hasChildren())
@@ -251,17 +250,15 @@ public class Field extends AbstractField {
 	private void accomodate(Field child) {
 		if (!hasChildren())
 			return;
-		GSRect union = rect.getUnion(child.getRect());
 		logger.warn("need union");
-		adjustRect(union);
+		adjustRect(rect.getUnion(child.getRect()));
 	}
 
 	private void fitInParent() {
 		if (isOrphan())
 			return;
-		Optional<GSRect> intersection = rect.getIntersection(parent.getRect());
 		logger.warn("need intersection");
-		intersection.ifPresent(intersect -> adjustRect(intersect));
+		rect.getIntersection(parent.getRect()).ifPresent(intersect -> adjustRect(intersect));
 	}
 
 }
