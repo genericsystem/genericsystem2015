@@ -34,7 +34,7 @@ public class Fields extends AbstractFields<Field> {
 	private static final double MIN_OVERLAP = 0.2;
 
 	public void reset() {
-//		displayFieldsTree();
+		displayFieldsTree();
 		fields = new ArrayList<>();
 	}
 
@@ -43,16 +43,9 @@ public class Fields extends AbstractFields<Field> {
 		stream().forEach(field -> field.draw(display, homography, color, thickness));
 	}
 
-
 	public void drawFieldsOnStabilized(Img stabilized) {
 		stream().forEach(f -> f.drawRect(stabilized, f.getDeadCounter() == 0 ? new Scalar(0, 255, 0) : new Scalar(0, 0, 255), 1));
 	}
-
-//	public void drawLockedFields(Img display, Mat homography) {
-//		fields.forEach(field -> field.drawLockedField(display, homography));
-//		fields.stream().filter(field -> !field.isOrphan()).forEach(field -> field.drawRect(display, field.getRectPointsWithHomography(homography), new Scalar(255, 128, 255), 1));
-//	}
-
 
 	public void displayFieldsTree() {
 		StringBuffer sb = new StringBuffer();
@@ -76,7 +69,6 @@ public class Fields extends AbstractFields<Field> {
 		mergeRects(rects, img.width(), img.height());
 
 		removeDeadTrees();
-		cleanRelationships();
 	}
 
 	private static class RectMerger {
@@ -96,29 +88,17 @@ public class Fields extends AbstractFields<Field> {
 		}
 	}
 
-	// TODO re-arrange the fields to match all the constraints (no overlap, children strictly contained in parents)
-	private void cleanRelationships() {
-		// // 1. Each tree must validate the constraints
-		// for (Field parent : getRoots()) {
-		// if (!parent.checkConstraints()) {
-		// System.err.println(parent.recursiveToString());
-		// parent.repairTree();
-		// }
-		// }
-		// // 2. Two overlapping trees can't coexist and must be merged
-	}
-
 	private void mergeRects(List<GSRect> rects, int width, int height) {
 		for (GSRect rect : rects) {
-			Field match = findMatch(rect, 0.4, width, height);
+			Field match = findMatch(rect, 0.6, width, height);
 			if (match != null)
 				updateNode(rect, match);
 			else
-				createNode(rect, findPotentialParent(rect, getRoots()));
+				createNode(rect, findPotentialParent(rect));
 		}
 	}
 
-	private Field findPotentialParent(GSRect rect, List<Field> roots) {
+	private Field findPotentialParent(GSRect rect) {
 		for (Field root : getRoots()) {
 			Field parent = findPotentialParent(rect, root);
 			if (parent != null)
@@ -128,8 +108,8 @@ public class Fields extends AbstractFields<Field> {
 	}
 
 	private Field findPotentialParent(GSRect rect, Field root) {
-		
-		if (rect.equals(rect.isInsider(root.getRect())))
+		GSRect insider = rect.isInsider(root.getRect());
+		if (insider == null || rect == insider)
 			return null;
 		for (Field child : root.getChildren()) {
 			Field candidate = findPotentialParent(rect, child);
@@ -179,50 +159,49 @@ public class Fields extends AbstractFields<Field> {
 			res.addAll(listTree(child));
 		return res;
 	}
-	
-	private Field findMatch(GSRect rect, double areaOverlap, int width, int height)	{		
-		GSRect frameRect = new GSRect(0,0,width, height);		
-		List<Field> matches = fields.stream().filter(f -> rect.inclusiveArea(f.getRect().getIntersection(frameRect))>areaOverlap).collect(Collectors.toList());	
-		if(matches.isEmpty()){
+
+	private Field findMatch(GSRect rect, double areaOverlap, int width, int height) {
+		GSRect frameRect = new GSRect(0, 0, width, height);
+		List<Field> matches = fields.stream().filter(f -> rect.inclusiveArea(f.getRect().getIntersection(frameRect)) > areaOverlap).collect(Collectors.toList());
+		if (matches.isEmpty()) {
 			System.out.println("AAAAAAAAAAAAAAA");
 			return null;
 		}
-		if(matches.size()>1){
-			StringBuilder sb = new StringBuilder(matches.size()+ " matches were detected.\n");
-			for(Field field : matches){
-				sb.append(field+"\n");
-			}			
-			//throw new IllegalStateException(sb.toString());
+		if (matches.size() > 1) {
+			StringBuilder sb = new StringBuilder(matches.size() + " matches were detected.\n");
+			for (Field field : matches) {
+				sb.append(field + "\n");
+			}
+			// throw new IllegalStateException(sb.toString());
 			logger.warn(sb.toString());
 		}
 		System.out.println("ZZZZZZZZZZZZZZZZZZZ");
-		return matches.get(0);	
+		return matches.get(0);
 	}
-	
 
-//	private Field findMatch(GSRect rect, double eps, int width, int height) {
-//		List<Field> matches = findPossibleMatches(rect, eps);
-//		// Remove the false positives
-//		matches.removeIf(f -> f.getRect().inclusiveArea(rect) <= MIN_OVERLAP / 10);
-//		if (matches.isEmpty())
-//			return null;
-//			// If there is more than one match, select only the best
-//		if (matches.size() > 1) {
-//			logger.debug("Multiple matches ({}), removing false positives", matches.size());
-//		// Remove the overlaps with less than 10% common area
-//		matches.removeIf(f -> f.getRect().inclusiveArea(rect) < MIN_OVERLAP);
-//			if (matches.size() > 1) {
-//				logger.warn("Still multiple matches ({}), selecting the maximum overlap", matches.size());
-//				matches = Arrays.asList(matches.stream().max((f1, f2) -> {
-//					double area1 = f1.getRect().inclusiveArea(rect);
-//					double area2 = f2.getRect().inclusiveArea(rect);
-//					return Double.compare(area1, area2);
-//				}).orElseThrow(IllegalStateException::new));
-//			}
-//		}
-//			return matches.isEmpty() ? null : matches.get(0);
-//		
-//	}
+	// private Field findMatch(GSRect rect, double eps, int width, int height) {
+	// List<Field> matches = findPossibleMatches(rect, eps);
+	// // Remove the false positives
+	// matches.removeIf(f -> f.getRect().inclusiveArea(rect) <= MIN_OVERLAP / 10);
+	// if (matches.isEmpty())
+	// return null;
+	// // If there is more than one match, select only the best
+	// if (matches.size() > 1) {
+	// logger.debug("Multiple matches ({}), removing false positives", matches.size());
+	// // Remove the overlaps with less than 10% common area
+	// matches.removeIf(f -> f.getRect().inclusiveArea(rect) < MIN_OVERLAP);
+	// if (matches.size() > 1) {
+	// logger.warn("Still multiple matches ({}), selecting the maximum overlap", matches.size());
+	// matches = Arrays.asList(matches.stream().max((f1, f2) -> {
+	// double area1 = f1.getRect().inclusiveArea(rect);
+	// double area2 = f2.getRect().inclusiveArea(rect);
+	// return Double.compare(area1, area2);
+	// }).orElseThrow(IllegalStateException::new));
+	// }
+	// }
+	// return matches.isEmpty() ? null : matches.get(0);
+	//
+	// }
 
 	public void restabilizeFields(Mat homography) {
 		long start = System.nanoTime();
