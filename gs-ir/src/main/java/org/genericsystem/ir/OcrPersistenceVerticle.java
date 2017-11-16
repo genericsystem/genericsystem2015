@@ -9,8 +9,6 @@ import io.vertx.core.json.JsonObject;
 
 /**
  * The OcrPersistenceVerticle persists the informations from the OCR into Generic System.
- * 
- * @author Pierrik Lassalas
  */
 public class OcrPersistenceVerticle extends ActionPersistentVerticle {
 

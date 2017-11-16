@@ -1,7 +1,5 @@
 package org.genericsystem.ir.app.gui.pages;
 
-import org.genericsystem.cv.model.MeanLevenshtein;
-import org.genericsystem.cv.model.Score;
 import org.genericsystem.ir.app.gui.pages.ClassifierPage.DocClassDiv;
 import org.genericsystem.ir.app.gui.pages.ClassifierPage.GeneralButtonsDiv;
 import org.genericsystem.ir.app.gui.utils.ContextActionCustom.CALL_HOME_PAGE;
@@ -25,8 +23,6 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlH1;
 
 /**
  * This class provides a gs-reactor application to visualize and update the {@link Score} and {@link MeanLevenshtein} distances for each filters.
- * 
- * @author Pierrik Lassalas
  */
 
 @Switch(CLASSIFIER_PAGE.class)

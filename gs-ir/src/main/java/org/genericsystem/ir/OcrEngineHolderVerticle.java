@@ -1,7 +1,6 @@
 package org.genericsystem.ir;
 
 import org.genericsystem.common.Root;
-import org.genericsystem.cv.comparator.FillModelWithData;
 import org.genericsystem.ir.AbstractMultitonVerticle.AbstractSingletonVerticle;
 
 import io.vertx.core.AsyncResult;
@@ -16,11 +15,6 @@ public class OcrEngineHolderVerticle extends AbstractSingletonVerticle {
 
 	public OcrEngineHolderVerticle(Root engine) {
 		this.engine = engine;
-	}
-
-	public static void main(String[] args) {
-		OcrEngineHolderVerticle verticle = new OcrEngineHolderVerticle(FillModelWithData.getEngine());
-		verticle.doDeploy();
 	}
 
 	@Override

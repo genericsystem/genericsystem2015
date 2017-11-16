@@ -13,8 +13,6 @@ import io.vertx.core.json.JsonObject;
 /**
  * The AddImageToEngineVerticle receives a message from the event bus when an image was classified. After saving the document in Generic System, a message is sent to the {@link DezonerVerticle}. A reference to an {@link Engine} must be given to be able to
  * store the data in Generic System.
- * 
- * @author Pierrik Lassalas
  */
 public class AddImageToEngineVerticle extends ActionPersistentVerticle {
 

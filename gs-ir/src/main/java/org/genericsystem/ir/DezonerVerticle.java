@@ -15,8 +15,6 @@ import io.vertx.core.json.JsonObject;
 
 /**
  * The DezonerVerticle receives a message from the event bus when a new image has been added to a class. If this class has already been dezoned, a message will be sent to the {@link OcrParametersVerticle}.
- * 
- * @author Pierrik Lassalas
  */
 public class DezonerVerticle extends ActionPersistentVerticle {
 

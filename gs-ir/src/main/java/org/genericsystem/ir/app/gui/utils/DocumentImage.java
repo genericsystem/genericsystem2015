@@ -7,8 +7,6 @@ import javafx.beans.property.SimpleStringProperty;
 
 /**
  * This class define how the document's image is displayed.
- * 
- * @author Pierrik Lassalas
  */
 @Style(name = "margin", value = "0.5em")
 @Style(name = "flex", value = "0 0 auto")

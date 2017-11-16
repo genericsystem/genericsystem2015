@@ -10,8 +10,6 @@ import java.util.stream.Collectors;
 
 /**
  * Compute the cosine similarity between two strings.
- * 
- * @author Pierrik Lassalas
  */
 public class CosineSimilarity {
 
@@ -22,8 +20,6 @@ public class CosineSimilarity {
 
 	/**
 	 * Define the {@link Pattern} used to split the string when computing the cosine similarity.
-	 * 
-	 * @author Pierrik Lassalas
 	 */
 	public enum PATTERN {
 		SINGLE_CHAR(Pattern.compile("(?!^)")),

@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.genericsystem.cv.Img;
@@ -243,7 +241,7 @@ public class Field extends AbstractField {
 			if (child.isOutsideParent()) {
 				if (child.getParent().getDeadCounter() == 0)
 					child.fitInParent();
-				else
+				else if (child.getDeadCounter() == 0)
 					child.getParent().accomodate(child);
 			}
 			if (child.hasChildren())
@@ -259,9 +257,8 @@ public class Field extends AbstractField {
 	private void accomodate(Field child) {
 		if (!hasChildren())
 			return;
-		GSRect union = rect.getUnion(child.getRect());
 		logger.warn("need union");
-		adjustRect(union);
+		adjustRect(rect.getUnion(child.getRect()));
 	}
 
 	private void fitInParent() {
@@ -271,6 +268,7 @@ public class Field extends AbstractField {
 		logger.warn("need intersection");
 		if(intersection!=null)
 			adjustRect(intersection);
+
 	}
 
 }

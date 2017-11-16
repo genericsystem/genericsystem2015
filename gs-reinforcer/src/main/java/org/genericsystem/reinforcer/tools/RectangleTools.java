@@ -14,8 +14,6 @@ import java.util.stream.IntStream;
 
 /**
  * Static methods to compare {@link GSRect} objects.
- * 
- * @author Pierrik Lassalas
  */
 public class RectangleTools {
 
@@ -24,8 +22,6 @@ public class RectangleTools {
 
 	/**
 	 * Describe the method used to merge multiple rectangles.
-	 * 
-	 * @author Pierrik Lassalas
 	 */
 	public enum MERGE_METHOD {
 		UNION,

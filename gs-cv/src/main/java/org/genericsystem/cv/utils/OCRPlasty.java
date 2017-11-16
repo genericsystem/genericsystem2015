@@ -26,16 +26,11 @@ import org.slf4j.LoggerFactory;
  * This class is used to compute the best possible string from a given list of closely-related strings. <br>
  * Its main use is to get a consensus of the correct string from a given list of OCR text. <br>
  * The list will be evaluated to look for the LCS (longest linear subsequence), and the characters between the characters of the LCS will be estimated from all the strings.
- * 
- * @author Jean Mathorel
- * @author Pierrik Lassalas
  */
 public class OCRPlasty {
 
 	/**
 	 * This enum contains all the methods available to compute an error with the RANSAC model.
-	 * 
-	 * @author Pierrik Lassalas
 	 */
 	public static enum RANSAC {
 		NONE,
@@ -48,8 +43,6 @@ public class OCRPlasty {
 	/**
 	 * Utility class used to return two results : an {@link Optional} string, representing the corrected string, a {@link Set} strings, representing the outliers eliminated by the RANSAC, and the confidence (percentage of similarity between inlier
 	 * strings).
-	 * 
-	 * @author Pierrik Lassalas
 	 */
 	public static class Tuple {
 		private final Optional<String> string;
@@ -341,8 +334,6 @@ public class OCRPlasty {
 
 	/**
 	 * Custom {@link Model} used in the {@link OCRPlasty} class. <br>
-	 * 
-	 * @author Pierrik Lassalas
 	 */
 	public static abstract class OcrModel implements Model<String> {
 		/**

@@ -12,9 +12,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Create a new class when a document was not classified into an existing one.
- * 
- * @author Fabienne Ducroquet
- * @author Pierrik Lassalas
  */
 public class NewClassCreator {
 

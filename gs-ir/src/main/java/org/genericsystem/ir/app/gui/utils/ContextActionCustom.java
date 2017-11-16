@@ -16,8 +16,6 @@ import org.genericsystem.security.model.User.Salt;
 
 /**
  * This class contains all the {@link ContextAction} needed across the app.
- * 
- * @author Pierrik Lassalas
  */
 public class ContextActionCustom {
 

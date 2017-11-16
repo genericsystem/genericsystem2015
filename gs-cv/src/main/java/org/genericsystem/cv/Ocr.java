@@ -27,8 +27,6 @@ public class Ocr {
 
 	/**
 	 * Internal factory class used to create a tesseractInstancePool of {@link OCRTesseract} instances. Otherwise, segmentation fault can occur when the instance of tesseract is shared accross multiple threads.
-	 * 
-	 * @author Pierrik Lassalas
 	 */
 	public static class OCRTesseractInstanceFactory extends BasePooledObjectFactory<OCRTesseract> {
 		@Override
