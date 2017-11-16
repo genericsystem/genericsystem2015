@@ -101,15 +101,27 @@ public class Fields extends AbstractFields<Field> {
 		// // 2. Two overlapping trees can't coexist and must be merged
 	}
 
+	//	private void mergeRects(List<GSRect> rects, int width, int height) {
+	//		for (GSRect rect : rects) {
+	//			Field match = findMatch(rect, 0.4, width, height);
+	//			if (match != null)
+	//				updateNode(rect, match);
+	//			else
+	//				createNode(rect, findPotentialParent(rect, getRoots()));
+	//		}
+	//	}
+
 	private void mergeRects(List<GSRect> rects, int width, int height) {
 		for (GSRect rect : rects) {
 			Field match = findMatch(rect, 0.4, width, height);
 			if (match != null)
-				updateNode(rect, match);
+				updateNode(rect, match, width, height);
 			else
 				createNode(rect, findPotentialParent(rect, getRoots()));
 		}
 	}
+
+
 
 	private Field findPotentialParent(GSRect rect, List<Field> roots) {
 		for (Field root : getRoots()) {
@@ -121,7 +133,7 @@ public class Fields extends AbstractFields<Field> {
 	}
 
 	private Field findPotentialParent(GSRect rect, Field root) {
-		
+
 		if (rect.equals(rect.isInsider(root.getRect())))
 			return null;
 		for (Field child : root.getChildren()) {
@@ -140,9 +152,9 @@ public class Fields extends AbstractFields<Field> {
 		fields.add(f);
 	}
 
-	private void updateNode(GSRect rect, Field field) {
-		logger.info("Updating node {} with {}", field.getRect(), rect);
-		field.updateRect(rect);
+	private void updateNode(GSRect rect, Field field, int width, int height) {
+		logger.info("Updating node {} with {}", field.getRect(), rect);//		
+		field.updateRect(rect, width, height);
 		field.resetDeadCounter();
 	}
 
@@ -172,7 +184,7 @@ public class Fields extends AbstractFields<Field> {
 			res.addAll(listTree(child));
 		return res;
 	}
-	
+
 	private Field findMatch(GSRect rect, double areaOverlap, int width, int height)	{		
 		GSRect frameRect = new GSRect(0,0,width, height);		
 		List<Field> matches = fields.stream().filter(f -> rect.inclusiveArea(f.getRect().getIntersection(frameRect))>areaOverlap).collect(Collectors.toList());	
@@ -247,5 +259,4 @@ public class Fields extends AbstractFields<Field> {
 			e.printStackTrace();
 		}
 	}
-
 }

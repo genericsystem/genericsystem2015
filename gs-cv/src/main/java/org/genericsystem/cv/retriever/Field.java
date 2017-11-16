@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.genericsystem.cv.Img;
+import org.genericsystem.reinforcer.tools.GSPoint;
 import org.genericsystem.reinforcer.tools.GSRect;
 import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
@@ -68,13 +69,13 @@ public class Field extends AbstractField {
 		Scalar scalar = selectColor(color);
 		if (needRect())
 			drawRect(display, getRectPointsWithHomography(homography), deadCounter == 0 ? scalar : new Scalar(0, 0, 255), thickness);
-//		if (needText())
-//			drawText(display, getRectPointsWithHomography(homography), new Scalar(0, 64, 255), thickness);
+		//		if (needText())
+		//			drawText(display, getRectPointsWithHomography(homography), new Scalar(0, 64, 255), thickness);
 	}
 
 	private Scalar selectColor(Scalar defaultColor) {
-//		if (drawAsTruncated())
-//			return new Scalar(0, 0, 51);
+		//		if (drawAsTruncated())
+		//			return new Scalar(0, 0, 51);
 		if (drawAsLocked())
 			return new Scalar(255, 172, 0);
 		if (drawAsChild())
@@ -90,17 +91,17 @@ public class Field extends AbstractField {
 		return (deadCounter == 0 && isOrphan()) || (!isOrphan() && parent.getDeadCounter() != 0) ? this.locked : false;
 	}
 
-//	private boolean drawAsTruncated() {
-//		return this.truncated;
-//	}
+	//	private boolean drawAsTruncated() {
+	//		return this.truncated;
+	//	}
 
 	private boolean needRect() {
 		return !isOrphan() && parent.getDeadCounter() == 0 ? false : true;
 	}
 
-//	private boolean needText() {
-//		return deadCounter == 0 && !truncated && needRect();
-//	}
+	//	private boolean needText() {
+	//		return deadCounter == 0 && !truncated && needRect();
+	//	}
 
 	public void setFinal() {
 		if (!locked)
@@ -169,6 +170,12 @@ public class Field extends AbstractField {
 		}
 	}
 
+	//	public void setParent(Field parent) {
+	//		
+	//	}
+
+
+
 	public boolean hasChildren() {
 		return children != null && !children.isEmpty();
 	}
@@ -181,9 +188,35 @@ public class Field extends AbstractField {
 		return parent == null;
 	}
 
-	@Override
-	void updateRect(GSRect rect) {
-		super.updateRect(rect);
+	//	@Override
+	//	void updateRect(GSRect rect) {
+	//		super.updateRect(rect);
+	//		boolean ok = checkConstraints();
+	//		if (!ok) {
+	//			if (isOrphan()) {
+	//				this.repairTree();
+	//			} else {
+	//				parent.repairTree();
+	//			}
+	//		}
+	//	}
+
+
+	void updateRect(GSRect rect, int width, int height) {		
+
+		GSRect truncatedRect = getRect().getIntersection(new GSRect(0,0,width,height));
+		if(truncatedRect!=this.rect){
+			double tlX = truncatedRect.getX();
+			double tlY = truncatedRect.getY();
+			double brX = tlX + truncatedRect.getWidth();
+			double brY = tlY + truncatedRect.getHeight();
+
+			this.rect = new GSRect(new GSPoint(tlX<=0?this.rect.tl().getX():rect.tl().getX(), tlY<=0?this.rect.tl().getY():rect.tl().getY()),
+					new GSPoint(brX>=width?this.rect.br().getX():rect.br().getX(), brY>=height?this.rect.br().getY():rect.br().getY()));		
+		}
+		else
+			this.rect = rect;
+
 		boolean ok = checkConstraints();
 		if (!ok) {
 			if (isOrphan()) {
@@ -210,7 +243,7 @@ public class Field extends AbstractField {
 			for (Field child : children) 
 				if(child.isOutsideParent() || child.isOverlappingSiblings())
 					return false;
-			
+
 			// If false was not returned, apply the function to the children
 			for (Field child : children) 
 				if (!child.checkConstraintsRecursive())
@@ -219,17 +252,17 @@ public class Field extends AbstractField {
 		// At this stage, all the constraints should be verified
 		return true;
 	}
-	
+
 	private boolean isOutsideParent() {		
 		return !rect.equals(rect.isInsider(getParent().getRect()));	
 	}
 
-		
+
 	private boolean isOverlappingSiblings() {
 		return getSiblings().stream().anyMatch(sibling -> getRect().isOverlapping(sibling.getRect()));		
 	}
 
-	
+
 
 
 	public void repairTree() {

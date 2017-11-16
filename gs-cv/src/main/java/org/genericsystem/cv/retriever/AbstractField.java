@@ -49,7 +49,7 @@ public abstract class AbstractField {
 	}
 
 	public AbstractField(GSRect rect) {
-		updateRect(rect);
+		this.rect=rect;
 		this.labels = new HashMap<>();
 		this.consolidated = null;
 		this.attempts = 0;
@@ -58,7 +58,7 @@ public abstract class AbstractField {
 	}
 
 	public AbstractField(AbstractField other) {
-		updateRect(other.getRect());
+		this.rect=other.getRect();
 		this.labels = other.getLabels();
 		this.consolidated = other.getConsolidated();
 		this.attempts = other.getAttempts();
