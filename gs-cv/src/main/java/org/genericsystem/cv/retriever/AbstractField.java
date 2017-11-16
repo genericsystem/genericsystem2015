@@ -43,15 +43,6 @@ public abstract class AbstractField {
 	protected long attempts;
 
 	protected int deadCounter;
-//	protected boolean truncated = false;
-//
-//	public boolean isTruncated() {
-//		return truncated;
-//	}
-//
-//	public void setTruncated(boolean truncated) {
-//		this.truncated = truncated;
-//	}
 
 	public AbstractField() {
 		this(new GSRect());
@@ -78,42 +69,6 @@ public abstract class AbstractField {
 	void updateRect(GSRect rect) {
 		this.rect = rect;
 	}
-	
-//		if (rect.isTruncated() && this.rect != null) {
-//
-//			switch (rect.getTruncateDirection()) {
-//			case GSRect.UP:
-//				this.rect = new GSRect(rect.getX(), this.rect.getY(), rect.getWidth(), this.rect.getHeight());
-//				break;
-//			case GSRect.LEFT:
-//				this.rect = new GSRect(rect.getX(), rect.getY(), this.rect.getWidth(), rect.getHeight());
-//				break;
-//			case GSRect.RIGHT:
-//				this.rect = new GSRect(this.rect.getX(), rect.getY(), this.rect.getWidth(), rect.getHeight());
-//				break;
-//			case GSRect.BOTTOM:
-//				this.rect = new GSRect(rect.getX(), rect.getY(), rect.getWidth(), this.rect.getHeight());
-//				break;
-//			case GSRect.BOTTOM_LEFT:
-//				this.rect = new GSRect(rect.getX(), rect.getY(), this.rect.getWidth(), this.rect.getHeight());
-//				break;
-//			case GSRect.BOTTOM_RIGHT:
-//				this.rect = new GSRect(this.rect.getX(), rect.getY(), this.rect.getWidth(), this.rect.getHeight());
-//				break;
-//			case GSRect.UP_LEFT:
-//				this.rect = new GSRect(rect.getX(), this.rect.getY(), this.rect.getWidth(), this.rect.getHeight());
-//				break;
-//			case GSRect.UP_RIGHT:
-//				this.rect = new GSRect(this.rect.getX(), this.rect.getY(), this.rect.getWidth(), this.rect.getHeight());
-//				break;
-//
-//			default:
-//				this.rect = rect;
-//			}
-//		} else {
-//			this.rect = rect;
-//		}
-//	}
 
 	public void ocr(Img rootImg) {
 		if (rootImg.getSrc().empty() || rootImg.getSrc().width() <= 3 || rootImg.getSrc().height() <= 3)
@@ -207,10 +162,6 @@ public abstract class AbstractField {
 		return this.rect.isOverlapping(otherRect);
 	}
 
-//	public boolean isIn(AbstractField other) {
-//		return rect.getInsider(other.getRect()).map(r -> r.equals(rect) ? true : false);
-//	}
-
 	public boolean overlapsMoreThanThresh(GSRect otherRect, double overlapThreshold) {
 		return this.rect.inclusiveArea(otherRect) > overlapThreshold;
 	}
@@ -266,65 +217,6 @@ public abstract class AbstractField {
 
 	public int getDeadCounter() {
 		return deadCounter;
-	}
-
-	@Override
-	public String toString() {
-		StringBuffer sb = new StringBuffer();
-		sb.append("AbstractField: ").append("\n").append(" -> rect: ").append(rect).append("\n").append(" -> labels size: ").append(getLabelsSize()).append("\n").append(" -> consolidated: ").append(consolidated).append("\n").append(" -> confidence: ")
-				.append(confidence).append("\n");
-		return sb.toString();
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + (int) (attempts ^ (attempts >>> 32));
-		long temp;
-		temp = Double.doubleToLongBits(confidence);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		result = prime * result + ((consolidated == null) ? 0 : consolidated.hashCode());
-		result = prime * result + deadCounter;
-		result = prime * result + ((labels == null) ? 0 : labels.hashCode());
-		result = prime * result + ((rect == null) ? 0 : rect.hashCode());
-//		result = prime * result + (truncated ? 1231 : 1237);
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		AbstractField other = (AbstractField) obj;
-		if (attempts != other.attempts)
-			return false;
-		if (Double.doubleToLongBits(confidence) != Double.doubleToLongBits(other.confidence))
-			return false;
-		if (consolidated == null) {
-			if (other.consolidated != null)
-				return false;
-		} else if (!consolidated.equals(other.consolidated))
-			return false;
-		if (deadCounter != other.deadCounter)
-			return false;
-		if (labels == null) {
-			if (other.labels != null)
-				return false;
-		} else if (!labels.equals(other.labels))
-			return false;
-		if (rect == null) {
-			if (other.rect != null)
-				return false;
-		} else if (!rect.equals(other.rect))
-			return false;
-//		if (truncated != other.truncated)
-//			return false;
-		return true;
 	}
 
 }

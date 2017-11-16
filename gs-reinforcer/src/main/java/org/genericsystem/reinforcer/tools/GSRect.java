@@ -8,18 +8,6 @@ public class GSRect implements Comparable<GSRect> {
 
 	private double x, y, width, height;
 
-//	private boolean truncated = false;
-//	private String truncateDirection;
-//
-//	public static final String UP = "UP";
-//	public static final String LEFT = "LEFT";
-//	public static final String BOTTOM = "BOTTOM";
-//	public static final String RIGHT = "RIGHT";
-//	public static final String UP_RIGHT = "UP_RIGHT";
-//	public static final String UP_LEFT = "UP_LEFT";
-//	public static final String BOTTOM_RIGHT = "BOTTOM_RIGHT";
-//	public static final String BOTTOM_LEFT = "BOTTOM_LEFT";
-
 	public GSRect(double x, double y, double width, double height) {
 		this.x = x;
 		this.y = y;
@@ -172,37 +160,6 @@ public class GSRect implements Comparable<GSRect> {
 		return x < other.br().getX() && other.tl().getX() < br().getX() && y < other.br().getY() && other.tl().getY() < br().getY();
 	}
 
-//	public boolean isTruncatedRect(int width, int height) {
-//		if (this.tl().getX() <= 0d) {
-//			this.setTruncateDirection(GSRect.RIGHT);
-//			return true;
-//		} else if (this.tl().getY() <= 0d) {
-//			this.setTruncateDirection(GSRect.UP);
-//			return true;
-//		} else if (this.br().getX() >= width) {
-//			this.setTruncateDirection(GSRect.LEFT);
-//			return true;
-//		} else if (this.br().getY() >= height) {
-//			this.setTruncateDirection(GSRect.BOTTOM);
-//			return true;
-//		} else if (this.tl().getX() <= 0d && this.tl().getY() <= 0d) {
-//			this.setTruncateDirection(GSRect.UP_RIGHT);
-//			return true;
-//		} else if (this.br().getX() >= width && this.br().getY() >= height) {
-//			this.setTruncateDirection(GSRect.BOTTOM_LEFT);
-//			return true;
-//		} else if (this.tl().getX() <= 0d && this.br().getY() >= height) {
-//			this.setTruncateDirection(GSRect.BOTTOM_RIGHT);
-//			return true;
-//		} else if (this.br().getX() >= width && this.tl().getY() <= 0d) {
-//			this.setTruncateDirection(GSRect.UP_LEFT);
-//			return true;
-//		}
-//
-//		else
-//			return false;
-//	}
-
 	/**
 	 * Compare this rectangle with another rectangle, and returns the smaller rectangle if it is inside the other. Returns an empty {@link Optional} if no rectangles is contained in the other.
 	 * 
@@ -314,22 +271,6 @@ public class GSRect implements Comparable<GSRect> {
 	public void setHeight(double height) {
 		this.height = height;
 	}
-
-//	public boolean isTruncated() {
-//		return truncated;
-//	}
-//
-//	public void setTruncated(boolean truncated) {
-//		this.truncated = truncated;
-//	}
-
-//	public String getTruncateDirection() {
-//		return truncateDirection;
-//	}
-//
-//	public void setTruncateDirection(String truncateDirection) {
-//		this.truncateDirection = truncateDirection;
-//	}
 
 	public GSPoint getCenter() {
 		return new GSPoint(x + width / 2, y + height / 2);

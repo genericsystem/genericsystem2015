@@ -196,8 +196,8 @@ public class Field extends AbstractField {
 
 	private boolean checkConstraints() {
 		boolean ok = isOrphan() ? this.checkConstraintsRecursive() : parent.checkConstraintsRecursive();
-		//if (!ok)
-		//	logger.error("Invalid constraint for:\n{}Tree:\n{}", this, isOrphan() ? this.recursiveToString() : this.parent.recursiveToString());
+		if (!ok)
+			logger.error("Invalid constraint for:\n{}Tree:\n{}", this, isOrphan() ? this.recursiveToString() : this.parent.recursiveToString());
 		return ok;
 	}
 
