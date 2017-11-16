@@ -34,13 +34,13 @@ public abstract class AbstractFields<F extends AbstractField> implements Iterabl
 		return fields.stream().filter(f -> f.isClusteredWith(rect, epsilon)).collect(Collectors.toList());
 	}
 
-	protected List<F> findContainingFields(F field) {
-		return stream().filter(f -> field.isIn(f)).collect(Collectors.toList());
-	}
+//	protected List<F> findContainingFields(F field) {
+//		return stream().filter(f -> field.isIn(f)).collect(Collectors.toList());
+//	}
 
-	protected List<F> findContainedFields(F field) {
-		return stream().filter(f -> f.isIn(field)).collect(Collectors.toList());
-	}
+//	protected List<F> findContainedFields(F field) {
+//		return stream().filter(f -> f.isIn(field)).collect(Collectors.toList());
+//	}
 
 	public abstract void performOcr(Img rootImg);
 

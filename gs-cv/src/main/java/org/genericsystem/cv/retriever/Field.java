@@ -1,9 +1,9 @@
 package org.genericsystem.cv.retriever;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Optional;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -16,10 +16,7 @@ import org.opencv.core.Scalar;
 public class Field extends AbstractField {
 
 	private Field parent;
-	private Set<Field> children;
-
-	private final Predicate<Field> outsideParent = field -> rect.getInsider(field.getRect()).map(r -> !r.equals(field.getRect())).orElse(true);
-	private final Predicate<Field> overlapWithSiblings = field -> field.getSiblings().stream().filter(f -> !f.equals(field)).anyMatch(sibling -> field.getRect().isOverlapping(sibling.getRect()));
+	private List<Field> children;
 
 	private static final int LABELS_SIZE_THRESHOLD = 15;
 	private static final double CONFIDENCE_THRESHOLD = 0.92;
@@ -28,7 +25,7 @@ public class Field extends AbstractField {
 	public Field(GSRect rect) {
 		super(rect);
 		this.parent = null;
-		this.children = new HashSet<>();
+		this.children = new ArrayList<>();
 		checkConstraints();
 	}
 
@@ -73,13 +70,13 @@ public class Field extends AbstractField {
 		Scalar scalar = selectColor(color);
 		if (needRect())
 			drawRect(display, getRectPointsWithHomography(homography), deadCounter == 0 ? scalar : new Scalar(0, 0, 255), thickness);
-		if (needText())
-			drawText(display, getRectPointsWithHomography(homography), new Scalar(0, 64, 255), thickness);
+//		if (needText())
+//			drawText(display, getRectPointsWithHomography(homography), new Scalar(0, 64, 255), thickness);
 	}
 
 	private Scalar selectColor(Scalar defaultColor) {
-		if (drawAsTruncated())
-			return new Scalar(0, 0, 51);
+//		if (drawAsTruncated())
+//			return new Scalar(0, 0, 51);
 		if (drawAsLocked())
 			return new Scalar(255, 172, 0);
 		if (drawAsChild())
@@ -95,17 +92,17 @@ public class Field extends AbstractField {
 		return (deadCounter == 0 && isOrphan()) || (!isOrphan() && parent.getDeadCounter() != 0) ? this.locked : false;
 	}
 
-	private boolean drawAsTruncated() {
-		return this.truncated;
-	}
+//	private boolean drawAsTruncated() {
+//		return this.truncated;
+//	}
 
 	private boolean needRect() {
 		return !isOrphan() && parent.getDeadCounter() == 0 ? false : true;
 	}
 
-	private boolean needText() {
-		return deadCounter == 0 && !truncated && needRect();
-	}
+//	private boolean needText() {
+//		return deadCounter == 0 && !truncated && needRect();
+//	}
 
 	public void setFinal() {
 		if (!locked)
@@ -133,11 +130,11 @@ public class Field extends AbstractField {
 		return this.children.addAll(children);
 	}
 
-	public void setChildren(Set<Field> children) {
+	public void setChildren(List<Field> children) {
 		this.children = children;
 	}
 
-	public Set<Field> getChildren() {
+	public List<Field> getChildren() {
 		return children;
 	}
 
@@ -145,10 +142,10 @@ public class Field extends AbstractField {
 		return parent;
 	}
 
-	public Set<Field> getSiblings() {
-		if (isOrphan())
-			return Collections.emptySet();
-		return getParent().getChildren().stream().filter(child -> !this.equals(child)).collect(Collectors.toSet());
+	public List<Field> getSiblings() {
+		if(getParent()==null)
+			return Collections.emptyList();
+		return getParent().getChildren().stream().filter(child -> this!=child).collect(Collectors.toList());
 	}
 
 	public void setParent(Field parent) {
@@ -159,7 +156,7 @@ public class Field extends AbstractField {
 			this.parent.removeChild(this); // TODO can this method be called here, or should it be handled separately?
 			this.parent = null;
 		} else {
-			if (!overlapWithSiblings.test(this)) {
+			if (this.isOverlappingSiblings()) {
 				if (this.parent != null)
 					logger.error("Child already has a parent:\n{}\nParent:\n{}", this, this.parent);
 				this.parent = parent;
@@ -201,8 +198,8 @@ public class Field extends AbstractField {
 
 	private boolean checkConstraints() {
 		boolean ok = isOrphan() ? this.checkConstraintsRecursive() : parent.checkConstraintsRecursive();
-		if (!ok)
-			logger.error("Invalid constraint for:\n{}Tree:\n{}", this, isOrphan() ? this.recursiveToString() : this.parent.recursiveToString());
+		//if (!ok)
+		//	logger.error("Invalid constraint for:\n{}Tree:\n{}", this, isOrphan() ? this.recursiveToString() : this.parent.recursiveToString());
 		return ok;
 	}
 
@@ -212,19 +209,30 @@ public class Field extends AbstractField {
 			return true;
 		// If the field has children, they must meet the constraint
 		if (hasChildren()) {
-			for (Field child : children) {
-				if (outsideParent.test(child) && overlapWithSiblings.test(child))
+			for (Field child : children) 
+				if(child.isOutsideParent() || child.isOverlappingSiblings())
 					return false;
-			}
+			
 			// If false was not returned, apply the function to the children
-			for (Field child : children) {
+			for (Field child : children) 
 				if (!child.checkConstraintsRecursive())
-					return false;
-			}
+					return false;			
 		}
 		// At this stage, all the constraints should be verified
 		return true;
 	}
+	
+	private boolean isOutsideParent() {		
+		return !rect.equals(rect.isInsider(getParent().getRect()));	
+	}
+
+		
+	private boolean isOverlappingSiblings() {
+		return getSiblings().stream().anyMatch(sibling -> getRect().isOverlapping(sibling.getRect()));		
+	}
+
+	
+
 
 	public void repairTree() {
 		if (isOrphan() && !hasChildren()) {
@@ -232,7 +240,7 @@ public class Field extends AbstractField {
 			return;
 		}
 		for (Field child : children) {
-			if (outsideParent.test(child)) {
+			if (child.isOutsideParent()) {
 				if (child.getParent().getDeadCounter() == 0)
 					child.fitInParent();
 				else
@@ -259,9 +267,10 @@ public class Field extends AbstractField {
 	private void fitInParent() {
 		if (isOrphan())
 			return;
-		Optional<GSRect> intersection = rect.getIntersection(parent.getRect());
+		GSRect intersection = rect.getIntersection(parent.getRect());
 		logger.warn("need intersection");
-		intersection.ifPresent(intersect -> adjustRect(intersect));
+		if(intersection!=null)
+			adjustRect(intersection);
 	}
 
 }

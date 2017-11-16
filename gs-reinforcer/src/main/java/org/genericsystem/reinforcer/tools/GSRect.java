@@ -8,17 +8,17 @@ public class GSRect implements Comparable<GSRect> {
 
 	private double x, y, width, height;
 
-	private boolean truncated = false;
-	private String truncateDirection;
-
-	public static final String UP = "UP";
-	public static final String LEFT = "LEFT";
-	public static final String BOTTOM = "BOTTOM";
-	public static final String RIGHT = "RIGHT";
-	public static final String UP_RIGHT = "UP_RIGHT";
-	public static final String UP_LEFT = "UP_LEFT";
-	public static final String BOTTOM_RIGHT = "BOTTOM_RIGHT";
-	public static final String BOTTOM_LEFT = "BOTTOM_LEFT";
+//	private boolean truncated = false;
+//	private String truncateDirection;
+//
+//	public static final String UP = "UP";
+//	public static final String LEFT = "LEFT";
+//	public static final String BOTTOM = "BOTTOM";
+//	public static final String RIGHT = "RIGHT";
+//	public static final String UP_RIGHT = "UP_RIGHT";
+//	public static final String UP_LEFT = "UP_LEFT";
+//	public static final String BOTTOM_RIGHT = "BOTTOM_RIGHT";
+//	public static final String BOTTOM_LEFT = "BOTTOM_LEFT";
 
 	public GSRect(double x, double y, double width, double height) {
 		this.x = x;
@@ -104,13 +104,13 @@ public class GSRect implements Comparable<GSRect> {
 	 * @return the percentage of overlap between the two rectangles, defined by <code>intersection.area() / union.area()</code>
 	 */
 	public double inclusiveArea(GSRect rect2) {
-		Optional<GSRect> optional = getIntersection(rect2);
-		if (!optional.isPresent())
+		if(rect2 == null)
 			return 0;
-		GSRect intersection = optional.get();
+		GSRect intersection = getIntersection(rect2);
+		if (intersection == null)
+			return 0;
 		GSRect union = getUnion(rect2);
-		double area = intersection.area() / union.area();
-		return area;
+		return intersection.area() / union.area();
 	}
 
 	/**
@@ -120,10 +120,10 @@ public class GSRect implements Comparable<GSRect> {
 	 * @param rect2 - the second rectangle
 	 * @return an {@link Optional} with the intersecting {@link GSRect}, or an empty Optional if no intersection was found
 	 */
-	public Optional<GSRect> getIntersection(GSRect rect2) {
+	public GSRect getIntersection(GSRect rect2) {
 		// First, check whether a rectangle is contained in the other
-		Optional<GSRect> insider = getInsider(rect2);
-		if (insider.isPresent())
+		GSRect insider = isInsider(rect2);
+		if (insider!=null)
 			return insider;
 
 		// If not, compute the intersection
@@ -132,10 +132,7 @@ public class GSRect implements Comparable<GSRect> {
 		double brX = Math.min(br().getX(), rect2.br().getX());
 		double brY = Math.min(br().getY(), rect2.br().getY());
 
-		if (brX - tlX <= 0 || brY - tlY <= 0) // XXX: swap tl and br if < 0?
-			return Optional.empty();
-		else
-			return Optional.of(new GSRect(new GSPoint(tlX, tlY), new GSPoint(brX, brY)));
+		return (brX - tlX <= 0 || brY - tlY <= 0)? null : new GSRect(new GSPoint(tlX, tlY), new GSPoint(brX, brY));
 	}
 
 	/**
@@ -146,20 +143,7 @@ public class GSRect implements Comparable<GSRect> {
 	 * @return the union {@link GSRect}
 	 */
 	public GSRect getUnion(GSRect rect2) {
-		// First, check whether a rectangle is contained in the other
-		Optional<GSRect> inside = getInsider(rect2);
-		if (inside.isPresent()) {
-			GSRect insider = inside.get();
-			return insider.equals(this) ? rect2 : this;
-		}
-
-		// If not, compute the union
-		double tlX = Math.min(tl().getX(), rect2.tl().getX());
-		double tlY = Math.min(tl().getY(), rect2.tl().getY());
-		double brX = Math.max(br().getX(), rect2.br().getX());
-		double brY = Math.max(br().getY(), rect2.br().getY());
-
-		return new GSRect(new GSPoint(tlX, tlY), new GSPoint(brX, brY));
+		return new GSRect(new GSPoint(Math.min(tl().getX(), rect2.tl().getX()), Math.min(tl().getY(), rect2.tl().getY())), new GSPoint(Math.max(br().getX(), rect2.br().getX()), Math.max(br().getY(), rect2.br().getY())));
 	}
 
 	/**
@@ -188,36 +172,36 @@ public class GSRect implements Comparable<GSRect> {
 		return x < other.br().getX() && other.tl().getX() < br().getX() && y < other.br().getY() && other.tl().getY() < br().getY();
 	}
 
-	public boolean isTruncatedRect(int width, int height) {
-		if (this.tl().getX() <= 0d) {
-			this.setTruncateDirection(GSRect.RIGHT);
-			return true;
-		} else if (this.tl().getY() <= 0d) {
-			this.setTruncateDirection(GSRect.UP);
-			return true;
-		} else if (this.br().getX() >= width) {
-			this.setTruncateDirection(GSRect.LEFT);
-			return true;
-		} else if (this.br().getY() >= height) {
-			this.setTruncateDirection(GSRect.BOTTOM);
-			return true;
-		} else if (this.tl().getX() <= 0d && this.tl().getY() <= 0d) {
-			this.setTruncateDirection(GSRect.UP_RIGHT);
-			return true;
-		} else if (this.br().getX() >= width && this.br().getY() >= height) {
-			this.setTruncateDirection(GSRect.BOTTOM_LEFT);
-			return true;
-		} else if (this.tl().getX() <= 0d && this.br().getY() >= height) {
-			this.setTruncateDirection(GSRect.BOTTOM_RIGHT);
-			return true;
-		} else if (this.br().getX() >= width && this.tl().getY() <= 0d) {
-			this.setTruncateDirection(GSRect.UP_LEFT);
-			return true;
-		}
-
-		else
-			return false;
-	}
+//	public boolean isTruncatedRect(int width, int height) {
+//		if (this.tl().getX() <= 0d) {
+//			this.setTruncateDirection(GSRect.RIGHT);
+//			return true;
+//		} else if (this.tl().getY() <= 0d) {
+//			this.setTruncateDirection(GSRect.UP);
+//			return true;
+//		} else if (this.br().getX() >= width) {
+//			this.setTruncateDirection(GSRect.LEFT);
+//			return true;
+//		} else if (this.br().getY() >= height) {
+//			this.setTruncateDirection(GSRect.BOTTOM);
+//			return true;
+//		} else if (this.tl().getX() <= 0d && this.tl().getY() <= 0d) {
+//			this.setTruncateDirection(GSRect.UP_RIGHT);
+//			return true;
+//		} else if (this.br().getX() >= width && this.br().getY() >= height) {
+//			this.setTruncateDirection(GSRect.BOTTOM_LEFT);
+//			return true;
+//		} else if (this.tl().getX() <= 0d && this.br().getY() >= height) {
+//			this.setTruncateDirection(GSRect.BOTTOM_RIGHT);
+//			return true;
+//		} else if (this.br().getX() >= width && this.tl().getY() <= 0d) {
+//			this.setTruncateDirection(GSRect.UP_LEFT);
+//			return true;
+//		}
+//
+//		else
+//			return false;
+//	}
 
 	/**
 	 * Compare this rectangle with another rectangle, and returns the smaller rectangle if it is inside the other. Returns an empty {@link Optional} if no rectangles is contained in the other.
@@ -225,7 +209,7 @@ public class GSRect implements Comparable<GSRect> {
 	 * @param rect2 - the second rectangle
 	 * @return an {@link Optional} with the rectangle contained in the other, an empty Optional if no rectangles is contained in the other.
 	 */
-	public Optional<GSRect> getInsider(GSRect rect2) {
+	public GSRect isInsider(GSRect rect2) {
 		GSPoint[] points1 = decomposeClockwise();
 		GSPoint[] points2 = rect2.decomposeClockwise();
 		boolean isGSRect2InGSRect1 = true;
@@ -242,11 +226,11 @@ public class GSRect implements Comparable<GSRect> {
 					isGSRect1InGSRect2 = false;
 			}
 			if (isGSRect1InGSRect2)
-				return Optional.of(this);
+				return this;
 			else
-				return Optional.empty();
+				return null;
 		} else {
-			return Optional.of(rect2);
+			return rect2;
 		}
 	}
 
@@ -331,21 +315,21 @@ public class GSRect implements Comparable<GSRect> {
 		this.height = height;
 	}
 
-	public boolean isTruncated() {
-		return truncated;
-	}
+//	public boolean isTruncated() {
+//		return truncated;
+//	}
+//
+//	public void setTruncated(boolean truncated) {
+//		this.truncated = truncated;
+//	}
 
-	public void setTruncated(boolean truncated) {
-		this.truncated = truncated;
-	}
-
-	public String getTruncateDirection() {
-		return truncateDirection;
-	}
-
-	public void setTruncateDirection(String truncateDirection) {
-		this.truncateDirection = truncateDirection;
-	}
+//	public String getTruncateDirection() {
+//		return truncateDirection;
+//	}
+//
+//	public void setTruncateDirection(String truncateDirection) {
+//		this.truncateDirection = truncateDirection;
+//	}
 
 	public GSPoint getCenter() {
 		return new GSPoint(x + width / 2, y + height / 2);

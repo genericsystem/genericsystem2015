@@ -64,7 +64,7 @@ public class RectangleTools {
 			merge = list -> list.size() <= 1 ? list.get(0) : list.stream().reduce(list.get(0), (r, total) -> r.getUnion(total));
 			break;
 		case INTERSECTION:
-			merge = list -> list.size() <= 1 ? list.get(0) : list.stream().reduce(list.get(0), (r, total) -> r.getIntersection(total).orElse(total));
+			merge = list -> list.size() <= 1 ? list.get(0) : list.stream().reduce(list.get(0), (r, total) -> r.getIntersection(total));
 			break;
 		default:
 		case MEAN:
@@ -207,11 +207,10 @@ public class RectangleTools {
 	 */
 	public static double[] commonArea(GSRect rect1, GSRect rect2) {
 		double[] result = new double[2];
-		Optional<GSRect> intersection = rect1.getIntersection(rect2);
-		if (intersection.isPresent()) {
-			GSRect intersect = intersection.get();
-			result[0] = intersect.area() / rect1.area();
-			result[1] = intersect.area() / rect2.area();
+		GSRect intersection = rect1.getIntersection(rect2);
+		if (intersection!=null) {			
+			result[0] = intersection.area() / rect1.area();
+			result[1] = intersection.area() / rect2.area();
 		} else {
 			result[0] = 0;
 			result[1] = 0;
