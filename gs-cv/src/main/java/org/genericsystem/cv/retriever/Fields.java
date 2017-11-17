@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.utils.ParallelTasks;
@@ -72,7 +73,7 @@ public class Fields extends AbstractFields<Field> {
 
 	public List<GSRect> cleanList(List<GSRect> bigRects, List<GSRect> smallRects) {
 		smallRects.removeIf(smallRect -> bigRects.stream().anyMatch(bigRect -> smallRect.inclusiveArea(bigRect) > 0.90));
-		return bigRects.stream().filter(bigRect -> smallRects.stream().filter(rect -> rect.isOverlapping(bigRect)).noneMatch(rect -> rect.isInsider(bigRect) == null)).collect(Collectors.toList());
+		return Stream.concat(bigRects.stream().filter(bigRect -> smallRects.stream().filter(rect -> rect.isOverlapping(bigRect)).noneMatch(rect -> rect.isInsider(bigRect) == null)), smallRects.stream()).collect(Collectors.toList());
 	}
 
 	private void mergeRects(Img img) {
