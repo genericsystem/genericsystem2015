@@ -165,11 +165,11 @@ public class Field extends AbstractField {
 
 	void updateRect(GSRect rect, int width, int height) {
 		GSRect truncatedRect = getRect().getIntersection(new GSRect(0, 0, width, height));
-		if (truncatedRect != this.rect) {
+		if (truncatedRect != getRect() && rect.inclusiveArea(truncatedRect)>0.6) {
 			double tlX = truncatedRect.getX();
 			double tlY = truncatedRect.getY();
-			double brX = tlX + truncatedRect.getWidth();
-			double brY = tlY + truncatedRect.getHeight();
+			double brX = tlX + getRect().getWidth();
+			double brY = tlY + getRect().getHeight();
 
 			this.rect = new GSRect(new GSPoint(tlX <= 0 ? this.rect.tl().getX() : rect.tl().getX(), tlY <= 0 ? this.rect.tl().getY() : rect.tl().getY()),
 					new GSPoint(brX >= width ? this.rect.br().getX() : rect.br().getX(), brY >= height ? this.rect.br().getY() : rect.br().getY()));
