@@ -209,6 +209,10 @@ public class GSRect implements Comparable<GSRect> {
 		return new NormalizedRect((x - mintlx) / width, (y - mintly) / height, this.width / width, this.height / height);
 	}
 
+	public boolean hOverlaps(GSRect other) {
+		return other.br().getX() >= x && other.x < br().getX();
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
