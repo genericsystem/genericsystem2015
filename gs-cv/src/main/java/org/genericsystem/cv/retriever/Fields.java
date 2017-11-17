@@ -72,7 +72,7 @@ public class Fields extends AbstractFields<Field> {
 
 	public List<GSRect> cleanList(List<GSRect> bigRects, List<GSRect> smallRects, double overlapThreshold) {
 		smallRects.removeIf(smallRect -> bigRects.stream().anyMatch(bigRect -> smallRect.inclusiveArea(bigRect) > overlapThreshold));
-		return Stream.concat(bigRects.stream().filter(bigRect -> smallRects.stream().filter(rect -> rect.isOverlapping(bigRect)).noneMatch(rect -> rect.getInsider(bigRect) == null)), smallRects.stream()).collect(Collectors.toList());
+		return Stream.concat(smallRects.stream().filter(smallRect -> bigRects.stream().filter(rect -> rect.isOverlapping(smallRect)).noneMatch(rect -> rect.getInsider(smallRect) == null)), bigRects.stream()).collect(Collectors.toList());
 	}
 
 	private void mergeRects(Img img, double overlapThreshold) {
@@ -96,7 +96,7 @@ public class Fields extends AbstractFields<Field> {
 
 	private Field findPotentialParent(GSRect rect, Field root) {
 		GSRect insider = rect.getInsider(root.getRect());
-		if (insider == null || rect != insider)
+		if (insider == null || insider == root.getRect())
 			return null;
 		for (Field child : root.getChildren()) {
 			Field candidate = findPotentialParent(rect, child);
