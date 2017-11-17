@@ -66,16 +66,23 @@ public class Field extends AbstractField {
 
 	@Override
 	public void resetDeadCounter() {
-		super.resetDeadCounter();		
+		super.resetDeadCounter();
 		setFinal();
 	}
 
 	public void draw(Img display, int thickness) {
-		Scalar scalar = selectColor(new Scalar(0, 255, 0));
-		if (needRect())
-			drawRect(display, scalar, thickness);
 		if (needText())
 			drawText(display, new Scalar(0, 64, 255), thickness);
+		drawRect(display, getColor(), thickness);
+	}
+
+	public Scalar getColor() {
+		// if (drawAsLocked())
+		// return new Scalar(255, 172, 0);
+		if (deadCounter != 0)
+			return new Scalar(0, 0, 255);
+		else
+			return new Scalar(0, 255, 0);
 	}
 
 	public void drawWithHomography(Img display, Mat homography, Scalar color, int thickness) {
@@ -85,24 +92,16 @@ public class Field extends AbstractField {
 			drawRect(display, getRectPointsWithHomography(homography), drawAsLocked() ? locked : detected, thickness);
 	}
 
-	private Scalar selectColor(Scalar defaultColor) {
-		if (drawAsLocked())
-			return new Scalar(255, 172, 0);
-		if (drawAsChild())
-			return new Scalar(255, 0, 0);
-		return defaultColor;
-	}
-
-	private boolean drawAsChild() {
-		return !isOrphan() && parent.deadCounter != 0;
-	}
+	// private boolean drawAsChild() {
+	// return !isOrphan() && parent.deadCounter != 0;
+	// }
 
 	private boolean drawAsLocked() {
 		return isOrphan() || (!isOrphan() && parent.getDeadCounter() != 0) ? isLocked() : false;
 	}
 
 	private boolean needRect() {
-		return !isOrphan() && parent.getDeadCounter() == 0 ? false : isLocked() ? true : deadCounter == 0;
+		return !isOrphan() && parent.getDeadCounter() == 0 ? false : true /* isLocked() ? true : deadCounter == 0 */;
 	}
 
 	private boolean needText() {
@@ -155,8 +154,7 @@ public class Field extends AbstractField {
 
 	public void setParent(Field parent) {
 		this.parent = parent;
-		if (parent != null)
-			this.parent.addChildIfNotPresent(this);
+		this.parent.addChildIfNotPresent(this);
 	}
 
 	public boolean hasChildren() {
@@ -177,26 +175,13 @@ public class Field extends AbstractField {
 
 	void updateRect(GSRect rect, int width, int height) {
 		GSRect truncatedRect = getRect().getIntersection(new GSRect(0, 0, width, height));
-		if(rect.inclusiveArea(truncatedRect)>0.6){
-			double tlX = truncatedRect.getX();
-			double tlY = truncatedRect.getY();
-			double brX = tlX + getRect().getWidth();
-			double brY = tlY + getRect().getHeight();
-			GSRect updatedRect = new GSRect(new GSPoint(tlX <= 0 ? this.rect.tl().getX() : rect.tl().getX(), tlY <= 0 ? this.rect.tl().getY() : rect.tl().getY()),
-					new GSPoint(brX >= width ? this.rect.br().getX() : rect.br().getX(), brY >= height ? this.rect.br().getY() : rect.br().getY()));
-
-			this.rect = updatedRect;
-
-
-			//		if(this.parent!=null && this.getParent().isOverlapping(updatedRect))
-			//			return;
-			//		for(Field sibling : getSiblings())
-			//			if(sibling.isOverlapping(updatedRect))
-			//				return;
-			//		for(Field child : getChildren())
-			//			if(child.isOverlapping(updatedRect))
-			//				return;
-		}
+		double tlX = truncatedRect.getX();
+		double tlY = truncatedRect.getY();
+		double brX = tlX + getRect().getWidth();
+		double brY = tlY + getRect().getHeight();
+		GSRect updatedRect = new GSRect(new GSPoint(tlX <= 0 ? this.rect.tl().getX() : rect.tl().getX(), tlY <= 0 ? this.rect.tl().getY() : rect.tl().getY()),
+				new GSPoint(brX >= width ? this.rect.br().getX() : rect.br().getX(), brY >= height ? this.rect.br().getY() : rect.br().getY()));
+		this.rect = updatedRect;
 	}
 
 	public boolean isVeryfyingConstraints() {
@@ -206,17 +191,16 @@ public class Field extends AbstractField {
 
 	public void resetChildrenDeadCounter() {
 		List<Field> potentialChildren = getChildren();
-		for(Field child : potentialChildren){
+		for (Field child : potentialChildren) {
 			child.resetChildrenDeadCounter();
 			child.resetDeadCounter();
 		}
 	}
 
 	public void resetParentsDeadCounter() {
-		if(getParent()!=null){
+		resetDeadCounter();
+		if (getParent() != null)
 			getParent().resetParentsDeadCounter();
-			getParent().resetDeadCounter();
-		}
 	}
 
 }

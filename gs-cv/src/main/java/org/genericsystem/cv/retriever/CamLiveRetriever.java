@@ -55,7 +55,7 @@ public class CamLiveRetriever extends AbstractApp {
 	private Mat frame = new Mat();
 	private boolean stabilizationHasChanged = true;
 	private int stabilizationErrors = 0;
-	private Point vp = new Point(0, 0);
+	private Point vp = new Point(5000, 0);
 	private AngleCalibrated calibrated;
 
 	public static void main(String[] args) {

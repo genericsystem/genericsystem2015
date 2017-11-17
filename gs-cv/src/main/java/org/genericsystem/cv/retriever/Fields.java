@@ -73,7 +73,7 @@ public class Fields extends AbstractFields<Field> {
 
 	public List<GSRect> cleanList(List<GSRect> bigRects, List<GSRect> smallRects, double overlapThreshold) {
 		smallRects.removeIf(smallRect -> bigRects.stream().anyMatch(bigRect -> smallRect.inclusiveArea(bigRect) > overlapThreshold));
-		return Stream.concat(bigRects.stream().filter(bigRect -> smallRects.stream().filter(rect -> rect.isOverlapping(bigRect)).noneMatch(rect -> rect.isInsider(bigRect) == null)), smallRects.stream()).collect(Collectors.toList());
+		return Stream.concat(bigRects.stream().filter(bigRect -> smallRects.stream().filter(rect -> rect.isOverlapping(bigRect)).noneMatch(rect -> rect.getInsider(bigRect) == null)), smallRects.stream()).collect(Collectors.toList());
 	}
 
 	private void mergeRects(Img img, double overlapThreshold) {
@@ -96,8 +96,8 @@ public class Fields extends AbstractFields<Field> {
 	}
 
 	private Field findPotentialParent(GSRect rect, Field root) {
-		GSRect insider = rect.isInsider(root.getRect());
-		if (insider == null || rect == insider)
+		GSRect insider = rect.getInsider(root.getRect());
+		if (insider == null || rect != insider)
 			return null;
 		for (Field child : root.getChildren()) {
 			Field candidate = findPotentialParent(rect, child);
@@ -107,22 +107,21 @@ public class Fields extends AbstractFields<Field> {
 		return root;
 	}
 
-	//	public void createNode(GSRect rect, Field parent) {
-	//		if (checkOverlapConstraint(rect, null)) {
-	//			logger.info("Creating a new node for {}", rect);
-	//			Field f = new Field(rect, parent);
-	//			if(f.isVeryfyingConstraints())
-	//				fields.add(f);
-	//		}
-	//	}
+	// public void createNode(GSRect rect, Field parent) {
+	// if (checkOverlapConstraint(rect, null)) {
+	// logger.info("Creating a new node for {}", rect);
+	// Field f = new Field(rect, parent);
+	// if(f.isVeryfyingConstraints())
+	// fields.add(f);
+	// }
+	// }
 
 	public void createNode(GSRect rect, Field parent) {
 		if (checkOverlapConstraint(rect, null)) {
 			logger.info("Creating a new node for {}", rect);
 			Field f = new Field(rect);
-			if (parent != null){
+			if (parent != null)
 				f.setParent(parent);
-			}
 			fields.add(f);
 		}
 	}
@@ -130,8 +129,6 @@ public class Fields extends AbstractFields<Field> {
 	public void updateNode(GSRect rect, Field field, int width, int height) {
 		logger.info("Updating node {} with {}", field.getRect(), rect);
 		field.updateRect(rect, width, height);
-
-		field.resetDeadCounter();		
 		field.resetParentsDeadCounter();
 		field.resetChildrenDeadCounter();
 
@@ -141,7 +138,7 @@ public class Fields extends AbstractFields<Field> {
 		for (Field field : fields)
 			if (target == null || field != target)
 				if (field.isOverlapping(rect))
-					if (rect.isInsider(field.getRect()) == null)
+					if (rect.getInsider(field.getRect()) == null)
 						return false;
 		return true;
 	}
