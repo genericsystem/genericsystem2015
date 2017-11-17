@@ -107,22 +107,34 @@ public class Fields extends AbstractFields<Field> {
 		return root;
 	}
 
+	//	public void createNode(GSRect rect, Field parent) {
+	//		if (checkOverlapConstraint(rect, null)) {
+	//			logger.info("Creating a new node for {}", rect);
+	//			Field f = new Field(rect, parent);
+	//			if(f.isVeryfyingConstraints())
+	//				fields.add(f);
+	//		}
+	//	}
+
 	public void createNode(GSRect rect, Field parent) {
 		if (checkOverlapConstraint(rect, null)) {
 			logger.info("Creating a new node for {}", rect);
 			Field f = new Field(rect);
-			if (parent != null)
+			if (parent != null){
 				f.setParent(parent);
+			}
 			fields.add(f);
 		}
 	}
 
 	public void updateNode(GSRect rect, Field field, int width, int height) {
-		if (checkOverlapConstraint(rect, field)) {
-			logger.info("Updating node {} with {}", field.getRect(), rect);
-			field.updateRect(rect, width, height);
-			field.resetDeadCounter();
-		}
+		logger.info("Updating node {} with {}", field.getRect(), rect);
+		field.updateRect(rect, width, height);
+
+		field.resetDeadCounter();		
+		field.resetParentsDeadCounter();
+		field.resetChildrenDeadCounter();
+
 	}
 
 	private boolean checkOverlapConstraint(GSRect rect, Field target) {

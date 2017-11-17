@@ -27,6 +27,12 @@ public class Field extends AbstractField {
 		this.children = new ArrayList<>();
 	}
 
+	public Field(GSRect rect, Field parent) {
+		super(rect);
+		setParent(parent);
+		this.children = new ArrayList<>();
+	}
+
 	public String recursiveToString() {
 		StringBuffer sb = new StringBuffer();
 		recursiveToString(this, sb, 0);
@@ -60,7 +66,7 @@ public class Field extends AbstractField {
 
 	@Override
 	public void resetDeadCounter() {
-		super.resetDeadCounter();
+		super.resetDeadCounter();		
 		setFinal();
 	}
 
@@ -171,16 +177,46 @@ public class Field extends AbstractField {
 
 	void updateRect(GSRect rect, int width, int height) {
 		GSRect truncatedRect = getRect().getIntersection(new GSRect(0, 0, width, height));
-		if (truncatedRect != getRect() && rect.inclusiveArea(truncatedRect) > 0.6) {
+		if(rect.inclusiveArea(truncatedRect)>0.6){
 			double tlX = truncatedRect.getX();
 			double tlY = truncatedRect.getY();
 			double brX = tlX + getRect().getWidth();
 			double brY = tlY + getRect().getHeight();
-
-			this.rect = new GSRect(new GSPoint(tlX <= 0 ? this.rect.tl().getX() : rect.tl().getX(), tlY <= 0 ? this.rect.tl().getY() : rect.tl().getY()),
+			GSRect updatedRect = new GSRect(new GSPoint(tlX <= 0 ? this.rect.tl().getX() : rect.tl().getX(), tlY <= 0 ? this.rect.tl().getY() : rect.tl().getY()),
 					new GSPoint(brX >= width ? this.rect.br().getX() : rect.br().getX(), brY >= height ? this.rect.br().getY() : rect.br().getY()));
-		} else
-			this.rect = rect;
+
+			this.rect = updatedRect;
+
+
+			//		if(this.parent!=null && this.getParent().isOverlapping(updatedRect))
+			//			return;
+			//		for(Field sibling : getSiblings())
+			//			if(sibling.isOverlapping(updatedRect))
+			//				return;
+			//		for(Field child : getChildren())
+			//			if(child.isOverlapping(updatedRect))
+			//				return;
+		}
+	}
+
+	public boolean isVeryfyingConstraints() {
+
+		return false;
+	}
+
+	public void resetChildrenDeadCounter() {
+		List<Field> potentialChildren = getChildren();
+		for(Field child : potentialChildren){
+			child.resetChildrenDeadCounter();
+			child.resetDeadCounter();
+		}
+	}
+
+	public void resetParentsDeadCounter() {
+		if(getParent()!=null){
+			getParent().resetParentsDeadCounter();
+			getParent().resetDeadCounter();
+		}
 	}
 
 }
