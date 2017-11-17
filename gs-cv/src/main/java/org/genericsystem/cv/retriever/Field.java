@@ -25,7 +25,6 @@ public class Field extends AbstractField {
 		super(rect);
 		this.parent = null;
 		this.children = new ArrayList<>();
-		// checkConstraints();
 	}
 
 	public String recursiveToString() {
@@ -65,12 +64,19 @@ public class Field extends AbstractField {
 		setFinal();
 	}
 
-	public void draw(Img display, Mat homography, Scalar color, int thickness) {
-		Scalar scalar = selectColor(color);
+	public void draw(Img display, int thickness) {
+		Scalar scalar = selectColor(new Scalar(0, 255, 0));
 		if (needRect())
-			drawRect(display, getRectPointsWithHomography(homography), scalar, thickness);
+			drawRect(display, scalar, thickness);
 		if (needText())
-			drawText(display, getRectPointsWithHomography(homography), new Scalar(0, 64, 255), thickness);
+			drawText(display, new Scalar(0, 64, 255), thickness);
+	}
+
+	public void drawWithHomography(Img display, Mat homography, Scalar color, int thickness) {
+		Scalar detected = new Scalar(0, 0, 255);
+		Scalar locked = new Scalar(0, 255, 0);
+		if (needRect())
+			drawRect(display, getRectPointsWithHomography(homography), drawAsLocked() ? locked : detected, thickness);
 	}
 
 	private Scalar selectColor(Scalar defaultColor) {
@@ -86,7 +92,7 @@ public class Field extends AbstractField {
 	}
 
 	private boolean drawAsLocked() {
-		return isOrphan() || (!isOrphan() && parent.getDeadCounter() != 0) ? this.locked : false;
+		return isOrphan() || (!isOrphan() && parent.getDeadCounter() != 0) ? isLocked() : false;
 	}
 
 	private boolean needRect() {
@@ -165,7 +171,7 @@ public class Field extends AbstractField {
 
 	void updateRect(GSRect rect, int width, int height) {
 		GSRect truncatedRect = getRect().getIntersection(new GSRect(0, 0, width, height));
-		if (truncatedRect != getRect() && rect.inclusiveArea(truncatedRect)>0.6) {
+		if (truncatedRect != getRect() && rect.inclusiveArea(truncatedRect) > 0.6) {
 			double tlX = truncatedRect.getX();
 			double tlY = truncatedRect.getY();
 			double brX = tlX + getRect().getWidth();
@@ -176,39 +182,5 @@ public class Field extends AbstractField {
 		} else
 			this.rect = rect;
 	}
-
-	// private boolean checkConstraints() {
-	// boolean ok = isOrphan() ? this.checkConstraintsRecursive() : parent.checkConstraintsRecursive();
-	// if (!ok)
-	// logger.error("Invalid constraint for:\n{}Tree:\n{}", this, isOrphan() ? this.recursiveToString() : this.parent.recursiveToString());
-	// return ok;
-	// }
-	//
-	// private boolean checkConstraintsRecursive() {
-	// // If the field is orphan and has no children, it validates the constraints
-	// if (isOrphan() && !hasChildren())
-	// return true;
-	// // If the field has children, they must meet the constraint
-	// if (hasChildren()) {
-	// for (Field child : children)
-	// if (child.isOutsideParent() || child.isOverlappingSiblings())
-	// return false;
-	//
-	// // If false was not returned, apply the function to the children
-	// for (Field child : children)
-	// if (!child.checkConstraintsRecursive())
-	// return false;
-	// }
-	// // At this stage, all the constraints should be verified
-	// return true;
-	// }
-	//
-	// private boolean isOutsideParent() {
-	// return !rect.equals(rect.isInsider(getParent().getRect()));
-	// }
-	//
-	// private boolean isOverlappingSiblings() {
-	// return getSiblings().stream().anyMatch(sibling -> rect.isOverlapping(sibling.getRect()));
-	// }
 
 }

@@ -130,6 +130,11 @@ public abstract class AbstractField {
 			Imgproc.line(display.getSrc(), targets[i], targets[(i + 1) % targets.length], color, thickness);
 	}
 
+	public void drawText(Img display, Scalar color, int thickness) {
+		Point[] points = RectToolsMapper.gsPointToPoint(Arrays.asList(rect.decomposeClockwise())).toArray(new Point[0]);
+		drawText(display, points, color, thickness);
+	}
+
 	public void drawText(Img display, Point[] targets, Scalar color, int thickness) {
 		if (consolidated != null) {
 			String text = Normalizer.normalize(consolidated, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", "");

@@ -39,11 +39,11 @@ public class Fields extends AbstractFields<Field> {
 
 	@Override
 	public void drawOcrPerspectiveInverse(Img display, Mat homography, Scalar color, int thickness) {
-		stream().forEach(field -> field.draw(display, homography, color, thickness));
+		stream().forEach(field -> field.drawWithHomography(display, homography, color, thickness));
 	}
 
 	public void drawFieldsOnStabilized(Img stabilized) {
-		stream().forEach(f -> f.drawRect(stabilized, f.getDeadCounter() == 0 ? new Scalar(0, 255, 0) : new Scalar(0, 0, 255), 1));
+		stream().forEach(field -> field.draw(stabilized, 1));
 	}
 
 	public void displayFieldsTree() {
