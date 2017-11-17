@@ -14,6 +14,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
+
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Calibrated.AngleCalibrated;
 import org.genericsystem.cv.Img;
@@ -32,9 +35,6 @@ import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
 
 @SuppressWarnings({ "resource" })
 public class CamLiveRetriever extends AbstractApp {
@@ -150,6 +150,7 @@ public class CamLiveRetriever extends AbstractApp {
 
 				fields.drawOcrPerspectiveInverse(display, stabilizationHomography.inv(), new Scalar(0, 255, 0), 1);
 				fields.drawFieldsOnStabilized(stabilizedDisplay);
+
 				src0.setImage(display.toJfxImage());
 				src1.setImage(stabilizedDisplay.toJfxImage());
 				Stats.endTask("frame");
@@ -315,7 +316,7 @@ public class CamLiveRetriever extends AbstractApp {
 			Set<Line> newLines = new HashSet<>();
 			while (newLines.size() < max)
 				newLines.add(lines.get((int) (Math.random() * size())));
-			return new Lines((newLines));
+			return new Lines(newLines);
 		}
 
 		public Lines reduce(double factor, int threshold) {

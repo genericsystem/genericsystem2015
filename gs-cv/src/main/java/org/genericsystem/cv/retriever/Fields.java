@@ -59,35 +59,25 @@ public class Fields extends AbstractFields<Field> implements OverlapConstraint {
 	}
 
 	public void consolidate(Img img) {
-		RectMerger rm = new RectMerger(img);
-		List<GSRect> rects = rm.mergeRectsList();
 		fields.forEach(Field::incrementDeadCounter);
-		mergeRects(rects, img.width(), img.height());
+		mergeRects(img);
 		removeDeadTrees();
 	}
 
-	private static class RectMerger {
-		private RectDetector rd;
-
-		public RectMerger(Img img) {
-			this.rd = new RectDetector(img);
-		}
-
-		public List<GSRect> mergeRectsList() {
-			List<GSRect> rects = RectToolsMapper.rectToGSRect(rd.getRects(200, 11, 3, new Size(11, 3)));
-			List<GSRect> children = RectToolsMapper.rectToGSRect(rd.getRects(40, 17, 3, new Size(7, 3)));
-			// Remove the duplicates of rects in children
-			children.removeIf(child -> rects.stream().anyMatch(parent -> child.inclusiveArea(parent) > 0.90)); // RectangleTools.isInCluster(parent, child, 0.1)
-			rects.addAll(children);
-			return rects;
-		}
+	public List<GSRect> mergeRectsList(Img img) {
+		RectDetector rd = new RectDetector(img);
+		List<GSRect> rects = RectToolsMapper.rectToGSRect(rd.getRects(200, 11, 3, new Size(11, 3)));
+		List<GSRect> children = RectToolsMapper.rectToGSRect(rd.getRects(40, 17, 3, new Size(7, 3)));
+		children.removeIf(child -> rects.stream().anyMatch(parent -> child.inclusiveArea(parent) > 0.90)); // RectangleTools.isInCluster(parent, child, 0.1)
+		rects.addAll(children);
+		return rects;
 	}
 
-	private void mergeRects(List<GSRect> rects, int width, int height) {
-		for (GSRect rect : rects) {
-			Field match = findMatch(rect, 0.6, width, height);
+	private void mergeRects(Img img) {
+		for (GSRect rect : mergeRectsList(img)) {
+			Field match = findMatch(rect, 0.6, img.width(), img.height());
 			if (match != null)
-				updateNode(rect, match, width, height);
+				updateNode(rect, match, img.width(), img.height());
 			else
 				createNode(rect, findPotentialParent(rect));
 		}
