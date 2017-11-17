@@ -35,8 +35,7 @@ public class Field extends AbstractField {
 	public String recursiveToString() {
 		StringBuffer sb = new StringBuffer();
 		this.recursiveToString(sb, 0);
-		sb.append("\n");
-		return sb.toString();
+		return sb.append("\n").toString();
 	}
 
 	public void recursiveToString(StringBuffer sb, int depth) {
@@ -57,8 +56,7 @@ public class Field extends AbstractField {
 	}
 
 	public Field findPotentialParent(GSRect rect) {
-		GSRect insider = rect.getInsider(this.getRect());
-		if (insider == null || insider == this.getRect())
+		if (!rect.isInside(getRect()))
 			return null;
 		for (Field child : children) {
 			Field candidate = child.findPotentialParent(rect);

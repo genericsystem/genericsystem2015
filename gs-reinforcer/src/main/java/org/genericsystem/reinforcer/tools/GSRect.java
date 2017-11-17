@@ -92,7 +92,7 @@ public class GSRect implements Comparable<GSRect> {
 	 * @return the percentage of overlap between the two rectangles, defined by <code>intersection.area() / union.area()</code>
 	 */
 	public double inclusiveArea(GSRect rect2) {
-		if(rect2 == null)
+		if (rect2 == null)
 			return 0;
 		GSRect intersection = getIntersection(rect2);
 		if (intersection == null)
@@ -111,7 +111,7 @@ public class GSRect implements Comparable<GSRect> {
 	public GSRect getIntersection(GSRect rect2) {
 		// First, check whether a rectangle is contained in the other
 		GSRect insider = getInsider(rect2);
-		if (insider!=null)
+		if (insider != null)
 			return insider;
 
 		// If not, compute the intersection
@@ -120,7 +120,7 @@ public class GSRect implements Comparable<GSRect> {
 		double brX = Math.min(br().getX(), rect2.br().getX());
 		double brY = Math.min(br().getY(), rect2.br().getY());
 
-		return (brX - tlX <= 0 || brY - tlY <= 0)? null : new GSRect(new GSPoint(tlX, tlY), new GSPoint(brX, brY));
+		return (brX - tlX <= 0 || brY - tlY <= 0) ? null : new GSRect(new GSPoint(tlX, tlY), new GSPoint(brX, brY));
 	}
 
 	/**
@@ -189,6 +189,11 @@ public class GSRect implements Comparable<GSRect> {
 		} else {
 			return rect2;
 		}
+	}
+
+	public boolean isInside(GSRect other) {
+		GSRect insider = this.getInsider(other);
+		return (insider == null || insider == other) ? false : true;
 	}
 
 	/**
