@@ -187,6 +187,11 @@ public class Field extends AbstractField {
 
 		return false;
 	}
+	
+	
+	public boolean needOcr() {
+		return !isLocked() && deadCounter == 0;
+	}
 
 	public void resetChildrenDeadCounter() {
 		List<Field> potentialChildren = getChildren();
