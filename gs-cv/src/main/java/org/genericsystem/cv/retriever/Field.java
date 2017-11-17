@@ -68,7 +68,7 @@ public class Field extends AbstractField {
 	public void draw(Img display, Mat homography, Scalar color, int thickness) {
 		Scalar scalar = selectColor(color);
 		if (needRect())
-			drawRect(display, getRectPointsWithHomography(homography), deadCounter == 0 ? scalar : new Scalar(0, 0, 255), thickness);
+			drawRect(display, getRectPointsWithHomography(homography), scalar, thickness);
 		if (needText())
 			drawText(display, getRectPointsWithHomography(homography), new Scalar(0, 64, 255), thickness);
 	}
