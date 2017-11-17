@@ -36,8 +36,8 @@ public abstract class AbstractFields<F extends AbstractField> implements Iterabl
 
 	public abstract void performOcr(Img rootImg);
 
-	public void drawOcrPerspectiveInverse(Img display, Mat homography, Scalar color, int thickness) {
-		stream().forEach(field -> field.drawOcrPerspectiveInverse(display, homography, color, thickness));
+	public void drawOcrPerspectiveInverse(Img display, Mat homography, int thickness) {
+		stream().forEach(field -> field.drawOcrPerspectiveInverse(display, homography, thickness));
 	}
 
 	public void drawConsolidated(Img stabilizedDisplay) {

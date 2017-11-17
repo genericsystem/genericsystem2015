@@ -67,7 +67,7 @@ public class Field extends AbstractField {
 	@Override
 	public void resetDeadCounter() {
 		super.resetDeadCounter();
-		lock();
+		tryLock();
 	}
 
 	public void draw(Img display, int thickness) {
@@ -85,11 +85,9 @@ public class Field extends AbstractField {
 			return new Scalar(0, 255, 0);
 	}
 
-	public void drawWithHomography(Img display, Mat homography, Scalar color, int thickness) {
-		Scalar detected = new Scalar(0, 0, 255);
-		Scalar locked = new Scalar(0, 255, 0);
+	public void drawWithHomography(Img display, Mat homography, int thickness) {
 		if (needRect())
-			drawRect(display, getRectPointsWithHomography(homography), drawAsLocked() ? locked : detected, thickness);
+			drawRect(display, getRectPointsWithHomography(homography), drawAsLocked() ? new Scalar(0, 255, 0) : new Scalar(0, 0, 255), thickness);
 		if (needText())
 			drawText(display, getRectPointsWithHomography(homography), new Scalar(0, 255, 0), thickness);
 	}
@@ -110,10 +108,9 @@ public class Field extends AbstractField {
 		return deadCounter == 0 && needRect();
 	}
 
-	public void lock() {
-		if (!locked)
-			if (getLabelsSize() > LABELS_SIZE_THRESHOLD && getConfidence() > CONFIDENCE_THRESHOLD)
-				this.locked = true;
+	public void tryLock() {
+		if (!locked && getLabelsSize() > LABELS_SIZE_THRESHOLD && getConfidence() > CONFIDENCE_THRESHOLD)
+			this.locked = true;
 	}
 
 	public boolean isLocked() {

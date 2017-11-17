@@ -114,10 +114,10 @@ public abstract class AbstractField {
 		}
 	}
 
-	public void drawOcrPerspectiveInverse(Img display, Mat homography, Scalar color, int thickness) {
+	public void drawOcrPerspectiveInverse(Img display, Mat homography, int thickness) {
 		Point[] targets = getRectPointsWithHomography(homography);
-		drawRect(display, targets, deadCounter == 0 ? color : new Scalar(0, 0, 255), thickness);
-		drawText(display, targets, new Scalar(0, 64, 255), thickness);
+		drawRect(display, targets, deadCounter == 0 ? new Scalar(0, 255, 0) : new Scalar(0, 0, 255), thickness);
+		drawText(display, targets, deadCounter == 0 ? new Scalar(0, 255, 0) : new Scalar(0, 0, 255), thickness);
 	}
 
 	public void drawRect(Img stabilizedDisplay, Scalar color, int thickness) {
@@ -228,7 +228,7 @@ public abstract class AbstractField {
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append("AbstractField: ").append("\n").append(" -> rect: ").append(rect).append("\n").append(" -> labels size: ").append(getLabelsSize()).append("\n").append(" -> consolidated: ").append(consolidated).append("\n").append(" -> confidence: ")
-		.append(confidence).append("\n");
+				.append(confidence).append("\n");
 		return sb.toString();
 	}
 
