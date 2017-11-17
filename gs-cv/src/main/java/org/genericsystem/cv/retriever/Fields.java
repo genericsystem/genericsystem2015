@@ -125,6 +125,7 @@ public class Fields extends AbstractFields<Field> {
 	}
 
 	private boolean checkOverlapConstraint(GSRect rect, Field target) {
+
 		for (Field field : fields)
 			if (target == null || field != target)
 				if (rect.isOverlapping(field.getRect()))
