@@ -23,7 +23,7 @@ import org.opencv.utils.Converters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Fields extends AbstractFields<Field> implements OverlapConstraint {
+public class Fields extends AbstractFields<Field> {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
@@ -103,42 +103,33 @@ public class Fields extends AbstractFields<Field> implements OverlapConstraint {
 		return root;
 	}
 
-	@Override
-	public void createNodeImpl(GSRect rect, Field parent) {
-		logger.info("Creating a new node for {}", rect);
-		Field f = new Field(rect);
-		if (parent != null)
-			f.setParent(parent);
-		fields.add(f);
+	public void createNode(GSRect rect, Field parent) {
+		if (checkOverlapConstraint(rect, null)) {
+			logger.info("Creating a new node for {}", rect);
+			Field f = new Field(rect);
+			if (parent != null)
+				f.setParent(parent);
+			fields.add(f);
+		}
 	}
 
-	@Override
-	public void updateNodeImpl(GSRect rect, Field field, int width, int height) {
-		logger.info("Updating node {} with {}", field.getRect(), rect);//
-		field.updateRect(rect, width, height);
-		field.resetDeadCounter();
+	public void updateNode(GSRect rect, Field field, int width, int height) {
+		if (checkOverlapConstraint(rect, field)) {
+			logger.info("Updating node {} with {}", field.getRect(), rect);
+			field.updateRect(rect, width, height);
+			field.resetDeadCounter();
+		}
 	}
 
-	@Override
-	public boolean checkOverlapConstraint(GSRect rect) {
+	private boolean checkOverlapConstraint(GSRect rect, Field target) {
 		for (Field field : fields)
-			if (field.isOverlapping(rect))
-				if (rect.isInsider(field.getRect()) == null)
-					return false;
-		return true;
-	}
-
-	@Override
-	public boolean checkOverlapConstraint(GSRect rect, Field target) {
-		for (Field field : fields)
-			if (field != target)
+			if (target == null || field != target)
 				if (field.isOverlapping(rect))
 					if (rect.isInsider(field.getRect()) == null)
 						return false;
 		return true;
 	}
 
-	@Override
 	public void removeNode(Field field) {
 		logger.info("Removing node: {}", field.getRect());
 		fields.remove(field);
