@@ -57,6 +57,18 @@ public class Field extends AbstractField {
 		}
 	}
 
+	public Field findPotentialParent(GSRect rect) {
+		GSRect insider = rect.getInsider(this.getRect());
+		if (insider == null || insider == this.getRect())
+			return null;
+		for (Field child : children) {
+			Field candidate = child.findPotentialParent(rect);
+			if (candidate != null)
+				return candidate;
+		}
+		return this;
+	}
+
 	@Override
 	public void ocr(Img rootImg) {
 		super.ocr(rootImg);
@@ -187,8 +199,7 @@ public class Field extends AbstractField {
 
 		return false;
 	}
-	
-	
+
 	public boolean needOcr() {
 		return !isLocked() && deadCounter == 0;
 	}

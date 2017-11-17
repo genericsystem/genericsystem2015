@@ -87,23 +87,11 @@ public class Fields extends AbstractFields<Field> {
 
 	private Field findPotentialParent(GSRect rect) {
 		for (Field root : getRoots()) {
-			Field parent = findPotentialParent(rect, root);
+			Field parent = root.findPotentialParent(rect);
 			if (parent != null)
 				return parent;
 		}
 		return null;
-	}
-
-	private Field findPotentialParent(GSRect rect, Field root) {
-		GSRect insider = rect.getInsider(root.getRect());
-		if (insider == null || insider == root.getRect())
-			return null;
-		for (Field child : root.getChildren()) {
-			Field candidate = findPotentialParent(rect, child);
-			if (candidate != null)
-				return candidate;
-		}
-		return root;
 	}
 
 	public void createNode(GSRect rect, Field parent) {
@@ -121,7 +109,6 @@ public class Fields extends AbstractFields<Field> {
 		field.updateRect(rect, width, height);
 		field.resetParentsDeadCounter();
 		field.resetChildrenDeadCounter();
-
 	}
 
 	private boolean checkOverlapConstraint(GSRect rect, Field target) {
