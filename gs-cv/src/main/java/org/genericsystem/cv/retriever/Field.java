@@ -1,7 +1,6 @@
 package org.genericsystem.cv.retriever;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,7 +14,7 @@ import org.opencv.core.Scalar;
 public class Field extends AbstractField {
 
 	private Field parent;
-	private List<Field> children;
+	private final List<Field> children;
 
 	private static final int LABELS_SIZE_THRESHOLD = 10;
 	private static final double CONFIDENCE_THRESHOLD = 0.92;
@@ -85,16 +84,7 @@ public class Field extends AbstractField {
 	public void draw(Img display, int thickness) {
 		// if (needText())
 		// drawText(display, new Scalar(0, 64, 255), thickness);
-		drawRect(display, getColor(), thickness);
-	}
-
-	public Scalar getColor() {
-		// if (drawAsLocked())
-		// return new Scalar(255, 172, 0);
-		if (deadCounter != 0)
-			return new Scalar(0, 0, 255);
-		else
-			return new Scalar(0, 255, 0);
+		drawRect(display, deadCounter == 0 ? new Scalar(0, 255, 0) : new Scalar(0, 0, 255), thickness);
 	}
 
 	public void drawWithHomography(Img display, Mat homography, int thickness) {
@@ -103,10 +93,6 @@ public class Field extends AbstractField {
 		if (needText())
 			drawText(display, getRectPointsWithHomography(homography), new Scalar(0, 255, 0), thickness);
 	}
-
-	// private boolean drawAsChild() {
-	// return !isOrphan() && parent.deadCounter != 0;
-	// }
 
 	private boolean drawAsLocked() {
 		return isOrphan() || (!isOrphan() && parent.getDeadCounter() != 0) ? isLocked() : false;
@@ -139,14 +125,6 @@ public class Field extends AbstractField {
 
 	public boolean containsChild(Field field) {
 		return children.stream().anyMatch(child -> child.getRect().inclusiveArea(field.getRect()) > 0.95);
-	}
-
-	public boolean addChildren(Collection<Field> children) {
-		return this.children.addAll(children);
-	}
-
-	public void setChildren(List<Field> children) {
-		this.children = children;
 	}
 
 	public List<Field> getChildren() {
@@ -196,7 +174,6 @@ public class Field extends AbstractField {
 	}
 
 	public boolean isVeryfyingConstraints() {
-
 		return false;
 	}
 
@@ -205,8 +182,7 @@ public class Field extends AbstractField {
 	}
 
 	public void resetChildrenDeadCounter() {
-		List<Field> potentialChildren = getChildren();
-		for (Field child : potentialChildren) {
+		for (Field child : children) {
 			child.resetChildrenDeadCounter();
 			child.resetDeadCounter();
 		}
