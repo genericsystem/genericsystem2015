@@ -189,11 +189,6 @@ public abstract class AbstractField {
 		return RectangleTools.isInCluster(this.rect, otherRect, epsilon, sides);
 	}
 
-	public boolean isOnDisplay(Img display) {
-		GSRect imgRect = new GSRect(0, 0, display.width(), display.height());
-		return imgRect.isOverlapping(this.rect);
-	}
-
 	public boolean isConsolidated() {
 		return consolidated != null;
 	}
