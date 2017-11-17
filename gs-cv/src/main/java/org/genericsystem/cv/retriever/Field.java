@@ -82,16 +82,16 @@ public class Field extends AbstractField {
 	}
 
 	public void draw(Img display, int thickness) {
-		// if (needText())
-		// drawText(display, new Scalar(0, 64, 255), thickness);
+		if (needText())
+			drawDebugText(display, new Scalar(0, 64, 255), thickness);
 		drawRect(display, deadCounter == 0 ? new Scalar(0, 255, 0) : new Scalar(0, 0, 255), thickness);
 	}
 
 	public void drawWithHomography(Img display, Mat homography, int thickness) {
-		if (needRect())
+		if (needRect()) {
 			drawRect(display, getRectPointsWithHomography(homography), drawAsLocked() ? new Scalar(0, 255, 0) : new Scalar(0, 0, 255), thickness);
-		if (needText())
-			drawText(display, getRectPointsWithHomography(homography), new Scalar(0, 255, 0), thickness);
+			drawText(display, getRectPointsWithHomography(homography), new Scalar(0, 172, 0), thickness);
+		}
 	}
 
 	private boolean drawAsLocked() {

@@ -99,7 +99,7 @@ public abstract class AbstractField {
 			if (Integer.MAX_VALUE == limit)
 				strings = labels.entrySet().stream().collect(ArrayList<String>::new, (list, e) -> IntStream.range(0, e.getValue()).forEach(count -> list.add(e.getKey())), List::addAll);
 			else
-				strings = labels.entrySet().stream().sorted(Entry.<String, Integer> comparingByValue().reversed()).limit(limit).collect(ArrayList<String>::new, (list, e) -> IntStream.range(0, e.getValue()).forEach(count -> list.add(e.getKey())),
+				strings = labels.entrySet().stream().sorted(Entry.<String, Integer>comparingByValue().reversed()).limit(limit).collect(ArrayList<String>::new, (list, e) -> IntStream.range(0, e.getValue()).forEach(count -> list.add(e.getKey())),
 						List::addAll);
 			Tuple res = OCRPlasty.correctStringsAndGetOutliers(strings, RANSAC.NORM_LEVENSHTEIN);
 			this.consolidated = res.getString().orElse(null);
@@ -138,14 +138,24 @@ public abstract class AbstractField {
 	public void drawText(Img display, Point[] targets, Scalar color, int thickness) {
 		if (consolidated != null) {
 			String text = Normalizer.normalize(consolidated, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", "");
-			String conf = String.format("%.3f", confidence);
 			// --- //
 			Point topCenter = new Point((targets[0].x + targets[1].x) / 2, (targets[0].y + targets[1].y) / 2);
 			double l = Math.sqrt(Math.pow(targets[0].x - topCenter.x, 2) + Math.pow(targets[0].y - topCenter.y, 2));
 			Imgproc.line(display.getSrc(), new Point(topCenter.x, topCenter.y - 2), new Point(topCenter.x, topCenter.y - 20), color, 1);
 			Imgproc.putText(display.getSrc(), text, new Point(topCenter.x - l, topCenter.y - 22), Core.FONT_HERSHEY_TRIPLEX, 0.45, color, 1);
-			Imgproc.putText(display.getSrc(), conf, new Point(topCenter.x - l, topCenter.y - 12), Core.FONT_HERSHEY_TRIPLEX, 0.35, color.conj());
 		}
+	}
+
+	public void drawDebugText(Img display, Scalar color, int thickness) {
+		Point[] points = RectToolsMapper.gsPointToPoint(Arrays.asList(rect.decomposeClockwise())).toArray(new Point[0]);
+		drawDebugText(display, points, color, thickness);
+	}
+
+	public void drawDebugText(Img display, Point[] targets, Scalar color, int thickness) {
+		String conf = String.format("%.3f", confidence);
+		Point topCenter = new Point((targets[0].x + targets[1].x) / 2, (targets[0].y + targets[1].y) / 2);
+		double l = Math.sqrt(Math.pow(targets[0].x - topCenter.x, 2) + Math.pow(targets[0].y - topCenter.y, 2));
+		Imgproc.putText(display.getSrc(), conf, new Point(topCenter.x - l, topCenter.y - 12), Core.FONT_HERSHEY_TRIPLEX, 0.35, color);
 	}
 
 	protected Point[] getRectPointsWithHomography(Mat homography) {
