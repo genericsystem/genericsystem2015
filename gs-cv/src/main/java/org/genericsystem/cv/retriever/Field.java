@@ -71,8 +71,8 @@ public class Field extends AbstractField {
 	}
 
 	public void draw(Img display, int thickness) {
-		if (needText())
-			drawText(display, new Scalar(0, 64, 255), thickness);
+		// if (needText())
+		// drawText(display, new Scalar(0, 64, 255), thickness);
 		drawRect(display, getColor(), thickness);
 	}
 
@@ -90,6 +90,8 @@ public class Field extends AbstractField {
 		Scalar locked = new Scalar(0, 255, 0);
 		if (needRect())
 			drawRect(display, getRectPointsWithHomography(homography), drawAsLocked() ? locked : detected, thickness);
+		if (needText())
+			drawText(display, getRectPointsWithHomography(homography), new Scalar(0, 255, 0), thickness);
 	}
 
 	// private boolean drawAsChild() {

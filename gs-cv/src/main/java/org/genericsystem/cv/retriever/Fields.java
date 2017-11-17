@@ -138,8 +138,8 @@ public class Fields extends AbstractFields<Field> {
 		for (Field field : fields)
 			if (target == null || field != target)
 				if (field.isOverlapping(rect))
-					if (rect.getInsider(field.getRect()) == null)
-						return false;
+					// if (rect.getInsider(field.getRect()) == null)
+					return false;
 		return true;
 	}
 
@@ -184,10 +184,7 @@ public class Fields extends AbstractFields<Field> {
 	}
 
 	public void restabilizeFields(Mat homography) {
-		long start = System.nanoTime();
 		fields.forEach(field -> field.updateRect(findNewRect(field.getRect(), homography)));
-		long stop = System.nanoTime();
-		logger.info("Restabilized {} fields in {} ms", fields.size(), String.format("%.3f", ((double) (stop - start)) / 1_000_000));
 	}
 
 	private GSRect findNewRect(GSRect rect, Mat homography) {
