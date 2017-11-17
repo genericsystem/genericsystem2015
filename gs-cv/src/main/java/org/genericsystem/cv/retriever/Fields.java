@@ -65,11 +65,14 @@ public class Fields extends AbstractFields<Field> {
 
 	public List<GSRect> mergeRectsList(Img img) {
 		RectDetector rd = new RectDetector(img);
-		List<GSRect> rects = RectToolsMapper.rectToGSRect(rd.getRects(200, 11, 3, new Size(11, 3)));
-		List<GSRect> children = RectToolsMapper.rectToGSRect(rd.getRects(40, 17, 3, new Size(7, 3)));
-		children.removeIf(child -> rects.stream().anyMatch(parent -> child.inclusiveArea(parent) > 0.90)); // RectangleTools.isInCluster(parent, child, 0.1)
-		rects.addAll(children);
-		return rects;
+		List<GSRect> rects = rd.getRects(200, 11, 3, new Size(11, 3));
+		List<GSRect> children = rd.getRects(40, 17, 3, new Size(7, 3));
+		return cleanList(rects, children);
+	}
+
+	public List<GSRect> cleanList(List<GSRect> bigRects, List<GSRect> smallRects) {
+		smallRects.removeIf(smallRect -> bigRects.stream().anyMatch(bigRect -> smallRect.inclusiveArea(bigRect) > 0.90));
+		return bigRects.stream().filter(bigRect -> smallRects.stream().filter(rect -> rect.isOverlapping(bigRect)).noneMatch(rect -> rect.isInsider(bigRect) == null)).collect(Collectors.toList());
 	}
 
 	private void mergeRects(Img img) {
