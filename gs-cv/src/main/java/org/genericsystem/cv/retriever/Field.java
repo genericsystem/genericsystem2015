@@ -35,24 +35,24 @@ public class Field extends AbstractField {
 
 	public String recursiveToString() {
 		StringBuffer sb = new StringBuffer();
-		recursiveToString(this, sb, 0);
+		this.recursiveToString(sb, 0);
 		sb.append("\n");
 		return sb.toString();
 	}
 
-	private void recursiveToString(Field field, StringBuffer sb, int depth) {
+	public void recursiveToString(StringBuffer sb, int depth) {
 		if (depth > 8)
 			return;
-		sb.append("depth: ").append(depth).append(": ").append(field.getRect());
-		if (field.isConsolidated())
-			sb.append(" -> ").append(field.getConsolidated());
-		if (!field.getChildren().isEmpty()) {
+		sb.append("depth: ").append(depth).append(": ").append(rect);
+		if (isConsolidated())
+			sb.append(" -> ").append(getConsolidated());
+		if (children.isEmpty()) {
 			depth++;
-			for (Field child : field.getChildren()) {
+			for (Field child : children) {
 				sb.append("\n");
 				for (int i = 0; i < depth; ++i)
 					sb.append("  ");
-				recursiveToString(child, sb, depth);
+				child.recursiveToString(sb, depth);
 			}
 		}
 	}
