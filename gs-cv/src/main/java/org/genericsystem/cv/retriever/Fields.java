@@ -18,7 +18,6 @@ import org.genericsystem.reinforcer.tools.GSRect;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
-import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.utils.Converters;
 import org.slf4j.Logger;
@@ -38,8 +37,8 @@ public class Fields extends AbstractFields<Field> {
 	}
 
 	@Override
-	public void drawOcrPerspectiveInverse(Img display, Mat homography, Scalar color, int thickness) {
-		stream().forEach(field -> field.drawWithHomography(display, homography, color, thickness));
+	public void drawOcrPerspectiveInverse(Img display, Mat homography, int thickness) {
+		stream().forEach(field -> field.drawWithHomography(display, homography, thickness));
 	}
 
 	public void drawFieldsOnStabilized(Img stabilized) {
@@ -107,17 +106,8 @@ public class Fields extends AbstractFields<Field> {
 		return root;
 	}
 
-	// public void createNode(GSRect rect, Field parent) {
-	// if (checkOverlapConstraint(rect, null)) {
-	// logger.info("Creating a new node for {}", rect);
-	// Field f = new Field(rect, parent);
-	// if(f.isVeryfyingConstraints())
-	// fields.add(f);
-	// }
-	// }
-
 	public void createNode(GSRect rect, Field parent) {
-		if (checkOverlapConstraint(rect, null)) {
+		if (checkOverlapConstraint(rect,null)) {
 			logger.info("Creating a new node for {}", rect);
 			Field f = new Field(rect);
 			if (parent != null)
@@ -137,8 +127,7 @@ public class Fields extends AbstractFields<Field> {
 	private boolean checkOverlapConstraint(GSRect rect, Field target) {
 		for (Field field : fields)
 			if (target == null || field != target)
-				if (field.isOverlapping(rect))
-					// if (rect.getInsider(field.getRect()) == null)
+				if (rect.isOverlapping(field.getRect()))
 					return false;
 		return true;
 	}
@@ -174,12 +163,8 @@ public class Fields extends AbstractFields<Field> {
 		List<Field> matches = fields.stream().filter(f -> rect.inclusiveArea(f.getRect().getIntersection(frameRect)) > areaOverlap).collect(Collectors.toList());
 		if (matches.isEmpty())
 			return null;
-		if (matches.size() > 1) {
-			StringBuilder sb = new StringBuilder(matches.size() + " matches were detected.\n");
-			for (Field field : matches)
-				sb.append(field + "\n");
-			logger.warn(sb.toString());
-		}
+		if (matches.size() > 1) 
+			logger.warn(matches.size()+ "matches were detected.");
 		return matches.get(0);
 	}
 
