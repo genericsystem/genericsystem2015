@@ -1,21 +1,15 @@
 package org.genericsystem.cv.retriever;
 
 import java.lang.invoke.MethodHandles;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
 
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Calibrated.AngleCalibrated;
@@ -35,6 +29,9 @@ import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
 
 @SuppressWarnings({ "resource" })
 public class CamLiveRetriever extends AbstractApp {
@@ -239,13 +236,12 @@ public class CamLiveRetriever extends AbstractApp {
 	}
 
 	private Mat findHomography(Point vp, double width, double height) {
-		Point bary = new Point(frame.width() / 2, frame.height() / 2);
-		double alpha_ = Math.atan2((vp.y - bary.y), (vp.x - bary.x));
-		if (alpha_ < -Math.PI / 2 && alpha_ > -Math.PI)
-			alpha_ = alpha_ + Math.PI;
-		if (alpha_ < Math.PI && alpha_ > Math.PI / 2)
-			alpha_ = alpha_ - Math.PI;
-		double alpha = alpha_;
+		Point bary = new Point(width / 2, height / 2);
+		double alpha = Math.atan2((vp.y - bary.y), (vp.x - bary.x));
+		if (alpha < -Math.PI / 2 && alpha > -Math.PI)
+			alpha = alpha + Math.PI;
+		if (alpha < Math.PI && alpha > Math.PI / 2)
+			alpha = alpha - Math.PI;
 
 		Point rotatedVp = rotate(bary, alpha, vp)[0];
 
@@ -269,26 +265,13 @@ public class CamLiveRetriever extends AbstractApp {
 			A_ = new Line(C_, bary).intersection(new Line(AB2, rotatedVp));
 			D_ = new Line(B_, bary).intersection(new Line(CD2, rotatedVp));
 		}
-
-		// System.out.println("vp : " + vp);
-		// System.out.println("rotated vp : " + rotatedVp);
-		// System.out.println("Alpha : " + alpha * 180 / Math.PI);
-		// System.out.println();
-		// System.out.println("A : " + A + " " + A_);
-		// System.out.println("B : " + B + " " + B_);
-		// System.out.println("C : " + C + " " + C_);
-		// System.out.println("D : " + D + " " + D_);
-
-		Mat src = new MatOfPoint2f(rotate(bary, -alpha, A_, B_, C_, D_));
-		Mat dst = new MatOfPoint2f(A, B, C, D);
-		return Imgproc.getPerspectiveTransform(src, dst);
+		return Imgproc.getPerspectiveTransform(new MatOfPoint2f(rotate(bary, -alpha, A_, B_, C_, D_)), new MatOfPoint2f(A, B, C, D));
 	}
 
-	private Point[] rotate(Point bary, double alpha, Point... p) {
+	private Point[] rotate(Point bary, double alpha, Point... points) {
 		Mat matrix = Imgproc.getRotationMatrix2D(bary, alpha / Math.PI * 180, 1);
-		MatOfPoint2f points = new MatOfPoint2f(p);
 		MatOfPoint2f results = new MatOfPoint2f();
-		Core.transform(points, results, matrix);
+		Core.transform(new MatOfPoint2f(points), results, matrix);
 		return results.toArray();
 	}
 
@@ -302,10 +285,6 @@ public class CamLiveRetriever extends AbstractApp {
 			super(lines);
 		}
 
-		public static Lines of(Collection<Line> lines) {
-			return new Lines(lines);
-		}
-
 		public Lines filter(Predicate<Line> predicate) {
 			return new Lines(lines.stream().filter(predicate).collect(Collectors.toList()));
 		}
@@ -317,21 +296,6 @@ public class CamLiveRetriever extends AbstractApp {
 			while (newLines.size() < max)
 				newLines.add(lines.get((int) (Math.random() * size())));
 			return new Lines(newLines);
-		}
-
-		public Lines reduce(double factor, int threshold) {
-			long target = Math.round(this.size() * factor);
-			if (target < threshold)
-				target = threshold;
-
-			List<Line> newLines = new ArrayList<>();
-			Set<Integer> indexes = new HashSet<>();
-			while (indexes.size() < target) {
-				int idx = ThreadLocalRandom.current().nextInt(this.size());
-				if (indexes.add(idx))
-					newLines.add(lines.get(idx));
-			}
-			return Lines.of(newLines);
 		}
 	}
 
