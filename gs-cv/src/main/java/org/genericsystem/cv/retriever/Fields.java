@@ -7,7 +7,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.genericsystem.cv.Img;
@@ -146,17 +145,16 @@ public class Fields extends AbstractFields<Field> implements OverlapConstraint {
 	}
 
 	private void removeDeadTrees() {
-		Predicate<Field> predicate = f -> !f.isLocked() && f.getDeadCounter() >= MAX_DELETE_UNMERGED;
-		getRoots().stream().filter(field -> isDeadTree(field, predicate)).flatMap(field -> listTree(field).stream()).forEach(this::removeNode);
+		getRoots().stream().filter(field -> isDeadTree(field, MAX_DELETE_UNMERGED)).flatMap(field -> listTree(field).stream()).forEach(this::removeNode);
 	}
 
-	private boolean isDeadTree(Field root, Predicate<Field> predicate) {
-		if (!root.hasChildren()) // Single element in the tree, use the predicate
-			return predicate.test(root);
+	private boolean isDeadTree(Field root, int maxDeadCount) {
+		if (!root.hasChildren())
+			return root.isDead(maxDeadCount);
 		for (Field child : root.getChildren())
-			if (!isDeadTree(child, predicate)) // Return false if one of the element does not match the predicate
+			if (!isDeadTree(child, maxDeadCount))
 				return false;
-		return true; // If false was not returned at this stage, the tree is dead
+		return true;
 	}
 
 	private List<Field> listTree(Field root) {
@@ -174,10 +172,8 @@ public class Fields extends AbstractFields<Field> implements OverlapConstraint {
 			return null;
 		if (matches.size() > 1) {
 			StringBuilder sb = new StringBuilder(matches.size() + " matches were detected.\n");
-			for (Field field : matches) {
+			for (Field field : matches)
 				sb.append(field + "\n");
-			}
-			// throw new IllegalStateException(sb.toString());
 			logger.warn(sb.toString());
 		}
 		return matches.get(0);

@@ -159,6 +159,10 @@ public class Field extends AbstractField {
 		return parent == null;
 	}
 
+	public boolean isDead(int maxDeadCount) {
+		return !locked && deadCounter >= maxDeadCount;
+	}
+
 	void updateRect(GSRect rect, int width, int height) {
 		GSRect truncatedRect = getRect().getIntersection(new GSRect(0, 0, width, height));
 		if (truncatedRect != this.rect) {
