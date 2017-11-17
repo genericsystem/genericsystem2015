@@ -110,7 +110,7 @@ public class GSRect implements Comparable<GSRect> {
 	 */
 	public GSRect getIntersection(GSRect rect2) {
 		// First, check whether a rectangle is contained in the other
-		GSRect insider = isInsider(rect2);
+		GSRect insider = getInsider(rect2);
 		if (insider!=null)
 			return insider;
 
@@ -166,7 +166,7 @@ public class GSRect implements Comparable<GSRect> {
 	 * @param rect2 - the second rectangle
 	 * @return an {@link Optional} with the rectangle contained in the other, an empty Optional if no rectangles is contained in the other.
 	 */
-	public GSRect isInsider(GSRect rect2) {
+	public GSRect getInsider(GSRect rect2) {
 		GSPoint[] points1 = decomposeClockwise();
 		GSPoint[] points2 = rect2.decomposeClockwise();
 		boolean isGSRect2InGSRect1 = true;

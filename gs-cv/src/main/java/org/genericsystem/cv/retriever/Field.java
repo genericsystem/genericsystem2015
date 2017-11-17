@@ -25,7 +25,12 @@ public class Field extends AbstractField {
 		super(rect);
 		this.parent = null;
 		this.children = new ArrayList<>();
-		// checkConstraints();
+	}
+
+	public Field(GSRect rect, Field parent) {
+		super(rect);
+		setParent(parent);
+		this.children = new ArrayList<>();
 	}
 
 	public String recursiveToString() {
@@ -65,32 +70,38 @@ public class Field extends AbstractField {
 		setFinal();
 	}
 
-	public void draw(Img display, Mat homography, Scalar color, int thickness) {
-		Scalar scalar = selectColor(color);
-		if (needRect())
-			drawRect(display, getRectPointsWithHomography(homography), scalar, thickness);
+	public void draw(Img display, int thickness) {
 		if (needText())
-			drawText(display, getRectPointsWithHomography(homography), new Scalar(0, 64, 255), thickness);
+			drawText(display, new Scalar(0, 64, 255), thickness);
+		drawRect(display, getColor(), thickness);
 	}
 
-	private Scalar selectColor(Scalar defaultColor) {
-		if (drawAsLocked())
-			return new Scalar(255, 172, 0);
-		if (drawAsChild())
-			return new Scalar(255, 0, 0);
-		return defaultColor;
+	public Scalar getColor() {
+		// if (drawAsLocked())
+		// return new Scalar(255, 172, 0);
+		if (deadCounter != 0)
+			return new Scalar(0, 0, 255);
+		else
+			return new Scalar(0, 255, 0);
 	}
 
-	private boolean drawAsChild() {
-		return !isOrphan() && parent.deadCounter != 0;
+	public void drawWithHomography(Img display, Mat homography, Scalar color, int thickness) {
+		Scalar detected = new Scalar(0, 0, 255);
+		Scalar locked = new Scalar(0, 255, 0);
+		if (needRect())
+			drawRect(display, getRectPointsWithHomography(homography), drawAsLocked() ? locked : detected, thickness);
 	}
+
+	// private boolean drawAsChild() {
+	// return !isOrphan() && parent.deadCounter != 0;
+	// }
 
 	private boolean drawAsLocked() {
-		return isOrphan() || (!isOrphan() && parent.getDeadCounter() != 0) ? this.locked : false;
+		return isOrphan() || (!isOrphan() && parent.getDeadCounter() != 0) ? isLocked() : false;
 	}
 
 	private boolean needRect() {
-		return !isOrphan() && parent.getDeadCounter() == 0 ? false : isLocked() ? true : deadCounter == 0;
+		return !isOrphan() && parent.getDeadCounter() == 0 ? false : true /* isLocked() ? true : deadCounter == 0 */;
 	}
 
 	private boolean needText() {
@@ -143,8 +154,7 @@ public class Field extends AbstractField {
 
 	public void setParent(Field parent) {
 		this.parent = parent;
-		if (parent != null)
-			this.parent.addChildIfNotPresent(this);
+		this.parent.addChildIfNotPresent(this);
 	}
 
 	public boolean hasChildren() {
@@ -165,50 +175,32 @@ public class Field extends AbstractField {
 
 	void updateRect(GSRect rect, int width, int height) {
 		GSRect truncatedRect = getRect().getIntersection(new GSRect(0, 0, width, height));
-		if (truncatedRect != getRect() && rect.inclusiveArea(truncatedRect)>0.6) {
-			double tlX = truncatedRect.getX();
-			double tlY = truncatedRect.getY();
-			double brX = tlX + getRect().getWidth();
-			double brY = tlY + getRect().getHeight();
-
-			this.rect = new GSRect(new GSPoint(tlX <= 0 ? this.rect.tl().getX() : rect.tl().getX(), tlY <= 0 ? this.rect.tl().getY() : rect.tl().getY()),
-					new GSPoint(brX >= width ? this.rect.br().getX() : rect.br().getX(), brY >= height ? this.rect.br().getY() : rect.br().getY()));
-		} else
-			this.rect = rect;
+		double tlX = truncatedRect.getX();
+		double tlY = truncatedRect.getY();
+		double brX = tlX + getRect().getWidth();
+		double brY = tlY + getRect().getHeight();
+		GSRect updatedRect = new GSRect(new GSPoint(tlX <= 0 ? this.rect.tl().getX() : rect.tl().getX(), tlY <= 0 ? this.rect.tl().getY() : rect.tl().getY()),
+				new GSPoint(brX >= width ? this.rect.br().getX() : rect.br().getX(), brY >= height ? this.rect.br().getY() : rect.br().getY()));
+		this.rect = updatedRect;
 	}
 
-	// private boolean checkConstraints() {
-	// boolean ok = isOrphan() ? this.checkConstraintsRecursive() : parent.checkConstraintsRecursive();
-	// if (!ok)
-	// logger.error("Invalid constraint for:\n{}Tree:\n{}", this, isOrphan() ? this.recursiveToString() : this.parent.recursiveToString());
-	// return ok;
-	// }
-	//
-	// private boolean checkConstraintsRecursive() {
-	// // If the field is orphan and has no children, it validates the constraints
-	// if (isOrphan() && !hasChildren())
-	// return true;
-	// // If the field has children, they must meet the constraint
-	// if (hasChildren()) {
-	// for (Field child : children)
-	// if (child.isOutsideParent() || child.isOverlappingSiblings())
-	// return false;
-	//
-	// // If false was not returned, apply the function to the children
-	// for (Field child : children)
-	// if (!child.checkConstraintsRecursive())
-	// return false;
-	// }
-	// // At this stage, all the constraints should be verified
-	// return true;
-	// }
-	//
-	// private boolean isOutsideParent() {
-	// return !rect.equals(rect.isInsider(getParent().getRect()));
-	// }
-	//
-	// private boolean isOverlappingSiblings() {
-	// return getSiblings().stream().anyMatch(sibling -> rect.isOverlapping(sibling.getRect()));
-	// }
+	public boolean isVeryfyingConstraints() {
+
+		return false;
+	}
+
+	public void resetChildrenDeadCounter() {
+		List<Field> potentialChildren = getChildren();
+		for (Field child : potentialChildren) {
+			child.resetChildrenDeadCounter();
+			child.resetDeadCounter();
+		}
+	}
+
+	public void resetParentsDeadCounter() {
+		resetDeadCounter();
+		if (getParent() != null)
+			getParent().resetParentsDeadCounter();
+	}
 
 }

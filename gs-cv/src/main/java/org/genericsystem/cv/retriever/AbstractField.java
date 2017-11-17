@@ -99,7 +99,7 @@ public abstract class AbstractField {
 			if (Integer.MAX_VALUE == limit)
 				strings = labels.entrySet().stream().collect(ArrayList<String>::new, (list, e) -> IntStream.range(0, e.getValue()).forEach(count -> list.add(e.getKey())), List::addAll);
 			else
-				strings = labels.entrySet().stream().sorted(Entry.<String, Integer>comparingByValue().reversed()).limit(limit).collect(ArrayList<String>::new, (list, e) -> IntStream.range(0, e.getValue()).forEach(count -> list.add(e.getKey())),
+				strings = labels.entrySet().stream().sorted(Entry.<String, Integer> comparingByValue().reversed()).limit(limit).collect(ArrayList<String>::new, (list, e) -> IntStream.range(0, e.getValue()).forEach(count -> list.add(e.getKey())),
 						List::addAll);
 			Tuple res = OCRPlasty.correctStringsAndGetOutliers(strings, RANSAC.NORM_LEVENSHTEIN);
 			this.consolidated = res.getString().orElse(null);
@@ -128,6 +128,11 @@ public abstract class AbstractField {
 	public void drawRect(Img display, Point[] targets, Scalar color, int thickness) {
 		for (int i = 0; i < targets.length; ++i)
 			Imgproc.line(display.getSrc(), targets[i], targets[(i + 1) % targets.length], color, thickness);
+	}
+
+	public void drawText(Img display, Scalar color, int thickness) {
+		Point[] points = RectToolsMapper.gsPointToPoint(Arrays.asList(rect.decomposeClockwise())).toArray(new Point[0]);
+		drawText(display, points, color, thickness);
 	}
 
 	public void drawText(Img display, Point[] targets, Scalar color, int thickness) {
@@ -217,6 +222,14 @@ public abstract class AbstractField {
 
 	public int getDeadCounter() {
 		return deadCounter;
+	}
+
+	@Override
+	public String toString() {
+		StringBuffer sb = new StringBuffer();
+		sb.append("AbstractField: ").append("\n").append(" -> rect: ").append(rect).append("\n").append(" -> labels size: ").append(getLabelsSize()).append("\n").append(" -> consolidated: ").append(consolidated).append("\n").append(" -> confidence: ")
+		.append(confidence).append("\n");
+		return sb.toString();
 	}
 
 }
