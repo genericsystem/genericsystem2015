@@ -60,7 +60,7 @@ public class Fields extends AbstractFields<Field> {
 
 	public void consolidate(Img img) {
 		fields.forEach(Field::incrementDeadCounter);
-		mergeRects(img);
+		mergeRects(img, 0.70);
 		removeDeadTrees();
 	}
 
@@ -68,17 +68,17 @@ public class Fields extends AbstractFields<Field> {
 		RectDetector rd = new RectDetector(img);
 		List<GSRect> rects = rd.getRects(200, 11, 3, new Size(11, 3));
 		List<GSRect> children = rd.getRects(40, 17, 3, new Size(7, 3));
-		return cleanList(rects, children);
+		return cleanList(rects, children, 0.70);
 	}
 
-	public List<GSRect> cleanList(List<GSRect> bigRects, List<GSRect> smallRects) {
-		smallRects.removeIf(smallRect -> bigRects.stream().anyMatch(bigRect -> smallRect.inclusiveArea(bigRect) > 0.90));
+	public List<GSRect> cleanList(List<GSRect> bigRects, List<GSRect> smallRects, double overlapThreshold) {
+		smallRects.removeIf(smallRect -> bigRects.stream().anyMatch(bigRect -> smallRect.inclusiveArea(bigRect) > overlapThreshold));
 		return Stream.concat(bigRects.stream().filter(bigRect -> smallRects.stream().filter(rect -> rect.isOverlapping(bigRect)).noneMatch(rect -> rect.isInsider(bigRect) == null)), smallRects.stream()).collect(Collectors.toList());
 	}
 
-	private void mergeRects(Img img) {
+	private void mergeRects(Img img, double overlapThreshold) {
 		for (GSRect rect : mergeRectsList(img)) {
-			Field match = findMatch(rect, 0.6, img.width(), img.height());
+			Field match = findMatch(rect, overlapThreshold, img.width(), img.height());
 			if (match != null)
 				updateNode(rect, match, img.width(), img.height());
 			else
