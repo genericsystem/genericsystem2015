@@ -17,7 +17,7 @@ public class Field extends AbstractField {
 	private Field parent;
 	private List<Field> children;
 
-	private static final int LABELS_SIZE_THRESHOLD = 15;
+	private static final int LABELS_SIZE_THRESHOLD = 10;
 	private static final double CONFIDENCE_THRESHOLD = 0.92;
 	private boolean locked = false;
 
@@ -67,7 +67,7 @@ public class Field extends AbstractField {
 	@Override
 	public void resetDeadCounter() {
 		super.resetDeadCounter();
-		setFinal();
+		lock();
 	}
 
 	public void draw(Img display, int thickness) {
@@ -110,9 +110,9 @@ public class Field extends AbstractField {
 		return deadCounter == 0 && needRect();
 	}
 
-	public void setFinal() {
+	public void lock() {
 		if (!locked)
-			if (getLabelsSize() > LABELS_SIZE_THRESHOLD && getConfidence() > CONFIDENCE_THRESHOLD && isOrphan())
+			if (getLabelsSize() > LABELS_SIZE_THRESHOLD && getConfidence() > CONFIDENCE_THRESHOLD)
 				this.locked = true;
 	}
 
