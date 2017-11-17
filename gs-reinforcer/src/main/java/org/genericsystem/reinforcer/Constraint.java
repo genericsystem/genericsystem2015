@@ -142,4 +142,25 @@ public interface Constraint {
 			return "alignment: " + alignment + ", min: " + min;
 		}
 	}
+
+	// Compares the number of columns discovered.
+	// Used only if the other types of constraints can’t be used.
+	public class ColsConstraint implements Constraint {
+
+		private int nbCols;
+
+		public ColsConstraint(Labels labels) {
+			nbCols = labels.findCols().size();
+		}
+
+		@Override
+		public boolean check(Labels labels) {
+			return labels.findCols().size() == nbCols;
+		}
+
+		@Override
+		public String toString() {
+			return "{ ColsConstraint: " + nbCols + " }";
+		}
+	}
 }

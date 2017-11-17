@@ -189,4 +189,121 @@ public class ReinforcerTest2 {
 		assert "aligned".equals(reinforcer.getTemplate(labels3));
 		assert "aligned".equals(reinforcer.getTemplate(labels4));
 	}
+
+	// One column vs. two-column layout
+	public void test005() {
+		Reinforcer2 reinforcer = new Reinforcer2();
+		Labels labels1 = new Labels();
+		labels1.addLabel(1, 1, 100, 20, "Took");
+		labels1.addLabel(1, 22, 80, 42, "Peregrin");
+		labels1.addLabel(1, 42, 140, 64, "2990-");
+		reinforcer.forceTemplate(labels1, "one-col");
+		Labels labels2 = new Labels();
+		labels2.addLabel(1, 1, 100, 20, "Brandybuck");
+		labels2.addLabel(1, 22, 80, 42, "Meriadoc");
+		labels2.addLabel(1, 42, 140, 64, "2982-");
+		reinforcer.forceTemplate(labels2, "one-col");
+
+		// Tests
+		Labels labels3 = new Labels();
+		labels3.addLabel(1, 1, 100, 20, "Gamgee");
+		labels3.addLabel(1, 22, 80, 42, "Samwise");
+		labels3.addLabel(1, 42, 140, 64, "29680922-");
+		Labels labels4 = new Labels();
+		labels4.addLabel(1, 1, 100, 20, "Baggins");
+		labels4.addLabel(1, 22, 80, 42, "Frodo");
+		labels4.addLabel(1, 42, 140, 64, "29800406-");
+
+		Labels labels5 = new Labels();
+		labels5.addLabel(1, 1, 100, 20, "Took");
+		labels5.addLabel(200, 1, 350, 20, "Peregrin");
+		labels5.addLabel(1, 22, 180, 42, "Brandybuck");
+		labels5.addLabel(203, 22, 405, 42, "Meriadoc");
+		reinforcer.forceTemplate(labels5, "two-cols");
+		Labels labels6 = new Labels();
+		labels6.addLabel(1, 1, 100, 20, "Baggins");
+		labels6.addLabel(200, 1, 350, 20, "Frodo");
+		labels6.addLabel(1, 22, 180, 42, "Gamgee");
+		labels6.addLabel(203, 22, 405, 42, "Samwise");
+		reinforcer.forceTemplate(labels6, "two-cols");
+
+		Labels labels7 = new Labels();
+		labels7.addLabel(1, 1, 100, 20, "Baggins");
+		labels7.addLabel(200, 1, 350, 20, "Bilbo");
+		labels7.addLabel(1, 22, 180, 42, "Took");
+		labels7.addLabel(203, 22, 405, 42, "Belladonna");
+		Labels labels8 = new Labels();
+		labels8.addLabel(1, 1, 100, 20, "Bolger");
+		labels8.addLabel(200, 1, 361, 19, "Fredegar");
+		labels8.addLabel(1, 22, 180, 42, "Gardner");
+		labels8.addLabel(198, 21, 342, 43, "Rosie");
+
+		logger.debug("Reinforcer after training: {}", reinforcer);
+		assert "one-col".equals(reinforcer.getTemplate(labels1));
+		assert "one-col".equals(reinforcer.getTemplate(labels2));
+		assert "one-col".equals(reinforcer.getTemplate(labels3));
+		assert "one-col".equals(reinforcer.getTemplate(labels4));
+		assert "two-cols".equals(reinforcer.getTemplate(labels5));
+		assert "two-cols".equals(reinforcer.getTemplate(labels6));
+		assert "two-cols".equals(reinforcer.getTemplate(labels7));
+		assert "two-cols".equals(reinforcer.getTemplate(labels8));
+	}
+
+	public void test006() {
+		Reinforcer2 reinforcer = new Reinforcer2();
+		Labels labels1 = new Labels();
+		labels1.addLabel(1, 1, 100, 20, "Took");
+		labels1.addLabel(1, 22, 120, 42, "Peregrin");
+		labels1.addLabel(1, 42, 140, 64, "2990-");
+		reinforcer.forceTemplate(labels1, "one-col");
+		Labels labels2 = new Labels();
+		labels2.addLabel(1, 1, 200, 20, "Brandybuck");
+		labels2.addLabel(1, 22, 200, 42, "Meriadoc");
+		labels2.addLabel(1, 42, 140, 64, "2982-");
+		reinforcer.forceTemplate(labels2, "one-col");
+
+		// Tests
+		Labels labels3 = new Labels();
+		labels3.addLabel(1, 1, 150, 20, "Gamgee");
+		labels3.addLabel(1, 22, 180, 42, "Samwise");
+		labels3.addLabel(1, 42, 200, 64, "29680922-");
+		Labels labels4 = new Labels();
+		labels4.addLabel(1, 1, 160, 20, "Baggins");
+		labels4.addLabel(1, 22, 90, 42, "Frodo");
+		labels4.addLabel(1, 42, 210, 64, "29800406-");
+
+		Labels labels5 = new Labels();
+		labels5.addLabel(1, 1, 100, 20, "Took");
+		labels5.addLabel(200, 1, 350, 20, "Peregrin");
+		labels5.addLabel(1, 22, 180, 42, "Brandybuck");
+		labels5.addLabel(203, 22, 405, 42, "Meriadoc");
+		reinforcer.forceTemplate(labels5, "two-cols");
+		Labels labels6 = new Labels();
+		labels6.addLabel(1, 1, 100, 20, "Baggins");
+		labels6.addLabel(200, 1, 350, 20, "Frodo");
+		labels6.addLabel(1, 22, 180, 42, "Gamgee");
+		labels6.addLabel(203, 22, 405, 42, "Samwise");
+		reinforcer.forceTemplate(labels6, "two-cols");
+
+		Labels labels7 = new Labels();
+		labels7.addLabel(1, 1, 100, 20, "Baggins");
+		labels7.addLabel(200, 1, 350, 20, "Bilbo");
+		labels7.addLabel(1, 22, 180, 42, "Took");
+		labels7.addLabel(203, 22, 405, 42, "Belladonna");
+		Labels labels8 = new Labels();
+		labels8.addLabel(1, 1, 100, 20, "Bolger");
+		labels8.addLabel(200, 1, 361, 19, "Fredegar");
+		labels8.addLabel(1, 22, 180, 42, "Gardner");
+		labels8.addLabel(198, 21, 342, 43, "Rosie");
+
+		logger.debug("Reinforcer after training: {}", reinforcer);
+		assert "one-col".equals(reinforcer.getTemplate(labels1));
+		assert "one-col".equals(reinforcer.getTemplate(labels2));
+		assert "one-col".equals(reinforcer.getTemplate(labels3));
+		assert "one-col".equals(reinforcer.getTemplate(labels4));
+		assert "two-cols".equals(reinforcer.getTemplate(labels5));
+		assert "two-cols".equals(reinforcer.getTemplate(labels6));
+		assert "two-cols".equals(reinforcer.getTemplate(labels7));
+		assert "two-cols".equals(reinforcer.getTemplate(labels8));
+	}
 }

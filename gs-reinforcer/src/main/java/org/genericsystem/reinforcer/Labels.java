@@ -7,10 +7,11 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.genericsystem.reinforcer.Constraint.AlignmentConstraint;
+import org.genericsystem.reinforcer.Constraint.ColsConstraint;
 import org.genericsystem.reinforcer.Constraint.PositionConstraint;
 import org.genericsystem.reinforcer.Constraint.RelationConstraint;
 import org.genericsystem.reinforcer.tools.GSPoint;
@@ -174,38 +175,101 @@ public class Labels implements Iterable<Label> {
 					result.add(new RelationConstraint(pos, label.getText(), direction, neighbour.getText()));
 			}
 		}
-		// AlignmentConstraints
-		for (Alignment alignment : Alignment.values()) {
-			List<List<Label>> grouped = groupAlignedLabels(alignment);
-			grouped.forEach(group -> {
-				if (group.size() >= 2)
-					result.add(new AlignmentConstraint(alignment, group.size()));
-			});
+		// AlignmentConstraint
+		// result.add(new AlignmentConstraint(this));
+		result.add(new ColsConstraint(this));
+		return result;
+	}
+
+	// Groups the given labels so that those that are considered equal with the given function are together.
+	// Assumes that the given labels’ list is sorted so that labels to be grouped are adjacent each other.
+	private List<List<Label>> groupBy(List<Label> labels, BiFunction<Label, Label, Boolean> equals) {
+		if (labels.isEmpty())
+			return new ArrayList<>();
+		List<List<Label>> result = new ArrayList<>();
+		List<Label> currentGroup = new ArrayList<>(Arrays.asList(labels.get(0)));
+		for (int i = 1; i < labels.size(); i++) {
+			if (equals.apply(currentGroup.get(0), labels.get(i)))
+				currentGroup.add(labels.get(i));
+			else {
+				result.add(currentGroup);
+				currentGroup = new ArrayList<>(Arrays.asList(labels.get(i)));
+			}
 		}
+		result.add(currentGroup);
 		return result;
 	}
 
 	public List<List<Label>> groupAlignedLabels(Alignment alignment) {
 		List<Label> ll = toList();
-		if (ll.isEmpty())
-			return new ArrayList<>();
 		Collections.sort(ll, (l1, l2) -> {
 			if (alignment == Alignment.LEFT)
 				return Double.compare(l1.getRect().getX(), l2.getRect().getX());
 			else
 				return Double.compare(l1.getRect().br().getX(), l2.getRect().br().getX());
 		});
-		List<List<Label>> result = new ArrayList<>();
-		List<Label> currentGroup = new ArrayList<>(Arrays.asList(ll.get(0)));
-		for (int i = 1; i < ll.size(); i++) {
-			if (currentGroup.get(0).alignedWith(ll.get(i), alignment))
-				currentGroup.add(ll.get(i));
-			else {
-				result.add(currentGroup);
-				currentGroup = new ArrayList<>(Arrays.asList(ll.get(i)));
+		return groupBy(ll, (l1, l2) -> l1.alignedWith(l2, alignment));
+	}
+
+	private List<List<Label>> byLine(List<Label> labels) {
+		Collections.sort(labels);
+		return groupBy(labels, (l1, l2) -> {
+			GSPoint c1 = l1.getRect().getCenter();
+			GSPoint c2 = l2.getRect().getCenter();
+			return Math.abs(c1.getY() - c2.getY()) <= .1 * Math.max(c1.getY(), c2.getY());
+		});
+	}
+
+	public List<List<Label>> groupByLine() {
+		return byLine(toList());
+	}
+
+	// Returns the labels in the line above or below label’s line that overlap horizontally with it.
+	private List<Label> computeOverlapping(Label label, List<List<Label>> lines) {
+		int lineNo = 0;
+		for (int i = 0; i <= lines.size(); i++)
+			if (lines.get(i).contains(label)) {
+				lineNo = i;
+				break;
 			}
-		}
-		result.add(currentGroup);
-		return result;
+		List<Label> overlaps = new ArrayList<>();
+		if (lineNo > 0)
+			for (Label other : lines.get(lineNo - 1))
+				if (label.getRect().hOverlaps(other.getRect()))
+					overlaps.add(other);
+		if (lineNo < lines.size() - 1)
+			for (Label other : lines.get(lineNo + 1))
+				if (label.getRect().hOverlaps(other.getRect()))
+					overlaps.add(other);
+		return overlaps;
+	}
+
+	// Returns the labels that belong to the same block as the given label.
+	private List<Label> expandBlock(Label label, List<Label> block, List<List<Label>> lines, Set<Label> expanded) {
+		expanded.add(label);
+		block.add(label);
+		for (Label other : computeOverlapping(label, lines))
+			if (expanded.add(other))
+				expandBlock(other, block, lines, expanded);
+		return block;
+	}
+
+	private List<List<Label>> findBlocks() {
+		Set<Label> expanded = new HashSet<>();
+		List<List<Label>> lines = groupByLine();
+		List<List<Label>> blocks = new ArrayList<>();
+		for (Label label : this)
+			if (!expanded.contains(label))
+				blocks.add(expandBlock(label, new ArrayList<>(), lines, expanded));
+		return blocks;
+	}
+
+	// Returns blocks that contain only one label per line.
+	public List<List<Label>> findCols() {
+		List<List<Label>> blocks = findBlocks();
+		return blocks.stream().filter(block -> {
+			List<List<Label>> lines = byLine(block);
+			return lines.size() > 1 && lines.stream().allMatch(line -> line.size() == 1);
+		}).collect(Collectors.toList());
 	}
 }
