@@ -224,4 +224,12 @@ public abstract class AbstractField {
 		return deadCounter;
 	}
 
+	@Override
+	public String toString() {
+		StringBuffer sb = new StringBuffer();
+		sb.append("AbstractField: ").append("\n").append(" -> rect: ").append(rect).append("\n").append(" -> labels size: ").append(getLabelsSize()).append("\n").append(" -> consolidated: ").append(consolidated).append("\n").append(" -> confidence: ")
+		.append(confidence).append("\n");
+		return sb.toString();
+	}
+
 }
