@@ -132,14 +132,14 @@ public class CamLiveRetriever extends AbstractApp {
 					Stats.beginTask("restabilizeFields");
 					fields.restabilizeFields(fieldsHomography);
 					Stats.endTask("restabilizeFields");
-					Stats.beginTask("consolidate fields");
-					fields.consolidate(stabilizedDisplay);
-					Stats.endTask("consolidate fields");
 					stabilizedImgDescriptor = newImgDescriptor;
 					stabilizationHomography = deperspectivGraphy;
 					stabilizationHasChanged = false;
 					Stats.endTask("stabilizationHasChanged");
 				}
+				Stats.beginTask("consolidate fields");
+				fields.consolidate(stabilizedDisplay);
+				Stats.endTask("consolidate fields");
 				Img display = new Img(frame, false);
 				Stats.beginTask("consolidateOcr");
 				fields.performOcr(stabilized);
@@ -235,7 +235,7 @@ public class CamLiveRetriever extends AbstractApp {
 		return new double[] { (line.x1 + line.x2) / 2, (line.y1 + line.y2) / 2, 1d };
 	}
 
-	private Mat findHomography(Point vp, double width, double height) {
+	private static Mat findHomography(Point vp, double width, double height) {
 		Point bary = new Point(width / 2, height / 2);
 		double alpha = Math.atan2((vp.y - bary.y), (vp.x - bary.x));
 		if (alpha < -Math.PI / 2 && alpha > -Math.PI)
@@ -268,7 +268,7 @@ public class CamLiveRetriever extends AbstractApp {
 		return Imgproc.getPerspectiveTransform(new MatOfPoint2f(rotate(bary, -alpha, A_, B_, C_, D_)), new MatOfPoint2f(A, B, C, D));
 	}
 
-	private Point[] rotate(Point bary, double alpha, Point... points) {
+	private static Point[] rotate(Point bary, double alpha, Point... points) {
 		Mat matrix = Imgproc.getRotationMatrix2D(bary, alpha / Math.PI * 180, 1);
 		MatOfPoint2f results = new MatOfPoint2f();
 		Core.transform(new MatOfPoint2f(points), results, matrix);
