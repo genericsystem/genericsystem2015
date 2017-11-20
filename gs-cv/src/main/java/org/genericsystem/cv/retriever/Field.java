@@ -44,7 +44,7 @@ public class Field extends AbstractField {
 		sb.append("depth: ").append(depth).append(": ").append(rect);
 		if (isConsolidated())
 			sb.append(" -> ").append(getConsolidated());
-		if (children.isEmpty()) {
+		if (!children.isEmpty()) {
 			depth++;
 			for (Field child : children) {
 				sb.append("\n");

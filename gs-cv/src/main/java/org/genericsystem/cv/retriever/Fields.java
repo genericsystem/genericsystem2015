@@ -47,7 +47,7 @@ public class Fields extends AbstractFields<Field> {
 	public void displayFieldsTree() {
 		StringBuffer sb = new StringBuffer();
 		sb.append("\n").append("--- FIELDS ---").append("\n");
-		fields.forEach(field -> sb.append(field.recursiveToString()));
+		getRoots().forEach(field -> sb.append(field.recursiveToString()));
 		sb.append("\n").append("--- /FIELDS ---").append("\n");
 		System.out.println(sb.toString());
 	}
