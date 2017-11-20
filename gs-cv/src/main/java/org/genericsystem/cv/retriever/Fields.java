@@ -92,8 +92,10 @@ public class Fields extends AbstractFields<Field> {
 			Field match = findMatch(rect, overlapThreshold, img.width(), img.height());
 			if (match != null)
 				updateNode(rect, match, img.width(), img.height());
+			else if (!rect.isNearEdge(img.width(), img.height(), 10))
+				createNode(rect, findPotentialParent(rect));
 			else
-				createNode(rect, findPotentialParent(rect), img.width(), img.height());
+				logger.warn("Rect {} was too close to the frame's edges", rect);
 		}
 	}
 
@@ -106,8 +108,8 @@ public class Fields extends AbstractFields<Field> {
 		return null;
 	}
 
-	public void createNode(GSRect rect, Field parent, int width, int height) {
-		if (checkOverlapConstraint(rect) && !rect.isNearEdge(width, height, 10)) {
+	public void createNode(GSRect rect, Field parent) {
+		if (checkOverlapConstraint(rect)) {
 			logger.info("Creating a new node for {}", rect);
 			Field f = new Field(rect);
 			if (parent != null)
