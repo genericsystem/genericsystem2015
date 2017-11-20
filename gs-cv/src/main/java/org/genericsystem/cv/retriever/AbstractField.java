@@ -141,8 +141,8 @@ public abstract class AbstractField {
 			// --- //
 			Point topCenter = new Point((targets[0].x + targets[1].x) / 2, (targets[0].y + targets[1].y) / 2);
 			double l = Math.sqrt(Math.pow(targets[0].x - topCenter.x, 2) + Math.pow(targets[0].y - topCenter.y, 2));
-			Imgproc.line(display.getSrc(), new Point(topCenter.x, topCenter.y - 2), new Point(topCenter.x, topCenter.y - 20), color, 1);
-			Imgproc.putText(display.getSrc(), text, new Point(topCenter.x - l, topCenter.y - 22), Core.FONT_HERSHEY_TRIPLEX, 0.45, color, 1);
+			Imgproc.line(display.getSrc(), new Point(topCenter.x, topCenter.y - 2), new Point(topCenter.x, topCenter.y - 12), color, 1);
+			Imgproc.putText(display.getSrc(), text, new Point(topCenter.x - l, topCenter.y - 14), Core.FONT_HERSHEY_TRIPLEX, 0.45, color, 1);
 		}
 	}
 

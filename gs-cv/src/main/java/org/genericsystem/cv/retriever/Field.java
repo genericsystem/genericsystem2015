@@ -80,15 +80,15 @@ public class Field extends AbstractField {
 	}
 
 	public void draw(Img display, int thickness) {
-		if (needText())
+		if (needText(display))
 			drawDebugText(display, new Scalar(0, 64, 255), thickness);
 		drawRect(display, deadCounter == 0 ? new Scalar(0, 255, 0) : new Scalar(0, 0, 255), thickness);
 	}
 
 	public void drawWithHomography(Img display, Mat homography, int thickness) {
-		if (needRect()) {
+		if (needRect(display)) {
 			drawRect(display, getRectPointsWithHomography(homography), drawAsLocked() ? new Scalar(0, 255, 0) : new Scalar(0, 0, 255), thickness);
-			drawText(display, getRectPointsWithHomography(homography), new Scalar(0, 172, 0), thickness);
+			drawText(display, getRectPointsWithHomography(homography), new Scalar(0, 255, 0), thickness);
 		}
 	}
 
@@ -96,12 +96,19 @@ public class Field extends AbstractField {
 		return isOrphan() || (!isOrphan() && parent.getDeadCounter() != 0) ? isLocked() : false;
 	}
 
-	private boolean needRect() {
-		return !isOrphan() && parent.getDeadCounter() == 0 ? false : true /* isLocked() ? true : deadCounter == 0 */;
+	private boolean needRect(Img display) {
+		GSRect imgRect = new GSRect(0, 0, display.width(), display.height());
+		boolean ok = rect.isInside(imgRect) && (isOrphan() || (!isOrphan() && parent.getDeadCounter() == 0));
+		return ok;
 	}
 
-	private boolean needText() {
-		return deadCounter == 0 && needRect();
+	private boolean needText(Img display) {
+		return deadCounter == 0 && needRect(display);
+	}
+
+	public boolean isOnDisplay(Img display) {
+		GSRect imgRect = new GSRect(0, 0, display.width(), display.height());
+		return imgRect.isOverlapping(rect);
 	}
 
 	public void tryLock() {
