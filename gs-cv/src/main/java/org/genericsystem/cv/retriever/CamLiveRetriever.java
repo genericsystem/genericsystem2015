@@ -83,6 +83,9 @@ public class CamLiveRetriever extends AbstractApp {
 		ImageView src1 = new ImageView(Tools.mat2jfxImage(frame));
 		mainGrid.add(src1, 1, 0);
 
+		ImageView src2 = new ImageView(Tools.mat2jfxImage(frame));
+		mainGrid.add(src2, 1, 1);
+
 		timerFields.scheduleAtFixedRate(() -> onSpace(), 0, STABILIZATION_DELAY, TimeUnit.MILLISECONDS);
 
 		// Detect the rectangles
@@ -142,11 +145,16 @@ public class CamLiveRetriever extends AbstractApp {
 				fields.performOcr(stabilized);
 				Stats.endTask("consolidateOcr");
 
+				Img stabilizedDebug = new Img(stabilizedDisplay.getSrc(), true);
+				fields.drawFieldsOnStabilizedDebug(stabilizedDebug);
+
 				fields.drawOcrPerspectiveInverse(display, stabilizationHomography.inv(), 1);
 				fields.drawFieldsOnStabilized(stabilizedDisplay);
 
 				src0.setImage(display.toJfxImage());
 				src1.setImage(stabilizedDisplay.toJfxImage());
+				src2.setImage(stabilizedDebug.toJfxImage());
+
 				Stats.endTask("frame");
 
 				if (++counter % 20 == 0) {

@@ -19,7 +19,9 @@ import org.genericsystem.reinforcer.tools.GSRect;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
+import org.opencv.core.Scalar;
 import org.opencv.core.Size;
+import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +45,14 @@ public class Fields extends AbstractFields<Field> {
 
 	public void drawFieldsOnStabilized(Img stabilized) {
 		stream().forEach(field -> field.draw(stabilized, 1));
+	}
+
+	public void drawFieldsOnStabilizedDebug(Img stabilized) {
+		for (GSRect rect : mergeRectsList(stabilized)) {
+			Point[] targets = RectToolsMapper.gsPointToPoint(Arrays.asList(rect.decomposeClockwise())).toArray(new Point[0]);
+			for (int i = 0; i < targets.length; ++i)
+				Imgproc.line(stabilized.getSrc(), targets[i], targets[(i + 1) % targets.length], new Scalar(255, 0, 0), 1);
+		}
 	}
 
 	public void displayFieldsTree() {
