@@ -3,6 +3,7 @@ package org.genericsystem.cv.retriever;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -75,7 +76,9 @@ public class Fields extends AbstractFields<Field> {
 	}
 
 	private void mergeRects(Img img, double overlapThreshold) {
-		for (GSRect rect : mergeRectsList(img)) {
+		List<GSRect> rects = mergeRectsList(img);
+		Collections.reverse(rects);
+		for (GSRect rect : rects) {
 			Field match = findMatch(rect, overlapThreshold, img.width(), img.height());
 			if (match != null)
 				updateNode(rect, match, img.width(), img.height());
@@ -94,13 +97,14 @@ public class Fields extends AbstractFields<Field> {
 	}
 
 	public void createNode(GSRect rect, Field parent) {
-		if (checkOverlapConstraint(rect,null)) {
+		if (checkOverlapConstraint(rect, null)) {
 			logger.info("Creating a new node for {}", rect);
 			Field f = new Field(rect);
 			if (parent != null)
 				f.setParent(parent);
 			fields.add(f);
-		}
+		} else
+			logger.error("Unable to create node: " + rect);
 	}
 
 	public void updateNode(GSRect rect, Field field, int width, int height) {
@@ -111,11 +115,11 @@ public class Fields extends AbstractFields<Field> {
 	}
 
 	private boolean checkOverlapConstraint(GSRect rect, Field target) {
-
 		for (Field field : fields)
 			if (target == null || field != target)
-				if (rect.isOverlapping(field.getRect()))
-					return false;
+				if (rect.isOverlappingStrict(field.getRect()))
+					if (rect.getInsider(field.getRect()) == null)
+						return false;
 		return true;
 	}
 
@@ -150,8 +154,8 @@ public class Fields extends AbstractFields<Field> {
 		List<Field> matches = fields.stream().filter(f -> rect.inclusiveArea(f.getRect().getIntersection(frameRect)) > areaOverlap).collect(Collectors.toList());
 		if (matches.isEmpty())
 			return null;
-		if (matches.size() > 1) 
-			logger.warn(matches.size()+ "matches were detected.");
+		if (matches.size() > 1)
+			logger.warn(matches.size() + "matches were detected.");
 		return matches.get(0);
 	}
 
