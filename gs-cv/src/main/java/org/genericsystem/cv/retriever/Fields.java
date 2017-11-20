@@ -107,7 +107,7 @@ public class Fields extends AbstractFields<Field> {
 	}
 
 	public void createNode(GSRect rect, Field parent, int width, int height) {
-		if (checkOverlapConstraint(rect, null) && !rect.isNearEdge(width, height, 10)) {
+		if (checkOverlapConstraint(rect) && !rect.isNearEdge(width, height, 10)) {
 			logger.info("Creating a new node for {}", rect);
 			Field f = new Field(rect);
 			if (parent != null)
@@ -124,12 +124,11 @@ public class Fields extends AbstractFields<Field> {
 		field.resetChildrenDeadCounter();
 	}
 
-	private boolean checkOverlapConstraint(GSRect rect, Field target) {
+	private boolean checkOverlapConstraint(GSRect rect) {
 		for (Field field : fields)
-			if (target == null || field != target)
-				if (rect.isOverlappingStrict(field.getRect()))
-					if (rect.getInsider(field.getRect()) == null)
-						return false;
+			if (rect.isOverlappingStrict(field.getRect()))
+				if (rect.getInsider(field.getRect()) == null)
+					return false;
 		return true;
 	}
 
