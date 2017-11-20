@@ -92,11 +92,28 @@ public class Fields extends AbstractFields<Field> {
 			Field match = findMatch(rect, overlapThreshold, img.width(), img.height());
 			if (match != null)
 				updateNode(rect, match, img.width(), img.height());
-			else if (!rect.isNearEdge(img.width(), img.height(), 10))
-				createNode(rect, findPotentialParent(rect));
-			else
+			else if (!rect.isNearEdge(img.width(), img.height(), 10)) {
+				Field parent = findPotentialParent(rect);
+				if (parent == null) {
+					List<Field> children = findPotentialChildren(rect);
+					if (children.isEmpty())
+						createNode(rect, null);
+					else
+						createNode2(rect, children);
+				} else
+					createNode(rect, parent);
+			} else
 				logger.warn("Rect {} was too close to the frame's edges", rect);
 		}
+	}
+
+	private List<Field> findPotentialChildren(GSRect rect) {
+		List<Field> children = new ArrayList<>();
+		for (Field root : getRoots()) {
+			if (root.getRect().isInside(rect))
+				children.add(root);
+		}
+		return children;
 	}
 
 	private Field findPotentialParent(GSRect rect) {
@@ -114,6 +131,18 @@ public class Fields extends AbstractFields<Field> {
 			Field f = new Field(rect);
 			if (parent != null)
 				f.setParent(parent);
+			fields.add(f);
+		} else
+			logger.error("Unable to create node: " + rect);
+	}
+
+	public void createNode2(GSRect rect, List<Field> children) {
+		if (checkOverlapConstraint(rect)) {
+			logger.info("Creating a new node for {}", rect);
+			Field f = new Field(rect);
+			if (children != null)
+				for (Field child : children)
+					child.setParent(f);
 			fields.add(f);
 		} else
 			logger.error("Unable to create node: " + rect);
