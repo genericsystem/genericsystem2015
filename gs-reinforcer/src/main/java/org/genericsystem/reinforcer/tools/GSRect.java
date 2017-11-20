@@ -196,6 +196,10 @@ public class GSRect implements Comparable<GSRect> {
 		return (insider == null || insider == other) ? false : true;
 	}
 
+	public boolean isNearEdge(int width, int height, int tolerance) {
+		return x <= tolerance || y <= tolerance || x + this.width >= width + tolerance || y + this.height >= height + tolerance;
+	}
+
 	/**
 	 * Decompose the {@link GSRect} in four points starting from tl(), clockwise.
 	 * 

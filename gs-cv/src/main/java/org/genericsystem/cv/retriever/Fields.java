@@ -83,7 +83,7 @@ public class Fields extends AbstractFields<Field> {
 			if (match != null)
 				updateNode(rect, match, img.width(), img.height());
 			else
-				createNode(rect, findPotentialParent(rect));
+				createNode(rect, findPotentialParent(rect), img.width(), img.height());
 		}
 	}
 
@@ -96,8 +96,8 @@ public class Fields extends AbstractFields<Field> {
 		return null;
 	}
 
-	public void createNode(GSRect rect, Field parent) {
-		if (checkOverlapConstraint(rect, null)) {
+	public void createNode(GSRect rect, Field parent, int width, int height) {
+		if (checkOverlapConstraint(rect, null) && !rect.isNearEdge(width, height, 10)) {
 			logger.info("Creating a new node for {}", rect);
 			Field f = new Field(rect);
 			if (parent != null)
@@ -109,7 +109,7 @@ public class Fields extends AbstractFields<Field> {
 
 	public void updateNode(GSRect rect, Field field, int width, int height) {
 		logger.info("Updating node {} with {}", field.getRect(), rect);
-		field.updateRect(rect, width, height);
+		// field.updateRect(rect, width, height);
 		field.resetParentsDeadCounter();
 		field.resetChildrenDeadCounter();
 	}
