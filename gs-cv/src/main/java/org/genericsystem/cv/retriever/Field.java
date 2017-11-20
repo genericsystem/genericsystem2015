@@ -98,8 +98,7 @@ public class Field extends AbstractField {
 
 	private boolean needRect(Img display) {
 		GSRect imgRect = new GSRect(0, 0, display.width(), display.height());
-		boolean ok = rect.isInside(imgRect) && (isOrphan() || (!isOrphan() && parent.getDeadCounter() == 0));
-		return ok;
+		return !isOrphan() && parent.getRect().isInside(imgRect) ? false : rect.isInside(imgRect);
 	}
 
 	private boolean needText(Img display) {
