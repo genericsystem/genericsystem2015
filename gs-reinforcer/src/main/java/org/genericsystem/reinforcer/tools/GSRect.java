@@ -197,7 +197,7 @@ public class GSRect implements Comparable<GSRect> {
 	}
 
 	public boolean isNearEdge(int width, int height, int tolerance) {
-		return x <= tolerance || y <= tolerance || x + this.width >= width + tolerance || y + this.height >= height + tolerance;
+		return x <= tolerance || y <= tolerance || x + this.width >= width - tolerance || y + this.height >= height - tolerance;
 	}
 
 	/**
