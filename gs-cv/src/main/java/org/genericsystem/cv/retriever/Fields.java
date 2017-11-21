@@ -108,12 +108,7 @@ public class Fields extends AbstractFields<Field> {
 	}
 
 	private List<Field> findPotentialChildren(GSRect rect) {
-		List<Field> children = new ArrayList<>();
-		for (Field root : getRoots()) {
-			if (root.getRect().isInside(rect))
-				children.add(root);
-		}
-		return children;
+		return getRoots().stream().filter(f -> f.getRect().isInside(rect)).collect(Collectors.toList());
 	}
 
 	private Field findPotentialParent(GSRect rect) {
