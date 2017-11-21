@@ -99,7 +99,7 @@ public class Fields extends AbstractFields<Field> {
 					if (children.isEmpty())
 						createNode(rect, null);
 					else
-						createNode2(rect, children);
+						createNodeWithChildren(rect, children);
 				} else
 					createNode(rect, parent);
 			} else
@@ -131,7 +131,7 @@ public class Fields extends AbstractFields<Field> {
 			logger.error("Unable to create node: " + rect);
 	}
 
-	public void createNode2(GSRect rect, List<Field> children) {
+	public void createNodeWithChildren(GSRect rect, List<Field> children) {
 		if (checkOverlapConstraint(rect)) {
 			logger.info("Creating a new node for {}", rect);
 			Field f = new Field(rect);
