@@ -73,13 +73,13 @@ public abstract class AbstractField {
 	public void ocr(Img rootImg) {
 		if (rootImg.getSrc().empty() || rootImg.getSrc().width() <= 3 || rootImg.getSrc().height() <= 3)
 			return;
-		Rect largeRect = getLargeRect(rootImg, 0.03, 0.1);
-		if (largeRect.empty() || largeRect.width <= 3 || largeRect.height <= 3)
+		Rect ocrRect = new Rect((int) rect.getX(), (int) rect.getY(), (int) rect.getWidth(), (int) rect.getHeight());
+		if (ocrRect.empty() || ocrRect.width <= 3 || ocrRect.height <= 3)
 			return;
 		// Prevent OpenCV assertion failure
-		if (!(0 <= largeRect.x && 0 <= largeRect.y && largeRect.x + largeRect.width < rootImg.getSrc().cols() && largeRect.y + largeRect.height < rootImg.getSrc().rows()))
+		if (!(0 <= ocrRect.x && 0 <= ocrRect.y && ocrRect.x + ocrRect.width < rootImg.getSrc().cols() && ocrRect.y + ocrRect.height < rootImg.getSrc().rows()))
 			return;
-		Mat roi = new Mat(rootImg.getSrc(), largeRect);
+		Mat roi = new Mat(rootImg.getSrc(), ocrRect);
 		String ocr = Ocr.doWork(roi, OCR_CONFIDENCE_THRESH);
 		if (!ocr.isEmpty()) {
 			labels.merge(ocr, 1, Integer::sum);
