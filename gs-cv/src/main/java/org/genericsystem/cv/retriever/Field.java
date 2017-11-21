@@ -28,7 +28,7 @@ public class Field extends AbstractField {
 
 	public Field(GSRect rect, Field parent) {
 		super(rect);
-		setParent(parent);
+		updateParent(parent);
 		this.children = new ArrayList<>();
 	}
 
@@ -147,7 +147,14 @@ public class Field extends AbstractField {
 
 	public void setParent(Field parent) {
 		this.parent = parent;
-		this.parent.addChildIfNotPresent(this);
+	}
+
+	public void updateParent(Field parent) {
+		setParent(parent);
+		if (parent != null)
+			this.parent.addChildIfNotPresent(this);
+		else if (this.parent != null)
+			this.parent.removeChild(this);
 	}
 
 	public boolean hasChildren() {

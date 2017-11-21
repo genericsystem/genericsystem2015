@@ -125,7 +125,7 @@ public class Fields extends AbstractFields<Field> {
 			logger.info("Creating a new node for {}", rect);
 			Field f = new Field(rect);
 			if (parent != null)
-				f.setParent(parent);
+				f.updateParent(parent);
 			fields.add(f);
 		} else
 			logger.error("Unable to create node: " + rect);
@@ -137,7 +137,7 @@ public class Fields extends AbstractFields<Field> {
 			Field f = new Field(rect);
 			if (children != null)
 				for (Field child : children)
-					child.setParent(f);
+					child.updateParent(f);
 			fields.add(f);
 		} else
 			logger.error("Unable to create node: " + rect);
