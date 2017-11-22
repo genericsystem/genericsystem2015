@@ -75,7 +75,7 @@ public class ImgDescriptor {
 		MATCHER.match(getDescriptors(), frameDescriptor.getDescriptors(), matches);
 		List<DMatch> goodMatches = new ArrayList<>();
 		for (DMatch dMatch : matches.toArray()) {
-			if (dMatch.distance <= 40) {
+			if (dMatch.distance <= 20) {
 				goodMatches.add(dMatch);
 			}
 		}
@@ -93,7 +93,19 @@ public class ImgDescriptor {
 			Mat goodNewPoints = Converters.vector_Point2f_to_Mat(goodNewKeypoints);
 			MatOfPoint2f originalNewPoints = new MatOfPoint2f();
 			Core.perspectiveTransform(goodNewPoints, originalNewPoints, frameDescriptor.getHomography().inv());
-			return Calib3d.findHomography(originalNewPoints, new MatOfPoint2f(goodOldKeypoints.stream().toArray(Point[]::new)), Calib3d.RANSAC, 5);
+			Mat result = Calib3d.findHomography(originalNewPoints, new MatOfPoint2f(goodOldKeypoints.stream().toArray(Point[]::new)), Calib3d.RANSAC, 1);
+			if (result.size().empty()) {
+				CamLiveRetriever.logger.warn("Stabilization homography is empty");
+				return null;
+			}
+
+			System.out.println("Determinant Stabilization : " + Core.determinant(result));
+			double det = Core.determinant(result);
+			if (det < 0.7 || det > 3) {
+				CamLiveRetriever.logger.warn("Stabilization homography has wrong  determinant : " + det);
+				return null;
+			}
+			return result;
 		} else {
 			CamLiveRetriever.logger.warn("Not enough matches ({})", goodMatches.size());
 			return null;

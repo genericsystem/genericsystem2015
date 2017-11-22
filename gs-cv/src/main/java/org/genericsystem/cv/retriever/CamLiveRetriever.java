@@ -88,7 +88,7 @@ public class CamLiveRetriever extends AbstractApp {
 
 		timerFields.scheduleAtFixedRate(() -> onSpace(), 0, STABILIZATION_DELAY, TimeUnit.MILLISECONDS);
 
-		// Detect the rectangles
+		Img display = new Img(frame, false);
 		timerFields.scheduleAtFixedRate(() -> {
 			try {
 				Stats.beginTask("frame");
@@ -99,68 +99,71 @@ public class CamLiveRetriever extends AbstractApp {
 				}
 
 				Mat deperspectivGraphy = computeFrameToDeperspectivedHomography(frame);
-				if (deperspectivGraphy == null) {
+				if (deperspectivGraphy != null) {
+					if (stabilizedImgDescriptor == null) {
+						stabilizedImgDescriptor = new ImgDescriptor(frame, deperspectivGraphy);
+						return;
+					}
+					if (stabilizationHasChanged && stabilizationErrors > 20) {
+						// TODO: clean fields
+						fields.reset();
+						stabilizationErrors = 0;
+						stabilizedImgDescriptor = new ImgDescriptor(frame, deperspectivGraphy);
+						return;
+					}
+
+					ImgDescriptor newImgDescriptor = new ImgDescriptor(frame, deperspectivGraphy);
+					Stats.beginTask("stabilization homography");
+					Mat stabilizationHomography = stabilizedImgDescriptor.computeStabilizationGraphy(newImgDescriptor);
+					Stats.endTask("stabilization homography");
+					if (stabilizationHomography != null) {
+						Img stabilized = warpPerspective(frame, stabilizationHomography);
+						Img stabilizedDisplay = new Img(stabilized.getSrc(), true);
+						if (stabilizationHasChanged) {
+							Stats.beginTask("stabilizationHasChanged");
+							stabilized = newImgDescriptor.getDeperspectivedImg();
+							stabilizedDisplay = new Img(stabilized.getSrc(), true);
+							Mat fieldsHomography = new Mat();
+							Core.gemm(deperspectivGraphy, stabilizationHomography.inv(), 1, new Mat(), 0, fieldsHomography);
+							Stats.beginTask("restabilizeFields");
+							fields.restabilizeFields(fieldsHomography);
+							Stats.endTask("restabilizeFields");
+							stabilizedImgDescriptor = newImgDescriptor;
+							stabilizationHomography = deperspectivGraphy;
+							stabilizationHasChanged = false;
+							Stats.endTask("stabilizationHasChanged");
+						}
+						Stats.beginTask("consolidate fields");
+						fields.consolidate(stabilizedDisplay);
+						Stats.endTask("consolidate fields");
+						Stats.beginTask("consolidateOcr");
+						fields.performOcr(stabilized);
+						Stats.endTask("consolidateOcr");
+
+						Img stabilizedDebug = new Img(stabilizedDisplay.getSrc(), true);
+						fields.drawFieldsOnStabilizedDebug(stabilizedDebug);
+
+						fields.drawOcrPerspectiveInverse(display, stabilizationHomography.inv(), 1);
+						fields.drawFieldsOnStabilized(stabilizedDisplay);
+
+						src0.setImage(display.toJfxImage());
+						src1.setImage(stabilizedDisplay.toJfxImage());
+						src2.setImage(stabilizedDebug.toJfxImage());
+
+						Stats.endTask("frame");
+
+						if (++counter % 20 == 0) {
+							System.out.println(Stats.getStatsAndReset());
+							counter = 0;
+						}
+					} else {
+						stabilizationErrors++;
+						logger.warn("Unable to compute a valid stabilization ({} times)", stabilizationErrors);
+					}
+				} else {
 					logger.warn("Unable to compute a valid deperspectivation");
-					return;
 				}
-				if (stabilizationErrors > 20) {
-					// TODO: clean fields
-					fields.reset();
-					stabilizationErrors = 0;
-					stabilizedImgDescriptor = null;
-				}
-				if (stabilizedImgDescriptor == null) {
-					stabilizedImgDescriptor = new ImgDescriptor(frame, deperspectivGraphy);
-					return;
-				}
-				ImgDescriptor newImgDescriptor = new ImgDescriptor(frame, deperspectivGraphy);
-				Mat stabilizationHomography = stabilizedImgDescriptor.computeStabilizationGraphy(newImgDescriptor);
-				if (stabilizationHomography == null) {
-					stabilizationErrors++;
-					logger.warn("Unable to compute a valid stabilization ({} times)", stabilizationErrors);
-					return;
-				}
-				Img stabilized = warpPerspective(frame, stabilizationHomography);
-				Img stabilizedDisplay = new Img(stabilized.getSrc(), true);
-
-				if (stabilizationHasChanged) {
-					Stats.beginTask("stabilizationHasChanged");
-					stabilized = newImgDescriptor.getDeperspectivedImg();
-					stabilizedDisplay = new Img(stabilized.getSrc(), true);
-					Mat fieldsHomography = new Mat();
-					Core.gemm(deperspectivGraphy, stabilizationHomography.inv(), 1, new Mat(), 0, fieldsHomography);
-					Stats.beginTask("restabilizeFields");
-					fields.restabilizeFields(fieldsHomography);
-					Stats.endTask("restabilizeFields");
-					stabilizedImgDescriptor = newImgDescriptor;
-					stabilizationHomography = deperspectivGraphy;
-					stabilizationHasChanged = false;
-					Stats.endTask("stabilizationHasChanged");
-				}
-				Stats.beginTask("consolidate fields");
-				fields.consolidate(stabilizedDisplay);
-				Stats.endTask("consolidate fields");
-				Img display = new Img(frame, false);
-				Stats.beginTask("consolidateOcr");
-				fields.performOcr(stabilized);
-				Stats.endTask("consolidateOcr");
-
-				Img stabilizedDebug = new Img(stabilizedDisplay.getSrc(), true);
-				fields.drawFieldsOnStabilizedDebug(stabilizedDebug);
-
-				fields.drawOcrPerspectiveInverse(display, stabilizationHomography.inv(), 1);
-				fields.drawFieldsOnStabilized(stabilizedDisplay);
-
 				src0.setImage(display.toJfxImage());
-				src1.setImage(stabilizedDisplay.toJfxImage());
-				src2.setImage(stabilizedDebug.toJfxImage());
-
-				Stats.endTask("frame");
-
-				if (++counter % 20 == 0) {
-					System.out.println(Stats.getStatsAndReset());
-					counter = 0;
-				}
 			} catch (Throwable e) {
 				logger.warn("Exception while computing layout.", e);
 			}
@@ -270,7 +273,11 @@ public class CamLiveRetriever extends AbstractApp {
 			A_ = new Line(C_, bary).intersection(new Line(AB2, rotatedVp));
 			D_ = new Line(B_, bary).intersection(new Line(CD2, rotatedVp));
 		}
-		return Imgproc.getPerspectiveTransform(new MatOfPoint2f(rotate(bary, -alpha, A_, B_, C_, D_)), new MatOfPoint2f(A, B, C, D));
+		Mat result = Imgproc.getPerspectiveTransform(new MatOfPoint2f(rotate(bary, -alpha, A_, B_, C_, D_)), new MatOfPoint2f(A, B, C, D));
+		// System.out.println("Determinant vanishing : " + Core.determinant(result));
+		// if (Core.determinant(result) < 0.3)
+		// return null;
+		return result;
 	}
 
 	private static Point[] rotate(Point bary, double alpha, Point... points) {
