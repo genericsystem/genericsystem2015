@@ -80,10 +80,11 @@ public abstract class AbstractField {
 	public void ocr(Img rootImg) {
 		if (rootImg.getSrc().empty() || rootImg.getSrc().width() <= 3 || rootImg.getSrc().height() <= 3)
 			return;
+		if (ocrRect.isNearEdge(rootImg.width(), rootImg.height(), 10))
+			return;
 		Rect rect = new Rect((int) getOcrRect().getX(), (int) getOcrRect().getY(), (int) getOcrRect().getWidth(), (int) getOcrRect().getHeight());
 		if (rect.empty() || rect.width <= 3 || rect.height <= 3)
 			return;
-		// Prevent OpenCV assertion failure
 		if (!(0 <= rect.x && 0 <= rect.y && rect.x + rect.width < rootImg.getSrc().cols() && rect.y + rect.height < rootImg.getSrc().rows()))
 			return;
 		Mat roi = new Mat(rootImg.getSrc(), rect);
