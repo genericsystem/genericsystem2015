@@ -146,6 +146,7 @@ public class Fields extends AbstractFields<Field> {
 	public void updateNode(GSRect rect, Field field, int width, int height) {
 		logger.info("Updating node {} with {}", field.getRect(), rect);
 		// field.updateRect(rect, width, height);
+		field.updateOcrRect(rect);
 		field.resetParentsDeadCounter();
 		field.resetChildrenDeadCounter();
 	}

@@ -37,6 +37,7 @@ public abstract class AbstractField {
 	private static final int OCR_CONFIDENCE_THRESH = 0;
 
 	protected GSRect rect;
+	protected GSRect ocrRect;
 	protected Map<String, Integer> labels;
 	protected String consolidated;
 	protected double confidence;
@@ -50,6 +51,7 @@ public abstract class AbstractField {
 
 	public AbstractField(GSRect rect) {
 		this.rect = rect;
+		this.ocrRect = rect;
 		this.labels = new HashMap<>();
 		this.consolidated = null;
 		this.attempts = 0;
@@ -59,6 +61,7 @@ public abstract class AbstractField {
 
 	public AbstractField(AbstractField other) {
 		this.rect = other.getRect();
+		this.ocrRect = other.getOcrRect();
 		this.labels = other.getLabels();
 		this.consolidated = other.getConsolidated();
 		this.attempts = other.getAttempts();
@@ -70,16 +73,20 @@ public abstract class AbstractField {
 		this.rect = rect;
 	}
 
+	void updateOcrRect(GSRect rect) {
+		this.ocrRect = rect;
+	}
+
 	public void ocr(Img rootImg) {
 		if (rootImg.getSrc().empty() || rootImg.getSrc().width() <= 3 || rootImg.getSrc().height() <= 3)
 			return;
-		Rect ocrRect = new Rect((int) rect.getX(), (int) rect.getY(), (int) rect.getWidth(), (int) rect.getHeight());
-		if (ocrRect.empty() || ocrRect.width <= 3 || ocrRect.height <= 3)
+		Rect rect = new Rect((int) getOcrRect().getX(), (int) getOcrRect().getY(), (int) getOcrRect().getWidth(), (int) getOcrRect().getHeight());
+		if (rect.empty() || rect.width <= 3 || rect.height <= 3)
 			return;
 		// Prevent OpenCV assertion failure
-		if (!(0 <= ocrRect.x && 0 <= ocrRect.y && ocrRect.x + ocrRect.width < rootImg.getSrc().cols() && ocrRect.y + ocrRect.height < rootImg.getSrc().rows()))
+		if (!(0 <= rect.x && 0 <= rect.y && rect.x + rect.width < rootImg.getSrc().cols() && rect.y + rect.height < rootImg.getSrc().rows()))
 			return;
-		Mat roi = new Mat(rootImg.getSrc(), ocrRect);
+		Mat roi = new Mat(rootImg.getSrc(), rect);
 		String ocr = Ocr.doWork(roi, OCR_CONFIDENCE_THRESH);
 		if (!ocr.isEmpty()) {
 			labels.merge(ocr, 1, Integer::sum);
@@ -219,6 +226,10 @@ public abstract class AbstractField {
 
 	public GSRect getRect() {
 		return rect;
+	}
+
+	public GSRect getOcrRect() {
+		return ocrRect;
 	}
 
 	public double getConfidence() {
