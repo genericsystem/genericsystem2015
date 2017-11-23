@@ -7,7 +7,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.stream.IntStream;
 
 import org.genericsystem.cv.Img;
@@ -88,23 +87,17 @@ public abstract class AbstractField {
 		roi.release();
 	}
 
-	public void consolidateOcr(boolean force) {
-		consolidateOcr(Integer.MAX_VALUE, force);
-	}
+	//	public void consolidateOcr(boolean force) {
+	//		consolidateOcr(Integer.MAX_VALUE, force);
+	//	}
 
-	protected void consolidateOcr(int limit, boolean force) {
+	public void consolidateOcr(boolean force) {
 		int labelsSize = getLabelsSize();
 		if (force || labelsSize >= MIN_SIZE_CONSOLIDATION) {
-			List<String> strings;
-			if (Integer.MAX_VALUE == limit)
-				strings = labels.entrySet().stream().collect(ArrayList<String>::new, (list, e) -> IntStream.range(0, e.getValue()).forEach(count -> list.add(e.getKey())), List::addAll);
-			else
-				strings = labels.entrySet().stream().sorted(Entry.<String, Integer>comparingByValue().reversed()).limit(limit).collect(ArrayList<String>::new, (list, e) -> IntStream.range(0, e.getValue()).forEach(count -> list.add(e.getKey())),
-						List::addAll);
+			List<String> strings = labels.entrySet().stream().collect(ArrayList<String>::new, (list, e) -> IntStream.range(0, e.getValue()).forEach(count -> list.add(e.getKey())), List::addAll);
 			Tuple res = OCRPlasty.correctStringsAndGetOutliers(strings, RANSAC.NORM_LEVENSHTEIN);
 			this.consolidated = res.getString().orElse(null);
 			this.confidence = res.getConfidence();
-
 			if (labelsSize >= 2 * MIN_SIZE_CONSOLIDATION)
 				res.getOutliers().forEach(outlier -> labels.remove(outlier));
 		} else {
@@ -233,7 +226,7 @@ public abstract class AbstractField {
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append("AbstractField: ").append("\n").append(" -> rect: ").append(rect).append("\n").append(" -> labels size: ").append(getLabelsSize()).append("\n").append(" -> consolidated: ").append(consolidated).append("\n").append(" -> confidence: ")
-				.append(confidence).append("\n");
+		.append(confidence).append("\n");
 		return sb.toString();
 	}
 
