@@ -128,7 +128,7 @@ public class Fields extends AbstractFields<Field> {
 				f.updateParent(parent);
 			fields.add(f);
 		} else
-			logger.error("Unable to create node: " + rect);
+			logger.info("Unable to create node: " + rect);
 	}
 
 	public void createNodeWithChildren(GSRect rect, List<Field> children) {
@@ -140,12 +140,13 @@ public class Fields extends AbstractFields<Field> {
 					child.updateParent(f);
 			fields.add(f);
 		} else
-			logger.error("Unable to create node: " + rect);
+			logger.info("Unable to create node: " + rect);
 	}
 
 	public void updateNode(GSRect rect, Field field, int width, int height) {
 		logger.info("Updating node {} with {}", field.getRect(), rect);
 		// field.updateRect(rect, width, height);
+		field.updateOcrRect(rect);
 		field.resetParentsDeadCounter();
 		field.resetChildrenDeadCounter();
 	}
@@ -190,7 +191,7 @@ public class Fields extends AbstractFields<Field> {
 		if (matches.isEmpty())
 			return null;
 		if (matches.size() > 1)
-			logger.warn(matches.size() + "matches were detected.");
+			logger.warn(matches.size() + " matches were detected.");
 		return matches.get(0);
 	}
 
