@@ -68,7 +68,10 @@ public class Fields extends AbstractFields<Field> {
 	}
 
 	public void consolidate(Img img) {
-		fields.forEach(Field::incrementDeadCounter);
+		fields.forEach(f -> {
+			f.incrementDeadCounter();
+			f.adjustLockLevel(-0.5);
+		});
 		mergeRects(img, 0.70);
 		removeDeadTrees();
 	}
@@ -145,8 +148,8 @@ public class Fields extends AbstractFields<Field> {
 
 	public void updateNode(GSRect rect, Field field, int width, int height) {
 		logger.info("Updating node {} with {}", field.getRect(), rect);
-		// field.updateRect(rect, width, height);
 		field.updateOcrRect(rect);
+		field.adjustLockLevel(1.0);
 		field.resetParentsDeadCounter();
 		field.resetChildrenDeadCounter();
 	}

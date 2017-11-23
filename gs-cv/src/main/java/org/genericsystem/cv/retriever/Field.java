@@ -8,8 +8,11 @@ import java.util.stream.Collectors;
 import org.genericsystem.cv.Img;
 import org.genericsystem.reinforcer.tools.GSPoint;
 import org.genericsystem.reinforcer.tools.GSRect;
+import org.opencv.core.Core;
 import org.opencv.core.Mat;
+import org.opencv.core.Point;
 import org.opencv.core.Scalar;
+import org.opencv.imgproc.Imgproc;
 
 public class Field extends AbstractField {
 
@@ -18,15 +21,17 @@ public class Field extends AbstractField {
 
 	private static final int LABELS_SIZE_THRESHOLD = 10;
 	private static final double CONFIDENCE_THRESHOLD = 0.92;
-	private boolean locked = false;
+	private static final double LOCK_THRESHOLD = 0.90;
 
 	private int deadCounter;
+	private double locklLevel;
 
 	public Field(GSRect rect) {
 		super(rect);
 		this.parent = null;
 		this.children = new ArrayList<>();
 		this.deadCounter = 0;
+		this.locklLevel = 0;
 	}
 
 	public Field(GSRect rect, Field parent) {
@@ -75,9 +80,19 @@ public class Field extends AbstractField {
 			consolidateOcr(false);
 	}
 
-	public void resetDeadCounter() {
-		deadCounter = 0;
-		tryLock();
+	@Override
+	public void consolidateOcr(boolean force) {
+		super.consolidateOcr(force);
+		adjustLockLevel(getLabelsSize() > LABELS_SIZE_THRESHOLD ? 0.5 : -0.1);
+		adjustLockLevel(getConfidence() > CONFIDENCE_THRESHOLD ? 1 : -0.5);
+	}
+
+	@Override
+	public void drawDebugText(Img display, Point[] targets, Scalar color, int thickness) {
+		String conf = String.format("%.3f", getLockLevel());
+		Point topCenter = new Point((targets[0].x + targets[1].x) / 2, (targets[0].y + targets[1].y) / 2);
+		double l = Math.sqrt(Math.pow(targets[0].x - topCenter.x, 2) + Math.pow(targets[0].y - topCenter.y, 2));
+		Imgproc.putText(display.getSrc(), conf, new Point(topCenter.x - l, topCenter.y - 12), Core.FONT_HERSHEY_TRIPLEX, 0.35, color);
 	}
 
 	public void draw(Img display, int thickness) {
@@ -111,13 +126,20 @@ public class Field extends AbstractField {
 		return imgRect.isOverlapping(rect);
 	}
 
-	public void tryLock() {
-		if (!locked && getLabelsSize() > LABELS_SIZE_THRESHOLD && getConfidence() > CONFIDENCE_THRESHOLD)
-			this.locked = true;
+	public boolean isLocked() {
+		return getLockLevel() >= LOCK_THRESHOLD;
 	}
 
-	public boolean isLocked() {
-		return locked;
+	public double getLockLevel() {
+		return Math.tanh(this.locklLevel);
+	}
+
+	public void adjustLockLevel(double step) {
+		this.locklLevel += 0.2 * step;
+	}
+
+	public void resetDeadCounter() {
+		deadCounter = 0;
 	}
 
 	public void incrementDeadCounter() {
@@ -179,7 +201,7 @@ public class Field extends AbstractField {
 	}
 
 	public boolean isDead(int maxDeadCount) {
-		return !locked && deadCounter >= maxDeadCount;
+		return !isLocked() && deadCounter >= maxDeadCount;
 	}
 
 	void updateRect(GSRect rect, int width, int height) {
