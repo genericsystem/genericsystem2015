@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.genericsystem.cv.Img;
-import org.genericsystem.reinforcer.tools.GSPoint;
 import org.genericsystem.reinforcer.tools.GSRect;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
@@ -86,7 +85,6 @@ public class Field extends AbstractField {
 	@Override
 	public void consolidateOcr(boolean force) {
 		super.consolidateOcr(force);
-		adjustLockLevel(getLabelsSize() > LABELS_SIZE_THRESHOLD ? 0.5 : -0.1);
 		adjustLockLevel(getConfidence() > CONFIDENCE_THRESHOLD ? 1 : -0.5);
 	}
 
@@ -134,7 +132,7 @@ public class Field extends AbstractField {
 	}
 
 	public double getLockLevel() {
-		return Math.tanh(this.locklLevel);
+		return Math.tanh(locklLevel);
 	}
 
 	public void adjustLockLevel(double step) {
@@ -161,9 +159,9 @@ public class Field extends AbstractField {
 		return children.remove(child);
 	}
 
-	public boolean containsChild(Field field) {
-		return children.stream().anyMatch(child -> child.getRect().inclusiveArea(field.getRect()) > 0.95);
-	}
+	// public boolean containsChild(Field field) {
+	// return children.stream().anyMatch(child -> child.getRect().inclusiveArea(field.getRect()) > 0.95);
+	// }
 
 	public List<Field> getChildren() {
 		return children;
@@ -207,23 +205,8 @@ public class Field extends AbstractField {
 		return !isLocked() && deadCounter >= maxDeadCount;
 	}
 
-	void updateRect(GSRect rect, int width, int height) {
-		GSRect truncatedRect = getRect().getIntersection(new GSRect(0, 0, width, height));
-		double tlX = truncatedRect.getX();
-		double tlY = truncatedRect.getY();
-		double brX = tlX + getRect().getWidth();
-		double brY = tlY + getRect().getHeight();
-		GSRect updatedRect = new GSRect(new GSPoint(tlX <= 0 ? this.rect.tl().getX() : rect.tl().getX(), tlY <= 0 ? this.rect.tl().getY() : rect.tl().getY()),
-				new GSPoint(brX >= width ? this.rect.br().getX() : rect.br().getX(), brY >= height ? this.rect.br().getY() : rect.br().getY()));
-		this.rect = updatedRect;
-	}
-
-	public boolean isVeryfyingConstraints() {
-		return false;
-	}
-
 	public boolean needOcr() {
-		return !isLocked() && deadCounter == 0;
+		return !isLocked();
 	}
 
 	public void resetChildrenDeadCounter() {
@@ -238,5 +221,16 @@ public class Field extends AbstractField {
 		if (getParent() != null)
 			getParent().resetParentsDeadCounter();
 	}
+
+	// void updateRect(GSRect rect, int width, int height) {
+	// GSRect truncatedRect = getRect().getIntersection(new GSRect(0, 0, width, height));
+	// double tlX = truncatedRect.getX();
+	// double tlY = truncatedRect.getY();
+	// double brX = tlX + getRect().getWidth();
+	// double brY = tlY + getRect().getHeight();
+	// GSRect updatedRect = new GSRect(new GSPoint(tlX <= 0 ? this.rect.tl().getX() : rect.tl().getX(), tlY <= 0 ? this.rect.tl().getY() : rect.tl().getY()),
+	// new GSPoint(brX >= width ? this.rect.br().getX() : rect.br().getX(), brY >= height ? this.rect.br().getY() : rect.br().getY()));
+	// this.rect = updatedRect;
+	// }
 
 }
