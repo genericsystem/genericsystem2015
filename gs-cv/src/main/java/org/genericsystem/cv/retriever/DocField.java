@@ -74,10 +74,6 @@ public class DocField extends AbstractField {
 		this.attempts = attempts;
 	}
 
-	protected void setDeadCounter(int counter) {
-		this.deadCounter = counter;
-	}
-
 	protected void setLabelsSize(int size) {
 		// Do nothing
 	}

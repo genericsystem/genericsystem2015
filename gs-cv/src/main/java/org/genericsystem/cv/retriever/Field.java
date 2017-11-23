@@ -20,16 +20,18 @@ public class Field extends AbstractField {
 	private static final double CONFIDENCE_THRESHOLD = 0.92;
 	private boolean locked = false;
 
+	private int deadCounter;
+
 	public Field(GSRect rect) {
 		super(rect);
 		this.parent = null;
 		this.children = new ArrayList<>();
+		this.deadCounter = 0;
 	}
 
 	public Field(GSRect rect, Field parent) {
-		super(rect);
+		this(rect);
 		updateParent(parent);
-		this.children = new ArrayList<>();
 	}
 
 	public String recursiveToString() {
@@ -73,9 +75,8 @@ public class Field extends AbstractField {
 			consolidateOcr(false);
 	}
 
-	@Override
 	public void resetDeadCounter() {
-		super.resetDeadCounter();
+		deadCounter = 0;
 		tryLock();
 	}
 
@@ -117,6 +118,14 @@ public class Field extends AbstractField {
 
 	public boolean isLocked() {
 		return locked;
+	}
+
+	public void incrementDeadCounter() {
+		deadCounter++;
+	}
+
+	public int getDeadCounter() {
+		return deadCounter;
 	}
 
 	public boolean addChildIfNotPresent(Field child) {

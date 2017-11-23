@@ -42,8 +42,6 @@ public abstract class AbstractField {
 	protected double confidence;
 	protected long attempts;
 
-	protected int deadCounter;
-
 	public AbstractField() {
 		this(new GSRect());
 	}
@@ -55,17 +53,6 @@ public abstract class AbstractField {
 		this.consolidated = null;
 		this.attempts = 0;
 		this.confidence = 0;
-		this.deadCounter = 0;
-	}
-
-	public AbstractField(AbstractField other) {
-		this.rect = other.getRect();
-		this.ocrRect = other.getOcrRect();
-		this.labels = other.getLabels();
-		this.consolidated = other.getConsolidated();
-		this.attempts = other.getAttempts();
-		this.confidence = other.getConfidence();
-		this.deadCounter = other.getDeadCounter();
 	}
 
 	void updateRect(GSRect rect) {
@@ -117,8 +104,8 @@ public abstract class AbstractField {
 
 	public void drawOcrPerspectiveInverse(Img display, Mat homography, int thickness) {
 		Point[] targets = getRectPointsWithHomography(homography);
-		drawRect(display, targets, deadCounter == 0 ? new Scalar(0, 255, 0) : new Scalar(0, 0, 255), thickness);
-		drawText(display, targets, deadCounter == 0 ? new Scalar(0, 255, 0) : new Scalar(0, 0, 255), thickness);
+		drawRect(display, targets, new Scalar(0, 255, 0), thickness);
+		drawText(display, targets, new Scalar(0, 255, 0), thickness);
 	}
 
 	public void drawRect(Img stabilizedDisplay, Scalar color, int thickness) {
@@ -194,14 +181,6 @@ public abstract class AbstractField {
 		return consolidated != null;
 	}
 
-	public void incrementDeadCounter() {
-		deadCounter++;
-	}
-
-	public void resetDeadCounter() {
-		deadCounter = 0;
-	}
-
 	public int getLabelsSize() {
 		return labels.entrySet().stream().mapToInt(entry -> entry.getValue()).sum();
 	}
@@ -228,10 +207,6 @@ public abstract class AbstractField {
 
 	public double getConfidence() {
 		return confidence;
-	}
-
-	public int getDeadCounter() {
-		return deadCounter;
 	}
 
 	@Override
