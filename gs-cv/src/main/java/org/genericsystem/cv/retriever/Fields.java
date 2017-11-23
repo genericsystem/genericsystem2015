@@ -103,7 +103,7 @@ public class Fields extends AbstractFields<Field> {
 				} else
 					createNode(rect, parent);
 			} else
-				logger.warn("Rect {} was too close to the frame's edges", rect);
+				logger.trace("Rect {} was too close to the frame's edges", rect);
 		}
 	}
 
