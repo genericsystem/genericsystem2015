@@ -75,7 +75,7 @@ public class ImgDescriptor {
 		MATCHER.match(getDescriptors(), frameDescriptor.getDescriptors(), matches);
 		List<DMatch> goodMatches = new ArrayList<>();
 		for (DMatch dMatch : matches.toArray()) {
-			if (dMatch.distance <= 20) {
+			if (dMatch.distance <= 30) {
 				goodMatches.add(dMatch);
 			}
 		}
@@ -98,11 +98,8 @@ public class ImgDescriptor {
 				CamLiveRetriever.logger.warn("Stabilization homography is empty");
 				return null;
 			}
-
-			System.out.println("Determinant Stabilization : " + Core.determinant(result));
-			double det = Core.determinant(result);
-			if (det < 0.7 || det > 3) {
-				CamLiveRetriever.logger.warn("Stabilization homography has wrong  determinant : " + det);
+			if (!isValidHomography(result)) {
+				CamLiveRetriever.logger.warn("Not a valid homography");
 				return null;
 			}
 			return result;
@@ -110,6 +107,27 @@ public class ImgDescriptor {
 			CamLiveRetriever.logger.warn("Not enough matches ({})", goodMatches.size());
 			return null;
 		}
+	}
+
+	/*
+	 * When the homography is applied to a rectangle (clockwise decomposition), the transformed points must be in the same order (clockwise)
+	 */
+	private boolean isValidHomography(Mat homography) {
+		int w = deperspectivedImg.getSrc().width();
+		int h = deperspectivedImg.getSrc().height();
+		MatOfPoint2f original = new MatOfPoint2f(new Point[] { new Point(0, 0), new Point(w, 0), new Point(w, h), new Point(0, h) });
+		MatOfPoint2f dst = new MatOfPoint2f();
+		Core.perspectiveTransform(original, dst, homography);
+		List<Point> targets = dst.toList();
+		return isClockwise(targets.get(0), targets.get(1), targets.get(2));
+	}
+
+	private boolean isClockwise(Point a, Point b, Point c) {
+		double areaSum = 0;
+		areaSum += a.x * (b.y - c.y);
+		areaSum += b.x * (c.y - a.y);
+		areaSum += c.x * (a.y - b.y);
+		return areaSum > 0;
 	}
 
 }
