@@ -76,8 +76,11 @@ public class Field extends AbstractField {
 	@Override
 	public void ocr(Img rootImg) {
 		super.ocr(rootImg);
-		if (attempts <= 3 || attempts % 5 == 0)
+		if (attempts <= 3 || attempts % 5 == 0) {
+			Stats.beginTask("ocr plasty");
 			consolidateOcr(false);
+			Stats.endTask("ocr plasty");
+		}
 	}
 
 	@Override

@@ -98,7 +98,9 @@ public class CamLiveRetriever extends AbstractApp {
 					return;
 				}
 
+				Stats.beginTask("deperspectivation");
 				Mat deperspectivGraphy = computeFrameToDeperspectivedHomography(frame);
+				Stats.endTask("deperspectivation");
 				if (deperspectivGraphy != null) {
 					if (stabilizedImgDescriptor == null) {
 						stabilizedImgDescriptor = new ImgDescriptor(frame, deperspectivGraphy);
@@ -111,7 +113,9 @@ public class CamLiveRetriever extends AbstractApp {
 						return;
 					}
 
+					Stats.beginTask("get img descriptors");
 					ImgDescriptor newImgDescriptor = new ImgDescriptor(frame, deperspectivGraphy);
+					Stats.endTask("get img descriptors");
 					Stats.beginTask("stabilization homography");
 					Mat stabilizationHomography = stabilizedImgDescriptor.computeStabilizationGraphy(newImgDescriptor);
 					Stats.endTask("stabilization homography");
@@ -141,9 +145,9 @@ public class CamLiveRetriever extends AbstractApp {
 						Stats.endTask("performOcr");
 
 						Img stabilizedDebug = new Img(stabilizedDisplay.getSrc(), true);
-						fields.drawFieldsOnStabilizedDebug(stabilizedDebug);
 
 						Stats.beginTask("draw");
+						fields.drawFieldsOnStabilizedDebug(stabilizedDebug);
 						fields.drawOcrPerspectiveInverse(display, stabilizationHomography.inv(), 1);
 						fields.drawFieldsOnStabilized(stabilizedDisplay);
 						Stats.endTask("draw");
@@ -151,8 +155,6 @@ public class CamLiveRetriever extends AbstractApp {
 						src0.setImage(display.toJfxImage());
 						src1.setImage(stabilizedDisplay.toJfxImage());
 						src2.setImage(stabilizedDebug.toJfxImage());
-
-						Stats.endTask("frame");
 
 						if (++counter % 20 == 0) {
 							System.out.println(Stats.getStatsAndReset());
@@ -168,6 +170,8 @@ public class CamLiveRetriever extends AbstractApp {
 				src0.setImage(display.toJfxImage());
 			} catch (Throwable e) {
 				logger.warn("Exception while computing layout.", e);
+			} finally {
+				Stats.endTask("frame");
 			}
 		}, 100, FRAME_DELAY, TimeUnit.MILLISECONDS);
 
