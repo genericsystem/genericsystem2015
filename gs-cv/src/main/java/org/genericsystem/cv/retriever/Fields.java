@@ -228,7 +228,7 @@ public class Fields extends AbstractFields<Field> {
 	private void runSequentialOcr(Img rootImg) {
 		int idx = ThreadLocalRandom.current().nextInt(size());
 		Field f = fields.get(idx);
-		if (!f.isLocked())
+		if (f.needOcr())
 			f.ocr(rootImg);
 	}
 
