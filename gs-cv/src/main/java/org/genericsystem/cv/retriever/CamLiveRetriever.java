@@ -105,7 +105,6 @@ public class CamLiveRetriever extends AbstractApp {
 						return;
 					}
 					if (stabilizationHasChanged && stabilizationErrors > 20) {
-						// TODO: clean fields
 						fields.reset();
 						stabilizationErrors = 0;
 						stabilizedImgDescriptor = new ImgDescriptor(frame, deperspectivGraphy);
@@ -117,6 +116,7 @@ public class CamLiveRetriever extends AbstractApp {
 					Mat stabilizationHomography = stabilizedImgDescriptor.computeStabilizationGraphy(newImgDescriptor);
 					Stats.endTask("stabilization homography");
 					if (stabilizationHomography != null) {
+						stabilizationErrors = 0;
 						Img stabilized = warpPerspective(frame, stabilizationHomography);
 						Img stabilizedDisplay = new Img(stabilized.getSrc(), true);
 						if (stabilizationHasChanged) {
