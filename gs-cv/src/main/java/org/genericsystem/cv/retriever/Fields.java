@@ -4,9 +4,12 @@ import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -16,8 +19,10 @@ import org.genericsystem.cv.utils.ParallelTasks;
 import org.genericsystem.cv.utils.RectToolsMapper;
 import org.genericsystem.reinforcer.tools.GSPoint;
 import org.genericsystem.reinforcer.tools.GSRect;
+import org.opencv.calib3d.Calib3d;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
@@ -31,10 +36,19 @@ public class Fields extends AbstractFields<Field> {
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	private static final int MAX_DELETE_UNMERGED = 5;
-	private static final int OCR_TIMEOUT = 50;
+	private static final int OCR_TIMEOUT = 100;
+
+
+	public Fields(List<Field> fields) {
+		super(fields);
+	}
+
+	public Fields() {
+		super();
+	}
 
 	public void reset() {
-		displayFieldsTree();
+		//displayFieldsTree();
 		fields = new ArrayList<>();
 	}
 
@@ -125,29 +139,34 @@ public class Fields extends AbstractFields<Field> {
 
 	public void createNode(GSRect rect, Field parent) {
 		if (checkOverlapConstraint(rect)) {
-			logger.info("Creating a new node for {}", rect);
+			//logger.info("Creating a new node for {}", rect);
 			Field f = new Field(rect);
 			if (parent != null)
 				f.updateParent(parent);
 			fields.add(f);
-		} else
-			logger.info("Unable to create node: " + rect);
+		} 
+		//		else
+		//			logger.info("Unable to create node: " + rect);
 	}
 
 	public void createNodeWithChildren(GSRect rect, List<Field> children) {
 		if (checkOverlapConstraint(rect)) {
-			logger.info("Creating a new node for {}", rect);
+			//logger.info("Creating a new node for {}", rect);
 			Field f = new Field(rect);
 			if (children != null)
 				for (Field child : children)
 					child.updateParent(f);
 			fields.add(f);
-		} else
-			logger.info("Unable to create node: " + rect);
+		} 
+		//		else
+		//			logger.info("Unable to create node: " + rect);
 	}
 
 	public void updateNode(GSRect rect, Field field, int width, int height) {
-		logger.info("Updating node {} with {}", field.getRect(), rect);
+
+		//logger.info("Updating node {} with {}", field.getRect(), rect);
+		// field.updateRect(rect, width, height);
+
 		field.updateOcrRect(rect);
 		field.adjustLockLevel(1.0);
 		field.resetParentsDeadCounter();
@@ -163,7 +182,7 @@ public class Fields extends AbstractFields<Field> {
 	}
 
 	public void removeNode(Field field) {
-		logger.info("Removing node: {}", field.getRect());
+		//logger.info("Removing node: {}", field.getRect());
 		fields.remove(field);
 	}
 
@@ -198,7 +217,7 @@ public class Fields extends AbstractFields<Field> {
 		return matches.get(0);
 	}
 
-	public void restabilizeFields(Mat homography) {
+	public void restabilizeFields(Mat homography) {		
 		fields.forEach(field -> field.updateRect(findNewRect(field.getRect(), homography)));
 	}
 
@@ -217,7 +236,7 @@ public class Fields extends AbstractFields<Field> {
 		return res;
 	}
 
-	@Override
+	@Override	
 	public void performOcr(Img rootImg) {
 		if (size() <= 0)
 			return;
@@ -252,4 +271,108 @@ public class Fields extends AbstractFields<Field> {
 			e.printStackTrace();
 		}
 	}
+
+
+
+
+	public Fields tryRestoringFromOldFields(Img rootImg, Fields oldFields) {
+		if (size() <= 0)
+			return null;
+		long TS = System.currentTimeMillis();
+		Map<Field, String> ocrs = new ConcurrentHashMap<Field, String>();
+		while (System.currentTimeMillis() - TS <= OCR_TIMEOUT) {
+			runParallelOcr(rootImg, ocrs, oldFields);
+		}
+		Map<Field, Field> labelMatches = findRecoveringMatches(oldFields, ocrs);
+		System.out.println("matches found: "+labelMatches.toString());
+		Mat homography = findRecoveringHomography(labelMatches);
+		if(homography!=null ){
+			oldFields.restabilizeFields(homography);
+			this.transferHistoryFrom(oldFields);
+		}
+		return oldFields.getFields().isEmpty()?null:oldFields;
+	}
+
+	private void runParallelOcr(Img rootImg, Map<Field, String> ocrs, Fields oldFields) {
+		ParallelTasks tasks = new ParallelTasks();
+		int limit = tasks.getCounter() * 2;
+		for (Set<Integer> indexes = new HashSet<>(); indexes.size() < limit && indexes.size() < size();) {
+			int idx = ThreadLocalRandom.current().nextInt(size());
+			if (indexes.add(idx)) {
+				Field f = fields.get(idx);
+				if (f.needOcr())
+					tasks.add(() -> f.ocr(rootImg));
+				if(!oldFields.getFields().isEmpty() && f.ocr(rootImg)!=null)
+					ocrs.put(f, f.ocr(rootImg));
+			}
+		}
+		try {
+			tasks.run();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private Map<Field, Field> findRecoveringMatches(Fields oldFields, Map<Field, String> ocrs){
+		Map<Field, Field> matches = new HashMap<Field,Field>();
+		for(Map.Entry<Field, String> entry : ocrs.entrySet()){
+			System.out.println("ocr detected: "+entry.getValue());
+			if(entry.getValue().length()<3)
+				continue;
+			oldFields.getFields().removeIf(f -> Collections.frequency(oldFields.getFields(), f) > 1);
+			for(Field oldField : oldFields){
+				if(oldField.getConsolidated()==null)
+					continue;				
+				if(oldField.getConsolidated().equals(entry.getValue()))
+					matches.put(entry.getKey(), oldField);				
+			}			
+		}
+		return matches;
+	}
+
+	private Mat findRecoveringHomography(Map<Field, Field> matches) {
+		if(matches.size()<1)
+			return null;
+		List<Point> newPointList = new ArrayList<>();
+		List<Point> oldPointList = new ArrayList<>();
+		for(Map.Entry<Field, Field> entry : matches.entrySet()){
+			newPointList.addAll(getSquarePoints(entry.getKey().getRect().decomposeClockwise()));
+			oldPointList.addAll(getSquarePoints(entry.getValue().getRect().decomposeClockwise()));
+		}
+		Mat homography = Calib3d.findHomography(new MatOfPoint2f(oldPointList.toArray(new Point[oldPointList.size()])), new MatOfPoint2f(newPointList.toArray(new Point[newPointList.size()])));
+		return evaluateHomography(newPointList, oldPointList, homography)<1?homography:null;
+	}
+
+	private double evaluateHomography(List<Point> newPointList, List<Point> oldPointList, Mat homography) {		
+		double error = 0.0;
+		List<Point> restabilized = restabilize(oldPointList, homography);
+		for(int i = 0; i < restabilized.size(); i++){
+			double deltaX = newPointList.get(i).x - restabilized.get(i).x;
+			double deltaY = newPointList.get(i).y - restabilized.get(i).y;
+			error+=deltaX*deltaX + deltaY*deltaY;
+		}
+		System.out.println("error found: "+ Math.sqrt(error));
+		return Math.sqrt(error);
+	}
+
+	private List<Point> getSquarePoints(GSPoint[] GSpoints) {
+		List<Point> points = new ArrayList<>();
+		for(int i = 0; i < GSpoints.length; i++)
+			points.add(new Point(GSpoints[i].getX(), GSpoints[i].getY()));
+		return points;
+	}
+
+	public void transferHistoryFrom(Fields oldFields){
+
+		for(Field newField : fields){
+			Field match = newField.findOldMatch(oldFields);
+			if(match!=null){
+				newField.setLabels(match.getLabels());
+				newField.setConsolidated(match.getConsolidated());
+				oldFields.removeNode(match);
+			}			
+		}
+	}
+
+
 }

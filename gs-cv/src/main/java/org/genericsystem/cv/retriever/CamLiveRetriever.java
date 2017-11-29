@@ -50,6 +50,8 @@ public class CamLiveRetriever extends AbstractApp {
 	private final ScheduledExecutorService timerFields = new ScheduledThreadPoolExecutor(1, new ThreadPoolExecutor.DiscardPolicy());
 	private final VideoCapture capture = new VideoCapture(0);
 	private final Fields fields = new Fields();
+	private Fields oldFields = null;
+	private int recoveringCounter = 0;
 
 	private ImgDescriptor stabilizedImgDescriptor;
 	private Mat frame = new Mat();
@@ -83,8 +85,8 @@ public class CamLiveRetriever extends AbstractApp {
 		ImageView src1 = new ImageView(Tools.mat2jfxImage(frame));
 		mainGrid.add(src1, 1, 0);
 
-		ImageView src2 = new ImageView(Tools.mat2jfxImage(frame));
-		mainGrid.add(src2, 1, 1);
+		//		ImageView src2 = new ImageView(Tools.mat2jfxImage(frame));
+		//		mainGrid.add(src2, 1, 1);
 
 		timerFields.scheduleAtFixedRate(() -> onSpace(), 0, STABILIZATION_DELAY, TimeUnit.MILLISECONDS);
 
@@ -107,6 +109,8 @@ public class CamLiveRetriever extends AbstractApp {
 						return;
 					}
 					if (stabilizationHasChanged && stabilizationErrors > 20) {
+						oldFields = oldFields==null?new Fields(fields.getFields()):oldFields;
+						recoveringCounter = 0;
 						fields.reset();
 						stabilizationErrors = 0;
 						stabilizedImgDescriptor = new ImgDescriptor(frame, deperspectivGraphy);
@@ -123,7 +127,7 @@ public class CamLiveRetriever extends AbstractApp {
 						stabilizationErrors = 0;
 						Img stabilized = warpPerspective(frame, stabilizationHomography);
 						Img stabilizedDisplay = new Img(stabilized.getSrc(), true);
-						if (stabilizationHasChanged) {
+						if (stabilizationHasChanged) {							
 							Stats.beginTask("stabilizationHasChanged");
 							stabilized = newImgDescriptor.getDeperspectivedImg();
 							stabilizedDisplay = new Img(stabilized.getSrc(), true);
@@ -138,12 +142,21 @@ public class CamLiveRetriever extends AbstractApp {
 							Stats.endTask("stabilizationHasChanged");
 						}
 						Stats.beginTask("consolidate fields");
-						fields.consolidate(stabilizedDisplay);
+						fields.consolidate(stabilizedDisplay);						
 						Stats.endTask("consolidate fields");
 						Stats.beginTask("performOcr");
-						fields.performOcr(stabilized);
-						Stats.endTask("performOcr");
 
+						if(oldFields==null)
+							fields.performOcr(stabilized);
+						else{
+							oldFields = fields.tryRestoringFromOldFields(stabilized, oldFields);
+							if(oldFields != null)
+								recoveringCounter++;
+						}
+						if(recoveringCounter>5)
+							oldFields = null;
+
+						Stats.endTask("performOcr");
 						Img stabilizedDebug = new Img(stabilizedDisplay.getSrc(), true);
 
 						Stats.beginTask("draw");
@@ -154,7 +167,7 @@ public class CamLiveRetriever extends AbstractApp {
 
 						src0.setImage(display.toJfxImage());
 						src1.setImage(stabilizedDisplay.toJfxImage());
-						src2.setImage(stabilizedDebug.toJfxImage());
+						//src2.setImage(stabilizedDebug.toJfxImage());
 
 						if (++counter % 20 == 0) {
 							System.out.println(Stats.getStatsAndReset());
@@ -164,9 +177,10 @@ public class CamLiveRetriever extends AbstractApp {
 						stabilizationErrors++;
 						logger.warn("Unable to compute a valid stabilization ({} times)", stabilizationErrors);
 					}
-				} else {
-					logger.warn("Unable to compute a valid deperspectivation");
 				}
+				//				} else {
+				//					logger.warn("Unable to compute a valid deperspectivation");
+				//				}
 				src0.setImage(display.toJfxImage());
 			} catch (Throwable e) {
 				logger.warn("Exception while computing layout.", e);
@@ -212,7 +226,7 @@ public class CamLiveRetriever extends AbstractApp {
 		Stats.endTask("levenberg");
 		calibrated = calibrated.dump(newThetaPhi, 3);
 		vp = calibrated.uncalibrate();
-		System.out.println("Levenberg vp : " + vp);
+		//System.out.println("Levenberg vp : " + vp);
 		return findHomography(vp, frame.width(), frame.height());
 	}
 

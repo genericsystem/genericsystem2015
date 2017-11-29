@@ -61,4 +61,7 @@ public abstract class AbstractFields<F extends AbstractField> implements Iterabl
 		return fields.size();
 	}
 
+	public List<F> getFields(){
+		return fields;
+	}
 }

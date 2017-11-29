@@ -39,6 +39,8 @@ public abstract class AbstractField {
 	protected GSRect ocrRect;
 	protected Map<String, Integer> labels;
 	protected String consolidated;
+
+
 	protected double confidence;
 	protected long attempts;
 
@@ -63,23 +65,31 @@ public abstract class AbstractField {
 		this.ocrRect = rect;
 	}
 
-	public void ocr(Img rootImg) {
+	public void setLabels(Map<String, Integer> labels) {
+		this.labels = labels;
+	}
+
+	public void setConsolidated(String consolidated) {
+		this.consolidated = consolidated;
+	}
+
+	public String ocr(Img rootImg) {
 		if (rootImg.getSrc().empty() || rootImg.getSrc().width() <= 3 || rootImg.getSrc().height() <= 3)
-			return;
+			return null;
 		if (ocrRect.isNearEdge(rootImg.width(), rootImg.height(), 10))
-			return;
+			return null;
 		Rect rect = new Rect((int) getOcrRect().getX(), (int) getOcrRect().getY(), (int) getOcrRect().getWidth(), (int) getOcrRect().getHeight());
 		if (rect.empty() || rect.width <= 3 || rect.height <= 3)
-			return;
+			return null;
 		if (!(0 <= rect.x && 0 <= rect.y && rect.x + rect.width < rootImg.getSrc().cols() && rect.y + rect.height < rootImg.getSrc().rows()))
-			return;
+			return null;
 		Mat roi = new Mat(rootImg.getSrc(), rect);
 		String ocr = Ocr.doWork(roi, OCR_CONFIDENCE_THRESH);
 		if (!ocr.isEmpty()) {
 			labels.merge(ocr, 1, Integer::sum);
 			attempts++;
 		}
-		roi.release();
+		return ocr;
 	}
 
 	//	public void consolidateOcr(boolean force) {

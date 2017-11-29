@@ -73,13 +73,14 @@ public class Field extends AbstractField {
 	}
 
 	@Override
-	public void ocr(Img rootImg) {
-		super.ocr(rootImg);
+	public String ocr(Img rootImg) {
+		String ocr = super.ocr(rootImg);
 		if (attempts <= 3 || attempts % 5 == 0) {
 			Stats.beginTask("ocr plasty");
 			consolidateOcr(false);
 			Stats.endTask("ocr plasty");
 		}
+		return ocr;
 	}
 
 	@Override
@@ -222,6 +223,7 @@ public class Field extends AbstractField {
 			getParent().resetParentsDeadCounter();
 	}
 
+
 	// void updateRect(GSRect rect, int width, int height) {
 	// GSRect truncatedRect = getRect().getIntersection(new GSRect(0, 0, width, height));
 	// double tlX = truncatedRect.getX();
@@ -232,5 +234,13 @@ public class Field extends AbstractField {
 	// new GSPoint(brX >= width ? this.rect.br().getX() : rect.br().getX(), brY >= height ? this.rect.br().getY() : rect.br().getY()));
 	// this.rect = updatedRect;
 	// }
+
+	public Field findOldMatch(Fields oldFields) {		
+		for(Field oldField : oldFields)
+			if(getRect().inclusiveArea(oldField.getRect())>0.6)
+				return oldField;
+		return null;
+	}
+
 
 }

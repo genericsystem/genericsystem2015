@@ -1,7 +1,5 @@
 package org.genericsystem.cv.retriever;
 
-import java.util.Map;
-
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.utils.ModelTools;
 import org.genericsystem.reinforcer.tools.GSRect;
@@ -58,13 +56,13 @@ public class DocField extends AbstractField {
 		this.uid = uid;
 	}
 
-	protected void setLabels(Map<String, Integer> labels) {
-		this.labels = labels;
-	}
-
-	protected void setConsolidated(String consolidated) {
-		this.consolidated = consolidated;
-	}
+	//	protected void setLabels(Map<String, Integer> labels) {
+	//		this.labels = labels;
+	//	}
+	//
+	//	protected void setConsolidated(String consolidated) {
+	//		this.consolidated = consolidated;
+	//	}
 
 	protected void setConfidence(double confidence) {
 		this.confidence = confidence;
