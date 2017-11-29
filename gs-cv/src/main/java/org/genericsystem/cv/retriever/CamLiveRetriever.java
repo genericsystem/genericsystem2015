@@ -2,7 +2,9 @@ package org.genericsystem.cv.retriever;
 
 import java.lang.invoke.MethodHandles;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -51,6 +53,7 @@ public class CamLiveRetriever extends AbstractApp {
 	private final VideoCapture capture = new VideoCapture(0);
 	private final Fields fields = new Fields();
 	private Fields oldFields = null;
+	private Map<Field, Field> labelMatches = new HashMap<>();
 	private int recoveringCounter = 0;
 
 	private ImgDescriptor stabilizedImgDescriptor;
@@ -149,9 +152,13 @@ public class CamLiveRetriever extends AbstractApp {
 						if(oldFields==null)
 							fields.performOcr(stabilized);
 						else{
-							oldFields = fields.tryRestoringFromOldFields(stabilized, oldFields);
-							if(oldFields != null)
-								recoveringCounter++;
+							recoveringCounter++;
+							labelMatches.putAll(fields.getLabelMatchesWithOldFields(stabilized, oldFields));
+							System.out.println(">>>> matches to work with:"+labelMatches.size());
+							if(labelMatches.size()>5){
+								fields.tryRecoveryfromOldFields(labelMatches, oldFields);
+								oldFields = null;
+							}							
 						}
 						if(recoveringCounter>5)
 							oldFields = null;
@@ -190,6 +197,9 @@ public class CamLiveRetriever extends AbstractApp {
 		}, 100, FRAME_DELAY, TimeUnit.MILLISECONDS);
 
 	}
+
+
+
 
 	@Override
 	protected void onSpace() {

@@ -250,8 +250,8 @@ public class Fields extends AbstractFields<Field> {
 	private void runSequentialOcr(Img rootImg) {
 		int idx = ThreadLocalRandom.current().nextInt(size());
 		Field f = fields.get(idx);
-		if (f.needOcr())
-			f.ocr(rootImg);
+		//if (f.needOcr())
+		f.ocr(rootImg);
 	}
 
 	private void runParallelOcr(Img rootImg) {
@@ -261,8 +261,8 @@ public class Fields extends AbstractFields<Field> {
 			int idx = ThreadLocalRandom.current().nextInt(size());
 			if (indexes.add(idx)) {
 				Field f = fields.get(idx);
-				if (f.needOcr())
-					tasks.add(() -> f.ocr(rootImg));
+				//if (f.needOcr())
+				tasks.add(() -> f.ocr(rootImg));
 			}
 		}
 		try {
@@ -273,36 +273,26 @@ public class Fields extends AbstractFields<Field> {
 	}
 
 
-
-
-	public Fields tryRestoringFromOldFields(Img rootImg, Fields oldFields) {
+	public Map<Field, Field> getLabelMatchesWithOldFields(Img rootImg, Fields oldFields) {
 		if (size() <= 0)
 			return null;
 		long TS = System.currentTimeMillis();
 		Map<Field, String> ocrs = new ConcurrentHashMap<Field, String>();
 		while (System.currentTimeMillis() - TS <= OCR_TIMEOUT) {
-			runParallelOcr(rootImg, ocrs, oldFields);
+			runParallelOcr(rootImg, ocrs);
 		}
-		Map<Field, Field> labelMatches = findRecoveringMatches(oldFields, ocrs);
-		System.out.println("matches found: "+labelMatches.toString());
-		Mat homography = findRecoveringHomography(labelMatches);
-		if(homography!=null ){
-			oldFields.restabilizeFields(homography);
-			this.transferHistoryFrom(oldFields);
-		}
-		return oldFields.getFields().isEmpty()?null:oldFields;
+		return findRecoveringMatches(oldFields, ocrs);
 	}
 
-	private void runParallelOcr(Img rootImg, Map<Field, String> ocrs, Fields oldFields) {
+	private void runParallelOcr(Img rootImg, Map<Field, String> ocrs) {
 		ParallelTasks tasks = new ParallelTasks();
 		int limit = tasks.getCounter() * 2;
 		for (Set<Integer> indexes = new HashSet<>(); indexes.size() < limit && indexes.size() < size();) {
 			int idx = ThreadLocalRandom.current().nextInt(size());
 			if (indexes.add(idx)) {
 				Field f = fields.get(idx);
-				if (f.needOcr())
-					tasks.add(() -> f.ocr(rootImg));
-				if(!oldFields.getFields().isEmpty() && f.ocr(rootImg)!=null)
+				tasks.add(() -> f.ocr(rootImg));
+				if(f.ocr(rootImg)!=null)
 					ocrs.put(f, f.ocr(rootImg));
 			}
 		}
@@ -313,42 +303,48 @@ public class Fields extends AbstractFields<Field> {
 		}
 	}
 
+	public void tryRecoveryfromOldFields(Map<Field, Field> labelMatches, Fields oldFields) {
+		Mat homography = findRecoveringHomography(labelMatches);
+		if(homography!=null ){
+			oldFields.restabilizeFields(homography);
+			transferHistoryFrom(oldFields);
+		}		
+	}
+
 	private Map<Field, Field> findRecoveringMatches(Fields oldFields, Map<Field, String> ocrs){
 		Map<Field, Field> matches = new HashMap<Field,Field>();
+		List<Field> singleOldFields = oldFields.stream().filter(field -> Collections.frequency(oldFields.getFields().stream().map(f -> f.getConsolidated()).collect(Collectors.toList()), field.getConsolidated()) == 1).collect(Collectors.toList());
 		for(Map.Entry<Field, String> entry : ocrs.entrySet()){
 			System.out.println("ocr detected: "+entry.getValue());
 			if(entry.getValue().length()<3)
 				continue;
-			oldFields.getFields().removeIf(f -> Collections.frequency(oldFields.getFields(), f) > 1);
-			for(Field oldField : oldFields){
-				if(oldField.getConsolidated()==null)
-					continue;				
-				if(oldField.getConsolidated().equals(entry.getValue()))
-					matches.put(entry.getKey(), oldField);				
+			for(Field oldField : singleOldFields){
+				if(entry.getValue().equals(oldField.getConsolidated()))
+					matches.put(oldField, entry.getKey());				
 			}			
 		}
+		System.out.println("returning "+matches);
 		return matches;
 	}
 
-	private Mat findRecoveringHomography(Map<Field, Field> matches) {
-		if(matches.size()<1)
-			return null;
+	private Mat findRecoveringHomography(Map<Field, Field> matches) {		
 		List<Point> newPointList = new ArrayList<>();
 		List<Point> oldPointList = new ArrayList<>();
 		for(Map.Entry<Field, Field> entry : matches.entrySet()){
-			newPointList.addAll(getSquarePoints(entry.getKey().getRect().decomposeClockwise()));
-			oldPointList.addAll(getSquarePoints(entry.getValue().getRect().decomposeClockwise()));
+			oldPointList.addAll(getSquarePoints(entry.getKey().getRect().decomposeClockwise()));
+			newPointList.addAll(getSquarePoints(entry.getValue().getRect().decomposeClockwise()));
 		}
 		Mat homography = Calib3d.findHomography(new MatOfPoint2f(oldPointList.toArray(new Point[oldPointList.size()])), new MatOfPoint2f(newPointList.toArray(new Point[newPointList.size()])));
-		return evaluateHomography(newPointList, oldPointList, homography)<1?homography:null;
+		return evaluateHomographyError(newPointList, oldPointList, homography)<3?homography:null;
 	}
 
-	private double evaluateHomography(List<Point> newPointList, List<Point> oldPointList, Mat homography) {		
+
+	private double evaluateHomographyError(List<Point> newPointList, List<Point> oldPointList, Mat homography) {		
 		double error = 0.0;
-		List<Point> restabilized = restabilize(oldPointList, homography);
-		for(int i = 0; i < restabilized.size(); i++){
-			double deltaX = newPointList.get(i).x - restabilized.get(i).x;
-			double deltaY = newPointList.get(i).y - restabilized.get(i).y;
+		List<Point> restabilizedPoints = restabilize(oldPointList, homography);
+		for(int i = 0; i < restabilizedPoints.size(); i++){
+			double deltaX = newPointList.get(i).x - restabilizedPoints.get(i).x;
+			double deltaY = newPointList.get(i).y - restabilizedPoints.get(i).y;
 			error+=deltaX*deltaX + deltaY*deltaY;
 		}
 		System.out.println("error found: "+ Math.sqrt(error));
@@ -362,6 +358,7 @@ public class Fields extends AbstractFields<Field> {
 		return points;
 	}
 
+
 	public void transferHistoryFrom(Fields oldFields){
 
 		for(Field newField : fields){
@@ -373,6 +370,8 @@ public class Fields extends AbstractFields<Field> {
 			}			
 		}
 	}
+
+
 
 
 }

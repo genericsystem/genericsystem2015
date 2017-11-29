@@ -206,9 +206,9 @@ public class Field extends AbstractField {
 		return !isLocked() && deadCounter >= maxDeadCount;
 	}
 
-	public boolean needOcr() {
-		return !isLocked();
-	}
+	//	public boolean needOcr() {
+	//		return !isLocked();
+	//	}
 
 	public void resetChildrenDeadCounter() {
 		for (Field child : children) {
