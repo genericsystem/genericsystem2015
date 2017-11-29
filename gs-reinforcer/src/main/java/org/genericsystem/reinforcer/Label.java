@@ -4,6 +4,7 @@ import java.text.Collator;
 
 import org.genericsystem.reinforcer.tools.GSPoint;
 import org.genericsystem.reinforcer.tools.GSRect;
+import org.genericsystem.reinforcer.tools.RectangleTools;
 import org.genericsystem.reinforcer.tools.StringCompare;
 import org.genericsystem.reinforcer.tools.StringCompare.SIMILARITY;
 
@@ -52,6 +53,14 @@ public class Label implements Comparable<Label> {
 		return new Label(rect.normalize(mintlx, mintly, width, height), label);
 	}
 
+	public Label affineTransform(double xScale, double xShift, double yScale, double yShift) {
+		double newX = xScale * rect.getX() + xShift;
+		double newBrX = xScale * rect.br().getX() + xShift;
+		double newY = yScale * rect.getY() + yShift;
+		double newBrY = yScale * rect.br().getY() + yShift;
+		return new Label(newX, newY, newBrX, newBrY, label);
+	}
+
 	public boolean matchesText(String text) {
 		return StringCompare.similar(text, label, SIMILARITY.LEVENSHTEIN);
 	}
@@ -60,19 +69,39 @@ public class Label implements Comparable<Label> {
 	public boolean isInDirection(Label other, Direction direction) {
 		GSPoint center = getRect().getCenter();
 		GSRect otherRect = other.getRect();
-		boolean result = true;
-		if (direction == Direction.NORTH_WEST || direction == Direction.NORTH || direction == Direction.NORTH_EAST) {
-			result &= center.getY() < otherRect.getY();
+		boolean north = center.getY() < otherRect.getY(); 
+		boolean east = center.getX() > otherRect.getX() + otherRect.getWidth();
+		boolean south = center.getY() > otherRect.getY() + otherRect.getHeight();
+		boolean west = center.getX() < otherRect.getX();
+		switch (direction) {
+			case NORTH_EAST:
+				return east && north;
+			case NORTH:
+				return north && !east && !west;
+			case NORTH_WEST:
+				return north && west;
+			case WEST:
+				return west && !south && !north;
+			case SOUTH_WEST:
+				return south && west;
+			case SOUTH:
+				return south && !west && !east;
+			case SOUTH_EAST:
+				return south && east;
+			case EAST:
+			default:
+				return east && !south && !north;
 		}
-		if (direction == Direction.NORTH_EAST || direction == Direction.EAST || direction == Direction.SOUTH_EAST) {
-			result &= center.getX() > otherRect.getX() + otherRect.getWidth();
-		}
-		if (direction == Direction.SOUTH_EAST || direction == Direction.SOUTH || direction == Direction.SOUTH_WEST) {
-			result &= center.getY() > otherRect.getY() + otherRect.getHeight();
-		}
-		if (direction == Direction.SOUTH_WEST || direction == Direction.WEST || direction == Direction.NORTH_WEST) {
-			result &= center.getX() < otherRect.getX();
-		}
+	}
+
+	public double alignmentCost(Label other) {
+		double result;
+		if (RectangleTools.isInCluster(rect, other.rect, RectangleTools.DEFAULT_EPSILON))
+			result = 0;
+		else if (alignedWith(other, Alignment.LEFT) || alignedWith(other, Alignment.RIGHT))
+			result = .4;
+		else
+			result = .8;
 		return result;
 	}
 

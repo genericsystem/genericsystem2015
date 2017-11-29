@@ -3,19 +3,26 @@ package org.genericsystem.reinforcer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.genericsystem.reinforcer.Constraint.ColsConstraint;
 import org.genericsystem.reinforcer.Constraint.PositionConstraint;
 import org.genericsystem.reinforcer.Constraint.RelationConstraint;
+import org.genericsystem.reinforcer.Template3.LabelDesc;
+import org.genericsystem.reinforcer.Template3.Match;
 import org.genericsystem.reinforcer.tools.GSPoint;
 import org.genericsystem.reinforcer.tools.GSRect;
+import org.genericsystem.reinforcer.tools.StringCompare;
+import org.genericsystem.reinforcer.tools.StringCompare.SIMILARITY;
 
 public class Labels implements Iterable<Label> {
 
@@ -48,6 +55,178 @@ public class Labels implements Iterable<Label> {
 	@Override
 	public int hashCode() {
 		return labels.hashCode();
+	}
+
+	// Assumes that the other item belongs to the same class as this, and transforms this
+	// so matching fields have the same coordinates.
+	public List<Match> alignWith(Labels item) {
+		List<Match> matches = new ArrayList<>();
+
+		for (Label label : this)
+			for (Label other : item)
+				if (StringCompare.similar(label.getText(), other.getText(), SIMILARITY.LEVENSHTEIN))
+					matches.add(new Match(label, other));
+
+		double bestMatchRate = 0;
+		List<Match> bestAlignment = new ArrayList<>();
+		for (Match match : matches) {
+			Label source = match.source;
+			Label target = match.match;
+
+			Labels aligned = item.alignOn(target, source);
+			MatchListWithRate alignedMatch = matchRate(aligned);
+			if (alignedMatch.matchRate > bestMatchRate) {
+				bestMatchRate = alignedMatch.matchRate;
+				bestAlignment = alignedMatch.matchList;
+			}
+		}
+		return bestAlignment;
+	}
+
+	private Labels alignOn(Label source, Label target) {
+		if (!labels.contains(source))
+			throw new IllegalStateException("Source label must be a member of the given Labels.");
+		Labels normalized = new Labels();
+		double[] xParams = solve(source.getRect().getX(), target.getRect().getX(), source.getRect().br().getX(), target.getRect().br().getX());
+		double[] yParams = solve(source.getRect().getY(), target.getRect().getY(), source.getRect().br().getY(), target.getRect().br().getY());
+		for(Label label : this)
+			normalized.addLabel(label.affineTransform(xParams[0], xParams[1], yParams[0], yParams[1]));
+		return normalized;
+	}
+
+	private enum Step {
+		INSERTION,
+		DELETION,
+		NONE,
+	}
+
+	public static class MatchListWithRate {
+		protected final List<Match> matchList;
+		protected final double matchRate;
+
+		MatchListWithRate(List<Match> matchList, double matchRate) {
+			this.matchList = matchList;
+			this.matchRate = matchRate;
+		}
+
+		@Override
+		public String toString() {
+			return matchList + ", matchRate: " + matchRate;
+		}
+	}
+
+	private Comparator<Label> labelComparator = (l1, l2) -> {
+		GSRect r1 = l1.getRect();
+		GSRect r2 = l2.getRect();
+		if (r1.getY() != r2.getY())
+			return Double.compare(r1.getY(), r2.getY());
+		return Double.compare(r1.getX(), r2.getX());
+	};
+
+	public MatchListWithRate matchRate(Labels others) {
+		int m = size();
+		int n = others.size();
+		List<Label> l1 = toList();
+		Collections.sort(l1, labelComparator);
+		List<Label> l2 = others.toList();
+		Collections.sort(l2, labelComparator);
+		Object[] costsAndSteps = computeCostsAndSteps(l1, l2, m, n);
+		Step[][] steps = (Step[][]) costsAndSteps[1];
+		List<Match> bestMatch = computeBestMatch(l1, l2, steps, m, n);
+
+		double[][] costs = (double[][]) costsAndSteps[0];
+		double total = costs[m][n];
+		total /= others.size();
+		total = 1 - total;
+		return new MatchListWithRate(bestMatch, total);
+	}
+
+	// Should return a pair (double[][], Step[][]).
+	private Object[] computeCostsAndSteps(List<Label> source, List<Label> target, int m, int n) {
+		// Initialization
+		double[][] costs = new double[m + 1][n + 1];
+		costs[0][0] = 0;
+		for (int i = 1; i <= m; i++)
+			costs[i][0] = costs[i - 1][0] + insertionCost(source.get(i - 1));
+		for (int j = 1; j <= n; j++)
+			costs[0][j] = costs[0][j - 1] + insertionCost(target.get(j - 1));
+
+		// Recursion
+		Step[][] steps = new Step[m + 1][n + 1];
+		steps[0][0] = Step.NONE;
+		for (int i = 1; i <= m; i++)
+			steps[i][0] = Step.INSERTION;
+		for (int j = 1; j <= n; j++)
+			steps[0][j] = Step.DELETION;
+		for (int i = 1; i <= m; i++)
+			for (int j = 1; j <= n; j++) {
+				double costInsertion = costs[i - 1][j] + insertionCost(source.get(i - 1));
+				double costNoChange = costs[i - 1][j - 1] + source.get(i - 1).alignmentCost(target.get(j - 1));
+				double costDeletion = costs[i][j - 1] + insertionCost(target.get(j - 1));
+				costs[i][j] = Math.min(costNoChange, Math.min(costInsertion, costDeletion));
+				if (costs[i][j] == costNoChange)
+					steps[i][j] = Step.NONE;
+				else if (costs[i][j] == costInsertion)
+					steps[i][j] = Step.INSERTION;
+				else
+					steps[i][j] = Step.DELETION;
+			}
+
+		Object[] result = new Object[] { costs, steps };
+		return result;
+	}
+
+	// source and target must be sorted lists.
+	private List<Match> computeBestMatch(List<Label> source, List<Label> target, Step[][] steps, int i, int j) {
+		if (i == 0 && j == 0)
+			return new ArrayList<>();
+
+		List<Match> bestMatch;
+		switch (steps[i][j]) {
+			case NONE:
+				bestMatch = computeBestMatch(source, target, steps, i - 1, j - 1);
+				bestMatch.add(new Match(source.get(i - 1), target.get(j - 1)));
+				break;
+			case INSERTION:
+				bestMatch = computeBestMatch(source, target, steps, i - 1, j);
+				bestMatch.add(new Match(source.get(i - 1), null));
+				break;
+			case DELETION:
+			default:
+				bestMatch = computeBestMatch(source, target, steps, i, j - 1);
+				bestMatch.add(new Match(null, target.get(j - 1)));
+				break;
+		}
+
+		return bestMatch;
+	}
+
+	private double insertionCost(Label label) {
+		return 1;
+	}
+
+	Function<Label, Predicate<LabelDesc>> getTest = label -> ld -> ld.getLabel() == label;
+
+	// Compute the direction to look in to get the content associated with a given label.
+	public Direction contentDirection(Label label, List<LabelDesc> description) {
+		Label neighbor = getDirectNeighbor(label, Direction.EAST);
+		if (neighbor != null && !description.stream().anyMatch(getTest.apply(neighbor)))
+			return Direction.EAST;
+		neighbor = getDirectNeighbor(label, Direction.SOUTH);
+		if (neighbor != null && !description.stream().anyMatch(getTest.apply(neighbor)))
+			return Direction.SOUTH;
+		else
+			throw new IllegalStateException("Impossible to detect content direction");
+	}
+
+	// Solves xt = a xs + b, returns a and b.
+	private double[] solve(double xs1, double xt1, double xs2, double xt2) {
+		double a, b;
+		if (xs1 == xs2)
+			throw new IllegalStateException("The given points must be distinct.");
+		a = (xt2 - xt1) / (xs2 - xs1);
+		b = xt1 - a * xs1;
+		return new double[] { a, b };
 	}
 
 	public Labels normalizeLabels() {
