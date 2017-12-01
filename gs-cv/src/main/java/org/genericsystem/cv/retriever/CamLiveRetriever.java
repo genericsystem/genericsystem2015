@@ -130,7 +130,7 @@ public class CamLiveRetriever extends AbstractApp {
 						stabilizationErrors = 0;
 						Img stabilized = warpPerspective(frame, stabilizationHomography);
 						Img stabilizedDisplay = new Img(stabilized.getSrc(), true);
-						if (stabilizationHasChanged) {							
+						if (stabilizationHasChanged && recoveringCounter==0) {
 							Stats.beginTask("stabilizationHasChanged");
 							stabilized = newImgDescriptor.getDeperspectivedImg();
 							stabilizedDisplay = new Img(stabilized.getSrc(), true);
@@ -157,8 +157,9 @@ public class CamLiveRetriever extends AbstractApp {
 							recoveringCounter++;
 							labelMatches.putAll(fields.getLabelMatchesWithOldFields(stabilized, oldFields));
 							System.out.println(">>>> matches to work with:"+labelMatches.size());
-							if(labelMatches.size()>5){
+							if((double)labelMatches.size()/(double)oldFields.size()>0.2){
 								fields.tryRecoveryfromOldFields(labelMatches, oldFields);
+								oldFields = null;
 							}							
 						}
 						if(recoveringCounter>5)

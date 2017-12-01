@@ -291,9 +291,11 @@ public class Fields extends AbstractFields<Field> {
 			int idx = ThreadLocalRandom.current().nextInt(size());
 			if (indexes.add(idx)) {
 				Field f = fields.get(idx);
-				tasks.add(() -> f.ocr(rootImg));
-				if(f.ocr(rootImg)!=null)
-					ocrs.put(f, f.ocr(rootImg));
+				tasks.add(() -> {
+					String s = f.ocr(rootImg);
+					if(s!=null)
+						ocrs.put(f, s);
+				});					
 			}
 		}
 		try {
@@ -313,16 +315,20 @@ public class Fields extends AbstractFields<Field> {
 
 	private Map<Field, Field> findRecoveringMatches(Fields oldFields, Map<Field, String> ocrs){
 		Map<Field, Field> matches = new HashMap<Field,Field>();
-		List<Field> singleOldFields = oldFields.stream().filter(field -> Collections.frequency(oldFields.getFields().stream().map(f -> f.getConsolidated()).collect(Collectors.toList()), field.getConsolidated()) == 1).collect(Collectors.toList());
 		for(Map.Entry<Field, String> entry : ocrs.entrySet()){
 			System.out.println("ocr detected: "+entry.getValue());
-			if(entry.getValue().length()<3)
+			if(entry.getValue().trim().length()<3)
 				continue;
-			for(Field oldField : singleOldFields){
-				if(entry.getValue().equals(oldField.getConsolidated()))
-					matches.put(oldField, entry.getKey());				
+			for(Field oldField : oldFields){
+				if(entry.getValue().equals(oldField.getConsolidated())){
+					if(matches.containsKey(entry.getKey()))
+						matches.remove(entry.getKey());
+					else
+						matches.put(entry.getKey(), oldField);
+				}
 			}			
 		}
+
 		System.out.println("returning "+matches);
 		return matches;
 	}
@@ -331,11 +337,12 @@ public class Fields extends AbstractFields<Field> {
 		List<Point> newPointList = new ArrayList<>();
 		List<Point> oldPointList = new ArrayList<>();
 		for(Map.Entry<Field, Field> entry : matches.entrySet()){
-			oldPointList.addAll(getSquarePoints(entry.getKey().getRect().decomposeClockwise()));
-			newPointList.addAll(getSquarePoints(entry.getValue().getRect().decomposeClockwise()));
+			newPointList.addAll(getSquarePoints(entry.getKey().getRect().decomposeClockwise()));
+			oldPointList.addAll(getSquarePoints(entry.getValue().getRect().decomposeClockwise()));			
+
 		}
 		Mat homography = Calib3d.findHomography(new MatOfPoint2f(oldPointList.toArray(new Point[oldPointList.size()])), new MatOfPoint2f(newPointList.toArray(new Point[newPointList.size()])));
-		return evaluateHomographyError(newPointList, oldPointList, homography)<3?homography:null;
+		return evaluateHomographyError(newPointList, oldPointList, homography)<2?homography:null;
 	}
 
 
@@ -343,10 +350,12 @@ public class Fields extends AbstractFields<Field> {
 		double error = 0.0;
 		List<Point> restabilizedPoints = restabilize(oldPointList, homography);
 		for(int i = 0; i < restabilizedPoints.size(); i++){
-			error+=(newPointList.get(i).x - restabilizedPoints.get(i).x)*(newPointList.get(i).x - restabilizedPoints.get(i).x) + (newPointList.get(i).y - restabilizedPoints.get(i).y)*(newPointList.get(i).y - restabilizedPoints.get(i).y);
+			double deltaX = newPointList.get(i).x - restabilizedPoints.get(i).x;
+			double deltaY = newPointList.get(i).y - restabilizedPoints.get(i).y;
+			error+=deltaX*deltaX + deltaY*deltaY;
 		}
-		System.out.println("error found: "+ Math.sqrt(error));
-		return Math.sqrt(error);
+		System.out.println("error found: "+ Math.sqrt(error)/restabilizedPoints.size());
+		return Math.sqrt(error)/restabilizedPoints.size();
 	}
 
 	private List<Point> getSquarePoints(GSPoint[] GSpoints) {
