@@ -149,6 +149,8 @@ public class CamLiveRetriever extends AbstractApp {
 						Stats.endTask("consolidate fields");
 						Stats.beginTask("performOcr");
 
+						//fields.performOcr(stabilized);
+
 						if(oldFields==null)
 							fields.performOcr(stabilized);
 						else{
