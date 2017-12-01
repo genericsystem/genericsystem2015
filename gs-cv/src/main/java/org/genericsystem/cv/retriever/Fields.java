@@ -343,9 +343,7 @@ public class Fields extends AbstractFields<Field> {
 		double error = 0.0;
 		List<Point> restabilizedPoints = restabilize(oldPointList, homography);
 		for(int i = 0; i < restabilizedPoints.size(); i++){
-			double deltaX = newPointList.get(i).x - restabilizedPoints.get(i).x;
-			double deltaY = newPointList.get(i).y - restabilizedPoints.get(i).y;
-			error+=deltaX*deltaX + deltaY*deltaY;
+			error+=(newPointList.get(i).x - restabilizedPoints.get(i).x)*(newPointList.get(i).x - restabilizedPoints.get(i).x) + (newPointList.get(i).y - restabilizedPoints.get(i).y)*(newPointList.get(i).y - restabilizedPoints.get(i).y);
 		}
 		System.out.println("error found: "+ Math.sqrt(error));
 		return Math.sqrt(error);

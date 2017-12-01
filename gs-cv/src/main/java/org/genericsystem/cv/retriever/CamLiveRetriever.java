@@ -157,7 +157,6 @@ public class CamLiveRetriever extends AbstractApp {
 							System.out.println(">>>> matches to work with:"+labelMatches.size());
 							if(labelMatches.size()>5){
 								fields.tryRecoveryfromOldFields(labelMatches, oldFields);
-								oldFields = null;
 							}							
 						}
 						if(recoveringCounter>5)
