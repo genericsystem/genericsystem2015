@@ -1,7 +1,6 @@
 package org.genericsystem.cv;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,15 +34,15 @@ public class LinesDetector9 {
 
 		double[] vp1 = ransacVanishingPoint(edgelets1, 2000, 5);
 		System.out.println("vp1 : " + vp1[0] / vp1[2] + ", " + vp1[1] / vp1[2] + ", 1");
-		vp1 = reestimate_model(vp1, edgelets1, 5);
-		System.out.println("vp1 reestimation : " + Arrays.toString(vp1));
+		// vp1 = reestimate_model(vp1, edgelets1, 5);
+		// System.out.println("vp1 reestimation : " + Arrays.toString(vp1));
 
 		List<Edgelet> edgelets2 = removeInliers(vp1, edgelets1, 10);
 
 		double[] vp2 = ransacVanishingPoint(edgelets2, 2000, 5);
 		System.out.println("vp2 : " + vp2[0] / vp2[2] + ", " + vp2[1] / vp2[2] + " ,1");
-		vp2 = reestimate_model(vp2, edgelets2, 5);
-		System.out.println("vp2 reestimation : " + Arrays.toString(vp2));
+		// vp2 = reestimate_model(vp2, edgelets2, 5);
+		// System.out.println("vp2 reestimation : " + Arrays.toString(vp2));
 
 		// double[][] vps = ransac_3_line(edgelets1, 1, 3000, 5);
 		// vp1 = vps[0];

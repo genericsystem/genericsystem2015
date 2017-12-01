@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.bytedeco.javacpp.opencv_core.Point2d;
 import org.genericsystem.cv.LinesDetector8.Line;
 import org.genericsystem.cv.LinesDetector8.Lines;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
@@ -15,7 +14,7 @@ import org.opencv.imgcodecs.Imgcodecs;
 public class LinesDetector10 {
 
 	private final List<Line> lines;
-	private final Point2d pp;
+	private final double[] pp;
 	private final double f;
 	private double noiseRatio = 0.5;
 	private List<LineInfo> lineInfos = new ArrayList<>();
@@ -37,17 +36,17 @@ public class LinesDetector10 {
 	}
 
 	public static void main(String[] args) {
-		Img img = new Img(Imgcodecs.imread("resources/liberty_loft.jpg"));
+		Img img = new Img(Imgcodecs.imread("resources/Batiment.jpg"));
 		Img gray_img = img.bgr2Gray();
 		Img edges = gray_img.canny(20, 80);
 		// Img grad = img.morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(2, 2)).otsu().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(3, 3));
 
-		Lines lines = new Lines(edges.houghLinesP(1, Math.PI / 180, 10, 50, 5));
+		Lines lines = new Lines(edges.houghLinesP(1, Math.PI / 180, 10, 30, 5));
 		double f = 6.053 / 0.009; // Focal length (in pixel)
-		new LinesDetector10(img, lines.lines, new Point2d(img.width(), img.height()), f);
+		new LinesDetector10(img, lines.lines, new double[] { img.width() / 2, img.height() / 2 }, f);// img.width() * 1.2, img.height() * 2.25 / 3 }, f);
 	}
 
-	public LinesDetector10(Img img, List<Line> lines, Point2d pp, double f) {
+	public LinesDetector10(Img img, List<Line> lines, double[] pp, double f) {
 
 		this.lines = lines;
 		this.pp = pp;
@@ -62,17 +61,18 @@ public class LinesDetector10 {
 		// System.out.println(Arrays.deepToString(vps));
 		double[][] vpsOnImg = new double[3][3];
 		for (int i = 0; i < 3; i++) {
-			vpsOnImg[i][0] = vps[i][0] * f / vps[i][2] + pp.x();
-			vpsOnImg[i][1] = vps[i][1] * f / vps[i][2] + pp.y();
+			vpsOnImg[i][0] = vps[i][0] * f / vps[i][2] + pp[0];
+			vpsOnImg[i][1] = vps[i][1] * f / vps[i][2] + pp[1];
 			vpsOnImg[i][2] = 1;
 		}
 		System.out.println(Arrays.deepToString(vpsOnImg));
+		// double[][] vpsOnImg = new double[][] { new double[] { -1005.4075382803298, 942.3380447585396, 1.0 }, new double[] { 3000, 1000, 1.0 }, new double[] { 320.9855258236744, -1007516.031731498057, 1.0 } };
 		Imgcodecs.imwrite("resources/img1.jpg", LinesDetector9.computeHomographyAndWarp(img, vpsOnImg[0], vpsOnImg[1], false, 3).getSrc());
-		Imgcodecs.imwrite("resources/img2.jpg", LinesDetector9.computeHomographyAndWarp(img, vpsOnImg[1], vpsOnImg[2], false, 3).getSrc());
+		Imgcodecs.imwrite("resources/img2.jpg", LinesDetector9.computeHomographyAndWarp(img, vpsOnImg[2], vpsOnImg[1], false, 3).getSrc());
 		Imgcodecs.imwrite("resources/img3.jpg", LinesDetector9.computeHomographyAndWarp(img, vpsOnImg[2], vpsOnImg[0], false, 3).getSrc());
 
 		double thAngle = 6.0 / 180.0 * Math.PI;
-		Map<Integer, List<Integer>> clusters = lines2Vps(thAngle, vps);
+		// Map<Integer, List<Integer>> clusters = lines2Vps(thAngle, vps);
 		// System.out.println(clusters);
 	}
 
@@ -125,7 +125,7 @@ public class LinesDetector10 {
 				i--;
 				continue;
 			}
-			double[] vp1 = new double[] { vp1_Img[0] / vp1_Img[2] - pp.x(), vp1_Img[1] / vp1_Img[2] - pp.y(), f };
+			double[] vp1 = new double[] { vp1_Img[0] / vp1_Img[2] - pp[0], vp1_Img[1] / vp1_Img[2] - pp[1], f };
 			if (vp1[2] == 0)
 				vp1[2] = 0.0011;
 			double N = Math.sqrt(vp1[0] * vp1[0] + vp1[1] * vp1[1] + vp1[2] * vp1[2]);
@@ -205,8 +205,8 @@ public class LinesDetector10 {
 					continue;
 				double x = ptIntersect[0] / ptIntersect[2];
 				double y = ptIntersect[1] / ptIntersect[2];
-				double X = x - pp.x();
-				double Y = y - pp.y();
+				double X = x - pp[0];
+				double Y = y - pp[1];
 				double Z = f;
 				double N = Math.sqrt(X * X + Y * Y + Z * Z);
 				latitude = Math.acos(Z / N);
@@ -286,7 +286,7 @@ public class LinesDetector10 {
 		// get the corresponding vanish points on the image plane
 		List<double[]> vp2D = new ArrayList<>();
 		for (int i = 0; i < 3; ++i)
-			vp2D.add(new double[] { vps[i][0] * f / vps[i][2] + pp.x(), vps[i][1] * f / vps[i][2] + pp.y() });
+			vp2D.add(new double[] { vps[i][0] * f / vps[i][2] + pp[0], vps[i][1] * f / vps[i][2] + pp[1] });
 		Map<Integer, List<Integer>> clusters = new HashMap<Integer, List<Integer>>() {
 			@Override
 			public List<Integer> get(Object key) {

@@ -12,9 +12,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
-
 import org.genericsystem.cv.lm.LMHostImpl;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.genericsystem.cv.utils.Tools;
@@ -28,6 +25,9 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
 import org.opencv.videoio.VideoCapture;
+
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
 
 public class LinesDetector8 extends AbstractApp {
 
@@ -165,7 +165,7 @@ public class LinesDetector8 extends AbstractApp {
 
 	public static class Lines {
 
-		private final List<Line> lines;
+		final List<Line> lines;
 
 		public Lines(Mat src) {
 			lines = new ArrayList<>();
@@ -211,7 +211,10 @@ public class LinesDetector8 extends AbstractApp {
 	}
 
 	public static class Line {
-		private final double x1, y1, x2, y2;
+		final double x1;
+		final double y1;
+		final double x2;
+		final double y2;
 
 		public Line(Point p1, Point p2) {
 			this(p1.x, p1.y, p2.x, p2.y);
