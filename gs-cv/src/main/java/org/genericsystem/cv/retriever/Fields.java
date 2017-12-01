@@ -317,7 +317,7 @@ public class Fields extends AbstractFields<Field> {
 		Map<Field, Field> matches = new HashMap<Field,Field>();
 		for(Map.Entry<Field, String> entry : ocrs.entrySet()){
 			System.out.println("ocr detected: "+entry.getValue());
-			if(entry.getValue().trim().length()<3)
+			if(entry.getValue().trim().length()<4)
 				continue;
 			for(Field oldField : oldFields){
 				if(entry.getValue().equals(oldField.getConsolidated())){
@@ -341,7 +341,16 @@ public class Fields extends AbstractFields<Field> {
 			oldPointList.addAll(getSquarePoints(entry.getValue().getRect().decomposeClockwise()));			
 
 		}
-		Mat homography = Calib3d.findHomography(new MatOfPoint2f(oldPointList.toArray(new Point[oldPointList.size()])), new MatOfPoint2f(newPointList.toArray(new Point[newPointList.size()])));
+		//Mat homography = Calib3d.findHomography(new MatOfPoint2f(oldPointList.toArray(new Point[oldPointList.size()])), new MatOfPoint2f(newPointList.toArray(new Point[newPointList.size()])));
+		Mat mask = new Mat();
+		Mat homography = Calib3d.findHomography(new MatOfPoint2f(oldPointList.toArray(new Point[oldPointList.size()])), new MatOfPoint2f(newPointList.toArray(new Point[newPointList.size()])), 8, 3, mask, 2000, 0.99);
+
+		for(int i=mask.rows()-1; i>=0 ;i--){
+			if(mask.get(i, 0)[0]==0){			
+				newPointList.remove(i);
+				oldPointList.remove(i);
+			}
+		}
 		return evaluateHomographyError(newPointList, oldPointList, homography)<2?homography:null;
 	}
 
