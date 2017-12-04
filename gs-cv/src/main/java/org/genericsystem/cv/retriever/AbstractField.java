@@ -65,10 +65,6 @@ public abstract class AbstractField {
 		this.ocrRect = rect;
 	}
 
-	public void setLabels(Map<String, Integer> labels) {
-		this.labels = labels;
-	}
-
 	public void setConsolidated(String consolidated) {
 		this.consolidated = consolidated;
 	}

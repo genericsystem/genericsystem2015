@@ -176,8 +176,10 @@ public class Fields extends AbstractFields<Field> {
 	private boolean checkOverlapConstraint(GSRect rect) {
 		for (Field field : fields)
 			if (rect.isOverlappingStrict(field.getRect()))
-				if (rect.getInsider(field.getRect()) == null)
+				if (rect.getInsider(field.getRect()) == null){
+					field.adjustLockLevel(-0.8);
 					return false;
+				}
 		return true;
 	}
 
@@ -375,7 +377,7 @@ public class Fields extends AbstractFields<Field> {
 		for(Field newField : fields){
 			Field match = newField.findOldMatch(oldFields);
 			if(match!=null){
-				newField.setLabels(match.getLabels());
+				newField.getLabels().putAll(match.getLabels());				
 				newField.setConsolidated(match.getConsolidated());
 			}			
 		}

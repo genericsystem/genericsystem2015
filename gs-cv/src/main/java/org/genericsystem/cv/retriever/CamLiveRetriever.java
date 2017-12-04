@@ -88,8 +88,8 @@ public class CamLiveRetriever extends AbstractApp {
 		ImageView src1 = new ImageView(Tools.mat2jfxImage(frame));
 		mainGrid.add(src1, 1, 0);
 
-		//		ImageView src2 = new ImageView(Tools.mat2jfxImage(frame));
-		//		mainGrid.add(src2, 1, 1);
+		ImageView src2 = new ImageView(Tools.mat2jfxImage(frame));
+		mainGrid.add(src2, 1, 1);
 
 		timerFields.scheduleAtFixedRate(() -> onSpace(), 0, STABILIZATION_DELAY, TimeUnit.MILLISECONDS);
 
@@ -111,7 +111,7 @@ public class CamLiveRetriever extends AbstractApp {
 						stabilizedImgDescriptor = new ImgDescriptor(frame, deperspectivGraphy);
 						return;
 					}
-					if (stabilizationHasChanged && stabilizationErrors > 20) {
+					if (stabilizationHasChanged && stabilizationErrors > 30) {
 						oldFields = oldFields==null?new Fields(fields.getFields()):oldFields;
 						recoveringCounter = 0;
 						fields.reset();
@@ -176,7 +176,7 @@ public class CamLiveRetriever extends AbstractApp {
 
 						src0.setImage(display.toJfxImage());
 						src1.setImage(stabilizedDisplay.toJfxImage());
-						//src2.setImage(stabilizedDebug.toJfxImage());
+						src2.setImage(stabilizedDebug.toJfxImage());
 
 						if (++counter % 20 == 0) {
 							System.out.println(Stats.getStatsAndReset());
