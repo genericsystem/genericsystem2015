@@ -9,7 +9,10 @@ import java.util.Map;
 import org.genericsystem.cv.LinesDetector8.Line;
 import org.genericsystem.cv.LinesDetector8.Lines;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
+import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
 
 public class LinesDetector10 {
 
@@ -36,14 +39,18 @@ public class LinesDetector10 {
 	}
 
 	public static void main(String[] args) {
-		Img img = new Img(Imgcodecs.imread("resources/Batiment.jpg"));
-		Img gray_img = img.bgr2Gray();
-		Img edges = gray_img.canny(20, 80);
-		// Img grad = img.morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(2, 2)).otsu().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(3, 3));
+		Img img = new Img(Imgcodecs.imread("resources/img.jpg"));
+		Img grad = img.bgr2Gray().canny(20, 80).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(60, 60)).grad(6, 6);// .morphologyEx(Imgproc.MORPH_DILATE, Imgproc.MORPH_ELLIPSE, new Size(5, 5));
+		// Img grad = img.bilateralFilter(20, 80, 80).bgr2Gray().adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY_INV, 17, 3).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(60, 60)).grad(5, 5)
+		// .morphologyEx(Imgproc.MORPH_DILATE, Imgproc.MORPH_ELLIPSE, new Size(5, 5));
+		// Img grad = img.grad(3, 3).bgr2Gray().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(60, 60)).grad(5, 5).morphologyEx(Imgproc.MORPH_DILATE, Imgproc.MORPH_ELLIPSE, new Size(5, 5));
 
-		Lines lines = new Lines(edges.houghLinesP(1, Math.PI / 180, 10, 30, 5));
+		Lines lines = new Lines(grad.houghLinesP(1, Math.PI / 180, 10, 100, 10));
 		double f = 6.053 / 0.009; // Focal length (in pixel)
-		new LinesDetector10(img, lines.lines, new double[] { img.width() / 2, img.height() / 2 }, f);// img.width() * 1.2, img.height() * 2.25 / 3 }, f);
+		Imgcodecs.imwrite("resources/img4.jpg", grad.getSrc());
+		// lines.draw(img.getSrc(), new Scalar(255));
+		Imgcodecs.imwrite("resources/img5.jpg", img.getSrc());
+		new LinesDetector10(img, lines.lines, new double[] { img.width() / 2, img.height() / 2 }, f);
 	}
 
 	public LinesDetector10(Img img, List<Line> lines, double[] pp, double f) {
@@ -66,14 +73,17 @@ public class LinesDetector10 {
 			vpsOnImg[i][2] = 1;
 		}
 		System.out.println(Arrays.deepToString(vpsOnImg));
-		// double[][] vpsOnImg = new double[][] { new double[] { -1005.4075382803298, 942.3380447585396, 1.0 }, new double[] { 3000, 1000, 1.0 }, new double[] { 320.9855258236744, -1007516.031731498057, 1.0 } };
-		Imgcodecs.imwrite("resources/img1.jpg", LinesDetector9.computeHomographyAndWarp(img, vpsOnImg[0], vpsOnImg[1], false, 3).getSrc());
-		Imgcodecs.imwrite("resources/img2.jpg", LinesDetector9.computeHomographyAndWarp(img, vpsOnImg[2], vpsOnImg[1], false, 3).getSrc());
-		Imgcodecs.imwrite("resources/img3.jpg", LinesDetector9.computeHomographyAndWarp(img, vpsOnImg[2], vpsOnImg[0], false, 3).getSrc());
-
 		double thAngle = 6.0 / 180.0 * Math.PI;
-		// Map<Integer, List<Integer>> clusters = lines2Vps(thAngle, vps);
-		// System.out.println(clusters);
+		Map<Integer, List<Integer>> clusters = lines2Vps(thAngle, vps);
+		for (int cluster : clusters.keySet()) {
+			for (int lineId : clusters.get(cluster))
+				lines.get(lineId).draw(img.getSrc(), new Scalar(cluster == 0 ? 255 : 0, cluster == 1 ? 255 : 0, cluster == 2 ? 255 : 0));
+
+		}
+		// double[][] vpsOnImg = new double[][] { new double[] { -1005.4075382803298, 942.3380447585396, 1.0 }, new double[] { 3000, 1000, 1.0 }, new double[] { 320.9855258236744, -1007516.031731498057, 1.0 } };
+		Imgcodecs.imwrite("resources/img1.jpg", LinesDetector9.computeHomographyAndWarp(img, vpsOnImg[0], vpsOnImg[1], true, 3).getSrc());
+		Imgcodecs.imwrite("resources/img2.jpg", LinesDetector9.computeHomographyAndWarp(img, vpsOnImg[1], vpsOnImg[2], true, 3).getSrc());
+		Imgcodecs.imwrite("resources/img3.jpg", LinesDetector9.computeHomographyAndWarp(img, vpsOnImg[0], vpsOnImg[2], true, 3).getSrc());
 	}
 
 	double[] cross(double[] a, double b[]) {
@@ -87,7 +97,7 @@ public class LinesDetector10 {
 
 		double confEfficience = 0.9999;
 		int it = (int) (Math.log(1 - confEfficience) / Math.log(1.0 - p));
-
+		System.out.println("Iterations : " + it);
 		int numVp2 = 360;
 		double stepVp2 = 2.0 * Math.PI / numVp2;
 
@@ -149,8 +159,8 @@ public class LinesDetector10 {
 				double Y = Math.sin(phi) * Math.cos(lambda);
 
 				vp2[0] = X;
-				vp2[0] = Y;
-				vp2[0] = Z;
+				vp2[1] = Y;
+				vp2[2] = Z;
 				if (vp2[2] == 0.0)
 					vp2[2] = 0.0011;
 				N = Math.sqrt(vp2[0] * vp2[0] + vp2[1] * vp2[1] + vp2[2] * vp2[2]);
@@ -275,7 +285,16 @@ public class LinesDetector10 {
 		for (int i = 0; i < num; ++i) {
 			if (lineLength[i] > maxLength) {
 				maxLength = lineLength[i];
+				double[][] vpsOnImg = new double[3][2];
+				double[][] vps = vpHypo.get(i);
+				for (int index = 0; index < 3; index++) {
+					vpsOnImg[index][0] = vps[index][0] * f / vps[index][2] + pp[0];
+					vpsOnImg[index][1] = vps[index][1] * f / vps[index][2] + pp[1];
+					// vpsOnImg[index][2] = 1;
+				}
+				System.out.println("find best model : " + lineLength[i] + "        " + Arrays.deepToString(vpsOnImg));
 				bestIdx = i;
+
 			}
 		}
 		return vpHypo.get(bestIdx);
