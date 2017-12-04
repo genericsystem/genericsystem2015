@@ -279,13 +279,4 @@ public class LinesDetector8 extends AbstractApp {
 			return new Point(x, y);
 		}
 	}
-
-	@Override
-	public void stop() throws Exception {
-		super.stop();
-		timer.shutdown();
-		timer.awaitTermination(5000, TimeUnit.MILLISECONDS);
-		capture.release();
-	}
-
 }
