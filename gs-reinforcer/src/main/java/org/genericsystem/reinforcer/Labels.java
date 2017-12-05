@@ -81,7 +81,7 @@ public class Labels implements Iterable<Label> {
 				AffineTransformation possibleTransformation = new AffineTransformation(selectedMatches);
 
 				for (int j = 0; j < matches.size(); j++)
-					if (j != i && possibleTransformation.computeError(matches.get(j)) < THRESHOLD) {
+					if (j != i && !tested.contains(j) && possibleTransformation.computeError(matches.get(j)) < THRESHOLD) {
 						selectedMatches.add(matches.get(j));
 						tested.add(j);
 					}
