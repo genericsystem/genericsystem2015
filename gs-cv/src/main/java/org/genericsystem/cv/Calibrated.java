@@ -79,6 +79,12 @@ public class Calibrated {
 			phi = Math.atan2(y, x);
 		}
 
+		public AngleCalibrated(double[] calibratedxyz, Object nullObject) {
+			super(calibratedxyz);
+			this.tetha = Math.atan2(calibratedxyz[1], calibratedxyz[0]);
+			this.phi = Math.acos(calibratedxyz[2]);
+		}
+
 		public AngleCalibrated(double[] tethaPhi) {
 			super(new double[] { Math.cos(tethaPhi[1]) * Math.sin(tethaPhi[0]), Math.sin(tethaPhi[1]) * Math.sin(tethaPhi[0]), Math.cos(tethaPhi[0]) });
 			this.tetha = tethaPhi[0];
@@ -93,5 +99,14 @@ public class Calibrated {
 		public AngleCalibrated dump(double[] tethaPhi, int dumpSize) {
 			return new AngleCalibrated(new double[] { ((dumpSize - 1) * tetha + tethaPhi[0]) / dumpSize, ((dumpSize - 1) * phi + tethaPhi[1]) / dumpSize });
 		}
+
+		public double[] getUncalibrated(double[] pp, double f) {
+			double[] uncalibrates = new double[3];
+			uncalibrates[0] = x * f / z + pp[0];
+			uncalibrates[1] = y * f / z + pp[1];
+			uncalibrates[2] = 1.0;
+			return uncalibrates;
+		}
+
 	}
 }
