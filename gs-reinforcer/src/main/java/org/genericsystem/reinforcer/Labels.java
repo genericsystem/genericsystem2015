@@ -27,6 +27,7 @@ import org.genericsystem.reinforcer.tools.StringCompare.SIMILARITY;
 public class Labels implements Iterable<Label> {
 
 	private final Set<Label> labels = new HashSet<>();
+	private static final double THRESHOLD = 0.1; // Error threshold for the computation of the affine transformation in alignWith.
 
 	public boolean addLabel(double tlx, double tly, double brx, double bry, String candidateLabel) {
 		Label candidate = new Label(tlx, tly, brx, bry, candidateLabel);
@@ -67,52 +68,35 @@ public class Labels implements Iterable<Label> {
 				if (StringCompare.similar(label.getText(), other.getText(), SIMILARITY.LEVENSHTEIN))
 					matches.add(new Match(label, other));
 
-		double bestMatchRate = 0;
-		List<Match> bestAlignment = new ArrayList<>();
-		for (Match match : matches) {
-			Label source = match.source;
-			Label target = match.match;
+		if (matches.isEmpty())
+			return new ArrayList<>();
 
-			Labels aligned = item.alignOn(target, source);
-			MatchListWithRate alignedMatch = matchRate(aligned);
-			if (alignedMatch.matchRate > bestMatchRate) {
-				bestMatchRate = alignedMatch.matchRate;
-				bestAlignment = alignedMatch.matchList;
+		MatchListWithRate bestMatches = null;
+
+		Set<Integer> tested = new HashSet<>();
+		for (int i = 0; i < matches.size(); i++) {
+			if (tested.add(i)) {
+				Set<Match> selectedMatches = new HashSet<>();
+				selectedMatches.add(matches.get(i));
+				AffineTransformation possibleTransformation = new AffineTransformation(selectedMatches);
+
+				for (int j = 0; j < matches.size(); j++)
+					if (j != i && possibleTransformation.computeError(matches.get(j)) < THRESHOLD) {
+						selectedMatches.add(matches.get(j));
+						tested.add(j);
+					}
+
+				possibleTransformation = new AffineTransformation(selectedMatches);
+				Labels aligned = possibleTransformation.transform(this);
+				MatchListWithRate result = aligned.matchRate(item);
+				if (bestMatches == null || result.matchRate > bestMatches.matchRate) {
+					bestMatches = result;
+					if (bestMatches.matchRate == 1)
+						break;
+				}
 			}
 		}
-		return bestAlignment;
-	}
-
-	private Labels alignOn(Label source, Label target) {
-		if (!labels.contains(source))
-			throw new IllegalStateException("Source label must be a member of the given Labels.");
-		Labels normalized = new Labels();
-		double[] xParams = solve(source.getRect().getX(), target.getRect().getX(), source.getRect().br().getX(), target.getRect().br().getX());
-		double[] yParams = solve(source.getRect().getY(), target.getRect().getY(), source.getRect().br().getY(), target.getRect().br().getY());
-		for(Label label : this)
-			normalized.addLabel(label.affineTransform(xParams[0], xParams[1], yParams[0], yParams[1]));
-		return normalized;
-	}
-
-	private enum Step {
-		INSERTION,
-		DELETION,
-		NONE,
-	}
-
-	public static class MatchListWithRate {
-		protected final List<Match> matchList;
-		protected final double matchRate;
-
-		MatchListWithRate(List<Match> matchList, double matchRate) {
-			this.matchList = matchList;
-			this.matchRate = matchRate;
-		}
-
-		@Override
-		public String toString() {
-			return matchList + ", matchRate: " + matchRate;
-		}
+		return bestMatches.matchList;
 	}
 
 	private Comparator<Label> labelComparator = (l1, l2) -> {
@@ -123,7 +107,21 @@ public class Labels implements Iterable<Label> {
 		return Double.compare(r1.getX(), r2.getX());
 	};
 
-	public MatchListWithRate matchRate(Labels others) {
+	Function<Label, Predicate<LabelDesc>> getTest = label -> ld -> ld.getLabel() == label;
+
+	// Compute the direction to look in to get the content associated with a given label.
+	public Direction contentDirection(Label label, List<LabelDesc> description) {
+		Label neighbor = getDirectNeighbor(label, Direction.EAST);
+		if (neighbor != null && !description.stream().anyMatch(getTest.apply(neighbor)))
+			return Direction.EAST;
+		neighbor = getDirectNeighbor(label, Direction.SOUTH);
+		if (neighbor != null && !description.stream().anyMatch(getTest.apply(neighbor)))
+			return Direction.SOUTH;
+		else
+			throw new IllegalStateException("Impossible to detect content direction for " + label + " among " + this);
+	}
+
+	private MatchListWithRate matchRate(Labels others) {
 		int m = size();
 		int n = others.size();
 		List<Label> l1 = toList();
@@ -203,30 +201,6 @@ public class Labels implements Iterable<Label> {
 
 	private double insertionCost(Label label) {
 		return 1;
-	}
-
-	Function<Label, Predicate<LabelDesc>> getTest = label -> ld -> ld.getLabel() == label;
-
-	// Compute the direction to look in to get the content associated with a given label.
-	public Direction contentDirection(Label label, List<LabelDesc> description) {
-		Label neighbor = getDirectNeighbor(label, Direction.EAST);
-		if (neighbor != null && !description.stream().anyMatch(getTest.apply(neighbor)))
-			return Direction.EAST;
-		neighbor = getDirectNeighbor(label, Direction.SOUTH);
-		if (neighbor != null && !description.stream().anyMatch(getTest.apply(neighbor)))
-			return Direction.SOUTH;
-		else
-			throw new IllegalStateException("Impossible to detect content direction");
-	}
-
-	// Solves xt = a xs + b, returns a and b.
-	private double[] solve(double xs1, double xt1, double xs2, double xt2) {
-		double a, b;
-		if (xs1 == xs2)
-			throw new IllegalStateException("The given points must be distinct.");
-		a = (xt2 - xt1) / (xs2 - xs1);
-		b = xt1 - a * xs1;
-		return new double[] { a, b };
 	}
 
 	public Labels normalizeLabels() {
@@ -450,5 +424,26 @@ public class Labels implements Iterable<Label> {
 			List<List<Label>> lines = byLine(block);
 			return lines.size() > 1 && lines.stream().allMatch(line -> line.size() == 1);
 		}).collect(Collectors.toList());
+	}
+
+	private enum Step {
+		INSERTION,
+		DELETION,
+		NONE,
+	}
+
+	public static class MatchListWithRate {
+		protected final List<Match> matchList;
+		protected final double matchRate;
+
+		MatchListWithRate(List<Match> matchList, double matchRate) {
+			this.matchList = matchList;
+			this.matchRate = matchRate;
+		}
+
+		@Override
+		public String toString() {
+			return matchList + ", matchRate: " + matchRate;
+		}
 	}
 }

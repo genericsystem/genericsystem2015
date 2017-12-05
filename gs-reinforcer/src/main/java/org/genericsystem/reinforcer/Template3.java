@@ -6,12 +6,9 @@ import java.util.List;
 
 import org.genericsystem.reinforcer.tools.StringCompare;
 import org.genericsystem.reinforcer.tools.StringCompare.SIMILARITY;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Template3 {
 
-	private final Logger logger = LoggerFactory.getLogger(Template3.class);
 	private final String name;
 	protected final List<Labels> members = new ArrayList<>();
 	private List<Constraint> constraints = new ArrayList<>();
@@ -48,9 +45,9 @@ public class Template3 {
 
 		for (Match match : bestAligned)
 			if (match.source != null && match.match != null && StringCompare.similar(match.source.getText(), match.match.getText(), SIMILARITY.LEVENSHTEIN))
-				description.add(new LabelDesc(match.source));
+				description.add(new LabelDesc(match.match));
 
-		description.forEach(ld -> ld.setDirection(labels2.contentDirection(ld.getLabel(), description)));
+		description.forEach(ld -> ld.setDirection(labels1.contentDirection(ld.getLabel(), description)));
 	}
 
 	// Specifies the template when a new item is added.
@@ -61,26 +58,25 @@ public class Template3 {
 			if (!absoluteLabels.toList().stream().map(label -> label.getText()).anyMatch(c -> StringCompare.similar(c, descriptor.getLabel().getText(), SIMILARITY.LEVENSHTEIN)))
 				it.remove();
 		}
-
 	}
 
 	public List<DetectedContent> extractData(Labels labels) {
 		Labels ref = new Labels();
 		description.forEach(ld -> ref.addLabel(ld.getLabel()));
-		List<Match> matched = ref.alignWith(labels);
+		List<Match> matched = labels.alignWith(ref);
 		Labels aligned = new Labels();
 		matched.forEach(match -> {
-			if (match.match != null)
-				aligned.addLabel(match.match);
+			if (match.source != null)
+				aligned.addLabel(match.source);
 		});
 		List<DetectedContent> result = new ArrayList<>();
 		for (Match match : matched)
 			if (match.source != null && match.match != null) {
-				LabelDesc ld = description.stream().filter(ref.getTest.apply(match.source)).findFirst().orElse(null);
+				LabelDesc ld = description.stream().filter(ref.getTest.apply(match.match)).findFirst().orElse(null);
 				if (ld != null) {
-					Label target = aligned.getDirectNeighbor(match.match, ld.direction);
+					Label target = aligned.getDirectNeighbor(match.source, ld.direction);
 					if (target != null)
-						result.add(new DetectedContent(match.source.getText(), target.getText()));
+						result.add(new DetectedContent(match.match.getText(), target.getText()));
 				}
 			}
 		return result;
