@@ -160,10 +160,13 @@ public class CamLiveRetriever extends AbstractApp {
 							if(labelMatches.size()>6){
 								fields.tryRecoveryfromOldFields(labelMatches, oldFields);
 								oldFields = null;
+								labelMatches.clear();
 							}							
 						}
-						if(recoveringCounter>5)
+						if(recoveringCounter>5){
 							oldFields = null;
+							labelMatches.clear();
+						}
 
 						Stats.endTask("performOcr");
 						Img stabilizedDebug = new Img(stabilizedDisplay.getSrc(), true);
