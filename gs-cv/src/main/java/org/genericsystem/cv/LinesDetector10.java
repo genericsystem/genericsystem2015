@@ -1,6 +1,7 @@
 package org.genericsystem.cv;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,7 +9,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import org.genericsystem.cv.Calibrated.AngleCalibrated;
 import org.genericsystem.cv.LinesDetector8.Line;
 import org.genericsystem.cv.LinesDetector8.Lines;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
@@ -37,11 +37,8 @@ public class LinesDetector10 extends AbstractApp {
 
 	private final VideoCapture capture = new VideoCapture(0);
 	private ScheduledExecutorService timer = Executors.newSingleThreadScheduledExecutor();
-
+	Lines lines;
 	private boolean stabilize = false;
-	private AngleCalibrated vpx = new AngleCalibrated(new double[] { 1000, 0, 1 }, null);
-	private AngleCalibrated vpy = new AngleCalibrated(new double[] { 0, 1000, 1 }, null);
-	// private AngleCalibrated vpz = new AngleCalibrated(new double[] { 0, 0 });
 
 	@Override
 	protected void onSpace() {
@@ -66,10 +63,11 @@ public class LinesDetector10 extends AbstractApp {
 			try {
 				if (!stabilize)
 					capture.read(frame);
-				Img grad = new Img(frame, false).morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(10, 10)).otsu().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(10, 10)).morphologyEx(Imgproc.MORPH_GRADIENT,
-						Imgproc.MORPH_ELLIPSE, new Size(3, 3));
-				gradView.setImage(grad.toJfxImage());
-				Lines lines = new Lines(grad.houghLinesP(1, Math.PI / 180, 10, 50, 10));
+				Img grad = new Img(frame, false).morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(10, 10)).otsu();
+				Img closed = grad.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(10, 10)).morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(3, 3));
+				gradView.setImage(closed.toJfxImage());
+				if (!stabilize)
+					lines = new Lines(closed.houghLinesP(1, Math.PI / 180, 10, 20, 5));
 
 				if (lines.size() > 10) {
 					// lines = lines.reduce(30);
@@ -79,56 +77,24 @@ public class LinesDetector10 extends AbstractApp {
 
 					double[][] vps = linesDetector.getVps();
 
-					double theta = Math.acos(vps[0][2]);
-					if (theta < 0)
-						theta += Math.PI;
-
-					double theta2 = Math.acos(vps[1][2]);
-					if (theta2 > Math.PI / 2)
-						theta2 -= Math.PI;
-					if (theta2 < -Math.PI / 2)
-						theta2 += Math.PI;
-
-					double phi = Math.atan2(vps[0][1], vps[0][0]);
-					if (phi > Math.PI / 2)
-						phi -= Math.PI;
-					if (phi < -Math.PI / 2)
-						phi += Math.PI;
-					double phi2 = Math.atan2(vps[1][1], vps[1][0]);
-					if (phi2 < 0)
-						phi2 += Math.PI;
-					System.out.println("theta : " + theta * 180 / Math.PI + " old : " + vpx.tetha * 180 / Math.PI);
-					System.out.println("phi : " + phi * 180 / Math.PI + " old : " + vpx.phi * 180 / Math.PI);
-
-					vpx = vpx.dump(new double[] { theta, phi }, 5);
-					vpy = vpy.dump(new double[] { theta2, phi2 }, 5);
-
-					// System.out.println("vpx : " + Arrays.toString(vpx.getTethaPhi()));
-					// System.out.println("vpy : " + Arrays.toString(vpy.getTethaPhi()));
-
-					// vpz.dump(new double[] { Math.atan2(vps[0][1], vps[0][0]), Math.acos(vps[0][2]) }, 3);
-
-					// System.out.println("Vanishing points : " + Arrays.deepToString(linesDetector.getVanishingPoints()));
-
-					// double latitude = Math.acos(vps[0][2]);
-					// double longitude = Math.atan2(vps[0][1], vps[0][0]);
-					// if (longitude < 0)
-					// longitude += Math.PI;
-					// double latitude2 = Math.acos(vps[1][2]);
-					// double longitude2 = Math.atan2(vps[1][1], vps[1][0]);
-					// if (longitude2 < 0)
-					// longitude2 += Math.PI;
-					// double latitude3 = Math.acos(vps[2][2]);
-					// double longitude3 = Math.atan2(vps[2][1], vps[2][0]);
-					// if (longitude3 < 0)
-					// longitude3 += Math.PI;
+					// double phi = Math.atan2(vps[0][1], vps[0][0]);
+					// if (phi < 0)
+					// phi = phi + Math.PI;
+					// double theta = Math.acos(vps[0][2] / Math.sqrt(vps[0][0] * vps[0][0] + vps[0][1] * vps[0][1] + vps[0][2] * vps[0][2]));
+					// System.out.println("phi: " + phi * 180 / Math.PI + " theta : " + theta * 180 / Math.PI);
+					// double phi2 = Math.atan2(vps[1][1], vps[1][0]);
+					// if (phi2 < 0)
+					// phi2 = phi2 + Math.PI;
+					// double theta2 = Math.acos(vps[1][2] / Math.sqrt(vps[1][0] * vps[1][0] + vps[1][1] * vps[1][1] + vps[1][2] * vps[1][2]));
+					// System.out.println("phi2: " + phi2 * 180 / Math.PI + " theta2 : " + theta2 * 180 / Math.PI);
 					//
-					// System.out.println("Vpx longitude : " + longitude * 180 / Math.PI);
-					// System.out.println("Vpx lattitude : " + latitude * 180 / Math.PI);
-					// System.out.println("Vpy longitude : " + longitude2 * 180 / Math.PI);
-					// System.out.println("Vpy lattitude : " + latitude2 * 180 / Math.PI);
-					// System.out.println("Vpz longitude : " + longitude3 * 180 / Math.PI);
-					// System.out.println("Vpz lattitude : " + latitude3 * 180 / Math.PI);
+					// double x = Math.sin(theta) * Math.cos(phi);
+					// double y = Math.sin(theta) * Math.sin(phi);
+
+					// System.out.println("x: " + x + "/" + vps[0][0] / Math.sqrt(vps[0][0] * vps[0][0] + vps[0][1] * vps[0][1] + vps[0][2] * vps[0][2]) + " y : " + y + "/"
+					// + vps[0][1] / Math.sqrt(vps[0][0] * vps[0][0] + vps[0][1] * vps[0][1] + vps[0][2] * vps[0][2]));
+					//
+					// System.out.println(Arrays.deepToString(vps));
 
 					Map<Integer, List<Integer>> clusters = linesDetector.lines2Vps(6.0 / 180.0 * Math.PI);
 					for (int cluster : clusters.keySet())
@@ -136,8 +102,7 @@ public class LinesDetector10 extends AbstractApp {
 							lines.lines.get(lineId).draw(colorFrame, new Scalar(cluster == 0 ? 255 : 0, cluster == 1 ? 255 : 0, cluster == 2 ? 255 : 0));
 
 					frameView.setImage(Tools.mat2jfxImage(colorFrame));
-					Mat homographyMat = findHomography(frame.size(), new double[] { frame.width() / 2, frame.height() / 2, 1.0 }, linesDetector.f,
-							new double[][] { vpx.getUncalibrated(new double[] { frame.width() / 2, frame.height() / 2, 1.0 }, linesDetector.f), vpy.getUncalibrated(new double[] { frame.width() / 2, frame.height() / 2, 1.0 }, linesDetector.f) });
+					Mat homographyMat = findHomography2(frame.size(), new double[] { frame.width() / 2, frame.height() / 2, 1.0 }, vps, linesDetector.getVanishingPoints(), LinesDetector.f);
 					Imgproc.warpPerspective(frame, dePerspectived, homographyMat, frame.size(), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(255));
 					deskiewedView.setImage(Tools.mat2jfxImage(dePerspectived));
 				} else
@@ -163,7 +128,7 @@ public class LinesDetector10 extends AbstractApp {
 
 		private final List<Line> lines;
 		private final double[] pp;
-		private final double f = 6.053 / 0.009;
+		private static final double f = 6.053 / 0.009;
 		private double noiseRatio = 0.5;
 		private List<LineInfo> lineInfos = new ArrayList<>();
 		double vps[][];
@@ -211,7 +176,7 @@ public class LinesDetector10 extends AbstractApp {
 
 			double confEfficience = 0.9999;
 			int it = (int) (Math.log(1 - confEfficience) / Math.log(1.0 - p));
-			System.out.println("Iterations : " + it);
+			// System.out.println("Iterations : " + it);
 			int numVp2 = 360;
 			double stepVp2 = 2.0 * Math.PI / numVp2;
 
@@ -346,7 +311,7 @@ public class LinesDetector10 extends AbstractApp {
 			}
 
 			//
-			int halfSize = 1;
+			int halfSize = 3;
 			int winSize = halfSize * 2 + 1;
 			int neighNum = winSize * winSize;
 
@@ -368,12 +333,24 @@ public class LinesDetector10 extends AbstractApp {
 
 		double[][] getBestVpsHyp(List<double[][]> vpHypo, double[][] sphereGrid) {
 			int num = vpHypo.size();
-			System.out.println("vpHypo : " + vpHypo.size());
+			// System.out.println("vpHypo : " + vpHypo.size());
 			double oneDegree = 1.0 / 180.0 * Math.PI;
 
 			// get the corresponding line length of every hypotheses
 			double[] lineLength = new double[num];
 			for (int i = 0; i < num; ++i) {
+
+				double[][] hypo = vpHypo.get(i);
+				int zIndex = 0;
+				double minXY = Double.MAX_VALUE;
+				// for (int k = 0; k < 3; k++) {
+				// double currentXY = hypo[k][0] * hypo[k][0] + hypo[k][1] * hypo[k][1];
+				// if (currentXY < minXY) {
+				// zIndex = k;
+				// minXY = currentXY;
+				// }
+				// }
+
 				for (int j = 0; j < 3; ++j) {
 					if (vpHypo.get(i)[j][2] == 0.0)
 						continue;
@@ -396,9 +373,12 @@ public class LinesDetector10 extends AbstractApp {
 				if (lineLength[i] > maxLength) {
 					maxLength = lineLength[i];
 					bestIdx = i;
+					// System.out.println("Select : " + Arrays.deepToString(vpHypo.get(bestIdx)) + " score : " + maxLength);
 				}
 			}
 			double[][] hypo = vpHypo.get(bestIdx);
+			System.out.println("------------------------------");
+			System.out.println("Select : " + Arrays.deepToString(vpHypo.get(bestIdx)) + " score : " + maxLength);
 
 			int xIndex = -1;
 			int yIndex = -1;
@@ -407,9 +387,9 @@ public class LinesDetector10 extends AbstractApp {
 			double minYZ = Double.MAX_VALUE;
 			double minXZ = Double.MAX_VALUE;
 			for (int i = 0; i < 3; i++) {
-				double currentXY = hypo[i][0] * hypo[i][0] + hypo[i][1] * hypo[i][1];
-				double currentYZ = hypo[i][1] * hypo[i][1] + hypo[i][2] * hypo[i][2];
-				double currentXZ = hypo[i][0] * hypo[i][0] + hypo[i][2] * hypo[i][2];
+				double currentXY = Math.sqrt(hypo[i][0] * hypo[i][0] + hypo[i][1] * hypo[i][1]);
+				double currentYZ = Math.sqrt(hypo[i][1] * hypo[i][1] + hypo[i][2] * hypo[i][2]);
+				double currentXZ = Math.sqrt(hypo[i][0] * hypo[i][0] + hypo[i][2] * hypo[i][2]);
 				if (currentXY < minXY) {
 					zIndex = i;
 					minXY = currentXY;
@@ -423,7 +403,16 @@ public class LinesDetector10 extends AbstractApp {
 					minXZ = currentXZ;
 				}
 			}
-			return new double[][] { hypo[xIndex], hypo[yIndex], hypo[zIndex] };
+
+			double[] vpx = hypo[xIndex];
+			double[] vpy = hypo[yIndex];
+			double[] vpz = hypo[zIndex];
+			// if (det(vpx, vpy, vpz) < 0) {
+			// vpy = new double[] { -vpy[0], -vpy[1], -vpy[2] };
+			// // vpz = new double[] { vpz[0], vpz[1], -vpz[2] };
+			// }
+
+			return new double[][] { vpx, vpy, vpz };
 		}
 
 		Map<Integer, List<Integer>> lines2Vps(double thAngle) {
@@ -484,7 +473,7 @@ public class LinesDetector10 extends AbstractApp {
 		}
 	}
 
-	public static Mat findHomography(Size size, double[] origin, double f, double[][] vps) {
+	public static Mat findHomography(Size size, double[] origin, double[][] vps) {
 
 		double[] A = new double[] { 0, 0, 1 };
 		double[] B = new double[] { size.width, 0, 1 };
@@ -501,8 +490,37 @@ public class LinesDetector10 extends AbstractApp {
 		return Imgproc.getPerspectiveTransform(new MatOfPoint2f(new Point(A_), new Point(B_), new Point(C_), new Point(D_)), new MatOfPoint2f(new Point(A), new Point(B), new Point(C), new Point(D)));
 	}
 
+	public static Mat findHomography2(Size size, double[] origin, double[][] vps, double[][] vanishingPoints, double f) {
+
+		System.out.println(Arrays.deepToString(vanishingPoints));
+
+		double[] A = new double[] { size.width / 2, size.height / 2, 1 };
+		double[] B = new double[] { size.width, size.height / 2, 1 };
+		double[] C = new double[] { size.width, size.height, 1 };
+		double[] D = new double[] { size.width / 2, size.height, 1 };
+
+		double phi = Math.abs(Math.atan(vps[0][1] / vps[0][0]));
+		double theta = Math.abs(Math.acos(Math.abs(vps[0][2])));
+		double phi2 = Math.abs(Math.atan(vps[1][1] / vps[1][0]));
+		double theta2 = Math.abs(Math.acos(Math.abs(vps[1][2])));
+
+		double[] A_ = A;
+		double[] B_ = new double[] { size.width / 2 + size.width / 2 * Math.sin(theta) * Math.cos(phi), size.height / 2 + size.height / 2 * Math.sin(theta) * Math.sin(phi), 1 };
+		double[] D_ = new double[] { size.width / 2 + size.width / 2 * Math.sin(theta2) * Math.cos(phi2), size.height / 2 + size.height / 2 * Math.sin(theta2) * Math.sin(phi2), 1 };
+		double[] C_ = cross2D(cross(B_, vanishingPoints[1]), cross(D_, vanishingPoints[0]));
+		System.out.println(Arrays.toString(A_));
+		System.out.println(Arrays.toString(B_));
+		System.out.println(Arrays.toString(C_));
+		System.out.println(Arrays.toString(D_));
+		return Imgproc.getPerspectiveTransform(new MatOfPoint2f(new Point(A_), new Point(B_), new Point(C_), new Point(D_)), new MatOfPoint2f(new Point(A), new Point(B), new Point(C), new Point(D)));
+	}
+
 	static double[] cross(double[] a, double b[]) {
 		return new double[] { a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0] };
+	}
+
+	static double det(double[] u, double v[], double w[]) {
+		return u[0] * v[1] * w[2] + u[2] * v[0] * w[1] + u[1] * v[2] * w[0] - u[2] * v[1] * w[0] - u[1] * v[0] * w[2] - u[0] * v[2] * w[1];
 	}
 
 	static double[] cross2D(double[] a, double b[]) {
