@@ -222,6 +222,10 @@ public class GSRect implements Comparable<GSRect> {
 		return other.br().getX() >= x && other.x < br().getX();
 	}
 
+	public boolean vOverlaps(GSRect other) {
+		return other.br().getY() >= y && other.y < br().getY();
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;

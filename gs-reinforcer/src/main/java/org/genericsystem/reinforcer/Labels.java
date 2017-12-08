@@ -367,9 +367,9 @@ public class Labels implements Iterable<Label> {
 	private List<List<Label>> byLine(List<Label> labels) {
 		Collections.sort(labels);
 		return groupBy(labels, (l1, l2) -> {
-			GSPoint c1 = l1.getRect().getCenter();
-			GSPoint c2 = l2.getRect().getCenter();
-			return Math.abs(c1.getY() - c2.getY()) <= .1 * Math.max(c1.getY(), c2.getY());
+			GSRect r1 = l1.getRect();
+			GSRect r2 = l2.getRect();
+			return r1.vOverlaps(r2);
 		});
 	}
 
