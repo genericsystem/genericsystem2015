@@ -9,6 +9,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
+
 import org.genericsystem.cv.LinesDetector8.Line;
 import org.genericsystem.cv.LinesDetector8.Lines;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
@@ -22,11 +25,8 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
 
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
-
 public class LinesDetector10 extends AbstractApp {
-
+	static final double f = 6.053 / 0.009;
 	static {
 		NativeLibraryLoader.load();
 	}
@@ -38,6 +38,7 @@ public class LinesDetector10 extends AbstractApp {
 	private final VideoCapture capture = new VideoCapture(0);
 	private ScheduledExecutorService timer = Executors.newSingleThreadScheduledExecutor();
 	Lines lines;
+	double[][] vps;
 	private boolean stabilize = false;
 
 	@Override
@@ -67,52 +68,33 @@ public class LinesDetector10 extends AbstractApp {
 				Img closed = grad.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(10, 10)).morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(3, 3));
 				gradView.setImage(closed.toJfxImage());
 				if (!stabilize)
-					lines = new Lines(closed.houghLinesP(1, Math.PI / 180, 10, 20, 5));
+					lines = new Lines(closed.houghLinesP(1, Math.PI / 180, 10, 15, 5));
 
 				if (lines.size() > 10) {
 					// lines = lines.reduce(30);
-					Mat colorFrame = frame.clone();
-					lines.draw(colorFrame, new Scalar(0, 0, 0));
-					LinesDetector linesDetector = new LinesDetector(new Img(frame, false), lines.lines);
+				Mat colorFrame = frame.clone();
+				lines.draw(colorFrame, new Scalar(0, 0, 0));
+				LinesDetector linesDetector = new LinesDetector(new Img(frame, false), lines.lines);
+				// if (!stabilize)
+				vps = linesDetector.getVps();
 
-					double[][] vps = linesDetector.getVps();
+				Map<Integer, List<Integer>> clusters = linesDetector.lines2Vps(6.0 / 180.0 * Math.PI);
+				for (int cluster : clusters.keySet())
+					for (int lineId : clusters.get(cluster))
+						lines.lines.get(lineId).draw(colorFrame, new Scalar(cluster == 0 ? 255 : 0, cluster == 1 ? 255 : 0, cluster == 2 ? 255 : 0));
 
-					// double phi = Math.atan2(vps[0][1], vps[0][0]);
-					// if (phi < 0)
-					// phi = phi + Math.PI;
-					// double theta = Math.acos(vps[0][2] / Math.sqrt(vps[0][0] * vps[0][0] + vps[0][1] * vps[0][1] + vps[0][2] * vps[0][2]));
-					// System.out.println("phi: " + phi * 180 / Math.PI + " theta : " + theta * 180 / Math.PI);
-					// double phi2 = Math.atan2(vps[1][1], vps[1][0]);
-					// if (phi2 < 0)
-					// phi2 = phi2 + Math.PI;
-					// double theta2 = Math.acos(vps[1][2] / Math.sqrt(vps[1][0] * vps[1][0] + vps[1][1] * vps[1][1] + vps[1][2] * vps[1][2]));
-					// System.out.println("phi2: " + phi2 * 180 / Math.PI + " theta2 : " + theta2 * 180 / Math.PI);
-					//
-					// double x = Math.sin(theta) * Math.cos(phi);
-					// double y = Math.sin(theta) * Math.sin(phi);
+				frameView.setImage(Tools.mat2jfxImage(colorFrame));
+				Mat homographyMat = findHomography2(frame.size(), vps, new double[] { frame.width() / 2, frame.height() / 2, 1.0 }, f);
+				Imgproc.warpPerspective(frame, dePerspectived, homographyMat, frame.size(), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(255));
+				deskiewedView.setImage(Tools.mat2jfxImage(dePerspectived));
+			} else
+				System.out.println("Not enough lines : " + lines.size());
 
-					// System.out.println("x: " + x + "/" + vps[0][0] / Math.sqrt(vps[0][0] * vps[0][0] + vps[0][1] * vps[0][1] + vps[0][2] * vps[0][2]) + " y : " + y + "/"
-					// + vps[0][1] / Math.sqrt(vps[0][0] * vps[0][0] + vps[0][1] * vps[0][1] + vps[0][2] * vps[0][2]));
-					//
-					// System.out.println(Arrays.deepToString(vps));
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
 
-					Map<Integer, List<Integer>> clusters = linesDetector.lines2Vps(6.0 / 180.0 * Math.PI);
-					for (int cluster : clusters.keySet())
-						for (int lineId : clusters.get(cluster))
-							lines.lines.get(lineId).draw(colorFrame, new Scalar(cluster == 0 ? 255 : 0, cluster == 1 ? 255 : 0, cluster == 2 ? 255 : 0));
-
-					frameView.setImage(Tools.mat2jfxImage(colorFrame));
-					Mat homographyMat = findHomography2(frame.size(), new double[] { frame.width() / 2, frame.height() / 2, 1.0 }, vps, linesDetector.getVanishingPoints(), LinesDetector.f);
-					Imgproc.warpPerspective(frame, dePerspectived, homographyMat, frame.size(), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(255));
-					deskiewedView.setImage(Tools.mat2jfxImage(dePerspectived));
-				} else
-					System.out.println("Not enough lines : " + lines.size());
-
-			} catch (Throwable e) {
-				e.printStackTrace();
-			}
-
-		}, 30, 50, TimeUnit.MILLISECONDS);
+	}, 30, 50, TimeUnit.MILLISECONDS);
 
 	}
 
@@ -128,7 +110,6 @@ public class LinesDetector10 extends AbstractApp {
 
 		private final List<Line> lines;
 		private final double[] pp;
-		private static final double f = 6.053 / 0.009;
 		private double noiseRatio = 0.5;
 		private List<LineInfo> lineInfos = new ArrayList<>();
 		double vps[][];
@@ -157,16 +138,6 @@ public class LinesDetector10 extends AbstractApp {
 
 		public double[][] getVps() {
 			return vps;
-		}
-
-		public double[][] getVanishingPoints() {
-			double[][] uncalibrates = new double[3][3];
-			for (int i = 0; i < 3; i++) {
-				uncalibrates[i][0] = vps[i][0] * f / vps[i][2] + pp[0];
-				uncalibrates[i][1] = vps[i][1] * f / vps[i][2] + pp[1];
-				uncalibrates[i][2] = 1.0;
-			}
-			return uncalibrates;
 		}
 
 		List<double[][]> getVPHypVia2Lines() {
@@ -210,13 +181,7 @@ public class LinesDetector10 extends AbstractApp {
 					i--;
 					continue;
 				}
-				double[] vp1 = new double[] { vp1_Img[0] / vp1_Img[2] - pp[0], vp1_Img[1] / vp1_Img[2] - pp[1], f };
-				if (vp1[2] == 0)
-					vp1[2] = 0.0011;
-				double N = Math.sqrt(vp1[0] * vp1[0] + vp1[1] * vp1[1] + vp1[2] * vp1[2]);
-				vp1[0] *= 1.0 / N;
-				vp1[1] *= 1.0 / N;
-				vp1[2] *= 1.0 / N;
+				double[] vp1 = getVpFromVp2D(vp1_Img, pp, f);
 
 				// get the vp2 and vp3
 				double[] vp2 = new double[3];
@@ -238,7 +203,7 @@ public class LinesDetector10 extends AbstractApp {
 					vp2[2] = Z;
 					if (vp2[2] == 0.0)
 						vp2[2] = 0.0011;
-					N = Math.sqrt(vp2[0] * vp2[0] + vp2[1] * vp2[1] + vp2[2] * vp2[2]);
+					double N = Math.sqrt(vp2[0] * vp2[0] + vp2[1] * vp2[1] + vp2[2] * vp2[2]);
 					vp2[0] *= 1.0 / N;
 					vp2[1] *= 1.0 / N;
 					vp2[2] *= 1.0 / N;
@@ -268,6 +233,21 @@ public class LinesDetector10 extends AbstractApp {
 			return vpHypo;
 		}
 
+		private static double[] getVpFromVp2D(double[] vpImg, double[] pp, double f) {
+			double[] vp = new double[] { vpImg[0] / vpImg[2] - pp[0], vpImg[1] / vpImg[2] - pp[1], f };
+			if (vp[2] == 0)
+				vp[2] = 0.0011;
+			double N = Math.sqrt(vp[0] * vp[0] + vp[1] * vp[1] + vp[2] * vp[2]);
+			vp[0] *= 1.0 / N;
+			vp[1] *= 1.0 / N;
+			vp[2] *= 1.0 / N;
+			return vp;
+		}
+
+		private static double[] getVp2DFromVp(double[] vp, double[] pp, double f) {
+			return new double[] { vp[0] * f / vp[2] + pp[0], vp[1] * f / vp[2] + pp[1] };
+		}
+
 		double[][] getSphereGrids() {
 			// build sphere grid with 1 degree accuracy
 			double angelAccuracy = 1.0 / 180.0 * Math.PI;
@@ -289,6 +269,7 @@ public class LinesDetector10 extends AbstractApp {
 						continue;
 					double x = ptIntersect[0] / ptIntersect[2];
 					double y = ptIntersect[1] / ptIntersect[2];
+
 					double X = x - pp[0];
 					double Y = y - pp[1];
 					double Z = f;
@@ -343,16 +324,16 @@ public class LinesDetector10 extends AbstractApp {
 				double[][] hypo = vpHypo.get(i);
 				int zIndex = 0;
 				double minXY = Double.MAX_VALUE;
-				// for (int k = 0; k < 3; k++) {
-				// double currentXY = hypo[k][0] * hypo[k][0] + hypo[k][1] * hypo[k][1];
-				// if (currentXY < minXY) {
-				// zIndex = k;
-				// minXY = currentXY;
-				// }
-				// }
+				for (int k = 0; k < 3; k++) {
+					double currentXY = hypo[k][0] * hypo[k][0] + hypo[k][1] * hypo[k][1];
+					if (currentXY < minXY) {
+						zIndex = k;
+						minXY = currentXY;
+					}
+				}
 
 				for (int j = 0; j < 3; ++j) {
-					if (vpHypo.get(i)[j][2] == 0.0)
+					if (j == zIndex || vpHypo.get(i)[j][2] == 0.0)
 						continue;
 					double latitude = Math.acos(vpHypo.get(i)[j][2]);
 					double longitude = Math.atan2(vpHypo.get(i)[j][0], vpHypo.get(i)[j][1]) + Math.PI;
@@ -420,7 +401,7 @@ public class LinesDetector10 extends AbstractApp {
 			// get the corresponding vanish points on the image plane
 			List<double[]> vp2D = new ArrayList<>();
 			for (int i = 0; i < 3; ++i)
-				vp2D.add(new double[] { vps[i][0] * f / vps[i][2] + pp[0], vps[i][1] * f / vps[i][2] + pp[1] });
+				vp2D.add(getVp2DFromVp(vps[i], pp, f));
 			Map<Integer, List<Integer>> clusters = new HashMap<Integer, List<Integer>>() {
 				@Override
 				public List<Integer> get(Object key) {
@@ -473,41 +454,59 @@ public class LinesDetector10 extends AbstractApp {
 		}
 	}
 
-	public static Mat findHomography(Size size, double[] origin, double[][] vps) {
+	// public static Mat findHomography(Size size, double[] origin, double[][] vps) {
+	//
+	// double[] A = new double[] { 0, 0, 1 };
+	// double[] B = new double[] { size.width, 0, 1 };
+	// double[] C = new double[] { size.width, size.height, 1 };
+	// double[] D = new double[] { 0, size.height, 1 };
+	// double[] X = cross2D(cross(vps[0], origin), cross(A, D));
+	// double[] Y = cross2D(cross(vps[1], origin), cross(A, B));
+	// double[] Z = cross2D(cross(vps[0], origin), cross(B, C));
+	// double[] W = cross2D(cross(vps[1], origin), cross(D, C));
+	// double[] A_ = cross2D(cross(vps[1], X), cross(vps[0], Y));
+	// double[] B_ = cross2D(cross(vps[1], Z), cross(vps[0], Y));
+	// double[] C_ = cross2D(cross(vps[1], Z), cross(vps[0], W));
+	// double[] D_ = cross2D(cross(vps[1], X), cross(vps[0], W));
+	// return Imgproc.getPerspectiveTransform(new MatOfPoint2f(new Point(A_), new Point(B_), new Point(C_), new Point(D_)), new MatOfPoint2f(new Point(A), new Point(B), new Point(C), new Point(D)));
+	// }
 
-		double[] A = new double[] { 0, 0, 1 };
-		double[] B = new double[] { size.width, 0, 1 };
-		double[] C = new double[] { size.width, size.height, 1 };
-		double[] D = new double[] { 0, size.height, 1 };
-		double[] X = cross2D(cross(vps[0], origin), cross(A, D));
-		double[] Y = cross2D(cross(vps[1], origin), cross(A, B));
-		double[] Z = cross2D(cross(vps[0], origin), cross(B, C));
-		double[] W = cross2D(cross(vps[1], origin), cross(D, C));
-		double[] A_ = cross2D(cross(vps[1], X), cross(vps[0], Y));
-		double[] B_ = cross2D(cross(vps[1], Z), cross(vps[0], Y));
-		double[] C_ = cross2D(cross(vps[1], Z), cross(vps[0], W));
-		double[] D_ = cross2D(cross(vps[1], X), cross(vps[0], W));
-		return Imgproc.getPerspectiveTransform(new MatOfPoint2f(new Point(A_), new Point(B_), new Point(C_), new Point(D_)), new MatOfPoint2f(new Point(A), new Point(B), new Point(C), new Point(D)));
+	public static double[][] getUncalibratedVps(double vps[][], double[] pp, double f) {
+		double[][] result = new double[3][3];
+		for (int i = 0; i < 3; i++) {
+			result[i][0] = vps[i][0] * f / vps[i][2] + pp[0];
+			result[i][1] = vps[i][1] * f / vps[i][2] + pp[1];
+			result[i][2] = 1.0;
+		}
+		return result;
 	}
 
-	public static Mat findHomography2(Size size, double[] origin, double[][] vps, double[][] vanishingPoints, double f) {
+	public static Mat findHomography2(Size size, double[][] vps, double[] pp, double f) {
+		double[][] vps2D = getUncalibratedVps(vps, pp, f);
 
-		System.out.println(Arrays.deepToString(vanishingPoints));
+		System.out.println(Arrays.deepToString(vps2D));
+
+		double phi = Math.atan2(vps[0][1], vps[0][0]);
+		double theta = Math.acos(vps[0][2]);
+		double phi2 = Math.atan2(vps[1][1], vps[1][0]);
+		double theta2 = Math.acos(vps[1][2]);
+		double phi3 = Math.atan2(vps[2][1], vps[2][0]);
+		double theta3 = Math.acos(vps[2][2]);
 
 		double[] A = new double[] { size.width / 2, size.height / 2, 1 };
-		double[] B = new double[] { size.width, size.height / 2, 1 };
-		double[] C = new double[] { size.width, size.height, 1 };
-		double[] D = new double[] { size.width / 2, size.height, 1 };
+		double[] B = new double[] { Math.sin(theta) * Math.cos(phi) < 0 ? 0 : size.width, size.height / 2 };
+		double[] D = new double[] { size.width / 2, Math.sin(theta2) * Math.sin(phi2) < 0 ? 0 : size.height, 1 };
+		double[] C = new double[] { Math.sin(theta) * Math.cos(phi) < 0 ? 0 : size.width, Math.sin(theta2) * Math.sin(phi2) < 0 ? 0 : size.height };
 
-		double phi = Math.abs(Math.atan(vps[0][1] / vps[0][0]));
-		double theta = Math.abs(Math.acos(Math.abs(vps[0][2])));
-		double phi2 = Math.abs(Math.atan(vps[1][1] / vps[1][0]));
-		double theta2 = Math.abs(Math.acos(Math.abs(vps[1][2])));
+		System.out.println("vp1(" + phi * 180 / Math.PI + "," + theta * 180 / Math.PI + ")");
+		System.out.println("vp2(" + phi2 * 180 / Math.PI + "," + theta2 * 180 / Math.PI + ")");
+		System.out.println("vp3(" + phi3 * 180 / Math.PI + "," + theta3 * 180 / Math.PI + ")");
 
 		double[] A_ = A;
 		double[] B_ = new double[] { size.width / 2 + size.width / 2 * Math.sin(theta) * Math.cos(phi), size.height / 2 + size.height / 2 * Math.sin(theta) * Math.sin(phi), 1 };
 		double[] D_ = new double[] { size.width / 2 + size.width / 2 * Math.sin(theta2) * Math.cos(phi2), size.height / 2 + size.height / 2 * Math.sin(theta2) * Math.sin(phi2), 1 };
-		double[] C_ = cross2D(cross(B_, vanishingPoints[1]), cross(D_, vanishingPoints[0]));
+		double[] C_ = cross2D(cross(B_, vps2D[1]), cross(D_, vps2D[0]));
+
 		System.out.println(Arrays.toString(A_));
 		System.out.println(Arrays.toString(B_));
 		System.out.println(Arrays.toString(C_));
