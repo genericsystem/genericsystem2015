@@ -10,9 +10,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
-
 import org.genericsystem.cv.LinesDetector8.Line;
 import org.genericsystem.cv.LinesDetector8.Lines;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
@@ -24,7 +21,11 @@ import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.utils.Converters;
 import org.opencv.videoio.VideoCapture;
+
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
 
 public class LinesDetector10 extends AbstractApp {
 	// static final double f = 6.053 / 0.009;
@@ -40,8 +41,22 @@ public class LinesDetector10 extends AbstractApp {
 	private final VideoCapture capture = new VideoCapture(0);
 	private ScheduledExecutorService timer = Executors.newSingleThreadScheduledExecutor();
 	private Lines lines;
+	private Point[] trapezePoints = new Point[] { new Point(), new Point(), new Point(), new Point() };
 	double[][] vps;
 	private boolean stabilize = false;
+
+	private Mat getDumpedTrapezePointsHomography(Mat homography, double dumpSize, Size size) {
+		MatOfPoint2f results = new MatOfPoint2f();
+		MatOfPoint2f framePoints = new MatOfPoint2f(new Point(0, 0), new Point(size.width, 0), new Point(size.width, size.height), new Point(0, size.height));
+		Core.perspectiveTransform(Converters.vector_Point2f_to_Mat(Arrays.asList(new Point(0, 0), new Point(size.width, 0), new Point(size.width, size.height), new Point(0, size.height))), results, homography);
+		dumpTrapezePoints(results.toArray(), dumpSize);
+		return Imgproc.getPerspectiveTransform(framePoints, new MatOfPoint2f(trapezePoints));
+	}
+
+	private void dumpTrapezePoints(Point[] newPoints, double dumpSize) {
+		for (int i = 0; i < trapezePoints.length; i++)
+			trapezePoints[i] = new Point(((dumpSize - 1) * trapezePoints[i].x + newPoints[i].x) / dumpSize, ((dumpSize - 1) * trapezePoints[i].y + newPoints[i].y) / dumpSize);
+	}
 
 	@Override
 	protected void onSpace() {
@@ -79,29 +94,30 @@ public class LinesDetector10 extends AbstractApp {
 
 				if (allLines.size() > 10) {
 					// lines = lines.reduce(30);
-				Mat colorFrame = frame.clone();
-				allLines.draw(colorFrame, new Scalar(0, 0, 0));
-				LinesDetector linesDetector = new LinesDetector(new Img(frame, false), allLines.lines);
-				// if (!stabilize)
-				vps = linesDetector.getVps();
+					Mat colorFrame = frame.clone();
+					allLines.draw(colorFrame, new Scalar(0, 0, 0));
+					LinesDetector linesDetector = new LinesDetector(new Img(frame, false), allLines.lines);
+					// if (!stabilize)
+					vps = linesDetector.getVps();
 
-				Map<Integer, List<Integer>> clusters = linesDetector.lines2Vps(6.0 / 180.0 * Math.PI);
-				for (int cluster : clusters.keySet())
-					for (int lineId : clusters.get(cluster))
-						allLines.lines.get(lineId).draw(colorFrame, new Scalar(cluster == 0 ? 255 : 0, cluster == 1 ? 255 : 0, cluster == 2 ? 255 : 0));
+					Map<Integer, List<Integer>> clusters = linesDetector.lines2Vps(6.0 / 180.0 * Math.PI);
+					for (int cluster : clusters.keySet())
+						for (int lineId : clusters.get(cluster))
+							allLines.lines.get(lineId).draw(colorFrame, new Scalar(cluster == 0 ? 255 : 0, cluster == 1 ? 255 : 0, cluster == 2 ? 255 : 0));
 
-				frameView.setImage(Tools.mat2jfxImage(colorFrame));
-				Mat homographyMat = findHomography(frame.size(), vps, new double[] { frame.width() / 2, frame.height() / 2, 1.0 }, f);
-				Imgproc.warpPerspective(frame, dePerspectived, homographyMat, frame.size(), Imgproc.INTER_LINEAR, Core.BORDER_CONSTANT, Scalar.all(255));
-				deskiewedView.setImage(Tools.mat2jfxImage(dePerspectived));
-			} else
-				System.out.println("Not enough lines : " + lines.size());
+					frameView.setImage(Tools.mat2jfxImage(colorFrame));
+					Mat homographyMat = findHomography(frame.size(), vps, new double[] { frame.width() / 2, frame.height() / 2, 1.0 }, f);
+					Mat dumpedHomographyMat = getDumpedTrapezePointsHomography(homographyMat, 3, frame.size());
+					Imgproc.warpPerspective(frame, dePerspectived, dumpedHomographyMat, frame.size(), Imgproc.INTER_LINEAR, Core.BORDER_CONSTANT, Scalar.all(255));
+					deskiewedView.setImage(Tools.mat2jfxImage(dePerspectived));
+				} else
+					System.out.println("Not enough lines : " + lines.size());
 
-		} catch (Throwable e) {
-			e.printStackTrace();
-		}
+			} catch (Throwable e) {
+				e.printStackTrace();
+			}
 
-	}, 30, 50, TimeUnit.MILLISECONDS);
+		}, 30, 50, TimeUnit.MILLISECONDS);
 
 	}
 
