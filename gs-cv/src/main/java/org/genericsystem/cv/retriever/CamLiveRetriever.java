@@ -111,7 +111,7 @@ public class CamLiveRetriever extends AbstractApp {
 						stabilizedImgDescriptor = new ImgDescriptor(frame, deperspectivGraphy);
 						return;
 					}
-					if (stabilizationHasChanged && stabilizationErrors > 30) {
+					if (stabilizationHasChanged && stabilizationErrors > 10) {
 						oldFields = oldFields==null?new Fields(fields.getFields()):oldFields;
 						recoveringCounter = 0;
 						fields.reset();
@@ -138,6 +138,7 @@ public class CamLiveRetriever extends AbstractApp {
 							Core.gemm(deperspectivGraphy, stabilizationHomography.inv(), 1, new Mat(), 0, fieldsHomography);
 							Stats.beginTask("restabilizeFields");
 							fields.restabilizeFields(fieldsHomography);
+							System.out.println("fields restabilized");
 							Stats.endTask("restabilizeFields");
 							stabilizedImgDescriptor = newImgDescriptor;
 							stabilizationHomography = deperspectivGraphy;
@@ -148,8 +149,7 @@ public class CamLiveRetriever extends AbstractApp {
 						fields.consolidate(stabilizedDisplay);						
 						Stats.endTask("consolidate fields");
 						Stats.beginTask("performOcr");
-
-						//fields.performOcr(stabilized);
+						fields.performOcr(stabilized);
 
 						if(oldFields==null)
 							fields.performOcr(stabilized);
@@ -161,16 +161,17 @@ public class CamLiveRetriever extends AbstractApp {
 								fields.tryRecoveryfromOldFields(labelMatches, oldFields);
 								oldFields = null;
 								labelMatches.clear();
+								recoveringCounter=0;
 							}							
 						}
 						if(recoveringCounter>5){
 							oldFields = null;
 							labelMatches.clear();
+							recoveringCounter=0;
 						}
 
 						Stats.endTask("performOcr");
 						Img stabilizedDebug = new Img(stabilizedDisplay.getSrc(), true);
-
 						Stats.beginTask("draw");
 						fields.drawFieldsOnStabilizedDebug(stabilizedDebug);
 						fields.drawOcrPerspectiveInverse(display, stabilizationHomography.inv(), 1);
@@ -203,9 +204,6 @@ public class CamLiveRetriever extends AbstractApp {
 
 	}
 
-
-
-
 	@Override
 	protected void onSpace() {
 		stabilizationHasChanged = true;
@@ -233,7 +231,7 @@ public class CamLiveRetriever extends AbstractApp {
 			logger.warn("Not enough lines to compute perspective transformation ({})", lines.size());
 			return null;
 		}
-		lines = lines.filter(line -> distance(vp, line) < 0.48);
+		lines = lines.filter(line -> distance(vp, line) < 0.5);
 		lines = lines.reduce(20);
 
 		Stats.beginTask("levenberg");
@@ -241,7 +239,7 @@ public class CamLiveRetriever extends AbstractApp {
 		Stats.endTask("levenberg");
 		calibrated = calibrated.dump(newThetaPhi, 3);
 		vp = calibrated.uncalibrate();
-		//System.out.println("Levenberg vp : " + vp);
+		//	System.out.println("Levenberg vp : " + vp);
 		return findHomography(vp, frame.width(), frame.height());
 	}
 
