@@ -97,7 +97,7 @@ public abstract class AbstractField {
 		if (force || labelsSize >= MIN_SIZE_CONSOLIDATION) {
 			List<String> strings = labels.entrySet().stream().collect(ArrayList<String>::new, (list, e) -> IntStream.range(0, e.getValue()).forEach(count -> list.add(e.getKey())), List::addAll);
 			Tuple res = OCRPlasty.correctStringsAndGetOutliers(strings, RANSAC.NORM_LEVENSHTEIN);
-			this.consolidated = res.getString().orElse(null);
+			this.consolidated = res.getString();
 			this.confidence = res.getConfidence();
 			if (labelsSize >= 2 * MIN_SIZE_CONSOLIDATION)
 				res.getOutliers().forEach(outlier -> labels.remove(outlier));

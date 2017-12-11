@@ -82,14 +82,16 @@ public class CamLiveRetriever extends AbstractApp {
 		AngleCalibrated.calibrate(frame.width(), frame.height());
 		calibrated = new AngleCalibrated(vp);
 
+		FieldDrawer drawer = new FieldDrawer();
+
 		ImageView src0 = new ImageView(Tools.mat2jfxImage(frame));
 		mainGrid.add(src0, 0, 0);
 
 		ImageView src1 = new ImageView(Tools.mat2jfxImage(frame));
 		mainGrid.add(src1, 1, 0);
 
-		ImageView src2 = new ImageView(Tools.mat2jfxImage(frame));
-		mainGrid.add(src2, 1, 1);
+		//		ImageView src2 = new ImageView(Tools.mat2jfxImage(frame));
+		//		mainGrid.add(src2, 1, 1);
 
 		timerFields.scheduleAtFixedRate(() -> onSpace(), 0, STABILIZATION_DELAY, TimeUnit.MILLISECONDS);
 
@@ -138,7 +140,6 @@ public class CamLiveRetriever extends AbstractApp {
 							Core.gemm(deperspectivGraphy, stabilizationHomography.inv(), 1, new Mat(), 0, fieldsHomography);
 							Stats.beginTask("restabilizeFields");
 							fields.restabilizeFields(fieldsHomography);
-							System.out.println("fields restabilized");
 							Stats.endTask("restabilizeFields");
 							stabilizedImgDescriptor = newImgDescriptor;
 							stabilizationHomography = deperspectivGraphy;
@@ -149,10 +150,9 @@ public class CamLiveRetriever extends AbstractApp {
 						fields.consolidate(stabilizedDisplay);						
 						Stats.endTask("consolidate fields");
 						Stats.beginTask("performOcr");
-						fields.performOcr(stabilized);
-
 						if(oldFields==null)
 							fields.performOcr(stabilized);
+
 						else{
 							recoveringCounter++;
 							labelMatches.putAll(fields.getLabelMatchesWithOldFields(stabilized, oldFields));
@@ -171,16 +171,19 @@ public class CamLiveRetriever extends AbstractApp {
 						}
 
 						Stats.endTask("performOcr");
-						Img stabilizedDebug = new Img(stabilizedDisplay.getSrc(), true);
+						//Img stabilizedDebug = new Img(stabilizedDisplay.getSrc(), true);
+
 						Stats.beginTask("draw");
-						fields.drawFieldsOnStabilizedDebug(stabilizedDebug);
-						fields.drawOcrPerspectiveInverse(display, stabilizationHomography.inv(), 1);
-						fields.drawFieldsOnStabilized(stabilizedDisplay);
+
+						drawer.drawFieldsOnStabilized(stabilizedDisplay, fields);
+						drawer.drawOcrPerspectiveInverse(display, fields, stabilizationHomography.inv(), 1);
+						//drawer.drawFieldsOnStabilizedDebug(stabilizedDebug, fields);
+
 						Stats.endTask("draw");
 
 						src0.setImage(display.toJfxImage());
 						src1.setImage(stabilizedDisplay.toJfxImage());
-						src2.setImage(stabilizedDebug.toJfxImage());
+						//src2.setImage(stabilizedDebug.toJfxImage());
 
 						if (++counter % 20 == 0) {
 							System.out.println(Stats.getStatsAndReset());
@@ -231,7 +234,7 @@ public class CamLiveRetriever extends AbstractApp {
 			logger.warn("Not enough lines to compute perspective transformation ({})", lines.size());
 			return null;
 		}
-		lines = lines.filter(line -> distance(vp, line) < 0.5);
+		lines = lines.filter(line -> distance(vp, line) < 0.48);
 		lines = lines.reduce(20);
 
 		Stats.beginTask("levenberg");
@@ -239,7 +242,7 @@ public class CamLiveRetriever extends AbstractApp {
 		Stats.endTask("levenberg");
 		calibrated = calibrated.dump(newThetaPhi, 3);
 		vp = calibrated.uncalibrate();
-		//	System.out.println("Levenberg vp : " + vp);
+		System.out.println("Levenberg vp : " + vp);
 		return findHomography(vp, frame.width(), frame.height());
 	}
 

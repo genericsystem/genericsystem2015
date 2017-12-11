@@ -1,12 +1,22 @@
 package org.genericsystem.cv;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.IntStream;
+
 import org.apache.commons.pool2.BasePooledObjectFactory;
 import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.impl.DefaultPooledObject;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
+import org.genericsystem.cv.retriever.Field;
+import org.genericsystem.cv.retriever.Stats;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
+import org.genericsystem.cv.utils.OCRPlasty;
+import org.genericsystem.cv.utils.OCRPlasty.RANSAC;
+import org.genericsystem.cv.utils.OCRPlasty.Tuple;
 import org.opencv.core.Mat;
+import org.opencv.core.Rect;
 import org.opencv.text.OCRTesseract;
 
 public class Ocr {
@@ -24,6 +34,10 @@ public class Ocr {
 	private static final String TESSERACT_CHAR_WHITE_LIST = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM0123456789.-,<>!?;éèàçÉÈÀÇ€£$œ'";
 	private static final int TESSERACT_OEM = 1;
 	private static final int TESSERACT_PSMODE = 13;
+
+	private static final double CONFIDENCE_THRESHOLD = 0.92;
+	protected static final int MIN_SIZE_CONSOLIDATION = 5;
+	private static final int OCR_CONFIDENCE_THRESH = 0;
 
 	/**
 	 * Internal factory class used to create a tesseractInstancePool of {@link OCRTesseract} instances. Otherwise, segmentation fault can occur when the instance of tesseract is shared accross multiple threads.
@@ -51,6 +65,44 @@ public class Ocr {
 			return new DefaultPooledObject<>(instance);
 		}
 	}
+
+
+	public static String performOcr(Img rootImg, Field f) {
+		int attempts = f.getAttempts();
+		if (f.getOcrRect().isNearEdge(rootImg.width(), rootImg.height(), 10))
+			return null;
+		Rect rect = new Rect((int) f.getOcrRect().getX(), (int) f.getOcrRect().getY(), (int) f.getOcrRect().getWidth(), (int) f.getOcrRect().getHeight());	
+		String ocr = doWork(new Mat(rootImg.getSrc(), rect), OCR_CONFIDENCE_THRESH);
+		if (ocr.length()!=0) {
+			f.getLabels().merge(ocr, 1, Integer::sum);
+			f.setAttempts(++attempts);
+		}
+		if (attempts <= 3 || attempts % 5 == 0) {
+			Stats.beginTask("ocr plasty");
+			consolidateOcr(f);
+			Stats.endTask("ocr plasty");
+		}
+		return ocr;
+	}
+
+	private static void consolidateOcr(Field field) {
+
+		int labelsSize = field.getLabelsSize();
+		if (labelsSize >= MIN_SIZE_CONSOLIDATION) {
+			List<String> strings = field.getLabels().entrySet().stream().collect(ArrayList<String>::new, (list, e) -> IntStream.range(0, e.getValue()).forEach(count -> list.add(e.getKey())), List::addAll);
+			Tuple res = OCRPlasty.correctStringsAndGetOutliers(strings, RANSAC.NORM_LEVENSHTEIN);			
+			field.setConsolidated(res.getString());			
+			field.setConfidence(res.getConfidence());
+			//			if (labelsSize >= 2 * MIN_SIZE_CONSOLIDATION)
+			//				res.getOutliers().forEach(outlier -> field.getLabels().remove(outlier));
+		} else {
+			//logger.trace("Not enough labels to consolidate OCR (current minimum = {})", MIN_SIZE_CONSOLIDATION);
+			field.setConsolidated(null);
+			field.setConfidence(0);
+		}
+		field.adjustLockLevel(field.getConfidence() > CONFIDENCE_THRESHOLD ? 1 : -0.5);
+	}
+
 
 	public static String doWork(Mat mat) {
 		return doWork(mat, 0);

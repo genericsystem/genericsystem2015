@@ -45,17 +45,17 @@ public class OCRPlasty {
 	 * strings).
 	 */
 	public static class Tuple {
-		private final Optional<String> string;
+		private final String string;
 		private final Set<String> outliers;
 		private final double confidence;
 
-		public Tuple(Optional<String> string, Set<String> outliers, double confidence) {
+		public Tuple(String string, Set<String> outliers, double confidence) {
 			this.string = string;
 			this.outliers = outliers;
 			this.confidence = confidence;
 		}
 
-		public Optional<String> getString() {
+		public String getString() {
 			return string;
 		}
 
@@ -83,7 +83,7 @@ public class OCRPlasty {
 
 		for (RANSAC option : RANSAC.values()) {
 			System.out.println(option.name());
-			System.out.println(correctStrings(new ArrayList<>(labels), option).orElse("-- none --"));
+			System.out.println(correctStrings(new ArrayList<>(labels), option));
 			// System.out.println(correctStringsAndGetOutliers(new ArrayList<>(labels), option));
 			for (StringCompare.SIMILARITY method : StringCompare.SIMILARITY.values()) {
 				System.out.println(String.format("Similarity (%s): %.3f", method.name(), StringCompare.similarity(labels, method)));
@@ -92,7 +92,7 @@ public class OCRPlasty {
 		}
 	}
 
-	public static Optional<String> correctStrings(List<String> labels, OCRPlasty.RANSAC options) {
+	public static String correctStrings(List<String> labels, OCRPlasty.RANSAC options) {
 		return correctStrings(labels, options, StringCompare.SIMILARITY.LEVENSHTEIN);
 	}
 
@@ -104,7 +104,7 @@ public class OCRPlasty {
 	 * @param method - the method to be used to compute string similarity
 	 * @return an {@link Optional} containing the string that reached the best consensus, otherwise an empty {@link Optional}
 	 */
-	public static Optional<String> correctStrings(List<String> labels, OCRPlasty.RANSAC options, StringCompare.SIMILARITY method) {
+	public static String correctStrings(List<String> labels, OCRPlasty.RANSAC options, StringCompare.SIMILARITY method) {
 		Tuple res = doStringCorrection(labels, options, method, false);
 		return res.getString();
 	}
@@ -121,9 +121,9 @@ public class OCRPlasty {
 	 * @param method - the method to be used to compute string similarity
 	 * @return a {@link Tuple} object with the results
 	 */
-	public static Tuple correctStringsAndGetOutliers(List<String> labels, OCRPlasty.RANSAC options, StringCompare.SIMILARITY method) {
-		return doStringCorrection(labels, options, method, true);
-	}
+	//	public static Tuple correctStringsAndGetOutliers(List<String> labels, OCRPlasty.RANSAC options, StringCompare.SIMILARITY method) {
+	//		return doStringCorrection(labels, options, method, true);
+	//	}
 
 	/**
 	 * Performs the string correction.
@@ -140,7 +140,7 @@ public class OCRPlasty {
 		// Initialize the parameters
 		Function<Collection<String>, Model<String>> modelProvider = null;
 		Set<String> outliers = Collections.emptySet();
-		Optional<String> result = Optional.empty();
+		String result = "";
 		double confidence = 0;
 		double error = 1;
 
@@ -191,11 +191,11 @@ public class OCRPlasty {
 	 * @param labels - the list of strings
 	 * @return an {@link Optional} containing the string if it was found, otherwise an empty {@link Optional}
 	 */
-	private static Optional<String> ocrPlasty(List<String> labels) {
+	private static String ocrPlasty(List<String> labels) {
 		if (labels == null)
 			throw new IllegalArgumentException("The list cannot be null");
 		if (labels.isEmpty())
-			return Optional.empty();
+			return null;
 		String common = longestCommonSubsequence(labels);
 		String consensus = "";
 		for (int i = 0; i < common.length() + 1; i++) {
@@ -209,7 +209,7 @@ public class OCRPlasty {
 			if (i < common.length() - 1)
 				consensus += common.charAt(i);
 		}
-		return consensus.isEmpty() ? Optional.empty() : Optional.of(consensus);
+		return consensus.isEmpty() ? null : consensus;
 	}
 
 	/**
@@ -221,18 +221,17 @@ public class OCRPlasty {
 	 * @return a new list of strings consisting without the outliers
 	 */
 	private static List<String> getRansacInliers(List<String> labels, Function<Collection<String>, Model<String>> modelProvider, double error) {
-		List<String> trimmed = labels.stream().map(s -> s.trim()).filter(s -> s.length() > 0).collect(Collectors.toList());
-		if (trimmed.isEmpty())
+		if (labels.isEmpty())
 			return Collections.emptyList();
 
-		int minSize = 1 + trimmed.size() / 2;
+		int minSize = 1 + labels.size() / 2;
 		if (minSize < 2)
 			return Collections.emptyList();
 
 		Map<Integer, String> bestFit = new HashMap<>();
 		for (int i = 1, maxAttempts = 10; bestFit.size() <= 3 && i <= maxAttempts; ++i) {
 			try {
-				Ransac<String> ransac = new Ransac<>(trimmed, modelProvider, 2, 10 * i, error, minSize);
+				Ransac<String> ransac = new Ransac<>(labels, modelProvider, 2, 10 * i, error, minSize);
 				bestFit = ransac.getBestDataSet();
 				// bestFit.entrySet().forEach(entry -> logger.debug("key: {} | | value: {}", entry.getKey(), entry.getValue()));
 			} catch (Exception e) {

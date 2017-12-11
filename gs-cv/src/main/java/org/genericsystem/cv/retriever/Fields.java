@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -15,6 +16,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.genericsystem.cv.Img;
+import org.genericsystem.cv.Ocr;
 import org.genericsystem.cv.utils.ParallelTasks;
 import org.genericsystem.cv.utils.RectToolsMapper;
 import org.genericsystem.reinforcer.tools.GSPoint;
@@ -24,57 +26,44 @@ import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
-import org.opencv.core.Scalar;
 import org.opencv.core.Size;
-import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Fields extends AbstractFields<Field> {
+public class Fields implements Iterable<Field>{
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	private static final int MAX_DELETE_UNMERGED = 5;
 	private static final int OCR_TIMEOUT = 100;
 
+	private List<Field> fields;
+
 
 	public Fields(List<Field> fields) {
-		super(fields);
+		this.fields = fields;		
 	}
 
 	public Fields() {
-		super();
+		this.fields = new ArrayList<>();
+	}
+
+	public List<Field> getFields(){
+		return fields;
 	}
 
 	public void reset() {
-		//displayFieldsTree();
 		fields = new ArrayList<>();
 	}
 
+	public Stream<Field> stream(){
+		return fields.stream();
+	}
+
 	@Override
-	public void drawOcrPerspectiveInverse(Img display, Mat homography, int thickness) {
-		stream().forEach(field -> field.drawWithHomography(display, homography, thickness));
-	}
-
-	public void drawFieldsOnStabilized(Img stabilized) {
-		stream().forEach(field -> field.draw(stabilized, 1));
-	}
-
-	public void drawFieldsOnStabilizedDebug(Img stabilized) {
-		for (GSRect rect : mergeRectsList(stabilized)) {
-			Point[] targets = RectToolsMapper.gsPointToPoint(Arrays.asList(rect.decomposeClockwise())).toArray(new Point[0]);
-			for (int i = 0; i < targets.length; ++i)
-				Imgproc.line(stabilized.getSrc(), targets[i], targets[(i + 1) % targets.length], new Scalar(255, 0, 0), 1);
-		}
-	}
-
-	public void displayFieldsTree() {
-		StringBuffer sb = new StringBuffer();
-		sb.append("\n").append("--- FIELDS ---").append("\n");
-		getRoots().forEach(field -> sb.append(field.recursiveToString()));
-		sb.append("\n").append("--- /FIELDS ---").append("\n");
-		System.out.println(sb.toString());
+	public Iterator<Field> iterator() {
+		return fields.iterator();
 	}
 
 	public List<Field> getRoots() {
@@ -108,7 +97,7 @@ public class Fields extends AbstractFields<Field> {
 		for (GSRect rect : rects) {
 			Field match = findMatch(rect, overlapThreshold, img.width(), img.height());
 			if (match != null)
-				updateNode(rect, match, img.width(), img.height());
+				updateNode(rect, match);
 			else if (!rect.isNearEdge(img.width(), img.height(), 10)) {
 				Field parent = findPotentialParent(rect);
 				if (parent == null) {
@@ -119,8 +108,7 @@ public class Fields extends AbstractFields<Field> {
 						createNodeWithChildren(rect, children);
 				} else
 					createNode(rect, parent);
-			} else
-				logger.trace("Rect {} was too close to the frame's edges", rect);
+			} 
 		}
 	}
 
@@ -162,10 +150,9 @@ public class Fields extends AbstractFields<Field> {
 		//			logger.info("Unable to create node: " + rect);
 	}
 
-	public void updateNode(GSRect rect, Field field, int width, int height) {
+	public void updateNode(GSRect rect, Field field) {
 
 		//logger.info("Updating node {} with {}", field.getRect(), rect);
-		// field.updateRect(rect, width, height);
 
 		field.updateOcrRect(rect);
 		field.adjustLockLevel(1.0);
@@ -238,33 +225,25 @@ public class Fields extends AbstractFields<Field> {
 		return res;
 	}
 
-	@Override	
+
 	public void performOcr(Img rootImg) {
-		if (size() <= 0)
+		if (fields.size() <= 0)
 			return;
 		long TS = System.currentTimeMillis();
 		while (System.currentTimeMillis() - TS <= OCR_TIMEOUT) {
 			runParallelOcr(rootImg);
-			// runSequentialOcr(rootImg);
 		}
-	}
-
-	private void runSequentialOcr(Img rootImg) {
-		int idx = ThreadLocalRandom.current().nextInt(size());
-		Field f = fields.get(idx);
-		//if (f.needOcr())
-		f.ocr(rootImg);
 	}
 
 	private void runParallelOcr(Img rootImg) {
 		ParallelTasks tasks = new ParallelTasks();
 		int limit = tasks.getCounter() * 2;
-		for (Set<Integer> indexes = new HashSet<>(); indexes.size() < limit && indexes.size() < size();) {
-			int idx = ThreadLocalRandom.current().nextInt(size());
-			if (indexes.add(idx)) {
-				Field f = fields.get(idx);
-				//if (f.needOcr())
-				tasks.add(() -> f.ocr(rootImg));
+		for (Set<Integer> indexes = new HashSet<>(); indexes.size() < limit && indexes.size() < fields.size();) {
+			int idx = ThreadLocalRandom.current().nextInt(fields.size());
+			if (indexes.add(idx)){				
+				Field f = fields.get(idx);				
+				tasks.add(() -> Ocr.performOcr(rootImg, f));
+
 			}
 		}
 		try {
@@ -276,7 +255,7 @@ public class Fields extends AbstractFields<Field> {
 
 
 	public Map<Field, Field> getLabelMatchesWithOldFields(Img rootImg, Fields oldFields) {
-		if (size() <= 0)
+		if (fields.size() <= 0)
 			return null;
 		long TS = System.currentTimeMillis();
 		Map<Field, String> ocrs = new ConcurrentHashMap<Field, String>();
@@ -289,12 +268,12 @@ public class Fields extends AbstractFields<Field> {
 	private void runParallelOcr(Img rootImg, Map<Field, String> ocrs) {
 		ParallelTasks tasks = new ParallelTasks();
 		int limit = tasks.getCounter() * 2;
-		for (Set<Integer> indexes = new HashSet<>(); indexes.size() < limit && indexes.size() < size();) {
-			int idx = ThreadLocalRandom.current().nextInt(size());
+		for (Set<Integer> indexes = new HashSet<>(); indexes.size() < limit && indexes.size() < fields.size();) {
+			int idx = ThreadLocalRandom.current().nextInt(fields.size());
 			if (indexes.add(idx)) {
-				Field f = fields.get(idx);
+				Field f = fields.get(idx);				
 				tasks.add(() -> {
-					String s = f.ocr(rootImg);
+					String s = Ocr.performOcr(rootImg, f);
 					if(s!=null)
 						ocrs.put(f, s);
 				});					
@@ -382,8 +361,4 @@ public class Fields extends AbstractFields<Field> {
 			}			
 		}
 	}
-
-
-
-
 }

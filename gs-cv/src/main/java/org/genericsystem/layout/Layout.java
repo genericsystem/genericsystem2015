@@ -187,10 +187,10 @@ public class Layout {
 		return containingDescendants;
 	}
 
-	private String getConsolidatedLabel() {
-		String undefined = "?";
-		return getLabels().isEmpty() ? undefined : OCRPlasty.correctStrings(new ArrayList<>(getLabels().keySet()), OCRPlasty.RANSAC.NORM_LEVENSHTEIN).orElse(undefined);
-	}
+//	private String getConsolidatedLabel() {
+//		String undefined = "?";
+//		return getLabels().isEmpty() ? undefined : OCRPlasty.correctStrings(new ArrayList<>(getLabels().keySet()), OCRPlasty.RANSAC.NORM_LEVENSHTEIN);
+//	}
 
 	private String getBestLabel() {
 		String result = "";
@@ -399,12 +399,12 @@ public class Layout {
 				start = i + 1;
 			else if (result[i] && !result[i + 1]) {
 				shards.add(vertical ? new double[] { Integer.valueOf(start).doubleValue() / result.length, (Integer.valueOf(i).doubleValue() + 1) / result.length }
-						: new double[] { Integer.valueOf(start).doubleValue() / result.length, (Integer.valueOf(i).doubleValue() + 1) / result.length });
+				: new double[] { Integer.valueOf(start).doubleValue() / result.length, (Integer.valueOf(i).doubleValue() + 1) / result.length });
 				start = null;
 			}
 		if (result[result.length - 1]) {
 			shards.add(vertical ? new double[] { Integer.valueOf(start).doubleValue() / result.length, Integer.valueOf(result.length).doubleValue() / result.length }
-					: new double[] { Integer.valueOf(start).doubleValue() / result.length, Integer.valueOf(result.length).doubleValue() / result.length });
+			: new double[] { Integer.valueOf(start).doubleValue() / result.length, Integer.valueOf(result.length).doubleValue() / result.length });
 			start = null;
 		}
 		return shards;
