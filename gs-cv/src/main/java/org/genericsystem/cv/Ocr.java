@@ -1,7 +1,10 @@
 package org.genericsystem.cv;
 
+import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -14,12 +17,17 @@ import org.genericsystem.cv.retriever.Field;
 import org.genericsystem.cv.retriever.Stats;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.genericsystem.cv.utils.OCRPlasty;
+import org.genericsystem.cv.utils.OCRPlasty.OcrModel;
 import org.genericsystem.cv.utils.Ransac;
+import org.genericsystem.cv.utils.Ransac.Model;
+import org.genericsystem.reinforcer.tools.Levenshtein;
 import org.genericsystem.reinforcer.tools.StringCompare;
 import org.genericsystem.reinforcer.tools.StringCompare.SIMILARITY;
 import org.opencv.core.Mat;
 import org.opencv.core.Rect;
 import org.opencv.text.OCRTesseract;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Ocr {
 
@@ -29,6 +37,8 @@ public class Ocr {
 
 	// Get the OcrTesseract instance from the tesseractInstancePool to prevent multi-threading problems
 	private static final GenericObjectPool<OCRTesseract> tesseractInstancePool = new GenericObjectPool<>(new OCRTesseractInstanceFactory(), Ocr.buildPoolConfig());
+
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	private static final String TESSDATA_PATH = "/usr/share/tesseract-ocr/4.00/";
 	private static final String TESSDATA_ALT_PATH = System.getenv("TESSDATA_PREFIX");
@@ -87,25 +97,46 @@ public class Ocr {
 		return ocr;
 	}
 
-	private static void consolidateOcr(Field field) {
-
-		int labelsSize = field.getLabelsSize();
-		if (labelsSize >= MIN_SIZE_CONSOLIDATION) {
-			List<String> strings = field.getLabels().entrySet().stream().collect(ArrayList<String>::new, (list, e) -> IntStream.range(0, e.getValue()).forEach(count -> list.add(e.getKey())), List::addAll);
-			//Tuple res = OCRPlasty.correctStringsAndGetOutliers(strings, RANSAC.NORM_LEVENSHTEIN);
-			List<String> trimmed = trimLabels(strings);
-			Ransac<String> ransac = OCRPlasty.getLabelRansac(trimmed, 0.1);
-			List<String> inliers = ransac.getBestDataSet().values().stream().collect(Collectors.toList());
-			field.setConsolidated(inliers.isEmpty() ? OCRPlasty.ocrPlasty(trimmed) : OCRPlasty.ocrPlasty(inliers));			
-			field.setConfidence(getConfidence(inliers, StringCompare.SIMILARITY.LEVENSHTEIN));
-			//			if (labelsSize >= 2 * MIN_SIZE_CONSOLIDATION)
-			//				res.getOutliers().forEach(outlier -> field.getLabels().remove(outlier));
-		} else {
-			//logger.trace("Not enough labels to consolidate OCR (current minimum = {})", MIN_SIZE_CONSOLIDATION);
-			field.setConsolidated(null);
-			field.setConfidence(0);
-		}
+	private static void consolidateOcr(Field field) {		
+		if (field.getLabelsSize() >= MIN_SIZE_CONSOLIDATION) {
+			//get the exhaustive list of OCRs: the same ocr should appear twice if it was discovered two times.  
+			List<String> trimmed = trimLabels(field.getLabels().entrySet().stream().collect(ArrayList<String>::new, (list, e) -> IntStream.range(0, e.getValue()).forEach(count -> list.add(e.getKey())), List::addAll));
+			List<String> inliers = getLabelRansac(trimmed, 0.1).getBestDataSet().values().stream().collect(Collectors.toList());
+			field.setConfidence(getConfidence(inliers, StringCompare.SIMILARITY.LEVENSHTEIN));	
+			field.setConsolidated(inliers.isEmpty() ? OCRPlasty.ocrPlasty(trimmed) : OCRPlasty.ocrPlasty(inliers));
+		} 
 		field.adjustLockLevel(field.getConfidence() > CONFIDENCE_THRESHOLD ? 1 : -0.5);
+	}
+
+	private static Ransac<String> getLabelRansac(List<String> labels, double error){
+		int minSize = 1 + labels.size() / 2;
+		if (minSize < 2)
+			return null;
+		Ransac<String> ransac = null;		
+		for (int i = 1;  i <= 10; ++i) {
+			try {
+				ransac = new Ransac<>(labels, getModelProviderNormLevenshtein(), 2, 10 * i, error, minSize);
+			} catch (Exception e) {
+				error *= 1.5;
+				logger.trace("Can't get a good model. Increase the error margin to {}", error);
+			}
+		}
+		return ransac;
+	}
+
+	private static Function<Collection<String>, Model<String>> getModelProviderNormLevenshtein() {
+		return datas -> {
+			return new OcrModel() {
+				@Override
+				public double computeError(String data) {
+					error = 0d;
+					for (String s : datas) {
+						error += Levenshtein.normedDistance(data, s);
+					}
+					return error / datas.size();
+				}
+			};
+		};
 	}
 
 

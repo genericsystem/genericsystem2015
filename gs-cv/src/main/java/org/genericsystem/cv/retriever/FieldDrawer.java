@@ -81,12 +81,12 @@ public class FieldDrawer {
 		}
 	}
 
-	//	public void drawFieldsOnStabilizedDebug(Img stabilized) {
-	//		for (GSRect rect : mergeRectsList(stabilized)) {
-	//			Point[] targets = RectToolsMapper.gsPointToPoint(Arrays.asList(rect.decomposeClockwise())).toArray(new Point[0]);
-	//			for (int i = 0; i < targets.length; ++i)
-	//				Imgproc.line(stabilized.getSrc(), targets[i], targets[(i + 1) % targets.length], new Scalar(255, 0, 0), 1);
-	//		}
-	//	}
+	public void drawFieldsOnStabilizedDebug(Img stabilized, Fields fields) {
+		for (GSRect rect : fields.mergeRectsList(stabilized)) {
+			Point[] targets = RectToolsMapper.gsPointToPoint(Arrays.asList(rect.decomposeClockwise())).toArray(new Point[0]);
+			for (int i = 0; i < targets.length; ++i)
+				Imgproc.line(stabilized.getSrc(), targets[i], targets[(i + 1) % targets.length], new Scalar(255, 0, 0), 1);
+		}
+	}
 
 }

@@ -171,19 +171,19 @@ public class CamLiveRetriever extends AbstractApp {
 						}
 
 						Stats.endTask("performOcr");
-						//Img stabilizedDebug = new Img(stabilizedDisplay.getSrc(), true);
+						Img stabilizedDebug = new Img(stabilizedDisplay.getSrc(), true);
 
 						Stats.beginTask("draw");
 
 						drawer.drawFieldsOnStabilized(stabilizedDisplay, fields);
 						drawer.drawOcrPerspectiveInverse(display, fields, stabilizationHomography.inv(), 1);
-						//drawer.drawFieldsOnStabilizedDebug(stabilizedDebug, fields);
+						drawer.drawFieldsOnStabilizedDebug(stabilizedDebug, fields);
 
 						Stats.endTask("draw");
 
 						src0.setImage(display.toJfxImage());
 						src1.setImage(stabilizedDisplay.toJfxImage());
-						//src2.setImage(stabilizedDebug.toJfxImage());
+						//	src2.setImage(stabilizedDebug.toJfxImage());
 
 						if (++counter % 20 == 0) {
 							System.out.println(Stats.getStatsAndReset());

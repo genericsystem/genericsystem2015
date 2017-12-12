@@ -126,7 +126,6 @@ public class OCRPlasty {
 	//	}
 
 	public static Ransac<String> getLabelRansac(List<String> labels, double error){
-		//		List<String> trimmed = labels.stream().map(s -> s.trim()).filter(s -> s.length() > 0).collect(Collectors.toList());
 		int minSize = 1 + labels.size() / 2;
 		if (minSize < 2)
 			return null;
@@ -219,7 +218,7 @@ public class OCRPlasty {
 			List<String> candidates = new ArrayList<>();
 			for (int label = 0; label < labels.size(); label++) {
 				List<String> is = (i < common.length()) ? interString(labels.get(label), common.charAt(i)) : endString(labels.get(label));
-				labels.set(label, is.get(0));
+				labels.set(label, is.get(0)); 
 				candidates.add(is.get(1));
 			}
 			consensus += selectBest(candidates);

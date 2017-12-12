@@ -131,6 +131,7 @@ public class Field {
 
 	public void updateParent(Field parent) {
 		setParent(parent);
+		adjustLockLevel(0.5);
 		if (parent != null)
 			this.parent.addChildIfNotPresent(this);
 		else if (this.parent != null)

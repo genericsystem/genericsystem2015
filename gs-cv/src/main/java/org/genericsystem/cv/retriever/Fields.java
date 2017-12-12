@@ -190,7 +190,7 @@ public class Fields implements Iterable<Field>{
 
 	private List<Field> listTree(Field root) {
 		List<Field> res = new ArrayList<>();
-		res.add(root);
+		res.add(root);		
 		for (Field child : root.getChildren())
 			res.addAll(listTree(child));
 		return res;
@@ -201,8 +201,10 @@ public class Fields implements Iterable<Field>{
 		List<Field> matches = fields.stream().filter(f -> rect.inclusiveArea(f.getRect().getIntersection(frameRect)) > areaOverlap).collect(Collectors.toList());
 		if (matches.isEmpty())
 			return null;
-		if (matches.size() > 1)
+		if (matches.size() > 1){
 			logger.warn(matches.size() + " matches were detected.");
+			System.out.println("multiple matches detected "+matches);
+		}
 		return matches.get(0);
 	}
 
