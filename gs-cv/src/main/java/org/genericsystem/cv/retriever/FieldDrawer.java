@@ -2,15 +2,18 @@ package org.genericsystem.cv.retriever;
 
 import java.text.Normalizer;
 import java.util.Arrays;
+import java.util.List;
 
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.utils.RectToolsMapper;
 import org.genericsystem.reinforcer.tools.GSRect;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.utils.Converters;
 
 public class FieldDrawer {
 
@@ -24,9 +27,16 @@ public class FieldDrawer {
 
 	public void drawWithHomography(Img display, Field field, Mat homography, int thickness) {
 		if (needRect(display, field)) {
-			drawRect(display, field.getRectPointsWithHomography(homography), drawAsLocked(field) ? new Scalar(0, 255, 0) : new Scalar(0, 0, 255), thickness);
-			drawText(display, field, field.getRectPointsWithHomography(homography), new Scalar(0, 255, 0), thickness);
+			drawRect(display, getRectPointsWithHomography(homography, field), drawAsLocked(field) ? new Scalar(0, 255, 0) : new Scalar(0, 0, 255), thickness);
+			drawText(display, field, getRectPointsWithHomography(homography, field), new Scalar(0, 255, 0), thickness);
 		}
+	}
+
+	private Point[] getRectPointsWithHomography(Mat homography, Field field) {
+		List<Point> points = RectToolsMapper.gsPointToPoint(Arrays.asList(field.getRect().decomposeClockwise()));
+		MatOfPoint2f results = new MatOfPoint2f();
+		Core.perspectiveTransform(Converters.vector_Point2f_to_Mat(points), results, homography);
+		return results.toArray();
 	}
 
 	private boolean drawAsLocked(Field field) {

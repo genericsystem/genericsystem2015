@@ -127,33 +127,24 @@ public class Fields implements Iterable<Field>{
 
 	public void createNode(GSRect rect, Field parent) {
 		if (checkOverlapConstraint(rect)) {
-			//logger.info("Creating a new node for {}", rect);
 			Field f = new Field(rect);
 			if (parent != null)
 				f.updateParent(parent);
 			fields.add(f);
 		} 
-		//		else
-		//			logger.info("Unable to create node: " + rect);
 	}
 
 	public void createNodeWithChildren(GSRect rect, List<Field> children) {
 		if (checkOverlapConstraint(rect)) {
-			//logger.info("Creating a new node for {}", rect);
 			Field f = new Field(rect);
 			if (children != null)
 				for (Field child : children)
 					child.updateParent(f);
 			fields.add(f);
-		} 
-		//		else
-		//			logger.info("Unable to create node: " + rect);
+		} 		
 	}
 
 	public void updateNode(GSRect rect, Field field) {
-
-		//logger.info("Updating node {} with {}", field.getRect(), rect);
-
 		field.updateOcrRect(rect);
 		field.adjustLockLevel(1.0);
 		field.resetParentsDeadCounter();
@@ -171,7 +162,6 @@ public class Fields implements Iterable<Field>{
 	}
 
 	public void removeNode(Field field) {
-		//logger.info("Removing node: {}", field.getRect());
 		fields.remove(field);
 	}
 

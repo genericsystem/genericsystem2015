@@ -2,21 +2,13 @@ package org.genericsystem.cv.retriever;
 
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.genericsystem.cv.Img;
-import org.genericsystem.cv.utils.RectToolsMapper;
 import org.genericsystem.reinforcer.tools.GSRect;
-import org.opencv.core.Core;
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfPoint2f;
-import org.opencv.core.Point;
-import org.opencv.utils.Converters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,18 +59,6 @@ public class Field {
 		return this;
 	}
 
-	protected Point[] getRectPointsWithHomography(Mat homography) {
-		List<Point> points = RectToolsMapper.gsPointToPoint(Arrays.asList(rect.decomposeClockwise()));
-		MatOfPoint2f results = new MatOfPoint2f();
-		Core.perspectiveTransform(Converters.vector_Point2f_to_Mat(points), results, homography);
-		return results.toArray();
-	}
-
-	public boolean isOnDisplay(Img display) {
-		GSRect imgRect = new GSRect(0, 0, display.width(), display.height());
-		return imgRect.isOverlapping(rect);
-	}
-
 	public boolean isLocked() {
 		return getLockLevel() >= LOCK_THRESHOLD;
 	}
@@ -103,14 +83,6 @@ public class Field {
 		return deadCounter;
 	}
 
-	public boolean addChildIfNotPresent(Field child) {
-		return children.add(child);
-	}
-
-	public boolean removeChild(Field child) {
-		return children.remove(child);
-	}
-
 	public List<Field> getChildren() {
 		return children;
 	}
@@ -131,11 +103,7 @@ public class Field {
 
 	public void updateParent(Field parent) {
 		setParent(parent);
-		adjustLockLevel(0.5);
-		if (parent != null)
-			this.parent.addChildIfNotPresent(this);
-		else if (this.parent != null)
-			this.parent.removeChild(this);
+		this.parent.getChildren().add(this);
 	}
 
 	public boolean hasChildren() {
