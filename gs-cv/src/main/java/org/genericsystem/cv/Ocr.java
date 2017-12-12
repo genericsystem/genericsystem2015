@@ -2,6 +2,7 @@ package org.genericsystem.cv;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.apache.commons.pool2.BasePooledObjectFactory;
@@ -13,8 +14,9 @@ import org.genericsystem.cv.retriever.Field;
 import org.genericsystem.cv.retriever.Stats;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.genericsystem.cv.utils.OCRPlasty;
-import org.genericsystem.cv.utils.OCRPlasty.RANSAC;
-import org.genericsystem.cv.utils.OCRPlasty.Tuple;
+import org.genericsystem.cv.utils.Ransac;
+import org.genericsystem.reinforcer.tools.StringCompare;
+import org.genericsystem.reinforcer.tools.StringCompare.SIMILARITY;
 import org.opencv.core.Mat;
 import org.opencv.core.Rect;
 import org.opencv.text.OCRTesseract;
@@ -90,9 +92,12 @@ public class Ocr {
 		int labelsSize = field.getLabelsSize();
 		if (labelsSize >= MIN_SIZE_CONSOLIDATION) {
 			List<String> strings = field.getLabels().entrySet().stream().collect(ArrayList<String>::new, (list, e) -> IntStream.range(0, e.getValue()).forEach(count -> list.add(e.getKey())), List::addAll);
-			Tuple res = OCRPlasty.correctStringsAndGetOutliers(strings, RANSAC.NORM_LEVENSHTEIN);			
-			field.setConsolidated(res.getString());			
-			field.setConfidence(res.getConfidence());
+			//Tuple res = OCRPlasty.correctStringsAndGetOutliers(strings, RANSAC.NORM_LEVENSHTEIN);
+			List<String> trimmed = trimLabels(strings);
+			Ransac<String> ransac = OCRPlasty.getLabelRansac(trimmed, 0.1);
+			List<String> inliers = ransac.getBestDataSet().values().stream().collect(Collectors.toList());
+			field.setConsolidated(inliers.isEmpty() ? OCRPlasty.ocrPlasty(trimmed) : OCRPlasty.ocrPlasty(inliers));			
+			field.setConfidence(getConfidence(inliers, StringCompare.SIMILARITY.LEVENSHTEIN));
 			//			if (labelsSize >= 2 * MIN_SIZE_CONSOLIDATION)
 			//				res.getOutliers().forEach(outlier -> field.getLabels().remove(outlier));
 		} else {
@@ -103,6 +108,14 @@ public class Ocr {
 		field.adjustLockLevel(field.getConfidence() > CONFIDENCE_THRESHOLD ? 1 : -0.5);
 	}
 
+
+	private static List<String> trimLabels(List<String> labels) {
+		return labels.stream().map(s -> s.trim()).filter(s -> s.length() > 0).collect(Collectors.toList());
+	}
+
+	private static double getConfidence(List<String> inliers, SIMILARITY method) {
+		return StringCompare.similarity(inliers, method);
+	}
 
 	public static String doWork(Mat mat) {
 		return doWork(mat, 0);

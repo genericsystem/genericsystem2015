@@ -125,6 +125,23 @@ public class OCRPlasty {
 	//		return doStringCorrection(labels, options, method, true);
 	//	}
 
+	public static Ransac<String> getLabelRansac(List<String> labels, double error){
+		//		List<String> trimmed = labels.stream().map(s -> s.trim()).filter(s -> s.length() > 0).collect(Collectors.toList());
+		int minSize = 1 + labels.size() / 2;
+		if (minSize < 2)
+			return null;
+		Ransac<String> ransac = null;		
+		for (int i = 1;  i <= 10; ++i) {
+			try {
+				ransac = new Ransac<>(labels, getModelProviderNormLevenshtein(), 2, 10 * i, error, minSize);
+			} catch (Exception e) {
+				error *= 1.5;
+				logger.trace("Can't get a good model. Increase the error margin to {}", error);
+			}
+		}
+		return ransac;
+	}
+
 	/**
 	 * Performs the string correction.
 	 * 
@@ -191,7 +208,7 @@ public class OCRPlasty {
 	 * @param labels - the list of strings
 	 * @return an {@link Optional} containing the string if it was found, otherwise an empty {@link Optional}
 	 */
-	private static String ocrPlasty(List<String> labels) {
+	public static String ocrPlasty(List<String> labels) {
 		if (labels == null)
 			throw new IllegalArgumentException("The list cannot be null");
 		if (labels.isEmpty())
