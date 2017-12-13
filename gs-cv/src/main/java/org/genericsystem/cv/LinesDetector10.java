@@ -28,7 +28,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 
 public class LinesDetector10 extends AbstractApp {
-	// static final double f = 6.053 / 0.009;
+
 	static final double f = 6.053 / 0.009;
 	static {
 		NativeLibraryLoader.load();
@@ -402,6 +402,7 @@ public class LinesDetector10 extends AbstractApp {
 		Map<Integer, List<Integer>> lines2Vps(double thAngle) {
 
 			// get the corresponding vanish points on the image plane
+
 			List<double[]> vp2D = new ArrayList<>();
 			for (int i = 0; i < 3; ++i)
 				vp2D.add(getVp2DFromVp(vps[i], pp, f));
@@ -457,19 +458,9 @@ public class LinesDetector10 extends AbstractApp {
 		}
 	}
 
-	public static double[][] getUncalibratedVps(double vps[][], double[] pp, double f) {
-		double[][] result = new double[3][3];
-		for (int i = 0; i < 3; i++) {
-			result[i][0] = vps[i][0] * f / vps[i][2] + pp[0];
-			result[i][1] = vps[i][1] * f / vps[i][2] + pp[1];
-			result[i][2] = 1.0;
-		}
-		return result;
-	}
-
 	public static Mat findHomography(Size size, double[][] vps, double[] pp, double f) {
 
-		double[][] vps2D = getUncalibratedVps(vps, pp, f);
+		double[][] vps2D = getVp2DFromVps(vps, pp, f);
 		System.out.println("vps2D : " + Arrays.deepToString(vps2D));
 
 		double phi = Math.atan2(vps[0][1], vps[0][0]);
@@ -528,6 +519,16 @@ public class LinesDetector10 extends AbstractApp {
 		vp[1] *= 1.0 / N;
 		vp[2] *= 1.0 / N;
 		return vp;
+	}
+
+	public static double[][] getVp2DFromVps(double vps[][], double[] pp, double f) {
+		double[][] result = new double[3][3];
+		for (int i = 0; i < 3; i++) {
+			result[i][0] = vps[i][0] * f / vps[i][2] + pp[0];
+			result[i][1] = vps[i][1] * f / vps[i][2] + pp[1];
+			result[i][2] = 1.0;
+		}
+		return result;
 	}
 
 	static double[] getVp2DFromVp(double[] vp, double[] pp, double f) {
