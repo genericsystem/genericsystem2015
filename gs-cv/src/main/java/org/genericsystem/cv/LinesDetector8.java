@@ -16,7 +16,6 @@ import org.genericsystem.cv.lm.LMHostImpl;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.genericsystem.cv.utils.Tools;
 import org.opencv.core.Core;
-import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
@@ -41,22 +40,24 @@ public class LinesDetector8 extends AbstractApp {
 
 	private final VideoCapture capture = new VideoCapture(0);
 	private ScheduledExecutorService timer = Executors.newSingleThreadScheduledExecutor();
-	private Point vp = new Point(0, 0);
+	//	private Point vp = new Point(0, 0);
+	private double[] vp = new double[]{0,0,1};
 	private Calibrated calibrated;
+	static final double f = 6.053/0.009;
+	private Mat frame = new Mat();
 
 	@Override
 	protected void fillGrid(GridPane mainGrid) {
-		Mat frame = new Mat();
-		capture.read(frame);
 
+		capture.read(frame);
 		ImageView frameView = new ImageView(Tools.mat2jfxImage(frame));
 		mainGrid.add(frameView, 0, 0);
 		ImageView deskiewedView = new ImageView(Tools.mat2jfxImage(frame));
 		mainGrid.add(deskiewedView, 0, 1);
 		Mat dePerspectived = frame.clone();
-		Calibrated.calibrate(frame.width(), frame.height());
-		calibrated = new Calibrated(vp);
-
+		//	Calibrated.calibrate(frame.width(), frame.height());
+		double[] pp = new double[] { frame.width() / 2, frame.height() / 2 };
+		calibrated = new Calibrated(vp, pp, f);
 		timer.scheduleAtFixedRate(() -> {
 			try {
 				capture.read(frame);
@@ -72,9 +73,10 @@ public class LinesDetector8 extends AbstractApp {
 
 					double[] newVp = new LMHostImpl<>((line, params) -> distance(params, line), lines.lines, calibrated.getCalibratexyz()).getParams();
 					calibrated = calibrated.dump(newVp, 5);
-					vp = calibrated.uncalibrate();
-					System.out.println("Vanishing point : " + vp);
-					Mat homography = findHomography(vp, frame.width(), frame.height());
+
+					vp = calibrated.uncalibrate(pp, f);
+					System.out.println("Vanishing point : " + Arrays.toString(vp));
+					Mat homography = findHomography(new Point(vp[0], vp[1]), frame.width(), frame.height());
 					Imgproc.warpPerspective(frame, dePerspectived, homography, frame.size(), Imgproc.INTER_LINEAR, Core.BORDER_CONSTANT, Scalar.all(0));
 					deskiewedView.setImage(Tools.mat2jfxImage(dePerspectived));
 				} else
@@ -89,29 +91,30 @@ public class LinesDetector8 extends AbstractApp {
 	}
 
 	private double distance(double[] calibratedxyz, Line line) {
-		Mat lineMat = getLineMat(line);
-		double di = calibratedxyz[0] * lineMat.get(0, 0)[0] + calibratedxyz[1] * lineMat.get(1, 0)[0] + calibratedxyz[2] * lineMat.get(2, 0)[0];
-		di /= (Math.sqrt(calibratedxyz[0] * calibratedxyz[0] + calibratedxyz[1] * calibratedxyz[1] + calibratedxyz[2] * calibratedxyz[2]) * Core.norm(lineMat));
+		double[] lineMat = getLineMat(line);
+		double di = calibratedxyz[0] * lineMat[0] + calibratedxyz[1] * lineMat[1] + calibratedxyz[2] * lineMat[2];
+		double normLineMat = Math.sqrt(lineMat[0]*lineMat[0] + lineMat[1]*lineMat[1] +lineMat[2]*lineMat[2]);
+		di /= (Math.sqrt(calibratedxyz[0] * calibratedxyz[0] + calibratedxyz[1] * calibratedxyz[1] + calibratedxyz[2] * calibratedxyz[2]) * normLineMat);
 		return di * di;
 	}
 
-	private static Mat getLineMat(Line line) {
-		Mat a = new Mat(3, 1, CvType.CV_64FC1);
-		Mat b = new Mat(3, 1, CvType.CV_64FC1);
-		a.put(0, 0, line.x1);
-		a.put(1, 0, line.y1);
-		a.put(2, 0, 1d);
-		b.put(0, 0, line.x2);
-		b.put(1, 0, line.y2);
-		b.put(2, 0, 1d);
-		Mat an = new Mat(3, 1, CvType.CV_64FC1);
-		Mat bn = new Mat(3, 1, CvType.CV_64FC1);
-		Core.gemm(Calibrated.Kinv, a, 1, new Mat(), 0, an);
-		Core.gemm(Calibrated.Kinv, b, 1, new Mat(), 0, bn);
-		Mat li = an.cross(bn);
-		Core.normalize(li, li);
-		return li;
+	private double[] getLineMat(Line line) {
+		double[] pp = new double[] {frame.width() / 2, frame.height() / 2 };
+		Calibrated calA = new Calibrated(new double[]{line.x1, line.y1,1d}, pp, f);
+		Calibrated calB = new Calibrated(new double[]{line.x2, line.y2,1d}, pp, f);
+		return cross2D(calA.getCalibratexyz(), calB.getCalibratexyz());
 	}
+
+	static double[] cross2D(double[] a, double b[]) {
+		return uncalibrate(cross(a, b));
+	}
+	static double[] uncalibrate(double[] a) {
+		return new double[] { a[0] / a[2], a[1] / a[2], 1 };
+	}
+	static double[] cross(double[] a, double b[]) {
+		return new double[] { a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0] };
+	}
+
 
 	public Point[] rotate(Point bary, double alpha, Point... p) {
 		Mat matrix = Imgproc.getRotationMatrix2D(bary, alpha / Math.PI * 180, 1);

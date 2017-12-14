@@ -12,9 +12,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
-
 import org.genericsystem.cv.Calibrated.AngleCalibrated;
 import org.genericsystem.cv.lm.LMHostImpl;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
@@ -29,6 +26,9 @@ import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
 import org.opencv.videoio.VideoCapture;
 
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
+
 public class LinesDetector7 extends AbstractApp {
 
 	static {
@@ -41,8 +41,10 @@ public class LinesDetector7 extends AbstractApp {
 
 	private final VideoCapture capture = new VideoCapture(0);
 	private ScheduledExecutorService timer = Executors.newSingleThreadScheduledExecutor();
-	private Point vp = new Point(0, 0);
+	//private Point vp = new Point(0, 0);
+	private double[] vp = new double[]{0,0,1};
 	private AngleCalibrated calibrated;
+	static final double f = 6.053/0.009;
 
 	@Override
 	protected void fillGrid(GridPane mainGrid) {
@@ -54,8 +56,10 @@ public class LinesDetector7 extends AbstractApp {
 		ImageView deskiewedView = new ImageView(Tools.mat2jfxImage(frame));
 		mainGrid.add(deskiewedView, 0, 1);
 		Mat dePerspectived = frame.clone();
-		AngleCalibrated.calibrate(frame.width(), frame.height());
-		calibrated = new AngleCalibrated(vp);
+		//AngleCalibrated.calibrate(frame.width(), frame.height());
+		double[] pp = new double[] { frame.width() / 2, frame.height() / 2 };
+		calibrated = new AngleCalibrated(vp, pp, f);
+
 
 		timer.scheduleAtFixedRate(() -> {
 			try {
@@ -69,33 +73,33 @@ public class LinesDetector7 extends AbstractApp {
 					lines.draw(frame, new Scalar(0, 255, 0));
 					frameView.setImage(Tools.mat2jfxImage(frame));
 					// lines = lines.reduce(10);
-				double[] newThetaPhi = new LMHostImpl<>((line, params) -> distance(new AngleCalibrated(params).uncalibrate(), line), lines.lines, calibrated.getTethaPhi()).getParams();
-				calibrated = calibrated.dump(newThetaPhi, 1);
-				vp = calibrated.uncalibrate();
-				System.out.println("Vanishing point : " + vp);
-				Mat homography = findHomography(vp, frame.width(), frame.height());
-				Imgproc.warpPerspective(frame, dePerspectived, homography, frame.size(), Imgproc.INTER_LINEAR, Core.BORDER_CONSTANT, Scalar.all(0));
-				deskiewedView.setImage(Tools.mat2jfxImage(dePerspectived));
-			} else
-				System.out.println("Not enough lines : " + lines.size());
+					double[] newThetaPhi = new LMHostImpl<>((line, params) -> distance(new AngleCalibrated(params).uncalibrate(pp, f), line), lines.lines, calibrated.getTethaPhi()).getParams();
+					calibrated = calibrated.dump(newThetaPhi, 1);
+					vp = calibrated.uncalibrate(pp, f);
+					System.out.println("Vanishing point : " + vp);
+					Mat homography = findHomography(new Point(vp[0], vp[1]), frame.width(), frame.height());
+					Imgproc.warpPerspective(frame, dePerspectived, homography, frame.size(), Imgproc.INTER_LINEAR, Core.BORDER_CONSTANT, Scalar.all(0));
+					deskiewedView.setImage(Tools.mat2jfxImage(dePerspectived));
+				} else
+					System.out.println("Not enough lines : " + lines.size());
 
-		} catch (Throwable e) {
-			e.printStackTrace();
-		}
+			} catch (Throwable e) {
+				e.printStackTrace();
+			}
 
-	}, 30, 10, TimeUnit.MILLISECONDS);
+		}, 30, 10, TimeUnit.MILLISECONDS);
 
 	}
 
-	private double distance(Point vp, Line line) {
+	private double distance(double[] vp, Line line) {
 		double[] lineSegment = getNormalizedLine(line);
 		double n0 = -lineSegment[1];
 		double n1 = lineSegment[0];
 		double nNorm = Math.sqrt(n0 * n0 + n1 * n1);
 		double[] midPoint = getMiLine(line);
 		double r0, r1;
-		r0 = vp.y * midPoint[2] - midPoint[1];
-		r1 = midPoint[0] - vp.x * midPoint[2];
+		r0 = vp[1] * midPoint[2] - midPoint[1];
+		r1 = midPoint[0] - vp[0] * midPoint[2];
 		double rNorm = Math.sqrt(r0 * r0 + r1 * r1);
 		double num = (r0 * n0 + r1 * n1);
 		if (num < 0)

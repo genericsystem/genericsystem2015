@@ -1,32 +1,15 @@
 package org.genericsystem.cv;
 
-import org.opencv.core.Core;
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
-import org.opencv.core.Point;
-import org.opencv.core.Scalar;
-
 public class Calibrated {
+
+
 	final double x, y, z;
 
-	static Mat K = new Mat(3, 1, CvType.CV_64FC1);
-	static Mat Kinv;
-
-	public static void calibrate(double width, double height) {
-		K = new Mat(3, 3, CvType.CV_64FC1, new Scalar(0));
-		K.put(0, 0, width);
-		K.put(0, 2, width / 2);
-		K.put(1, 1, height);
-		K.put(1, 2, height);
-		K.put(2, 2, 1d);
-		Kinv = K.inv();
-	}
-
-	public Calibrated(Point uncalibrate) {
-		Mat calibrated = calibrate(uncalibrate);
-		x = calibrated.get(0, 0)[0];
-		y = calibrated.get(1, 0)[0];
-		z = calibrated.get(2, 0)[0];
+	public Calibrated (double[] vp, double[] pp, double f){
+		double [] vps = calibrate(vp, pp ,f);
+		x = vps[0];
+		y = vps[1];
+		z = vps[2];	
 	}
 
 	public Calibrated(double[] calibratedxyz) {
@@ -35,7 +18,7 @@ public class Calibrated {
 		z = calibratedxyz[2];
 	}
 
-	double[] getCalibratexyz() {
+	public double[] getCalibratexyz() {
 		return new double[] { x, y, z };
 	}
 
@@ -43,28 +26,24 @@ public class Calibrated {
 		return new Calibrated(new double[] { ((dumpSize - 1) * x + xyz[0]) / dumpSize, ((dumpSize - 1) * y + xyz[1]) / dumpSize, ((dumpSize - 1) * z + xyz[2]) / dumpSize });
 	}
 
-	public static Mat calibrate(Point vp) {
-		Mat result = new Mat(3, 1, CvType.CV_64FC1);
-		result.put(0, 0, vp.x);
-		result.put(1, 0, vp.y);
-		result.put(2, 0, 1d);
-		Core.gemm(Kinv, result, 1, new Mat(), 0, result);
-		Core.normalize(result, result);
-		return result;
+	public static double[] calibrate(double[] vpImg, double[] pp, double f){
+		double[] vp = new double[] { vpImg[0] / vpImg[2] - pp[0], vpImg[1] / vpImg[2] - pp[1], f };
+		if (vp[2] == 0)
+			vp[2] = 0.0011;
+		double N = Math.sqrt(vp[0] * vp[0] + vp[1] * vp[1] + vp[2] * vp[2]);
+		vp[0] *= 1.0 / N;
+		vp[1] *= 1.0 / N;
+		vp[2] *= 1.0 / N;
+		return vp;
+
 	}
 
-	public Point uncalibrate() {
-		Mat result = new Mat(3, 1, CvType.CV_64FC1);
-		result.put(0, 0, x);
-		result.put(1, 0, y);
-		result.put(2, 0, z);
-		Core.gemm(K, result, 1, new Mat(), 0, result);
-		// if (result.get(2, 0)[0] != 0) {
-		// result.put(0, 0, result.get(0, 0)[0] / result.get(2, 0)[0]);
-		// result.put(1, 0, result.get(1, 0)[0] / result.get(2, 0)[0]);
-		// result.put(2, 0, 1d);
-		// }
-		return new Point(result.get(0, 0)[0] / result.get(2, 0)[0], result.get(1, 0)[0] / result.get(2, 0)[0]);
+	public double[] uncalibrate(double[] pp, double f){
+		double[] result = new double[3];
+		result[0] = x * f / z + pp[0];
+		result[1] = y * f / z + pp[1];
+		result[2] = 1.0;
+		return result;
 	}
 
 	public static class AngleCalibrated extends Calibrated {
@@ -73,8 +52,8 @@ public class Calibrated {
 
 		final double phi;
 
-		public AngleCalibrated(Point uncalibrate) {
-			super(uncalibrate);
+		public AngleCalibrated(double[] vp, double [] pp, double f) {
+			super(vp, pp, f);
 			tetha = Math.acos(z);
 			phi = Math.atan2(y, x);
 		}

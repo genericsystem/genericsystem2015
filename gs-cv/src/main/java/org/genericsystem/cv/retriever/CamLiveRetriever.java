@@ -60,8 +60,10 @@ public class CamLiveRetriever extends AbstractApp {
 	private Mat frame = new Mat();
 	private boolean stabilizationHasChanged = true;
 	private int stabilizationErrors = 0;
-	private Point vp = new Point(5000, 0);
+	private double[] vp1 = new double[]{5000, 0,1};
 	private AngleCalibrated calibrated;
+	static final double f = 6.053/0.009;
+
 
 	public static void main(String[] args) {
 		launch(args);
@@ -79,8 +81,9 @@ public class CamLiveRetriever extends AbstractApp {
 
 		capture.read(frame);
 
-		AngleCalibrated.calibrate(frame.width(), frame.height());
-		calibrated = new AngleCalibrated(vp);
+		//	AngleCalibrated.calibrate(frame.width(), frame.height());
+		double[] pp = new double[] { frame.width() / 2, frame.height() / 2 };
+		calibrated = new AngleCalibrated(vp1, pp, f);
 
 		ImageView src0 = new ImageView(Tools.mat2jfxImage(frame));
 		mainGrid.add(src0, 0, 0);
@@ -225,33 +228,111 @@ public class CamLiveRetriever extends AbstractApp {
 		return new Lines(grad.houghLinesP(1, Math.PI / 180, 10, 100, 10));
 	}
 
-	private Mat computeFrameToDeperspectivedHomography(Mat frame) {
+	private Mat computeFrameToDeperspectivedHomography(Mat frame) {		
 		Lines lines = houghlinesP(frame);
 		if (lines.size() < 8) {
 			logger.warn("Not enough lines to compute perspective transformation ({})", lines.size());
 			return null;
 		}
-		lines = lines.filter(line -> distance(vp, line) < 0.5);
+		lines = lines.filter(line -> distance(vp1, line) < 0.5);
 		lines = lines.reduce(20);
-
+		double[] pp = new double[] { frame.width() / 2, frame.height() / 2 };
 		Stats.beginTask("levenberg");
-		double[] newThetaPhi = new LMHostImpl<>((line, params) -> distance(new AngleCalibrated(params).uncalibrate(), line), lines.lines, calibrated.getTethaPhi()).getParams();
+		double[] newThetaPhi = new LMHostImpl<>((line, params) -> distance(new AngleCalibrated(params).uncalibrate(pp ,f), line), lines.lines, calibrated.getTethaPhi()).getParams();
 		Stats.endTask("levenberg");
 		calibrated = calibrated.dump(newThetaPhi, 3);
-		vp = calibrated.uncalibrate();
+
+		double[] vp_1 = calibrated.getCalibratexyz();
+		double[] vp_2 = new AngleCalibrated(new double[]{0, 5000, 1}, pp, f).getCalibratexyz();
+
 		//	System.out.println("Levenberg vp : " + vp);
-		return findHomography(vp, frame.width(), frame.height());
+
+		return findHomography(frame.size(), new double[][] { vp_1, vp_2 }, new double[] { frame.width() / 2, frame.height() / 2 }, f);
+
 	}
 
-	private double distance(Point vp, Line line) {
+	public static Mat findHomography(Size size, double[][] vps, double[] pp, double f) {
+
+		double[][] vps2D = getVp2DFromVps(vps, pp, f);
+		//		System.out.println("vps : " + Arrays.deepToString(vps));
+		//		System.out.println("vps2D : " + Arrays.deepToString(vps2D));
+
+		double phi = Math.atan2(vps[0][1], vps[0][0]);
+		double theta = Math.acos(vps[0][2]);
+		double phi2 = Math.atan2(vps[1][1], vps[1][0]);
+		double theta2 = Math.acos(vps[1][2]);
+		// double phi3 = Math.atan2(vps[2][1], vps[2][0]);
+		// double theta3 = Math.acos(vps[2][2]);
+
+		double x = size.width / 4;
+
+		double[] A = new double[] { size.width / 2, size.height / 2, 1 };
+		double[] B = new double[] { Math.cos(phi) < 0 ? size.width / 2 - x : size.width / 2 + x, size.height / 2 };
+		double[] D = new double[] { size.width / 2, Math.sin(phi2) < 0 ? size.height / 2 - x : size.height / 2 + x, 1 };
+		double[] C = new double[] { Math.cos(phi) < 0 ? size.width / 2 - x : size.width / 2 + x, Math.sin(phi2) < 0 ? size.height / 2 - x : size.height / 2 + x };
+
+		//		System.out.println("vp1 (" + phi * 180 / Math.PI + "°, " + theta * 180 / Math.PI + "°)");
+		//		System.out.println("vp2 (" + phi2 * 180 / Math.PI + "°, " + theta2 * 180 / Math.PI + "°)");
+		// System.out.println("vp3 (" + phi3 * 180 / Math.PI + "°, " + theta3 * 180 / Math.PI + "°)");
+
+		double[] A_ = A;
+		double[] B_ = new double[] { size.width / 2 + x * Math.sin(theta) * Math.sin(theta) * Math.cos(phi), size.height / 2 + x * Math.sin(theta) * Math.sin(theta) * Math.sin(phi), 1 };
+		double[] D_ = new double[] { size.width / 2 + x * Math.sin(theta2) * Math.sin(theta2) * Math.cos(phi2), size.height / 2 + x * Math.sin(theta2) * Math.sin(theta2) * Math.sin(phi2), 1 };
+		double[] C_ = cross2D(cross(B_, vps2D[1]), cross(D_, vps2D[0]));
+
+		// double[] A_ = A;
+		// double[] B_ = new double[] { size.width / 2 + x * Math.sin(theta) * vps[0][0], size.height / 2 + x * Math.sin(theta) * vps[0][1], 1 };
+		// double[] D_ = new double[] { size.width / 2 + x * Math.sin(theta2) *vps[1][0], size.height / 2 + x * Math.sin(theta2) *vps[1][1], 1 };
+		// double[] C_ = cross2D(cross(B_, vps2D[1]), cross(D_, vps2D[0]));
+
+		return Imgproc.getPerspectiveTransform(new MatOfPoint2f(new Point(A_), new Point(B_), new Point(C_), new Point(D_)), new MatOfPoint2f(new Point(A), new Point(B), new Point(C), new Point(D)));
+	}
+
+	static double[] getVpFromVp2D(double[] vpImg, double[] pp, double f) {
+		double[] vp = new double[] { vpImg[0] / vpImg[2] - pp[0], vpImg[1] / vpImg[2] - pp[1], f };
+		if (vp[2] == 0)
+			vp[2] = 0.0011;
+		double N = Math.sqrt(vp[0] * vp[0] + vp[1] * vp[1] + vp[2] * vp[2]);
+		vp[0] *= 1.0 / N;
+		vp[1] *= 1.0 / N;
+		vp[2] *= 1.0 / N;
+		return vp;
+	}
+
+	public static double[][] getVp2DFromVps(double vps[][], double[] pp, double f) {
+		double[][] result = new double[2][3];
+		for (int i = 0; i < 2; i++) {
+			result[i][0] = vps[i][0] * f / vps[i][2] + pp[0];
+			result[i][1] = vps[i][1] * f / vps[i][2] + pp[1];
+			result[i][2] = 1.0;
+		}
+		return result;
+	}
+
+	static double[] cross(double[] a, double b[]) {
+		return new double[] { a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0] };
+	}
+
+	static double det(double[] u, double v[], double w[]) {
+		return u[0] * v[1] * w[2] + u[2] * v[0] * w[1] + u[1] * v[2] * w[0] - u[2] * v[1] * w[0] - u[1] * v[0] * w[2] - u[0] * v[2] * w[1];
+	}
+
+	static double[] cross2D(double[] a, double b[]) {
+		return uncalibrate(cross(a, b));
+	}
+	static double[] uncalibrate(double[] a) {
+		return new double[] { a[0] / a[2], a[1] / a[2], 1 };
+	}
+
+	private double distance(double[] vp, Line line) {
 		double[] lineSegment = getNormalizedLine(line);
 		double n0 = -lineSegment[1];
 		double n1 = lineSegment[0];
 		double nNorm = Math.sqrt(n0 * n0 + n1 * n1);
 		double[] midPoint = getMiLine(line);
 		double r0, r1;
-		r0 = vp.y * midPoint[2] - midPoint[1];
-		r1 = midPoint[0] - vp.x * midPoint[2];
+		r0 = vp[1] * midPoint[2] - midPoint[1];
+		r1 = midPoint[0] - vp[0] * midPoint[2];
 		double rNorm = Math.sqrt(r0 * r0 + r1 * r1);
 		double num = (r0 * n0 + r1 * n1);
 		if (num < 0)
