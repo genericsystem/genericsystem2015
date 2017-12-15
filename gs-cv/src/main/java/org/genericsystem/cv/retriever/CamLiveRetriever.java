@@ -91,8 +91,8 @@ public class CamLiveRetriever extends AbstractApp {
 		ImageView src1 = new ImageView(Tools.mat2jfxImage(frame));
 		mainGrid.add(src1, 1, 0);
 
-		ImageView src2 = new ImageView(Tools.mat2jfxImage(frame));
-		mainGrid.add(src2, 1, 1);
+		//		ImageView src2 = new ImageView(Tools.mat2jfxImage(frame));
+		//		mainGrid.add(src2, 1, 1);
 
 		timerFields.scheduleAtFixedRate(() -> onSpace(), 0, STABILIZATION_DELAY, TimeUnit.MILLISECONDS);
 
@@ -152,10 +152,12 @@ public class CamLiveRetriever extends AbstractApp {
 						fields.consolidate(stabilizedDisplay);						
 						Stats.endTask("consolidate fields");
 						Stats.beginTask("performOcr");
-						fields.performOcr(stabilized);
+						//fields.performOcr(stabilized);
 
-						if(oldFields==null)
+						if(oldFields==null){
 							fields.performOcr(stabilized);
+							fields.consolidateHierarchyLabels();
+						}
 						else{
 							recoveringCounter++;
 							labelMatches.putAll(fields.getLabelMatchesWithOldFields(stabilized, oldFields));
@@ -183,7 +185,7 @@ public class CamLiveRetriever extends AbstractApp {
 
 						src0.setImage(display.toJfxImage());
 						src1.setImage(stabilizedDisplay.toJfxImage());
-						src2.setImage(stabilizedDebug.toJfxImage());
+						//src2.setImage(stabilizedDebug.toJfxImage());
 
 						if (++counter % 20 == 0) {
 							System.out.println(Stats.getStatsAndReset());

@@ -246,7 +246,7 @@ public class Fields extends AbstractFields<Field> {
 		while (System.currentTimeMillis() - TS <= OCR_TIMEOUT) {
 			runParallelOcr(rootImg);
 			// runSequentialOcr(rootImg);
-		}
+		}		
 	}
 
 	private void runSequentialOcr(Img rootImg) {
@@ -381,6 +381,13 @@ public class Fields extends AbstractFields<Field> {
 				newField.setConsolidated(match.getConsolidated());
 			}			
 		}
+	}
+
+	public void consolidateHierarchyLabels() {
+		for(Field field : getRoots()){
+			field.consolidateLabelWithChildren();
+		}
+
 	}
 
 
