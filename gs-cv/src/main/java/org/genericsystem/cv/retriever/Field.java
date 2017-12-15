@@ -246,5 +246,29 @@ public class Field extends AbstractField {
 		confidence += (1 - confidence)*0.1;
 	}
 
+	//	public void consolidateLabelWithChildren() {
+	//		if(children.isEmpty())
+	//			return;
+	//		children.sort(new Comparator<Field>(){
+	//			@Override
+	//			public int compare(Field f1, Field f2) {
+	//				//return new Double(f1.getRect().tl().getX()).compareTo(new Double(f2.getRect().tl().getX()));
+	//				return (int) (f1.getRect().tl().getX() - f2.getRect().tl().getX());
+	//			}
+	//		});
+	//		String concatenated = "";
+	//		for(Field child : children){	
+	//			child.consolidateLabelWithChildren();
+	//			concatenated+=child.getConsolidated()!=null?child.getConsolidated()+" ":"";
+	//
+	//		}
+	//		System.out.println(concatenated + "\\/" + consolidated);
+	//		if(consolidated!=null && consolidated.trim().equals(concatenated.trim())){
+	//			System.out.println("All children matching, increasing confidence");
+	//			//increasing confidence by 10% of difference to 1. Arbitrary choice
+	//			confidence += (1 - confidence)*0.1;
+	//		}
+	//	}
+
 
 }
