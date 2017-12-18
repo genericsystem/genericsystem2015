@@ -125,7 +125,7 @@ public class Fields extends AbstractFields<Field> {
 	}
 
 	private List<Field> findPotentialChildren(GSRect rect) {
-		return getRoots().stream().filter(f -> f.getRect().isInside(rect)).collect(Collectors.toList());
+		return getRoots().stream().filter(f -> f.getRect().isInside(rect) && f.getRect().inclusiveArea(rect)<0.7).collect(Collectors.toList());
 	}
 
 	private Field findPotentialParent(GSRect rect) {
