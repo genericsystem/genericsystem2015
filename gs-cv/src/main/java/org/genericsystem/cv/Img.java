@@ -89,8 +89,12 @@ public class Img implements AutoCloseable, Serializable {
 	}
 
 	public Img laplacian() {
+		return laplacian(CvType.CV_8U);
+	}
+
+	public Img laplacian(int ddepth) {
 		Mat result = new Mat();
-		Imgproc.Laplacian(src, result, CvType.CV_8U);
+		Imgproc.Laplacian(src, result, ddepth);
 		return new Img(result, false);
 	}
 
@@ -440,7 +444,7 @@ public class Img implements AutoCloseable, Serializable {
 
 	public Img sobel() {
 		Img gray = bgr2Gray();
-		Img sobel = gray.sobel(CvType.CV_8UC1, 1, 1, 5, 1, 0, Core.BORDER_DEFAULT);
+		Img sobel = gray.sobel(CvType.CV_8UC1, 3, 0, 5, 1, 10, Core.BORDER_DEFAULT);
 		// Img threshold = sobel.thresHold(0, 255, Imgproc.THRESH_BINARY + Imgproc.THRESH_OTSU);
 		return sobel;
 	}
@@ -950,5 +954,18 @@ public class Img implements AutoCloseable, Serializable {
 		Rect[] faces = FaceDetector.detect(result.getSrc());
 		Arrays.stream(faces).forEach(face -> new Zone(0, face).adjustRect(result.getSrc().width() * px / 2, result.getSrc().height() * py / 2, result.getSrc().width(), result.getSrc().height()).draw(result, Scalar.all(0), -1));
 		return result;
+	}
+
+	public Img directionalFilter(int size) {
+		Size newSize = new Size(getSrc().width(), getSrc().height() - size);
+		Mat result = new Mat(newSize, CvType.CV_64FC1, new Scalar(0));
+		for (int i = 0; i < size; i++) {
+			Mat roi = new Mat(getSrc(), new Rect(new Point(0, i), new Point(getSrc().width(), getSrc().height() - size + i)));
+			Mat roi2 = new Mat();
+			roi.convertTo(roi2, CvType.CV_64FC1);
+			Core.addWeighted(result, 1, roi2, 1, 0, result);
+		}
+		Core.divide(result, new Scalar(size), result);
+		return new Img(result, false);
 	}
 }
