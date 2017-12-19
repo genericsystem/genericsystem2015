@@ -125,7 +125,7 @@ public class Fields extends AbstractFields<Field> {
 	}
 
 	private List<Field> findPotentialChildren(GSRect rect) {
-		return getRoots().stream().filter(f -> f.getRect().isInside(rect)).collect(Collectors.toList());
+		return getRoots().stream().filter(f -> f.getRect().isInside(rect) && f.getRect().inclusiveArea(rect)<0.7).collect(Collectors.toList());
 	}
 
 	private Field findPotentialParent(GSRect rect) {
@@ -246,7 +246,7 @@ public class Fields extends AbstractFields<Field> {
 		while (System.currentTimeMillis() - TS <= OCR_TIMEOUT) {
 			runParallelOcr(rootImg);
 			// runSequentialOcr(rootImg);
-		}
+		}		
 	}
 
 	private void runSequentialOcr(Img rootImg) {
@@ -381,6 +381,13 @@ public class Fields extends AbstractFields<Field> {
 				newField.setConsolidated(match.getConsolidated());
 			}			
 		}
+	}
+
+	public void consolidateHierarchyLabels() {
+		for(Field field : getRoots()){
+			field.consolidateLabelWithChildren();
+		}
+
 	}
 
 

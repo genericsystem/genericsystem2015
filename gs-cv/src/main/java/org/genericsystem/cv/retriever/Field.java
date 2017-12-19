@@ -224,23 +224,51 @@ public class Field extends AbstractField {
 	}
 
 
-	// void updateRect(GSRect rect, int width, int height) {
-	// GSRect truncatedRect = getRect().getIntersection(new GSRect(0, 0, width, height));
-	// double tlX = truncatedRect.getX();
-	// double tlY = truncatedRect.getY();
-	// double brX = tlX + getRect().getWidth();
-	// double brY = tlY + getRect().getHeight();
-	// GSRect updatedRect = new GSRect(new GSPoint(tlX <= 0 ? this.rect.tl().getX() : rect.tl().getX(), tlY <= 0 ? this.rect.tl().getY() : rect.tl().getY()),
-	// new GSPoint(brX >= width ? this.rect.br().getX() : rect.br().getX(), brY >= height ? this.rect.br().getY() : rect.br().getY()));
-	// this.rect = updatedRect;
-	// }
-
 	public Field findOldMatch(Fields oldFields) {		
 		for(Field oldField : oldFields)
 			if(getRect().inclusiveArea(oldField.getRect())>0.6)
 				return oldField;
 		return null;
 	}
+
+	public void consolidateLabelWithChildren() {
+		if(children.isEmpty())
+			return;
+		for(Field child : children){	
+			child.consolidateLabelWithChildren();
+			if(consolidated!=null && child.getConsolidated()!=null && consolidated.contains(child.getConsolidated()))
+				continue;
+			else 
+				return;
+		}
+		System.out.println("All children matching, increasing confidence");
+		//increasing confidence by 10% of difference to 1. Arbitrary choice
+		confidence += (1 - confidence)*0.1;
+	}
+
+	//	public void consolidateLabelWithChildren() {
+	//		if(children.isEmpty())
+	//			return;
+	//		children.sort(new Comparator<Field>(){
+	//			@Override
+	//			public int compare(Field f1, Field f2) {
+	//				//return new Double(f1.getRect().tl().getX()).compareTo(new Double(f2.getRect().tl().getX()));
+	//				return (int) (f1.getRect().tl().getX() - f2.getRect().tl().getX());
+	//			}
+	//		});
+	//		String concatenated = "";
+	//		for(Field child : children){	
+	//			child.consolidateLabelWithChildren();
+	//			concatenated+=child.getConsolidated()!=null?child.getConsolidated()+" ":"";
+	//
+	//		}
+	//		System.out.println(concatenated + "\\/" + consolidated);
+	//		if(consolidated!=null && consolidated.trim().equals(concatenated.trim())){
+	//			System.out.println("All children matching, increasing confidence");
+	//			//increasing confidence by 10% of difference to 1. Arbitrary choice
+	//			confidence += (1 - confidence)*0.1;
+	//		}
+	//	}
 
 
 }
