@@ -232,18 +232,20 @@ public class Field extends AbstractField {
 	}
 
 	public void consolidateLabelWithChildren() {
-		if(children.isEmpty())
+		if(children.isEmpty() || consolidated == null)
 			return;
+		StringBuilder consolidatedLabel = new StringBuilder(consolidated);
 		for(Field child : children){	
 			child.consolidateLabelWithChildren();
-			if(consolidated!=null && child.getConsolidated()!=null && consolidated.contains(child.getConsolidated()))
-				continue;
-			else 
-				return;
+			if(child.getConsolidated()!=null && consolidatedLabel.toString().contains(child.getConsolidated())){
+				int start = consolidatedLabel.indexOf(child.getConsolidated());
+				consolidatedLabel.delete(start, start+child.getConsolidated().length());
+				consolidatedLabel = new StringBuilder(consolidatedLabel.toString().trim());
+			}		
 		}
-		System.out.println("All children matching, increasing confidence");
+		if(consolidatedLabel.length() == 0)
+			confidence += (1 - confidence)*0.1;
 		//increasing confidence by 10% of difference to 1. Arbitrary choice
-		confidence += (1 - confidence)*0.1;
 	}
 
 	//	public void consolidateLabelWithChildren() {
@@ -269,6 +271,7 @@ public class Field extends AbstractField {
 	//			confidence += (1 - confidence)*0.1;
 	//		}
 	//	}
+
 
 
 }
