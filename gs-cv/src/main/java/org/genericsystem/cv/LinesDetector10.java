@@ -190,7 +190,7 @@ public class LinesDetector10 extends AbstractApp {
 		Point point = null;
 		double poly_angle = 0.0;
 		double max = 0.0;
-		for (double angle = -absMinMax; angle <= absMinMax; angle += step) {
+		for (double angle = -absMinMax; angle <= absMinMax; angle += 12) {
 			Point oldPoint = point;
 			double score = f.apply(angle,result );
 			point = new Point((absMinMax + angle) * 10,  score/ 1000);
