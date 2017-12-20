@@ -24,6 +24,7 @@ public class Field extends AbstractField {
 
 	private int deadCounter;
 	private double locklLevel;
+	private boolean validated;
 
 	public Field(GSRect rect) {
 		super(rect);
@@ -31,6 +32,7 @@ public class Field extends AbstractField {
 		this.children = new ArrayList<>();
 		this.deadCounter = 0;
 		this.locklLevel = 0;
+		this.validated = false;
 	}
 
 	public Field(GSRect rect, Field parent) {
@@ -106,6 +108,8 @@ public class Field extends AbstractField {
 	public void drawWithHomography(Img display, Mat homography, int thickness) {
 		if (needRect(display)) {
 			drawRect(display, getRectPointsWithHomography(homography), drawAsLocked() ? new Scalar(0, 255, 0) : new Scalar(0, 0, 255), thickness);
+			if(isValidated() && isOrphan())
+				drawRect(display, getRectPointsWithHomography(homography), new Scalar(255, 255, 0), thickness);
 			drawText(display, getRectPointsWithHomography(homography), new Scalar(0, 255, 0), thickness);
 		}
 	}
@@ -126,6 +130,10 @@ public class Field extends AbstractField {
 	public boolean isOnDisplay(Img display) {
 		GSRect imgRect = new GSRect(0, 0, display.width(), display.height());
 		return imgRect.isOverlapping(rect);
+	}
+
+	public boolean isValidated() {
+		return validated;
 	}
 
 	public boolean isLocked() {
@@ -152,7 +160,7 @@ public class Field extends AbstractField {
 		return deadCounter;
 	}
 
-	public boolean addChildIfNotPresent(Field child) {
+	public boolean addChild(Field child) {
 		return children.add(child);
 	}
 
@@ -160,9 +168,6 @@ public class Field extends AbstractField {
 		return children.remove(child);
 	}
 
-	// public boolean containsChild(Field field) {
-	// return children.stream().anyMatch(child -> child.getRect().inclusiveArea(field.getRect()) > 0.95);
-	// }
 
 	public List<Field> getChildren() {
 		return children;
@@ -178,16 +183,10 @@ public class Field extends AbstractField {
 		return parent.getChildren().stream().filter(child -> this != child).collect(Collectors.toList());
 	}
 
-	public void setParent(Field parent) {
-		this.parent = parent;
-	}
-
 	public void updateParent(Field parent) {
-		setParent(parent);
-		if (parent != null)
-			this.parent.addChildIfNotPresent(this);
-		else if (this.parent != null)
-			this.parent.removeChild(this);
+		this.parent = parent;
+		this.parent.addChild(this);
+
 	}
 
 	public boolean hasChildren() {
@@ -240,11 +239,12 @@ public class Field extends AbstractField {
 			if(child.getConsolidated()!=null && consolidatedLabel.toString().contains(child.getConsolidated())){
 				int start = consolidatedLabel.indexOf(child.getConsolidated());
 				consolidatedLabel.delete(start, start+child.getConsolidated().length());
-				consolidatedLabel = new StringBuilder(consolidatedLabel.toString().trim());
+
 			}		
 		}
+		consolidatedLabel = new StringBuilder(consolidatedLabel.toString().trim());
 		if(consolidatedLabel.length() == 0)
-			confidence += (1 - confidence)*0.1;
+			validated = true;
 		//increasing confidence by 10% of difference to 1. Arbitrary choice
 	}
 
