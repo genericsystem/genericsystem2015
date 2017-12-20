@@ -249,7 +249,11 @@ public class LinesDetector8 extends AbstractApp {
 		}
 
 		public void draw(Mat frame, Scalar color) {
-			Imgproc.line(frame, new Point(x1, y1), new Point(x2, y2), color, 1);
+			draw(frame, color, 1);
+		}
+
+		public void draw(Mat frame, Scalar color, int thickness) {
+			Imgproc.line(frame, new Point(x1, y1), new Point(x2, y2), color, thickness);
 		}
 
 		public double geta() {

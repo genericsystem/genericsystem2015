@@ -10,9 +10,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
-
 import org.genericsystem.cv.LinesDetector8.Line;
 import org.genericsystem.cv.LinesDetector8.Lines;
 import org.genericsystem.cv.lm.LMHostImpl;
@@ -29,6 +26,9 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
 import org.opencv.videoio.VideoCapture;
+
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
 
 public class LinesDetector10 extends AbstractApp {
 
@@ -114,7 +114,7 @@ public class LinesDetector10 extends AbstractApp {
 				// line.draw(frame, new Scalar(0, 0, 0), 2);
 
 				gradView3.setImage(binarized[0].toJfxImage());
-				Imgproc.putText(display.getSrc(), "angle : " + angle, new Point(5, 20), Core.FONT_HERSHEY_TRIPLEX, 0.5, new Scalar(255));
+				Imgproc.putText(display.getSrc(), "angle : " + angle*180/Math.PI, new Point(5, 20), Core.FONT_HERSHEY_TRIPLEX, 0.5, new Scalar(255));
 				gradView2.setImage(display.toJfxImage());
 				// circledImg.getSrc().convertTo(circledImg.getSrc(), CvType.CV_8UC1);
 
@@ -171,29 +171,43 @@ public class LinesDetector10 extends AbstractApp {
 	public double getBestAngle(Img circledImg, int absMinMax, double step, int filterSize, double threshold, Img[] binarized) {
 		double maxScore = 0;
 		double bestAngle = -1;
-		binarized[0] = new Img(new Mat(new Size(2 * absMinMax * 10, 100), CvType.CV_8UC1, new Scalar(0)), false);
+		binarized[0] = new Img(new Mat(new Size(2 * absMinMax * 10, 200), CvType.CV_8UC1, new Scalar(0)), false);
 		List<double[]> results = new ArrayList<double[]>();
-		for (double angle = -absMinMax; angle <= absMinMax; angle += step) {
+		for (double angle = -absMinMax; angle <= absMinMax; angle += 12) {
 			double score = score(circledImg, angle, filterSize, threshold);
 			if (angle != 0 && score > maxScore) {
 				maxScore = score;
 				bestAngle = angle;
 			}
-			results.add(new double[] { angle, score });
+			if(angle !=0)
+				results.add(new double[] { angle, score });
 			System.out.println(score);
 			new Line((absMinMax + angle) * 10, 0, (absMinMax + angle) * 10, score / 1000).draw(binarized[0].getSrc(), new Scalar(255, 0, 0), 10);
 		}
-		BiFunction<double[], double[], Double> f = (xy, params) -> params[0] * xy[0] * xy[0] + params[1] * xy[0] + params[2] - xy[1];
-		double[] result = new LMHostImpl<>(f, results, new double[] { 1, 1, 1 }).getParams();
-
+		BiFunction<Double, double[], Double> f = (x, params) -> params[0] * x * x * x * x + params[1] * x * x * x + params[2] * x * x + params[3] * x+ params[4];
+		BiFunction<double[], double[], Double> e = (xy,params) -> f.apply(xy[0], params) - xy[1];
+		double[] result = new LMHostImpl<>(e, results, new double[] { 1, 1, 1, 1, 1 }).getParams();
+		Point point = null;
+		double poly_angle = 0.0;
+		double max = 0.0;
 		for (double angle = -absMinMax; angle <= absMinMax; angle += step) {
-			f.apply(result, new double[] { angle });
-
+			Point oldPoint = point;
+			double score = f.apply(angle,result );
+			point = new Point((absMinMax + angle) * 10,  score/ 1000);
+			if(score > max){
+				max = score;
+				poly_angle = angle;
+			}
+			if(oldPoint!=null)
+				new Line(oldPoint, point).draw(binarized[0].getSrc(), new Scalar(0, 255, 0));
 		}
+		Imgproc.circle(binarized[0].getSrc(), new Point(poly_angle, max/1000), 10, new Scalar(0, 255, 0), 2);
+		new Line(new Point((absMinMax + bestAngle) * 10,  maxScore/ 1000), new Point((absMinMax + bestAngle) * 10,0)).draw(binarized[0].getSrc(), new Scalar(0, 255, 0), 3);
+
 
 		System.out.println(Arrays.toString(result));
 
-		return bestAngle;
+		return poly_angle;
 	}
 
 	@Override
