@@ -10,6 +10,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
+
 import org.genericsystem.cv.LinesDetector8.Line;
 import org.genericsystem.cv.LinesDetector8.Lines;
 import org.genericsystem.cv.lm.LMHostImpl;
@@ -26,9 +29,6 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
 import org.opencv.videoio.VideoCapture;
-
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
 
 public class LinesDetector10 extends AbstractApp {
 
@@ -86,35 +86,35 @@ public class LinesDetector10 extends AbstractApp {
 		mainGrid.add(gradView3, 2, 1);
 		trapezePoints = new Point[] { new Point(0, 0), new Point(frame.width(), 0), new Point(frame.width(), frame.height()), new Point(0, frame.height()) };
 
-		int radius = 100;
-		Mat mask = new Mat(new Size(radius * 2, radius * 2), CvType.CV_8UC1, new Scalar(0));
-		Imgproc.circle(mask, new Point(radius, radius), radius, new Scalar(255), -1);
-		Rect rect = new Rect(new Point(frame.width() / 2 - radius, frame.height() / 2 - radius), new Point(frame.width() / 2 + radius, frame.height() / 2 + radius));
 		Img[] binarized = new Img[1];
 		timer.scheduleAtFixedRate(() -> {
 			try {
 				if (!stabilize)
 					capture.read(frame);
-				// Img laplacian = new Img(frame, false).sobel().thresHold(50, 255, Imgproc.THRESH_BINARY);
-				// Img result = new Img(new Mat(frame.size(), frame.type(), Scalar.all(0)));
-				// new Lines(laplacian.houghLinesP(1, Math.PI / 180, 10, 6, 1)).draw(result.getSrc(), new Scalar(0, 255, 0));
 
-				Mat roi = new Img(new Mat(frame, rect), true).adaptativeGaussianInvThreshold(3, 3).getSrc();
-				Mat circled = new Mat();
-				roi.copyTo(circled, mask);
-				Img circledImg = new Img(circled, false);
+				List<Circle> circles = detectCircles(frame, 200, 800);
+				List<Circle> selectedCircles = selectRandomCirles(circles, 3);
+				for (Circle circle : selectedCircles) {
+					Point center = new Point(frame.width() / 4, frame.height() / 2);
+					Img circledImg = getCircledImg(frame, circle.radius, center);
+					double angle = getBestAngle(circledImg, 30, 12, 8, 192, binarized) / 180 * Math.PI;
+					displayLine(frame, center, angle, 100);
+				}
+				int radius = 100;
+				Point center = new Point(frame.width() / 4, frame.height() / 2);
+				Img circledImg = getCircledImg(frame, radius, center);
+				double angle = getBestAngle(circledImg, 30, 12, 8, 192, binarized) / 180 * Math.PI;
+				displayLine(frame, center, angle, 100);
 
-				Img display = new Img(circledImg.getSrc(), true);
-				double angle = getBestAngle(circledImg, 30, 1, 10, 192, binarized) / 180 * Math.PI;
-				double x1 = frame.width() / 2 - Math.sin(angle) * frame.height() / 2;
-				double y1 = frame.height() / 2 + Math.cos(angle) * frame.height() / 2;
-				double x2 = frame.width() / 2 + Math.sin(angle) * frame.height() / 2;
-				double y2 = frame.height() / 2 - Math.cos(angle) * frame.height() / 2;
-				Line line = new Line(new Point(x1, y1), new Point(x2, y2));
-				// line.draw(frame, new Scalar(0, 0, 0), 2);
+				center = new Point(3 * frame.width() / 4, frame.height() / 2);
+				circledImg = getCircledImg(frame, radius, center);
+				angle = getBestAngle(circledImg, 30, 12, 8, 192, null) / 180 * Math.PI;
+				displayLine(frame, center, angle, 100);
 
 				gradView3.setImage(binarized[0].toJfxImage());
-				Imgproc.putText(display.getSrc(), "angle : " + angle*180/Math.PI, new Point(5, 20), Core.FONT_HERSHEY_TRIPLEX, 0.5, new Scalar(255));
+
+				Img display = new Img(circledImg.getSrc(), true);
+				Imgproc.putText(display.getSrc(), "angle : " + angle * 180 / Math.PI, new Point(5, 20), Core.FONT_HERSHEY_TRIPLEX, 0.5, new Scalar(255));
 				gradView2.setImage(display.toJfxImage());
 				// circledImg.getSrc().convertTo(circledImg.getSrc(), CvType.CV_8UC1);
 
@@ -125,7 +125,7 @@ public class LinesDetector10 extends AbstractApp {
 				if (!stabilize) {
 					lines = new Lines(closed.houghLinesP(1, Math.PI / 180, 10, 20, 5));
 					lines.lines.addAll(new Lines(closed2.houghLinesP(1, Math.PI / 180, 10, 50, 10)).lines);
-					lines.lines.add(line);
+					// lines.lines.add(line);
 				}
 
 				if (lines.size() > 10) {
@@ -157,6 +157,46 @@ public class LinesDetector10 extends AbstractApp {
 
 	}
 
+	private List<Circle> selectRandomCirles(List<Circle> circles, int i) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	private List<Circle> detectCircles(Mat frame, int i, int j) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	private class Circle {
+		public Circle(Point center, int radius) {
+			this.center = center;
+			this.radius = radius;
+		}
+
+		Point center;
+		int radius;
+	}
+
+	public Img getCircledImg(Mat frame, int radius, Point center) {
+		Mat mask = new Mat(new Size(radius * 2, radius * 2), CvType.CV_8UC1, new Scalar(0));
+		Imgproc.circle(mask, new Point(radius, radius), radius, new Scalar(255), -1);
+		Rect rect = new Rect(new Point(center.x - radius, center.y - radius), new Point(center.x + radius, center.y + radius));
+		Mat roi = new Img(new Mat(frame, rect), true).bilateralFilter().adaptativeGaussianInvThreshold(3, 3).getSrc();
+		Mat circled = new Mat();
+		roi.copyTo(circled, mask);
+		Img circledImg = new Img(circled, false);
+		return circledImg;
+	}
+
+	public void displayLine(Mat mat, Point center, double angle, double size) {
+		double x1 = center.x - Math.sin(angle) * size;
+		double y1 = center.y + Math.cos(angle) * size;
+		double x2 = center.x + Math.sin(angle) * size;
+		double y2 = center.y - Math.cos(angle) * size;
+		Line line = new Line(new Point(x1, y1), new Point(x2, y2));
+		line.draw(mat, new Scalar(0, 0, 0), 2);
+	}
+
 	public double score(Img circled, double angle, int filterSize, double threshold) {
 		Mat M = Imgproc.getRotationMatrix2D(new Point(circled.width() / 2, circled.width() / 2), angle, 1);
 		Mat rotated = new Mat();
@@ -171,43 +211,45 @@ public class LinesDetector10 extends AbstractApp {
 	public double getBestAngle(Img circledImg, int absMinMax, double step, int filterSize, double threshold, Img[] binarized) {
 		double maxScore = 0;
 		double bestAngle = -1;
-		binarized[0] = new Img(new Mat(new Size(2 * absMinMax * 10, 200), CvType.CV_8UC1, new Scalar(0)), false);
+		if (binarized != null)
+			binarized[0] = new Img(new Mat(new Size(2 * absMinMax * 10, 200), CvType.CV_8UC1, new Scalar(0)), false);
 		List<double[]> results = new ArrayList<double[]>();
-		for (double angle = -absMinMax; angle <= absMinMax; angle += 12) {
+		for (double angle = -absMinMax; angle <= absMinMax; angle += step) {
 			double score = score(circledImg, angle, filterSize, threshold);
 			if (angle != 0 && score > maxScore) {
 				maxScore = score;
 				bestAngle = angle;
 			}
-			if(angle !=0)
+			if (angle != 0)
 				results.add(new double[] { angle, score });
 			System.out.println(score);
-			new Line((absMinMax + angle) * 10, 0, (absMinMax + angle) * 10, score / 1000).draw(binarized[0].getSrc(), new Scalar(255, 0, 0), 10);
+			if (binarized != null)
+				new Line((absMinMax + angle) * 10, 0, (absMinMax + angle) * 10, score / 1000).draw(binarized[0].getSrc(), new Scalar(255, 0, 0), 10);
 		}
-		BiFunction<Double, double[], Double> f = (x, params) -> params[0] * x * x * x * x + params[1] * x * x * x + params[2] * x * x + params[3] * x+ params[4];
-		BiFunction<double[], double[], Double> e = (xy,params) -> f.apply(xy[0], params) - xy[1];
+		BiFunction<Double, double[], Double> f = (x, params) -> params[0] * x * x * x * x + params[1] * x * x * x + params[2] * x * x + params[3] * x + params[4];
+		BiFunction<double[], double[], Double> e = (xy, params) -> f.apply(xy[0], params) - xy[1];
 		double[] result = new LMHostImpl<>(e, results, new double[] { 1, 1, 1, 1, 1 }).getParams();
 		Point point = null;
-		double poly_angle = 0.0;
+		double polynomAngle = 0.0;
 		double max = 0.0;
-		for (double angle = -absMinMax; angle <= absMinMax; angle += 12) {
+		for (double angle = -absMinMax; angle <= absMinMax; angle++) {
 			Point oldPoint = point;
-			double score = f.apply(angle,result );
-			point = new Point((absMinMax + angle) * 10,  score/ 1000);
-			if(score > max){
+			double score = f.apply(angle, result);
+			point = new Point((absMinMax + angle) * 10, score / 1000);
+			if (score > max) {
 				max = score;
-				poly_angle = angle;
+				polynomAngle = angle;
 			}
-			if(oldPoint!=null)
-				new Line(oldPoint, point).draw(binarized[0].getSrc(), new Scalar(0, 255, 0));
+			if (binarized != null && oldPoint != null)
+				new Line(oldPoint, point).draw(binarized[0].getSrc(), new Scalar(255, 0, 0));
 		}
-		Imgproc.circle(binarized[0].getSrc(), new Point(poly_angle, max/1000), 10, new Scalar(0, 255, 0), 2);
-		new Line(new Point((absMinMax + bestAngle) * 10,  maxScore/ 1000), new Point((absMinMax + bestAngle) * 10,0)).draw(binarized[0].getSrc(), new Scalar(0, 255, 0), 3);
-
-
+		if (binarized != null) {
+			Imgproc.circle(binarized[0].getSrc(), new Point((absMinMax + polynomAngle) * 10, max / 1000), 10, new Scalar(255, 255, 0), 3);
+			// new Line(new Point((absMinMax + bestAngle) * 10, maxScore / 1000), new Point((absMinMax + bestAngle) * 10, 0)).draw(binarized[0].getSrc(), new Scalar(255, 255, 0), 3);
+		}
 		System.out.println(Arrays.toString(result));
 
-		return poly_angle;
+		return polynomAngle;
 	}
 
 	@Override
