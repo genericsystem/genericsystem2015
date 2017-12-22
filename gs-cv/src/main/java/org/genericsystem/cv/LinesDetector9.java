@@ -94,7 +94,6 @@ public class LinesDetector9 extends AbstractApp {
 					System.out.println("vp1 : " + vp1[0] / vp1[2] + ", " + vp1[1] / vp1[2] + " ,1");
 					vp1 = reestimate_model(vp1, edgelets1, 5);
 					System.out.println("vp1 reestimation : " + Arrays.toString(vp1));
-
 					List<Edgelet> edgelets2 = removeInliers(vp1, edgelets1, 10);
 
 					double[] vp2 = ransacVanishingPoint(edgelets2, 300, 5);
