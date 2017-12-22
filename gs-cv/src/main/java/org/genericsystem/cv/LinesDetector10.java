@@ -2,9 +2,12 @@ package org.genericsystem.cv;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -21,6 +24,7 @@ import org.genericsystem.cv.utils.Tools;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
@@ -92,30 +96,32 @@ public class LinesDetector10 extends AbstractApp {
 				if (!stabilize)
 					capture.read(frame);
 
-				List<Circle> circles = detectCircles(frame, 200, 800);
-				List<Circle> selectedCircles = selectRandomCirles(circles, 3);
+				Mat diffFrame = getDiffFrame(frame);
+				List<Circle> circles = detectCircles(frame, diffFrame, 50, 120);
+				Collection<Circle> selectedCircles = selectRandomCirles(circles, 3);
 				for (Circle circle : selectedCircles) {
-					Point center = new Point(frame.width() / 4, frame.height() / 2);
-					Img circledImg = getCircledImg(frame, circle.radius, center);
+					Img circledImg = getCircledImg(frame, circle.radius, circle.center);
 					double angle = getBestAngle(circledImg, 30, 12, 8, 192, binarized) / 180 * Math.PI;
-					displayLine(frame, center, angle, 100);
+					displayLine(frame, circle.center, angle, 50);
+					Imgproc.circle(frame, circle.center, (int) circle.radius, new Scalar(0, 255, 0), 1);
+					System.out.println("zzz");
 				}
-				int radius = 100;
-				Point center = new Point(frame.width() / 4, frame.height() / 2);
-				Img circledImg = getCircledImg(frame, radius, center);
-				double angle = getBestAngle(circledImg, 30, 12, 8, 192, binarized) / 180 * Math.PI;
-				displayLine(frame, center, angle, 100);
+				// int radius = 100;
+				// Point center = new Point(frame.width() / 4, frame.height() / 2);
+				// Img circledImg = getCircledImg(frame, radius, center);
+				// double angle = getBestAngle(circledImg, 30, 12, 8, 192, binarized) / 180 * Math.PI;
+				// displayLine(frame, center, angle, 100);
+				//
+				// center = new Point(3 * frame.width() / 4, frame.height() / 2);
+				// circledImg = getCircledImg(frame, radius, center);
+				// angle = getBestAngle(circledImg, 30, 12, 8, 192, null) / 180 * Math.PI;
+				// displayLine(frame, center, angle, 100);
+				//
+				// gradView3.setImage(binarized[0].toJfxImage());
 
-				center = new Point(3 * frame.width() / 4, frame.height() / 2);
-				circledImg = getCircledImg(frame, radius, center);
-				angle = getBestAngle(circledImg, 30, 12, 8, 192, null) / 180 * Math.PI;
-				displayLine(frame, center, angle, 100);
-
-				gradView3.setImage(binarized[0].toJfxImage());
-
-				Img display = new Img(circledImg.getSrc(), true);
-				Imgproc.putText(display.getSrc(), "angle : " + angle * 180 / Math.PI, new Point(5, 20), Core.FONT_HERSHEY_TRIPLEX, 0.5, new Scalar(255));
-				gradView2.setImage(display.toJfxImage());
+				// Img display = new Img(circledImg.getSrc(), true);
+				// Imgproc.putText(display.getSrc(), "angle : " + angle * 180 / Math.PI, new Point(5, 20), Core.FONT_HERSHEY_TRIPLEX, 0.5, new Scalar(255));
+				// gradView2.setImage(display.toJfxImage());
 				// circledImg.getSrc().convertTo(circledImg.getSrc(), CvType.CV_8UC1);
 
 				Img grad = new Img(frame, false).morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(3, 3)).otsu();
@@ -157,29 +163,60 @@ public class LinesDetector10 extends AbstractApp {
 
 	}
 
-	private List<Circle> selectRandomCirles(List<Circle> circles, int i) {
-		// TODO Auto-generated method stub
-		return null;
+	private Mat getDiffFrame(Mat frame) {
+		Mat result = new Mat();
+		Imgproc.cvtColor(frame, result, Imgproc.COLOR_BGR2GRAY);
+		Imgproc.GaussianBlur(result, result, new Size(3, 3), 0);
+		Mat diffFrame = new Mat();
+		Core.absdiff(result, new Scalar(255), diffFrame);
+		Imgproc.adaptiveThreshold(diffFrame, diffFrame, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 7, 3);
+		return diffFrame;
 	}
 
-	private List<Circle> detectCircles(Mat frame, int i, int j) {
-		// TODO Auto-generated method stub
-		return null;
+	private Collection<Circle> selectRandomCirles(List<Circle> circles, int circlesNumber) {
+		if (circles.size() <= circlesNumber)
+			return circles;
+		Set<Circle> result = new HashSet<>();
+		while (result.size() < circlesNumber)
+			result.add(circles.get((int) (Math.random() * circles.size())));
+		return result;
 	}
 
-	private class Circle {
-		public Circle(Point center, int radius) {
+	private List<Circle> detectCircles(Mat frame, Mat diffFrame, int minRadius, int maxRadius) {
+		List<MatOfPoint> contours = new ArrayList<>();
+		Imgproc.findContours(diffFrame, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+		List<Circle> circles = new ArrayList<>();
+		for (int i = 0; i < contours.size(); i++) {
+			MatOfPoint contour = contours.get(i);
+			double contourarea = Imgproc.contourArea(contour);
+			if (contourarea > 50) {
+				float[] radius = new float[1];
+				Point center = new Point();
+				MatOfPoint2f contour2F = new MatOfPoint2f(contour.toArray());
+				Imgproc.minEnclosingCircle(contour2F, center, radius);
+				if (radius[0] > minRadius && radius[0] < maxRadius) {
+					circles.add(new Circle(center, radius[0]));
+					// Imgproc.circle(frame, center, (int) radius[0], new Scalar(0, 0, 255));
+				}
+				// Imgproc.drawContours(frame, Arrays.asList(contour), 0, new Scalar(0, 255, 0), 1);
+			}
+		}
+		return circles;
+	}
+
+	private static class Circle {
+		public Circle(Point center, float radius) {
 			this.center = center;
 			this.radius = radius;
 		}
 
 		Point center;
-		int radius;
+		float radius;
 	}
 
-	public Img getCircledImg(Mat frame, int radius, Point center) {
+	public Img getCircledImg(Mat frame, float radius, Point center) {
 		Mat mask = new Mat(new Size(radius * 2, radius * 2), CvType.CV_8UC1, new Scalar(0));
-		Imgproc.circle(mask, new Point(radius, radius), radius, new Scalar(255), -1);
+		Imgproc.circle(mask, new Point(radius, radius), (int) radius, new Scalar(255), -1);
 		Rect rect = new Rect(new Point(center.x - radius, center.y - radius), new Point(center.x + radius, center.y + radius));
 		Mat roi = new Img(new Mat(frame, rect), true).bilateralFilter().adaptativeGaussianInvThreshold(3, 3).getSrc();
 		Mat circled = new Mat();
