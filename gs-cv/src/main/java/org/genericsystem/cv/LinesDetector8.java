@@ -12,6 +12,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
+
+import org.genericsystem.cv.Calibrated.AngleCalibrated;
 import org.genericsystem.cv.lm.LMHostImpl;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.genericsystem.cv.utils.Tools;
@@ -25,9 +29,6 @@ import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
 import org.opencv.videoio.VideoCapture;
 
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
-
 public class LinesDetector8 extends AbstractApp {
 
 	static {
@@ -40,10 +41,10 @@ public class LinesDetector8 extends AbstractApp {
 
 	private final VideoCapture capture = new VideoCapture(0);
 	private ScheduledExecutorService timer = Executors.newSingleThreadScheduledExecutor();
-	//	private Point vp = new Point(0, 0);
-	private double[] vp = new double[]{0,0,1};
-	private Calibrated calibrated;
-	static final double f = 6.053/0.009;
+	// private Point vp = new Point(0, 0);
+	private double[] vp = new double[] { 0, 0, 1 };
+	private AngleCalibrated calibrated;
+	static final double f = 6.053 / 0.009;
 	private Mat frame = new Mat();
 
 	@Override
@@ -55,9 +56,9 @@ public class LinesDetector8 extends AbstractApp {
 		ImageView deskiewedView = new ImageView(Tools.mat2jfxImage(frame));
 		mainGrid.add(deskiewedView, 0, 1);
 		Mat dePerspectived = frame.clone();
-		//	Calibrated.calibrate(frame.width(), frame.height());
+		// Calibrated.calibrate(frame.width(), frame.height());
 		double[] pp = new double[] { frame.width() / 2, frame.height() / 2 };
-		calibrated = new Calibrated(vp, pp, f);
+		calibrated = new AngleCalibrated(vp, pp, f);
 		timer.scheduleAtFixedRate(() -> {
 			try {
 				capture.read(frame);
@@ -71,8 +72,8 @@ public class LinesDetector8 extends AbstractApp {
 					frameView.setImage(Tools.mat2jfxImage(frame));
 					lines = lines.reduce(10);
 
-					double[] newVp = new LMHostImpl<>((line, params) -> distance(params, line), lines.lines, calibrated.getCalibratexyz()).getParams();
-					calibrated = calibrated.dump(newVp, 5);
+					double[] newThetaPhi = new LMHostImpl<>((line, params) -> distance(new AngleCalibrated(params).getCalibratexyz(), line), lines.lines, calibrated.getTethaPhi()).getParams();
+					calibrated = calibrated.dump(newThetaPhi, 1);
 
 					vp = calibrated.uncalibrate(pp, f);
 					System.out.println("Vanishing point : " + Arrays.toString(vp));
@@ -93,28 +94,29 @@ public class LinesDetector8 extends AbstractApp {
 	private double distance(double[] calibratedxyz, Line line) {
 		double[] lineMat = getLineMat(line);
 		double di = calibratedxyz[0] * lineMat[0] + calibratedxyz[1] * lineMat[1] + calibratedxyz[2] * lineMat[2];
-		double normLineMat = Math.sqrt(lineMat[0]*lineMat[0] + lineMat[1]*lineMat[1] +lineMat[2]*lineMat[2]);
+		double normLineMat = Math.sqrt(lineMat[0] * lineMat[0] + lineMat[1] * lineMat[1] + lineMat[2] * lineMat[2]);
 		di /= (Math.sqrt(calibratedxyz[0] * calibratedxyz[0] + calibratedxyz[1] * calibratedxyz[1] + calibratedxyz[2] * calibratedxyz[2]) * normLineMat);
-		return di * di;
+		return di;
 	}
 
 	private double[] getLineMat(Line line) {
-		double[] pp = new double[] {frame.width() / 2, frame.height() / 2 };
-		Calibrated calA = new Calibrated(new double[]{line.x1, line.y1,1d}, pp, f);
-		Calibrated calB = new Calibrated(new double[]{line.x2, line.y2,1d}, pp, f);
+		double[] pp = new double[] { frame.width() / 2, frame.height() / 2 };
+		Calibrated calA = new Calibrated(new double[] { line.x1, line.y1, 1d }, pp, f);
+		Calibrated calB = new Calibrated(new double[] { line.x2, line.y2, 1d }, pp, f);
 		return cross2D(calA.getCalibratexyz(), calB.getCalibratexyz());
 	}
 
 	static double[] cross2D(double[] a, double b[]) {
 		return uncalibrate(cross(a, b));
 	}
+
 	static double[] uncalibrate(double[] a) {
 		return new double[] { a[0] / a[2], a[1] / a[2], 1 };
 	}
+
 	static double[] cross(double[] a, double b[]) {
 		return new double[] { a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0] };
 	}
-
 
 	public Point[] rotate(Point bary, double alpha, Point... p) {
 		Mat matrix = Imgproc.getRotationMatrix2D(bary, alpha / Math.PI * 180, 1);
@@ -285,5 +287,13 @@ public class LinesDetector8 extends AbstractApp {
 			double y = geta() * x + getb();
 			return new Point(x, y);
 		}
+	}
+
+	@Override
+	public void stop() throws Exception {
+		super.stop();
+		timer.shutdown();
+		timer.awaitTermination(5000, TimeUnit.MILLISECONDS);
+		capture.release();
 	}
 }

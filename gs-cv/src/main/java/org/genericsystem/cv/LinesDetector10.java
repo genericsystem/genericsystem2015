@@ -13,6 +13,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
+
 import org.genericsystem.cv.LinesDetector8.Line;
 import org.genericsystem.cv.LinesDetector8.Lines;
 import org.genericsystem.cv.lm.LMHostImpl;
@@ -30,9 +33,6 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
 import org.opencv.videoio.VideoCapture;
-
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
 
 public class LinesDetector10 extends AbstractApp {
 
@@ -83,8 +83,8 @@ public class LinesDetector10 extends AbstractApp {
 		mainGrid.add(deskiewedView, 0, 1);
 		ImageView gradView = new ImageView(Tools.mat2jfxImage(frame));
 		mainGrid.add(gradView, 1, 0);
-		// ImageView gradView2 = new ImageView(Tools.mat2jfxImage(frame));
-		// mainGrid.add(gradView2, 1, 1);
+		ImageView gradView2 = new ImageView(Tools.mat2jfxImage(frame));
+		mainGrid.add(gradView2, 1, 1);
 		// ImageView gradView3 = new ImageView(Tools.mat2jfxImage(frame));
 
 		// mainGrid.add(gradView3, 2, 1);
@@ -97,69 +97,54 @@ public class LinesDetector10 extends AbstractApp {
 					capture.read(frame);
 
 				Mat diffFrame = getDiffFrame(frame);
-				List<Circle> circles = detectCircles(frame, diffFrame, 50, 100);
-				Collection<Circle> selectedCircles = selectRandomCirles(circles, 10);
+				List<Circle> circles = detectCircles(frame, diffFrame, 30, 100);
+				Collection<Circle> selectedCircles = selectRandomCirles(circles, 20);
 				List<Line> addedLines = new ArrayList<>();
 				for (Circle circle : selectedCircles) {
 					Img circledImg = getCircledImg(frame, (int) circle.radius, circle.center);
-					double angle = getBestAngle(circledImg, 30, 12, 8, 192, null) / 180 * Math.PI;
+					double angle = getBestAngle(circledImg, 30, 12, 6, 192, null) / 180 * Math.PI;
 					addedLines.add(buildLine(frame, circle.center, angle, circle.radius));
-					Imgproc.circle(frame, circle.center, (int) circle.radius, new Scalar(0, 255, 0), 1);
-				}
-				// int radius = 100;
-				// Point center = new Point(frame.width() / 4, frame.height() / 2);
-				// Img circledImg = getCircledImg(frame, radius, center);
-				// double angle = getBestAngle(circledImg, 30, 12, 8, 192, binarized) / 180 * Math.PI;
-				// displayLine(frame, center, angle, 100);
-				//
-				// center = new Point(3 * frame.width() / 4, frame.height() / 2);
-				// circledImg = getCircledImg(frame, radius, center);
-				// angle = getBestAngle(circledImg, 30, 12, 8, 192, null) / 180 * Math.PI;
-				// displayLine(frame, center, angle, 100);
-				//
-				// gradView3.setImage(binarized[0].toJfxImage());
-
-				// Img display = new Img(circledImg.getSrc(), true);
-				// Imgproc.putText(display.getSrc(), "angle : " + angle * 180 / Math.PI, new Point(5, 20), Core.FONT_HERSHEY_TRIPLEX, 0.5, new Scalar(255));
-				// gradView2.setImage(display.toJfxImage());
-				// circledImg.getSrc().convertTo(circledImg.getSrc(), CvType.CV_8UC1);
-
-				Img grad = new Img(frame, false).morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(3, 3)).otsu();
-				Img closed = grad.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(10, 10)).morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(3, 3));
-				Img closed2 = grad.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(30, 40)).morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(3, 3));
-				gradView.setImage(closed.toJfxImage());
-				if (!stabilize) {
-					lines = new Lines(closed.houghLinesP(1, Math.PI / 180, 10, 20, 5));
-					lines.lines.addAll(new Lines(closed2.houghLinesP(1, Math.PI / 180, 10, 50, 10)).lines);
-					lines.lines.addAll(addedLines);
-				}
-
-				if (lines.size() > 10) {
-					// lines = lines.reduce(30);
-					Mat colorFrame = frame.clone();
-					lines.draw(colorFrame, new Scalar(0, 0, 0));
-					LinesDetector linesDetector = new LinesDetector(new Img(frame, false), lines.lines, vps);
-					// if (!stabilize)
-					vps = linesDetector.getVps();
-
-					Map<Integer, List<Integer>> clusters = linesDetector.lines2Vps(6.0 / 180.0 * Math.PI);
-					for (int cluster : clusters.keySet())
-						for (int lineId : clusters.get(cluster))
-							lines.lines.get(lineId).draw(colorFrame, new Scalar(cluster == 0 ? 255 : 0, cluster == 1 ? 255 : 0, cluster == 2 ? 255 : 0));
-
-					frameView.setImage(Tools.mat2jfxImage(colorFrame));
-					Mat homographyMat = findHomography(frame.size(), vps, new double[] { frame.width() / 2, frame.height() / 2, 1.0 }, f);
-					Mat dumpedHomographyMat = dumpTrapezePointsHomography(homographyMat, 1, frame.size());
-					Imgproc.warpPerspective(frame, dePerspectived, dumpedHomographyMat, frame.size(), Imgproc.INTER_LINEAR, Core.BORDER_CONSTANT, Scalar.all(255));
-					deskiewedView.setImage(Tools.mat2jfxImage(dePerspectived));
-				} else
-					System.out.println("Not enough lines : " + lines.size());
-
-			} catch (Throwable e) {
-				e.printStackTrace();
+					// Imgproc.circle(frame, circle.center, (int) circle.radius, new Scalar(0, 255, 0), 1);
 			}
 
-		}, 30, 50, TimeUnit.MILLISECONDS);
+			Img grad = new Img(frame, false).morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(3, 3)).otsu();
+			Img closed = grad.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(10, 10)).morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(3, 3));
+			Img closed2 = grad.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(30, 30)).morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(3, 3));
+			gradView.setImage(closed.toJfxImage());
+			gradView2.setImage(closed2.toJfxImage());
+
+			if (!stabilize) {
+				lines = new Lines(closed.houghLinesP(1, Math.PI / 180, 10, 10, 5));
+				lines.lines.addAll(new Lines(closed2.houghLinesP(1, Math.PI / 180, 10, 30, 10)).lines);
+				lines.lines.addAll(addedLines);
+			}
+
+			if (lines.size() > 10) {
+				// lines = lines.reduce(30);
+				Mat colorFrame = frame.clone();
+				lines.draw(colorFrame, new Scalar(0, 0, 0));
+				LinesDetector linesDetector = new LinesDetector(new Img(frame, false), lines.lines, vps);
+				// if (!stabilize)
+				vps = linesDetector.getVps();
+
+				Map<Integer, List<Integer>> clusters = linesDetector.lines2Vps(5.0 / 180.0 * Math.PI);
+				for (int cluster : clusters.keySet())
+					for (int lineId : clusters.get(cluster))
+						lines.lines.get(lineId).draw(colorFrame, new Scalar(cluster == 0 ? 255 : 0, cluster == 1 ? 255 : 0, cluster == 2 ? 255 : 0));
+
+				frameView.setImage(Tools.mat2jfxImage(colorFrame));
+				Mat homographyMat = findHomography(frame.size(), vps, new double[] { frame.width() / 2, frame.height() / 2, 1.0 }, f);
+				Mat dumpedHomographyMat = dumpTrapezePointsHomography(homographyMat, 1, frame.size());
+				Imgproc.warpPerspective(frame, dePerspectived, dumpedHomographyMat, frame.size(), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(255));
+				deskiewedView.setImage(Tools.mat2jfxImage(dePerspectived));
+			} else
+				System.out.println("Not enough lines : " + lines.size());
+
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
+
+	}, 30, 50, TimeUnit.MILLISECONDS);
 
 	}
 
@@ -184,7 +169,7 @@ public class LinesDetector10 extends AbstractApp {
 
 	private List<Circle> detectCircles(Mat frame, Mat diffFrame, int minRadius, int maxRadius) {
 		List<MatOfPoint> contours = new ArrayList<>();
-		Imgproc.findContours(diffFrame, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+		Imgproc.findContours(diffFrame, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
 		List<Circle> circles = new ArrayList<>();
 		for (int i = 0; i < contours.size(); i++) {
 			MatOfPoint contour = contours.get(i);
@@ -386,18 +371,16 @@ public class LinesDetector10 extends AbstractApp {
 				for (int j = 0; j < numVp2; ++j) {
 					// vp2
 					double lambda = j * stepVp2;
-
 					double k1 = vp1[0] * Math.sin(lambda) + vp1[1] * Math.cos(lambda);
 					double k2 = vp1[2];
 					double phi = Math.atan(-k2 / k1);
 
-					double Z = Math.cos(phi);
-					double X = Math.sin(phi) * Math.sin(lambda);
-					double Y = Math.sin(phi) * Math.cos(lambda);
+					vp2[0] = Math.sin(phi) * Math.sin(lambda);
+					vp2[1] = Math.sin(phi) * Math.cos(lambda);
+					vp2[2] = Math.cos(phi);
 
-					vp2[0] = X;
-					vp2[1] = Y;
-					vp2[2] = Z;
+					// System.out.println(vp1[0] * vp2[0] + vp1[1] * vp2[1] + vp1[2] * vp2[2]);
+
 					if (vp2[2] == 0.0)
 						vp2[2] = 0.0011;
 					double N = Math.sqrt(vp2[0] * vp2[0] + vp2[1] * vp2[1] + vp2[2] * vp2[2]);
@@ -460,7 +443,6 @@ public class LinesDetector10 extends AbstractApp {
 					LA = (int) (latitude / angelAccuracy);
 					if (LA >= gridLA)
 						LA = gridLA - 1;
-
 					LO = (int) (longitude / angelAccuracy);
 					if (LO >= gridLO)
 						LO = gridLO - 1;
@@ -488,7 +470,7 @@ public class LinesDetector10 extends AbstractApp {
 					sphereGridNew[i][j] = sphereGrid[i][j] + neighborTotal / neighNum;
 				}
 			}
-			// sphereGrid = sphereGridNew;
+			sphereGrid = sphereGridNew;
 			return sphereGrid;
 		}
 
@@ -598,31 +580,40 @@ public class LinesDetector10 extends AbstractApp {
 	}
 
 	public static Mat findHomography(Size size, double[][] vps, double[] pp, double f) {
+		double theta = Math.atan2(vps[0][1], vps[0][0]);
+		double phi = Math.acos(vps[0][2]);
+
+		// vps[1] = new AngleCalibrated(new double[] { Math.PI / 2, phi + Math.PI / 2 }).getCalibratexyz();
+
+		// System.out.println(vps[0][0] * vps[0][0] + vps[0][1] * vps[0][1] + vps[0][2] * vps[0][2]);
+		// System.out.println(vps[1][0] * vps[1][0] + vps[1][1] * vps[1][1] + vps[1][2] * vps[1][2]);
+		// System.out.println(vps[0][0] * vps[1][0] + vps[0][1] * vps[1][1] + vps[0][2] * vps[1][2]);
 
 		double[][] vps2D = getVp2DFromVps(vps, pp, f);
 		System.out.println("vps2D : " + Arrays.deepToString(vps2D));
+		System.out.println("vps : " + Arrays.deepToString(vps));
 
-		double phi = Math.atan2(vps[0][1], vps[0][0]);
-		double theta = Math.acos(vps[0][2]);
-		double phi2 = Math.atan2(vps[1][1], vps[1][0]);
-		double theta2 = Math.acos(vps[1][2]);
-		double phi3 = Math.atan2(vps[2][1], vps[2][0]);
-		double theta3 = Math.acos(vps[2][2]);
+		double theta2 = Math.atan2(vps[1][1], vps[1][0]);
+		double phi2 = Math.acos(vps[1][2]);
+
+		// double phi3 = Math.atan2(vps[2][1], vps[2][0]);
+		// double theta3 = Math.acos(vps[2][2]);
 
 		double x = size.width / 8;
 
 		double[] A = new double[] { size.width / 2, size.height / 2, 1 };
-		double[] B = new double[] { Math.cos(phi) < 0 ? size.width / 2 - x : size.width / 2 + x, size.height / 2 };
-		double[] D = new double[] { size.width / 2, Math.sin(phi2) < 0 ? size.height / 2 - x : size.height / 2 + x, 1 };
-		double[] C = new double[] { Math.cos(phi) < 0 ? size.width / 2 - x : size.width / 2 + x, Math.sin(phi2) < 0 ? size.height / 2 - x : size.height / 2 + x };
+		double[] B = new double[] { Math.cos(theta) < 0 ? size.width / 2 - x : size.width / 2 + x, size.height / 2 };
+		double[] D = new double[] { size.width / 2, Math.sin(theta2) < 0 ? size.height / 2 - x : size.height / 2 + x, 1 };
+		double[] C = new double[] { Math.cos(theta) < 0 ? size.width / 2 - x : size.width / 2 + x, Math.sin(theta2) < 0 ? size.height / 2 - x : size.height / 2 + x };
 
-		System.out.println("vp1 (" + phi * 180 / Math.PI + "°, " + theta * 180 / Math.PI + "°)");
-		System.out.println("vp2 (" + phi2 * 180 / Math.PI + "°, " + theta2 * 180 / Math.PI + "°)");
-		System.out.println("vp3 (" + phi3 * 180 / Math.PI + "°, " + theta3 * 180 / Math.PI + "°)");
+		System.out.println("vp1 (" + theta * 180 / Math.PI + "°, " + phi * 180 / Math.PI + "°)");
+		System.out.println("vp2 (" + theta2 * 180 / Math.PI + "°, " + phi2 * 180 / Math.PI + "°)");
+
+		// System.out.println("vp3 (" + phi3 * 180 / Math.PI + "°, " + theta3 * 180 / Math.PI + "°)");
 
 		double[] A_ = A;
-		double[] B_ = new double[] { size.width / 2 + x * Math.sin(theta) * Math.sin(theta) * Math.cos(phi), size.height / 2 + x * Math.sin(theta) * Math.sin(theta) * Math.sin(phi), 1 };
-		double[] D_ = new double[] { size.width / 2 + x * Math.sin(theta2) * Math.sin(theta2) * Math.cos(phi2), size.height / 2 + x * Math.sin(theta2) * Math.sin(theta2) * Math.sin(phi2), 1 };
+		double[] B_ = new double[] { size.width / 2 + x * Math.sin(phi) * Math.cos(theta), size.height / 2 + x * Math.sin(phi) * Math.sin(theta), 1 };
+		double[] D_ = new double[] { size.width / 2 + x * Math.sin(phi2) * Math.cos(theta2), size.height / 2 + x * Math.sin(phi2) * Math.sin(theta2), 1 };
 		double[] C_ = cross2D(cross(B_, vps2D[1]), cross(D_, vps2D[0]));
 
 		// double[] A_ = A;
@@ -642,10 +633,10 @@ public class LinesDetector10 extends AbstractApp {
 	}
 
 	static double[] cross2D(double[] a, double b[]) {
-		return uncalibrate(cross(a, b));
+		return on2D(cross(a, b));
 	}
 
-	static double[] uncalibrate(double[] a) {
+	static double[] on2D(double[] a) {
 		return new double[] { a[0] / a[2], a[1] / a[2], 1 };
 	}
 

@@ -9,11 +9,15 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
+
 import org.apache.commons.math3.linear.DecompositionSolver;
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.SingularValueDecomposition;
 import org.genericsystem.cv.LinesDetector8.Line;
 import org.genericsystem.cv.LinesDetector8.Lines;
+import org.genericsystem.cv.lm.LMHostImpl;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.genericsystem.cv.utils.Tools;
 import org.opencv.core.Core;
@@ -25,9 +29,6 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
 
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
-
 public class LinesDetector9 extends AbstractApp {
 
 	static final double f = 6.053 / 0.009;
@@ -35,6 +36,8 @@ public class LinesDetector9 extends AbstractApp {
 	private ScheduledExecutorService timer = Executors.newSingleThreadScheduledExecutor();
 	private boolean stabilize;
 	private Lines lines;
+	double[] vps0 = new double[] { 5000, 0, 1 };
+	// double[] vps1 = new double[] { 0, 0, 1 };
 	static {
 		NativeLibraryLoader.load();
 	}
@@ -83,56 +86,85 @@ public class LinesDetector9 extends AbstractApp {
 
 				if (lines.size() > 10) {
 					// lines = lines.reduce(30);
-					Mat colorFrame = frame.clone();
-					lines.draw(colorFrame, new Scalar(0, 0, 0));
+				Mat colorFrame = frame.clone();
+				lines.draw(colorFrame, new Scalar(0, 0, 0));
 
-					Img img = new Img(frame, false);
+				Img img = new Img(frame, false);
 
-					List<Edgelet> edgelets1 = computeEdgelets(img, 3);
+				List<Edgelet> edgelets1 = computeEdgelets(img);
 
-					double[] vp1 = ransacVanishingPoint(edgelets1, 300, 5);
-					System.out.println("vp1 : " + vp1[0] / vp1[2] + ", " + vp1[1] / vp1[2] + " ,1");
-					vp1 = reestimate_model(vp1, edgelets1, 5);
-					System.out.println("vp1 reestimation : " + Arrays.toString(vp1));
-					List<Edgelet> edgelets2 = removeInliers(vp1, edgelets1, 10);
+				// double[] vp1 = ransacVanishingPoint(edgelets1, 500, 5);
+				// System.out.println("vp1 : " + Arrays.toString(vp1));
+				// System.out.println("vp1 : " + vp1[0] / vp1[2] + ", " + vp1[1] / vp1[2] + " ,1");
+				// vp1 = reestimate_model(vp1, edgelets1, 5);
+				// System.out.println("vp1 reestimation : " + Arrays.toString(vp1));
+				// List<Edgelet> edgelets2 = removeInliers(vp1, edgelets1, 30);
 
-					double[] vp2 = ransacVanishingPoint(edgelets2, 300, 5);
-					System.out.println("vp2 : " + vp2[0] / vp2[2] + ", " + vp2[1] / vp2[2] + " ,1");
-					vp2 = reestimate_model(vp2, edgelets2, 5);
-					System.out.println("vp2 reestimation : " + Arrays.toString(vp2));
+				// double[] vp2 = ransacVanishingPoint(edgelets2, 500, 5);
+				// System.out.println("vp2 : " + Arrays.toString(vp2));
+				// System.out.println("vp2 : " + vp2[0] / vp2[2] + ", " + vp2[1] / vp2[2] + " ,1");
+				// vp2 = reestimate_model(vp2, edgelets2, 5);
+				// System.out.println("vp2 reestimation : " + Arrays.toString(vp2));
 
-					// double[][] vps = ransac_3_line(edgelets1, f, 300, 5);
-					// vp1 = vps[0];
-					// System.out.println("vp1 : " + vps[0][0] / vps[0][2] + ", " + vps[0][1] / vps[0][2] + ", 1");
-					// vp2 = vps[1];
-					// System.out.println("vp2 : " + vps[1][0] / vps[1][2] + ", " + vps[1][1] / vps[1][2] + ", 1");
+				double[] pp = new double[] { frame.width() / 2, frame.height() / 2 };
 
-					frameView.setImage(Tools.mat2jfxImage(colorFrame));
-					double[] pp = new double[] { frame.width() / 2, frame.height() / 2 };
-					Mat homographyMat = findHomography(frame.size(), new double[][] { getVpFromVp2D(vp1, pp, f), getVpFromVp2D(vp2, pp, f) }, new double[] { frame.width() / 2, frame.height() / 2 }, f);
-					Imgproc.warpPerspective(frame, dePerspectived, homographyMat, frame.size(), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(255));
-					deskiewedView.setImage(Tools.mat2jfxImage(dePerspectived));
-				} else
-					System.out.println("Not enough lines : " + lines.size());
+				vps0 = new LMHostImpl<>((edgelet, model) -> computeVote(edgelet, model, 5), edgelets1, vps0).getParams();
+				double[] calibratedVps0 = new Calibrated(vps0, pp, f).getCalibratexyz();
+				// double[] calibratedVps1 = getOrthoVpFromVp(calibratedVps0, 0);
+				double[] calibratedVps1 = new Calibrated(new double[] { 320, 240000, 1 }, pp, f).getCalibratexyz();// getOrthoVpFromVp(calibratedVps0, 0);
+				System.out.println("SCALAR :" + (calibratedVps0[0] * calibratedVps1[0] + calibratedVps0[1] * calibratedVps1[1] + calibratedVps0[2] * calibratedVps1[2]));
+				// vps1 = new LMHostImpl<>((edgelet, model) -> +computeVote(edgelet, new double[] { model[0], model[1], model[2] }, 5), removeInliers(vps0, edgelets1, 10), vps1).getParams();
 
-			} catch (Throwable e) {
-				e.printStackTrace();
-			}
+				// double[][] vps = ransac_3_line(edgelets1, f, pp, 4000, 5);
+				// double[][] vps = reorderXyz(new double[][] { calibratedVps0, calibratedVps1 });
+				// System.out.println("vp1 ransac normal : " + vp1[0] / vp1[2] + ", " + vp1[1] / vp1[2] + " ,1");
 
-		}, 30, 50, TimeUnit.MILLISECONDS);
+				frameView.setImage(Tools.mat2jfxImage(colorFrame));
+				Mat homographyMat = findHomography(frame.size(), reorderXyz(new double[][] { calibratedVps0, calibratedVps1 }), new double[] { frame.width() / 2, frame.height() / 2 }, f);
+				Imgproc.warpPerspective(frame, dePerspectived, homographyMat, frame.size(), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(255));
+				deskiewedView.setImage(Tools.mat2jfxImage(dePerspectived));
+			} else
+				System.out.println("Not enough lines : " + lines.size());
 
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
+
+	}, 30, 50, TimeUnit.MILLISECONDS);
+
+	}
+
+	public double[] getOrthoVpFromVp(double[] vp1, double lambda) {
+		double k1 = vp1[0] * Math.sin(lambda) + vp1[1] * Math.cos(lambda);
+		double k2 = vp1[2];
+		double phi = Math.atan(-k2 / k1);
+		double[] result = new double[] { Math.sin(phi) * Math.sin(lambda), Math.sin(phi) * Math.cos(lambda), Math.cos(phi) };
+
+		if (result[2] == 0.0)
+			result[2] = 0.0011;
+		double N = Math.sqrt(result[0] * result[0] + result[1] * result[1] + result[2] * result[2]);
+		result[0] *= 1.0 / N;
+		result[1] *= 1.0 / N;
+		result[2] *= 1.0 / N;
+		return result;
 	}
 
 	public static Mat findHomography(Size size, double[][] vps, double[] pp, double f) {
 
+		// System.out.println(vps[0][0] * vps[0][0] + vps[0][1] * vps[0][1] + vps[0][2] * vps[0][2]);
+		// System.out.println(vps[1][0] * vps[1][0] + vps[1][1] * vps[1][1] + vps[1][2] * vps[1][2]);
+		// System.out.println(vps[0][0] * vps[1][0] + vps[0][1] * vps[1][1] + vps[0][2] * vps[1][2]);
+
 		double[][] vps2D = getVp2DFromVps(vps, pp, f);
-		System.out.println("vps : " + Arrays.deepToString(vps));
+		// System.out.println("vps : " + Arrays.deepToString(vps));
 		System.out.println("vps2D : " + Arrays.deepToString(vps2D));
 
-		double phi = Math.atan2(vps[0][1], vps[0][0]);
 		double theta = Math.acos(vps[0][2]);
-		double phi2 = Math.atan2(vps[1][1], vps[1][0]);
+		double phi = Math.atan2(vps[0][1], vps[0][0]);
+
 		double theta2 = Math.acos(vps[1][2]);
+		double phi2 = Math.atan2(vps[1][1], vps[1][0]);
+
 		// double phi3 = Math.atan2(vps[2][1], vps[2][0]);
 		// double theta3 = Math.acos(vps[2][2]);
 
@@ -143,8 +175,8 @@ public class LinesDetector9 extends AbstractApp {
 		double[] D = new double[] { size.width / 2, Math.sin(phi2) < 0 ? size.height / 2 - x : size.height / 2 + x, 1 };
 		double[] C = new double[] { Math.cos(phi) < 0 ? size.width / 2 - x : size.width / 2 + x, Math.sin(phi2) < 0 ? size.height / 2 - x : size.height / 2 + x };
 
-		System.out.println("vp1 (" + phi * 180 / Math.PI + "°, " + theta * 180 / Math.PI + "°)");
-		System.out.println("vp2 (" + phi2 * 180 / Math.PI + "°, " + theta2 * 180 / Math.PI + "°)");
+		System.out.println("vp1 (" + theta * 180 / Math.PI + "°, " + phi * 180 / Math.PI + "°)");
+		System.out.println("vp2 (" + theta2 * 180 / Math.PI + "°, " + phi2 * 180 / Math.PI + "°)");
 		// System.out.println("vp3 (" + phi3 * 180 / Math.PI + "°, " + theta3 * 180 / Math.PI + "°)");
 
 		double[] A_ = A;
@@ -211,7 +243,7 @@ public class LinesDetector9 extends AbstractApp {
 		return new double[] { a[0] / a[2], a[1] / a[2], 1 };
 	}
 
-	public static List<Edgelet> computeEdgelets(Img image, int sigma/* 3 */) {
+	public static List<Edgelet> computeEdgelets(Img image) {
 		Img grad = image.morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(10, 10)).otsu();
 		Img closed = grad.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(10, 20)).morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(3, 3));
 		Lines lines = new Lines(closed.houghLinesP(1, Math.PI / 180, 10, 20, 5));
@@ -222,22 +254,24 @@ public class LinesDetector9 extends AbstractApp {
 		return edgelets.stream().map(edgelet -> new double[] { edgelet.direction[1], -edgelet.direction[0], edgelet.direction[0] * edgelet.location[1] - edgelet.direction[1] * edgelet.location[0] }).collect(Collectors.toList());
 	}
 
-	public static List<Double> compute_votes(List<Edgelet> edgelets, double[] model, double threshold_inlier) {
-
+	public static List<Double> computeVotes(List<Edgelet> edgelets, double[] model, double threshold_inlier) {
 		double[] vp = new double[] { model[0] / model[2], model[1] / model[2] };
 		List<Double> result = new ArrayList<>();
-		for (Edgelet edgelet : edgelets) {
-			double est_directions0 = edgelet.location[0] - vp[0];
-			double est_directions1 = edgelet.location[1] - vp[1];
-			double dotProd = est_directions0 * edgelet.direction[0] + est_directions1 * edgelet.direction[1];
-			double absProd = Math.sqrt(edgelet.direction[0] * edgelet.direction[0] + edgelet.direction[1] * edgelet.direction[1]) * Math.sqrt(est_directions0 * est_directions0 + est_directions1 * est_directions1);
-			if (absProd == 0)
-				absProd = 1e-5;
-			double theta = Math.acos(Math.abs(dotProd / absProd));
-			double theta_thresh = threshold_inlier * Math.PI / 180;
-			result.add(theta < theta_thresh ? edgelet.strength : 0);
-		}
+		for (Edgelet edgelet : edgelets)
+			result.add(computeVote(edgelet, vp, threshold_inlier));
 		return result;
+	}
+
+	public static Double computeVote(Edgelet edgelet, double[] vp, double threshold_inlier) {
+		double est_directions0 = edgelet.location[0] - vp[0];
+		double est_directions1 = edgelet.location[1] - vp[1];
+		double dotProd = est_directions0 * edgelet.direction[0] + est_directions1 * edgelet.direction[1];
+		double absProd = Math.sqrt(edgelet.direction[0] * edgelet.direction[0] + edgelet.direction[1] * edgelet.direction[1]) * Math.sqrt(est_directions0 * est_directions0 + est_directions1 * est_directions1);
+		if (absProd == 0)
+			absProd = 1e-5;
+		double theta = Math.acos(Math.abs(dotProd / absProd));
+		double theta_thresh = threshold_inlier * Math.PI / 180;
+		return theta < theta_thresh ? edgelet.strength * (Math.sin(2 * theta) + 0.2) : 0;
 	}
 
 	private static List<Integer> reverseArgSort(final List<Double> a) {
@@ -262,7 +296,7 @@ public class LinesDetector9 extends AbstractApp {
 			double[] current_model = cross(l1, l2);
 			if (current_model[0] * current_model[0] + current_model[1] * current_model[1] + current_model[2] * current_model[2] < 1 || current_model[2] == 0)
 				continue;
-			double current_votes = compute_votes(edgelets, current_model, thresholdInlier).stream().mapToDouble(d -> d).sum();
+			double current_votes = computeVotes(edgelets, current_model, thresholdInlier).stream().mapToDouble(d -> d).sum();
 			if (current_votes > best_votes) {
 				best_model = current_model;
 				best_votes = current_votes;
@@ -271,41 +305,48 @@ public class LinesDetector9 extends AbstractApp {
 		return best_model;
 	}
 
-	public static double[][] ransac_3_line(List<Edgelet> edgelets, double f, int num_ransac_iter/* 2000 */, int thresholdInlier/* =5 */) {
-		List<Double> strengths = edgelets.stream().map(edgelet -> edgelet.strength).collect(Collectors.toList());
-		List<double[]> lines = edgeletLines(edgelets);
-		List<Integer> sorted = reverseArgSort(strengths);
-		List<Integer> first_index_space = new ArrayList<>(sorted.subList(0, strengths.size() / 5));
-		List<Integer> second_index_space = new ArrayList<>(sorted.subList(0, strengths.size() / 5));
-		List<Integer> third_index_space = new ArrayList<>(sorted.subList(0, strengths.size() / 2));
+	// public static double[][] ransac_3_line(List<Edgelet> edgelets, double f, double[] pp, int num_ransac_iter/* 2000 */, int thresholdInlier/* =5 */) {
+	// List<Double> strengths = edgelets.stream().map(edgelet -> edgelet.strength).collect(Collectors.toList());
+	// List<double[]> lines = edgeletLines(edgelets);
+	// List<Integer> sorted = reverseArgSort(strengths);
+	// List<Integer> first_index_space = new ArrayList<>(sorted.subList(0, strengths.size() / 2));
+	// List<Integer> second_index_space = new ArrayList<>(sorted.subList(0, strengths.size() / 2));
+	// List<Integer> third_index_space = new ArrayList<>(sorted.subList(0, strengths.size()));
+	//
+	// double[][] best_model = null;
+	// double best_votes = 0;
+	//
+	// for (int ransacIter = 0; ransacIter < num_ransac_iter; ransacIter++) {
+	// double[] l1 = lines.get(first_index_space.get((int) (Math.random() * first_index_space.size())));
+	// double[] l2 = lines.get(second_index_space.get((int) (Math.random() * second_index_space.size())));
+	// double[] l3 = lines.get(third_index_space.get((int) (Math.random() * third_index_space.size())));
+	//
+	// double[] vp1 = cross(l1, l2);
+	// if ((vp1[0] * vp1[0] + vp1[1] * vp1[1] + vp1[2] * vp1[2] < 1) || vp1[2] == 0)
+	// continue;
+	// double[] h = new double[] { vp1[0] / f, vp1[1] / f, vp1[2] };
+	// double[] vp2 = cross(h, l3);
+	// if ((vp2[0] * vp2[0] + vp2[1] * vp2[1] + vp2[2] * vp2[2] < 1) || vp2[2] == 0)
+	// continue;
+	// double current_votes = computeVotes(edgelets, vp1, thresholdInlier).stream().filter(d -> d > 0).mapToDouble(d -> d).sum() + computeVotes(edgelets, vp2, thresholdInlier).stream().filter(d -> d > 0).mapToDouble(d -> d).sum();
+	// if (current_votes > best_votes) {
+	// best_model = new double[][] { vp1, vp2 };
+	// best_votes = current_votes;
+	// // System.out.println("Current best model has : " + current_votes + " votes at iteration : " + ransacIter);
+	// }
+	// }
+	// return reorderXyz(best_model, pp);
+	// }
 
-		double[][] best_model = null;
-		double best_votes = 0;
-
-		for (int ransacIter = 0; ransacIter < num_ransac_iter; ransacIter++) {
-			double[] l1 = lines.get(first_index_space.get((int) (Math.random() * first_index_space.size())));
-			double[] l2 = lines.get(second_index_space.get((int) (Math.random() * second_index_space.size())));
-			double[] l3 = lines.get(third_index_space.get((int) (Math.random() * third_index_space.size())));
-
-			double[] vp1 = cross(l1, l2);
-			double[] h = new double[] { vp1[0] / f, vp1[1] / f, vp1[2] };
-			double[] vp2 = cross(h, l3);
-			if ((vp1[0] * vp1[0] + vp1[1] * vp1[1] + vp1[2] * vp1[2] < 1) || vp1[2] == 0)
-				continue;
-			if ((vp2[0] * vp2[0] + vp2[1] * vp2[1] + vp2[2] * vp2[2] < 1) || vp2[2] == 0)
-				continue;
-			double current_votes = compute_votes(edgelets, vp1, thresholdInlier).stream().filter(d -> d > 0).mapToDouble(d -> d).sum() + compute_votes(edgelets, vp2, thresholdInlier).stream().filter(d -> d > 0).mapToDouble(d -> d).sum();
-			if (current_votes > best_votes) {
-				best_model = new double[][] { vp1, vp2 };
-				best_votes = current_votes;
-				// System.out.println("Current best model has : " + current_votes + " votes at iteration : " + ransacIter);
-			}
-		}
-		return best_model;
+	private static double[][] reorderXyz(double[][] calibrateds) {
+		if (calibrateds[0][1] * calibrateds[0][1] < calibrateds[1][1] * calibrateds[1][1])
+			return new double[][] { calibrateds[0], calibrateds[1] };
+		else
+			return new double[][] { calibrateds[1], calibrateds[0] };
 	}
 
 	public static double[] reestimate_model(double[] model, List<Edgelet> edgelets, int threshold_reestimate/* =5 */) {
-		List<Double> votes = compute_votes(edgelets, model, threshold_reestimate);
+		List<Double> votes = computeVotes(edgelets, model, threshold_reestimate);
 		List<Edgelet> inliersEdgelets = new ArrayList<>();
 		for (int i = 0; i < edgelets.size(); i++)
 			if (votes.get(i) > 0)
@@ -319,7 +360,7 @@ public class LinesDetector9 extends AbstractApp {
 	}
 
 	public static List<Edgelet> removeInliers(double[] model, List<Edgelet> edgelets, int threshold_inlier/* 10 */) {
-		List<Double> votes = compute_votes(edgelets, model, threshold_inlier);
+		List<Double> votes = computeVotes(edgelets, model, threshold_inlier);
 		List<Edgelet> ouliers = new ArrayList<>();
 		for (int i = 0; i < edgelets.size(); i++)
 			if (votes.get(i) <= 0)
