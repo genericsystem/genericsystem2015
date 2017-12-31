@@ -83,6 +83,7 @@ public class LinesDetector7 extends AbstractApp {
 	
 					AngleCalibrated[] result = findOtherVps(calibrated0, lines, pp, f);
 					
+					
 					double[] uncalibrate0 = result[0].uncalibrate(pp, f);
 					Lines horizontals = lines.filter(line -> distance(uncalibrate0, line) < 0.5);
 					horizontals.draw(display.getSrc(), new Scalar(0, 255, 0));
