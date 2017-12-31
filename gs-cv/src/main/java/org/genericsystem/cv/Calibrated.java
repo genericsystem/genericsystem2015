@@ -63,34 +63,46 @@ public class Calibrated {
 
 	public static class AngleCalibrated extends Calibrated {
 
-		final double tetha;
+		final double theta;
 		final double phi;
 
 		public AngleCalibrated(double[] vp, double[] pp, double f) {
 			super(vp, pp, f);
-			tetha = Math.atan2(this.y, this.x);
+			theta = Math.atan2(this.y, this.x);
 			phi = Math.acos(this.z);
 		}
 
 		public AngleCalibrated(double[] calibratedxyz, Object nullObject) {
 			super(calibratedxyz);
-			this.tetha = Math.atan2(this.y, this.x);
+			this.theta = Math.atan2(this.y, this.x);
 			this.phi = Math.acos(this.z);
+		}
+		
+		public AngleCalibrated(double theta,double phi) {
+			this(new double[] {theta,phi});
 		}
 
 		public AngleCalibrated(double[] tethaPhi) {
 			super(new double[] { Math.sin(tethaPhi[1]) * Math.cos(tethaPhi[0]), Math.sin(tethaPhi[1]) * Math.sin(tethaPhi[0]), Math.cos(tethaPhi[1]) });
-			this.tetha = Math.atan2(this.y, this.x);
+			this.theta = Math.atan2(this.y, this.x);
 			this.phi = Math.acos(this.z);
 		}
 
-		public double[] getTethaPhi() {
-			return new double[] { tetha, phi };
+		public double getTheta(){
+			return theta;
+		}
+		
+		public double getPhi(){
+			return phi;
+		}
+		
+		public double[] getThetaPhi() {
+			return new double[] { theta, phi };
 		}
 
 		@Override
 		public AngleCalibrated dump(double[] tethaPhi, int dumpSize) {
-			return new AngleCalibrated(new double[] { ((dumpSize - 1) * tetha + tethaPhi[0]) / dumpSize, ((dumpSize - 1) * phi + tethaPhi[1]) / dumpSize });
+			return new AngleCalibrated(new double[] { ((dumpSize - 1) * theta + tethaPhi[0]) / dumpSize, ((dumpSize - 1) * phi + tethaPhi[1]) / dumpSize });
 		}
 
 		public double[] getUncalibrated(double[] pp, double f) {
@@ -145,7 +157,7 @@ public class Calibrated {
 
 		@Override
 		public String toString() {
-			return "(" + tetha * 180 / Math.PI + "°, " + phi * 180 / Math.PI + "°)";
+			return "(" + theta * 180 / Math.PI + "°, " + phi * 180 / Math.PI + "°)";
 		}
 	}
 }

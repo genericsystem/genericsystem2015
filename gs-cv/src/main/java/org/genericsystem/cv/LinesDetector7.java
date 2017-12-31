@@ -12,9 +12,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
-
 import org.genericsystem.cv.Calibrated.AngleCalibrated;
 import org.genericsystem.cv.lm.LMHostImpl;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
@@ -29,6 +26,9 @@ import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
 import org.opencv.videoio.VideoCapture;
 
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
+
 public class LinesDetector7 extends AbstractApp {
 
 	static {
@@ -38,13 +38,11 @@ public class LinesDetector7 extends AbstractApp {
 	public static void main(String[] args) {
 		launch(args);
 	}
-
+	
 	private final VideoCapture capture = new VideoCapture(0);
 	private ScheduledExecutorService timer = Executors.newSingleThreadScheduledExecutor();;
 
 	private AngleCalibrated calibrated0;
-	private AngleCalibrated calibrated1;
-	private AngleCalibrated calibrated2;
 
 	private final double f = 6.053 / 0.009;
 	private boolean stabilize = false;
@@ -63,9 +61,7 @@ public class LinesDetector7 extends AbstractApp {
 		Mat dePerspectived = frame.clone();
 
 		double[] pp = new double[] { frame.width() / 2, frame.height() / 2 };
-		calibrated0 = new AngleCalibrated(new double[] { 0, Math.PI / 2 });
-		calibrated1 = new AngleCalibrated(new double[] { -Math.PI / 2, Math.PI / 2 });
-		calibrated2 = new AngleCalibrated(new double[] { 0, 0 });
+		calibrated0 = new AngleCalibrated( 0, Math.PI / 2 );
 		timer.scheduleAtFixedRate(() -> {
 			try {
 
@@ -77,38 +73,25 @@ public class LinesDetector7 extends AbstractApp {
 				// if (!stabilize) {
 				lines = new Lines(grad.houghLinesP(1, Math.PI / 180, 10, 50, 3));
 				// }
-				if (lines.size() > 10) {
+				if (lines.size() > 4) {
 					lines.draw(display.getSrc(), new Scalar(0, 0, 255));
-					Lines horizontals = lines.filter(line -> distance(calibrated0.uncalibrate(pp, f), line) < 0.5);
-					horizontals.draw(display.getSrc(), new Scalar(0, 255, 0));
 					lines = lines.reduce(100);
 
-					double[] newThetaPhi = new LMHostImpl<>((line, params) -> distance(new AngleCalibrated(new double[] { params[0], params[1] }).uncalibrate(pp, f), line), lines.lines, calibrated0.getTethaPhi()).getParams();
+					double[] newThetaPhi = new LMHostImpl<>((line, params) -> distance(new AngleCalibrated(params).uncalibrate(pp, f), line), lines.lines, calibrated0.getThetaPhi()).getParams();
 					calibrated0 = calibrated0.dump(newThetaPhi, 1);
-
-					double bestError = Double.MAX_VALUE;
-					double bestAngle = 0;
-					double angleMax = 360;
-					for (double angle = 0; angle < angleMax / 180 * Math.PI - 0.00001; angle += 1 * Math.PI / 180) {
-						double error = 0;
-						AngleCalibrated model = calibrated0.getOrthoFromAngle(angle);
-						AngleCalibrated model2 = calibrated0.getOrthoFromVps(model);
-						model = (model.getTethaPhi()[1] > model2.getTethaPhi()[1] ? model : model2);
-						double[] uncalibrate = model.uncalibrate(pp, f);
-						for (Line line : lines.lines)
-							error += distance(uncalibrate, line);
-						if (error < bestError) {
-							bestError = error;
-							calibrated1 = model;
-							bestAngle = angle;
-						}
-					}
-					System.out.println("Best angle = " + bestAngle * 180 / Math.PI);
-					double[] uncalibrate1 = calibrated1.uncalibrate(pp, f);
-					Lines verticals = lines.filter(line -> distance(uncalibrate1, line) < 0.50);
+	
+					AngleCalibrated[] result = findOtherVps(calibrated0, lines, pp, f);
+					
+					double[] uncalibrate0 = result[0].uncalibrate(pp, f);
+					Lines horizontals = lines.filter(line -> distance(uncalibrate0, line) < 0.5);
+					horizontals.draw(display.getSrc(), new Scalar(0, 255, 0));
+					
+					double[] uncalibrate1 = result[1].uncalibrate(pp, f);
+					Lines verticals = lines.filter(line -> distance(uncalibrate1, line) < 0.5);
 					verticals.draw(display.getSrc(), new Scalar(255, 0, 0));
+					
 					frameView.setImage(Tools.mat2jfxImage(display.getSrc()));
-					Mat homography = findHomography(frame.size(), new AngleCalibrated[] { calibrated0, calibrated1 }, pp, f);
+					Mat homography = findHomography(frame.size(), result, pp, f);
 					Imgproc.warpPerspective(frame, dePerspectived, homography, frame.size(), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(0));
 					deskiewedView.setImage(Tools.mat2jfxImage(dePerspectived));
 				} else
@@ -121,8 +104,77 @@ public class LinesDetector7 extends AbstractApp {
 		}, 30, 30, TimeUnit.MILLISECONDS);
 
 	}
+	
+	public static AngleCalibrated[] findOtherVps(AngleCalibrated calibrated0,Lines lines,double[] pp, double f){
+		AngleCalibrated[] result = new AngleCalibrated[] {null,null,null};
+		double bestError = Double.MAX_VALUE;
+		//double bestAngle = 0;
+		for (double angle = 0; angle < 360 / 180 * Math.PI; angle += 1 * Math.PI / 180) {
+			double error = 0;
+			AngleCalibrated calibratexy = calibrated0.getOrthoFromAngle(angle);
+			AngleCalibrated calibratez = calibrated0.getOrthoFromVps(calibratexy);
+			if(calibratexy.getPhi() < calibratez.getPhi()) {
+				AngleCalibrated tmp = calibratexy;
+				calibratexy = calibratez;
+				calibratez = tmp;
+			}
+			double[] uncalibrate = calibratexy.uncalibrate(pp, f);
+			for (Line line : lines.lines)
+				error += distance(uncalibrate, line);
+			if (error < bestError) {
+				bestError = error;
+				result[0] = calibrated0;
+				result[1] = calibratexy;
+				result[2] = calibratez;
+				//bestAngle = angle;
+			}
+		}
+		//System.out.println("Best angle = " + bestAngle * 180 / Math.PI);
+		
+		double theta0 = Math.abs(result[0].getTheta())%Math.PI;
+		theta0=Math.min(Math.PI - theta0,theta0);
+		
+		double theta1 = Math.abs(result[1].getTheta())%Math.PI;
+		theta1=Math.min(Math.PI - theta1,theta1);
+		
+		if(theta0>theta1) {
+			AngleCalibrated tmp = result[0];
+			result[0] = result[1];
+			result[1] = tmp;
+		}	
+		return result;
+	}
 
-	private double distance(double[] vp, Line line) {
+	public static Mat findHomography(Size size, AngleCalibrated[] calibrateds, double[] pp, double f) {
+
+		double[][] vps = new double[][] { calibrateds[0].getCalibratexyz(), calibrateds[1].getCalibratexyz(), calibrateds[2].getCalibratexyz()};
+		// System.out.println("vps : " + Arrays.deepToString(vps));
+
+		double[][] vps2D = getVp2DFromVps(vps, pp, f);
+		System.out.println("vps2D : " + Arrays.deepToString(vps2D));
+
+		System.out.println("vp1 " + calibrateds[0]);
+		System.out.println("vp2 " + calibrateds[1]);
+		System.out.println("vp3 " + calibrateds[2]);
+
+		double theta = calibrateds[0].getTheta();
+		double theta2 = calibrateds[1].getTheta();
+		double x = size.width / 6;
+
+		double[] A = new double[] { size.width / 2, size.height / 2, 1 };
+		double[] B = new double[] { size.width / 2 + (Math.cos(theta) < 0 ? -x : x), size.height / 2 };
+		double[] D = new double[] { size.width / 2, size.height / 2 + (Math.sin(theta2) < 0 ? -x : +x), 1 };
+		double[] C = new double[] { size.width / 2 + (Math.cos(theta) < 0 ? -x : +x), size.height / 2 + (Math.sin(theta2) < 0 ? -x : +x) };
+
+		double[] A_ = A;
+		double[] B_ = new double[] { size.width / 2 + x * vps[0][0], size.height / 2 + x * vps[0][1], 1 };
+		double[] D_ = new double[] { size.width / 2 + x * vps[1][0], size.height / 2 + x * vps[1][1], 1 };
+		double[] C_ = cross2D(cross(B_, vps2D[1]), cross(D_, vps2D[0]));
+
+		return Imgproc.getPerspectiveTransform(new MatOfPoint2f(new Point(A_), new Point(B_), new Point(C_), new Point(D_)), new MatOfPoint2f(new Point(A), new Point(B), new Point(C), new Point(D)));
+	}
+	
+	private static double distance(double[] vp, Line line) {
 		double dy = line.y1 - line.y2;
 		double dx = line.x2 - line.x1;
 		double dz = line.y1 * line.x2 - line.x1 * line.y2;
@@ -143,35 +195,6 @@ public class LinesDetector7 extends AbstractApp {
 		return d < 0.5 ? d : 0.5;
 	}
 
-	public static Mat findHomography(Size size, AngleCalibrated[] calibrateds, double[] pp, double f) {
-
-		double[][] vps = new double[][] { calibrateds[0].getCalibratexyz(), calibrateds[1].getCalibratexyz(), calibrateds[0].getOrthoFromVps(calibrateds[1]).getCalibratexyz() };
-		// System.out.println("vps : " + Arrays.deepToString(vps));
-
-		double[][] vps2D = getVp2DFromVps(vps, pp, f);
-		System.out.println("vps2D : " + Arrays.deepToString(vps2D));
-
-		AngleCalibrated calibrated3 = calibrateds[0].getOrthoFromVps(calibrateds[1]);
-		System.out.println("vp1 " + calibrateds[0]);
-		System.out.println("vp2 " + calibrateds[1]);
-		System.out.println("vp3 " + calibrated3);
-
-		double theta = calibrateds[0].getTethaPhi()[0];
-		double theta2 = calibrateds[1].getTethaPhi()[0];
-		double x = size.width / 6;
-
-		double[] A = new double[] { size.width / 2, size.height / 2, 1 };
-		double[] B = new double[] { size.width / 2 + (Math.cos(theta) < 0 ? -x : x), size.height / 2 };
-		double[] D = new double[] { size.width / 2, size.height / 2 + (Math.sin(theta2) < 0 ? -x : +x), 1 };
-		double[] C = new double[] { size.width / 2 + (Math.cos(theta) < 0 ? -x : +x), size.height / 2 + (Math.sin(theta2) < 0 ? -x : +x) };
-
-		double[] A_ = A;
-		double[] B_ = new double[] { size.width / 2 + x * vps[0][0], size.height / 2 + x * vps[0][1], 1 };
-		double[] D_ = new double[] { size.width / 2 + x * vps[1][0], size.height / 2 + x * vps[1][1], 1 };
-		double[] C_ = cross2D(cross(B_, vps2D[1]), cross(D_, vps2D[0]));
-
-		return Imgproc.getPerspectiveTransform(new MatOfPoint2f(new Point(A_), new Point(B_), new Point(C_), new Point(D_)), new MatOfPoint2f(new Point(A), new Point(B), new Point(C), new Point(D)));
-	}
 
 	public static double[][] getVp2DFromVps(double vps[][], double[] pp, double f) {
 		double[][] result = new double[2][3];
@@ -286,35 +309,6 @@ public class LinesDetector7 extends AbstractApp {
 			Imgproc.line(frame, new Point(x1, y1), new Point(x2, y2), color, 1);
 		}
 
-		public double geta() {
-			return (y2 - y1) / (x2 - x1);
-		}
-
-		public double getb() {
-			return y1 - geta() * x1;
-		}
-
-		public double distance(Point p) {
-			return Math.abs(geta() * p.x - p.y + getb()) / Math.sqrt(1 + Math.pow(geta(), 2));
-		}
-
-		public Point intersection(double a, double b) {
-			double x = (b - getb()) / (geta() - a);
-			double y = a * x + b;
-			return new Point(x, y);
-		}
-
-		public Point intersection(Line line) {
-			double x = (line.getb() - getb()) / (geta() - line.geta());
-			double y = geta() * x + getb();
-			return new Point(x, y);
-		}
-
-		public Point intersection(double verticalLinex) {
-			double x = verticalLinex;
-			double y = geta() * x + getb();
-			return new Point(x, y);
-		}
 	}
 
 	@Override
