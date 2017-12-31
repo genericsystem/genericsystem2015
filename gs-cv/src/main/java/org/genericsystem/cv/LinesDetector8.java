@@ -72,7 +72,7 @@ public class LinesDetector8 extends AbstractApp {
 					frameView.setImage(Tools.mat2jfxImage(frame));
 					lines = lines.reduce(10);
 
-					double[] newThetaPhi = new LMHostImpl<>((line, params) -> distance(new AngleCalibrated(params).getCalibratexyz(), line), lines.lines, calibrated.getTethaPhi()).getParams();
+					double[] newThetaPhi = new LMHostImpl<>((line, params) -> distance(new AngleCalibrated(params).getCalibratexyz(), line), lines.lines, calibrated.getThetaPhi()).getParams();
 					calibrated = calibrated.dump(newThetaPhi, 1);
 
 					vp = calibrated.uncalibrate(pp, f);

@@ -9,9 +9,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
-
 import org.apache.commons.math3.linear.DecompositionSolver;
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.SingularValueDecomposition;
@@ -28,6 +25,9 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
+
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
 
 public class LinesDetector9 extends AbstractApp {
 
