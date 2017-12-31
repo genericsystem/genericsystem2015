@@ -49,6 +49,7 @@ public class LinesDetector7 extends AbstractApp {
 	private Lines lines;
 	private Img display;
 
+	
 	@Override
 	protected void fillGrid(GridPane mainGrid) {
 		Mat frame = new Mat();
