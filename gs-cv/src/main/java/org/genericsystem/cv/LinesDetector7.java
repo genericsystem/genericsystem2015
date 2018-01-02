@@ -80,17 +80,16 @@ public class LinesDetector7 extends AbstractApp {
 					lines = lines.reduce(100);
 
 					double[] newThetaPhi = new LMHostImpl<>((line, params) -> distance(new AngleCalibrated(params).uncalibrate(pp, f), line), lines.lines, calibrated0.getThetaPhi()).getParams();
-					calibrated0 = calibrated0.dump(newThetaPhi, 1);
+					calibrated0 = calibrated0.dump(newThetaPhi, 3);
 	
 					AngleCalibrated[] result = findOtherVps(calibrated0, lines, pp, f);
-					
-					
+								
 					double[] uncalibrate0 = result[0].uncalibrate(pp, f);
-					Lines horizontals = lines.filter(line -> distance(uncalibrate0, line) < 0.5);
+					Lines horizontals = lines.filter(line -> distance(uncalibrate0, line) < 0.3);
 					horizontals.draw(display.getSrc(), new Scalar(0, 255, 0));
 					
 					double[] uncalibrate1 = result[1].uncalibrate(pp, f);
-					Lines verticals = lines.filter(line -> distance(uncalibrate1, line) < 0.5);
+					Lines verticals = lines.filter(line -> distance(uncalibrate1, line) < 0.3);
 					verticals.draw(display.getSrc(), new Scalar(255, 0, 0));
 					
 					frameView.setImage(Tools.mat2jfxImage(display.getSrc()));
@@ -195,7 +194,7 @@ public class LinesDetector7 extends AbstractApp {
 		double d = 0;
 		if (nNorm != 0 && rNorm != 0)
 			d = num / (nNorm * rNorm);
-		return d < 0.5 ? d : 0.5;
+		return d < 0.3 ? d : 0.3;
 	}
 
 
