@@ -242,7 +242,7 @@ public class CamLiveRetriever extends AbstractApp {
 		Stats.beginTask("levenberg");
 		double[] newThetaPhi = new LMHostImpl<>((line, params) -> distance(new AngleCalibrated(params).uncalibrate(pp ,f), line), lines.lines, calibrated.getThetaPhi()).getParams();
 		Stats.endTask("levenberg");
-		calibrated = calibrated.dump(newThetaPhi, 3);
+		calibrated = calibrated.dumpThetaPhi(newThetaPhi, 3);
 
 		double[] vp_1 = calibrated.getCalibratexyz();
 		double[] vp_2 = new AngleCalibrated(new double[]{0, 5000, 1}, pp, f).getCalibratexyz();

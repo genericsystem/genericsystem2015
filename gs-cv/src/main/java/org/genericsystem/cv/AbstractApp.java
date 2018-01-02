@@ -56,6 +56,8 @@ public abstract class AbstractApp extends Application {
 				onSpace();
 			if (event.getCode() == KeyCode.R)
 				onR();
+			if (event.getCode() == KeyCode.T)
+				onT();
 		});
 		stage.setScene(scene);
 		stage.show();
@@ -68,6 +70,10 @@ public abstract class AbstractApp extends Application {
 
 	protected void onR() {
 		System.out.println("r pressed");
+	}
+	
+	protected void onT() {
+		System.out.println("t pressed");
 	}
 
 	protected abstract void fillGrid(GridPane mainGrid);

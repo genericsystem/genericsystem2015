@@ -32,7 +32,7 @@ public class Calibrated {
 		return new double[] { x, y, z };
 	}
 
-	Calibrated dump(double[] xyz, int dumpSize) {
+	Calibrated dumpXyz(double[] xyz, int dumpSize) {
 		return new Calibrated(new double[] { ((dumpSize - 1) * x + xyz[0]) / dumpSize, ((dumpSize - 1) * y + xyz[1]) / dumpSize, ((dumpSize - 1) * z + xyz[2]) / dumpSize });
 	}
 
@@ -100,9 +100,12 @@ public class Calibrated {
 			return new double[] { theta, phi };
 		}
 
-		@Override
-		public AngleCalibrated dump(double[] tethaPhi, int dumpSize) {
+		public AngleCalibrated dumpThetaPhi(double[] tethaPhi, int dumpSize) {
 			return new AngleCalibrated(new double[] { ((dumpSize - 1) * theta + tethaPhi[0]) / dumpSize, ((dumpSize - 1) * phi + tethaPhi[1]) / dumpSize });
+		}
+		
+		AngleCalibrated dumpXyz(double[] xyz, int dumpSize) {
+			return new AngleCalibrated(new double[] { ((dumpSize - 1) * x + xyz[0]) / dumpSize, ((dumpSize - 1) * y + xyz[1]) / dumpSize, ((dumpSize - 1) * z + xyz[2]) / dumpSize },null);
 		}
 
 		public double[] getUncalibrated(double[] pp, double f) {
@@ -130,7 +133,7 @@ public class Calibrated {
 			// result[1] *= -1.0;
 			// result[2] *= -1.0;
 			// }
-			return new AngleCalibrated(result, null);
+			return new AngleCalibrated(result,null);
 		}
 
 		public AngleCalibrated getOrthoFromVps(Calibrated calibrated2) {
@@ -148,7 +151,7 @@ public class Calibrated {
 			// vp3[1] *= -1.0;
 			// vp3[2] *= -1.0;
 			// }
-			return new AngleCalibrated(vp3, null);
+			return new AngleCalibrated(vp3,null);
 		}
 
 		static double[] cross(double[] a, double b[]) {

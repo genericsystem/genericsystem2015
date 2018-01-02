@@ -96,55 +96,55 @@ public class LinesDetector10 extends AbstractApp {
 				if (!stabilize)
 					capture.read(frame);
 
-				Mat diffFrame = getDiffFrame(frame);
-				List<Circle> circles = detectCircles(frame, diffFrame, 30, 100);
-				Collection<Circle> selectedCircles = selectRandomCirles(circles, 20);
+//				Mat diffFrame = getDiffFrame(frame);
+//				List<Circle> circles = detectCircles(frame, diffFrame, 30, 100);
+//				Collection<Circle> selectedCircles = selectRandomCirles(circles, 20);
 				List<Line> addedLines = new ArrayList<>();
-				for (Circle circle : selectedCircles) {
-					Img circledImg = getCircledImg(frame, (int) circle.radius, circle.center);
-					double angle = getBestAngle(circledImg, 30, 12, 6, 192, null) / 180 * Math.PI;
-					addedLines.add(buildLine(frame, circle.center, angle, circle.radius));
-					// Imgproc.circle(frame, circle.center, (int) circle.radius, new Scalar(0, 255, 0), 1);
+//				for (Circle circle : selectedCircles) {
+//					Img circledImg = getCircledImg(frame, (int) circle.radius, circle.center);
+//					double angle = getBestAngle(circledImg, 30, 12, 6, 192, null) / 180 * Math.PI;
+//					addedLines.add(buildLine(frame, circle.center, angle, circle.radius));
+//					// Imgproc.circle(frame, circle.center, (int) circle.radius, new Scalar(0, 255, 0), 1);
+//				}
+
+				Img grad = new Img(frame, false).morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(3, 3)).otsu();
+				Img closed = grad.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(10, 10)).morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(3, 3));
+				Img closed2 = grad.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(30, 30)).morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(3, 3));
+				gradView.setImage(closed.toJfxImage());
+				gradView2.setImage(closed2.toJfxImage());
+
+				if (!stabilize) {
+					lines = new Lines(closed.houghLinesP(1, Math.PI / 180, 10, 10, 5));
+					lines.lines.addAll(new Lines(closed2.houghLinesP(1, Math.PI / 180, 10, 30, 10)).lines);
+					lines.lines.addAll(addedLines);
+				}
+
+				if (lines.size() > 10) {
+					// lines = lines.reduce(30);
+					Mat colorFrame = frame.clone();
+					lines.draw(colorFrame, new Scalar(0, 0, 0));
+					LinesDetector linesDetector = new LinesDetector(new Img(frame, false), lines.lines, vps);
+					// if (!stabilize)
+					vps = linesDetector.getVps();
+
+					Map<Integer, List<Integer>> clusters = linesDetector.lines2Vps(5.0 / 180.0 * Math.PI);
+					for (int cluster : clusters.keySet())
+						for (int lineId : clusters.get(cluster))
+							lines.lines.get(lineId).draw(colorFrame, new Scalar(cluster == 0 ? 255 : 0, cluster == 1 ? 255 : 0, cluster == 2 ? 255 : 0));
+
+					frameView.setImage(Tools.mat2jfxImage(colorFrame));
+					Mat homographyMat = findHomography(frame.size(), vps, new double[] { frame.width() / 2, frame.height() / 2, 1.0 }, f);
+					Mat dumpedHomographyMat = dumpTrapezePointsHomography(homographyMat, 1, frame.size());
+					Imgproc.warpPerspective(frame, dePerspectived, dumpedHomographyMat, frame.size(), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(255));
+					deskiewedView.setImage(Tools.mat2jfxImage(dePerspectived));
+				} else
+					System.out.println("Not enough lines : " + lines.size());
+
+			} catch (Throwable e) {
+				e.printStackTrace();
 			}
 
-			Img grad = new Img(frame, false).morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(3, 3)).otsu();
-			Img closed = grad.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(10, 10)).morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(3, 3));
-			Img closed2 = grad.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(30, 30)).morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(3, 3));
-			gradView.setImage(closed.toJfxImage());
-			gradView2.setImage(closed2.toJfxImage());
-
-			if (!stabilize) {
-				lines = new Lines(closed.houghLinesP(1, Math.PI / 180, 10, 10, 5));
-				lines.lines.addAll(new Lines(closed2.houghLinesP(1, Math.PI / 180, 10, 30, 10)).lines);
-				lines.lines.addAll(addedLines);
-			}
-
-			if (lines.size() > 10) {
-				// lines = lines.reduce(30);
-				Mat colorFrame = frame.clone();
-				lines.draw(colorFrame, new Scalar(0, 0, 0));
-				LinesDetector linesDetector = new LinesDetector(new Img(frame, false), lines.lines, vps);
-				// if (!stabilize)
-				vps = linesDetector.getVps();
-
-				Map<Integer, List<Integer>> clusters = linesDetector.lines2Vps(5.0 / 180.0 * Math.PI);
-				for (int cluster : clusters.keySet())
-					for (int lineId : clusters.get(cluster))
-						lines.lines.get(lineId).draw(colorFrame, new Scalar(cluster == 0 ? 255 : 0, cluster == 1 ? 255 : 0, cluster == 2 ? 255 : 0));
-
-				frameView.setImage(Tools.mat2jfxImage(colorFrame));
-				Mat homographyMat = findHomography(frame.size(), vps, new double[] { frame.width() / 2, frame.height() / 2, 1.0 }, f);
-				Mat dumpedHomographyMat = dumpTrapezePointsHomography(homographyMat, 1, frame.size());
-				Imgproc.warpPerspective(frame, dePerspectived, dumpedHomographyMat, frame.size(), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(255));
-				deskiewedView.setImage(Tools.mat2jfxImage(dePerspectived));
-			} else
-				System.out.println("Not enough lines : " + lines.size());
-
-		} catch (Throwable e) {
-			e.printStackTrace();
-		}
-
-	}, 30, 50, TimeUnit.MILLISECONDS);
+		}, 30, 50, TimeUnit.MILLISECONDS);
 
 	}
 
