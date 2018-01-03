@@ -248,6 +248,10 @@ public class Field extends AbstractField {
 		//increasing confidence by 10% of difference to 1. Arbitrary choice
 	}
 
+	public boolean isInFrame(Img img) {		
+		return (rect.tl().getX()>0 && rect.br().getX() < img.width()) && (rect.tl().getY() > 0 && rect.br().getY() < img.height());
+	}
+
 	//	public void consolidateLabelWithChildren() {
 	//		if(children.isEmpty())
 	//			return;

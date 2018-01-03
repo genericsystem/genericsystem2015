@@ -83,8 +83,10 @@ public class Fields extends AbstractFields<Field> {
 
 	public void consolidate(Img img) {
 		fields.forEach(f -> {
-			f.incrementDeadCounter();
-			f.adjustLockLevel(-0.5);
+			if(f.isInFrame(img)){
+				f.incrementDeadCounter();
+				f.adjustLockLevel(-0.5);
+			}
 		});
 		mergeRects(img, 0.70);
 		removeDeadTrees();
