@@ -18,7 +18,6 @@ import org.opencv.core.Size;
 import org.opencv.features2d.DescriptorExtractor;
 import org.opencv.features2d.DescriptorMatcher;
 import org.opencv.imgproc.Imgproc;
-import org.opencv.utils.Converters;
 
 public class ImgDescriptor {
 	private static final DescriptorExtractor EXTRACTOR = DescriptorExtractor.create(DescriptorExtractor.ORB);
@@ -71,7 +70,7 @@ public class ImgDescriptor {
 
 	public Mat computeStabilizationGraphy(ImgDescriptor frameDescriptor) {
 		MatOfDMatch matches = new MatOfDMatch();
-
+		System.out.println(frameDescriptor.getDescriptors());
 		MATCHER.match(getDescriptors(), frameDescriptor.getDescriptors(), matches);
 		List<DMatch> goodMatches = new ArrayList<>();
 		for (DMatch dMatch : matches.toArray()) {
@@ -90,10 +89,10 @@ public class ImgDescriptor {
 		}
 
 		if (goodMatches.size() > 30) {
-			Mat goodNewPoints = Converters.vector_Point2f_to_Mat(goodNewKeypoints);
-			MatOfPoint2f originalNewPoints = new MatOfPoint2f();
-			Core.perspectiveTransform(goodNewPoints, originalNewPoints, frameDescriptor.getHomography().inv());
-			Mat result = Calib3d.findHomography(originalNewPoints, new MatOfPoint2f(goodOldKeypoints.stream().toArray(Point[]::new)), Calib3d.RANSAC, 1);
+			// Mat goodNewPoints = Converters.vector_Point2f_to_Mat(goodNewKeypoints);
+			// MatOfPoint2f originalNewPoints = new MatOfPoint2f();
+			// Core.perspectiveTransform(goodNewPoints, originalNewPoints, frameDescriptor.getHomography().inv());
+			Mat result = Calib3d.findHomography(new MatOfPoint2f(goodOldKeypoints.stream().toArray(Point[]::new)), new MatOfPoint2f(goodNewKeypoints.stream().toArray(Point[]::new)), Calib3d.RANSAC, 1);
 			if (result.size().empty()) {
 				CamLiveRetriever.logger.warn("Stabilization homography is empty");
 				return null;
