@@ -60,10 +60,9 @@ public class CamLiveRetriever extends AbstractApp {
 	private Mat frame = new Mat();
 	private boolean stabilizationHasChanged = true;
 	private int stabilizationErrors = 0;
-	private double[] vp1 = new double[]{5000, 0,1};
+	private double[] vp1 = new double[] { 5000, 0, 1 };
 	private AngleCalibrated calibrated;
-	static final double f = 6.053/0.009;
-
+	static final double f = 6.053 / 0.009;
 
 	public static void main(String[] args) {
 		launch(args);
@@ -81,7 +80,7 @@ public class CamLiveRetriever extends AbstractApp {
 
 		capture.read(frame);
 
-		//	AngleCalibrated.calibrate(frame.width(), frame.height());
+		// AngleCalibrated.calibrate(frame.width(), frame.height());
 		double[] pp = new double[] { frame.width() / 2, frame.height() / 2 };
 		calibrated = new AngleCalibrated(vp1, pp, f);
 
@@ -91,8 +90,8 @@ public class CamLiveRetriever extends AbstractApp {
 		ImageView src1 = new ImageView(Tools.mat2jfxImage(frame));
 		mainGrid.add(src1, 1, 0);
 
-		//		ImageView src2 = new ImageView(Tools.mat2jfxImage(frame));
-		//		mainGrid.add(src2, 1, 1);
+		// ImageView src2 = new ImageView(Tools.mat2jfxImage(frame));
+		// mainGrid.add(src2, 1, 1);
 
 		timerFields.scheduleAtFixedRate(() -> onSpace(), 0, STABILIZATION_DELAY, TimeUnit.MILLISECONDS);
 
@@ -115,7 +114,7 @@ public class CamLiveRetriever extends AbstractApp {
 						return;
 					}
 					if (stabilizationHasChanged && stabilizationErrors > 10) {
-						oldFields = oldFields==null?new Fields(fields.getFields()):oldFields;
+						oldFields = oldFields == null ? new Fields(fields.getFields()) : oldFields;
 						recoveringCounter = 0;
 						fields.reset();
 						stabilizationErrors = 0;
@@ -127,65 +126,67 @@ public class CamLiveRetriever extends AbstractApp {
 					ImgDescriptor newImgDescriptor = new ImgDescriptor(frame, deperspectivGraphy);
 					Stats.endTask("get img descriptors");
 					Stats.beginTask("stabilization homography");
-					Mat stabilizationHomography = stabilizedImgDescriptor.computeStabilizationGraphy(newImgDescriptor);
+					Mat betweenStabilizedHomography = stabilizedImgDescriptor.computeStabilizationGraphy(newImgDescriptor);
 					Stats.endTask("stabilization homography");
-					if (stabilizationHomography != null) {
+					if (betweenStabilizedHomography != null) {
 						stabilizationErrors = 0;
-						Img stabilized = warpPerspective(frame, stabilizationHomography);
+
+						Mat stabilizationHomographyFromFrame = new Mat();
+						Core.gemm(betweenStabilizedHomography.inv(), deperspectivGraphy, 1, new Mat(), 0, stabilizationHomographyFromFrame);
+						Img stabilized = warpPerspective(frame, stabilizationHomographyFromFrame);
 						Img stabilizedDisplay = new Img(stabilized.getSrc(), true);
-						if (stabilizationHasChanged && recoveringCounter==0) {
+						if (stabilizationHasChanged && recoveringCounter == 0) {
 							Stats.beginTask("stabilizationHasChanged");
 							stabilized = newImgDescriptor.getDeperspectivedImg();
 							stabilizedDisplay = new Img(stabilized.getSrc(), true);
-							Mat fieldsHomography = new Mat();
-							Core.gemm(deperspectivGraphy, stabilizationHomography.inv(), 1, new Mat(), 0, fieldsHomography);
+							// Mat fieldsHomography = new Mat();
+							// KK Core.gemm(deperspectivGraphy, stabilizationHomography.inv(), 1, new Mat(), 0, fieldsHomography);
 							Stats.beginTask("restabilizeFields");
-							fields.restabilizeFields(fieldsHomography);
+							fields.restabilizeFields(betweenStabilizedHomography);
 							System.out.println("fields restabilized");
 							Stats.endTask("restabilizeFields");
 							stabilizedImgDescriptor = newImgDescriptor;
-							stabilizationHomography = deperspectivGraphy;
+							stabilizationHomographyFromFrame = deperspectivGraphy;
 							stabilizationHasChanged = false;
 							Stats.endTask("stabilizationHasChanged");
 						}
 						Stats.beginTask("consolidate fields");
-						fields.consolidate(stabilizedDisplay);						
+						fields.consolidate(stabilizedDisplay);
 						Stats.endTask("consolidate fields");
 						Stats.beginTask("performOcr");
-						//fields.performOcr(stabilized);
+						// fields.performOcr(stabilized);
 
-						if(oldFields==null){
+						if (oldFields == null) {
 							fields.performOcr(stabilized);
 							fields.consolidateHierarchyLabels();
-						}
-						else{
+						} else {
 							recoveringCounter++;
 							labelMatches.putAll(fields.getLabelMatchesWithOldFields(stabilized, oldFields));
-							System.out.println(">>>> matches to work with:"+labelMatches.size());
-							if(labelMatches.size()>6){
+							System.out.println(">>>> matches to work with:" + labelMatches.size());
+							if (labelMatches.size() > 6) {
 								fields.tryRecoveryfromOldFields(labelMatches, oldFields);
 								oldFields = null;
 								labelMatches.clear();
-								recoveringCounter=0;
-							}							
+								recoveringCounter = 0;
+							}
 						}
-						if(recoveringCounter>5){
+						if (recoveringCounter > 5) {
 							oldFields = null;
 							labelMatches.clear();
-							recoveringCounter=0;
+							recoveringCounter = 0;
 						}
 
 						Stats.endTask("performOcr");
 						Img stabilizedDebug = new Img(stabilizedDisplay.getSrc(), true);
 						Stats.beginTask("draw");
 						fields.drawFieldsOnStabilizedDebug(stabilizedDebug);
-						fields.drawOcrPerspectiveInverse(display, stabilizationHomography.inv(), 1);
+						fields.drawOcrPerspectiveInverse(display, stabilizationHomographyFromFrame.inv(), 1);
 						fields.drawFieldsOnStabilized(stabilizedDisplay);
 						Stats.endTask("draw");
 
 						src0.setImage(display.toJfxImage());
 						src1.setImage(stabilizedDisplay.toJfxImage());
-						//src2.setImage(stabilizedDebug.toJfxImage());
+						// src2.setImage(stabilizedDebug.toJfxImage());
 
 						if (++counter % 20 == 0) {
 							System.out.println(Stats.getStatsAndReset());
@@ -196,9 +197,9 @@ public class CamLiveRetriever extends AbstractApp {
 						logger.warn("Unable to compute a valid stabilization ({} times)", stabilizationErrors);
 					}
 				}
-				//				} else {
-				//					logger.warn("Unable to compute a valid deperspectivation");
-				//				}
+				// } else {
+				// logger.warn("Unable to compute a valid deperspectivation");
+				// }
 				src0.setImage(display.toJfxImage());
 			} catch (Throwable e) {
 				logger.warn("Exception while computing layout.", e);
@@ -230,7 +231,7 @@ public class CamLiveRetriever extends AbstractApp {
 		return new Lines(grad.houghLinesP(1, Math.PI / 180, 10, 100, 10));
 	}
 
-	private Mat computeFrameToDeperspectivedHomography(Mat frame) {		
+	private Mat computeFrameToDeperspectivedHomography(Mat frame) {
 		Lines lines = houghlinesP(frame);
 		if (lines.size() < 8) {
 			logger.warn("Not enough lines to compute perspective transformation ({})", lines.size());
@@ -240,14 +241,14 @@ public class CamLiveRetriever extends AbstractApp {
 		lines = lines.reduce(20);
 		double[] pp = new double[] { frame.width() / 2, frame.height() / 2 };
 		Stats.beginTask("levenberg");
-		double[] newThetaPhi = new LMHostImpl<>((line, params) -> distance(new AngleCalibrated(params).uncalibrate(pp ,f), line), lines.lines, calibrated.getThetaPhi()).getParams();
+		double[] newThetaPhi = new LMHostImpl<>((line, params) -> distance(new AngleCalibrated(params).uncalibrate(pp, f), line), lines.lines, calibrated.getThetaPhi()).getParams();
 		Stats.endTask("levenberg");
 		calibrated = calibrated.dumpThetaPhi(newThetaPhi, 3);
 
 		double[] vp_1 = calibrated.getCalibratexyz();
-		double[] vp_2 = new AngleCalibrated(new double[]{0, 5000, 1}, pp, f).getCalibratexyz();
+		double[] vp_2 = new AngleCalibrated(new double[] { 0, 5000, 1 }, pp, f).getCalibratexyz();
 
-		//	System.out.println("Levenberg vp : " + vp);
+		// System.out.println("Levenberg vp : " + vp);
 
 		return findHomography(frame.size(), new double[][] { vp_1, vp_2 }, new double[] { frame.width() / 2, frame.height() / 2 }, f);
 
@@ -256,8 +257,8 @@ public class CamLiveRetriever extends AbstractApp {
 	public static Mat findHomography(Size size, double[][] vps, double[] pp, double f) {
 
 		double[][] vps2D = getVp2DFromVps(vps, pp, f);
-		//		System.out.println("vps : " + Arrays.deepToString(vps));
-		//		System.out.println("vps2D : " + Arrays.deepToString(vps2D));
+		// System.out.println("vps : " + Arrays.deepToString(vps));
+		// System.out.println("vps2D : " + Arrays.deepToString(vps2D));
 
 		double phi = Math.atan2(vps[0][1], vps[0][0]);
 		double theta = Math.acos(vps[0][2]);
@@ -273,8 +274,8 @@ public class CamLiveRetriever extends AbstractApp {
 		double[] D = new double[] { size.width / 2, Math.sin(phi2) < 0 ? size.height / 2 - x : size.height / 2 + x, 1 };
 		double[] C = new double[] { Math.cos(phi) < 0 ? size.width / 2 - x : size.width / 2 + x, Math.sin(phi2) < 0 ? size.height / 2 - x : size.height / 2 + x };
 
-		//		System.out.println("vp1 (" + phi * 180 / Math.PI + "°, " + theta * 180 / Math.PI + "°)");
-		//		System.out.println("vp2 (" + phi2 * 180 / Math.PI + "°, " + theta2 * 180 / Math.PI + "°)");
+		// System.out.println("vp1 (" + phi * 180 / Math.PI + "°, " + theta * 180 / Math.PI + "°)");
+		// System.out.println("vp2 (" + phi2 * 180 / Math.PI + "°, " + theta2 * 180 / Math.PI + "°)");
 		// System.out.println("vp3 (" + phi3 * 180 / Math.PI + "°, " + theta3 * 180 / Math.PI + "°)");
 
 		double[] A_ = A;
@@ -322,6 +323,7 @@ public class CamLiveRetriever extends AbstractApp {
 	static double[] cross2D(double[] a, double b[]) {
 		return uncalibrate(cross(a, b));
 	}
+
 	static double[] uncalibrate(double[] a) {
 		return new double[] { a[0] / a[2], a[1] / a[2], 1 };
 	}
