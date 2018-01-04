@@ -1,11 +1,13 @@
 package org.genericsystem.cv.retriever;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.genericsystem.cv.Img;
-import org.opencv.calib3d.Calib3d;
+import org.genericsystem.cv.lm.LMHostImpl;
 import org.opencv.core.Core;
+import org.opencv.core.CvType;
 import org.opencv.core.DMatch;
 import org.opencv.core.KeyPoint;
 import org.opencv.core.Mat;
@@ -14,6 +16,7 @@ import org.opencv.core.MatOfKeyPoint;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
+import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.features2d.DescriptorExtractor;
 import org.opencv.features2d.DescriptorMatcher;
@@ -70,7 +73,7 @@ public class ImgDescriptor {
 
 	public Mat computeStabilizationGraphy(ImgDescriptor frameDescriptor) {
 		MatOfDMatch matches = new MatOfDMatch();
-		System.out.println(frameDescriptor.getDescriptors());
+		//System.out.println(frameDescriptor.getDescriptors());
 		MATCHER.match(getDescriptors(), frameDescriptor.getDescriptors(), matches);
 		List<DMatch> goodMatches = new ArrayList<>();
 		for (DMatch dMatch : matches.toArray()) {
@@ -89,10 +92,17 @@ public class ImgDescriptor {
 		}
 
 		if (goodMatches.size() > 30) {
-			// Mat goodNewPoints = Converters.vector_Point2f_to_Mat(goodNewKeypoints);
-			// MatOfPoint2f originalNewPoints = new MatOfPoint2f();
-			// Core.perspectiveTransform(goodNewPoints, originalNewPoints, frameDescriptor.getHomography().inv());
-			Mat result = Calib3d.findHomography(new MatOfPoint2f(goodOldKeypoints.stream().toArray(Point[]::new)), new MatOfPoint2f(goodNewKeypoints.stream().toArray(Point[]::new)), Calib3d.RANSAC, 1);
+
+			List<Point[]> pairedPoints = new ArrayList<>();
+			for(int i =0; i<goodNewKeypoints.size(); i++)
+				pairedPoints.add(new Point[]{goodOldKeypoints.get(i), goodNewKeypoints.get(i)});
+
+			double[] transScaleParams= new LMHostImpl<>((points, params) -> distance(points, params),pairedPoints , new double[] { 1, 1, 0, 0 }).getParams();
+			System.out.println("params "+Arrays.toString(transScaleParams));
+
+			Mat result = getTSMat(transScaleParams);
+
+			//Mat result = Calib3d.findHomography(new MatOfPoint2f(goodOldKeypoints.stream().toArray(Point[]::new)), new MatOfPoint2f(goodNewKeypoints.stream().toArray(Point[]::new)), Calib3d.RANSAC, 1);
 			if (result.size().empty()) {
 				CamLiveRetriever.logger.warn("Stabilization homography is empty");
 				return null;
@@ -106,6 +116,27 @@ public class ImgDescriptor {
 			CamLiveRetriever.logger.warn("Not enough matches ({})", goodMatches.size());
 			return null;
 		}
+	}
+
+	private Mat getTSMat(double[] transScaleParams) {
+		Mat TSMat = new Mat(3, 3, CvType.CV_64FC1, new Scalar(0));
+		TSMat.put(0, 0, transScaleParams[0]);
+		TSMat.put(1, 1, transScaleParams[1]);
+		TSMat.put(0, 2, transScaleParams[2]*transScaleParams[0]);
+		TSMat.put(1, 2, transScaleParams[3]*transScaleParams[1]);
+		TSMat.put(2, 2, 1d);
+		return TSMat;
+	}
+
+	private double distance(Point[] points, double[] params){
+		double p2x=points[1].x , p2y=points[1].y;
+		double p1x = params[0]*points[0].x + params[0]*params[2];
+		double p1y = params[1]*points[0].y + params[1]*params[3];
+		double deltaX = p2x - p1x;
+		double deltaY = p2y - p1y;
+		double distance = Math.sqrt(deltaX*deltaX + deltaY*deltaY);
+		//System.out.println("distance: "+distance);
+		return distance < 5?distance:5;
 	}
 
 	/*
