@@ -15,9 +15,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-
 import javax.swing.ImageIcon;
 
 import org.genericsystem.cv.utils.Tools;
@@ -46,6 +43,9 @@ import org.opencv.utils.Converters;
 import org.opencv.ximgproc.Ximgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 
 public class Img implements AutoCloseable, Serializable {
 
@@ -946,7 +946,13 @@ public class Img implements AutoCloseable, Serializable {
 
 		// Img hImg = this.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(close * getSrc().width(), 1));
 		// Img vImg = this.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(1, close * getSrc().height()));
-		// return new Img(this.bitwise_xor(hImg.bitwise_and(vImg).bitwise_not()).getSrc());
+		// return new Img(this.bitwise_xor(hImg.bitwise_and(vImg)).getSrc());
+	}
+
+	public Img cleanTablesInv(double close) {
+		Img hImg = this.morphologyEx(Imgproc.MORPH_OPEN, Imgproc.MORPH_RECT, new Size(close * getSrc().width(), 1));
+		Img vImg = this.morphologyEx(Imgproc.MORPH_OPEN, Imgproc.MORPH_RECT, new Size(1, close * getSrc().height()));
+		return new Img(this.bitwise_xor(hImg.bitwise_or(vImg)).getSrc());
 	}
 
 	public Img cleanFaces(double px, double py) {
