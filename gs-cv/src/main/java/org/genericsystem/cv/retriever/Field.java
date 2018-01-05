@@ -13,9 +13,15 @@ import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 public class Field extends AbstractField {
 
+	@JsonBackReference
 	private Field parent;
+	@JsonManagedReference
 	private final List<Field> children;
 
 	private static final int LABELS_SIZE_THRESHOLD = 10;
@@ -140,6 +146,7 @@ public class Field extends AbstractField {
 		return getLockLevel() >= LOCK_THRESHOLD;
 	}
 
+	@JsonIgnore
 	public double getLockLevel() {
 		return Math.tanh(locklLevel);
 	}
@@ -177,6 +184,7 @@ public class Field extends AbstractField {
 		return parent;
 	}
 
+	@JsonIgnore
 	public List<Field> getSiblings() {
 		if (parent == null)
 			return Collections.emptyList();
