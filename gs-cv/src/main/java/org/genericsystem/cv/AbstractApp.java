@@ -58,9 +58,15 @@ public abstract class AbstractApp extends Application {
 				onR();
 			if (event.getCode() == KeyCode.T)
 				onT();
+			if (event.getCode() == KeyCode.S)
+				onS();
 		});
 		stage.setScene(scene);
 		stage.show();
+	}
+
+	protected void onS() {
+		System.out.println("s pressed");
 	}
 
 	// hook
@@ -71,7 +77,7 @@ public abstract class AbstractApp extends Application {
 	protected void onR() {
 		System.out.println("r pressed");
 	}
-	
+
 	protected void onT() {
 		System.out.println("t pressed");
 	}
