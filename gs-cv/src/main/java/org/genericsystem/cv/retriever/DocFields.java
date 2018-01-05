@@ -20,7 +20,6 @@ import io.vertx.core.json.JsonObject;
 public class DocFields extends AbstractFields<DocField> {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-	private static final String FIELDS = "fields";
 
 	public DocFields() {
 		super();
@@ -38,7 +37,7 @@ public class DocFields extends AbstractFields<DocField> {
 
 	public static DocFields of(JsonObject jsonFields) {
 		List<DocField> list = new ArrayList<>();
-		JsonArray array = jsonFields.getJsonArray(FIELDS);
+		JsonArray array = jsonFields.getJsonArray(AbstractFields.FIELDS);
 		array.forEach(field -> {
 			try {
 				list.add((DocField) field);
@@ -50,10 +49,6 @@ public class DocFields extends AbstractFields<DocField> {
 		});
 		DocFields fields = new DocFields(list);
 		return fields;
-	}
-
-	public JsonObject toJsonObject() {
-		return new JsonObject().put(FIELDS, fields);
 	}
 
 	public void buildFields(List<GSRect> rects) {

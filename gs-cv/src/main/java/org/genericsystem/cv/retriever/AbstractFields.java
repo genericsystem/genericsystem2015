@@ -11,12 +11,15 @@ import org.genericsystem.reinforcer.tools.GSRect;
 import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
 
+import io.vertx.core.json.JsonObject;
+
 public abstract class AbstractFields<F extends AbstractField> implements Iterable<F> {
 
 	protected List<F> fields;
 	protected static final double MIN_SIMILARITY = 0.90;
 	protected static final double OVERLAP_THRESHOLD = 0.30;
 	protected static final double OVERLAP_CONFIDENCE = 0.90;
+	protected static final String FIELDS = "fields";
 
 	public AbstractFields() {
 		this.fields = new ArrayList<>();
@@ -59,6 +62,10 @@ public abstract class AbstractFields<F extends AbstractField> implements Iterabl
 
 	public int size() {
 		return fields.size();
+	}
+
+	public JsonObject toJsonObject() {
+		return new JsonObject().put(FIELDS, fields);
 	}
 
 	public List<F> getFields(){
