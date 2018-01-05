@@ -36,7 +36,7 @@ public class ImgDescriptor {
 	private final Mat homography;
 
 	public ImgDescriptor(Mat frame, Mat deperspectivGraphy) {
-		deperspectivedImg = CamLiveRetriever.warpPerspective(frame, deperspectivGraphy);
+		deperspectivedImg = LiveRetrieverBase.warpPerspective(frame, deperspectivGraphy);
 		detector.detect(deperspectivedImg.getSrc(), keypoints);
 
 		// keypoints = detect(deperspectivedImg);
@@ -113,16 +113,16 @@ public class ImgDescriptor {
 			Mat result = Calib3d.findHomography(new MatOfPoint2f(goodOldKeypoints.stream().toArray(Point[]::new)), new MatOfPoint2f(goodNewKeypoints.stream().toArray(Point[]::new)), Calib3d.RANSAC, 1);
 
 			if (result.size().empty()) {
-				CamLiveRetriever.logger.warn("Stabilization homography is empty");
+				LiveRetrieverBase.logger.warn("Stabilization homography is empty");
 				return null;
 			}
 			if (!isValidHomography(result)) {
-				CamLiveRetriever.logger.warn("Not a valid homography");
+				LiveRetrieverBase.logger.warn("Not a valid homography");
 				return null;
 			}
 			return result;
 		} else {
-			CamLiveRetriever.logger.warn("Not enough matches ({})", goodMatches.size());
+			LiveRetrieverBase.logger.warn("Not enough matches ({})", goodMatches.size());
 			return null;
 		}
 	}
