@@ -1,5 +1,6 @@
 package org.genericsystem.cv.retriever;
 
+
 import org.opencv.core.Mat;
 import org.opencv.videoio.VideoCapture;
 

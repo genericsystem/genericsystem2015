@@ -19,6 +19,7 @@ import org.genericsystem.cv.utils.ParallelTasks;
 import org.genericsystem.cv.utils.RectToolsMapper;
 import org.genericsystem.reinforcer.tools.GSPoint;
 import org.genericsystem.reinforcer.tools.GSRect;
+import org.genericsystem.reinforcer.tools.Levenshtein;
 import org.opencv.calib3d.Calib3d;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
@@ -323,16 +324,20 @@ public class Fields extends AbstractFields<Field> {
 			if(entry.getValue().trim().length()<4)
 				continue;
 			for(Field oldField : oldFields){
-				if(entry.getValue().equals(oldField.getConsolidated())){
+				if(entry.getValue().equals(oldField.getConsolidated()) /*|| levenshteinDistance(entry.getValue(),oldField.getConsolidated())<2*/){
 					if(matches.containsKey(entry.getKey()))
 						matches.remove(entry.getKey());
 					else
 						matches.put(entry.getKey(), oldField);
-				}
+				}				
 			}			
 		}
 		System.out.println("returning "+matches);
 		return matches;
+	}
+
+	private double levenshteinDistance(String ocr, String consolidatedLabel){
+		return Levenshtein.normedDistance(ocr,consolidatedLabel);
 	}
 
 	private Mat findRecoveringHomography(Map<Field, Field> matches) {		
@@ -343,6 +348,17 @@ public class Fields extends AbstractFields<Field> {
 			oldPointList.addAll(getSquarePoints(entry.getValue().getRect().decomposeClockwise()));			
 
 		}
+
+		//
+		//		List<Point[]> pairedPoints = new ArrayList<>();
+		//		for(int i =0; i<newPointList.size(); i++)
+		//			pairedPoints.add(new Point[]{oldPointList.get(i), newPointList.get(i)});
+		//
+		//
+		//		double[] transScaleParams= new LMHostImpl<>((points, params) -> distance(points, params),pairedPoints , new double[] { 1, 1, 0, 0 }).getParams();
+		//		Mat result = getTSMat(transScaleParams);
+		//return result;
+
 		Mat mask = new Mat();
 		Mat homography = Calib3d.findHomography(new MatOfPoint2f(oldPointList.toArray(new Point[oldPointList.size()])), new MatOfPoint2f(newPointList.toArray(new Point[newPointList.size()])), 8, 2, mask, 2000, 0.995);
 		for(int i=mask.rows()-1; i>=0 ;i--){
@@ -353,6 +369,27 @@ public class Fields extends AbstractFields<Field> {
 		}
 		return evaluateHomographyError(newPointList, oldPointList, homography)<1?homography:null;
 	}
+
+	//	private double distance(Point[] points, double[] params){
+	//		double p2x=points[1].x , p2y=points[1].y;
+	//		double p1x = params[0]*points[0].x + params[0]*params[2];
+	//		double p1y = params[1]*points[0].y + params[1]*params[3];
+	//		double deltaX = p2x - p1x;
+	//		double deltaY = p2y - p1y;
+	//		double distance = Math.sqrt(deltaX*deltaX + deltaY*deltaY);
+	//		//System.out.println("distance: "+distance);
+	//		return distance < 5?distance:5;
+	//	}
+	//
+	//	private Mat getTSMat(double[] transScaleParams) {
+	//		Mat TSMat = new Mat(3, 3, CvType.CV_64FC1, new Scalar(0));
+	//		TSMat.put(0, 0, transScaleParams[0]);
+	//		TSMat.put(1, 1, transScaleParams[1]);
+	//		TSMat.put(0, 2, transScaleParams[2]*transScaleParams[0]);
+	//		TSMat.put(1, 2, transScaleParams[3]*transScaleParams[1]);
+	//		TSMat.put(2, 2, 1d);
+	//		return TSMat;
+	//	}
 
 	private double evaluateHomographyError(List<Point> newPointList, List<Point> oldPointList, Mat homography) {		
 		double error = 0.0;
