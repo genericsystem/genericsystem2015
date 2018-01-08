@@ -69,6 +69,7 @@ public class Field extends AbstractField {
 		}
 	}
 
+	//recursive
 	public Field findPotentialParent(GSRect rect) {
 		if (!rect.isInside(getRect()))
 			return null;
@@ -192,6 +193,8 @@ public class Field extends AbstractField {
 	}
 
 	public void updateParent(Field parent) {
+		if(this.parent!=null)
+			this.parent.removeChild(this);
 		this.parent = parent;
 		this.parent.addChild(this);
 
@@ -212,10 +215,6 @@ public class Field extends AbstractField {
 	public boolean isDead(int maxDeadCount) {
 		return !isLocked() && deadCounter >= maxDeadCount;
 	}
-
-	//	public boolean needOcr() {
-	//		return !isLocked();
-	//	}
 
 	public void resetChildrenDeadCounter() {
 		for (Field child : children) {
@@ -259,6 +258,7 @@ public class Field extends AbstractField {
 	public boolean isInFrame(Img img) {		
 		return (rect.tl().getX()>0 && rect.br().getX() < img.width()) && (rect.tl().getY() > 0 && rect.br().getY() < img.height());
 	}
+
 
 	//	public void consolidateLabelWithChildren() {
 	//		if(children.isEmpty())
