@@ -42,6 +42,10 @@ import javafx.scene.layout.GridPane;
 @SuppressWarnings({ "resource" })
 public abstract class LiveRetrieverBase extends AbstractApp {
 
+	public static enum DeperspectivationMode {
+		NONE, ROTATION, FULL
+	}
+
 	static {
 		NativeLibraryLoader.load();
 	}
@@ -63,15 +67,16 @@ public abstract class LiveRetrieverBase extends AbstractApp {
 	private Mat frame;
 	private boolean stabilizationHasChanged = true;
 	private int stabilizationErrors = 0;
-	//private double[] vp1 = new double[]{5000, 0,1};
-	//private AngleCalibrated calibrated;
+	// private double[] vp1 = new double[]{5000, 0,1};
+	// private AngleCalibrated calibrated;
 	private AngleCalibrated calibrated0;
 
 	private final double f = 6.053 / 0.009;
 	private boolean stabilizedMode = false;
-	private boolean textsEnabledMode =false;
+	private boolean textsEnabledMode = false;
 	private Lines lines;
 	private Img display;
+	protected DeperspectivationMode mode = DeperspectivationMode.FULL;
 
 	@Override
 	public void stop() throws Exception {
@@ -90,7 +95,7 @@ public abstract class LiveRetrieverBase extends AbstractApp {
 		// AngleCalibrated.calibrate(frame.width(), frame.height());
 		double[] pp = new double[] { frame.width() / 2, frame.height() / 2 };
 		calibrated0 = new AngleCalibrated(0, Math.PI / 2);
-		//calibrated = new AngleCalibrated(vp1, pp, f);
+		// calibrated = new AngleCalibrated(vp1, pp, f);
 
 		ImageView src0 = new ImageView(Tools.mat2jfxImage(frame));
 		mainGrid.add(src0, 0, 0);
@@ -114,7 +119,7 @@ public abstract class LiveRetrieverBase extends AbstractApp {
 				}
 
 				Stats.beginTask("deperspectivation");
-				Mat deperspectivGraphy = computeDeperspectivedHomography(frame, pp);
+				Mat deperspectivGraphy = computeDeperspectivedHomography(frame, pp, f, mode);
 				Stats.endTask("deperspectivation");
 				if (deperspectivGraphy != null) {
 					if (stabilizedImgDescriptor == null) {
@@ -135,7 +140,7 @@ public abstract class LiveRetrieverBase extends AbstractApp {
 					Stats.endTask("get img descriptors");
 					Stats.beginTask("stabilization homography");
 					Mat betweenStabilizedHomography = stabilizedImgDescriptor.computeStabilizationGraphy(newImgDescriptor);
-					//	displayMat(betweenStabilizedHomography);
+					// displayMat(betweenStabilizedHomography);
 					Stats.endTask("stabilization homography");
 					if (betweenStabilizedHomography != null) {
 						stabilizationErrors = 0;
@@ -217,18 +222,20 @@ public abstract class LiveRetrieverBase extends AbstractApp {
 
 	}
 
-	//	private void displayMat(Mat betweenStabilizedHomography) {
-	//		for()
-	//		
-	//	}
+	// private void displayMat(Mat betweenStabilizedHomography) {
+	// for()
+	//
+	// }
 
-	private Mat computeDeperspectivedHomography(Mat frame, double[] pp) {
+	private Mat computeDeperspectivedHomography(Mat frame, double[] pp, double f, DeperspectivationMode mode) {
 		if (!stabilizedMode) {
-			//			capture.read(frame);
+			// capture.read(frame);
 		}
+		if (DeperspectivationMode.NONE == mode)
+			return Mat.eye(3, 3, CvType.CV_64FC1);
 		display = new Img(frame, true);
-		List<Line> addedLines=null;
-		if(textsEnabledMode) {
+		List<Line> addedLines = null;
+		if (textsEnabledMode) {
 			Mat diffFrame = getDiffFrame(frame);
 			List<Circle> circles = detectCircles(frame, diffFrame, 30, 100);
 			Collection<Circle> selectedCircles = selectRandomCirles(circles, 20);
@@ -240,31 +247,31 @@ public abstract class LiveRetrieverBase extends AbstractApp {
 				Imgproc.circle(display.getSrc(), circle.center, (int) circle.radius, new Scalar(0, 255, 0), 1);
 			}
 		}
-		Mat diffFrame =  new Mat();
+		Mat diffFrame = new Mat();
 		Core.absdiff(frame, new Scalar(255), diffFrame);
-		Img grad = new Img(diffFrame, false).adaptativeGaussianInvThreshold(5, 3).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(10,10)).morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(3, 3));
+		Img grad = new Img(diffFrame, false).adaptativeGaussianInvThreshold(5, 3).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(10, 10)).morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(3, 3));
 		lines = new Lines(grad.houghLinesP(1, Math.PI / 180, 10, 40, 10));
-		if(addedLines!=null)
+		if (addedLines != null)
 			lines.lines.addAll(addedLines);
 		if (lines.size() > 4) {
 			double[] thetaPhi = new LMHostImpl<>((line, params) -> distance(new AngleCalibrated(params).uncalibrate(pp, f), line), lines.lines, calibrated0.getThetaPhi()).getParams();
 			calibrated0 = calibrated0.dumpThetaPhi(thetaPhi, 1);
 			AngleCalibrated[] result = findOtherVps(calibrated0, lines, pp, f);
 			return findHomography(frame.size(), result, pp, f);
-		} else{
+		} else {
 			System.out.println("Not enough lines : " + lines.size());
 			return null;
 		}
 	}
 
-	public static AngleCalibrated[] findOtherVps(AngleCalibrated calibrated0,Lines lines,double[] pp, double f){
-		AngleCalibrated[] result = new AngleCalibrated[] {null,null,null};
+	public static AngleCalibrated[] findOtherVps(AngleCalibrated calibrated0, Lines lines, double[] pp, double f) {
+		AngleCalibrated[] result = new AngleCalibrated[] { null, null, null };
 		double bestError = Double.MAX_VALUE;
 		for (double angle = 0; angle < 360 / 180 * Math.PI; angle += 1 * Math.PI / 180) {
 			double error = 0;
 			AngleCalibrated calibratexy = calibrated0.getOrthoFromAngle(angle);
 			AngleCalibrated calibratez = calibrated0.getOrthoFromVps(calibratexy);
-			if(calibratexy.getPhi() < calibratez.getPhi()) {
+			if (calibratexy.getPhi() < calibratez.getPhi()) {
 				AngleCalibrated tmp = calibratexy;
 				calibratexy = calibratez;
 				calibratez = tmp;
@@ -280,17 +287,17 @@ public abstract class LiveRetrieverBase extends AbstractApp {
 			}
 		}
 
-		double theta0 = Math.abs(result[0].getTheta())%Math.PI;
-		theta0=Math.min(Math.PI - theta0,theta0);
+		double theta0 = Math.abs(result[0].getTheta()) % Math.PI;
+		theta0 = Math.min(Math.PI - theta0, theta0);
 
-		double theta1 = Math.abs(result[1].getTheta())%Math.PI;
-		theta1=Math.min(Math.PI - theta1,theta1);
+		double theta1 = Math.abs(result[1].getTheta()) % Math.PI;
+		theta1 = Math.min(Math.PI - theta1, theta1);
 
-		if(theta0>theta1) {
+		if (theta0 > theta1) {
 			AngleCalibrated tmp = result[0];
 			result[0] = result[1];
 			result[1] = tmp;
-		}	
+		}
 		return result;
 	}
 
@@ -317,14 +324,14 @@ public abstract class LiveRetrieverBase extends AbstractApp {
 
 	public static Mat findHomography(Size size, AngleCalibrated[] calibrateds, double[] pp, double f) {
 
-		double[][] vps = new double[][] { calibrateds[0].getCalibratexyz(), calibrateds[1].getCalibratexyz(), calibrateds[2].getCalibratexyz()};
+		double[][] vps = new double[][] { calibrateds[0].getCalibratexyz(), calibrateds[1].getCalibratexyz(), calibrateds[2].getCalibratexyz() };
 
 		double[][] vps2D = getVp2DFromVps(vps, pp, f);
-		//		System.out.println("vps2D : " + Arrays.deepToString(vps2D));
+		// System.out.println("vps2D : " + Arrays.deepToString(vps2D));
 		//
-		//		System.out.println("vp1 " + calibrateds[0]);
-		//		System.out.println("vp2 " + calibrateds[1]);
-		//		System.out.println("vp3 " + calibrateds[2]);
+		// System.out.println("vp1 " + calibrateds[0]);
+		// System.out.println("vp2 " + calibrateds[1]);
+		// System.out.println("vp3 " + calibrateds[2]);
 
 		double theta = calibrateds[0].getTheta();
 		double theta2 = calibrateds[1].getTheta();
@@ -446,7 +453,7 @@ public abstract class LiveRetrieverBase extends AbstractApp {
 				polynomAngle = angle;
 			}
 			if (binarized != null && oldPoint != null)
-				new Line(oldPoint, point).draw(binarized[0].getSrc(), new Scalar(255, 0, 0),1);
+				new Line(oldPoint, point).draw(binarized[0].getSrc(), new Scalar(255, 0, 0), 1);
 		}
 		if (binarized != null) {
 			Imgproc.circle(binarized[0].getSrc(), new Point((absMinMax + polynomAngle) * 10, max / 1000), 10, new Scalar(255, 255, 0), 3);
@@ -484,70 +491,70 @@ public abstract class LiveRetrieverBase extends AbstractApp {
 		return new Img(dePerspectived, false);
 	}
 
-	//	private Lines houghlinesP(Mat frame) {
-	//		Img grad = new Img(frame, false).morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_RECT, new Size(2, 2)).otsu().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(3, 3));
-	//		return new Lines(grad.houghLinesP(1, Math.PI / 180, 10, 100, 10));
-	//	}
+	// private Lines houghlinesP(Mat frame) {
+	// Img grad = new Img(frame, false).morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_RECT, new Size(2, 2)).otsu().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(3, 3));
+	// return new Lines(grad.houghLinesP(1, Math.PI / 180, 10, 100, 10));
+	// }
 
-	//	private Mat computeFrameToDeperspectivedHomography(Mat frame) {		
-	//		Lines lines = houghlinesP(frame);
-	//		if (lines.size() < 8) {
-	//			logger.warn("Not enough lines to compute perspective transformation ({})", lines.size());
-	//			return null;
-	//		}
-	//		lines = lines.filter(line -> distance(vp1, line) < 0.5);
-	//		lines = lines.reduce(20);
-	//		double[] pp = new double[] { frame.width() / 2, frame.height() / 2 };
-	//		Stats.beginTask("levenberg");
-	//		double[] newThetaPhi = new LMHostImpl<>((line, params) -> distance(new AngleCalibrated(params).uncalibrate(pp ,f), line), lines.lines, calibrated.getThetaPhi()).getParams();
-	//		Stats.endTask("levenberg");
-	//		calibrated = calibrated.dumpThetaPhi(newThetaPhi, 3);
+	// private Mat computeFrameToDeperspectivedHomography(Mat frame) {
+	// Lines lines = houghlinesP(frame);
+	// if (lines.size() < 8) {
+	// logger.warn("Not enough lines to compute perspective transformation ({})", lines.size());
+	// return null;
+	// }
+	// lines = lines.filter(line -> distance(vp1, line) < 0.5);
+	// lines = lines.reduce(20);
+	// double[] pp = new double[] { frame.width() / 2, frame.height() / 2 };
+	// Stats.beginTask("levenberg");
+	// double[] newThetaPhi = new LMHostImpl<>((line, params) -> distance(new AngleCalibrated(params).uncalibrate(pp ,f), line), lines.lines, calibrated.getThetaPhi()).getParams();
+	// Stats.endTask("levenberg");
+	// calibrated = calibrated.dumpThetaPhi(newThetaPhi, 3);
 	//
-	//		double[] vp_1 = calibrated.getCalibratexyz();
-	//		double[] vp_2 = new AngleCalibrated(new double[]{0, 5000, 1}, pp, f).getCalibratexyz();
+	// double[] vp_1 = calibrated.getCalibratexyz();
+	// double[] vp_2 = new AngleCalibrated(new double[]{0, 5000, 1}, pp, f).getCalibratexyz();
 	//
-	//		//	System.out.println("Levenberg vp : " + vp);
+	// // System.out.println("Levenberg vp : " + vp);
 	//
-	//		return findHomography(frame.size(), new double[][] { vp_1, vp_2 }, new double[] { frame.width() / 2, frame.height() / 2 }, f);
+	// return findHomography(frame.size(), new double[][] { vp_1, vp_2 }, new double[] { frame.width() / 2, frame.height() / 2 }, f);
 	//
-	//	}
+	// }
 
-	//	public static Mat findHomography(Size size, double[][] vps, double[] pp, double f) {
+	// public static Mat findHomography(Size size, double[][] vps, double[] pp, double f) {
 	//
-	//		double[][] vps2D = getVp2DFromVps(vps, pp, f);
-	//		//		System.out.println("vps : " + Arrays.deepToString(vps));
-	//		//		System.out.println("vps2D : " + Arrays.deepToString(vps2D));
+	// double[][] vps2D = getVp2DFromVps(vps, pp, f);
+	// // System.out.println("vps : " + Arrays.deepToString(vps));
+	// // System.out.println("vps2D : " + Arrays.deepToString(vps2D));
 	//
-	//		double phi = Math.atan2(vps[0][1], vps[0][0]);
-	//		double theta = Math.acos(vps[0][2]);
-	//		double phi2 = Math.atan2(vps[1][1], vps[1][0]);
-	//		double theta2 = Math.acos(vps[1][2]);
-	//		// double phi3 = Math.atan2(vps[2][1], vps[2][0]);
-	//		// double theta3 = Math.acos(vps[2][2]);
+	// double phi = Math.atan2(vps[0][1], vps[0][0]);
+	// double theta = Math.acos(vps[0][2]);
+	// double phi2 = Math.atan2(vps[1][1], vps[1][0]);
+	// double theta2 = Math.acos(vps[1][2]);
+	// // double phi3 = Math.atan2(vps[2][1], vps[2][0]);
+	// // double theta3 = Math.acos(vps[2][2]);
 	//
-	//		double x = size.width / 4;
+	// double x = size.width / 4;
 	//
-	//		double[] A = new double[] { size.width / 2, size.height / 2, 1 };
-	//		double[] B = new double[] { Math.cos(phi) < 0 ? size.width / 2 - x : size.width / 2 + x, size.height / 2 };
-	//		double[] D = new double[] { size.width / 2, Math.sin(phi2) < 0 ? size.height / 2 - x : size.height / 2 + x, 1 };
-	//		double[] C = new double[] { Math.cos(phi) < 0 ? size.width / 2 - x : size.width / 2 + x, Math.sin(phi2) < 0 ? size.height / 2 - x : size.height / 2 + x };
+	// double[] A = new double[] { size.width / 2, size.height / 2, 1 };
+	// double[] B = new double[] { Math.cos(phi) < 0 ? size.width / 2 - x : size.width / 2 + x, size.height / 2 };
+	// double[] D = new double[] { size.width / 2, Math.sin(phi2) < 0 ? size.height / 2 - x : size.height / 2 + x, 1 };
+	// double[] C = new double[] { Math.cos(phi) < 0 ? size.width / 2 - x : size.width / 2 + x, Math.sin(phi2) < 0 ? size.height / 2 - x : size.height / 2 + x };
 	//
-	//		//		System.out.println("vp1 (" + phi * 180 / Math.PI + "°, " + theta * 180 / Math.PI + "°)");
-	//		//		System.out.println("vp2 (" + phi2 * 180 / Math.PI + "°, " + theta2 * 180 / Math.PI + "°)");
-	//		// System.out.println("vp3 (" + phi3 * 180 / Math.PI + "°, " + theta3 * 180 / Math.PI + "°)");
+	// // System.out.println("vp1 (" + phi * 180 / Math.PI + "°, " + theta * 180 / Math.PI + "°)");
+	// // System.out.println("vp2 (" + phi2 * 180 / Math.PI + "°, " + theta2 * 180 / Math.PI + "°)");
+	// // System.out.println("vp3 (" + phi3 * 180 / Math.PI + "°, " + theta3 * 180 / Math.PI + "°)");
 	//
-	//		double[] A_ = A;
-	//		double[] B_ = new double[] { size.width / 2 + x * Math.sin(theta) * Math.sin(theta) * Math.cos(phi), size.height / 2 + x * Math.sin(theta) * Math.sin(theta) * Math.sin(phi), 1 };
-	//		double[] D_ = new double[] { size.width / 2 + x * Math.sin(theta2) * Math.sin(theta2) * Math.cos(phi2), size.height / 2 + x * Math.sin(theta2) * Math.sin(theta2) * Math.sin(phi2), 1 };
-	//		double[] C_ = cross2D(cross(B_, vps2D[1]), cross(D_, vps2D[0]));
+	// double[] A_ = A;
+	// double[] B_ = new double[] { size.width / 2 + x * Math.sin(theta) * Math.sin(theta) * Math.cos(phi), size.height / 2 + x * Math.sin(theta) * Math.sin(theta) * Math.sin(phi), 1 };
+	// double[] D_ = new double[] { size.width / 2 + x * Math.sin(theta2) * Math.sin(theta2) * Math.cos(phi2), size.height / 2 + x * Math.sin(theta2) * Math.sin(theta2) * Math.sin(phi2), 1 };
+	// double[] C_ = cross2D(cross(B_, vps2D[1]), cross(D_, vps2D[0]));
 	//
-	//		// double[] A_ = A;
-	//		// double[] B_ = new double[] { size.width / 2 + x * Math.sin(theta) * vps[0][0], size.height / 2 + x * Math.sin(theta) * vps[0][1], 1 };
-	//		// double[] D_ = new double[] { size.width / 2 + x * Math.sin(theta2) *vps[1][0], size.height / 2 + x * Math.sin(theta2) *vps[1][1], 1 };
-	//		// double[] C_ = cross2D(cross(B_, vps2D[1]), cross(D_, vps2D[0]));
+	// // double[] A_ = A;
+	// // double[] B_ = new double[] { size.width / 2 + x * Math.sin(theta) * vps[0][0], size.height / 2 + x * Math.sin(theta) * vps[0][1], 1 };
+	// // double[] D_ = new double[] { size.width / 2 + x * Math.sin(theta2) *vps[1][0], size.height / 2 + x * Math.sin(theta2) *vps[1][1], 1 };
+	// // double[] C_ = cross2D(cross(B_, vps2D[1]), cross(D_, vps2D[0]));
 	//
-	//		return Imgproc.getPerspectiveTransform(new MatOfPoint2f(new Point(A_), new Point(B_), new Point(C_), new Point(D_)), new MatOfPoint2f(new Point(A), new Point(B), new Point(C), new Point(D)));
-	//	}
+	// return Imgproc.getPerspectiveTransform(new MatOfPoint2f(new Point(A_), new Point(B_), new Point(C_), new Point(D_)), new MatOfPoint2f(new Point(A), new Point(B), new Point(C), new Point(D)));
+	// }
 
 	static double[] getVpFromVp2D(double[] vpImg, double[] pp, double f) {
 		double[] vp = new double[] { vpImg[0] / vpImg[2] - pp[0], vpImg[1] / vpImg[2] - pp[1], f };
@@ -581,79 +588,80 @@ public abstract class LiveRetrieverBase extends AbstractApp {
 	static double[] cross2D(double[] a, double b[]) {
 		return uncalibrate(cross(a, b));
 	}
+
 	static double[] uncalibrate(double[] a) {
 		return new double[] { a[0] / a[2], a[1] / a[2], 1 };
 	}
 
-	//	private double distance(double[] vp, Line line) {
-	//		double[] lineSegment = getNormalizedLine(line);
-	//		double n0 = -lineSegment[1];
-	//		double n1 = lineSegment[0];
-	//		double nNorm = Math.sqrt(n0 * n0 + n1 * n1);
-	//		double[] midPoint = getMiLine(line);
-	//		double r0, r1;
-	//		r0 = vp[1] * midPoint[2] - midPoint[1];
-	//		r1 = midPoint[0] - vp[0] * midPoint[2];
-	//		double rNorm = Math.sqrt(r0 * r0 + r1 * r1);
-	//		double num = (r0 * n0 + r1 * n1);
-	//		if (num < 0)
-	//			num = -num;
+	// private double distance(double[] vp, Line line) {
+	// double[] lineSegment = getNormalizedLine(line);
+	// double n0 = -lineSegment[1];
+	// double n1 = lineSegment[0];
+	// double nNorm = Math.sqrt(n0 * n0 + n1 * n1);
+	// double[] midPoint = getMiLine(line);
+	// double r0, r1;
+	// r0 = vp[1] * midPoint[2] - midPoint[1];
+	// r1 = midPoint[0] - vp[0] * midPoint[2];
+	// double rNorm = Math.sqrt(r0 * r0 + r1 * r1);
+	// double num = (r0 * n0 + r1 * n1);
+	// if (num < 0)
+	// num = -num;
 	//
-	//		double d = 0;
-	//		if (nNorm != 0 && rNorm != 0)
-	//			d = num / (nNorm * rNorm);
-	//		// d *= line.size();
-	//		return d;
-	//	}
+	// double d = 0;
+	// if (nNorm != 0 && rNorm != 0)
+	// d = num / (nNorm * rNorm);
+	// // d *= line.size();
+	// return d;
+	// }
 
-	//	private double[] getNormalizedLine(Line line) {
-	//		double a = line.y1 - line.y2;
-	//		double b = line.x2 - line.x1;
-	//		double c = line.y1 * line.x2 - line.x1 * line.y2;
-	//		double norm = Math.sqrt(a * a + b * b + c * c);
-	//		return new double[] { a / norm, b / norm, c / norm };
-	//	}
+	// private double[] getNormalizedLine(Line line) {
+	// double a = line.y1 - line.y2;
+	// double b = line.x2 - line.x1;
+	// double c = line.y1 * line.x2 - line.x1 * line.y2;
+	// double norm = Math.sqrt(a * a + b * b + c * c);
+	// return new double[] { a / norm, b / norm, c / norm };
+	// }
 	//
-	//	private double[] getMiLine(Line line) {
-	//		return new double[] { (line.x1 + line.x2) / 2, (line.y1 + line.y2) / 2, 1d };
-	//	}
+	// private double[] getMiLine(Line line) {
+	// return new double[] { (line.x1 + line.x2) / 2, (line.y1 + line.y2) / 2, 1d };
+	// }
 	//
-	//	private static Mat findHomography(Point vp, double width, double height) {
-	//		Point bary = new Point(width / 2, height / 2);
-	//		double alpha = Math.atan2((vp.y - bary.y), (vp.x - bary.x));
-	//		if (alpha < -Math.PI / 2 && alpha > -Math.PI)
-	//			alpha = alpha + Math.PI;
-	//		if (alpha < Math.PI && alpha > Math.PI / 2)
-	//			alpha = alpha - Math.PI;
+	// private static Mat findHomography(Point vp, double width, double height) {
+	// Point bary = new Point(width / 2, height / 2);
+	// double alpha = Math.atan2((vp.y - bary.y), (vp.x - bary.x));
+	// if (alpha < -Math.PI / 2 && alpha > -Math.PI)
+	// alpha = alpha + Math.PI;
+	// if (alpha < Math.PI && alpha > Math.PI / 2)
+	// alpha = alpha - Math.PI;
 	//
-	//		Point rotatedVp = rotate(bary, alpha, vp)[0];
+	// Point rotatedVp = rotate(bary, alpha, vp)[0];
 	//
-	//		Point A = new Point(0, 0);
-	//		Point B = new Point(width, 0);
-	//		Point C = new Point(width, height);
-	//		Point D = new Point(0, height);
+	// Point A = new Point(0, 0);
+	// Point B = new Point(width, 0);
+	// Point C = new Point(width, height);
+	// Point D = new Point(0, height);
 	//
-	//		Point AB2 = new Point(width / 2, 0);
-	//		Point CD2 = new Point(width / 2, height);
+	// Point AB2 = new Point(width / 2, 0);
+	// Point CD2 = new Point(width / 2, height);
 	//
-	//		Point A_, B_, C_, D_;
-	//		if (rotatedVp.x >= width / 2) {
-	//			A_ = new Line(AB2, rotatedVp).intersection(0);
-	//			D_ = new Line(CD2, rotatedVp).intersection(0);
-	//			C_ = new Line(A_, bary).intersection(new Line(CD2, rotatedVp));
-	//			B_ = new Line(D_, bary).intersection(new Line(AB2, rotatedVp));
-	//		} else {
-	//			B_ = new Line(AB2, rotatedVp).intersection(width);
-	//			C_ = new Line(CD2, rotatedVp).intersection(width);
-	//			A_ = new Line(C_, bary).intersection(new Line(AB2, rotatedVp));
-	//			D_ = new Line(B_, bary).intersection(new Line(CD2, rotatedVp));
-	//		}
-	//		Mat result = Imgproc.getPerspectiveTransform(new MatOfPoint2f(rotate(bary, -alpha, A_, B_, C_, D_)), new MatOfPoint2f(A, B, C, D));
-	//		// System.out.println("Determinant vanishing : " + Core.determinant(result));
-	//		// if (Core.determinant(result) < 0.3)
-	//		// return null;
-	//		return result;
-	//	}
+	// Point A_, B_, C_, D_;
+	// if (rotatedVp.x >= width / 2) {
+	// A_ = new Line(AB2, rotatedVp).intersection(0);
+	// D_ = new Line(CD2, rotatedVp).intersection(0);
+	// C_ = new Line(A_, bary).intersection(new Line(CD2, rotatedVp));
+	// B_ = new Line(D_, bary).intersection(new Line(AB2, rotatedVp));
+	// } else {
+	// B_ = new Line(AB2, rotatedVp).intersection(width);
+	// C_ = new Line(CD2, rotatedVp).intersection(width);
+	// A_ = new Line(C_, bary).intersection(new Line(AB2, rotatedVp));
+	// D_ = new Line(B_, bary).intersection(new Line(CD2, rotatedVp));
+	// }
+	// Mat result = Imgproc.getPerspectiveTransform(new MatOfPoint2f(rotate(bary, -alpha, A_, B_, C_, D_)), new MatOfPoint2f(A, B, C, D));
+	// // System.out.println("Determinant vanishing : " + Core.determinant(result));
+	// // if (Core.determinant(result) < 0.3)
+	// // return null;
+	// return result;
+	// }
 
 	private static Point[] rotate(Point bary, double alpha, Point... points) {
 		Mat matrix = Imgproc.getRotationMatrix2D(bary, alpha / Math.PI * 180, 1);
@@ -688,7 +696,7 @@ public abstract class LiveRetrieverBase extends AbstractApp {
 
 	@Override
 	protected void onT() {
-		textsEnabledMode = ! textsEnabledMode;
+		textsEnabledMode = !textsEnabledMode;
 	}
 
 }

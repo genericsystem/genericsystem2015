@@ -9,6 +9,10 @@ public class RetrieverFromImg extends LiveRetrieverBase {
 
 	private Mat frame = new Img(Imgcodecs.imread("classes/facture/factures-2.png")).resize(new Size(480, 640)).getSrc();
 
+	public RetrieverFromImg() {
+		mode = DeperspectivationMode.NONE;
+	}
+
 	public static void main(String[] args) {
 		launch(args);
 	}
