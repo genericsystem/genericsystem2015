@@ -43,7 +43,6 @@ public class Fields extends AbstractFields<Field> {
 	}
 
 	public void reset() {
-		//displayFieldsTree();
 		fields = new ArrayList<>();
 	}
 
@@ -155,7 +154,6 @@ public class Fields extends AbstractFields<Field> {
 	}
 
 	public void removeNode(Field field) {
-		//logger.info("Removing node: {}", field.getRect());
 		fields.remove(field);
 	}
 
@@ -234,7 +232,6 @@ public class Fields extends AbstractFields<Field> {
 			int idx = ThreadLocalRandom.current().nextInt(size());
 			if (indexes.add(idx)) {
 				Field f = fields.get(idx);
-				//if (f.needOcr())
 				tasks.add(() -> f.ocr(rootImg));
 			}
 		}

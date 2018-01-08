@@ -175,7 +175,7 @@ public class FillNewModelWithData {
 				}
 			});
 			// Loop through the "labels" Map and choose the best text
-			field.consolidateOcr(true);
+			field.consolidateOcr();
 
 			// Store the field data in a json object
 			JsonObject json = new JsonObject();
