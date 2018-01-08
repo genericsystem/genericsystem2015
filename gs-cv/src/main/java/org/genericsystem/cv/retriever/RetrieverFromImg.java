@@ -7,7 +7,7 @@ import org.opencv.imgcodecs.Imgcodecs;
 
 public class RetrieverFromImg extends LiveRetrieverBase {
 
-	private Mat frame = new Img(Imgcodecs.imread("classes/facture/factures-2.png")).resize(new Size(480, 640)).getSrc();
+	private Mat frame = new Img(Imgcodecs.imread("classes/facture/factures-2.png")).resize(640).getSrc();
 
 	public static void main(String[] args) {
 		launch(args);

@@ -664,6 +664,21 @@ public class Img implements AutoCloseable, Serializable {
 		return new Img(result, false);
 	}
 
+	/**
+	 * Resizes the image so that the larger side’s length is equal to maxLength, preserving the proportions.
+	 * Does nothing if both sides of the original image are smaller than maxLength.
+	 * 
+	 * @param maxLength	The maximum side length of the resized image.
+	 * @return This if no change was made, a resized image otherwise.
+	 */
+	public Img resize(int maxLength) {
+		if (src.width() <= maxLength && src.height() <= maxLength)
+			return this;
+		if (src.width() >= src.height())
+			return resize(new Size(maxLength, src.height() * maxLength / src.width()));
+		return resize(new Size(src.width() * maxLength / src.height(), maxLength));
+	}
+
 	public Img resize(double coeff) {
 		Mat result = new Mat();
 		Imgproc.resize(src, result, new Size(src.width() * coeff, src.height() * coeff));
