@@ -224,7 +224,7 @@ public abstract class LiveRetrieverBase extends AbstractApp {
 
 	private Mat computeDeperspectivedHomography(Mat frame, double[] pp) {
 		if (!stabilizedMode) {
-			//			capture.read(frame);
+			frame = updateFrame();
 		}
 		display = new Img(frame, true);
 		List<Line> addedLines=null;
