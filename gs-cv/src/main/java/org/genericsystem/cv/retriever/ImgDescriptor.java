@@ -36,6 +36,7 @@ public class ImgDescriptor {
 	private final Mat homography;
 
 	public ImgDescriptor(Mat frame, Mat deperspectivGraphy) {
+
 		deperspectivedImg = LiveRetrieverBase.warpPerspective(frame, deperspectivGraphy);
 		detector.detect(deperspectivedImg.getSrc(), keypoints);
 
@@ -85,10 +86,10 @@ public class ImgDescriptor {
 		matcher.match(getDescriptors(), frameDescriptor.getDescriptors(), matches);
 		List<DMatch> goodMatches = new ArrayList<>();
 		for (DMatch dMatch : matches.toArray()) {
-			// if (dMatch.distance <= 30) {
-			goodMatches.add(dMatch);
-			// }
-		}
+			if (dMatch.distance <= 100) {
+				goodMatches.add(dMatch);
+			}
+		}		
 
 		List<KeyPoint> newKeypoints_ = frameDescriptor.getKeypoints().toList();
 		List<KeyPoint> oldKeypoints_ = getKeypoints().toList();
