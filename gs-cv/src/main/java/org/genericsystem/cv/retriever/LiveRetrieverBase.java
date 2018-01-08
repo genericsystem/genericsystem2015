@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
@@ -56,8 +57,8 @@ public abstract class LiveRetrieverBase extends AbstractApp {
 	private static final int STABILIZATION_DELAY = 500;
 	private static final int FRAME_DELAY = 100;
 
-	private final ScheduledExecutorService timerFields = new ScheduledThreadPoolExecutor(0);
-	private final Fields fields = new Fields();	
+	private final ScheduledExecutorService timerFields = new ScheduledThreadPoolExecutor(1, new ThreadPoolExecutor.DiscardPolicy());
+	private final Fields fields = new Fields();
 	private int recoveringCounter = 0;
 
 	private ImgDescriptor stabilizedImgDescriptor;
@@ -123,7 +124,7 @@ public abstract class LiveRetrieverBase extends AbstractApp {
 						stabilizedImgDescriptor = new ImgDescriptor(frame, deperspectivGraphy);
 						return;
 					}
-					if (stabilizationHasChanged && stabilizationErrors > 10) {						
+					if (stabilizationHasChanged && stabilizationErrors > 10) {
 						fields.reset();
 						stabilizationErrors = 0;
 						stabilizedImgDescriptor = new ImgDescriptor(frame, deperspectivGraphy);
@@ -188,6 +189,7 @@ public abstract class LiveRetrieverBase extends AbstractApp {
 					src0.setImage(displayImage);
 					System.out.println("B " + (System.currentTimeMillis() - A));
 				});
+
 			} catch (Throwable e) {
 				logger.warn("Exception while computing layout.", e);
 			} finally {
@@ -460,7 +462,6 @@ public abstract class LiveRetrieverBase extends AbstractApp {
 		Imgproc.warpPerspective(frame, dePerspectived, homography, frame.size(), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(255));
 		return new Img(dePerspectived, false);
 	}
-
 
 	static double[] getVpFromVp2D(double[] vpImg, double[] pp, double f) {
 		double[] vp = new double[] { vpImg[0] / vpImg[2] - pp[0], vpImg[1] / vpImg[2] - pp[1], f };

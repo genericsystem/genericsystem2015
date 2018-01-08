@@ -24,7 +24,6 @@ public class Field extends AbstractField {
 	@JsonManagedReference
 	private final List<Field> children;
 
-	private static final int LABELS_SIZE_THRESHOLD = 10;
 	private static final double CONFIDENCE_THRESHOLD = 0.92;
 	private static final double LOCK_THRESHOLD = 0.90;
 
@@ -69,11 +68,12 @@ public class Field extends AbstractField {
 		}
 	}
 
-	public Field findPotentialParent(GSRect rect) {
+	//recursive
+	public Field recursiveFindPotentialParent(GSRect rect) {
 		if (!rect.isInside(getRect()))
 			return null;
 		for (Field child : children) {
-			Field candidate = child.findPotentialParent(rect);
+			Field candidate = child.recursiveFindPotentialParent(rect);
 			if (candidate != null)
 				return candidate;
 		}
@@ -192,6 +192,8 @@ public class Field extends AbstractField {
 	}
 
 	public void updateParent(Field parent) {
+		if(this.parent!=null)
+			this.parent.removeChild(this);
 		this.parent = parent;
 		this.parent.addChild(this);
 
@@ -213,21 +215,17 @@ public class Field extends AbstractField {
 		return !isLocked() && deadCounter >= maxDeadCount;
 	}
 
-	//	public boolean needOcr() {
-	//		return !isLocked();
-	//	}
-
-	public void resetChildrenDeadCounter() {
+	public void recursiveResetChildrenDeadCounter() {
 		for (Field child : children) {
-			child.resetChildrenDeadCounter();
+			child.recursiveResetChildrenDeadCounter();
 			child.resetDeadCounter();
 		}
 	}
 
-	public void resetParentsDeadCounter() {
+	public void recursiveResetParentsDeadCounter() {
 		resetDeadCounter();
 		if (getParent() != null)
-			getParent().resetParentsDeadCounter();
+			getParent().recursiveResetParentsDeadCounter();
 	}
 
 
@@ -259,6 +257,7 @@ public class Field extends AbstractField {
 	public boolean isInFrame(Img img) {		
 		return (rect.tl().getX()>0 && rect.br().getX() < img.width()) && (rect.tl().getY() > 0 && rect.br().getY() < img.height());
 	}
+
 
 	//	public void consolidateLabelWithChildren() {
 	//		if(children.isEmpty())
