@@ -85,15 +85,15 @@ public class Field extends AbstractField {
 		String ocr = super.ocr(rootImg);
 		if (attempts <= 3 || attempts % 5 == 0) {
 			Stats.beginTask("ocr plasty");
-			consolidateOcr(false);
+			consolidateOcr();
 			Stats.endTask("ocr plasty");
 		}
 		return ocr;
 	}
 
 	@Override
-	public void consolidateOcr(boolean force) {
-		super.consolidateOcr(force);
+	public void consolidateOcr() {
+		super.consolidateOcr();
 		adjustLockLevel(getConfidence() > CONFIDENCE_THRESHOLD ? 1 : -0.5);
 	}
 

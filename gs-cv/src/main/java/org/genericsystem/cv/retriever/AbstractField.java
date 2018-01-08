@@ -92,9 +92,9 @@ public abstract class AbstractField {
 	//		consolidateOcr(Integer.MAX_VALUE, force);
 	//	}
 
-	public void consolidateOcr(boolean force) {
+	public void consolidateOcr() {
 		int labelsSize = getLabelsSize();
-		if (force || labelsSize >= MIN_SIZE_CONSOLIDATION) {
+		if (labelsSize >= MIN_SIZE_CONSOLIDATION) {
 			List<String> strings = labels.entrySet().stream().collect(ArrayList<String>::new, (list, e) -> IntStream.range(0, e.getValue()).forEach(count -> list.add(e.getKey())), List::addAll);
 			Tuple res = OCRPlasty.correctStringsAndGetOutliers(strings, RANSAC.NORM_LEVENSHTEIN);
 			this.consolidated = res.getString().orElse(null);
@@ -216,11 +216,8 @@ public abstract class AbstractField {
 	}
 
 	@Override
-	public String toString() {
-		StringBuffer sb = new StringBuffer();
-		sb.append("AbstractField: ").append("\n").append(" -> rect: ").append(rect).append("\n").append(" -> labels size: ").append(getLabelsSize()).append("\n").append(" -> consolidated: ").append(consolidated).append("\n").append(" -> confidence: ")
-		.append(confidence).append("\n");
-		return sb.toString();
+	public String toString() {		
+		return "AbstractField: \n -> rect: "+rect+"\n -> labels size: "+getLabelsSize()+"\n -> consolidated: "+consolidated+"\n -> confidence: "+confidence;
 	}
 
 }
