@@ -24,7 +24,6 @@ public class Field extends AbstractField {
 	@JsonManagedReference
 	private final List<Field> children;
 
-	private static final int LABELS_SIZE_THRESHOLD = 10;
 	private static final double CONFIDENCE_THRESHOLD = 0.92;
 	private static final double LOCK_THRESHOLD = 0.90;
 
@@ -70,11 +69,11 @@ public class Field extends AbstractField {
 	}
 
 	//recursive
-	public Field findPotentialParent(GSRect rect) {
+	public Field recursiveFindPotentialParent(GSRect rect) {
 		if (!rect.isInside(getRect()))
 			return null;
 		for (Field child : children) {
-			Field candidate = child.findPotentialParent(rect);
+			Field candidate = child.recursiveFindPotentialParent(rect);
 			if (candidate != null)
 				return candidate;
 		}
@@ -216,17 +215,17 @@ public class Field extends AbstractField {
 		return !isLocked() && deadCounter >= maxDeadCount;
 	}
 
-	public void resetChildrenDeadCounter() {
+	public void recursiveResetChildrenDeadCounter() {
 		for (Field child : children) {
-			child.resetChildrenDeadCounter();
+			child.recursiveResetChildrenDeadCounter();
 			child.resetDeadCounter();
 		}
 	}
 
-	public void resetParentsDeadCounter() {
+	public void recursiveResetParentsDeadCounter() {
 		resetDeadCounter();
 		if (getParent() != null)
-			getParent().resetParentsDeadCounter();
+			getParent().recursiveResetParentsDeadCounter();
 	}
 
 

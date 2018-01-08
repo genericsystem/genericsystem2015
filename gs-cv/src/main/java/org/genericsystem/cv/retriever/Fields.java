@@ -4,12 +4,9 @@ import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -19,11 +16,8 @@ import org.genericsystem.cv.utils.ParallelTasks;
 import org.genericsystem.cv.utils.RectToolsMapper;
 import org.genericsystem.reinforcer.tools.GSPoint;
 import org.genericsystem.reinforcer.tools.GSRect;
-import org.genericsystem.reinforcer.tools.Levenshtein;
-import org.opencv.calib3d.Calib3d;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
@@ -122,7 +116,7 @@ public class Fields extends AbstractFields<Field> {
 
 	private Field findPotentialParent(GSRect rect) {
 		for (Field root : getRoots()) {
-			Field parent = root.findPotentialParent(rect);
+			Field parent = root.recursiveFindPotentialParent(rect);
 			if (parent != null)
 				return parent;
 		}
@@ -146,8 +140,8 @@ public class Fields extends AbstractFields<Field> {
 	public void updateNode(GSRect rect, Field field, int width, int height) {
 		field.updateOcrRect(rect);
 		field.adjustLockLevel(1.0);
-		field.resetParentsDeadCounter();
-		field.resetChildrenDeadCounter();
+		field.recursiveResetParentsDeadCounter();
+		field.recursiveResetChildrenDeadCounter();
 	}
 
 	private boolean checkOverlapConstraint(GSRect rect) {
@@ -248,151 +242,6 @@ public class Fields extends AbstractFields<Field> {
 			tasks.run();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
-		}
-	}
-
-
-	public Map<Field, Field> getLabelMatchesWithOldFields(Img rootImg, Fields oldFields) {
-		if (size() <= 0)
-			return null;
-		long TS = System.currentTimeMillis();
-		Map<Field, String> ocrs = new ConcurrentHashMap<Field, String>();
-		while (System.currentTimeMillis() - TS <= OCR_TIMEOUT) {
-			runParallelOcr(rootImg, ocrs);
-		}
-		return findRecoveringMatches(oldFields, ocrs);
-	}
-
-	private void runParallelOcr(Img rootImg, Map<Field, String> ocrs) {
-		ParallelTasks tasks = new ParallelTasks();
-		int limit = tasks.getCounter() * 2;
-		for (Set<Integer> indexes = new HashSet<>(); indexes.size() < limit && indexes.size() < size();) {
-			int idx = ThreadLocalRandom.current().nextInt(size());
-			if (indexes.add(idx)) {
-				Field f = fields.get(idx);
-				tasks.add(() -> {
-					String s = f.ocr(rootImg);
-					if(s!=null)
-						ocrs.put(f, s);
-				});					
-			}
-		}
-		try {
-			tasks.run();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-	}
-
-	public void tryRecoveryfromOldFields(Map<Field, Field> labelMatches, Fields oldFields) {
-		Mat homography = findRecoveringHomography(labelMatches);
-		if(homography!=null ){
-			oldFields.restabilizeFields(homography);
-			transferHistoryFrom(oldFields);
-		}		
-	}
-
-	private Map<Field, Field> findRecoveringMatches(Fields oldFields, Map<Field, String> ocrs){
-		Map<Field, Field> matches = new HashMap<Field,Field>();
-		for(Map.Entry<Field, String> entry : ocrs.entrySet()){
-			if(entry.getValue().trim().length()<4)
-				continue;
-			for(Field oldField : oldFields){
-				if(entry.getValue().equals(oldField.getConsolidated()) /*|| levenshteinDistance(entry.getValue(),oldField.getConsolidated())<2*/){
-					if(matches.containsKey(entry.getKey()))
-						matches.remove(entry.getKey());
-					else
-						matches.put(entry.getKey(), oldField);
-				}				
-			}			
-		}
-		System.out.println("returning "+matches);
-		return matches;
-	}
-
-	private double levenshteinDistance(String ocr, String consolidatedLabel){
-		return Levenshtein.normedDistance(ocr,consolidatedLabel);
-	}
-
-	private Mat findRecoveringHomography(Map<Field, Field> matches) {		
-		List<Point> newPointList = new ArrayList<>();
-		List<Point> oldPointList = new ArrayList<>();
-		for(Map.Entry<Field, Field> entry : matches.entrySet()){
-			newPointList.addAll(getSquarePoints(entry.getKey().getRect().decomposeClockwise()));
-			oldPointList.addAll(getSquarePoints(entry.getValue().getRect().decomposeClockwise()));			
-
-		}
-
-		//
-		//		List<Point[]> pairedPoints = new ArrayList<>();
-		//		for(int i =0; i<newPointList.size(); i++)
-		//			pairedPoints.add(new Point[]{oldPointList.get(i), newPointList.get(i)});
-		//
-		//
-		//		double[] transScaleParams= new LMHostImpl<>((points, params) -> distance(points, params),pairedPoints , new double[] { 1, 1, 0, 0 }).getParams();
-		//		Mat result = getTSMat(transScaleParams);
-		//return result;
-
-		Mat mask = new Mat();
-		Mat homography = Calib3d.findHomography(new MatOfPoint2f(oldPointList.toArray(new Point[oldPointList.size()])), new MatOfPoint2f(newPointList.toArray(new Point[newPointList.size()])), 8, 2, mask, 2000, 0.995);
-		for(int i=mask.rows()-1; i>=0 ;i--){
-			if(mask.get(i, 0)[0]==0){
-				newPointList.remove(i);
-				oldPointList.remove(i);
-			}
-		}
-		return evaluateHomographyError(newPointList, oldPointList, homography)<1?homography:null;
-	}
-
-	//	private double distance(Point[] points, double[] params){
-	//		double p2x=points[1].x , p2y=points[1].y;
-	//		double p1x = params[0]*points[0].x + params[0]*params[2];
-	//		double p1y = params[1]*points[0].y + params[1]*params[3];
-	//		double deltaX = p2x - p1x;
-	//		double deltaY = p2y - p1y;
-	//		double distance = Math.sqrt(deltaX*deltaX + deltaY*deltaY);
-	//		//System.out.println("distance: "+distance);
-	//		return distance < 5?distance:5;
-	//	}
-	//
-	//	private Mat getTSMat(double[] transScaleParams) {
-	//		Mat TSMat = new Mat(3, 3, CvType.CV_64FC1, new Scalar(0));
-	//		TSMat.put(0, 0, transScaleParams[0]);
-	//		TSMat.put(1, 1, transScaleParams[1]);
-	//		TSMat.put(0, 2, transScaleParams[2]*transScaleParams[0]);
-	//		TSMat.put(1, 2, transScaleParams[3]*transScaleParams[1]);
-	//		TSMat.put(2, 2, 1d);
-	//		return TSMat;
-	//	}
-
-	private double evaluateHomographyError(List<Point> newPointList, List<Point> oldPointList, Mat homography) {		
-		double error = 0.0;
-		List<Point> restabilizedPoints = restabilize(oldPointList, homography);
-		for(int i = 0; i < restabilizedPoints.size(); i++){
-			double deltaX = newPointList.get(i).x - restabilizedPoints.get(i).x;
-			double deltaY = newPointList.get(i).y - restabilizedPoints.get(i).y;
-			error+=deltaX*deltaX + deltaY*deltaY;
-		}
-		System.out.println("error found: "+ Math.sqrt(error)/restabilizedPoints.size());
-		return Math.sqrt(error)/restabilizedPoints.size();
-	}
-
-	private List<Point> getSquarePoints(GSPoint[] GSpoints) {
-		List<Point> points = new ArrayList<>();
-		for(int i = 0; i < GSpoints.length; i++)
-			points.add(new Point(GSpoints[i].getX(), GSpoints[i].getY()));
-		return points;
-	}
-
-
-	public void transferHistoryFrom(Fields oldFields){
-
-		for(Field newField : fields){
-			Field match = newField.findOldMatch(oldFields);
-			if(match!=null){
-				newField.getLabels().putAll(match.getLabels());				
-				newField.setConsolidated(match.getConsolidated());
-			}			
 		}
 	}
 
