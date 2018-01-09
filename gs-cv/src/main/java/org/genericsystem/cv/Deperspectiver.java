@@ -52,57 +52,52 @@ public class Deperspectiver extends AbstractApp {
 	private boolean stabilizedMode = false;
 	private boolean textsEnabledMode = false;
 	private Lines lines;
-	private Img display;
+	private SuperFrameImg superFrame;
 
 	@Override
 	protected void fillGrid(GridPane mainGrid) {
-		Mat frame = new Mat();
-		capture.read(frame);
-		display = new Img(frame, true);
-		ImageView frameView = new ImageView(Tools.mat2jfxImage(frame));
-		mainGrid.add(frameView, 0, 0);
-		ImageView deskiewedView = new ImageView(Tools.mat2jfxImage(frame));
-		mainGrid.add(deskiewedView, 0, 1);
-		Mat dePerspectived = frame.clone();
+		superFrame = SuperFrameImg.create(capture);
 
-		double[] pp = new double[] { frame.width() / 2, frame.height() / 2 };
+		ImageView view00 = new ImageView(superFrame.getDisplay().toJfxImage());
+		mainGrid.add(view00, 0, 0);
+		ImageView view01 = new ImageView(superFrame.getDisplay().toJfxImage());
+		mainGrid.add(view01, 0, 1);
+		ImageView view10 = new ImageView(superFrame.getDisplay().toJfxImage());
+		mainGrid.add(view10, 1, 0);
+		ImageView view11 = new ImageView(superFrame.getDisplay().toJfxImage());
+		mainGrid.add(view11, 1, 1);
+
+		double[] pp = superFrame.getPrincipalPoint();
 		calibrated0 = new AngleCalibrated(0, Math.PI / 2);
 		timer.scheduleAtFixedRate(() -> {
 			try {
 
 				if (!stabilizedMode) {
-					capture.read(frame);
+					superFrame = SuperFrameImg.create(capture);
 				}
 
-				display = new Img(frame, true);
 				List<Line> addedLines = null;
 				if (textsEnabledMode) {
-					Mat diffFrame = getDiffFrame(frame);
-					List<Circle> circles = detectCircles(frame, diffFrame, 30, 100);
+					List<Circle> circles = detectCircles(superFrame, 30, 100);
 					Collection<Circle> selectedCircles = selectRandomCirles(circles, 20);
 					addedLines = new ArrayList<>();
 					for (Circle circle : selectedCircles) {
-						Img circledImg = getCircledImg(frame, (int) circle.radius, circle.center);
+						Img circledImg = getCircledImg(superFrame.getFrame().getSrc(), (int) circle.radius, circle.center);
 						double angle = getBestAngle(circledImg, 42, 12, 5, 180, null) / 180 * Math.PI;
-						addedLines.add(buildLine(frame, circle.center, angle, circle.radius));
-						Imgproc.circle(display.getSrc(), circle.center, (int) circle.radius, new Scalar(0, 255, 0), 1);
+						addedLines.add(buildLine(circle.center, angle, circle.radius));
+						Imgproc.circle(superFrame.getDisplay().getSrc(), circle.center, (int) circle.radius, new Scalar(0, 255, 0), 1);
 					}
 				}
 
-				Mat diffFrame = new Mat();
-				Core.absdiff(frame, new Scalar(255), diffFrame);
-				// Img grad = new Img(diffFrame, false).adaptativeGaussianInvThreshold(5, 3).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(15, 15)).morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(3, 3));
-				Img grad = new Img(frame, false).morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(2, 2)).otsu().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(10, 10)).morphologyEx(Imgproc.MORPH_GRADIENT,
-						Imgproc.MORPH_ELLIPSE, new Size(3, 3));
+				Img grad = superFrame.getBinaryClosed10().morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(3, 3));
+				lines = new Lines(grad.houghLinesP(1, Math.PI / 180, 10, 10, 3));
+				Img grad2 = superFrame.getBinaryClosed20().morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(3, 3));
+				lines.lines.addAll(new Lines(grad2.houghLinesP(1, Math.PI / 180, 10, 20, 6)).lines);
 
-				// if (!stabilize) {
-				lines = new Lines(grad.houghLinesP(1, Math.PI / 180, 10, 100, 10));
 				if (addedLines != null)
 					lines.lines.addAll(addedLines);
-				// }
 				if (lines.size() > 4) {
-					lines.draw(display.getSrc(), new Scalar(0, 0, 255), 1);
-					// lines = lines.reduce(100);
+					lines.draw(superFrame.getDisplay().getSrc(), new Scalar(0, 0, 255), 1);
 
 					double[] thetaPhi = new LMHostImpl<>((line, params) -> distance(new AngleCalibrated(params).uncalibrate(pp, f), line), lines.lines, calibrated0.getThetaPhi()).getParams();
 					calibrated0 = calibrated0.dumpThetaPhi(thetaPhi, 1);
@@ -111,16 +106,19 @@ public class Deperspectiver extends AbstractApp {
 
 					double[] uncalibrate0 = result[0].uncalibrate(pp, f);
 					Lines horizontals = lines.filter(line -> distance(uncalibrate0, line) < 0.40);
-					horizontals.draw(display.getSrc(), new Scalar(0, 255, 0), 1);
+					horizontals.draw(superFrame.getDisplay().getSrc(), new Scalar(0, 255, 0), 1);
 
 					double[] uncalibrate1 = result[1].uncalibrate(pp, f);
 					Lines verticals = lines.filter(line -> distance(uncalibrate1, line) < 0.40);
-					verticals.draw(display.getSrc(), new Scalar(255, 0, 0), 1);
+					verticals.draw(superFrame.getDisplay().getSrc(), new Scalar(255, 0, 0), 1);
 
-					frameView.setImage(Tools.mat2jfxImage(display.getSrc()));
-					Mat homography = findHomography(frame.size(), result, pp, f);
-					Imgproc.warpPerspective(frame, dePerspectived, homography, frame.size(), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(0));
-					deskiewedView.setImage(Tools.mat2jfxImage(dePerspectived));
+					view00.setImage(superFrame.getDisplay().toJfxImage());
+					Mat homography = findHomography(superFrame.size(), result, pp, f);
+					Mat deperspectived = new Mat();
+					Imgproc.warpPerspective(superFrame.getFrame().getSrc(), deperspectived, homography, superFrame.size(), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(0));
+					view01.setImage(Tools.mat2jfxImage(deperspectived));
+					view10.setImage(superFrame.getBinaryClosed10().toJfxImage());
+					view11.setImage(superFrame.getDiffFrame().toJfxImage());
 				} else
 					System.out.println("Not enough lines : " + lines.size());
 
@@ -138,9 +136,10 @@ public class Deperspectiver extends AbstractApp {
 	}
 
 	public static AngleCalibrated[] findOtherVps(AngleCalibrated calibrated0, Lines lines, double[] pp, double f) {
+		System.out.println(Arrays.toString(calibrated0.getCalibratexyz()));
 		AngleCalibrated[] result = new AngleCalibrated[] { null, null, null };
 		double bestError = Double.MAX_VALUE;
-		// double bestAngle = 0;
+		double bestAngle = 0;
 		for (double angle = 0; angle < 360 / 180 * Math.PI; angle += 1 * Math.PI / 180) {
 			double error = 0;
 			AngleCalibrated calibratexy = calibrated0.getOrthoFromAngle(angle);
@@ -153,15 +152,16 @@ public class Deperspectiver extends AbstractApp {
 			double[] uncalibrate = calibratexy.uncalibrate(pp, f);
 			for (Line line : lines.lines)
 				error += distance(uncalibrate, line);
+			// System.out.println(error);
 			if (error < bestError) {
 				bestError = error;
 				result[0] = calibrated0;
 				result[1] = calibratexy;
 				result[2] = calibratez;
-				// bestAngle = angle;
+				bestAngle = angle;
 			}
 		}
-		// System.out.println("Best angle = " + bestAngle * 180 / Math.PI);
+		System.out.println("Best angle = " + bestAngle * 180 / Math.PI);
 
 		double theta0 = Math.abs(result[0].getTheta()) % Math.PI;
 		theta0 = Math.min(Math.PI - theta0, theta0);
@@ -205,16 +205,6 @@ public class Deperspectiver extends AbstractApp {
 
 		return Imgproc.getPerspectiveTransform(new MatOfPoint2f(new Point(A_), new Point(B_), new Point(C_), new Point(D_)), new MatOfPoint2f(new Point(A), new Point(B), new Point(C), new Point(D)));
 	}
-
-	// private static double distance(double[] calibratedxyz, Line line,double[] pp,double f) {
-	// Calibrated calA = new Calibrated(new double[] { line.x1, line.y1, 1d }, pp, f);
-	// Calibrated calB = new Calibrated(new double[] { line.x2, line.y2, 1d }, pp, f);
-	// double[] lineMat = cross(calA.getCalibratexyz(), calB.getCalibratexyz());
-	// double di = calibratedxyz[0] * lineMat[0] + calibratedxyz[1] * lineMat[1] + calibratedxyz[2] * lineMat[2];
-	// double normLineMat = Math.sqrt(lineMat[0] * lineMat[0] + lineMat[1] * lineMat[1] + lineMat[2] * lineMat[2]);
-	// di /= (Math.sqrt(calibratedxyz[0] * calibratedxyz[0] + calibratedxyz[1] * calibratedxyz[1] + calibratedxyz[2] * calibratedxyz[2]) * normLineMat);
-	// return (di*di)> 0.06? 0.06 : (di*di);
-	// }
 
 	private static double distance(double[] vp, Line line) {
 		double dy = line.y1 - line.y2;
@@ -352,16 +342,6 @@ public class Deperspectiver extends AbstractApp {
 
 	}
 
-	private Mat getDiffFrame(Mat frame) {
-		Mat result = new Mat();
-		Imgproc.cvtColor(frame, result, Imgproc.COLOR_BGR2GRAY);
-		Imgproc.GaussianBlur(result, result, new Size(3, 3), 0);
-		Mat diffFrame = new Mat();
-		Core.absdiff(result, new Scalar(255), diffFrame);
-		Imgproc.adaptiveThreshold(diffFrame, diffFrame, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 7, 3);
-		return diffFrame;
-	}
-
 	private Collection<Circle> selectRandomCirles(List<Circle> circles, int circlesNumber) {
 		if (circles.size() <= circlesNumber)
 			return circles;
@@ -371,9 +351,9 @@ public class Deperspectiver extends AbstractApp {
 		return result;
 	}
 
-	private List<Circle> detectCircles(Mat frame, Mat diffFrame, int minRadius, int maxRadius) {
+	private List<Circle> detectCircles(SuperFrameImg superFrame, int minRadius, int maxRadius) {
 		List<MatOfPoint> contours = new ArrayList<>();
-		Imgproc.findContours(diffFrame, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+		Imgproc.findContours(superFrame.getDiffFrame().getSrc(), contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
 		List<Circle> circles = new ArrayList<>();
 		for (int i = 0; i < contours.size(); i++) {
 			MatOfPoint contour = contours.get(i);
@@ -383,11 +363,11 @@ public class Deperspectiver extends AbstractApp {
 				Point center = new Point();
 				MatOfPoint2f contour2F = new MatOfPoint2f(contour.toArray());
 				Imgproc.minEnclosingCircle(contour2F, center, radius);
-				if (radius[0] > minRadius && radius[0] < maxRadius && center.x > radius[0] && center.y > radius[0] && ((center.x + radius[0]) < frame.width()) && ((center.y + radius[0]) < frame.height())) {
+				if (radius[0] > minRadius && radius[0] < maxRadius && center.x > radius[0] && center.y > radius[0] && ((center.x + radius[0]) < superFrame.width()) && ((center.y + radius[0]) < superFrame.height())) {
 					circles.add(new Circle(center, radius[0]));
 					// Imgproc.circle(frame, center, (int) radius[0], new Scalar(0, 0, 255));
 				}
-				// Imgproc.drawContours(frame, Arrays.asList(contour), 0, new Scalar(0, 255, 0), 1);
+				// Imgproc.drawContours(superFrame.getDisplay().getSrc(), Arrays.asList(contour), 0, new Scalar(0, 0, 255), 1);
 			}
 		}
 		return circles;
@@ -414,7 +394,7 @@ public class Deperspectiver extends AbstractApp {
 		return circledImg;
 	}
 
-	public Line buildLine(Mat mat, Point center, double angle, double size) {
+	public Line buildLine(Point center, double angle, double size) {
 		double x1 = center.x - Math.sin(angle) * size;
 		double y1 = center.y + Math.cos(angle) * size;
 		double x2 = center.x + Math.sin(angle) * size;

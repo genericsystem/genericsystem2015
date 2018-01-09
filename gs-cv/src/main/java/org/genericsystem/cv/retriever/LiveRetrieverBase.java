@@ -107,8 +107,6 @@ public abstract class LiveRetrieverBase extends AbstractApp {
 		Img display = new Img(frame, false);
 		timerFields.scheduleAtFixedRate(() -> {
 			try {
-				long A = System.currentTimeMillis();
-				System.out.println("A " + A);
 				Stats.beginTask("frame");
 				frame = updateFrame();
 				if (frame == null) {
@@ -185,10 +183,7 @@ public abstract class LiveRetrieverBase extends AbstractApp {
 
 				Image displayImage = display.toJfxImage();
 
-				Platform.runLater(() -> {
-					src0.setImage(displayImage);
-					System.out.println("B " + (System.currentTimeMillis() - A));
-				});
+				Platform.runLater(() -> src0.setImage(displayImage));
 
 			} catch (Throwable e) {
 				logger.warn("Exception while computing layout.", e);
