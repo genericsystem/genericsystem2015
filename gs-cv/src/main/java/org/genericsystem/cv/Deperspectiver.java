@@ -82,8 +82,8 @@ public class Deperspectiver extends AbstractApp {
 					Collection<Circle> selectedCircles = selectRandomCirles(circles, 20);
 					addedLines = new ArrayList<>();
 					for (Circle circle : selectedCircles) {
-						Img circledImg = getCircledImg(superFrame.getFrame().getSrc(), (int) circle.radius, circle.center);
-						double angle = getBestAngle(circledImg, 42, 12, 5, 180, null) / 180 * Math.PI;
+						Img circledImg = getCircledImg(superFrame, (int) circle.radius, circle.center);
+						double angle = getBestAngle(circledImg, 42, 12, 5, 192, null) / 180 * Math.PI;
 						addedLines.add(buildLine(circle.center, angle, circle.radius));
 						Imgproc.circle(superFrame.getDisplay().getSrc(), circle.center, (int) circle.radius, new Scalar(0, 255, 0), 1);
 					}
@@ -383,11 +383,11 @@ public class Deperspectiver extends AbstractApp {
 		float radius;
 	}
 
-	public Img getCircledImg(Mat frame, int radius, Point center) {
+	public Img getCircledImg(SuperFrameImg superFrame, int radius, Point center) {
 		Mat mask = new Mat(new Size(radius * 2, radius * 2), CvType.CV_8UC1, new Scalar(0));
 		Imgproc.circle(mask, new Point(radius, radius), radius, new Scalar(255), -1);
 		Rect rect = new Rect(new Point(center.x - radius, center.y - radius), new Point(center.x + radius, center.y + radius));
-		Mat roi = new Img(new Mat(frame, rect), true).bilateralFilter().adaptativeGaussianInvThreshold(3, 3).getSrc();
+		Mat roi = new Mat(superFrame.getBinarized().getSrc(), rect);
 		Mat circled = new Mat();
 		roi.copyTo(circled, mask);
 		Img circledImg = new Img(circled, false);
