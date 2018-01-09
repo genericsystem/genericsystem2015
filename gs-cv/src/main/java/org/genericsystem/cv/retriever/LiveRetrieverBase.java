@@ -201,7 +201,7 @@ public abstract class LiveRetrieverBase extends AbstractApp {
 
 	private Mat computeDeperspectivedHomography(Mat frame, double[] pp, double f, DeperspectivationMode mode) {
 		if (!stabilizedMode) {
-			// capture.read(frame);
+			frame = updateFrame();
 		}
 		if (DeperspectivationMode.NONE == mode)
 			return Mat.eye(3, 3, CvType.CV_64FC1);
