@@ -33,7 +33,7 @@ public class Tools {
 
 	public static BufferedImage mat2bufferedImage(Mat image) {
 		MatOfByte bytemat = new MatOfByte();
-		Imgcodecs.imencode(".png", image, bytemat);
+		Imgcodecs.imencode(".bmp", image, bytemat);
 		try {
 			return ImageIO.read(new ByteArrayInputStream(bytemat.toArray()));
 		} catch (IOException e) {
