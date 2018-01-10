@@ -86,10 +86,10 @@ public class ImgDescriptor {
 		matcher.match(getDescriptors(), frameDescriptor.getDescriptors(), matches);
 		List<DMatch> goodMatches = new ArrayList<>();
 		for (DMatch dMatch : matches.toArray()) {
-			if (dMatch.distance <= 100) {
+			if (dMatch.distance <= 120) {
 				goodMatches.add(dMatch);
 			}
-		}		
+		}
 
 		List<KeyPoint> newKeypoints_ = frameDescriptor.getKeypoints().toList();
 		List<KeyPoint> oldKeypoints_ = getKeypoints().toList();
@@ -108,7 +108,6 @@ public class ImgDescriptor {
 
 			double[] transScaleParams = new LevenbergImpl<>((points, params) -> distance(points, params), pairedPoints, new double[] { 1, 1, 0, 0 }).getParams();
 			System.out.println("params " + Arrays.toString(transScaleParams));
-
 
 			// Mat result = getTSMat(transScaleParams);
 

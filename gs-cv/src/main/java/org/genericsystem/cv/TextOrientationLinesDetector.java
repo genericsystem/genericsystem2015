@@ -36,15 +36,6 @@ public class TextOrientationLinesDetector {
 		return result;
 	}
 
-	private static Collection<Circle> selectRandomCirles(List<Circle> circles, int circlesNumber) {
-		if (circles.size() <= circlesNumber)
-			return circles;
-		Set<Circle> result = new HashSet<>();
-		while (result.size() < circlesNumber)
-			result.add(circles.get((int) (Math.random() * circles.size())));
-		return result;
-	}
-
 	private static List<Circle> detectCircles(SuperFrameImg superFrame, int minRadius, int maxRadius) {
 		List<MatOfPoint> contours = new ArrayList<>();
 		Imgproc.findContours(superFrame.getDiffFrame().getSrc(), contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
@@ -65,6 +56,15 @@ public class TextOrientationLinesDetector {
 			}
 		}
 		return circles;
+	}
+
+	private static Collection<Circle> selectRandomCirles(List<Circle> circles, int circlesNumber) {
+		if (circles.size() <= circlesNumber)
+			return circles;
+		Set<Circle> result = new HashSet<>();
+		while (result.size() < circlesNumber)
+			result.add(circles.get((int) (Math.random() * circles.size())));
+		return result;
 	}
 
 	private static Img getCircledImg(SuperFrameImg superFrame, int radius, Point center) {

@@ -1,8 +1,10 @@
 package org.genericsystem.cv;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.genericsystem.cv.Calibrated.AngleCalibrated;
+import org.genericsystem.cv.Deperspectiver.Line;
 import org.genericsystem.cv.Deperspectiver.Lines;
 import org.genericsystem.cv.lm.LevenbergImpl;
 import org.opencv.core.Core;
@@ -197,8 +199,8 @@ public class SuperFrameImg {
 		lines.draw(getDisplay().getSrc(), color, thickness);
 	}
 
-	public void draw(AngleCalibrated calibratedVps, Lines lines, double[] pp, double f, Scalar color, int thickness) {
-		double[] uncalibrate0 = calibratedVps.uncalibrate(pp, f);
+	public void drawVanishingPointLines(Lines lines, AngleCalibrated calibratedVp, double[] pp, double f, Scalar color, int thickness) {
+		double[] uncalibrate0 = calibratedVp.uncalibrate(pp, f);
 		Lines horizontals = lines.filter(line -> AngleCalibrated.distance(uncalibrate0, line) < 0.3);
 		draw(horizontals, color, thickness);
 	}
@@ -218,6 +220,10 @@ public class SuperFrameImg {
 	public AngleCalibrated findVanishingPoint(Lines lines, AngleCalibrated old, double[] pp, double f) {
 		double[] thetaPhi = new LevenbergImpl<>((line, params) -> new AngleCalibrated(params).distance(line, pp, f), lines.lines, old.getThetaPhi()).getParams();
 		return new AngleCalibrated(thetaPhi);
+	}
+
+	public List<Line> findTextOrientationLines() {
+		return TextOrientationLinesDetector.getTextOrientationLines(this);
 	}
 
 }

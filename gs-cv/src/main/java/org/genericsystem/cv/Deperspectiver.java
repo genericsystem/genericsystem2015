@@ -66,20 +66,18 @@ public class Deperspectiver extends AbstractApp {
 		calibrated0 = new AngleCalibrated(0, Math.PI / 2);
 		timer.scheduleAtFixedRate(() -> {
 			try {
-
-				if (!stabilizedMode) {
+				if (!stabilizedMode)
 					superFrame = SuperFrameImg.create(capture);
-				}
 				Lines lines = superFrame.detectLines();
 				if (textsEnabledMode)
-					lines.lines.addAll(TextOrientationLinesDetector.getTextOrientationLines(superFrame));
+					lines.lines.addAll(superFrame.findTextOrientationLines());
 				if (lines.size() > 4) {
 					superFrame.draw(lines, new Scalar(0, 0, 255), 1);
 					calibrated0 = superFrame.findVanishingPoint(lines, calibrated0, pp, f);
 					AngleCalibrated[] calibratedVps = calibrated0.findOtherVps(lines, pp, f);
 
-					superFrame.draw(calibratedVps[0], lines, pp, f, new Scalar(0, 255, 0), 1);
-					superFrame.draw(calibratedVps[1], lines, pp, f, new Scalar(255, 0, 0), 1);
+					superFrame.drawVanishingPointLines(lines, calibratedVps[0], pp, f, new Scalar(0, 255, 0), 1);
+					superFrame.drawVanishingPointLines(lines, calibratedVps[1], pp, f, new Scalar(255, 0, 0), 1);
 
 					Image displayImage = superFrame.getDisplay().toJfxImage();
 					Image deperspectivedImage = superFrame.dePerspective(calibratedVps, pp, f).toJfxImage();
