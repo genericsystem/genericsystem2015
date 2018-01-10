@@ -106,15 +106,15 @@ public class SuperFrameImg {
 	}
 
 	private Img buildBinaryClosed10() {
-		return getBinarized().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(10, 10));
+		return getBinarized().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(10, 10)).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(10, 10));
 	}
 
 	private Img buildBinaryClosed20() {
-		return getBinarized().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(20, 20));
+		return getBinarized().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(20, 20)).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(20, 20));
 	}
 
 	private Img buildBinaryClosed30() {
-		return getBinarized().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(30, 30));
+		return getBinarized().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(30, 30)).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(30, 30));
 	}
 
 	private Img buildBinaryClosed40() {
@@ -209,7 +209,7 @@ public class SuperFrameImg {
 		Img grad = getBinaryClosed10().morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(3, 3));
 		Lines lines = new Lines(grad.houghLinesP(1, Math.PI / 180, 10, 10, 3));
 		Img grad2 = getBinaryClosed30().morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(3, 3));
-		lines.lines.addAll(new Lines(grad2.houghLinesP(1, Math.PI / 180, 10, 30, 10)).lines);
+		lines.lines.addAll(new Lines(grad2.houghLinesP(1, Math.PI / 180, 10, 30, 15)).lines);
 		return lines;
 	}
 

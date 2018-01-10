@@ -19,6 +19,7 @@ import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
 import org.opencv.videoio.VideoCapture;
@@ -81,7 +82,7 @@ public class Deperspectiver extends AbstractApp {
 
 					Image displayImage = superFrame.getDisplay().toJfxImage();
 					Image deperspectivedImage = superFrame.dePerspective(calibratedVps, pp, f).toJfxImage();
-					Image closed = superFrame.getBinaryClosed30().toJfxImage();
+					Image closed = superFrame.getBinaryClosed10().morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(3, 3)).toJfxImage();
 					Image diff = superFrame.getDiffFrame().toJfxImage();
 
 					Platform.runLater(() -> {
