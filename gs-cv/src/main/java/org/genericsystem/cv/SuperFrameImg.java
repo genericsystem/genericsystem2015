@@ -197,6 +197,12 @@ public class SuperFrameImg {
 		lines.draw(getDisplay().getSrc(), color, thickness);
 	}
 
+	public void draw(AngleCalibrated calibratedVps, Lines lines, double[] pp, double f, Scalar color, int thickness) {
+		double[] uncalibrate0 = calibratedVps.uncalibrate(pp, f);
+		Lines horizontals = lines.filter(line -> AngleCalibrated.distance(uncalibrate0, line) < 0.3);
+		draw(horizontals, color, thickness);
+	}
+
 	public Lines detectLines() {
 		Img grad = getBinaryClosed10().morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(3, 3));
 		Lines lines = new Lines(grad.houghLinesP(1, Math.PI / 180, 10, 10, 3));

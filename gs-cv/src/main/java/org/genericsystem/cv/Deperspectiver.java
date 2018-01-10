@@ -41,13 +41,13 @@ public class Deperspectiver extends AbstractApp {
 	private final VideoCapture capture = new VideoCapture(0);
 	private ScheduledExecutorService timer = Executors.newSingleThreadScheduledExecutor();;
 
+	private SuperFrameImg superFrame;
 	private AngleCalibrated calibrated0;
 
 	private final double f = 6.053 / 0.009;
+
 	private boolean stabilizedMode = false;
 	private boolean textsEnabledMode = false;
-
-	private SuperFrameImg superFrame;
 
 	@Override
 	protected void fillGrid(GridPane mainGrid) {
@@ -78,8 +78,8 @@ public class Deperspectiver extends AbstractApp {
 					calibrated0 = superFrame.findVanishingPoint(lines, calibrated0, pp, f);
 					AngleCalibrated[] calibratedVps = calibrated0.findOtherVps(lines, pp, f);
 
-					calibratedVps[0].draw(superFrame, lines, pp, f, new Scalar(0, 255, 0), 1);
-					calibratedVps[1].draw(superFrame, lines, pp, f, new Scalar(255, 0, 0), 1);
+					superFrame.draw(calibratedVps[0], lines, pp, f, new Scalar(0, 255, 0), 1);
+					superFrame.draw(calibratedVps[1], lines, pp, f, new Scalar(255, 0, 0), 1);
 
 					Image displayImage = superFrame.getDisplay().toJfxImage();
 					Image deperspectivedImage = superFrame.dePerspective(calibratedVps, pp, f).toJfxImage();

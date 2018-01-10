@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.genericsystem.cv.Deperspectiver.Line;
 import org.genericsystem.cv.Deperspectiver.Lines;
-import org.opencv.core.Scalar;
 
 public class Calibrated {
 
@@ -171,12 +170,6 @@ public class Calibrated {
 			return "(" + theta * 180 / Math.PI + "°, " + phi * 180 / Math.PI + "°)";
 		}
 
-		public void draw(SuperFrameImg superFrame, Lines lines, double[] pp, double f, Scalar color, int thickness) {
-			double[] uncalibrate0 = uncalibrate(pp, f);
-			Lines horizontals = lines.filter(line -> distance(uncalibrate0, line) < 0.3);
-			superFrame.draw(horizontals, color, thickness);
-		}
-
 		public double distance(List<Line> lines, double[] pp, double f) {
 			double[] uncalibrate = uncalibrate(pp, f);
 			double error = 0;
@@ -189,7 +182,7 @@ public class Calibrated {
 			return Math.pow(Math.min(AngleCalibrated.distance(uncalibrate(pp, f), line), 0.3) * line.size(), 2);
 		}
 
-		private static double distance(double[] vp, Line line) {
+		static double distance(double[] vp, Line line) {
 			double dy = line.y1 - line.y2;
 			double dx = line.x2 - line.x1;
 			double dz = line.y1 * line.x2 - line.x1 * line.y2;
