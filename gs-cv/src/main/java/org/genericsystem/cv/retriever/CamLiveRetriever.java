@@ -590,11 +590,11 @@ public class CamLiveRetriever extends AbstractApp {
 	}
 
 
-	//TODO : not sure, to be checked!!
+
 	private Mat getHomographyToTheLast(ImgDescriptor descriptor, Mat betweenStabilizationHomo) {
 		Mat homography = betweenStabilizationHomo;
 		List<ImgDescriptor> descriptors = new ArrayList<>(descriptorTree.keySet());
-		for(int i = descriptors.size()-1; i > descriptors.indexOf(descriptor);i--)
+		for(int i = descriptors.indexOf(descriptor)+1; i<descriptors.size();i++)
 			homography = cross(descriptorTree.get(descriptors.get(i)),homography);
 		return homography;
 	}
@@ -617,7 +617,7 @@ public class CamLiveRetriever extends AbstractApp {
 		Mat homography = Mat.eye(new Size(3, 3), CvType.CV_64FC1);
 		List<ImgDescriptor> descriptors = new ArrayList<>(descriptorTree.keySet());
 		if(descriptors.indexOf(origin)>descriptors.indexOf(target)){
-			for(int i = descriptors.indexOf(target)+1; i<= descriptors.indexOf(origin);i++)
+			for(int i = descriptors.indexOf(origin); i>descriptors.indexOf(target) ;i--)
 				homography = cross(descriptorTree.get(descriptors.get(i)),homography);
 			return homography.inv();
 		}
