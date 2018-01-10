@@ -13,7 +13,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.genericsystem.cv.Calibrated.AngleCalibrated;
-import org.genericsystem.cv.lm.LevenbergImpl;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
@@ -76,10 +75,8 @@ public class Deperspectiver extends AbstractApp {
 					lines.lines.addAll(TextOrientationLinesDetector.getTextOrientationLines(superFrame));
 				if (lines.size() > 4) {
 					superFrame.draw(lines, new Scalar(0, 0, 255), 1);
-
-					double[] thetaPhi = new LevenbergImpl<>((line, params) -> new AngleCalibrated(params).distance(line, pp, f), lines.lines, calibrated0.getThetaPhi()).getParams();
-					calibrated0 = new AngleCalibrated(thetaPhi);
-					AngleCalibrated[] calibratedVps = calibrated0.findOtherVps(lines.lines, pp, f);
+					calibrated0 = superFrame.findVanishingPoint(lines, calibrated0, pp, f);
+					AngleCalibrated[] calibratedVps = calibrated0.findOtherVps(lines, pp, f);
 
 					calibratedVps[0].draw(superFrame, lines, pp, f, new Scalar(0, 255, 0), 1);
 					calibratedVps[1].draw(superFrame, lines, pp, f, new Scalar(255, 0, 0), 1);

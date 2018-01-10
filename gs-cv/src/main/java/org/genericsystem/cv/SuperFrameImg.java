@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import org.genericsystem.cv.Calibrated.AngleCalibrated;
 import org.genericsystem.cv.Deperspectiver.Lines;
+import org.genericsystem.cv.lm.LevenbergImpl;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint2f;
@@ -206,6 +207,11 @@ public class SuperFrameImg {
 
 	public Img dePerspective(AngleCalibrated[] calibratedVps, double[] pp, double f) {
 		return warpPerspective(findHomography(calibratedVps, pp, f));
+	}
+
+	public AngleCalibrated findVanishingPoint(Lines lines, AngleCalibrated old, double[] pp, double f) {
+		double[] thetaPhi = new LevenbergImpl<>((line, params) -> new AngleCalibrated(params).distance(line, pp, f), lines.lines, old.getThetaPhi()).getParams();
+		return new AngleCalibrated(thetaPhi);
 	}
 
 }

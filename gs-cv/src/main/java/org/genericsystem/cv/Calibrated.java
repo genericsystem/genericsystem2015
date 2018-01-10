@@ -210,7 +210,7 @@ public class Calibrated {
 			return d;
 		}
 
-		public AngleCalibrated[] findOtherVps(List<Line> lines, double[] pp, double f) {
+		public AngleCalibrated[] findOtherVps(Lines lines, double[] pp, double f) {
 			System.out.println(Arrays.toString(getCalibratexyz()));
 			AngleCalibrated[] result = new AngleCalibrated[] { null, null, null };
 			double bestError = Double.MAX_VALUE;
@@ -223,7 +223,7 @@ public class Calibrated {
 					calibratexy = calibratez;
 					calibratez = tmp;
 				}
-				double error = calibratexy.distance(lines, pp, f);
+				double error = calibratexy.distance(lines.lines, pp, f);
 				if (error < bestError) {
 					bestError = error;
 					result[0] = this;
