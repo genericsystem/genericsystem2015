@@ -2,9 +2,17 @@ package org.genericsystem.cv.retriever;
 
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -31,6 +39,7 @@ import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.utils.Converters;
 import org.opencv.videoio.VideoCapture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,6 +79,9 @@ public class CamLiveRetriever extends AbstractApp {
 	// private double[] vp1 = new double[]{5000, 0,1};
 	// private AngleCalibrated calibrated;
 	private AngleCalibrated calibrated0;
+
+	private Map<ImgDescriptor,Mat> descriptorTree = new LinkedHashMap<>();
+	private Map<ImgDescriptor,Double> distanceMap = new HashMap<>();
 
 	private final double f = 6.053 / 0.009;
 	private boolean stabilizedMode = false;
@@ -137,11 +149,14 @@ public class CamLiveRetriever extends AbstractApp {
 					ImgDescriptor newImgDescriptor = new ImgDescriptor(frame, deperspectivGraphy);
 					Stats.endTask("get img descriptors");
 					Stats.beginTask("stabilization homography");
-					Mat betweenStabilizedHomography = stabilizedImgDescriptor.computeStabilizationGraphy(newImgDescriptor);
+					Mat betweenStabilizedHomography = stabilizedImgDescriptor.computeStabilizationGraphy(newImgDescriptor);					
+
 					// displayMat(betweenStabilizedHomography);
 					Stats.endTask("stabilization homography");
 					if (betweenStabilizedHomography != null) {
 						stabilizationErrors = 0;
+
+						//						computeDistanceBetweenStabilized(betweenStabilizedHomography);
 
 						Mat stabilizationHomographyFromFrame = new Mat();
 						Core.gemm(betweenStabilizedHomography.inv(), deperspectivGraphy, 1, new Mat(), 0, stabilizationHomographyFromFrame);
@@ -195,6 +210,33 @@ public class CamLiveRetriever extends AbstractApp {
 				Stats.endTask("frame");
 			}
 		}, 100, FRAME_DELAY, TimeUnit.MILLISECONDS);
+	}
+
+
+
+	private double computeDistanceBetweenStabilized(Mat betweenStabilizedHomography) {
+		List<Point> originalPoints = Arrays.asList(new Point[]{new Point(0,0), new Point(frame.width(),0), new Point(frame.width(), frame.height()), new Point(0, frame.height())});
+		List<Point> points = restabilize(originalPoints, betweenStabilizedHomography);
+		return evaluateDistanceBetweenStabilized(points, originalPoints);
+	}
+
+	private List<Point> restabilize(List<Point> originals, Mat homography) {
+		Mat original = Converters.vector_Point2d_to_Mat(originals);
+		Mat results = new Mat();
+		Core.perspectiveTransform(original, results, homography);
+		List<Point> res = new ArrayList<>();
+		Converters.Mat_to_vector_Point2d(results, res);
+		return res;
+	}
+
+	private double evaluateDistanceBetweenStabilized(List<Point> newPointList, List<Point> oldPointList) {		
+		double error = 0.0;
+		for(int i = 0; i < oldPointList.size(); i++){
+			double deltaX = newPointList.get(i).x - oldPointList.get(i).x;
+			double deltaY = newPointList.get(i).y - oldPointList.get(i).y;
+			error+=deltaX*deltaX + deltaY*deltaY;
+		}
+		return Math.sqrt(error)/oldPointList.size();
 	}
 
 	private Mat computeDeperspectivedHomography(Mat frame, double[] pp, double f, DeperspectivationMode mode) {
@@ -526,5 +568,82 @@ public class CamLiveRetriever extends AbstractApp {
 	protected void onT() {
 		textsEnabledMode = !textsEnabledMode;
 	}
+	@Override
+	protected void onS(){
+		if(descriptorTree.isEmpty())
+			descriptorTree.put(stabilizedImgDescriptor, Mat.eye(new Size(3, 3), CvType.CV_64FC1));
+		int descriptorMapSize = descriptorTree.size();
+		ListIterator<ImgDescriptor> iterator = new ArrayList(descriptorTree.keySet()).listIterator(descriptorTree.size());
+
+		while (iterator.hasPrevious()){ 
+			ImgDescriptor d = iterator.previous();
+			Mat betweenStabilizationHomo = d==stabilizedImgDescriptor?null:d.computeStabilizationGraphy(stabilizedImgDescriptor);
+			if(betweenStabilizationHomo!=null)	{
+				Mat homographyToTheLast = getHomographyToTheLast(d, betweenStabilizationHomo);	
+				descriptorTree.put(stabilizedImgDescriptor,homographyToTheLast);
+				break;
+			}			
+		}
+		if(descriptorTree.size() == descriptorMapSize)
+			return;
+		findBestStabilized();
+	}
+
+
+
+	private Mat getHomographyToTheLast(ImgDescriptor descriptor, Mat betweenStabilizationHomo) {
+		Mat homography = betweenStabilizationHomo;
+		List<ImgDescriptor> descriptors = new ArrayList<>(descriptorTree.keySet());
+		for(int i = descriptors.indexOf(descriptor)+1; i<descriptors.size();i++)
+			homography = cross(descriptorTree.get(descriptors.get(i)),homography);
+		return homography;
+	}
+
+
+	private void findBestStabilized() {
+		List<ImgDescriptor> descriptors = new ArrayList<>(descriptorTree.keySet());
+		for(ImgDescriptor origin : descriptorTree.keySet()){
+			double totalDistance = 0.0;
+			for(ImgDescriptor target : descriptorTree.keySet())
+				totalDistance += origin == target?0.0:computeDistanceBetweenStabilized(computeHomography(origin, target));
+			distanceMap.put(origin, totalDistance);
+			System.out.println("index n° "+descriptors.indexOf(origin)+" distance: "+totalDistance);
+		}
+		Entry<ImgDescriptor, Double> min = Collections.min(distanceMap.entrySet(), Comparator.comparingDouble(Entry::getValue));
+		System.out.println(descriptors.indexOf(min.getKey()));
+	}
+
+	private Mat computeHomography(ImgDescriptor origin, ImgDescriptor target) {
+		Mat homography = Mat.eye(new Size(3, 3), CvType.CV_64FC1);
+		List<ImgDescriptor> descriptors = new ArrayList<>(descriptorTree.keySet());
+		if(descriptors.indexOf(origin)>descriptors.indexOf(target)){
+			for(int i = descriptors.indexOf(target)+1; i<= descriptors.indexOf(origin);i++)
+				homography = cross(descriptorTree.get(descriptors.get(i)),homography);
+			return homography.inv();
+		}
+		else{
+			for(int i = descriptors.indexOf(origin); i< descriptors.indexOf(target);i++)
+				homography = cross(homography,descriptorTree.get(descriptors.get(i+1)));
+			return homography;
+		}
+
+	}
+
+	private Mat cross(Mat matrix1, Mat matrix2){
+		Mat result = new Mat(matrix1.cols(),matrix2.rows(),CvType.CV_64FC1, new Scalar(0));
+		for(int i = 0; i < matrix1.rows() ; i++){
+			for(int j = 0; j < matrix2.cols() ; j++){
+				double sum = 0.0;
+				for(int k = 0; k < matrix2.rows(); k++){
+					sum += matrix1.get(i, k)[0]*matrix2.get(k, j)[0];
+				}
+				result.put(i, j, sum);
+			}
+		}
+		return result;
+	}
+
+
+
 
 }

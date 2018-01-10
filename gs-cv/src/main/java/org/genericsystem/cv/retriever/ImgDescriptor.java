@@ -109,6 +109,7 @@ public class ImgDescriptor {
 			double[] transScaleParams = new LevenbergImpl<>((points, params) -> distance(points, params), pairedPoints, new double[] { 1, 1, 0, 0 }).getParams();
 			System.out.println("params " + Arrays.toString(transScaleParams));
 
+
 			// Mat result = getTSMat(transScaleParams);
 
 			Mat result = Calib3d.findHomography(new MatOfPoint2f(goodOldKeypoints.stream().toArray(Point[]::new)), new MatOfPoint2f(goodNewKeypoints.stream().toArray(Point[]::new)), Calib3d.RANSAC, 1);
