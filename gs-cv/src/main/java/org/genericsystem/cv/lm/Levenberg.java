@@ -1,6 +1,6 @@
 package org.genericsystem.cv.lm;
 
-interface LMHost {
+interface Levenberg {
 	double dNudge(double dp[]);
 
 	// Allows myLM.bLMiter to modify parms[] and reevaluate.

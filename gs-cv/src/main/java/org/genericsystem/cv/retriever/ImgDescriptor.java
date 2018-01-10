@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.genericsystem.cv.Img;
-import org.genericsystem.cv.lm.LMHostImpl;
+import org.genericsystem.cv.lm.LevenbergImpl;
 import org.opencv.calib3d.Calib3d;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
@@ -106,7 +106,7 @@ public class ImgDescriptor {
 			for (int i = 0; i < goodNewKeypoints.size(); i++)
 				pairedPoints.add(new Point[] { goodOldKeypoints.get(i), goodNewKeypoints.get(i) });
 
-			double[] transScaleParams = new LMHostImpl<>((points, params) -> distance(points, params), pairedPoints, new double[] { 1, 1, 0, 0 }).getParams();
+			double[] transScaleParams = new LevenbergImpl<>((points, params) -> distance(points, params), pairedPoints, new double[] { 1, 1, 0, 0 }).getParams();
 			System.out.println("params " + Arrays.toString(transScaleParams));
 
 			// Mat result = getTSMat(transScaleParams);

@@ -1,5 +1,12 @@
 package org.genericsystem.cv;
 
+import java.util.Arrays;
+import java.util.List;
+
+import org.genericsystem.cv.Deperspectiver.Line;
+import org.genericsystem.cv.Deperspectiver.Lines;
+import org.opencv.core.Scalar;
+
 public class Calibrated {
 
 	final double x, y, z;
@@ -77,9 +84,9 @@ public class Calibrated {
 			this.theta = Math.atan2(this.y, this.x);
 			this.phi = Math.acos(this.z);
 		}
-		
-		public AngleCalibrated(double theta,double phi) {
-			this(new double[] {theta,phi});
+
+		public AngleCalibrated(double theta, double phi) {
+			this(new double[] { theta, phi });
 		}
 
 		public AngleCalibrated(double[] tethaPhi) {
@@ -88,14 +95,14 @@ public class Calibrated {
 			this.phi = Math.acos(this.z);
 		}
 
-		public double getTheta(){
+		public double getTheta() {
 			return theta;
 		}
-		
-		public double getPhi(){
+
+		public double getPhi() {
 			return phi;
 		}
-		
+
 		public double[] getThetaPhi() {
 			return new double[] { theta, phi };
 		}
@@ -103,9 +110,10 @@ public class Calibrated {
 		public AngleCalibrated dumpThetaPhi(double[] tethaPhi, int dumpSize) {
 			return new AngleCalibrated(new double[] { ((dumpSize - 1) * theta + tethaPhi[0]) / dumpSize, ((dumpSize - 1) * phi + tethaPhi[1]) / dumpSize });
 		}
-		
+
+		@Override
 		AngleCalibrated dumpXyz(double[] xyz, int dumpSize) {
-			return new AngleCalibrated(new double[] { ((dumpSize - 1) * x + xyz[0]) / dumpSize, ((dumpSize - 1) * y + xyz[1]) / dumpSize, ((dumpSize - 1) * z + xyz[2]) / dumpSize },null);
+			return new AngleCalibrated(new double[] { ((dumpSize - 1) * x + xyz[0]) / dumpSize, ((dumpSize - 1) * y + xyz[1]) / dumpSize, ((dumpSize - 1) * z + xyz[2]) / dumpSize }, null);
 		}
 
 		public double[] getUncalibrated(double[] pp, double f) {
@@ -133,7 +141,7 @@ public class Calibrated {
 			// result[1] *= -1.0;
 			// result[2] *= -1.0;
 			// }
-			return new AngleCalibrated(result,null);
+			return new AngleCalibrated(result, null);
 		}
 
 		public AngleCalibrated getOrthoFromVps(Calibrated calibrated2) {
@@ -151,7 +159,7 @@ public class Calibrated {
 			// vp3[1] *= -1.0;
 			// vp3[2] *= -1.0;
 			// }
-			return new AngleCalibrated(vp3,null);
+			return new AngleCalibrated(vp3, null);
 		}
 
 		static double[] cross(double[] a, double b[]) {
@@ -161,6 +169,79 @@ public class Calibrated {
 		@Override
 		public String toString() {
 			return "(" + theta * 180 / Math.PI + "°, " + phi * 180 / Math.PI + "°)";
+		}
+
+		public void draw(SuperFrameImg superFrame, Lines lines, double[] pp, double f, Scalar color, int thickness) {
+			double[] uncalibrate0 = uncalibrate(pp, f);
+			Lines horizontals = lines.filter(line -> distance(uncalibrate0, line) < 0.3);
+			superFrame.draw(horizontals, color, thickness);
+		}
+
+		public double distance(List<Line> lines, double[] pp, double f) {
+			double[] uncalibrate = uncalibrate(pp, f);
+			double error = 0;
+			for (Line line : lines)
+				error += Math.pow(Math.min(AngleCalibrated.distance(uncalibrate, line), 0.3) * line.size(), 2);
+			return error;
+		}
+
+		public double distance(Line line, double[] pp, double f) {
+			return Math.pow(Math.min(AngleCalibrated.distance(uncalibrate(pp, f), line), 0.3) * line.size(), 2);
+		}
+
+		private static double distance(double[] vp, Line line) {
+			double dy = line.y1 - line.y2;
+			double dx = line.x2 - line.x1;
+			double dz = line.y1 * line.x2 - line.x1 * line.y2;
+			double norm = Math.sqrt(dy * dy + dx * dx + dz * dz);
+			double n0 = -dx / norm;
+			double n1 = dy / norm;
+			double nNorm = Math.sqrt(n0 * n0 + n1 * n1);
+			double[] midPoint = new double[] { (line.x1 + line.x2) / 2, (line.y1 + line.y2) / 2, 1d };
+			double r0 = vp[1] * midPoint[2] - midPoint[1];
+			double r1 = midPoint[0] - vp[0] * midPoint[2];
+			double rNorm = Math.sqrt(r0 * r0 + r1 * r1);
+			double num = r0 * n0 + r1 * n1;
+			if (num < 0)
+				num = -num;
+			double d = 0;
+			if (nNorm != 0 && rNorm != 0)
+				d = num / (nNorm * rNorm);
+			return d;
+		}
+
+		public AngleCalibrated[] findOtherVps(List<Line> lines, double[] pp, double f) {
+			System.out.println(Arrays.toString(getCalibratexyz()));
+			AngleCalibrated[] result = new AngleCalibrated[] { null, null, null };
+			double bestError = Double.MAX_VALUE;
+			// double bestAngle = 0;
+			for (double angle = 0; angle < 360 / 180 * Math.PI; angle += 1 * Math.PI / 180) {
+				AngleCalibrated calibratexy = getOrthoFromAngle(angle);
+				AngleCalibrated calibratez = getOrthoFromVps(calibratexy);
+				if (calibratexy.getPhi() < calibratez.getPhi()) {
+					AngleCalibrated tmp = calibratexy;
+					calibratexy = calibratez;
+					calibratez = tmp;
+				}
+				double error = calibratexy.distance(lines, pp, f);
+				if (error < bestError) {
+					bestError = error;
+					result[0] = this;
+					result[1] = calibratexy;
+					result[2] = calibratez;
+					// bestAngle = angle;
+				}
+			}
+			double theta0 = Math.abs(result[0].getTheta()) % Math.PI;
+			theta0 = Math.min(Math.PI - theta0, theta0);
+			double theta1 = Math.abs(result[1].getTheta()) % Math.PI;
+			theta1 = Math.min(Math.PI - theta1, theta1);
+			if (theta0 > theta1) {
+				AngleCalibrated tmp = result[0];
+				result[0] = result[1];
+				result[1] = tmp;
+			}
+			return result;
 		}
 	}
 }

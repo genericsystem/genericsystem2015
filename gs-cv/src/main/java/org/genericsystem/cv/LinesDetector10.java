@@ -18,7 +18,7 @@ import javafx.scene.layout.GridPane;
 
 import org.genericsystem.cv.LinesDetector8.Line;
 import org.genericsystem.cv.LinesDetector8.Lines;
-import org.genericsystem.cv.lm.LMHostImpl;
+import org.genericsystem.cv.lm.LevenbergImpl;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.genericsystem.cv.utils.Tools;
 import org.opencv.core.Core;
@@ -249,7 +249,7 @@ public class LinesDetector10 extends AbstractApp {
 		}
 		BiFunction<Double, double[], Double> f = (x, params) -> params[0] * x * x * x * x + params[1] * x * x * x + params[2] * x * x + params[3] * x + params[4];
 		BiFunction<double[], double[], Double> e = (xy, params) -> f.apply(xy[0], params) - xy[1];
-		double[] result = new LMHostImpl<>(e, results, new double[] { 1, 1, 1, 1, 1 }).getParams();
+		double[] result = new LevenbergImpl<>(e, results, new double[] { 1, 1, 1, 1, 1 }).getParams();
 		Point point = null;
 		double polynomAngle = 0.0;
 		double max = 0.0;

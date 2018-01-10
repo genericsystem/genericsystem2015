@@ -13,7 +13,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.genericsystem.cv.Calibrated.AngleCalibrated;
-import org.genericsystem.cv.lm.LMHostImpl;
+import org.genericsystem.cv.lm.LevenbergImpl;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.genericsystem.cv.utils.Tools;
 import org.opencv.core.Core;
@@ -75,7 +75,7 @@ public class LinesDetector7 extends AbstractApp {
 					// lines = lines.filter(line -> distance(vp, line) < 0.4);
 					lines.draw(frame, new Scalar(0, 255, 0));
 					frameView.setImage(Tools.mat2jfxImage(frame));
-					double[] newThetaPhi = new LMHostImpl<>((line, params) -> distance(new AngleCalibrated(params).uncalibrate(pp, f), line), lines.lines, calibrated.getThetaPhi()).getParams();
+					double[] newThetaPhi = new LevenbergImpl<>((line, params) -> distance(new AngleCalibrated(params).uncalibrate(pp, f), line), lines.lines, calibrated.getThetaPhi()).getParams();
 					calibrated = calibrated.dumpThetaPhi(newThetaPhi, 1);
 
 					vp = calibrated.uncalibrate(pp, f);

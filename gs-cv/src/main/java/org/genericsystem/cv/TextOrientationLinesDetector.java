@@ -9,7 +9,7 @@ import java.util.function.BiFunction;
 
 import org.genericsystem.cv.Deperspectiver.Circle;
 import org.genericsystem.cv.Deperspectiver.Line;
-import org.genericsystem.cv.lm.LMHostImpl;
+import org.genericsystem.cv.lm.LevenbergImpl;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -117,7 +117,7 @@ public class TextOrientationLinesDetector {
 		}
 		BiFunction<Double, double[], Double> f = (x, params) -> params[0] * x * x * x * x + params[1] * x * x * x + params[2] * x * x + params[3] * x + params[4];
 		BiFunction<double[], double[], Double> e = (xy, params) -> f.apply(xy[0], params) - xy[1];
-		double[] result = new LMHostImpl<>(e, results, new double[] { 1, 1, 1, 1, 1 }).getParams();
+		double[] result = new LevenbergImpl<>(e, results, new double[] { 1, 1, 1, 1, 1 }).getParams();
 		Point point = null;
 		double polynomAngle = 0.0;
 		double max = 0.0;

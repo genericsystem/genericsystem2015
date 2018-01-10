@@ -12,7 +12,7 @@ import java.util.function.Function;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 
-import org.genericsystem.cv.lm.LMHostImpl;
+import org.genericsystem.cv.lm.LevenbergImpl;
 import org.genericsystem.cv.utils.Line;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.genericsystem.cv.utils.Ransac;
@@ -69,7 +69,7 @@ public class LinesDetector3 extends AbstractApp {
 					// Matrix vpCalib = Matrix.convert(Lines.K.inv()).times(new Matrix(new double[][] { { vp.x }, { vp.y }, { 1d } }), 1);
 					Mat vpCalib = calibrate(Converters.vector_double_to_Mat(Arrays.asList(vp.x, vp.y, 1d))); // replace with vp_mat directly?
 
-					LMHostImpl<Line> fitHost = new LMHostImpl<>((datas, params) -> {
+					LevenbergImpl<Line> fitHost = new LevenbergImpl<>((datas, params) -> {
 						Mat lineMat = Lines.getLineMat(datas);
 						double di = params[0] * lineMat.get(0, 0)[0] + params[1] * lineMat.get(1, 0)[0] + params[2] * lineMat.get(2, 0)[0];
 						di /= (Math.sqrt(params[0] * params[0] + params[1] * params[1] + params[2] * params[2]) * Core.norm(lineMat, Core.NORM_L2));

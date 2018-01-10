@@ -11,7 +11,7 @@ public class LM {
 
 	private double sos, sosprev, lambda;
 
-	private final LMHost myH;
+	private final Levenberg myH;
 	private final int nadj;
 	private final int npts;
 	private final double[] delta;
@@ -19,7 +19,7 @@ public class LM {
 	private final double[][] alpha;
 	private final double[][] amatrix;
 
-	public LM(LMHost gH, int gnadj, int gnpts) {
+	public LM(Levenberg gH, int gnadj, int gnpts) {
 		myH = gH;
 		nadj = gnadj;
 		npts = gnpts;

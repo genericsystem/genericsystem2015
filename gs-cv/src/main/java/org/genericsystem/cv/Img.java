@@ -665,10 +665,10 @@ public class Img implements AutoCloseable, Serializable {
 	}
 
 	/**
-	 * Resizes the image so that the larger side’s length is equal to maxLength, preserving the proportions.
-	 * Does nothing if both sides of the original image are smaller than maxLength.
+	 * Resizes the image so that the larger side’s length is equal to maxLength, preserving the proportions. Does nothing if both sides of the original image are smaller than maxLength.
 	 * 
-	 * @param maxLength	The maximum side length of the resized image.
+	 * @param maxLength
+	 *            The maximum side length of the resized image.
 	 * @return This if no change was made, a resized image otherwise.
 	 */
 	public Img resize(int maxLength) {
@@ -884,7 +884,9 @@ public class Img implements AutoCloseable, Serializable {
 	}
 
 	public Image toJfxImage() {
-		return Tools.mat2jfxImage(src);
+		MatOfByte byteMat = new MatOfByte();
+		Imgcodecs.imencode(".bmp", getSrc(), byteMat);
+		return new Image(new ByteArrayInputStream(byteMat.toArray()));
 	}
 
 	public ImageView toJfxImageView() {

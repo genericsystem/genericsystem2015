@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.BiFunction;
 
-public class LMHostImpl<T> implements LMHost {
+public class LevenbergImpl<T> implements Levenberg {
 	// --------constants for LM---------------
 	private final double DELTAP = 1e-6; // parm step
 	private final double BIGVAL = 9e99; // fault flag
@@ -21,7 +21,7 @@ public class LMHostImpl<T> implements LMHost {
 	private final double jac[][];
 	private final BiFunction<T, double[], Double> error;
 
-	public LMHostImpl(BiFunction<T, double[], Double> error, Collection<T> datas, double[] guess) {
+	public LevenbergImpl(BiFunction<T, double[], Double> error, Collection<T> datas, double[] guess) {
 		this.datas = datas;
 		this.NPTS = datas.size();
 		this.parms = guess;
@@ -44,7 +44,7 @@ public class LMHostImpl<T> implements LMHost {
 			return p[0] / denom - rowData[1];
 		};
 
-		new LMHostImpl<>(error, Arrays.asList(new double[][] { { 0.00, 0.6793 }, { 0.03, 0.6787 }, { 0.06, 0.6768 }, { 0.09, 0.6736 }, { 0.12, 0.6691 }, { 0.15, 0.6634 }, { 0.18, 0.6565 }, { 0.21, 0.6482 }, { 0.24, 0.6388 }, { 0.27, 0.6280 },
+		new LevenbergImpl<>(error, Arrays.asList(new double[][] { { 0.00, 0.6793 }, { 0.03, 0.6787 }, { 0.06, 0.6768 }, { 0.09, 0.6736 }, { 0.12, 0.6691 }, { 0.15, 0.6634 }, { 0.18, 0.6565 }, { 0.21, 0.6482 }, { 0.24, 0.6388 }, { 0.27, 0.6280 },
 				{ 0.30, 0.6161 }, { 0.33, 0.6030 }, { 0.36, 0.5887 }, { 0.39, 0.5733 }, { 0.42, 0.5568 }, { 0.45, 0.5394 }, { 0.48, 0.5210 }, { 0.51, 0.5019 }, { 0.54, 0.4820 }, { 0.57, 0.4614 }, { 0.60, 0.4404 }, { 0.63, 0.4191 }, { 0.66, 0.3975 },
 				{ 0.69, 0.3758 }, { 0.72, 0.3542 }, { 0.75, 0.3328 }, { 0.78, 0.3117 }, { 0.81, 0.2910 }, { 0.84, 0.2710 }, { 0.87, 0.2515 }, { 0.90, 0.2328 }, { 0.93, 0.2149 }, { 0.96, 0.1979 }, { 0.99, 0.1818 }, { 1.02, 0.1667 }, { 1.05, 0.1524 },
 				{ 1.08, 0.1392 }, { 1.11, 0.1268 }, { 1.14, 0.1154 }, { 1.17, 0.1048 }, { 1.20, 0.0951 }, { 1.23, 0.0862 }, { 1.26, 0.0781 }, { 1.29, 0.0706 }, { 1.32, 0.0639 }, { 1.35, 0.0577 }, { 1.38, 0.0521 }, { 1.41, 0.0471 }, { 1.44, 0.0425 },

@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Calibrated.AngleCalibrated;
 import org.genericsystem.cv.Img;
-import org.genericsystem.cv.lm.LMHostImpl;
+import org.genericsystem.cv.lm.LevenbergImpl;
 import org.genericsystem.cv.utils.Line;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.genericsystem.cv.utils.Tools;
@@ -224,7 +224,7 @@ public class CamLiveRetriever extends AbstractApp {
 		if (addedLines != null)
 			lines.lines.addAll(addedLines);
 		if (lines.size() > 4) {
-			double[] thetaPhi = new LMHostImpl<>((line, params) -> distance(new AngleCalibrated(params).uncalibrate(pp, f), line), lines.lines, calibrated0.getThetaPhi()).getParams();
+			double[] thetaPhi = new LevenbergImpl<>((line, params) -> distance(new AngleCalibrated(params).uncalibrate(pp, f), line), lines.lines, calibrated0.getThetaPhi()).getParams();
 			calibrated0 = calibrated0.dumpThetaPhi(thetaPhi, 1);
 			AngleCalibrated[] result = findOtherVps(calibrated0, lines, pp, f);
 			return findHomography(frame.size(), result, pp, f);
@@ -410,7 +410,7 @@ public class CamLiveRetriever extends AbstractApp {
 		}
 		BiFunction<Double, double[], Double> f = (x, params) -> params[0] * x * x * x * x + params[1] * x * x * x + params[2] * x * x + params[3] * x + params[4];
 		BiFunction<double[], double[], Double> e = (xy, params) -> f.apply(xy[0], params) - xy[1];
-		double[] result = new LMHostImpl<>(e, results, new double[] { 1, 1, 1, 1, 1 }).getParams();
+		double[] result = new LevenbergImpl<>(e, results, new double[] { 1, 1, 1, 1, 1 }).getParams();
 		Point point = null;
 		double polynomAngle = 0.0;
 		double max = 0.0;

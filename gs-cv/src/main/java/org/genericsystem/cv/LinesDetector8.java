@@ -12,11 +12,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
-
 import org.genericsystem.cv.Calibrated.AngleCalibrated;
-import org.genericsystem.cv.lm.LMHostImpl;
+import org.genericsystem.cv.lm.LevenbergImpl;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.genericsystem.cv.utils.Tools;
 import org.opencv.core.Core;
@@ -28,6 +25,9 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
 import org.opencv.videoio.VideoCapture;
+
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
 
 public class LinesDetector8 extends AbstractApp {
 
@@ -56,28 +56,30 @@ public class LinesDetector8 extends AbstractApp {
 		ImageView deskiewedView = new ImageView(Tools.mat2jfxImage(frame));
 		mainGrid.add(deskiewedView, 0, 1);
 		Mat dePerspectived = frame.clone();
+
 		// Calibrated.calibrate(frame.width(), frame.height());
 		double[] pp = new double[] { frame.width() / 2, frame.height() / 2 };
-		calibrated = new AngleCalibrated(0,Math.PI/2);
+		calibrated = new AngleCalibrated(0, Math.PI / 2);
 		timer.scheduleAtFixedRate(() -> {
 			try {
 				capture.read(frame);
+
 				Img grad = new Img(frame, false).morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(2, 2)).otsu().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(3, 3));
 				Lines lines = new Lines(grad.houghLinesP(1, Math.PI / 180, 10, 100, 10));
 				if (lines.size() > 10) {
-					//lines = lines.reduce(20);
+					// lines = lines.reduce(20);
 					lines.draw(frame, new Scalar(0, 0, 255));
-					Lines filtered = lines.filter(line -> distance(calibrated.getCalibratexyz(), line) < 0.1);
+					Lines filtered = lines.filter(line -> distance(calibrated.getCalibratexyz(), line, pp, f) < 0.1);
 					filtered.draw(frame, new Scalar(0, 255, 0));
 					frameView.setImage(Tools.mat2jfxImage(frame));
-					//lines = lines.reduce(10);
+					// lines = lines.reduce(10);
 
-					double[] thetaphi = new LMHostImpl<>((line, params) -> distance(new AngleCalibrated(params).getCalibratexyz(), line), lines.lines, calibrated.getThetaPhi()).getParams();
+					double[] thetaphi = new LevenbergImpl<>((line, params) -> distance(new AngleCalibrated(params).getCalibratexyz(), line, pp, f), lines.lines, calibrated.getThetaPhi()).getParams();
 					calibrated = calibrated.dumpThetaPhi(thetaphi, 1);
 
 					vp = calibrated.uncalibrate(pp, f);
 					System.out.println("Vanishing point : " + Arrays.toString(vp));
-					Mat homography = findHomography(frame.size(), new AngleCalibrated[] {calibrated,new AngleCalibrated(new double[] {Math.PI/2,Math.PI/2}),new AngleCalibrated(new double[] {Math.PI/2,0})}, pp,f);
+					Mat homography = findHomography(frame.size(), new AngleCalibrated[] { calibrated, new AngleCalibrated(new double[] { calibrated.getTheta() + Math.PI / 2, Math.PI / 2 }), new AngleCalibrated(new double[] { Math.PI / 2, 0 }) }, pp, f);
 					Imgproc.warpPerspective(frame, dePerspectived, homography, frame.size(), Imgproc.INTER_LINEAR, Core.BORDER_CONSTANT, Scalar.all(0));
 					deskiewedView.setImage(Tools.mat2jfxImage(dePerspectived));
 				} else
@@ -90,10 +92,10 @@ public class LinesDetector8 extends AbstractApp {
 		}, 30, 10, TimeUnit.MILLISECONDS);
 
 	}
-	
+
 	public static Mat findHomography(Size size, AngleCalibrated[] calibrateds, double[] pp, double f) {
 
-		double[][] vps = new double[][] { calibrateds[0].getCalibratexyz(), calibrateds[1].getCalibratexyz(), calibrateds[2].getCalibratexyz()};
+		double[][] vps = new double[][] { calibrateds[0].getCalibratexyz(), calibrateds[1].getCalibratexyz(), calibrateds[2].getCalibratexyz() };
 		// System.out.println("vps : " + Arrays.deepToString(vps));
 
 		double[][] vps2D = getVp2DFromVps(vps, pp, f);
@@ -119,7 +121,7 @@ public class LinesDetector8 extends AbstractApp {
 
 		return Imgproc.getPerspectiveTransform(new MatOfPoint2f(new Point(A_), new Point(B_), new Point(C_), new Point(D_)), new MatOfPoint2f(new Point(A), new Point(B), new Point(C), new Point(D)));
 	}
-	
+
 	public static double[][] getVp2DFromVps(double vps[][], double[] pp, double f) {
 		double[][] result = new double[2][3];
 		for (int i = 0; i < 2; i++) {
@@ -130,16 +132,12 @@ public class LinesDetector8 extends AbstractApp {
 		return result;
 	}
 
-
-	private double distance(double[] calibratedxyz, Line line) {
-		double[] pp = new double[] { frame.width() / 2, frame.height() / 2 };
-		Calibrated calA = new Calibrated(new double[] { line.x1, line.y1, 1d }, pp, f);
-		Calibrated calB = new Calibrated(new double[] { line.x2, line.y2, 1d }, pp, f);
-		double[] lineMat =  cross(calA.getCalibratexyz(), calB.getCalibratexyz());
+	private double distance(double[] calibratedxyz, Line line, double[] pp, double f) {
+		double[] lineMat = cross(Calibrated.calibrate(new double[] { line.x1, line.y1, 1d }, pp, f), Calibrated.calibrate(new double[] { line.x2, line.y2, 1d }, pp, f));
 		double di = calibratedxyz[0] * lineMat[0] + calibratedxyz[1] * lineMat[1] + calibratedxyz[2] * lineMat[2];
 		double normLineMat = Math.sqrt(lineMat[0] * lineMat[0] + lineMat[1] * lineMat[1] + lineMat[2] * lineMat[2]);
 		di /= (Math.sqrt(calibratedxyz[0] * calibratedxyz[0] + calibratedxyz[1] * calibratedxyz[1] + calibratedxyz[2] * calibratedxyz[2]) * normLineMat);
-		return (di*di > 0.10)? 0.10 : (di*di);
+		return (di * di > 0.1) ? 0.1 : di * di;
 	}
 
 	static double[] cross2D(double[] a, double b[]) {
@@ -289,5 +287,5 @@ public class LinesDetector8 extends AbstractApp {
 		timer.awaitTermination(5000, TimeUnit.MILLISECONDS);
 		capture.release();
 	}
-	
+
 }

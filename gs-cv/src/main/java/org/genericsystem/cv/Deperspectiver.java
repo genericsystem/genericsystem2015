@@ -13,19 +13,18 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.genericsystem.cv.Calibrated.AngleCalibrated;
-import org.genericsystem.cv.lm.LMHostImpl;
+import org.genericsystem.cv.lm.LevenbergImpl;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
-import org.genericsystem.cv.utils.Tools;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
-import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
 import org.opencv.videoio.VideoCapture;
 
+import javafx.application.Platform;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
@@ -48,7 +47,7 @@ public class Deperspectiver extends AbstractApp {
 	private final double f = 6.053 / 0.009;
 	private boolean stabilizedMode = false;
 	private boolean textsEnabledMode = false;
-	private Lines lines;
+
 	private SuperFrameImg superFrame;
 
 	@Override
@@ -72,37 +71,30 @@ public class Deperspectiver extends AbstractApp {
 				if (!stabilizedMode) {
 					superFrame = SuperFrameImg.create(capture);
 				}
-
-				Img grad = superFrame.getBinaryClosed10().morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(3, 3));
-				lines = new Lines(grad.houghLinesP(1, Math.PI / 180, 10, 10, 3));
-				Img grad2 = superFrame.getBinaryClosed20().morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(3, 3));
-				lines.lines.addAll(new Lines(grad2.houghLinesP(1, Math.PI / 180, 10, 20, 6)).lines);
-
-				if (textsEnabledMode) 
+				Lines lines = superFrame.detectLines();
+				if (textsEnabledMode)
 					lines.lines.addAll(TextOrientationLinesDetector.getTextOrientationLines(superFrame));
 				if (lines.size() > 4) {
-					lines.draw(superFrame.getDisplay().getSrc(), new Scalar(0, 0, 255), 1);
+					superFrame.draw(lines, new Scalar(0, 0, 255), 1);
 
-					double[] thetaPhi = new LMHostImpl<>((line, params) -> distance(new AngleCalibrated(params).uncalibrate(pp, f), line), lines.lines, calibrated0.getThetaPhi()).getParams();
-					calibrated0 = calibrated0.dumpThetaPhi(thetaPhi, 1);
+					double[] thetaPhi = new LevenbergImpl<>((line, params) -> new AngleCalibrated(params).distance(line, pp, f), lines.lines, calibrated0.getThetaPhi()).getParams();
+					calibrated0 = new AngleCalibrated(thetaPhi);
+					AngleCalibrated[] calibratedVps = calibrated0.findOtherVps(lines.lines, pp, f);
 
-					AngleCalibrated[] result = findOtherVps(calibrated0, lines, pp, f);
+					calibratedVps[0].draw(superFrame, lines, pp, f, new Scalar(0, 255, 0), 1);
+					calibratedVps[1].draw(superFrame, lines, pp, f, new Scalar(255, 0, 0), 1);
 
-					double[] uncalibrate0 = result[0].uncalibrate(pp, f);
-					Lines horizontals = lines.filter(line -> distance(uncalibrate0, line) < 0.40);
-					horizontals.draw(superFrame.getDisplay().getSrc(), new Scalar(0, 255, 0), 1);
+					Image displayImage = superFrame.getDisplay().toJfxImage();
+					Image deperspectivedImage = superFrame.dePerspective(calibratedVps, pp, f).toJfxImage();
+					Image closed = superFrame.getBinaryClosed30().toJfxImage();
+					Image diff = superFrame.getDiffFrame().toJfxImage();
 
-					double[] uncalibrate1 = result[1].uncalibrate(pp, f);
-					Lines verticals = lines.filter(line -> distance(uncalibrate1, line) < 0.40);
-					verticals.draw(superFrame.getDisplay().getSrc(), new Scalar(255, 0, 0), 1);
-
-					view00.setImage(superFrame.getDisplay().toJfxImage());
-					Mat homography = findHomography(superFrame.size(), result, pp, f);
-					Mat deperspectived = new Mat();
-					Imgproc.warpPerspective(superFrame.getFrame().getSrc(), deperspectived, homography, superFrame.size(), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(0));
-					view01.setImage(Tools.mat2jfxImage(deperspectived));
-					view10.setImage(superFrame.getBinaryClosed10().toJfxImage());
-					view11.setImage(superFrame.getDiffFrame().toJfxImage());
+					Platform.runLater(() -> {
+						view00.setImage(displayImage);
+						view01.setImage(deperspectivedImage);
+						view10.setImage(closed);
+						view11.setImage(diff);
+					});
 				} else
 					System.out.println("Not enough lines : " + lines.size());
 
@@ -114,136 +106,14 @@ public class Deperspectiver extends AbstractApp {
 
 	}
 
-
 	@Override
 	protected void onT() {
 		textsEnabledMode = !textsEnabledMode;
 	}
 
-	public static AngleCalibrated[] findOtherVps(AngleCalibrated calibrated0, Lines lines, double[] pp, double f) {
-		System.out.println(Arrays.toString(calibrated0.getCalibratexyz()));
-		AngleCalibrated[] result = new AngleCalibrated[] { null, null, null };
-		double bestError = Double.MAX_VALUE;
-		double bestAngle = 0;
-		for (double angle = 0; angle < 360 / 180 * Math.PI; angle += 1 * Math.PI / 180) {
-			double error = 0;
-			AngleCalibrated calibratexy = calibrated0.getOrthoFromAngle(angle);
-			AngleCalibrated calibratez = calibrated0.getOrthoFromVps(calibratexy);
-			if (calibratexy.getPhi() < calibratez.getPhi()) {
-				AngleCalibrated tmp = calibratexy;
-				calibratexy = calibratez;
-				calibratez = tmp;
-			}
-			double[] uncalibrate = calibratexy.uncalibrate(pp, f);
-			for (Line line : lines.lines)
-				error += distance(uncalibrate, line);
-			// System.out.println(error);
-			if (error < bestError) {
-				bestError = error;
-				result[0] = calibrated0;
-				result[1] = calibratexy;
-				result[2] = calibratez;
-				bestAngle = angle;
-			}
-		}
-		System.out.println("Best angle = " + bestAngle * 180 / Math.PI);
-
-		double theta0 = Math.abs(result[0].getTheta()) % Math.PI;
-		theta0 = Math.min(Math.PI - theta0, theta0);
-
-		double theta1 = Math.abs(result[1].getTheta()) % Math.PI;
-		theta1 = Math.min(Math.PI - theta1, theta1);
-
-		if (theta0 > theta1) {
-			AngleCalibrated tmp = result[0];
-			result[0] = result[1];
-			result[1] = tmp;
-		}
-		return result;
-	}
-
-	public static Mat findHomography(Size size, AngleCalibrated[] calibrateds, double[] pp, double f) {
-
-		double[][] vps = new double[][] { calibrateds[0].getCalibratexyz(), calibrateds[1].getCalibratexyz(), calibrateds[2].getCalibratexyz() };
-		// System.out.println("vps : " + Arrays.deepToString(vps));
-
-		double[][] vps2D = getVp2DFromVps(vps, pp, f);
-		System.out.println("vps2D : " + Arrays.deepToString(vps2D));
-
-		System.out.println("vp1 " + calibrateds[0]);
-		System.out.println("vp2 " + calibrateds[1]);
-		System.out.println("vp3 " + calibrateds[2]);
-
-		double theta = calibrateds[0].getTheta();
-		double theta2 = calibrateds[1].getTheta();
-		double x = size.width / 6;
-
-		double[] A = new double[] { size.width / 2, size.height / 2, 1 };
-		double[] B = new double[] { size.width / 2 + (Math.cos(theta) < 0 ? -x : x), size.height / 2 };
-		double[] D = new double[] { size.width / 2, size.height / 2 + (Math.sin(theta2) < 0 ? -x : +x), 1 };
-		double[] C = new double[] { size.width / 2 + (Math.cos(theta) < 0 ? -x : +x), size.height / 2 + (Math.sin(theta2) < 0 ? -x : +x) };
-
-		double[] A_ = A;
-		double[] B_ = new double[] { size.width / 2 + x * vps[0][0], size.height / 2 + x * vps[0][1], 1 };
-		double[] D_ = new double[] { size.width / 2 + x * vps[1][0], size.height / 2 + x * vps[1][1], 1 };
-		double[] C_ = cross2D(cross(B_, vps2D[1]), cross(D_, vps2D[0]));
-
-		return Imgproc.getPerspectiveTransform(new MatOfPoint2f(new Point(A_), new Point(B_), new Point(C_), new Point(D_)), new MatOfPoint2f(new Point(A), new Point(B), new Point(C), new Point(D)));
-	}
-
-	private static double distance(double[] vp, Line line) {
-		double dy = line.y1 - line.y2;
-		double dx = line.x2 - line.x1;
-		double dz = line.y1 * line.x2 - line.x1 * line.y2;
-		double norm = Math.sqrt(dy * dy + dx * dx + dz * dz);
-		double n0 = -dx / norm;
-		double n1 = dy / norm;
-		double nNorm = Math.sqrt(n0 * n0 + n1 * n1);
-		double[] midPoint = new double[] { (line.x1 + line.x2) / 2, (line.y1 + line.y2) / 2, 1d };
-		double r0 = vp[1] * midPoint[2] - midPoint[1];
-		double r1 = midPoint[0] - vp[0] * midPoint[2];
-		double rNorm = Math.sqrt(r0 * r0 + r1 * r1);
-		double num = r0 * n0 + r1 * n1;
-		if (num < 0)
-			num = -num;
-		double d = 0;
-		if (nNorm != 0 && rNorm != 0)
-			d = num / (nNorm * rNorm);
-		return d < 0.4 ? d : 0.4;
-	}
-
-	public static double[][] getVp2DFromVps(double vps[][], double[] pp, double f) {
-		double[][] result = new double[2][3];
-		for (int i = 0; i < 2; i++) {
-			result[i][0] = vps[i][0] * f / vps[i][2] + pp[0];
-			result[i][1] = vps[i][1] * f / vps[i][2] + pp[1];
-			result[i][2] = 1.0;
-		}
-		return result;
-	}
-
-	static double[] cross2D(double[] a, double b[]) {
-		return on2D(cross(a, b));
-	}
-
-	static double[] on2D(double[] a) {
-		return new double[] { a[0] / a[2], a[1] / a[2], 1 };
-	}
-
-	static double[] cross(double[] a, double b[]) {
-		return new double[] { a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0] };
-	}
-
-	public Point[] rotate(Point bary, double alpha, Point... p) {
-		Mat matrix = Imgproc.getRotationMatrix2D(bary, alpha / Math.PI * 180, 1);
-		MatOfPoint2f results = new MatOfPoint2f();
-		Core.transform(new MatOfPoint2f(p), results, matrix);
-		return results.toArray();
-	}
-
 	public static class Lines {
 
-		private final List<Line> lines;
+		final List<Line> lines;
 
 		public Lines(Mat src) {
 			lines = new ArrayList<>();
@@ -290,7 +160,7 @@ public class Deperspectiver extends AbstractApp {
 	}
 
 	public static class Line {
-		private final double x1, y1, x2, y2;
+		final double x1, y1, x2, y2;
 
 		public Line(Point p1, Point p2) {
 			this(p1.x, p1.y, p2.x, p2.y);
@@ -327,7 +197,6 @@ public class Deperspectiver extends AbstractApp {
 
 	}
 
-	
 	static class Circle {
 		public Circle(Point center, float radius) {
 			this.center = center;
@@ -337,8 +206,6 @@ public class Deperspectiver extends AbstractApp {
 		Point center;
 		float radius;
 	}
-
-	
 
 	@Override
 	public void stop() throws Exception {

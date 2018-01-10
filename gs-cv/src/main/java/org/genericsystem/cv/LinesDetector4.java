@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 
-import org.genericsystem.cv.lm.LMHostImpl;
+import org.genericsystem.cv.lm.LevenbergImpl;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.genericsystem.cv.utils.Ransac;
 import org.genericsystem.cv.utils.Ransac.Model;
@@ -221,7 +221,7 @@ public class LinesDetector4 extends AbstractApp {
 					double r = Core.norm(vp[0]);
 					double theta = Math.acos(vp[0].get(2, 0)[0] / r);
 					double phi = Math.atan2(vp[0].get(1, 0)[0], vp[0].get(0, 0)[0]);
-					double[] parameters = new LMHostImpl<>((line, params) -> {
+					double[] parameters = new LevenbergImpl<>((line, params) -> {
 						Mat vn = new Mat(3, 1, CvType.CV_64FC1);
 						vn.put(0, 0, Math.cos(params[1]) * Math.sin(params[0]));
 						vn.put(1, 0, Math.sin(params[1]) * Math.sin(params[0]));

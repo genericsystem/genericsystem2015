@@ -14,7 +14,7 @@ import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.SingularValueDecomposition;
 import org.genericsystem.cv.LinesDetector8.Line;
 import org.genericsystem.cv.LinesDetector8.Lines;
-import org.genericsystem.cv.lm.LMHostImpl;
+import org.genericsystem.cv.lm.LevenbergImpl;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.genericsystem.cv.utils.Tools;
 import org.opencv.core.Core;
@@ -108,7 +108,7 @@ public class LinesDetector9 extends AbstractApp {
 
 				double[] pp = new double[] { frame.width() / 2, frame.height() / 2 };
 
-				vps0 = new LMHostImpl<>((edgelet, model) -> computeVote(edgelet, model, 5), edgelets1, vps0).getParams();
+				vps0 = new LevenbergImpl<>((edgelet, model) -> computeVote(edgelet, model, 5), edgelets1, vps0).getParams();
 				double[] calibratedVps0 = new Calibrated(vps0, pp, f).getCalibratexyz();
 				// double[] calibratedVps1 = getOrthoVpFromVp(calibratedVps0, 0);
 				double[] calibratedVps1 = new Calibrated(new double[] { 320, 240000, 1 }, pp, f).getCalibratexyz();// getOrthoVpFromVp(calibratedVps0, 0);
