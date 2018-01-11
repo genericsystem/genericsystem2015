@@ -189,8 +189,8 @@ public class SuperFrameImg {
 	}
 
 	public static double[][] getVp2DFromVps(double vps[][], double[] pp, double f) {
-		double[][] result = new double[2][3];
-		for (int i = 0; i < 2; i++) {
+		double[][] result = new double[3][3];
+		for (int i = 0; i < 3; i++) {
 			result[i][0] = vps[i][0] * f / vps[i][2] + pp[0];
 			result[i][1] = vps[i][1] * f / vps[i][2] + pp[1];
 			result[i][2] = 1.0;

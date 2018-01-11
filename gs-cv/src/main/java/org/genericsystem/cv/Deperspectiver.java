@@ -50,6 +50,9 @@ public class Deperspectiver extends AbstractApp {
 	private boolean stabilizedMode = false;
 	private boolean textsEnabledMode = false;
 
+	private Kalman kalmanX = new Kalman();
+	private Kalman kalmanZ = new Kalman();
+
 	@Override
 	protected void fillGrid(GridPane mainGrid) {
 		superFrame = SuperFrameImg.create(capture);
@@ -75,12 +78,30 @@ public class Deperspectiver extends AbstractApp {
 				if (lines.size() > 4) {
 					superFrame.draw(lines, new Scalar(0, 0, 255), 1);
 					calibrated0 = superFrame.findVanishingPoint(lines, calibrated0, pp, f);
+
 					AngleCalibrated[] calibratedVps = calibrated0.findOtherVps(lines, pp, f);
+
+					double[] vpx = calibratedVps[0].uncalibrate(pp, f);
+					double[] predictionX = kalmanX.predict();
+					System.out.println("Prediction : " + Arrays.toString(predictionX) + Arrays.toString(vpx));
+					kalmanX.correct(vpx);
+
+					double[] vpz = calibratedVps[2].uncalibrate(pp, f);
+					double[] predictionZ = kalmanZ.predict();
+					System.out.println("Prediction : " + Arrays.toString(predictionZ) + Arrays.toString(vpz));
+					kalmanZ.correct(vpz);
+
+					superFrame.draw(new Lines(Arrays.asList(new Line(pp[0], pp[1], vpz[0], vpz[1]))), new Scalar(0, 0, 255), 2);
+					superFrame.draw(new Lines(Arrays.asList(new Line(pp[0], pp[1], predictionZ[0], predictionZ[1]))), new Scalar(0, 255, 0), 2);
 
 					superFrame.drawVanishingPointLines(lines, calibratedVps[0], pp, f, new Scalar(0, 255, 0), 1);
 					superFrame.drawVanishingPointLines(lines, calibratedVps[1], pp, f, new Scalar(255, 0, 0), 1);
 
 					Image displayImage = superFrame.getDisplay().toJfxImage();
+					// calibratedVps[0] = new AngleCalibrated(new double[] { predictionX[0], predictionX[1], 1.0 }, pp, f);
+					calibratedVps[2] = new AngleCalibrated(new double[] { predictionZ[0], predictionZ[1], 1.0 }, pp, f);
+					calibratedVps[1] = calibratedVps[0].getOrthoFromVps(calibratedVps[2]);
+
 					Image deperspectivedImage = superFrame.dePerspective(calibratedVps, pp, f).toJfxImage();
 					Image grad = superFrame.getGradient().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(30, 30)).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(30, 30))
 							.morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(3, 3)).toJfxImage();

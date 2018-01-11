@@ -115,14 +115,6 @@ public class Calibrated {
 			return new AngleCalibrated(new double[] { ((dumpSize - 1) * x + xyz[0]) / dumpSize, ((dumpSize - 1) * y + xyz[1]) / dumpSize, ((dumpSize - 1) * z + xyz[2]) / dumpSize }, null);
 		}
 
-		public double[] getUncalibrated(double[] pp, double f) {
-			double[] uncalibrates = new double[3];
-			uncalibrates[0] = x * f / z + pp[0];
-			uncalibrates[1] = y * f / z + pp[1];
-			uncalibrates[2] = 1.0;
-			return uncalibrates;
-		}
-
 		public AngleCalibrated getOrthoFromAngle(double lambda) {
 			double[] vp1 = getCalibratexyz();
 			double k1 = vp1[0] * Math.sin(lambda) + vp1[1] * Math.cos(lambda);
