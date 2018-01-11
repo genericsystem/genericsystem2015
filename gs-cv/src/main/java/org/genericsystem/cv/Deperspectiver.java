@@ -82,14 +82,17 @@ public class Deperspectiver extends AbstractApp {
 
 					Image displayImage = superFrame.getDisplay().toJfxImage();
 					Image deperspectivedImage = superFrame.dePerspective(calibratedVps, pp, f).toJfxImage();
-					Image grad = superFrame.getGradient().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(10,10)).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(10,10)).morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(3,3)).toJfxImage();
-					Image closed = superFrame.getBinarized().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(10,10)).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(10,10)).morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(3,3)).toJfxImage();
-					Image diff = superFrame.getDiffFrame().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(10,10)).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(10,10)).morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(3,3)).toJfxImage();
+					Image grad = superFrame.getGradient().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(30, 30)).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(30, 30))
+							.morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(3, 3)).toJfxImage();
+					Image closed = superFrame.getBinarized().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(10, 10)).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(10, 10))
+							.morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(3, 3)).toJfxImage();
+					Image diff = superFrame.getDiffFrame().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(10, 10)).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(10, 10))
+							.morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(3, 3)).toJfxImage();
 
 					Platform.runLater(() -> {
 						view00.setImage(displayImage);
 						view01.setImage(deperspectivedImage);
-						view10.setImage(closed);
+						view10.setImage(grad);
 						view11.setImage(diff);
 					});
 				} else
