@@ -6,11 +6,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -72,6 +69,7 @@ public class CamLiveRetriever extends AbstractApp {
 	private int recoveringCounter = 0;
 
 	private ImgDescriptor stabilizedImgDescriptor;
+	private ImgDescriptor deperspectivedImgDescriptor;
 	private final VideoCapture capture = new VideoCapture(0);
 	private Mat frame = new Mat();
 	private boolean stabilizationHasChanged = true;
@@ -80,14 +78,15 @@ public class CamLiveRetriever extends AbstractApp {
 	// private AngleCalibrated calibrated;
 	private AngleCalibrated calibrated0;
 
-	private Map<ImgDescriptor,Mat> descriptorTree = new LinkedHashMap<>();
-	private Map<ImgDescriptor,Double> distanceMap = new HashMap<>();
+	private DescriptorManager descriptorManager = new DescriptorManager();
+	private static final Mat IDENTITY_MAT = Mat.eye(new Size(3, 3), CvType.CV_64F);
 
 	private final double f = 6.053 / 0.009;
 	private boolean stabilizedMode = false;
 	private boolean textsEnabledMode = false;
 	private Lines lines;
 	private Img display;
+	private Img savedDisplay = null; 
 	protected DeperspectivationMode mode = DeperspectivationMode.FULL;
 
 	public static void main(String[] args) {
@@ -115,8 +114,8 @@ public class CamLiveRetriever extends AbstractApp {
 		ImageView src1 = new ImageView(Tools.mat2jfxImage(frame));
 		mainGrid.add(src1, 1, 0);
 
-		// ImageView src2 = new ImageView(Tools.mat2jfxImage(frame));
-		// mainGrid.add(src2, 1, 1);
+		ImageView src2 = new ImageView(Tools.mat2jfxImage(frame));
+		mainGrid.add(src2, 1, 1);
 
 		timerFields.scheduleAtFixedRate(() -> onSpace(), 0, STABILIZATION_DELAY, TimeUnit.MILLISECONDS);
 
@@ -147,6 +146,9 @@ public class CamLiveRetriever extends AbstractApp {
 
 					Stats.beginTask("get img descriptors");
 					ImgDescriptor newImgDescriptor = new ImgDescriptor(frame, deperspectivGraphy);
+
+					deperspectivedImgDescriptor = newImgDescriptor;					
+
 					Stats.endTask("get img descriptors");
 					Stats.beginTask("stabilization homography");
 					Mat betweenStabilizedHomography = stabilizedImgDescriptor.computeStabilizationGraphy(newImgDescriptor);					
@@ -189,6 +191,9 @@ public class CamLiveRetriever extends AbstractApp {
 						Stats.endTask("draw");
 
 						Image stabilizedDisplayImage = stabilizedDisplay.toJfxImage();
+						if(savedDisplay==null)
+							savedDisplay=stabilizedDisplay;
+						Platform.runLater(() -> src2.setImage(savedDisplay.toJfxImage()));
 						Platform.runLater(() -> src1.setImage(stabilizedDisplayImage));
 						if (++counter % 20 == 0) {
 							System.out.println(Stats.getStatsAndReset());
@@ -214,7 +219,7 @@ public class CamLiveRetriever extends AbstractApp {
 
 
 
-	private double computeDistanceBetweenStabilized(Mat betweenStabilizedHomography) {
+	private double computeDistanceBetweenDeperspectived(Mat betweenStabilizedHomography) {
 		List<Point> originalPoints = Arrays.asList(new Point[]{new Point(0,0), new Point(frame.width(),0), new Point(frame.width(), frame.height()), new Point(0, frame.height())});
 		List<Point> points = restabilize(originalPoints, betweenStabilizedHomography);
 		return evaluateDistanceBetweenStabilized(points, originalPoints);
@@ -498,7 +503,7 @@ public class CamLiveRetriever extends AbstractApp {
 	}
 
 	static Img warpPerspective(Mat frame, Mat homography) {
-		Mat dePerspectived = new Mat(frame.size(), CvType.CV_8UC3, Scalar.all(255));
+		Mat dePerspectived = new Mat(frame.size(), CvType.CV_64F, Scalar.all(255));
 		Imgproc.warpPerspective(frame, dePerspectived, homography, frame.size(), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(255));
 		return new Img(dePerspectived, false);
 	}
@@ -568,69 +573,85 @@ public class CamLiveRetriever extends AbstractApp {
 	protected void onT() {
 		textsEnabledMode = !textsEnabledMode;
 	}
+
 	@Override
-	protected void onS(){
-		if(descriptorTree.isEmpty())
-			descriptorTree.put(stabilizedImgDescriptor, Mat.eye(new Size(3, 3), CvType.CV_64FC1));
-		int descriptorMapSize = descriptorTree.size();
-		ListIterator<ImgDescriptor> iterator = new ArrayList(descriptorTree.keySet()).listIterator(descriptorTree.size());
+	protected void onS() {
 
-		while (iterator.hasPrevious()){ 
-			ImgDescriptor d = iterator.previous();
-			Mat betweenStabilizationHomo = d==stabilizedImgDescriptor?null:d.computeStabilizationGraphy(stabilizedImgDescriptor);
-			if(betweenStabilizationHomo!=null)	{
-				Mat homographyToTheLast = getHomographyToTheLast(d, betweenStabilizationHomo);	
-				descriptorTree.put(stabilizedImgDescriptor,homographyToTheLast);
-				break;
-			}			
-		}
-		if(descriptorTree.size() == descriptorMapSize)
+		Map<ImgDescriptor,Mat> descriptorGroup = descriptorManager.getDescriptors();
+		if(descriptorGroup.isEmpty()){
+			descriptorGroup.put(deperspectivedImgDescriptor, IDENTITY_MAT);
+			descriptorManager.setReference(deperspectivedImgDescriptor);
+			savedDisplay = warpPerspective(frame,IDENTITY_MAT);			
 			return;
-		findBestStabilized();
-	}
-
-
-
-	private Mat getHomographyToTheLast(ImgDescriptor descriptor, Mat betweenStabilizationHomo) {
-		Mat homography = betweenStabilizationHomo;
-		List<ImgDescriptor> descriptors = new ArrayList<>(descriptorTree.keySet());
-		for(int i = descriptors.indexOf(descriptor)+1; i<descriptors.size();i++)
-			homography = cross(descriptorTree.get(descriptors.get(i)),homography);
-		return homography;
-	}
-
-
-	private void findBestStabilized() {
-		List<ImgDescriptor> descriptors = new ArrayList<>(descriptorTree.keySet());
-		for(ImgDescriptor origin : descriptorTree.keySet()){
-			double totalDistance = 0.0;
-			for(ImgDescriptor target : descriptorTree.keySet())
-				totalDistance += origin == target?0.0:computeDistanceBetweenStabilized(computeHomography(origin, target));
-			distanceMap.put(origin, totalDistance);
-			System.out.println("index n° "+descriptors.indexOf(origin)+" distance: "+totalDistance);
 		}
-		Entry<ImgDescriptor, Double> min = Collections.min(distanceMap.entrySet(), Comparator.comparingDouble(Entry::getValue));
-		System.out.println(descriptors.indexOf(min.getKey()));
+		Mat homographyToRef = IDENTITY_MAT;
+		for(ImgDescriptor descriptor : descriptorGroup.keySet()){
+			Mat joinHomography = descriptor.computeStabilizationGraphy(deperspectivedImgDescriptor);
+			if(joinHomography!=null){
+				homographyToRef = computeHomographyToRef(descriptor, joinHomography);
+				descriptorGroup.put(deperspectivedImgDescriptor, homographyToRef);
+				break;
+			}
+		}
+
+		savedDisplay = warpPerspective(frame,homographyToRef);
+		//ImgDescriptor reference = updateReferenceDeperspectived(descriptorGroup);	
+		//		//		savedDisplay = warpPerspective(frame,descriptorGroup.get(deperspectivedImgDescriptor));
+
 	}
 
-	private Mat computeHomography(ImgDescriptor origin, ImgDescriptor target) {
-		Mat homography = Mat.eye(new Size(3, 3), CvType.CV_64FC1);
-		List<ImgDescriptor> descriptors = new ArrayList<>(descriptorTree.keySet());
-		if(descriptors.indexOf(origin)>descriptors.indexOf(target)){
-			for(int i = descriptors.indexOf(origin); i>descriptors.indexOf(target) ;i--)
-				homography = cross(descriptorTree.get(descriptors.get(i)),homography);
-			return homography.inv();
-		}
+	private Mat computeHomographyToRef(ImgDescriptor descriptor, Mat joinHomography) {	
+		return matrixProduct(descriptorManager.getDescriptors().get(descriptor),joinHomography);
+	}
+
+	private boolean isReference(ImgDescriptor descriptor) {
+		return descriptor == descriptorManager.getReference();
+	}
+
+	private ImgDescriptor updateReferenceDeperspectived(Map<ImgDescriptor, Mat> descriptorGroup) {
+		ImgDescriptor bestDescriptor = computeBestDescriptor(descriptorGroup);
+		if(isReference(bestDescriptor))
+			System.out.println("reference is still the best, doing nothing special for the moment.");		
 		else{
-			for(int i = descriptors.indexOf(origin); i< descriptors.indexOf(target);i++)
-				homography = cross(homography,descriptorTree.get(descriptors.get(i+1)));
-			return homography;
+			System.out.println("Reference has changed, recomputing homographies to new ref");
+			computeHomographiesToNewRef(bestDescriptor);
+			descriptorManager.setReference(bestDescriptor);
 		}
-
+		return bestDescriptor;
 	}
 
-	private Mat cross(Mat matrix1, Mat matrix2){
-		Mat result = new Mat(matrix1.cols(),matrix2.rows(),CvType.CV_64FC1, new Scalar(0));
+	private void computeHomographiesToNewRef(ImgDescriptor newReference) {
+		Map<ImgDescriptor,Mat> descriptorGroup = descriptorManager.getDescriptors();	
+		for(ImgDescriptor descriptor : descriptorGroup.keySet()){
+			if(descriptor == newReference)
+				descriptorGroup.put(descriptor, IDENTITY_MAT);
+			else
+				descriptorGroup.put(descriptor, matrixProduct(descriptorGroup.get(newReference).inv(),descriptorGroup.get(descriptor)));
+		}
+	}
+
+	private ImgDescriptor computeBestDescriptor(Map<ImgDescriptor, Mat> descriptorGroup) {
+		Map<ImgDescriptor,Double> distanceMap = descriptorManager.getDistanceMap();
+		for(ImgDescriptor origin : descriptorGroup.keySet()){
+			double totalDistance = 0.0;
+			for(ImgDescriptor target : descriptorGroup.keySet())
+				totalDistance += origin == target?0.0:computeDistanceBetweenDeperspectived(computeHomographyBetweenDeperspectived(origin, target));
+			distanceMap.put(origin, totalDistance);
+		}
+		return Collections.min(distanceMap.entrySet(), Comparator.comparingDouble(Entry::getValue)).getKey();
+	}
+
+	private Mat computeHomographyBetweenDeperspectived(ImgDescriptor origin, ImgDescriptor target) {
+		if(isReference(origin) )
+			return descriptorManager.getDescriptors().get(target).inv();
+		else if(isReference(target))
+			return descriptorManager.getDescriptors().get(origin);
+		else
+			return matrixProduct(descriptorManager.getDescriptors().get(target).inv(),descriptorManager.getDescriptors().get(origin));
+	}
+
+	private Mat matrixProduct(Mat matrix1, Mat matrix2){
+		Mat result = new Mat(matrix1.cols(),matrix2.rows(),CvType.CV_64F, new Scalar(0));
 		for(int i = 0; i < matrix1.rows() ; i++){
 			for(int j = 0; j < matrix2.cols() ; j++){
 				double sum = 0.0;
