@@ -1,7 +1,6 @@
 package org.genericsystem.cv.retriever;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.genericsystem.cv.Img;
@@ -107,7 +106,7 @@ public class ImgDescriptor {
 				pairedPoints.add(new Point[] { goodOldKeypoints.get(i), goodNewKeypoints.get(i) });
 
 			double[] transScaleParams = new LevenbergImpl<>((points, params) -> distance(points, params), pairedPoints, new double[] { 1, 1, 0, 0 }).getParams();
-			System.out.println("params " + Arrays.toString(transScaleParams));
+			//System.out.println("params " + Arrays.toString(transScaleParams));
 
 			// Mat result = getTSMat(transScaleParams);
 

@@ -170,7 +170,6 @@ public class CamLiveRetriever extends AbstractApp {
 							stabilizedDisplay = new Img(stabilized.getSrc(), true);
 							Stats.beginTask("restabilizeFields");
 							fields.restabilizeFields(betweenStabilizedHomography);
-							System.out.println("fields restabilized");
 							Stats.endTask("restabilizeFields");
 							stabilizedImgDescriptor = newImgDescriptor;
 							stabilizationHomographyFromFrame = deperspectivGraphy;
@@ -595,8 +594,8 @@ public class CamLiveRetriever extends AbstractApp {
 		}
 
 		savedDisplay = warpPerspective(frame,homographyToRef);
-		//ImgDescriptor reference = updateReferenceDeperspectived(descriptorGroup);	
-		//		//		savedDisplay = warpPerspective(frame,descriptorGroup.get(deperspectivedImgDescriptor));
+		ImgDescriptor reference = updateReferenceDeperspectived(descriptorGroup);	
+		//savedDisplay = warpPerspective(frame,descriptorGroup.get(deperspectivedImgDescriptor));
 
 	}
 
@@ -611,9 +610,9 @@ public class CamLiveRetriever extends AbstractApp {
 	private ImgDescriptor updateReferenceDeperspectived(Map<ImgDescriptor, Mat> descriptorGroup) {
 		ImgDescriptor bestDescriptor = computeBestDescriptor(descriptorGroup);
 		if(isReference(bestDescriptor))
-			System.out.println("reference is still the best, doing nothing special for the moment.");		
+			System.out.println("Reference is still the best, doing nothing special for the moment.");		
 		else{
-			System.out.println("Reference has changed, recomputing homographies to new ref");
+			System.out.println(">>>>>>>>>>> CHANGE: Reference has changed, recomputing homographies to new ref");
 			computeHomographiesToNewRef(bestDescriptor);
 			descriptorManager.setReference(bestDescriptor);
 		}
@@ -621,12 +620,15 @@ public class CamLiveRetriever extends AbstractApp {
 	}
 
 	private void computeHomographiesToNewRef(ImgDescriptor newReference) {
-		Map<ImgDescriptor,Mat> descriptorGroup = descriptorManager.getDescriptors();	
+		Map<ImgDescriptor,Mat> descriptorGroup = descriptorManager.getDescriptors();
+		ImgDescriptor oldReference = descriptorManager.getReference();
 		for(ImgDescriptor descriptor : descriptorGroup.keySet()){
-			if(descriptor == newReference)
+			if(descriptor == newReference){
+				descriptorGroup.put(oldReference, descriptorGroup.get(descriptor).inv());
 				descriptorGroup.put(descriptor, IDENTITY_MAT);
+			}
 			else
-				descriptorGroup.put(descriptor, matrixProduct(descriptorGroup.get(newReference).inv(),descriptorGroup.get(descriptor)));
+				descriptorGroup.put(descriptor, matrixProduct(descriptorGroup.get(oldReference),descriptorGroup.get(descriptor)));
 		}
 	}
 
