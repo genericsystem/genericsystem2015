@@ -72,7 +72,7 @@ public class DescriptorManager {
 		}
 		updateReferenceDeperspectived(descriptors);		
 		Mat stabilizationHomographyFromFrame = new Mat();
-		Core.gemm(descriptors.get(reference), deperspectiveHomography, 1, new Mat(), 0, stabilizationHomographyFromFrame);
+		Core.gemm(descriptors.get(deperspectivedImgDescriptor), deperspectiveHomography, 1, new Mat(), 0, stabilizationHomographyFromFrame);
 		return CamLiveRetriever.warpPerspective(frame, stabilizationHomographyFromFrame);
 	}
 
