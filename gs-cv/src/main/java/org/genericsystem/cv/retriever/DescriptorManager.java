@@ -63,7 +63,7 @@ public class DescriptorManager {
 			if (joinHomography != null) 				
 				possibleHomographies.add(computeHomographyToRef(descriptor, joinHomography));
 		}
-		Mat pertinentHomography = possibleHomographies.size()==1?possibleHomographies.get(0):getPertinentDescriptor(possibleHomographies);
+		Mat pertinentHomography = possibleHomographies.size()==1?possibleHomographies.get(0):getPertinentHomography(possibleHomographies);
 		if(pertinentHomography!=null)
 			descriptors.put(deperspectivedImgDescriptor, pertinentHomography);
 		else
@@ -74,7 +74,7 @@ public class DescriptorManager {
 		return CamLiveRetriever.warpPerspective(frame, stabilizationHomographyFromFrame);
 	}
 
-	private Mat getPertinentDescriptor(List<Mat> possibleHomographies) {
+	private Mat getPertinentHomography(List<Mat> possibleHomographies) {
 		return possibleHomographies.isEmpty()?null:getBestHomography(possibleHomographies);
 
 	}
