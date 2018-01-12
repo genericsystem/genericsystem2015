@@ -50,30 +50,52 @@ public class DescriptorManager {
 
 
 	public Img add(ImgDescriptor deperspectivedImgDescriptor, Mat deperspectiveHomography) {
-
 		if (descriptors.isEmpty()) {
 			descriptors.put(deperspectivedImgDescriptor, IDENTITY_MAT);
 			setReference(deperspectivedImgDescriptor);
 			Mat stabilizationHomographyFromFrame = new Mat();
 			Core.gemm(IDENTITY_MAT, deperspectiveHomography, 1, new Mat(), 0, stabilizationHomographyFromFrame);
 			return CamLiveRetriever.warpPerspective(frame, stabilizationHomographyFromFrame);
-
 		}
-		Mat homographyToRef = IDENTITY_MAT;
+		List<Mat> possibleHomographies = new ArrayList<>();
 		for (ImgDescriptor descriptor : descriptors.keySet()) {
 			Mat joinHomography = deperspectivedImgDescriptor.computeStabilizationGraphy(descriptor);
-			if (joinHomography != null) {
-				homographyToRef = computeHomographyToRef(descriptor, joinHomography);
-				descriptors.put(deperspectivedImgDescriptor, homographyToRef);
-				break;
-			}
-			else
-				return null;
+			if (joinHomography != null) 				
+				possibleHomographies.add(computeHomographyToRef(descriptor, joinHomography));
 		}
+		Mat pertinentHomography = possibleHomographies.size()==1?possibleHomographies.get(0):getPertinentDescriptor(possibleHomographies);
+		if(pertinentHomography!=null)
+			descriptors.put(deperspectivedImgDescriptor, pertinentHomography);
+		else
+			return null;
 		updateReferenceDeperspectived(descriptors);		
 		Mat stabilizationHomographyFromFrame = new Mat();
 		Core.gemm(descriptors.get(deperspectivedImgDescriptor), deperspectiveHomography, 1, new Mat(), 0, stabilizationHomographyFromFrame);
 		return CamLiveRetriever.warpPerspective(frame, stabilizationHomographyFromFrame);
+	}
+
+	private Mat getPertinentDescriptor(List<Mat> possibleHomographies) {
+		return possibleHomographies.isEmpty()?null:getBestHomography(possibleHomographies);
+
+	}
+
+	private Mat getBestHomography(List<Mat> possibleHomographies){
+		Map<Mat, Double> distancesByHomography = new HashMap<>();
+		double totalDistance = 0.0;
+		for(Mat h : possibleHomographies){
+			double distance = computeDistanceBetweenDeperspectived(h);
+			distancesByHomography.put(h, distance);
+			totalDistance+=distance;
+		}
+		double meanDistance = totalDistance / distancesByHomography.size();
+		double squareStandardDeviation = 0.0;
+		for(Mat h : distancesByHomography.keySet()){
+			double diff = meanDistance - distancesByHomography.get(h);
+			squareStandardDeviation+=diff*diff;
+			distancesByHomography.put(h, diff);
+		}
+		System.out.println("Standard deviation: "+Math.sqrt(squareStandardDeviation / distancesByHomography.size()));
+		return (Math.sqrt(squareStandardDeviation / distancesByHomography.size())) > 10 ? null : Collections.min(distancesByHomography.entrySet(), Comparator.comparingDouble(Entry::getValue)).getKey();		
 	}
 
 	private Mat computeHomographyToRef(ImgDescriptor descriptor, Mat joinHomography) {
