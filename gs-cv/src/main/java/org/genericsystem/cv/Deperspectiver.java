@@ -88,20 +88,21 @@ public class Deperspectiver extends AbstractApp {
 
 					double[] vpz = calibratedVps[2].uncalibrate(pp, f);
 					double[] predictionZ = kalmanZ.predict();
-					System.out.println("Prediction : " + Arrays.toString(predictionZ) + Arrays.toString(vpz));
+					//System.out.println("Prediction : " + Arrays.toString(predictionZ) + Arrays.toString(vpz));
 					kalmanZ.correct(vpz);
 
-					superFrame.draw(new Lines(Arrays.asList(new Line(pp[0], pp[1], vpz[0], vpz[1]))), new Scalar(0, 0, 255), 2);
-					superFrame.draw(new Lines(Arrays.asList(new Line(pp[0], pp[1], predictionZ[0], predictionZ[1]))), new Scalar(0, 255, 0), 2);
 
 					superFrame.drawVanishingPointLines(lines, calibratedVps[0], pp, f, new Scalar(0, 255, 0), 1);
 					superFrame.drawVanishingPointLines(lines, calibratedVps[1], pp, f, new Scalar(255, 0, 0), 1);
 
-					Image displayImage = superFrame.getDisplay().toJfxImage();
+					
 					// calibratedVps[0] = new AngleCalibrated(new double[] { predictionX[0], predictionX[1], 1.0 }, pp, f);
 					calibratedVps[2] = new AngleCalibrated(new double[] { predictionZ[0], predictionZ[1], 1.0 }, pp, f);
 					calibratedVps[1] = calibratedVps[0].getOrthoFromVps(calibratedVps[2]);
 
+					superFrame.drawVpsArrows(calibratedVps,pp, new Scalar(0, 255, 0), 2);	
+					
+					Image displayImage = superFrame.getDisplay().toJfxImage();
 					Image deperspectivedImage = superFrame.dePerspective(calibratedVps, pp, f).toJfxImage();
 					Image grad = superFrame.getGradient().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(30, 30)).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(30, 30))
 							.morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(3, 3)).toJfxImage();
