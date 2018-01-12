@@ -546,7 +546,8 @@ public class CamLiveRetriever extends AbstractApp {
 
 	@Override
 	protected void onS() {
-		savedDisplay = descriptorManager.add(deperspectivedImgDescriptor, deperspectiveHomography);
+		Img image = descriptorManager.add(deperspectivedImgDescriptor, deperspectiveHomography);
+		savedDisplay = image!=null?image:savedDisplay;
 	}
 
 

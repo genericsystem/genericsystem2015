@@ -39,12 +39,6 @@ public class DescriptorManager {
 		return descriptors;
 	}
 
-
-	public ImgDescriptor getReference() {
-		return reference;
-	}
-
-
 	public void setReference(ImgDescriptor reference) {
 		this.reference = reference;
 	}
@@ -73,10 +67,12 @@ public class DescriptorManager {
 				descriptors.put(deperspectivedImgDescriptor, homographyToRef);
 				break;
 			}
+			else
+				return null;
 		}
 		updateReferenceDeperspectived(descriptors);		
 		Mat stabilizationHomographyFromFrame = new Mat();
-		Core.gemm(homographyToRef, deperspectiveHomography, 1, new Mat(), 0, stabilizationHomographyFromFrame);
+		Core.gemm(descriptors.get(reference), deperspectiveHomography, 1, new Mat(), 0, stabilizationHomographyFromFrame);
 		return CamLiveRetriever.warpPerspective(frame, homographyToRef);
 	}
 
@@ -85,7 +81,7 @@ public class DescriptorManager {
 	}
 
 	private boolean isReference(ImgDescriptor descriptor) {
-		return descriptor == getReference();
+		return descriptor == reference;
 	}
 
 	private Mat matrixProduct(Mat matrix1, Mat matrix2) {
@@ -115,8 +111,7 @@ public class DescriptorManager {
 	}
 
 	private void computeHomographiesToNewRef(ImgDescriptor newReference) {
-
-		ImgDescriptor oldReference = getReference();
+		ImgDescriptor oldReference = reference;
 		for (ImgDescriptor descriptor : descriptors.keySet()) {
 			if (descriptor == newReference) {
 				descriptors.put(oldReference, descriptors.get(descriptor).inv());
