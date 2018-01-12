@@ -2,14 +2,9 @@ package org.genericsystem.cv.retriever;
 
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -36,7 +31,6 @@ import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
-import org.opencv.utils.Converters;
 import org.opencv.videoio.VideoCapture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,7 +73,7 @@ public class CamLiveRetriever extends AbstractApp {
 	private AngleCalibrated calibrated0;
 
 	private DescriptorManager descriptorManager = new DescriptorManager();
-	private static final Mat IDENTITY_MAT = Mat.eye(new Size(3, 3), CvType.CV_64F);
+	private Mat deperspectiveHomography = new Mat();
 
 	private final double f = 6.053 / 0.009;
 	private boolean stabilizedMode = false;
@@ -133,14 +127,17 @@ public class CamLiveRetriever extends AbstractApp {
 				Mat deperspectivGraphy = computeDeperspectivedHomography(frame, pp, f, mode);
 				Stats.endTask("deperspectivation");
 				if (deperspectivGraphy != null) {
+					descriptorManager.setFrame(frame);
+					deperspectiveHomography = deperspectivGraphy;
 					if (stabilizedImgDescriptor == null) {
 						stabilizedImgDescriptor = new ImgDescriptor(frame, deperspectivGraphy);
 						return;
 					}
-					if (stabilizationHasChanged && stabilizationErrors > 10) {
+					if (stabilizationHasChanged && stabilizationErrors > 20) {
 						fields.reset();
 						stabilizationErrors = 0;
 						stabilizedImgDescriptor = new ImgDescriptor(frame, deperspectivGraphy);
+						//deperspectivedImgDescriptor = stabilizedImgDescriptor;
 						return;
 					}
 
@@ -216,30 +213,6 @@ public class CamLiveRetriever extends AbstractApp {
 		}, 100, FRAME_DELAY, TimeUnit.MILLISECONDS);
 	}
 
-	private double computeDistanceBetweenDeperspectived(Mat betweenStabilizedHomography) {
-		List<Point> originalPoints = Arrays.asList(new Point[] { new Point(0, 0), new Point(frame.width(), 0), new Point(frame.width(), frame.height()), new Point(0, frame.height()) });
-		List<Point> points = restabilize(originalPoints, betweenStabilizedHomography);
-		return evaluateDistanceBetweenStabilized(points, originalPoints);
-	}
-
-	private List<Point> restabilize(List<Point> originals, Mat homography) {
-		Mat original = Converters.vector_Point2d_to_Mat(originals);
-		Mat results = new Mat();
-		Core.perspectiveTransform(original, results, homography);
-		List<Point> res = new ArrayList<>();
-		Converters.Mat_to_vector_Point2d(results, res);
-		return res;
-	}
-
-	private double evaluateDistanceBetweenStabilized(List<Point> newPointList, List<Point> oldPointList) {
-		double error = 0.0;
-		for (int i = 0; i < oldPointList.size(); i++) {
-			double deltaX = newPointList.get(i).x - oldPointList.get(i).x;
-			double deltaY = newPointList.get(i).y - oldPointList.get(i).y;
-			error += deltaX * deltaX + deltaY * deltaY;
-		}
-		return Math.sqrt(error) / oldPointList.size();
-	}
 
 	private Mat computeDeperspectivedHomography(Mat frame, double[] pp, double f, DeperspectivationMode mode) {
 		if (!stabilizedMode) {
@@ -573,94 +546,13 @@ public class CamLiveRetriever extends AbstractApp {
 
 	@Override
 	protected void onS() {
-
-		Map<ImgDescriptor, Mat> descriptorGroup = descriptorManager.getDescriptors();
-		if (descriptorGroup.isEmpty()) {
-			descriptorGroup.put(deperspectivedImgDescriptor, IDENTITY_MAT);
-			descriptorManager.setReference(deperspectivedImgDescriptor);
-			savedDisplay = warpPerspective(frame, IDENTITY_MAT);
-			return;
-		}
-		Mat homographyToRef = IDENTITY_MAT;
-		for (ImgDescriptor descriptor : descriptorGroup.keySet()) {
-			Mat joinHomography = deperspectivedImgDescriptor.computeStabilizationGraphy(descriptor);
-			if (joinHomography != null) {
-				homographyToRef = computeHomographyToRef(descriptor, joinHomography);
-				descriptorGroup.put(deperspectivedImgDescriptor, homographyToRef);
-				break;
-			}
-		}
-
-		savedDisplay = warpPerspective(frame, homographyToRef);
-		ImgDescriptor reference = updateReferenceDeperspectived(descriptorGroup);
-		// savedDisplay = warpPerspective(frame,descriptorGroup.get(deperspectivedImgDescriptor));
-
+		savedDisplay = descriptorManager.add(deperspectivedImgDescriptor, deperspectiveHomography);
 	}
 
-	private Mat computeHomographyToRef(ImgDescriptor descriptor, Mat joinHomography) {
-		return matrixProduct(joinHomography, descriptorManager.getDescriptors().get(descriptor));
-	}
 
-	private boolean isReference(ImgDescriptor descriptor) {
-		return descriptor == descriptorManager.getReference();
-	}
 
-	private ImgDescriptor updateReferenceDeperspectived(Map<ImgDescriptor, Mat> descriptorGroup) {
-		ImgDescriptor bestDescriptor = computeBestDescriptor(descriptorGroup);
-		if (isReference(bestDescriptor))
-			System.out.println("Reference is still the best, doing nothing special for the moment.");
-		else {
-			System.out.println(">>>>>>>>>>> CHANGE: Reference has changed, recomputing homographies to new ref");
-			computeHomographiesToNewRef(bestDescriptor);
-			descriptorManager.setReference(bestDescriptor);
-		}
-		return bestDescriptor;
-	}
 
-	private void computeHomographiesToNewRef(ImgDescriptor newReference) {
-		Map<ImgDescriptor, Mat> descriptorGroup = descriptorManager.getDescriptors();
-		ImgDescriptor oldReference = descriptorManager.getReference();
-		for (ImgDescriptor descriptor : descriptorGroup.keySet()) {
-			if (descriptor == newReference) {
-				descriptorGroup.put(oldReference, descriptorGroup.get(descriptor).inv());
-				descriptorGroup.put(descriptor, IDENTITY_MAT);
-			} else
-				descriptorGroup.put(descriptor, matrixProduct(descriptorGroup.get(oldReference), descriptorGroup.get(descriptor)));
-		}
-	}
 
-	private ImgDescriptor computeBestDescriptor(Map<ImgDescriptor, Mat> descriptorGroup) {
-		Map<ImgDescriptor, Double> distanceMap = descriptorManager.getDistanceMap();
-		for (ImgDescriptor origin : descriptorGroup.keySet()) {
-			double totalDistance = 0.0;
-			for (ImgDescriptor target : descriptorGroup.keySet())
-				totalDistance += origin == target ? 0.0 : computeDistanceBetweenDeperspectived(computeHomographyBetweenDeperspectived(origin, target));
-			distanceMap.put(origin, totalDistance);
-		}
-		return Collections.min(distanceMap.entrySet(), Comparator.comparingDouble(Entry::getValue)).getKey();
-	}
 
-	private Mat computeHomographyBetweenDeperspectived(ImgDescriptor origin, ImgDescriptor target) {
-		if (isReference(origin))
-			return descriptorManager.getDescriptors().get(target).inv();
-		else if (isReference(target))
-			return descriptorManager.getDescriptors().get(origin);
-		else
-			return matrixProduct(descriptorManager.getDescriptors().get(target).inv(), descriptorManager.getDescriptors().get(origin));
-	}
-
-	private Mat matrixProduct(Mat matrix1, Mat matrix2) {
-		Mat result = new Mat(matrix1.cols(), matrix2.rows(), CvType.CV_64F, new Scalar(0));
-		for (int i = 0; i < matrix1.rows(); i++) {
-			for (int j = 0; j < matrix2.cols(); j++) {
-				double sum = 0.0;
-				for (int k = 0; k < matrix2.rows(); k++) {
-					sum += matrix1.get(i, k)[0] * matrix2.get(k, j)[0];
-				}
-				result.put(i, j, sum);
-			}
-		}
-		return result;
-	}
 
 }
