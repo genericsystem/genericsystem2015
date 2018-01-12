@@ -235,7 +235,7 @@ public class SuperFrameImg {
 
 	public void drawVpsArrows(Calibrated[] calibratedVps, double[] shift,Scalar color, int thickness) {
 		drawArrow(new Point(shift[0], shift[1]),new Point(shift[0]+calibratedVps[0].x*20,shift[1]+calibratedVps[0].y*20), new Scalar(0, 255, 0), 2);
-		drawArrow(new Point(shift[0], shift[1]),new Point(shift[0]+calibratedVps[1].x*20,shift[1]+calibratedVps[1].y*20), new Scalar(255, 0, 0), 2);
+		drawArrow(new Point(shift[0], shift[1]),new Point(shift[0]-calibratedVps[1].x*20,shift[1]-calibratedVps[1].y*20), new Scalar(255, 0, 0), 2);
 		drawArrow(new Point(shift[0], shift[1]),new Point(shift[0]-calibratedVps[2].x*20,shift[1]-calibratedVps[2].y*20), new Scalar(0, 0, 255), 2);		
 	}
 	
