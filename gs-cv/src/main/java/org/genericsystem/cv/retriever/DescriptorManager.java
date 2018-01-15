@@ -81,16 +81,9 @@ public class DescriptorManager {
 		return homographyToRef;
 	}
 
-	private boolean isReference(ImgDescriptor descriptor) {
-		return descriptor == reference;
-	}
-
 	private ImgDescriptor updateReferenceDeperspectived(Map<ImgDescriptor, Mat> descriptorGroup) {
 		ImgDescriptor bestDescriptor = computeBestDescriptor(descriptorGroup);
-		if (isReference(bestDescriptor))
-			System.out.println("Reference is still the best, doing nothing special for the moment.");
-		else {
-			System.out.println(">>>>>>>>>>> CHANGE: Reference has changed, recomputing homographies to new ref");
+		if (bestDescriptor != reference){
 			computeHomographiesToNewRef(bestDescriptor);
 			setReference(bestDescriptor);
 		}
@@ -98,17 +91,17 @@ public class DescriptorManager {
 	}
 
 	private void computeHomographiesToNewRef(ImgDescriptor newReference) {
-		ImgDescriptor oldReference = reference;
+		System.out.println(">>>>>>>>>>> CHANGE: Reference has changed, recomputing homographies to new ref");
 		for (ImgDescriptor descriptor : descriptors.keySet()) {
 			if (descriptor == newReference) {
-				descriptors.put(oldReference, descriptors.get(descriptor).inv());
+				descriptors.put(reference, descriptors.get(descriptor).inv());
 				descriptors.put(descriptor, IDENTITY_MAT);
 			} else{
 				Mat newHomographyToRef = new Mat();
-				Core.gemm(descriptors.get(oldReference), descriptors.get(descriptor), 1, new Mat(), 1, newHomographyToRef);
+				Core.gemm(descriptors.get(reference), descriptors.get(descriptor), 1, new Mat(), 1, newHomographyToRef);
 				descriptors.put(descriptor, newHomographyToRef);
 			}
-		}
+		}		
 	}
 
 	private ImgDescriptor computeBestDescriptor(Map<ImgDescriptor, Mat> descriptorGroup) {
