@@ -1,28 +1,41 @@
 package org.genericsystem.cv;
 
+import org.genericsystem.cv.Calibrated.AngleCalibrated;
+import org.genericsystem.cv.utils.NativeLibraryLoader;
+import org.opencv.calib3d.Calib3d;
+import org.opencv.core.Core;
+import org.opencv.core.CvType;
+import org.opencv.core.DMatch;
+import org.opencv.core.KeyPoint;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfDMatch;
+import org.opencv.core.MatOfKeyPoint;
+import org.opencv.core.MatOfPoint2f;
+import org.opencv.core.Point;
+import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
+import org.opencv.core.Size;
+import org.opencv.features2d.BFMatcher;
+import org.opencv.features2d.DescriptorMatcher;
+import org.opencv.features2d.FastFeatureDetector;
+import org.opencv.imgproc.Imgproc;
+import org.opencv.utils.Converters;
+import org.opencv.videoio.VideoCapture;
+import org.opencv.xfeatures2d.BriefDescriptorExtractor;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
-import org.genericsystem.cv.Calibrated.AngleCalibrated;
-import org.genericsystem.cv.utils.NativeLibraryLoader;
-import org.opencv.core.Core;
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfPoint2f;
-import org.opencv.core.Point;
-import org.opencv.core.Scalar;
-import org.opencv.core.Size;
-import org.opencv.imgproc.Imgproc;
-import org.opencv.utils.Converters;
-import org.opencv.videoio.VideoCapture;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -39,93 +52,327 @@ public class Deperspectiver extends AbstractApp {
 		launch(args);
 	}
 
+	private final double f = 6.053 / 0.009;
 	private final VideoCapture capture = new VideoCapture(0);
+	private SuperFrameImg superFrame = SuperFrameImg.create(capture, f);
 	private ScheduledExecutorService timer = Executors.newSingleThreadScheduledExecutor();;
 
-	private SuperFrameImg superFrame;
 	private AngleCalibrated calibrated0;
-
-	private final double f = 6.053 / 0.009;
+	private Kalman kalmanZ = new Kalman();
+	private ReferenceManager referenceManager = new ReferenceManager();
 
 	private boolean stabilizedMode = false;
 	private boolean textsEnabledMode = false;
 
-	private Kalman kalmanX = new Kalman();
-	private Kalman kalmanZ = new Kalman();
-
 	@Override
 	protected void fillGrid(GridPane mainGrid) {
-		superFrame = SuperFrameImg.create(capture);
-		Image jfx = superFrame.getDisplay().toJfxImage();
-		ImageView view00 = new ImageView(jfx);
+		double displaySizeReduction = 2;
+
+		ImageView view00 = new ImageView();
+		ImageView view01 = new ImageView();
+		ImageView view10 = new ImageView();
+		ImageView view11 = new ImageView();
+
 		mainGrid.add(view00, 0, 0);
-		ImageView view01 = new ImageView(jfx);
 		mainGrid.add(view01, 0, 1);
-		ImageView view10 = new ImageView(jfx);
 		mainGrid.add(view10, 1, 0);
-		ImageView view11 = new ImageView(jfx);
 		mainGrid.add(view11, 1, 1);
+
+		view00.setFitWidth(superFrame.width() / displaySizeReduction);
+		view00.setFitHeight(superFrame.height() / displaySizeReduction);
+		view01.setFitWidth(superFrame.width() / displaySizeReduction);
+		view01.setFitHeight(superFrame.height() / displaySizeReduction);
+		view10.setFitWidth(superFrame.width() / displaySizeReduction);
+		view10.setFitHeight(superFrame.height() / displaySizeReduction);
+		view11.setFitWidth(superFrame.width() / displaySizeReduction);
+		view11.setFitHeight(superFrame.height() / displaySizeReduction);
 
 		double[] pp = superFrame.getPrincipalPoint();
 		calibrated0 = new AngleCalibrated(0, Math.PI / 2);
 		timer.scheduleAtFixedRate(() -> {
 			try {
-				if (!stabilizedMode)
-					superFrame = SuperFrameImg.create(capture);
-				Lines lines = superFrame.detectLines();
-				if (textsEnabledMode)
-					lines.lines.addAll(superFrame.findTextOrientationLines());
-				if (lines.size() > 4) {
-					superFrame.draw(lines, new Scalar(0, 0, 255), 1);
-					calibrated0 = superFrame.findVanishingPoint(lines, calibrated0, pp, f);
-
-					AngleCalibrated[] calibratedVps = calibrated0.findOtherVps(lines, pp, f);
-
-					double[] vpx = calibratedVps[0].uncalibrate(pp, f);
-					double[] predictionX = kalmanX.predict();
-					System.out.println("Prediction : " + Arrays.toString(predictionX) + Arrays.toString(vpx));
-					kalmanX.correct(vpx);
-
-					double[] vpz = calibratedVps[2].uncalibrate(pp, f);
-					double[] predictionZ = kalmanZ.predict();
-					//System.out.println("Prediction : " + Arrays.toString(predictionZ) + Arrays.toString(vpz));
-					kalmanZ.correct(vpz);
-
-
-					superFrame.drawVanishingPointLines(lines, calibratedVps[0], pp, f, new Scalar(0, 255, 0), 1);
-					superFrame.drawVanishingPointLines(lines, calibratedVps[1], pp, f, new Scalar(255, 0, 0), 1);
-
-					
-					// calibratedVps[0] = new AngleCalibrated(new double[] { predictionX[0], predictionX[1], 1.0 }, pp, f);
-					calibratedVps[2] = new AngleCalibrated(new double[] { predictionZ[0], predictionZ[1], 1.0 }, pp, f);
-					calibratedVps[1] = calibratedVps[0].getOrthoFromVps(calibratedVps[2]);
-
-					superFrame.drawVpsArrows(calibratedVps,pp, new Scalar(0, 255, 0), 2);	
-					
-					Image displayImage = superFrame.getDisplay().toJfxImage();
-					Image deperspectivedImage = superFrame.dePerspective(calibratedVps, pp, f).toJfxImage();
-					Image grad = superFrame.getGradient().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(30, 30)).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(30, 30))
-							.morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(3, 3)).toJfxImage();
-					Image closed = superFrame.getBinarized().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(10, 10)).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(10, 10))
-							.morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(3, 3)).toJfxImage();
-					Image diff = superFrame.getDiffFrame().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(10, 10)).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(10, 10))
-							.morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(3, 3)).toJfxImage();
-
+				Image[][] images = doWork(pp);
+				if (images != null)
 					Platform.runLater(() -> {
-						view00.setImage(displayImage);
-						view01.setImage(deperspectivedImage);
-						view10.setImage(grad);
-						view11.setImage(diff);
+						view00.setImage(images[0][0]);
+						view01.setImage(images[0][1]);
+						view10.setImage(images[0][2]);
+						view11.setImage(images[0][3]);
 					});
-				} else
-					System.out.println("Not enough lines : " + lines.size());
 
 			} catch (Throwable e) {
 				e.printStackTrace();
 			}
-
 		}, 30, 30, TimeUnit.MILLISECONDS);
 
+	}
+
+	protected Image[][] doWork(double[] pp) {
+		if (!stabilizedMode)
+			superFrame = SuperFrameImg.create(capture, f);
+		Lines lines = superFrame.detectLines();
+		if (textsEnabledMode)
+			lines.lines.addAll(superFrame.findTextOrientationLines());
+		if (lines.size() > 4) {
+			superFrame.draw(lines, new Scalar(0, 0, 255), 1);
+			// calibrated0 = new AngleCalibrated(new double[] {0,Math.PI/2});
+			calibrated0 = superFrame.findVanishingPoint(lines, calibrated0);
+
+			AngleCalibrated[] calibratedVps = superFrame.findOtherVps(calibrated0, lines);
+
+			superFrame.drawVanishingPointLines(lines, calibratedVps[0], new Scalar(0, 255, 0), 1);
+			superFrame.drawVanishingPointLines(lines, calibratedVps[1], new Scalar(255, 0, 0), 1);
+
+			double[] predictionZ = kalmanZ.predict();
+			kalmanZ.correct(calibratedVps[2].uncalibrate(pp, f));
+			calibratedVps[2] = new AngleCalibrated(new double[] { predictionZ[0], predictionZ[1], 1.0 }, pp, f);
+			calibratedVps[1] = calibratedVps[0].getOrthoFromVps(calibratedVps[2]);
+
+			superFrame.drawVpsArrows(calibratedVps, new double[] { 20, 20 }, new Scalar(0, 255, 0), 2);
+
+			Image displayImage = superFrame.getDisplay().toJfxImage();
+
+			Mat deperspectiveHomography = superFrame.findHomography(calibratedVps);
+			SuperFrameImg superDeperspectived = superFrame.deperspective(deperspectiveHomography);
+			List<Rect> detectedRects = superDeperspectived.detectRects();
+			superDeperspectived.drawRects(superDeperspectived.detectRects(), new Scalar(255), -1);
+			Image deperspectivedImage = superDeperspectived.getDisplay().toJfxImage();
+
+			// Image grad = superFrame.getGradient().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(30, 30)).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(30, 30))
+			// .morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(3, 3)).toJfxImage();
+			// Image closed = superFrame.getBinarized().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(10, 10)).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(10, 10))
+			// .morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(3, 3)).toJfxImage();
+			// Image diff = superFrame.getDiffFrame().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(10, 10)).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(10, 10))
+			// .morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(3, 3)).toJfxImage();
+
+			// Image text = superDeperspectived.getBinarized().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(5, 3)).toJfxImage();
+			Image text = superDeperspectived.getDiffFrame().toJfxImage();
+			// Template closedDeperspectived = new Template(superDeperspectived);
+			// closedDeperspectived.drawRects(closedDeperspectived.detectRects(closedDeperspectived.getFrame().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(9, 5)), 100, 10000));
+			// Image text2 = closedDeperspectived.getDisplay().toJfxImage();
+
+			ImgDescriptor newImgDescriptor = new ImgDescriptor(superDeperspectived);
+			referenceManager.submit(newImgDescriptor, detectedRects);
+			SuperTemplate superTemplate = new SuperTemplate(referenceManager.getReference().getSuperFrame().getFrame().getSrc(), pp, f);
+			List<Rect> referenceRects = referenceManager.getReferenceRects();
+			superTemplate.drawRects(referenceRects, new Scalar(255), -1);
+			Image superTemplateImg = superTemplate.getDisplay().toJfxImage();
+			return new Image[][] { new Image[] { displayImage, deperspectivedImage, text, superTemplateImg } };
+
+		} else {
+			System.out.println("Not enough lines : " + lines.size());
+			return null;
+		}
+	}
+
+	private static class Reconciliation {
+		private final Mat homography;
+		private final List<Point> newPts;
+		private final List<Point> referencePts;
+
+		public Reconciliation(Mat homography, List<Point> newPts, List<Point> referencePts) {
+			this.homography = homography;
+			this.newPts = newPts;
+			this.referencePts = referencePts;
+		}
+
+		public Mat getHomography() {
+			return homography;
+		}
+
+		public List<Point> getPts() {
+			return newPts;
+		}
+
+		public List<Point> getReferencePts() {
+			return referencePts;
+		}
+	}
+
+	public static class ImgDescriptor {
+		private static final BriefDescriptorExtractor briefExtractor = BriefDescriptorExtractor.create(32, false);
+		private static final FastFeatureDetector detector = FastFeatureDetector.create(10, true, FastFeatureDetector.TYPE_9_16);
+		private static final DescriptorMatcher matcher = BFMatcher.create(DescriptorMatcher.BRUTEFORCE_HAMMING, true);
+
+		private final SuperFrameImg superFrame;
+		private final MatOfKeyPoint keypoints = new MatOfKeyPoint();
+		private final Mat descriptors;
+
+		public ImgDescriptor(SuperFrameImg superFrame) {
+			this.superFrame = superFrame;
+			detector.detect(superFrame.getFrame().getSrc(), keypoints);
+			// keypoints = detect(deperspectivedImg);
+			assert keypoints != null && !keypoints.empty();
+			descriptors = new Mat();
+			briefExtractor.compute(superFrame.getFrame().getSrc(), keypoints, descriptors);
+			// EXTRACTOR.compute(deperspectivedImg.getSrc(), keypoints, descriptors);
+		}
+
+		public SuperFrameImg getSuperFrame() {
+			return superFrame;
+		}
+
+		public Mat getDescriptors() {
+			return descriptors;
+		}
+
+		public MatOfKeyPoint getKeypoints() {
+			return keypoints;
+		}
+
+		public Reconciliation computeReconciliation(ImgDescriptor reference) {
+			MatOfDMatch matches = new MatOfDMatch();
+			// System.out.println(frameDescriptor.getDescriptors());
+			matcher.match(getDescriptors(), reference.getDescriptors(), matches);
+
+			List<KeyPoint> referenceKeyPoints = reference.getKeypoints().toList();
+			List<KeyPoint> keyPoints = getKeypoints().toList();
+			List<Point> referencePts = new ArrayList<>();
+			List<Point> pts = new ArrayList<>();
+			for (DMatch goodMatch : matches.toArray())
+				if (goodMatch.distance <= 120) {
+					referencePts.add(referenceKeyPoints.get(goodMatch.trainIdx).pt);
+					pts.add(keyPoints.get(goodMatch.queryIdx).pt);
+				}
+			if (referencePts.size() > 40) {
+
+				// List<Point[]> pairedPoints = new ArrayList<>();
+				// for (int i = 0; i < goodNewKeypoints.size(); i++)
+				// pairedPoints.add(new Point[] { goodOldKeypoints.get(i), goodNewKeypoints.get(i) });
+
+				// double[] transScaleParams = new LevenbergImpl<>((points, params) -> distance(points, params), pairedPoints, new double[] { 1, 1, 0, 0 }).getParams();
+				// System.out.println("params " + Arrays.toString(transScaleParams));
+				// Mat result = getTSMat(transScaleParams);
+
+				Mat result = Calib3d.findHomography(new MatOfPoint2f(pts.stream().toArray(Point[]::new)), new MatOfPoint2f(referencePts.stream().toArray(Point[]::new)), Calib3d.RANSAC, 1);
+				if (result.size().empty()) {
+					System.out.println("Stabilization homography is empty");
+					return null;
+				}
+				if (!isValidHomography(result)) {
+					System.out.println("Not a valid homography");
+					return null;
+				}
+				return new Reconciliation(result, pts, referencePts);
+			} else {
+				System.out.println("Not enough matches (" + referencePts.size() + "})");
+				return null;
+			}
+		}
+
+		private boolean isValidHomography(Mat homography) {
+			int w = superFrame.getFrame().width();
+			int h = superFrame.getFrame().height();
+			MatOfPoint2f original = new MatOfPoint2f(new Point[] { new Point(0, 0), new Point(w, 0), new Point(w, h), new Point(0, h) });
+			MatOfPoint2f dst = new MatOfPoint2f();
+			Core.perspectiveTransform(original, dst, homography);
+			List<Point> targets = dst.toList();
+			return isClockwise(targets.get(0), targets.get(1), targets.get(2));
+		}
+
+		private boolean isClockwise(Point a, Point b, Point c) {
+			double areaSum = 0;
+			areaSum += a.x * (b.y - c.y);
+			areaSum += b.x * (c.y - a.y);
+			areaSum += c.x * (a.y - b.y);
+			return areaSum > 0;
+		}
+	}
+
+	public static class ReferenceManager {
+		private static final Mat IDENTITY_MAT = Mat.eye(new Size(3, 3), CvType.CV_64F);
+
+		private Map<ImgDescriptor, Mat> toReferenceGraphy = new LinkedHashMap<>();
+
+		private ImgDescriptor reference;
+		private List<Rect> referenceRects = new ArrayList<>();
+		private boolean take = true;
+
+		public void submit(ImgDescriptor newImgDescriptor, List<Rect> detectedrects) {
+			Mat homography = null;
+			if (take) {
+				this.reference = newImgDescriptor;
+				homography = IDENTITY_MAT;
+				take = false;
+			} else {
+				Reconciliation reconciliation = computeHomography(newImgDescriptor);
+				if (reconciliation != null)
+					homography = reconciliation.getHomography();
+			}
+			if (homography != null) {
+				toReferenceGraphy.put(newImgDescriptor, homography);
+				List<Rect> shiftedRect = shift(detectedrects, homography);
+				consolidate(shiftedRect);
+				updateReference(newImgDescriptor);
+			}
+		}
+
+		private void updateReference(ImgDescriptor newImgDescriptor) {
+
+		}
+
+		private void consolidate(List<Rect> shiftedRect) {
+			referenceRects = shiftedRect;
+		}
+
+		public List<Rect> getReferenceRects() {
+			return referenceRects;
+		}
+
+		private List<Rect> shift(List<Rect> detectedRects, Mat homography) {
+			List<Point> pts = new ArrayList<>(2 * detectedRects.size());
+			detectedRects.forEach(rect -> {
+				pts.add(rect.tl());
+				pts.add(rect.br());
+			});
+			List<Point> transform = transform(pts, homography);
+			List<Rect> result = new ArrayList<>(detectedRects.size());
+			for (int i = 0; i < transform.size(); i += 2)
+				result.add(new Rect(transform.get(i), transform.get(i + 1)));
+			return result;
+		}
+
+		private List<Point> transform(List<Point> originals, Mat homography) {
+			Mat original = Converters.vector_Point2d_to_Mat(originals);
+			Mat results = new Mat();
+			Core.perspectiveTransform(original, results, homography);
+			List<Point> res = new ArrayList<>();
+			Converters.Mat_to_vector_Point2d(results, res);
+			return res;
+		}
+
+		public Reconciliation computeHomography(ImgDescriptor newDescriptor) {
+			return newDescriptor.computeReconciliation(getReference());
+		}
+
+		public ImgDescriptor getReference() {
+			return reference;
+		}
+
+		public void take() {
+			take = true;
+		}
+	}
+
+	public static class SuperTemplate extends SuperFrameImg {
+
+		public SuperTemplate(SuperFrameImg superFrame) {
+			this(superFrame.getDisplay().getSrc(), superFrame.getPp(), superFrame.getF());
+		}
+
+		public SuperTemplate(Mat frameMat, double[] pp, double f) {
+			super(frameMat, pp, f);
+		}
+
+		@Override
+		protected Img buildDisplay() {
+			return new Img(new Mat(size(), CvType.CV_8UC1, new Scalar(0)), false);
+		}
+	}
+
+	@Override
+	protected void onS() {
+		referenceManager.take();
 	}
 
 	@Override

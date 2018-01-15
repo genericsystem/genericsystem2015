@@ -1,24 +1,36 @@
 package org.genericsystem.cv;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.genericsystem.cv.Calibrated.AngleCalibrated;
 import org.genericsystem.cv.Deperspectiver.Line;
 import org.genericsystem.cv.Deperspectiver.Lines;
+import org.genericsystem.cv.Deperspectiver.SuperTemplate;
 import org.genericsystem.cv.lm.LevenbergImpl;
+import org.genericsystem.reinforcer.tools.GSRect;
 import org.opencv.core.Core;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
+import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 public class SuperFrameImg {
 
-	private Img frame;
+	private final Img frame;
+	private final double[] pp;
+	private final double f;
+
 	private Img display;
 
 	private Img bilateralFilter;
@@ -30,14 +42,16 @@ public class SuperFrameImg {
 	private Img binaryClosed30;
 	private Img binaryClosed40;
 
-	public static SuperFrameImg create(VideoCapture capture) {
+	public static SuperFrameImg create(VideoCapture capture, double f) {
 		Mat frameMat = new Mat();
 		capture.read(frameMat);
-		return new SuperFrameImg(frameMat);
+		return new SuperFrameImg(frameMat, new double[] { frameMat.width() / 2, frameMat.height() / 2 }, f);
 	}
 
-	public SuperFrameImg(Mat frameMat) {
+	public SuperFrameImg(Mat frameMat, double[] pp, double f) {
 		frame = new Img(frameMat, true);
+		this.pp = pp;
+		this.f = f;
 	}
 
 	public Img getFrame() {
@@ -92,15 +106,8 @@ public class SuperFrameImg {
 		return getFrame().bgr2Gray().morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE, new Size(2, 2)).thresHold(15, 255, Imgproc.THRESH_BINARY);
 	}
 
-	private Img buildDisplay() {
+	protected Img buildDisplay() {
 		return new Img(getFrame().getSrc(), true);
-	}
-
-	private Img buildDiffFrame() {
-		Mat diffFrame = getBilateralFilter().bgr2Gray().getSrc();
-		Core.absdiff(diffFrame, new Scalar(255), diffFrame);
-		Imgproc.adaptiveThreshold(diffFrame, diffFrame, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 11, 3);
-		return new Img(diffFrame, false);
 	}
 
 	private Img buildBinaryClosed10() {
@@ -116,7 +123,7 @@ public class SuperFrameImg {
 	}
 
 	private Img buildBinaryClosed40() {
-		return getBinarized().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(40, 40));
+		return getBinarized().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(40, 40)).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(40, 40));
 	}
 
 	public Lines detectLines() {
@@ -158,17 +165,17 @@ public class SuperFrameImg {
 		return new Img(deperspectived, false);
 	}
 
-	public Mat findHomography(AngleCalibrated[] calibrateds, double[] pp, double f) {
+	public Mat findHomography(AngleCalibrated[] calibrateds) {
 
 		double[][] vps = new double[][] { calibrateds[0].getCalibratexyz(), calibrateds[1].getCalibratexyz(), calibrateds[2].getCalibratexyz() };
 		// System.out.println("vps : " + Arrays.deepToString(vps));
 
-		double[][] vps2D = getVp2DFromVps(vps, pp, f);
-		System.out.println("vps2D : " + Arrays.deepToString(vps2D));
+		double[][] vps2D = getVp2DFromVps(vps);
+		// System.out.println("vps2D : " + Arrays.deepToString(vps2D));
 
-		System.out.println("vp1 " + calibrateds[0]);
-		System.out.println("vp2 " + calibrateds[1]);
-		System.out.println("vp3 " + calibrateds[2]);
+		// System.out.println("vp1 " + calibrateds[0]);
+		// System.out.println("vp2 " + calibrateds[1]);
+		// System.out.println("vp3 " + calibrateds[2]);
 
 		double theta = calibrateds[0].getTheta();
 		double theta2 = calibrateds[1].getTheta();
@@ -188,7 +195,7 @@ public class SuperFrameImg {
 		return Imgproc.getPerspectiveTransform(new MatOfPoint2f(new Point(A_), new Point(B_), new Point(C_), new Point(D_)), new MatOfPoint2f(new Point(A), new Point(B), new Point(C), new Point(D)));
 	}
 
-	public static double[][] getVp2DFromVps(double vps[][], double[] pp, double f) {
+	public double[][] getVp2DFromVps(double vps[][]) {
 		double[][] result = new double[3][3];
 		for (int i = 0; i < 3; i++) {
 			result[i][0] = vps[i][0] * f / vps[i][2] + pp[0];
@@ -214,17 +221,17 @@ public class SuperFrameImg {
 		lines.draw(getDisplay().getSrc(), color, thickness);
 	}
 
-	public void drawVanishingPointLines(Lines lines, AngleCalibrated calibratedVp, double[] pp, double f, Scalar color, int thickness) {
+	public void drawVanishingPointLines(Lines lines, AngleCalibrated calibratedVp, Scalar color, int thickness) {
 		double[] uncalibrate0 = calibratedVp.uncalibrate(pp, f);
 		Lines horizontals = lines.filter(line -> AngleCalibrated.distance(uncalibrate0, line) < 0.4);
 		draw(horizontals, color, thickness);
 	}
 
-	public Img dePerspective(AngleCalibrated[] calibratedVps, double[] pp, double f) {
-		return warpPerspective(findHomography(calibratedVps, pp, f));
+	public SuperTemplate deperspective(Mat homography) {
+		return new SuperTemplate(warpPerspective(homography).getSrc(), pp, f);
 	}
 
-	public AngleCalibrated findVanishingPoint(Lines lines, AngleCalibrated old, double[] pp, double f) {
+	public AngleCalibrated findVanishingPoint(Lines lines, AngleCalibrated old) {
 		double[] thetaPhi = new LevenbergImpl<>((line, params) -> new AngleCalibrated(params).distance(line, pp, f), lines.lines, old.getThetaPhi()).getParams();
 		return new AngleCalibrated(thetaPhi);
 	}
@@ -233,15 +240,114 @@ public class SuperFrameImg {
 		return TextOrientationLinesDetector.getTextOrientationLines(this);
 	}
 
-	public void drawVpsArrows(Calibrated[] calibratedVps, double[] shift,Scalar color, int thickness) {
-		drawArrow(new Point(shift[0], shift[1]),new Point(shift[0]+calibratedVps[0].x*20,shift[1]+calibratedVps[0].y*20), new Scalar(0, 255, 0), 2);
-		drawArrow(new Point(shift[0], shift[1]),new Point(shift[0]-calibratedVps[1].x*20,shift[1]-calibratedVps[1].y*20), new Scalar(255, 0, 0), 2);
-		drawArrow(new Point(shift[0], shift[1]),new Point(shift[0]-calibratedVps[2].x*20,shift[1]-calibratedVps[2].y*20), new Scalar(0, 0, 255), 2);		
+	public void drawVpsArrows(Calibrated[] calibratedVps, double[] shift, Scalar color, int thickness) {
+		drawArrow(new Point(shift[0], shift[1]), new Point(shift[0] + calibratedVps[0].x * 20, shift[1] + calibratedVps[0].y * 20), new Scalar(0, 255, 0), 2);
+		drawArrow(new Point(shift[0], shift[1]), new Point(shift[0] - calibratedVps[1].x * 20, shift[1] - calibratedVps[1].y * 20), new Scalar(255, 0, 0), 2);
+		drawArrow(new Point(shift[0], shift[1]), new Point(shift[0] - calibratedVps[2].x * 20, shift[1] - calibratedVps[2].y * 20), new Scalar(0, 0, 255), 2);
 	}
-	
+
 	public void drawArrow(Point pt1, Point pt2, Scalar color, int thickness) {
 		Imgproc.arrowedLine(getDisplay().getSrc(), pt1, pt2, color, thickness, 8, 0, 0.5);
-		
+	}
+
+	public void drawDetectedRects() {
+		drawRects(detectRects(), new Scalar(255), -1);
+	}
+
+	public void drawRects(List<Rect> gsRects, Scalar color, int thickness) {
+		Mat display = getDisplay().getSrc();
+		gsRects.forEach(rect -> Imgproc.rectangle(display, rect.tl(), rect.br(), color, thickness));
+	}
+
+	public Img getGrayFrame() {
+		return CvType.CV_8U != getFrame().type() ? getFrame().bgr2Gray() : getFrame();
+	}
+
+	private Img buildDiffFrame() {
+		Mat diffFrame = getGrayFrame().gaussianBlur(new Size(5, 5)).getSrc();
+		Core.absdiff(diffFrame, new Scalar(90), diffFrame);
+		Imgproc.adaptiveThreshold(diffFrame, diffFrame, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 7, 3);
+		return new Img(diffFrame, false);
+	}
+
+	public List<Rect> detectRects() {
+		return (detectRects(getDiffFrame(), 5, 10000));
+		// return (detectRects(getBinarized().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(7,3)), 5,10000));
+
+		// List<GSRect> rects = getRects(200, 11, 3, new Size(11, 3));
+		// List<GSRect> children = getRects(40, 17, 3, new Size(7, 3));
+		// return cleanList(rects, children, 0.70);
+	}
+
+	List<Rect> detectRects(Img binarized, int minArea, int maxArea) {
+		List<MatOfPoint> contours = new ArrayList<>();
+		Imgproc.findContours(binarized.getSrc(), contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+		Size size = binarized.size();
+		return contours.stream().filter(contour -> Imgproc.contourArea(contour) > minArea && Imgproc.contourArea(contour) < maxArea).map(c -> Imgproc.boundingRect(c))
+				.filter(rect -> rect.tl().x != 0 && rect.tl().y != 0 && rect.br().x != (size.width) && rect.br().y != (size.height)).collect(Collectors.toList());
+	}
+
+	public List<GSRect> cleanList(List<GSRect> bigRects, List<GSRect> smallRects, double overlapThreshold) {
+		smallRects.removeIf(smallRect -> bigRects.stream().anyMatch(bigRect -> smallRect.inclusiveArea(bigRect) > overlapThreshold));
+		return Stream.concat(smallRects.stream().filter(smallRect -> bigRects.stream().filter(rect -> rect.isOverlapping(smallRect)).noneMatch(rect -> rect.getInsider(smallRect) == null)), bigRects.stream()).collect(Collectors.toList());
+	}
+
+	private List<Rect> applyNoOverlapsConstraint(List<Rect> rects) {
+		Collections.reverse(rects);
+		List<Rect> result = new ArrayList<>();
+		for (ListIterator<Rect> it = rects.listIterator(); it.hasNext();) {
+			int i = it.nextIndex();
+			Rect rect = it.next();
+			if (rects.subList(i, rects.size() - 1).stream().filter(r -> r != rect).noneMatch(r -> isOverlapping(r, rect)))
+				result.add(rect);
+		}
+		return result;
+	}
+
+	public boolean isOverlapping(Rect rect, Rect other) {
+		return rect.x <= other.br().x && other.tl().x <= rect.br().x && rect.y <= other.br().y && other.tl().y <= rect.br().y;
+	}
+
+	public AngleCalibrated[] findOtherVps(AngleCalibrated calibrated0, Lines lines) {
+		// System.out.println(Arrays.toString(calibrated0.getCalibratexyz()));
+		AngleCalibrated[] result = new AngleCalibrated[] { null, null, null };
+		double bestError = Double.MAX_VALUE;
+		// double bestAngle = 0;
+		for (double angle = 0; angle < 360 / 180 * Math.PI; angle += 1 * Math.PI / 180) {
+			AngleCalibrated calibratexy = calibrated0.getOrthoFromAngle(angle);
+			AngleCalibrated calibratez = calibrated0.getOrthoFromVps(calibratexy);
+			if (calibratexy.getPhi() < calibratez.getPhi()) {
+				AngleCalibrated tmp = calibratexy;
+				calibratexy = calibratez;
+				calibratez = tmp;
+			}
+			double error = calibratexy.distance(lines.lines, pp, f);
+			if (error < bestError) {
+				bestError = error;
+				result[0] = calibrated0;
+				result[1] = calibratexy;
+				result[2] = calibratez;
+				// bestAngle = angle;
+			}
+		}
+		double theta0 = Math.abs(result[0].getTheta()) % Math.PI;
+		theta0 = Math.min(Math.PI - theta0, theta0);
+		double theta1 = Math.abs(result[1].getTheta()) % Math.PI;
+		theta1 = Math.min(Math.PI - theta1, theta1);
+		if (theta0 > theta1) {
+			AngleCalibrated tmp = result[0];
+			result[0] = result[1];
+			result[1] = tmp;
+		}
+		return result;
+	}
+
+	public double[] getPp() {
+		return pp;
+	}
+
+	public double getF() {
+		return f;
 	}
 
 }

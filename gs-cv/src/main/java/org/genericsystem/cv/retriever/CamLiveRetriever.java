@@ -137,7 +137,7 @@ public class CamLiveRetriever extends AbstractApp {
 						fields.reset();
 						stabilizationErrors = 0;
 						stabilizedImgDescriptor = new ImgDescriptor(frame, deperspectivGraphy);
-						//deperspectivedImgDescriptor = stabilizedImgDescriptor;
+						// deperspectivedImgDescriptor = stabilizedImgDescriptor;
 						return;
 					}
 
@@ -212,7 +212,6 @@ public class CamLiveRetriever extends AbstractApp {
 			}
 		}, 100, FRAME_DELAY, TimeUnit.MILLISECONDS);
 	}
-
 
 	private Mat computeDeperspectivedHomography(Mat frame, double[] pp, double f, DeperspectivationMode mode) {
 		if (!stabilizedMode) {
@@ -547,13 +546,7 @@ public class CamLiveRetriever extends AbstractApp {
 	@Override
 	protected void onS() {
 		Img image = descriptorManager.add(deperspectivedImgDescriptor, deperspectiveHomography);
-		savedDisplay = image!=null?image:savedDisplay;
+		savedDisplay = image != null ? image : savedDisplay;
 	}
-
-
-
-
-
-
 
 }

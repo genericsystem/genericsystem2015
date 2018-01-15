@@ -16,7 +16,7 @@ import org.opencv.core.Size;
  */
 public final class RectToolsMapper {
 
-	private static GSRect convert(Rect rect) {
+	public static GSRect convert(Rect rect) {
 		return new GSRect(rect.x, rect.y, rect.width, rect.height);
 	}
 

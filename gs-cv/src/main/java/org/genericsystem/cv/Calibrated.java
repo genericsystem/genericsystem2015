@@ -194,39 +194,5 @@ public class Calibrated {
 				d = num / (nNorm * rNorm);
 			return d;
 		}
-
-		public AngleCalibrated[] findOtherVps(Lines lines, double[] pp, double f) {
-			System.out.println(Arrays.toString(getCalibratexyz()));
-			AngleCalibrated[] result = new AngleCalibrated[] { null, null, null };
-			double bestError = Double.MAX_VALUE;
-			// double bestAngle = 0;
-			for (double angle = 0; angle < 360 / 180 * Math.PI; angle += 1 * Math.PI / 180) {
-				AngleCalibrated calibratexy = getOrthoFromAngle(angle);
-				AngleCalibrated calibratez = getOrthoFromVps(calibratexy);
-				if (calibratexy.getPhi() < calibratez.getPhi()) {
-					AngleCalibrated tmp = calibratexy;
-					calibratexy = calibratez;
-					calibratez = tmp;
-				}
-				double error = calibratexy.distance(lines.lines, pp, f);
-				if (error < bestError) {
-					bestError = error;
-					result[0] = this;
-					result[1] = calibratexy;
-					result[2] = calibratez;
-					// bestAngle = angle;
-				}
-			}
-			double theta0 = Math.abs(result[0].getTheta()) % Math.PI;
-			theta0 = Math.min(Math.PI - theta0, theta0);
-			double theta1 = Math.abs(result[1].getTheta()) % Math.PI;
-			theta1 = Math.min(Math.PI - theta1, theta1);
-			if (theta0 > theta1) {
-				AngleCalibrated tmp = result[0];
-				result[0] = result[1];
-				result[1] = tmp;
-			}
-			return result;
-		}
 	}
 }
