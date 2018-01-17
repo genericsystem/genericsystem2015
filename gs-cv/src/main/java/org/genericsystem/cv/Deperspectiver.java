@@ -3,12 +3,12 @@ package org.genericsystem.cv;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -198,6 +198,7 @@ public class Deperspectiver extends AbstractApp {
 		private final SuperFrameImg superFrame;
 		private final MatOfKeyPoint keypoints = new MatOfKeyPoint();
 		private final Mat descriptors;
+		private final long timeStamp;	
 
 		public ImgDescriptor(SuperFrameImg superFrame) {
 			this.superFrame = superFrame;
@@ -207,6 +208,7 @@ public class Deperspectiver extends AbstractApp {
 			descriptors = new Mat();
 			briefExtractor.compute(superFrame.getFrame().getSrc(), keypoints, descriptors);
 			// EXTRACTOR.compute(deperspectivedImg.getSrc(), keypoints, descriptors);
+			timeStamp = System.currentTimeMillis();
 		}
 
 		public SuperFrameImg getSuperFrame() {
@@ -219,6 +221,10 @@ public class Deperspectiver extends AbstractApp {
 
 		public MatOfKeyPoint getKeypoints() {
 			return keypoints;
+		}
+
+		public long getTimeStamp(){
+			return timeStamp;
 		}
 
 		public Reconciliation computeReconciliation(ImgDescriptor reference) {
@@ -278,12 +284,21 @@ public class Deperspectiver extends AbstractApp {
 			areaSum += c.x * (a.y - b.y);
 			return areaSum > 0;
 		}
+
+
 	}
 
 	public static class ReferenceManager {
 		private static final Mat IDENTITY_MAT = Mat.eye(new Size(3, 3), CvType.CV_64F);
 
-		private Map<ImgDescriptor, Mat> toReferenceGraphy = new LinkedHashMap<>();
+		private TreeMap<ImgDescriptor, Mat> toReferenceGraphy = new TreeMap<>(new Comparator<ImgDescriptor>() {
+
+			@Override
+			public int compare(ImgDescriptor d1, ImgDescriptor d2) {
+				return new Long(d1.getTimeStamp()).compareTo(new Long(d2.getTimeStamp()));
+			}
+
+		});
 
 		private ImgDescriptor reference;
 		private List<Rect> referenceRects = new ArrayList<>();
@@ -303,22 +318,38 @@ public class Deperspectiver extends AbstractApp {
 			int bestMatchingPointsCount = 0;
 			ImgDescriptor bestImgDescriptor = null;
 			Reconciliation bestReconciliation = null;
-			for (ImgDescriptor imgDescriptor : toReferenceGraphy.keySet()) {
-				Reconciliation reconciliation = newImgDescriptor.computeReconciliation(imgDescriptor);
-				if (reconciliation != null) {
-					int matchingPointsCount = reconciliation.getPts().size();
-					if (matchingPointsCount >= bestMatchingPointsCount) {
-						bestMatchingPointsCount = matchingPointsCount;
-						bestReconciliation = reconciliation;
-						bestImgDescriptor = imgDescriptor;
+
+			Reconciliation reconciliationWithRef = newImgDescriptor.computeReconciliation(reference);
+			if (reconciliationWithRef != null) {				
+				bestReconciliation = reconciliationWithRef;
+				bestImgDescriptor = reference;				
+			}
+			else{
+				ImgDescriptor lastStored = toReferenceGraphy.lastKey();
+				Reconciliation reconciliationWithlast = newImgDescriptor.computeReconciliation(lastStored);
+				if (reconciliationWithlast != null){
+					bestReconciliation = reconciliationWithlast;
+					bestImgDescriptor = lastStored;
+				}
+				else{
+					for (ImgDescriptor imgDescriptor : toReferenceGraphy.keySet()) {
+						Reconciliation reconciliation = newImgDescriptor.computeReconciliation(imgDescriptor);
+						if (reconciliation != null) {
+							int matchingPointsCount = reconciliation.getPts().size();
+							if (matchingPointsCount >= bestMatchingPointsCount) {
+								bestMatchingPointsCount = matchingPointsCount;
+								bestReconciliation = reconciliation;
+								bestImgDescriptor = imgDescriptor;
+							}
+						}
 					}
 				}
 			}
-
 			if (bestReconciliation == null) {
 				if (toReferenceGraphy.size() <= 1) {
 					toReferenceGraphy.clear();
 					toReferenceGraphy.put(newImgDescriptor, IDENTITY_MAT);
+					reference = newImgDescriptor;
 				}
 				return;
 			}
