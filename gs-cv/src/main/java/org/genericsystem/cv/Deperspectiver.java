@@ -1,5 +1,20 @@
 package org.genericsystem.cv;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
 import org.genericsystem.cv.Calibrated.AngleCalibrated;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.opencv.calib3d.Calib3d;
@@ -23,20 +38,6 @@ import org.opencv.utils.Converters;
 import org.opencv.videoio.VideoCapture;
 import org.opencv.xfeatures2d.BriefDescriptorExtractor;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-
 import javafx.application.Platform;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -59,7 +60,7 @@ public class Deperspectiver extends AbstractApp {
 
 	private AngleCalibrated calibrated0;
 	private Kalman kalmanZ = new Kalman();
-	private ReferenceManager referenceManager = new ReferenceManager();
+	private ReferenceManager referenceManager = new ReferenceManager(superFrame.size());
 
 	private boolean stabilizedMode = false;
 	private boolean textsEnabledMode = false;
@@ -255,7 +256,7 @@ public class Deperspectiver extends AbstractApp {
 				}
 				return new Reconciliation(result, pts, referencePts);
 			} else {
-				System.out.println("Not enough matches (" + referencePts.size() + "})");
+				System.out.println("Not enough matches (" + referencePts.size() + ")");
 				return null;
 			}
 		}
@@ -286,29 +287,102 @@ public class Deperspectiver extends AbstractApp {
 
 		private ImgDescriptor reference;
 		private List<Rect> referenceRects = new ArrayList<>();
-		private boolean take = true;
+		private Size frameSize;
+
+		public ReferenceManager(Size frameSize) {
+			this.frameSize = frameSize;
+		}
 
 		public void submit(ImgDescriptor newImgDescriptor, List<Rect> detectedrects) {
-			Mat homography = null;
-			if (take) {
-				this.reference = newImgDescriptor;
-				homography = IDENTITY_MAT;
-				take = false;
-			} else {
-				Reconciliation reconciliation = computeHomography(newImgDescriptor);
-				if (reconciliation != null)
-					homography = reconciliation.getHomography();
+			if (reference == null) {
+				toReferenceGraphy.put(newImgDescriptor, IDENTITY_MAT);
+				reference = newImgDescriptor;
+				return;
 			}
-			if (homography != null) {
-				toReferenceGraphy.put(newImgDescriptor, homography);
-				List<Rect> shiftedRect = shift(detectedrects, homography);
-				consolidate(shiftedRect);
-				updateReference(newImgDescriptor);
+
+			int bestMatchingPointsCount = 0;
+			ImgDescriptor bestImgDescriptor = null;
+			Reconciliation bestReconciliation = null;
+			for (ImgDescriptor imgDescriptor : toReferenceGraphy.keySet()) {
+				Reconciliation reconciliation = newImgDescriptor.computeReconciliation(imgDescriptor);
+				if (reconciliation != null) {
+					int matchingPointsCount = reconciliation.getPts().size();
+					if (matchingPointsCount >= bestMatchingPointsCount) {
+						bestMatchingPointsCount = matchingPointsCount;
+						bestReconciliation = reconciliation;
+						bestImgDescriptor = imgDescriptor;
+					}
+				}
+			}
+
+			if (bestReconciliation == null) {
+				if (toReferenceGraphy.size() <= 1) {
+					toReferenceGraphy.clear();
+					toReferenceGraphy.put(newImgDescriptor, IDENTITY_MAT);
+				}
+				return;
+			}
+			Mat homographyToReference = new Mat();
+			Core.gemm(bestReconciliation.getHomography(), toReferenceGraphy.get(bestImgDescriptor), 1, new Mat(), 0, homographyToReference);
+			toReferenceGraphy.put(newImgDescriptor, homographyToReference);
+			consolidate(shift(detectedrects, homographyToReference));
+			updateReference();
+			cleanReferenceNeighbours();
+		}
+
+		private void cleanReferenceNeighbours() {
+			if (toReferenceGraphy.size() > 6) {
+				double bestDistance = Double.MAX_VALUE;
+				ImgDescriptor closestDescriptor = null;
+				for (Entry<ImgDescriptor, Mat> entry : toReferenceGraphy.entrySet()) {
+					if (!entry.getKey().equals(reference)) {
+						double distance = distance(entry.getValue());
+						if (distance < bestDistance) {
+							bestDistance = distance;
+							closestDescriptor = entry.getKey();
+						}
+					}
+				}
+				toReferenceGraphy.remove(closestDescriptor);
 			}
 		}
 
-		private void updateReference(ImgDescriptor newImgDescriptor) {
+		private void updateReference() {
+			ImgDescriptor consensualDescriptor = findConsensualDescriptor();
+			if (reference != consensualDescriptor) {
+				System.out.println("Change reference");
+				Mat homoInv = toReferenceGraphy.get(consensualDescriptor).inv();
+				for (Entry<ImgDescriptor, Mat> entry : toReferenceGraphy.entrySet()) {
+					if (!entry.getKey().equals(consensualDescriptor)) {
+						Mat result = new Mat();
+						Core.gemm(entry.getValue(), homoInv, 1, new Mat(), 0, result);
+						toReferenceGraphy.put(entry.getKey(), result);
+					} else
+						toReferenceGraphy.put(entry.getKey(), IDENTITY_MAT);
+				}
+				reference = consensualDescriptor;
+			} else
+				System.out.println("No change reference");
+		}
 
+		private ImgDescriptor findConsensualDescriptor() {
+			double bestDistance = Double.MAX_VALUE;
+			ImgDescriptor bestDescriptor = null;
+			for (Entry<ImgDescriptor, Mat> entry : toReferenceGraphy.entrySet()) {
+				double distance = 0;
+				for (Entry<ImgDescriptor, Mat> entry2 : toReferenceGraphy.entrySet()) {
+					if (!entry.getKey().equals(entry2.getKey())) {
+						Mat betweenHomography = new Mat();
+						Core.gemm(entry.getValue(), entry2.getValue().inv(), 1, new Mat(), 0, betweenHomography);
+						distance += distance(betweenHomography);
+					}
+				}
+				if (distance < bestDistance) {
+					bestDistance = distance;
+					bestDescriptor = entry.getKey();
+				}
+			}
+			return bestDescriptor;
 		}
 
 		private void consolidate(List<Rect> shiftedRect) {
@@ -345,12 +419,24 @@ public class Deperspectiver extends AbstractApp {
 			return newDescriptor.computeReconciliation(getReference());
 		}
 
-		public ImgDescriptor getReference() {
-			return reference;
+		private double distance(Mat betweenHomography) {
+			List<Point> originalPoints = Arrays.asList(new Point[] { new Point(0, 0), new Point(frameSize.width, 0), new Point(frameSize.width, frameSize.height), new Point(0, frameSize.height) });
+			List<Point> points = transform(originalPoints, betweenHomography);
+			return distance(points, originalPoints);
 		}
 
-		public void take() {
-			take = true;
+		private double distance(List<Point> newPointList, List<Point> oldPointList) {
+			double error = 0.0;
+			for (int i = 0; i < oldPointList.size(); i++) {
+				double deltaX = newPointList.get(i).x - oldPointList.get(i).x;
+				double deltaY = newPointList.get(i).y - oldPointList.get(i).y;
+				error += deltaX * deltaX + deltaY * deltaY;
+			}
+			return Math.sqrt(error) / oldPointList.size();
+		}
+
+		public ImgDescriptor getReference() {
+			return reference;
 		}
 	}
 
@@ -368,11 +454,12 @@ public class Deperspectiver extends AbstractApp {
 		protected Img buildDisplay() {
 			return new Img(new Mat(size(), CvType.CV_8UC1, new Scalar(0)), false);
 		}
+
 	}
 
 	@Override
 	protected void onS() {
-		referenceManager.take();
+
 	}
 
 	@Override
