@@ -1,5 +1,12 @@
 package org.genericsystem.cv;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.genericsystem.cv.Calibrated.AngleCalibrated;
 import org.genericsystem.cv.Deperspectiver.Line;
 import org.genericsystem.cv.Deperspectiver.Lines;
@@ -17,13 +24,6 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class SuperFrameImg {
 
@@ -267,11 +267,11 @@ public class SuperFrameImg {
 		Mat diffFrame = getGrayFrame().gaussianBlur(new Size(5, 5)).getSrc();
 		Core.absdiff(diffFrame, new Scalar(90), diffFrame);
 		Imgproc.adaptiveThreshold(diffFrame, diffFrame, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 7, 3);
-		return new Img(diffFrame, false);
+		return new Img(diffFrame, false).cleanTablesInv(0.05);
 	}
 
 	public List<Rect> detectRects() {
-		return (detectRects(getDiffFrame(), 5, 10000));
+		return detectRects(getDiffFrame(), 5, 10000);
 		// return (detectRects(getBinarized().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(7,3)), 5,10000));
 
 		// List<GSRect> rects = getRects(200, 11, 3, new Size(11, 3));
