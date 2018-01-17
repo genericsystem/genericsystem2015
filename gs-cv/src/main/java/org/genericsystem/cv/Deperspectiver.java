@@ -349,7 +349,6 @@ public class Deperspectiver extends AbstractApp {
 				if (toReferenceGraphy.size() <= 1) {
 					toReferenceGraphy.clear();
 					toReferenceGraphy.put(newImgDescriptor, IDENTITY_MAT);
-					reference = newImgDescriptor;
 				}
 				return;
 			}
