@@ -136,7 +136,7 @@ public class Deperspectiver extends AbstractApp {
 			Mat deperspectiveHomography = superFrame.findHomography(calibratedVps);
 			SuperFrameImg superDeperspectived = superFrame.deperspective(deperspectiveHomography);
 			List<Rect> detectedRects = superDeperspectived.detectRects();
-			superDeperspectived.drawRects(superDeperspectived.detectRects(), new Scalar(255), -1);
+			superDeperspectived.drawRects(detectedRects, new Scalar(255), -1);
 			Image deperspectivedImage = superDeperspectived.getDisplay().toJfxImage();
 
 			// Image grad = superFrame.getGradient().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(30, 30)).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(30, 30))
@@ -262,7 +262,7 @@ public class Deperspectiver extends AbstractApp {
 				}
 				return new Reconciliation(result, pts, referencePts);
 			} else {
-				System.out.println("Not enough matches (" + referencePts.size() + ")");
+				//System.out.println("Not enough matches (" + referencePts.size() + ")");
 				return null;
 			}
 		}
@@ -346,10 +346,12 @@ public class Deperspectiver extends AbstractApp {
 				}
 			}
 			if (bestReconciliation == null) {
+				//System.out.println("map size: " +toReferenceGraphy.size());
 				if (toReferenceGraphy.size() <= 1) {
 					toReferenceGraphy.clear();
 					toReferenceGraphy.put(newImgDescriptor, IDENTITY_MAT);
-				}
+					reference = newImgDescriptor;
+				}				
 				return;
 			}
 			Mat homographyToReference = new Mat();
