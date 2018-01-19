@@ -812,21 +812,21 @@ public class Img implements AutoCloseable, Serializable {
 
 	}
 
-	public List<Double> projectVertically() {
+	public List<Boolean> projectVertically() {
 		Mat result = new Mat();
-		Core.reduce(getSrc(), result, 1, Core.REDUCE_AVG, CvType.CV_64F);
+		Core.reduce(getSrc(), result, 1, Core.REDUCE_SUM, CvType.CV_64F);
 		List<Double> histoVertical = new ArrayList<>();
 		Converters.Mat_to_vector_double(result, histoVertical);
-		return histoVertical;
+		return histoVertical.stream().map(value -> value != 0).collect(Collectors.toList());
 	}
 
-	public List<Double> projectHorizontally() {
+	public List<Boolean> projectHorizontally() {
 		Mat result = new Mat();
-		Core.reduce(getSrc(), result, 0, Core.REDUCE_AVG, CvType.CV_64F);
+		Core.reduce(getSrc(), result, 0, Core.REDUCE_SUM, CvType.CV_64F);
 		Core.transpose(result, result);
 		List<Double> histoHorizontal = new ArrayList<>();
 		Converters.Mat_to_vector_double(result, histoHorizontal);
-		return histoHorizontal;
+		return histoHorizontal.stream().map(value -> value != 0).collect(Collectors.toList());
 	}
 
 	private Img range(Scalar scalar, Scalar scalar2) {
@@ -914,7 +914,11 @@ public class Img implements AutoCloseable, Serializable {
 		return root.recursiveSplit(morph, level, root.getRoi(this));
 	}
 
-	private static boolean[] close(List<Boolean> histo, int k) {
+	public static void main(String[] args) {
+		System.out.println(Arrays.toString(open(Arrays.asList(true, true, false, true, true, false, true, false, true), 2)));
+	}
+
+	public static boolean[] close(List<Boolean> histo, int k) {
 		boolean[] closed = new boolean[histo.size()];
 		for (int i = 0; i < histo.size() - 1; i++)
 			if (histo.get(i) && !histo.get(i + 1)) {
@@ -934,17 +938,37 @@ public class Img implements AutoCloseable, Serializable {
 		return closed;
 	}
 
+	public static boolean[] open(List<Boolean> histo, int k) {
+		boolean[] closed = new boolean[histo.size()];
+		for (int i = 0; i < histo.size() - 1; i++)
+			if (!histo.get(i) && histo.get(i + 1)) {
+				for (int j = k + 1; j > 0; j--)
+					if (i + j < histo.size()) {
+						if (!histo.get(i + j)) {
+							Arrays.fill(closed, i, i + j + 1, false);
+							i += j - 1;
+							break;
+						}
+						closed[i] = histo.get(i);
+					}
+			} else
+				closed[i] = histo.get(i);
+		if (!closed[histo.size() - 1])
+			closed[histo.size() - 1] = histo.get(histo.size() - 1);
+		return closed;
+	}
+
 	private List<Boolean> getRow(int row) {
 		List<Boolean> result = new ArrayList<>(src.cols());
 		for (int col = 0; col < src.cols(); col++)
-			result.add(src.get(row, col)[0] >= 255.0);
+			result.add(src.get(row, col)[0] != 0);
 		return result;
 	};
 
 	public List<Boolean> getCol(int col) {
 		List<Boolean> result = new ArrayList<>(src.rows());
 		for (int row = 0; row < src.rows(); row++)
-			result.add(src.get(row, col)[0] >= 255.0);
+			result.add(src.get(row, col)[0] != 0);
 		return result;
 	};
 
@@ -952,13 +976,13 @@ public class Img implements AutoCloseable, Serializable {
 		Mat result = new Mat(src.size(), CvType.CV_8U, new Scalar(255));
 		boolean[][] hHistos = new boolean[src.cols()][src.rows()];
 		for (int col = 0; col < src.cols(); col++)
-			hHistos[col] = close(getCol(col), Long.valueOf(Math.round(close * src.rows())).intValue());
+			hHistos[col] = open(getCol(col), Long.valueOf(Math.round(close * src.rows())).intValue());
 		boolean[][] vHistos = new boolean[src.rows()][src.cols()];
 		for (int row = 0; row < src.rows(); row++)
-			vHistos[row] = close(getRow(row), Long.valueOf(Math.round(close * src.cols())).intValue());
+			vHistos[row] = open(getRow(row), Long.valueOf(Math.round(close * src.cols())).intValue());
 		for (int col = 0; col < src.cols(); col++)
 			for (int row = 0; row < src.rows(); row++)
-				result.put(row, col, (src.get(row, col)[0] >= 255.0) ^ !(hHistos[col][row] && vHistos[row][col]) ? 255.0 : 0.0);
+				result.put(row, col, getSrc().get(row, col)[0] != 0 ^ (hHistos[col][row] || vHistos[row][col]) ? 255 : 0);
 		return new Img(result, false);
 
 		// Img hImg = this.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(close * getSrc().width(), 1));

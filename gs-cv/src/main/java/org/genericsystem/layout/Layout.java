@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.BiConsumer;
-import java.util.function.Function;
 
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.Ocr;
@@ -317,12 +316,12 @@ public class Layout {
 		}
 	}
 
-	public static double[] getHistoLimits(List<Double> hist) {
+	public static double[] getHistoLimits(List<Boolean> hist) {
 		int start = 0;
 		int end = hist.size() - 1;
-		while (start < hist.size() && hist.get(start) >= 255.0)
+		while (start < hist.size() && !hist.get(start))
 			start++;
-		while (end >= 0 && hist.get(end) >= 255.0)
+		while (end >= 0 && !hist.get(end))
 			end--;
 		return new double[] { Integer.valueOf(start).doubleValue() / hist.size(), Integer.valueOf(end + 1).doubleValue() / hist.size() };
 	}
@@ -347,37 +346,13 @@ public class Layout {
 
 		int verticalParam = Double.valueOf(Math.floor(morphH * binary.height())).intValue();
 		int horizontalParam = Double.valueOf(Math.floor(morphW * binary.width())).intValue();
-		return extractZones(close(verticalParam, binary.projectVertically()), close(horizontalParam, binary.projectHorizontally()), binary);
-	}
-
-	private static boolean[] close(int k, List<Double> histo) {
-		// System.out.println(Arrays.asList(histo));
-		boolean[] closed = new boolean[histo.size()];
-		Function<Integer, Boolean> isWhite = i -> histo.get(i) >= 255;
-		for (int i = 0; i < histo.size() - 1; i++)
-			if (!isWhite.apply(i) && isWhite.apply(i + 1)) {
-				for (int j = k + 1; j > 0; j--)
-					if (i + j < histo.size()) {
-						if (!isWhite.apply(i + j)) {
-							Arrays.fill(closed, i, i + j + 1, true);
-							i += j - 1;
-							break;
-						}
-						closed[i] = !isWhite.apply(i);
-					}
-			} else
-				closed[i] = !isWhite.apply(i);
-		if (!closed[histo.size() - 1])
-			closed[histo.size() - 1] = !isWhite.apply(histo.size() - 1);
-		return closed;
+		return extractZones(Img.close(binary.projectVertically(), verticalParam), Img.close(binary.projectHorizontally(), horizontalParam), binary);
 	}
 
 	private List<Layout> extractZones(boolean[] resultV, boolean[] resultH, Img binary) {
 
 		List<double[]> shardsV = getShards(resultV, true);
 		List<double[]> shardsH = getShards(resultH, false);
-		// System.out.println("Binary size : " + binary.size());
-		// System.out.println("Size spit : " + shardsV.size() + " " + shardsH.size());
 		List<Layout> shards = new ArrayList<>();
 		for (double[] shardv : shardsV)
 			for (double[] shardh : shardsH) {
@@ -411,12 +386,9 @@ public class Layout {
 	}
 
 	public Layout recursiveSplit(Size morph, int level, Img binary) {
-		// System.out.println("level : " + level);
-		// System.out.println("Layout : " + this);
 		assert binary.size().equals(binary.size());
 		if (binary.size().height == 0 || binary.size().width == 0)
 			return this;
-
 		if (level <= 0) {
 			// Imgproc.rectangle(img.getSrc(), new Point(0, 0), new Point(img.width(), img.height()), new Scalar(255, 0,
 			// 0), -1);
