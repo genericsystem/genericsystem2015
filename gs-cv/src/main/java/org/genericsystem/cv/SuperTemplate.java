@@ -1,6 +1,7 @@
-package org.genericsystem.cv.application;
+package org.genericsystem.cv;
 
 import org.genericsystem.cv.Img;
+import org.genericsystem.cv.SuperFrameImg;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Scalar;

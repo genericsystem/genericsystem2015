@@ -2,7 +2,11 @@ package org.genericsystem.cv.application;
 
 import java.util.List;
 
-import org.genericsystem.cv.application.Calibrated.AngleCalibrated;
+import org.genericsystem.cv.Calibrated.AngleCalibrated;
+import org.genericsystem.cv.Lines;
+import org.genericsystem.cv.ReferenceManager;
+import org.genericsystem.cv.SuperFrameImg;
+import org.genericsystem.cv.SuperTemplate;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 
@@ -16,7 +20,6 @@ public class DisplayManager {
 		superFrame.drawVanishingPointLines(lines, calibratedVps[1], new Scalar(255, 0, 0), 1);
 		superFrame.drawVpsArrows(calibratedVps, new double[] { 20, 20 }, new Scalar(0, 255, 0), 2);
 		return superFrame.getDisplay().toJfxImage();
-
 	}
 
 	public Image displaySuperDeperspectived(SuperFrameImg superDeperspectived, List<Rect> detectedRects) {

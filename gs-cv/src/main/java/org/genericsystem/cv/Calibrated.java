@@ -1,14 +1,16 @@
 package org.genericsystem.cv;
 
-import java.util.Arrays;
 import java.util.List;
 
-import org.genericsystem.cv.Deperspectiver.Line;
-import org.genericsystem.cv.Deperspectiver.Lines;
+import org.genericsystem.cv.Lines.Line;
+
+
 
 public class Calibrated {
 
-	final double x, y, z;
+	private final double x;
+	private final double y;
+	final double z;
 
 	public Calibrated(double[] vp, double[] pp, double f) {
 		double[] calibratedxyz = calibrate(vp, pp, f);
@@ -35,11 +37,11 @@ public class Calibrated {
 	}
 
 	public double[] getCalibratexyz() {
-		return new double[] { x, y, z };
+		return new double[] { getX(), getY(), z };
 	}
 
 	Calibrated dumpXyz(double[] xyz, int dumpSize) {
-		return new Calibrated(new double[] { ((dumpSize - 1) * x + xyz[0]) / dumpSize, ((dumpSize - 1) * y + xyz[1]) / dumpSize, ((dumpSize - 1) * z + xyz[2]) / dumpSize });
+		return new Calibrated(new double[] { ((dumpSize - 1) * getX() + xyz[0]) / dumpSize, ((dumpSize - 1) * getY() + xyz[1]) / dumpSize, ((dumpSize - 1) * z + xyz[2]) / dumpSize });
 	}
 
 	public static double[] calibrate(double[] vpImg, double[] pp, double f) {
@@ -61,10 +63,18 @@ public class Calibrated {
 
 	public double[] uncalibrate(double[] pp, double f) {
 		double[] result = new double[3];
-		result[0] = x * f / z + pp[0];
-		result[1] = y * f / z + pp[1];
+		result[0] = getX() * f / z + pp[0];
+		result[1] = getY() * f / z + pp[1];
 		result[2] = 1.0;
 		return result;
+	}
+
+	public double getX() {
+		return x;
+	}
+
+	public double getY() {
+		return y;
 	}
 
 	public static class AngleCalibrated extends Calibrated {
@@ -74,13 +84,13 @@ public class Calibrated {
 
 		public AngleCalibrated(double[] vp, double[] pp, double f) {
 			super(vp, pp, f);
-			theta = Math.atan2(this.y, this.x);
+			theta = Math.atan2(this.getY(), this.getX());
 			phi = Math.acos(this.z);
 		}
 
 		public AngleCalibrated(double[] calibratedxyz, Object nullObject) {
 			super(calibratedxyz);
-			this.theta = Math.atan2(this.y, this.x);
+			this.theta = Math.atan2(this.getY(), this.getX());
 			this.phi = Math.acos(this.z);
 		}
 
@@ -90,7 +100,7 @@ public class Calibrated {
 
 		public AngleCalibrated(double[] tethaPhi) {
 			super(new double[] { Math.sin(tethaPhi[1]) * Math.cos(tethaPhi[0]), Math.sin(tethaPhi[1]) * Math.sin(tethaPhi[0]), Math.cos(tethaPhi[1]) });
-			this.theta = Math.atan2(this.y, this.x);
+			this.theta = Math.atan2(this.getY(), this.getX());
 			this.phi = Math.acos(this.z);
 		}
 
@@ -112,7 +122,7 @@ public class Calibrated {
 
 		@Override
 		AngleCalibrated dumpXyz(double[] xyz, int dumpSize) {
-			return new AngleCalibrated(new double[] { ((dumpSize - 1) * x + xyz[0]) / dumpSize, ((dumpSize - 1) * y + xyz[1]) / dumpSize, ((dumpSize - 1) * z + xyz[2]) / dumpSize }, null);
+			return new AngleCalibrated(new double[] { ((dumpSize - 1) * getX() + xyz[0]) / dumpSize, ((dumpSize - 1) * getY() + xyz[1]) / dumpSize, ((dumpSize - 1) * z + xyz[2]) / dumpSize }, null);
 		}
 
 		public AngleCalibrated getOrthoFromAngle(double lambda) {
@@ -174,7 +184,7 @@ public class Calibrated {
 			return Math.pow(Math.min(AngleCalibrated.distance(uncalibrate(pp, f), line), 0.3) * line.size(), 2);
 		}
 
-		static double distance(double[] vp, Line line) {
+		public static double distance(double[] vp, Line line) {
 			double dy = line.y1 - line.y2;
 			double dx = line.x2 - line.x1;
 			double dz = line.y1 * line.x2 - line.x1 * line.y2;

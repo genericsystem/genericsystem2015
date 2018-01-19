@@ -8,9 +8,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.genericsystem.cv.Calibrated.AngleCalibrated;
-import org.genericsystem.cv.Deperspectiver.Line;
-import org.genericsystem.cv.Deperspectiver.Lines;
-import org.genericsystem.cv.Deperspectiver.SuperTemplate;
+import org.genericsystem.cv.Lines.Line;
 import org.genericsystem.cv.lm.LevenbergImpl;
 import org.genericsystem.reinforcer.tools.GSRect;
 import org.opencv.core.Core;
@@ -139,7 +137,7 @@ public class SuperFrameImg {
 		Lines lines = new Lines(grad.houghLinesP(1, Math.PI / 180, 10, 10, 3));
 		Img grad2 = getGradient().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(30, 30)).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(30, 30)).morphologyEx(Imgproc.MORPH_GRADIENT, Imgproc.MORPH_ELLIPSE,
 				new Size(3, 3));
-		lines.lines.addAll(new Lines(grad2.houghLinesP(1, Math.PI / 180, 10, 30, 10)).lines);
+		lines.getLines().addAll(new Lines(grad2.houghLinesP(1, Math.PI / 180, 10, 30, 10)).getLines());
 		return lines;
 	}
 
@@ -232,7 +230,7 @@ public class SuperFrameImg {
 	}
 
 	public AngleCalibrated findVanishingPoint(Lines lines, AngleCalibrated old) {
-		double[] thetaPhi = new LevenbergImpl<>((line, params) -> new AngleCalibrated(params).distance(line, pp, f), lines.lines, old.getThetaPhi()).getParams();
+		double[] thetaPhi = new LevenbergImpl<>((line, params) -> new AngleCalibrated(params).distance(line, pp, f), lines.getLines(), old.getThetaPhi()).getParams();
 		return new AngleCalibrated(thetaPhi);
 	}
 
@@ -241,9 +239,9 @@ public class SuperFrameImg {
 	}
 
 	public void drawVpsArrows(Calibrated[] calibratedVps, double[] shift, Scalar color, int thickness) {
-		drawArrow(new Point(shift[0], shift[1]), new Point(shift[0] + calibratedVps[0].x * 20, shift[1] + calibratedVps[0].y * 20), new Scalar(0, 255, 0), 2);
-		drawArrow(new Point(shift[0], shift[1]), new Point(shift[0] - calibratedVps[1].x * 20, shift[1] - calibratedVps[1].y * 20), new Scalar(255, 0, 0), 2);
-		drawArrow(new Point(shift[0], shift[1]), new Point(shift[0] - calibratedVps[2].x * 20, shift[1] - calibratedVps[2].y * 20), new Scalar(0, 0, 255), 2);
+		drawArrow(new Point(shift[0], shift[1]), new Point(shift[0] + calibratedVps[0].getX() * 20, shift[1] + calibratedVps[0].getY() * 20), new Scalar(0, 255, 0), 2);
+		drawArrow(new Point(shift[0], shift[1]), new Point(shift[0] - calibratedVps[1].getX() * 20, shift[1] - calibratedVps[1].getY() * 20), new Scalar(255, 0, 0), 2);
+		drawArrow(new Point(shift[0], shift[1]), new Point(shift[0] - calibratedVps[2].getX() * 20, shift[1] - calibratedVps[2].getY() * 20), new Scalar(0, 0, 255), 2);
 	}
 
 	public void drawArrow(Point pt1, Point pt2, Scalar color, int thickness) {
@@ -321,7 +319,7 @@ public class SuperFrameImg {
 				calibratexy = calibratez;
 				calibratez = tmp;
 			}
-			double error = calibratexy.distance(lines.lines, pp, f);
+			double error = calibratexy.distance(lines.getLines(), pp, f);
 			if (error < bestError) {
 				bestError = error;
 				result[0] = calibrated0;

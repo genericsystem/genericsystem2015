@@ -7,8 +7,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.BiFunction;
 
-import org.genericsystem.cv.Deperspectiver.Circle;
-import org.genericsystem.cv.Deperspectiver.Line;
+import org.genericsystem.cv.Lines.Line;
 import org.genericsystem.cv.lm.LevenbergImpl;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
@@ -139,5 +138,15 @@ public class TextOrientationLinesDetector {
 		// System.out.println(Arrays.toString(result));
 
 		return polynomAngle;
+	}
+
+	static class Circle {
+		public Circle(Point center, float radius) {
+			this.center = center;
+			this.radius = radius;
+		}
+
+		Point center;
+		float radius;
 	}
 }

@@ -1,19 +1,18 @@
 package org.genericsystem.cv.application;
 
-import java.io.ByteArrayInputStream;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.genericsystem.cv.Deperspectiver;
+import org.genericsystem.cv.ImgDescriptor;
+import org.genericsystem.cv.Lines;
+import org.genericsystem.cv.ReferenceManager;
+import org.genericsystem.cv.SuperFrameImg;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
-import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfByte;
 import org.opencv.core.Rect;
-import org.opencv.core.Size;
-import org.opencv.imgcodecs.Imgcodecs;
-import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
 
 import javafx.application.Application;
@@ -155,22 +154,6 @@ public class GraphicApp extends Application{
 	protected void onT() {
 		System.out.println("t pressed");
 		textsEnabledMode = !textsEnabledMode;
-	}
-
-	protected ImageView buildImageViewFromMat(Mat src) {
-		Mat conv = new Mat();
-		src.convertTo(conv, CvType.CV_8UC1);
-		Mat target = new Mat();
-		Imgproc.resize(conv, target, new Size(displayWidth, Math.floor((displayWidth / conv.width()) * conv.height())));
-		MatOfByte buffer = new MatOfByte();
-		Imgcodecs.imencode(".png", target, buffer);
-		ImageView imageView = new ImageView(new Image(new ByteArrayInputStream(buffer.toArray())));
-		imageView.setPreserveRatio(true);
-		imageView.setFitWidth(displayWidth);
-		conv.release();
-		target.release();
-		buffer.release();
-		return imageView;
 	}
 
 	@Override

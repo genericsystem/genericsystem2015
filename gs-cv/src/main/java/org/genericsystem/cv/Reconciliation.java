@@ -1,4 +1,4 @@
-package org.genericsystem.cv.application;
+package org.genericsystem.cv;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package org.genericsystem.cv.application;
+package org.genericsystem.cv;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,29 +18,28 @@ import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
 
 public class Lines {
-
-	final List<Line> lines;
+	private final List<Line> lines;
 
 	public Lines(Mat src) {
 		lines = new ArrayList<>();
 		for (int i = 0; i < src.rows(); i++) {
 			double[] val = src.get(i, 0);
 			Line line = new Line(val[0], val[1], val[2], val[3]);
-			lines.add(line);
+			getLines().add(line);
 		}
 	}
 
 	public Lines filter(Predicate<Line> predicate) {
-		return new Lines(lines.stream().filter(predicate).collect(Collectors.toList()));
+		return new Lines(getLines().stream().filter(predicate).collect(Collectors.toList()));
 	}
 
 	public Lines reduce(int max) {
-		if (lines.size() <= max)
+		if (getLines().size() <= max)
 			return this;
 
 		Set<Line> newLines = new HashSet<>();
 		while (newLines.size() < max)
-			newLines.add(lines.get((int) (Math.random() * size())));
+			newLines.add(getLines().get((int) (Math.random() * size())));
 		return new Lines((newLines));
 	}
 
@@ -49,24 +48,27 @@ public class Lines {
 	}
 
 	public Lines rotate(Mat matrix) {
-		return new Lines(lines.stream().map(line -> line.transform(matrix)).collect(Collectors.toList()));
+		return new Lines(getLines().stream().map(line -> line.transform(matrix)).collect(Collectors.toList()));
 	}
 
 	public Lines perspectivTransform(Mat matrix) {
-		return new Lines(lines.stream().map(line -> line.perspectivTransform(matrix)).collect(Collectors.toList()));
+		return new Lines(getLines().stream().map(line -> line.perspectivTransform(matrix)).collect(Collectors.toList()));
 	}
 
 	public void draw(Mat frame, Scalar color, int thickness) {
-		lines.forEach(line -> line.draw(frame, color, thickness));
+		getLines().forEach(line -> line.draw(frame, color, thickness));
 	}
 
 	public int size() {
-		return lines.size();
+		return getLines().size();
+	}
+
+	public List<Line> getLines() {
+		return lines;
 	}
 
 
 	public static class Line {
-
 		final double x1, y1, x2, y2;
 
 		public Line(Point p1, Point p2) {
