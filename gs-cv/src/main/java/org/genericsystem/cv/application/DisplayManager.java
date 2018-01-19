@@ -2,11 +2,8 @@ package org.genericsystem.cv.application;
 
 import java.util.List;
 
-import org.genericsystem.cv.Calibrated.AngleCalibrated;
 import org.genericsystem.cv.Lines;
-import org.genericsystem.cv.ReferenceManager;
-import org.genericsystem.cv.SuperFrameImg;
-import org.genericsystem.cv.SuperTemplate;
+import org.genericsystem.cv.Calibrated.AngleCalibrated;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 

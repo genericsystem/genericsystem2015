@@ -5,11 +5,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import org.genericsystem.cv.Deperspectiver;
-import org.genericsystem.cv.ImgDescriptor;
 import org.genericsystem.cv.Lines;
-import org.genericsystem.cv.ReferenceManager;
-import org.genericsystem.cv.SuperFrameImg;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.opencv.core.Mat;
 import org.opencv.core.Rect;

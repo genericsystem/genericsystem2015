@@ -1,4 +1,4 @@
-package org.genericsystem.cv;
+package org.genericsystem.cv.application;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -7,6 +7,9 @@ import java.util.ListIterator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.genericsystem.cv.Calibrated;
+import org.genericsystem.cv.Img;
+import org.genericsystem.cv.Lines;
 import org.genericsystem.cv.Calibrated.AngleCalibrated;
 import org.genericsystem.cv.Lines.Line;
 import org.genericsystem.cv.lm.LevenbergImpl;

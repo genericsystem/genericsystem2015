@@ -1,4 +1,4 @@
-package org.genericsystem.cv;
+package org.genericsystem.cv.application;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
-import org.genericsystem.cv.ImgDescriptor;
-import org.genericsystem.cv.Reconciliation;
+import org.genericsystem.cv.application.ImgDescriptor;
+import org.genericsystem.cv.application.Reconciliation;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;

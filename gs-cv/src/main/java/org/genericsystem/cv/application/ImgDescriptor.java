@@ -1,9 +1,9 @@
-package org.genericsystem.cv;
+package org.genericsystem.cv.application;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.genericsystem.cv.SuperFrameImg;
+import org.genericsystem.cv.application.SuperFrameImg;
 import org.opencv.calib3d.Calib3d;
 import org.opencv.core.Core;
 import org.opencv.core.DMatch;

@@ -1,4 +1,4 @@
-package org.genericsystem.cv;
+package org.genericsystem.cv.application;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.BiFunction;
 
+import org.genericsystem.cv.Img;
 import org.genericsystem.cv.Lines.Line;
 import org.genericsystem.cv.lm.LevenbergImpl;
 import org.opencv.core.Core;
