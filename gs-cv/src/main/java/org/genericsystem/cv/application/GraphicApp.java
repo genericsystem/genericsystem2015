@@ -46,7 +46,7 @@ public class GraphicApp extends AbstractApp {
 
 	@Override
 	protected void fillGrid(GridPane mainGrid) {
-		double displaySizeReduction = 1.5;
+		double displaySizeReduction = 1;
 
 		ImageView[][] imageViews = new ImageView[][] { new ImageView[2], new ImageView[2], new ImageView[2] };
 		for (int col = 0; col < imageViews.length; col++)
