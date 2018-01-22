@@ -1,5 +1,12 @@
 package org.genericsystem.cv.application;
 
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Calibrated.AngleCalibrated;
 import org.genericsystem.cv.Lines;
@@ -10,13 +17,6 @@ import org.opencv.core.Mat;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.videoio.VideoCapture;
-
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -32,7 +32,8 @@ public class GraphicApp extends AbstractApp {
 	private boolean stabilizedMode = false;
 	private boolean textsEnabledMode = false;
 	private Deperspectiver deperspectiver;
-	private ScheduledExecutorService timer = Executors.newSingleThreadScheduledExecutor();
+	private ScheduledExecutorService timer = new BoundedScheduledThreadPoolExecutor(1, (r, executor) -> {
+	}, 2);
 
 	public static void main(String[] args) {
 		launch(args);
@@ -62,56 +63,63 @@ public class GraphicApp extends AbstractApp {
 		deperspectiver = new Deperspectiver(f, pp);
 		timer.scheduleAtFixedRate(() -> {
 			try {
-				if (!stabilizedMode)
-					superFrame = SuperFrameImg.create(capture, f);
-				Image[] images = new Image[6];
-				Lines lines = superFrame.detectLines();
-				AngleCalibrated[] calibratedVps = deperspectiver.computeCalibratedVps(superFrame, textsEnabledMode, lines);
-				if (calibratedVps == null)
-					return;
-				Mat deperspectiveHomography = deperspectiver.findHomography(superFrame, calibratedVps);
-				if (deperspectiveHomography == null)
-					return;
-
-				superFrame.draw(lines, new Scalar(0, 0, 255), 1);
-				superFrame.drawVanishingPointLines(lines, calibratedVps[0], new Scalar(0, 255, 0), 1);
-				superFrame.drawVanishingPointLines(lines, calibratedVps[1], new Scalar(255, 0, 0), 1);
-				superFrame.drawVpsArrows(calibratedVps, new double[] { 20, 20 }, new Scalar(0, 255, 0), 2);
-				images[0] = superFrame.getDisplay().toJfxImage();
-
-				SuperTemplate superDeperspectived = superFrame.deperspective(deperspectiveHomography);
-				images[1] = superDeperspectived.getDiffFrame().toJfxImage();
-
-				List<Rect> detectedRects = superDeperspectived.detectRects();
-				superDeperspectived.drawRects(detectedRects, new Scalar(0, 255, 0), -1);
-				images[2] = superDeperspectived.getDisplay().toJfxImage();
-
-				ImgDescriptor newImgDescriptor = new ImgDescriptor(superDeperspectived);
-				if (newImgDescriptor.getDescriptors().empty()) {
-					System.out.println("Empty descriptors");
-					return;
-				}
-				referenceManager.submit(newImgDescriptor, detectedRects);
-				List<Rect> referenceRects = referenceManager.getReferenceRects();
-				SuperTemplate referenceTemplate = new SuperTemplate(referenceManager.getReference().getSuperFrame(), CvType.CV_8UC1, SuperFrameImg::getFrame);
-				referenceTemplate.drawRects(referenceRects, new Scalar(255), -1);
-				images[3] = referenceTemplate.getDisplay().toJfxImage();
-
-				SuperTemplate layoutTemplate = new SuperTemplate(referenceTemplate, CvType.CV_8UC3, SuperFrameImg::getDisplay);
-				Layout layout = layoutTemplate.layout();
-				layoutTemplate.drawLayout(layout);
-				images[4] = layoutTemplate.getDisplay().toJfxImage();
-
-				Platform.runLater(() -> {
-					Iterator<Image> it = Arrays.asList(images).iterator();
-					for (int row = 0; row < imageViews.length; row++)
-						for (int col = 0; col < imageViews[row].length; col++)
-							imageViews[row][col].setImage(it.next());
-				});
+				Image[] images = doWork(pp);
+				if(images != null)
+					Platform.runLater(() -> {
+						Iterator<Image> it = Arrays.asList(images).iterator();
+						for (int row = 0; row < imageViews.length; row++)
+							for (int col = 0; col < imageViews[row].length; col++)
+								imageViews[row][col].setImage(it.next());
+					});
 			} catch (Throwable e) {
 				e.printStackTrace();
 			}
 		}, 30, 30, TimeUnit.MILLISECONDS);
+	}
+
+	private Image[] doWork(double[] pp) {
+
+		if (!stabilizedMode)
+			superFrame = SuperFrameImg.create(capture, f);
+		Image[] images = new Image[6];
+		Lines lines = superFrame.detectLines();
+		AngleCalibrated[] calibratedVps = deperspectiver.computeCalibratedVps(superFrame, textsEnabledMode, lines);
+		if (calibratedVps == null)
+			return null;
+		Mat deperspectiveHomography = deperspectiver.findHomography(superFrame, calibratedVps);
+		if (deperspectiveHomography == null)
+			return null;
+
+		superFrame.draw(lines, new Scalar(0, 0, 255), 1);
+		superFrame.drawVanishingPointLines(lines, calibratedVps[0], new Scalar(0, 255, 0), 1);
+		superFrame.drawVanishingPointLines(lines, calibratedVps[1], new Scalar(255, 0, 0), 1);
+		superFrame.drawVpsArrows(calibratedVps, new double[] { 20, 20 }, new Scalar(0, 255, 0), 2);
+		images[0] = superFrame.getDisplay().toJfxImage();
+
+		SuperTemplate superDeperspectived = superFrame.deperspective(deperspectiveHomography);
+		images[1] = superDeperspectived.getDiffFrame().toJfxImage();
+
+		List<Rect> detectedRects = superDeperspectived.detectRects();
+		superDeperspectived.drawRects(detectedRects, new Scalar(0, 255, 0), -1);
+		images[2] = superDeperspectived.getDisplay().toJfxImage();
+
+		ImgDescriptor newImgDescriptor = new ImgDescriptor(superDeperspectived);
+		if (newImgDescriptor.getDescriptors().empty()) {
+			System.out.println("Empty descriptors");
+			return null;
+		}
+		referenceManager.submit(newImgDescriptor, detectedRects);
+		List<Rect> referenceRects = referenceManager.getReferenceRects();
+		SuperTemplate referenceTemplate = new SuperTemplate(referenceManager.getReference().getSuperFrame(), CvType.CV_8UC1, SuperFrameImg::getFrame);
+		referenceTemplate.drawRects(referenceRects, new Scalar(255), -1);
+		images[3] = referenceTemplate.getDisplay().toJfxImage();
+
+		SuperTemplate layoutTemplate = new SuperTemplate(referenceTemplate, CvType.CV_8UC3, SuperFrameImg::getDisplay);
+		Layout layout = layoutTemplate.layout();
+		layoutTemplate.drawLayout(layout);
+		images[4] = layoutTemplate.getDisplay().toJfxImage();
+
+		return images;
 	}
 
 	@Override
@@ -126,7 +134,7 @@ public class GraphicApp extends AbstractApp {
 
 	@Override
 	protected void onR() {
-		System.out.println("r pressed");
+		timer.schedule(() -> referenceManager.clear(), 0, TimeUnit.MILLISECONDS);
 	}
 
 	@Override
