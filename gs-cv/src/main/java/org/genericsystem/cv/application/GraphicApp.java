@@ -122,6 +122,51 @@ public class GraphicApp extends AbstractApp {
 		return images;
 	}
 
+	private Image[] doWork(double[] pp) {
+
+		if (!stabilizedMode)
+			superFrame = SuperFrameImg.create(capture, f);
+		Image[] images = new Image[6];
+		Lines lines = superFrame.detectLines();
+		AngleCalibrated[] calibratedVps = deperspectiver.computeCalibratedVps(superFrame, textsEnabledMode, lines);
+		if (calibratedVps == null)
+			return null;
+		Mat deperspectiveHomography = deperspectiver.findHomography(superFrame, calibratedVps);
+		if (deperspectiveHomography == null)
+			return null;
+
+		superFrame.draw(lines, new Scalar(0, 0, 255), 1);
+		superFrame.drawVanishingPointLines(lines, calibratedVps[0], new Scalar(0, 255, 0), 1);
+		superFrame.drawVanishingPointLines(lines, calibratedVps[1], new Scalar(255, 0, 0), 1);
+		superFrame.drawVpsArrows(calibratedVps, new double[] { 20, 20 }, new Scalar(0, 255, 0), 2);
+		images[0] = superFrame.getDisplay().toJfxImage();
+
+		SuperTemplate superDeperspectived = superFrame.deperspective(deperspectiveHomography);
+		images[1] = superDeperspectived.getDiffFrame().toJfxImage();
+
+		List<Rect> detectedRects = superDeperspectived.detectRects();
+		superDeperspectived.drawRects(detectedRects, new Scalar(0, 255, 0), -1);
+		images[2] = superDeperspectived.getDisplay().toJfxImage();
+
+		ImgDescriptor newImgDescriptor = new ImgDescriptor(superDeperspectived);
+		if (newImgDescriptor.getDescriptors().empty()) {
+			System.out.println("Empty descriptors");
+			return null;
+		}
+		referenceManager.submit(newImgDescriptor, detectedRects);
+		List<Rect> referenceRects = referenceManager.getReferenceRects();
+		SuperTemplate referenceTemplate = new SuperTemplate(referenceManager.getReference().getSuperFrame(), CvType.CV_8UC1, SuperFrameImg::getFrame);
+		referenceTemplate.drawRects(referenceRects, new Scalar(255), -1);
+		images[3] = referenceTemplate.getDisplay().toJfxImage();
+
+		SuperTemplate layoutTemplate = new SuperTemplate(referenceTemplate, CvType.CV_8UC3, SuperFrameImg::getDisplay);
+		Layout layout = layoutTemplate.layout();
+		layoutTemplate.drawLayout(layout);
+		images[4] = layoutTemplate.getDisplay().toJfxImage();
+
+		return images;
+	}
+
 	@Override
 	protected void onS() {
 		System.out.println("s pressed");
