@@ -11,7 +11,7 @@ import org.opencv.core.Size;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 
-public class LayoutComparisonTestFigure2 extends AbstractApp {
+public class LayoutComparisonTestFigure3 extends AbstractApp {
 
 	static {
 		NativeLibraryLoader.load();

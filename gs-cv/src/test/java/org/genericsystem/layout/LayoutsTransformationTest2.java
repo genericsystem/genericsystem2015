@@ -36,7 +36,7 @@ public class LayoutsTransformationTest2 extends AbstractApp {
 		new Zone(1, new Rect(new Point(400, 400), new Point(500, 500))).draw(binary1, new Scalar(0, 0, 0), -1);
 
 		Layout layout1 = binary1.adaptativeGaussianThreshold(17, 15).buildLayout(new Size(0.04, 0.008), 8);
-		layout1.draw(binary1, new Scalar(0, 255, 0), 2);
+		layout1.draw(binary1, new Scalar(0, 255, 0), new Scalar(0, 0, 255), 2, 2);
 		mainGrid.add(new ImageView(binary1.toJfxImage()), columnIndex, rowIndex++);
 		System.out.println(layout1.recursiveToString());
 
@@ -45,7 +45,7 @@ public class LayoutsTransformationTest2 extends AbstractApp {
 		new Zone(1, new Rect(new Point(450, 400), new Point(550, 500))).draw(binary2, new Scalar(0, 0, 0), -1);
 
 		Layout layout2 = binary2.adaptativeGaussianThreshold(17, 15).buildLayout(new Size(0.04, 0.008), 8);
-		layout2.draw(binary2, new Scalar(0, 255, 0), 2);
+		layout2.draw(binary2, new Scalar(0, 255, 0), new Scalar(0, 0, 255), 2, 2);
 		mainGrid.add(new ImageView(binary2.toJfxImage()), columnIndex, rowIndex++);
 		System.out.println(layout2.recursiveToString());
 
@@ -54,7 +54,7 @@ public class LayoutsTransformationTest2 extends AbstractApp {
 		new Zone(1, new Rect(new Point(80, 80), new Point(100, 100))).draw(binary3, new Scalar(0, 0, 0), -1);
 
 		Layout layout3 = binary3.adaptativeGaussianThreshold(17, 15).buildLayout(new Size(0.04, 0.008), 8);
-		layout3.draw(binary3, new Scalar(0, 255, 0), 2);
+		layout3.draw(binary3, new Scalar(0, 255, 0), new Scalar(0, 0, 255), 2, 2);
 		mainGrid.add(new ImageView(binary3.toJfxImage()), columnIndex, rowIndex++);
 		System.out.println(layout3.recursiveToString());
 

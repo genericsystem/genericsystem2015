@@ -1,14 +1,5 @@
 package org.genericsystem.layout;
 
-import java.text.Normalizer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.function.BiConsumer;
-
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.Ocr;
 import org.genericsystem.cv.utils.OCRPlasty;
@@ -21,6 +12,15 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
+
+import java.text.Normalizer;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.function.BiConsumer;
 
 public class Layout {
 
@@ -87,14 +87,9 @@ public class Layout {
 		return this;
 	}
 
-	public void draw(Img img, Scalar color, int thickness) {
-		traverse(getRoi(img), (roi, shard) -> {
-			if (shard.getChildren().isEmpty())
-				Imgproc.rectangle(roi.getSrc(), new Point(0, 0), new Point(roi.width() - 1, roi.height() - 1), color, thickness);
-			else
-				Imgproc.rectangle(roi.getSrc(), new Point(0, 0), new Point(roi.width() - 1, roi.height() - 1), new Scalar(0, 0, 255), thickness);
-		});
-
+	public void draw(Img img, Scalar branchColor, Scalar leafColor, int branchThickness, int leafThickness) {
+		traverse(getRoi(img),
+				(roi, shard) -> Imgproc.rectangle(roi.getSrc(), new Point(0, 0), new Point(roi.width() - 1, roi.height() - 1), shard.getChildren().isEmpty() ? leafColor : branchColor, shard.getChildren().isEmpty() ? leafThickness : branchThickness));
 	}
 
 	public void drawOcrPerspectiveInverse(Img rootImg, Mat homography, Scalar color, int thickness) {
@@ -387,6 +382,7 @@ public class Layout {
 
 	public Layout recursiveSplit(Size morph, int level, Img binary) {
 		assert binary.size().equals(binary.size());
+		// System.out.println("AAA" + binary.size());
 		if (binary.size().height == 0 || binary.size().width == 0)
 			return this;
 		if (level <= 0) {
@@ -394,8 +390,14 @@ public class Layout {
 			// 0), -1);
 			return this;
 		}
+		// System.out.println("BBB");
+
 		List<Layout> shards = split(morph, binary);
+		// System.out.println("CCC" + shards.size());
+
 		shards.removeIf(shard -> ((shard.getY2() - shard.getY1()) * binary.size().height) < 2 || ((shard.getX2() - shard.getX1()) * binary.size().width) < 2);
+		// System.out.println("DDD" + shards.size());
+
 		if (shards.isEmpty()) {
 			// Imgproc.rectangle(img.getSrc(), new Point(0, 0), new Point(img.width(), img.height()), new Scalar(0, 0,
 			// 255), -1);

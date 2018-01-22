@@ -1,40 +1,37 @@
 package org.genericsystem.cv.application;
 
+import org.genericsystem.cv.AbstractApp;
+import org.genericsystem.cv.Calibrated.AngleCalibrated;
+import org.genericsystem.cv.Lines;
+import org.genericsystem.cv.utils.NativeLibraryLoader;
+import org.genericsystem.layout.Layout;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
+import org.opencv.videoio.VideoCapture;
+
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import org.genericsystem.cv.Lines;
-import org.genericsystem.cv.utils.NativeLibraryLoader;
-import org.opencv.core.Mat;
-import org.opencv.core.Rect;
-import org.opencv.videoio.VideoCapture;
-
-import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.event.EventHandler;
-import javafx.scene.Group;
-import javafx.scene.Scene;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyCode;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 
-public class GraphicApp extends Application{
+public class GraphicApp extends AbstractApp {
 
 	private final double f = 6.053 / 0.009;
 	private final VideoCapture capture = new VideoCapture(0);
-	private SuperFrameImg superFrame = SuperFrameImg.create(capture, f);	
+	private SuperFrameImg superFrame = SuperFrameImg.create(capture, f);
 	private ReferenceManager referenceManager = new ReferenceManager(superFrame.size());
 	private boolean stabilizedMode = false;
 	private boolean textsEnabledMode = false;
-	private Deperspectiver deperspectiver = new Deperspectiver();
-	private DisplayManager displayManager = new DisplayManager();
+	private Deperspectiver deperspectiver;
 	private ScheduledExecutorService timer = Executors.newSingleThreadScheduledExecutor();
 
 	public static void main(String[] args) {
@@ -48,107 +45,92 @@ public class GraphicApp extends Application{
 	public final static double displayWidth = 400d;
 
 	@Override
-	public void start(Stage stage) throws Exception {
-		GridPane gridPane = new GridPane();
-		//	fillGrid(gridPane);
-		double displaySizeReduction = 2;
+	protected void fillGrid(GridPane mainGrid) {
+		double displaySizeReduction = 1.5;
 
-		ImageView view00 = new ImageView();
-		ImageView view01 = new ImageView();
-		ImageView view10 = new ImageView();
-		ImageView view11 = new ImageView();
-
-		gridPane.add(view00, 0, 0);
-		gridPane.add(view01, 0, 1);
-		gridPane.add(view10, 1, 0);
-		gridPane.add(view11, 1, 1);
-
-		view00.setFitWidth(superFrame.width() / displaySizeReduction);
-		view00.setFitHeight(superFrame.height() / displaySizeReduction);
-		view01.setFitWidth(superFrame.width() / displaySizeReduction);
-		view01.setFitHeight(superFrame.height() / displaySizeReduction);
-		view10.setFitWidth(superFrame.width() / displaySizeReduction);
-		view10.setFitHeight(superFrame.height() / displaySizeReduction);
-		view11.setFitWidth(superFrame.width() / displaySizeReduction);
-		view11.setFitHeight(superFrame.height() / displaySizeReduction);
+		ImageView[][] imageViews = new ImageView[][] { new ImageView[2], new ImageView[2], new ImageView[2] };
+		for (int col = 0; col < imageViews.length; col++)
+			for (int row = 0; row < imageViews[col].length; row++) {
+				ImageView imageView = new ImageView();
+				imageViews[col][row] = imageView;
+				mainGrid.add(imageViews[col][row], col, row);
+				imageView.setFitWidth(superFrame.width() / displaySizeReduction);
+				imageView.setFitHeight(superFrame.height() / displaySizeReduction);
+			}
 
 		double[] pp = superFrame.getPrincipalPoint();
+		deperspectiver = new Deperspectiver(f, pp);
 		timer.scheduleAtFixedRate(() -> {
 			try {
 				if (!stabilizedMode)
 					superFrame = SuperFrameImg.create(capture, f);
-				Lines lines = superFrame.detectLines();				
-				Mat deperspectiveHomography = deperspectiver.doWork(superFrame, f, pp, textsEnabledMode, lines);				
-				if (deperspectiveHomography != null){
-					SuperFrameImg superDeperspectived = superFrame.deperspective(deperspectiveHomography);
-					List<Rect> detectedRects = superDeperspectived.detectRects();
-					ImgDescriptor newImgDescriptor = new ImgDescriptor(superDeperspectived);
-					referenceManager.submit(newImgDescriptor, detectedRects);
+				Image[] images = new Image[6];
+				Lines lines = superFrame.detectLines();
+				AngleCalibrated[] calibratedVps = deperspectiver.computeCalibratedVps(superFrame, textsEnabledMode, lines);
+				if (calibratedVps == null)
+					return;
+				Mat deperspectiveHomography = deperspectiver.findHomography(superFrame, calibratedVps);
+				if (deperspectiveHomography == null)
+					return;
 
-					Image image1 = displayManager.displayFrame(superFrame, lines, deperspectiver.getCalibratedVps());
-					Image image2 = displayManager.displaySuperDeperspectived(superDeperspectived, detectedRects);
-					Image image3 = displayManager.displayDiffFrame(superDeperspectived);
-					Image image4 = displayManager.displayReferenceFrame(referenceManager, pp ,f);
+				superFrame.draw(lines, new Scalar(0, 0, 255), 1);
+				superFrame.drawVanishingPointLines(lines, calibratedVps[0], new Scalar(0, 255, 0), 1);
+				superFrame.drawVanishingPointLines(lines, calibratedVps[1], new Scalar(255, 0, 0), 1);
+				superFrame.drawVpsArrows(calibratedVps, new double[] { 20, 20 }, new Scalar(0, 255, 0), 2);
+				images[0] = superFrame.getDisplay().toJfxImage();
 
-					Platform.runLater(() -> {
-						view00.setImage(image1);
-						view01.setImage(image2);
-						view10.setImage(image3);
-						view11.setImage(image4);
-					});
+				SuperTemplate superDeperspectived = superFrame.deperspective(deperspectiveHomography);
+				images[1] = superDeperspectived.getDiffFrame().toJfxImage();
+
+				List<Rect> detectedRects = superDeperspectived.detectRects();
+				superDeperspectived.drawRects(detectedRects, new Scalar(0, 255, 0), -1);
+				images[2] = superDeperspectived.getDisplay().toJfxImage();
+
+				ImgDescriptor newImgDescriptor = new ImgDescriptor(superDeperspectived);
+				if (newImgDescriptor.getDescriptors().empty()) {
+					System.out.println("Empty descriptors");
+					return;
 				}
+				referenceManager.submit(newImgDescriptor, detectedRects);
+				List<Rect> referenceRects = referenceManager.getReferenceRects();
+				SuperTemplate referenceTemplate = new SuperTemplate(referenceManager.getReference().getSuperFrame(), CvType.CV_8UC1, SuperFrameImg::getFrame);
+				referenceTemplate.drawRects(referenceRects, new Scalar(255), -1);
+				images[3] = referenceTemplate.getDisplay().toJfxImage();
+
+				SuperTemplate layoutTemplate = new SuperTemplate(referenceTemplate, CvType.CV_8UC3, SuperFrameImg::getDisplay);
+				Layout layout = layoutTemplate.layout();
+				layoutTemplate.drawLayout(layout);
+				images[4] = layoutTemplate.getDisplay().toJfxImage();
+
+				Platform.runLater(() -> {
+					Iterator<Image> it = Arrays.asList(images).iterator();
+					for (int row = 0; row < imageViews.length; row++)
+						for (int col = 0; col < imageViews[row].length; col++)
+							imageViews[row][col].setImage(it.next());
+				});
 			} catch (Throwable e) {
 				e.printStackTrace();
 			}
 		}, 30, 30, TimeUnit.MILLISECONDS);
-
-		Scene scene = new Scene(new Group());
-		stage.setTitle("Generic System Information Retriever");
-		ScrollPane scrollPane = new ScrollPane(gridPane);
-		scrollPane.setFitToHeight(true);
-		VBox root = new VBox(scrollPane);
-		scene.setRoot(root);
-		stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-			@Override
-			public void handle(WindowEvent event) {
-				try {
-					stop();
-				} catch (Exception e) {
-					throw new RuntimeException(e);
-				}
-			}
-		});
-
-		scene.setOnKeyPressed(event -> {
-			if (event.getCode() == KeyCode.SPACE)
-				onSpace();
-			if (event.getCode() == KeyCode.R)
-				onR();
-			if (event.getCode() == KeyCode.T)
-				onT();
-			if (event.getCode() == KeyCode.S)
-				onS();
-		});
-		stage.setScene(scene);
-		stage.show();
 	}
 
+	@Override
 	protected void onS() {
 		System.out.println("s pressed");
 	}
 
-	// hook
+	@Override
 	protected void onSpace() {
-		System.out.println("space pressed");
-		stabilizedMode = !stabilizedMode; 
+		stabilizedMode = !stabilizedMode;
 	}
 
+	@Override
 	protected void onR() {
 		System.out.println("r pressed");
 	}
 
+	@Override
 	protected void onT() {
-		System.out.println("t pressed");
 		textsEnabledMode = !textsEnabledMode;
 	}
 

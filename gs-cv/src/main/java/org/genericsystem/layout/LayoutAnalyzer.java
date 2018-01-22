@@ -30,7 +30,7 @@ public class LayoutAnalyzer extends AbstractApp {
 		mainGrid.add(new ImageView(img.toJfxImage()), columnIndex, rowIndex++);
 		Img binary = img.cleanFaces(0.1, 0.26).bilateralFilter(20, 80, 80).adaptativeGaussianInvThreshold(17, 15).cleanTables(0.05);
 		Layout layout = binary.buildLayout(new Size(0.04, 0.008), 8);
-		layout.draw(img, new Scalar(0, 255, 0), 1);
+		layout.draw(img, new Scalar(0, 255, 0), new Scalar(0, 0, 255), 1, 1);
 		mainGrid.add(new ImageView(img.toJfxImage()), columnIndex, rowIndex++);
 		mainGrid.add(new ImageView(binary.toJfxImage()), columnIndex, rowIndex++);
 

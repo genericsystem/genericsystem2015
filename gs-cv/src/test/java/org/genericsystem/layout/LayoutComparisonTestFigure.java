@@ -107,8 +107,8 @@ public class LayoutComparisonTestFigure extends AbstractApp {
 		layoutB.addChild(childB2);
 		childB2.addChild(childB21);
 
-		layoutA.draw(binary, new Scalar(0, 255, 0), 2);
-		layoutB.draw(binary, new Scalar(255, 0), 2);
+		layoutA.draw(binary, new Scalar(0, 255, 0), new Scalar(0, 0, 255), 2, 2);
+		layoutB.draw(binary, new Scalar(255, 0), new Scalar(0, 0, 255), 2, 2);
 
 		mainGrid.add(new ImageView(binary.toJfxImage()), 0, 0);
 

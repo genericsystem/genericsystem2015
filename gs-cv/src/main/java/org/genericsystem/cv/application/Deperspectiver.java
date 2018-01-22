@@ -1,19 +1,24 @@
 package org.genericsystem.cv.application;
 
 import org.genericsystem.cv.Calibrated.AngleCalibrated;
-import org.genericsystem.cv.Calibrated;
 import org.genericsystem.cv.Kalman;
 import org.genericsystem.cv.Lines;
 import org.opencv.core.Mat;
 
 public class Deperspectiver {
 
+	private final double f;
+	private final double[] pp;
 	private AngleCalibrated calibrated0 = new AngleCalibrated(0, Math.PI / 2);
 	private Kalman kalmanZ = new Kalman();
 	private AngleCalibrated[] calibratedVps;
 
+	public Deperspectiver(double f, double[] pp) {
+		this.f = f;
+		this.pp = pp;
+	}
 
-	public Mat doWork(SuperFrameImg superFrame, double f, double[] pp, boolean textsEnabledMode, Lines lines) {
+	public AngleCalibrated[] computeCalibratedVps(SuperFrameImg superFrame, boolean textsEnabledMode, Lines lines) {
 		if (textsEnabledMode)
 			lines.getLines().addAll(superFrame.findTextOrientationLines());
 		if (lines.size() > 4) {
@@ -24,8 +29,7 @@ public class Deperspectiver {
 			kalmanZ.correct(calibratedVps[2].uncalibrate(pp, f));
 			calibratedVps[2] = new AngleCalibrated(new double[] { predictionZ[0], predictionZ[1], 1.0 }, pp, f);
 			calibratedVps[1] = calibratedVps[0].getOrthoFromVps(calibratedVps[2]);
-
-			return superFrame.findHomography(calibratedVps);
+			return calibratedVps;
 
 		} else {
 			System.out.println("Not enough lines : " + lines.size());
@@ -33,8 +37,8 @@ public class Deperspectiver {
 		}
 	}
 
-	public AngleCalibrated[] getCalibratedVps() {
-		return calibratedVps;
+	public Mat findHomography(SuperFrameImg superFrame, AngleCalibrated[] calibratedVps) {
+		return superFrame.findHomography(calibratedVps);
 	}
 
 }

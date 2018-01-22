@@ -1,22 +1,5 @@
 package org.genericsystem.cv;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.stream.Collectors;
-
-import javax.swing.ImageIcon;
-
 import org.genericsystem.cv.utils.Tools;
 import org.genericsystem.layout.Layout;
 import org.opencv.core.Core;
@@ -43,6 +26,23 @@ import org.opencv.utils.Converters;
 import org.opencv.ximgproc.Ximgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
+
+import javax.swing.ImageIcon;
 
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -814,7 +814,7 @@ public class Img implements AutoCloseable, Serializable {
 
 	public List<Boolean> projectVertically() {
 		Mat result = new Mat();
-		Core.reduce(getSrc(), result, 1, Core.REDUCE_SUM, CvType.CV_64F);
+		Core.reduce(getSrc(), result, 1, Core.REDUCE_SUM, CvType.CV_64FC1);
 		List<Double> histoVertical = new ArrayList<>();
 		Converters.Mat_to_vector_double(result, histoVertical);
 		return histoVertical.stream().map(value -> value != 0).collect(Collectors.toList());
@@ -822,7 +822,7 @@ public class Img implements AutoCloseable, Serializable {
 
 	public List<Boolean> projectHorizontally() {
 		Mat result = new Mat();
-		Core.reduce(getSrc(), result, 0, Core.REDUCE_SUM, CvType.CV_64F);
+		Core.reduce(getSrc(), result, 0, Core.REDUCE_SUM, CvType.CV_64FC1);
 		Core.transpose(result, result);
 		List<Double> histoHorizontal = new ArrayList<>();
 		Converters.Mat_to_vector_double(result, histoHorizontal);
@@ -914,9 +914,9 @@ public class Img implements AutoCloseable, Serializable {
 		return root.recursiveSplit(morph, level, root.getRoi(this));
 	}
 
-	public static void main(String[] args) {
-		System.out.println(Arrays.toString(open(Arrays.asList(true, true, false, true, true, false, true, false, true), 2)));
-	}
+	// public static void main(String[] args) {
+	// System.out.println(Arrays.toString(open(Arrays.asList(true, true, false, true, true, false, true, false, true), 2)));
+	// }
 
 	public static boolean[] close(List<Boolean> histo, int k) {
 		boolean[] closed = new boolean[histo.size()];

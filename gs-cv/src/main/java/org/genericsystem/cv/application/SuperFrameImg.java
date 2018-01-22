@@ -1,16 +1,9 @@
 package org.genericsystem.cv.application;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import org.genericsystem.cv.Calibrated;
+import org.genericsystem.cv.Calibrated.AngleCalibrated;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.Lines;
-import org.genericsystem.cv.Calibrated.AngleCalibrated;
 import org.genericsystem.cv.Lines.Line;
 import org.genericsystem.cv.lm.LevenbergImpl;
 import org.genericsystem.reinforcer.tools.GSRect;
@@ -25,6 +18,13 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class SuperFrameImg {
 
@@ -229,7 +229,7 @@ public class SuperFrameImg {
 	}
 
 	public SuperTemplate deperspective(Mat homography) {
-		return new SuperTemplate(warpPerspective(homography).getSrc(), pp, f);
+		return new SuperTemplate(this, CvType.CV_8UC3, st -> st.warpPerspective(homography));
 	}
 
 	public AngleCalibrated findVanishingPoint(Lines lines, AngleCalibrated old) {
@@ -272,7 +272,7 @@ public class SuperFrameImg {
 	}
 
 	public List<Rect> detectRects() {
-		return detectRects(getDiffFrame(), 5, 10000);
+		return detectRects(getDiffFrame(), 40, 10000);
 		// return (detectRects(getBinarized().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(7,3)), 5,10000));
 
 		// List<GSRect> rects = getRects(200, 11, 3, new Size(11, 3));
@@ -282,10 +282,12 @@ public class SuperFrameImg {
 
 	List<Rect> detectRects(Img binarized, int minArea, int maxArea) {
 		List<MatOfPoint> contours = new ArrayList<>();
-		Imgproc.findContours(binarized.getSrc(), contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+		Imgproc.findContours(binarized.getSrc(), contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 		Size size = binarized.size();
-		return contours.stream().filter(contour -> Imgproc.contourArea(contour) > minArea && Imgproc.contourArea(contour) < maxArea).map(c -> Imgproc.boundingRect(c))
+		List<Rect> result = contours.stream().filter(contour -> Imgproc.contourArea(contour) > minArea && Imgproc.contourArea(contour) < maxArea).map(c -> Imgproc.boundingRect(c))
 				.filter(rect -> rect.tl().x != 0 && rect.tl().y != 0 && rect.br().x != (size.width) && rect.br().y != (size.height)).collect(Collectors.toList());
+		Collections.reverse(result);
+		return result;
 	}
 
 	public List<GSRect> cleanList(List<GSRect> bigRects, List<GSRect> smallRects, double overlapThreshold) {

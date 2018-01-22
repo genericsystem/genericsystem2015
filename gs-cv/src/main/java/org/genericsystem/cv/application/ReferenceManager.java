@@ -1,14 +1,5 @@
 package org.genericsystem.cv.application;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.TreeMap;
-
-import org.genericsystem.cv.application.ImgDescriptor;
-import org.genericsystem.cv.application.Reconciliation;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -16,6 +7,15 @@ import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Size;
 import org.opencv.utils.Converters;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.TreeMap;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class ReferenceManager {
 	private static final Mat IDENTITY_MAT = Mat.eye(new Size(3, 3), CvType.CV_64F);
@@ -30,7 +30,8 @@ public class ReferenceManager {
 	});
 
 	private ImgDescriptor reference;
-	private List<Rect> referenceRects = new ArrayList<>();
+	// private List<Rect> referenceRects = new ArrayList<>();
+	private Fields fields = new Fields();
 	private Size frameSize;
 
 	public ReferenceManager(Size frameSize) {
@@ -49,18 +50,16 @@ public class ReferenceManager {
 		Reconciliation bestReconciliation = null;
 
 		Reconciliation reconciliationWithRef = newImgDescriptor.computeReconciliation(reference);
-		if (reconciliationWithRef != null) {				
+		if (reconciliationWithRef != null) {
 			bestReconciliation = reconciliationWithRef;
-			bestImgDescriptor = reference;				
-		}
-		else{
+			bestImgDescriptor = reference;
+		} else {
 			ImgDescriptor lastStored = toReferenceGraphy.lastKey();
 			Reconciliation reconciliationWithlast = newImgDescriptor.computeReconciliation(lastStored);
-			if (reconciliationWithlast != null){
+			if (reconciliationWithlast != null) {
 				bestReconciliation = reconciliationWithlast;
 				bestImgDescriptor = lastStored;
-			}
-			else{
+			} else {
 				for (ImgDescriptor imgDescriptor : toReferenceGraphy.keySet()) {
 					Reconciliation reconciliation = newImgDescriptor.computeReconciliation(imgDescriptor);
 					if (reconciliation != null) {
@@ -75,12 +74,12 @@ public class ReferenceManager {
 			}
 		}
 		if (bestReconciliation == null) {
-			//System.out.println("map size: " +toReferenceGraphy.size());
+			// System.out.println("map size: " +toReferenceGraphy.size());
 			if (toReferenceGraphy.size() <= 1) {
 				toReferenceGraphy.clear();
 				toReferenceGraphy.put(newImgDescriptor, IDENTITY_MAT);
 				reference = newImgDescriptor;
-			}				
+			}
 			return;
 		}
 		Mat homographyToReference = new Mat();
@@ -122,6 +121,7 @@ public class ReferenceManager {
 					toReferenceGraphy.put(entry.getKey(), IDENTITY_MAT);
 			}
 			reference = consensualDescriptor;
+			fields.shift(homoInv);
 		} else
 			System.out.println("No change reference");
 	}
@@ -146,12 +146,123 @@ public class ReferenceManager {
 		return bestDescriptor;
 	}
 
-	private void consolidate(List<Rect> shiftedRect) {
-		referenceRects = shiftedRect;
+	private static class Field {
+
+		private Rect rect;
+		private int level = 0;
+
+		Field(Rect rect) {
+			this.rect = rect;
+		}
+
+		public int getLevel() {
+			return level;
+		}
+
+		public void decrease() {
+			level--;
+		}
+
+		public void increase() {
+			level++;
+		}
+
+		public boolean isEnoughOverlapping(Rect shiftedRect, int pts) {
+			return (Math.abs(rect.tl().x - shiftedRect.tl().x) < pts) && (Math.abs(rect.tl().y - shiftedRect.tl().y) < pts) && (Math.abs(rect.br().x - shiftedRect.br().x) < pts) && (Math.abs(rect.br().y - shiftedRect.br().y) < pts);
+		}
+
+		public boolean isOverlapping(Rect other) {
+			return rect.tl().x <= other.br().x && other.tl().x <= rect.br().x && rect.tl().y <= other.br().y && other.tl().y <= rect.br().y;
+		}
+
+		public void dump(Rect shiftedRect, double dumpingSize) {
+			this.rect = new Rect(new Point(rect.tl().x * ((dumpingSize - 1) / dumpingSize) + shiftedRect.tl().x / dumpingSize, rect.tl().y * ((dumpingSize - 1) / dumpingSize) + shiftedRect.tl().y / dumpingSize),
+					new Point(rect.br().x * (dumpingSize - 1) / dumpingSize + shiftedRect.br().x / dumpingSize, rect.br().y * (dumpingSize - 1) / dumpingSize + shiftedRect.br().y / dumpingSize));
+		}
+
+		public Rect getRect() {
+			return rect;
+		}
+
+		public void shift(Mat homography) {
+			Mat original = Converters.vector_Point2d_to_Mat(Arrays.asList(rect.tl(), rect.br()));
+			Mat results = new Mat();
+			Core.perspectiveTransform(original, results, homography);
+			List<Point> res = new ArrayList<>();
+			Converters.Mat_to_vector_Point2d(results, res);
+			rect = new Rect(res.get(0), res.get(1));
+		}
+
+		public boolean contains(Rect shiftedRect) {
+			return (rect.tl().x <= shiftedRect.tl().x && rect.tl().y <= shiftedRect.tl().y && rect.br().x >= shiftedRect.tl().x && rect.br().y >= shiftedRect.tl().y);
+		}
+
+		public boolean isInner(Rect shiftedRect) {
+			return (rect.tl().x >= shiftedRect.tl().x && rect.tl().y >= shiftedRect.tl().y && rect.br().x <= shiftedRect.tl().x && rect.br().y <= shiftedRect.tl().y);
+		}
+
+	}
+
+	private static class Fields {
+		private List<Field> fieldsList = new ArrayList<>();
+
+		public void clean(Predicate<Field> predicate) {
+			fieldsList.removeIf(predicate);
+		}
+
+		public void shift(Mat homoInv) {
+			fieldsList.forEach(field -> field.shift(homoInv));
+		}
+
+		public List<Field> findOverlapingFields(Rect shiftedRect) {
+			return fieldsList.stream().filter(field -> field.isOverlapping(shiftedRect)).collect(Collectors.toList());
+		}
+
+		public void add(Field field) {
+			fieldsList.add(field);
+		}
+
+		public List<Rect> getPositiveLevelRects() {
+			return fieldsList.stream().filter(field -> field.getLevel() >= 0).map(field -> field.getRect()).collect(Collectors.toList());
+		}
+
+		public void decreaseAll() {
+			fieldsList.forEach(field -> field.decrease());
+		}
+	}
+
+	private void consolidate(List<Rect> shiftedRects) {
+		for (Rect shiftedRect : shiftedRects) {
+			List<Field> targetFields = fields.findOverlapingFields(shiftedRect);
+			if (targetFields.isEmpty()) {
+				Field newField = new Field(shiftedRect);
+				newField.increase();
+				newField.increase();
+				fields.add(newField);
+			} else {
+				if (targetFields.size() == 1) {
+					Field targetField = targetFields.iterator().next();
+					if (targetField.isEnoughOverlapping(shiftedRect, 8)) {
+						targetField.dump(shiftedRect, 3);
+						targetField.increase();
+						targetField.increase();
+						targetField.increase();
+					} else
+						targetField.decrease();
+				} else
+					for (Field targetField : targetFields) {
+						if ((!targetField.contains(shiftedRect) || !targetField.isInner(shiftedRect)))
+							if (!targetField.isEnoughOverlapping(shiftedRect, 8))
+								targetField.decrease();
+					}
+			}
+		}
+		fields.decreaseAll();
+		fields.clean(targetField -> targetField.getLevel() < -10);
 	}
 
 	public List<Rect> getReferenceRects() {
-		return referenceRects;
+		return fields.getPositiveLevelRects();
 	}
 
 	private List<Rect> shift(List<Rect> detectedRects, Mat homography) {
