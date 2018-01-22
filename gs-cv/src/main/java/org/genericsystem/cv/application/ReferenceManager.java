@@ -1,13 +1,5 @@
 package org.genericsystem.cv.application;
 
-import org.opencv.core.Core;
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
-import org.opencv.core.Point;
-import org.opencv.core.Rect;
-import org.opencv.core.Size;
-import org.opencv.utils.Converters;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -16,6 +8,14 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import org.opencv.core.Core;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.core.Point;
+import org.opencv.core.Rect;
+import org.opencv.core.Size;
+import org.opencv.utils.Converters;
 
 public class ReferenceManager {
 	private static final Mat IDENTITY_MAT = Mat.eye(new Size(3, 3), CvType.CV_64F);
@@ -309,5 +309,11 @@ public class ReferenceManager {
 
 	public ImgDescriptor getReference() {
 		return reference;
+	}
+
+	public void clear() {
+		reference = null;
+		toReferenceGraphy.clear();
+		fields.clean(field -> true);
 	}
 }
