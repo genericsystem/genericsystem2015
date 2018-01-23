@@ -1,5 +1,11 @@
 package org.genericsystem.cv.application;
 
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Calibrated.AngleCalibrated;
 import org.genericsystem.cv.Lines;
@@ -10,12 +16,7 @@ import org.opencv.core.Mat;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.videoio.VideoCapture;
-
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import org.opencv.videoio.Videoio;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -47,6 +48,8 @@ public class GraphicApp extends AbstractApp {
 
 	@Override
 	protected void fillGrid(GridPane mainGrid) {
+		capture.set(Videoio.CAP_PROP_FRAME_WIDTH, 1280);
+		capture.set(Videoio.CAP_PROP_FRAME_HEIGHT, 1024);
 		double displaySizeReduction = 1;
 		for (int col = 0; col < imageViews.length; col++)
 			for (int row = 0; row < imageViews[col].length; row++) {

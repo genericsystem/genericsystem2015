@@ -45,7 +45,11 @@ public class SuperFrameImg {
 
 	public static SuperFrameImg create(VideoCapture capture, double f) {
 		Mat frameMat = new Mat();
+		long ts = System.currentTimeMillis();
 		capture.read(frameMat);
+		long ts2 = System.currentTimeMillis();
+		Imgproc.resize(frameMat, frameMat, new Size(640, 480));
+
 		return new SuperFrameImg(frameMat, new double[] { frameMat.width() / 2, frameMat.height() / 2 }, f);
 	}
 

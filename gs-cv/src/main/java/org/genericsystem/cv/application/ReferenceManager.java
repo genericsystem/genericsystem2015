@@ -55,16 +55,14 @@ public class ReferenceManager {
 		if (reconciliationWithlast != null) {
 			bestReconciliation = reconciliationWithlast;
 			bestImgDescriptor = lastStored;
-		} 
-		else {
+		} else {
 			Reconciliation reconciliationWithRef = newImgDescriptor.computeReconciliation(reference);
 			if (reconciliationWithRef != null) {
 				bestReconciliation = reconciliationWithRef;
 				bestImgDescriptor = reference;
-			} 
-			else {
+			} else {
 				int counter = 0;
-				while(counter<5){
+				while (counter < 3) {
 					ImgDescriptor randomImgDescriptor = getRandomDescriptor();
 					Reconciliation reconciliation = newImgDescriptor.computeReconciliation(randomImgDescriptor);
 					if (reconciliation != null) {
@@ -96,7 +94,7 @@ public class ReferenceManager {
 		cleanReferenceNeighbours();
 	}
 
-	private ImgDescriptor getRandomDescriptor(){
+	private ImgDescriptor getRandomDescriptor() {
 		List<ImgDescriptor> list = new ArrayList<>(toReferenceGraphy.keySet());
 		return list.get(new Random().nextInt(list.size()));
 	}
