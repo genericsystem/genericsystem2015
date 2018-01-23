@@ -3,7 +3,6 @@ package org.genericsystem.cv.application;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -301,18 +300,6 @@ public class SuperFrameImg {
 	public List<GSRect> cleanList(List<GSRect> bigRects, List<GSRect> smallRects, double overlapThreshold) {
 		smallRects.removeIf(smallRect -> bigRects.stream().anyMatch(bigRect -> smallRect.inclusiveArea(bigRect) > overlapThreshold));
 		return Stream.concat(smallRects.stream().filter(smallRect -> bigRects.stream().filter(rect -> rect.isOverlapping(smallRect)).noneMatch(rect -> rect.getInsider(smallRect) == null)), bigRects.stream()).collect(Collectors.toList());
-	}
-
-	private List<Rect> applyNoOverlapsConstraint(List<Rect> rects) {
-		Collections.reverse(rects);
-		List<Rect> result = new ArrayList<>();
-		for (ListIterator<Rect> it = rects.listIterator(); it.hasNext();) {
-			int i = it.nextIndex();
-			Rect rect = it.next();
-			if (rects.subList(i, rects.size() - 1).stream().filter(r -> r != rect).noneMatch(r -> isOverlapping(r, rect)))
-				result.add(rect);
-		}
-		return result;
 	}
 
 	public boolean isOverlapping(Rect rect, Rect other) {
