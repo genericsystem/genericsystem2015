@@ -147,21 +147,6 @@ public class ReferenceManager {
 
 	private static class Field {
 
-		// public static void main(String[] args){
-		// Rect rect1 = new Rect(10,10,100,20);
-		// Rect rect2 = new Rect(10,10,100,10);
-		// Rect rect3 = new Rect(12,12,80,10);
-		//
-		// Field field1 = new Field(rect1);
-		// Field field3 = new Field(rect3);
-		// System.out.println("testing contains and inner methods");
-		// System.out.println(field1.contains(rect2));
-		// System.out.println(field1.contains(rect3));
-		// System.out.println(field3.isInner(rect1));
-		// System.out.println(!field3.isInner(rect1));
-		//
-		// }
-
 		private Rect rect;
 		private int level = 0;
 
@@ -190,8 +175,8 @@ public class ReferenceManager {
 		}
 
 		public void dump(Rect shiftedRect, double dumpingSize) {
-			this.rect = new Rect(new Point(rect.tl().x * ((dumpingSize - 1) / dumpingSize) + shiftedRect.tl().x / dumpingSize, rect.tl().y * ((dumpingSize - 1) / dumpingSize) + shiftedRect.tl().y / dumpingSize),
-					new Point(rect.br().x * (dumpingSize - 1) / dumpingSize + shiftedRect.br().x / dumpingSize, rect.br().y * (dumpingSize - 1) / dumpingSize + shiftedRect.br().y / dumpingSize));
+			this.rect = new Rect(new Point(Math.round(rect.tl().x * ((dumpingSize - 1) / dumpingSize) + shiftedRect.tl().x / dumpingSize), Math.round(rect.tl().y * ((dumpingSize - 1) / dumpingSize) + shiftedRect.tl().y / dumpingSize)),
+					new Point(Math.round(rect.br().x * (dumpingSize - 1) / dumpingSize + shiftedRect.br().x / dumpingSize), Math.round(rect.br().y * (dumpingSize - 1) / dumpingSize + shiftedRect.br().y / dumpingSize)));
 		}
 
 		public Rect getRect() {
@@ -248,43 +233,25 @@ public class ReferenceManager {
 	private void consolidate(List<Rect> shiftedRects) {
 		for (Rect shiftedRect : shiftedRects) {
 			List<Field> targetFields = fields.findOverlapingFields(shiftedRect);
-			if (targetFields.isEmpty()) {
+			boolean toAdd = true;
+			for (Field targetField : targetFields) {
+				if (targetField.isEnoughOverlapping(shiftedRect, 5)) {
+					targetField.dump(shiftedRect, 3);
+					targetField.increase();
+					targetField.increase();
+					toAdd = false;
+				}
+			}
+			if (toAdd) {
 				Field newField = new Field(shiftedRect);
 				newField.increase();
 				newField.increase();
 				fields.add(newField);
-			} else {
-				if (targetFields.size() == 1) {
-					Field targetField = targetFields.iterator().next();
-					if (targetField.isEnoughOverlapping(shiftedRect, 8)) {
-						targetField.dump(shiftedRect, 3);
-						targetField.increase();
-						targetField.increase();
-						targetField.increase();
-					} else
-						targetField.decrease();
-				} else {
-					for (Field targetField : targetFields) {
-						if ((!targetField.contains(shiftedRect) || !targetField.isInner(shiftedRect))) {
-							if (!targetField.isEnoughOverlapping(shiftedRect, 3))
-								targetField.decrease();
-							else {
-								targetField.dump(shiftedRect, 3);
-								targetField.increase();
-								targetField.increase();
-							}
-						} else {
-							targetField.dump(shiftedRect, 3);
-							targetField.increase();
-							targetField.increase();
-							targetField.increase();
-						}
-					}
-				}
 			}
 		}
 		fields.decreaseAll();
-		fields.clean(targetField -> targetField.getLevel() < -10);
+		fields.clean(targetField -> targetField.getLevel() < -3);
+
 	}
 
 	public List<Rect> getReferenceRects() {
