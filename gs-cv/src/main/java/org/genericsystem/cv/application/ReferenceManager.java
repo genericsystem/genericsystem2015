@@ -250,7 +250,6 @@ public class ReferenceManager {
 		for (Rect shiftedRect : shiftedRects) {
 			List<Field> targetFields = fields.findOverlapingFields(shiftedRect);
 			if (targetFields.isEmpty()) {
-				System.out.println("no match found, creating new field");
 				Field newField = new Field(shiftedRect);
 				newField.increase();
 				newField.increase();
@@ -266,9 +265,7 @@ public class ReferenceManager {
 					} else						
 						targetField.decrease();
 				} else{
-					System.out.println(targetFields.size()+" match found");
-					for (Field targetField : targetFields) {
-						System.out.println(targetField.getRect() + " vs "+ shiftedRect);						
+					for (Field targetField : targetFields) {					
 						if ((!targetField.contains(shiftedRect) || !targetField.isInner(shiftedRect))){
 							if (!targetField.isEnoughOverlapping(shiftedRect, 3))
 								targetField.decrease();							
