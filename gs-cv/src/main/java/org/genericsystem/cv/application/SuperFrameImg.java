@@ -1,6 +1,7 @@
 package org.genericsystem.cv.application;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -263,6 +264,7 @@ public class SuperFrameImg {
 		return CvType.CV_8U != getFrame().type() ? getFrame().bgr2Gray() : getFrame();
 	}
 
+	@SuppressWarnings("resource")
 	private Img buildDiffFrame() {
 		Mat diffFrame = getGrayFrame().gaussianBlur(new Size(5, 5)).getSrc();
 		Core.absdiff(diffFrame, new Scalar(90), diffFrame);
@@ -271,15 +273,10 @@ public class SuperFrameImg {
 	}
 
 	public List<Rect> detectRects() {
-		return detectRects(getDiffFrame(), 10, 10000, 15);
-		// return (detectRects(getBinarized().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(7,3)), 5,10000));
-
-		// List<GSRect> rects = getRects(200, 11, 3, new Size(11, 3));
-		// List<GSRect> children = getRects(40, 17, 3, new Size(7, 3));
-		// return cleanList(rects, children, 0.70);
+		return detectRects(getDiffFrame(), 10, 10000, 0.3);
 	}
 
-	List<Rect> detectRects(Img binarized, int minArea, int maxArea, double fillLevel) {
+	List<Rect> detectRects(Img binarized, int minArea, int maxArea, double fillRatio) {
 		List<MatOfPoint> contours = new ArrayList<>();
 		Imgproc.findContours(binarized.getSrc(), contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 		Size size = binarized.size();
@@ -289,12 +286,21 @@ public class SuperFrameImg {
 			if (area > minArea && area < maxArea) {
 				Rect rect = Imgproc.boundingRect(contour);
 				if (rect.tl().x != 0 && rect.tl().y != 0 && rect.br().x != (size.width) && rect.br().y != (size.height))
-					if ((rect.area() / fillLevel) <= contour.rows())
+					if (getFillRatio(contour, rect) > fillRatio)
 						result.add(rect);
+
 			}
 		}
 		Collections.reverse(result);
 		return result;
+	}
+
+	public double getFillRatio(MatOfPoint contour, Rect rect) {
+		Mat mask = Mat.zeros(rect.size(), CvType.CV_8UC1);
+		Imgproc.drawContours(mask, Arrays.asList(contour), 0, new Scalar(255), -1, Imgproc.LINE_8, new Mat(), Integer.MAX_VALUE, new Point(-rect.tl().x, -rect.tl().y));
+		Mat mat = new Mat();
+		Core.findNonZero(mask, mat);
+		return mat.rows() / rect.area();
 	}
 
 	public List<GSRect> cleanList(List<GSRect> bigRects, List<GSRect> smallRects, double overlapThreshold) {

@@ -122,8 +122,7 @@ public class ReferenceManager {
 			}
 			reference = consensualDescriptor;
 			fields.shift(homoInv);
-		} else
-			System.out.println("No change reference");
+		}
 	}
 
 	private ImgDescriptor findConsensualDescriptor() {
@@ -148,20 +147,20 @@ public class ReferenceManager {
 
 	private static class Field {
 
-		//		public static void main(String[] args){
-		//			Rect rect1 = new Rect(10,10,100,20);
-		//			Rect rect2 = new Rect(10,10,100,10);
-		//			Rect rect3 = new Rect(12,12,80,10);
+		// public static void main(String[] args){
+		// Rect rect1 = new Rect(10,10,100,20);
+		// Rect rect2 = new Rect(10,10,100,10);
+		// Rect rect3 = new Rect(12,12,80,10);
 		//
-		//			Field field1 = new Field(rect1);
-		//			Field field3 = new Field(rect3);
-		//			System.out.println("testing contains and inner methods");
-		//			System.out.println(field1.contains(rect2));
-		//			System.out.println(field1.contains(rect3));
-		//			System.out.println(field3.isInner(rect1));
-		//			System.out.println(!field3.isInner(rect1));
+		// Field field1 = new Field(rect1);
+		// Field field3 = new Field(rect3);
+		// System.out.println("testing contains and inner methods");
+		// System.out.println(field1.contains(rect2));
+		// System.out.println(field1.contains(rect3));
+		// System.out.println(field3.isInner(rect1));
+		// System.out.println(!field3.isInner(rect1));
 		//
-		//		}
+		// }
 
 		private Rect rect;
 		private int level = 0;
@@ -262,19 +261,19 @@ public class ReferenceManager {
 						targetField.increase();
 						targetField.increase();
 						targetField.increase();
-					} else						
+					} else
 						targetField.decrease();
-				} else{
-					for (Field targetField : targetFields) {					
-						if ((!targetField.contains(shiftedRect) || !targetField.isInner(shiftedRect))){
+				} else {
+					for (Field targetField : targetFields) {
+						if ((!targetField.contains(shiftedRect) || !targetField.isInner(shiftedRect))) {
 							if (!targetField.isEnoughOverlapping(shiftedRect, 3))
-								targetField.decrease();							
-							else{								
+								targetField.decrease();
+							else {
 								targetField.dump(shiftedRect, 3);
 								targetField.increase();
 								targetField.increase();
 							}
-						}else{
+						} else {
 							targetField.dump(shiftedRect, 3);
 							targetField.increase();
 							targetField.increase();
