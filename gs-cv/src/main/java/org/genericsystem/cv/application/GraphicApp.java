@@ -1,11 +1,5 @@
 package org.genericsystem.cv.application;
 
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Calibrated.AngleCalibrated;
 import org.genericsystem.cv.Lines;
@@ -16,6 +10,12 @@ import org.opencv.core.Mat;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.videoio.VideoCapture;
+
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -30,9 +30,10 @@ public class GraphicApp extends AbstractApp {
 	private ReferenceManager referenceManager = new ReferenceManager(superFrame.size());
 	private boolean stabilizedMode = false;
 	private boolean textsEnabledMode = false;
+	private boolean isOn = true;
 	private Deperspectiver deperspectiver;
-	private ScheduledExecutorService timer = new BoundedScheduledThreadPoolExecutor(1, (r, executor) -> {
-	}, 2);
+	private ScheduledExecutorService timer = new BoundedScheduledThreadPoolExecutor();
+	ImageView[][] imageViews = new ImageView[][] { new ImageView[2], new ImageView[2], new ImageView[2] };
 
 	public static void main(String[] args) {
 		launch(args);
@@ -47,8 +48,6 @@ public class GraphicApp extends AbstractApp {
 	@Override
 	protected void fillGrid(GridPane mainGrid) {
 		double displaySizeReduction = 1;
-
-		ImageView[][] imageViews = new ImageView[][] { new ImageView[2], new ImageView[2], new ImageView[2] };
 		for (int col = 0; col < imageViews.length; col++)
 			for (int row = 0; row < imageViews[col].length; row++) {
 				ImageView imageView = new ImageView();
@@ -57,12 +56,14 @@ public class GraphicApp extends AbstractApp {
 				imageView.setFitWidth(superFrame.width() / displaySizeReduction);
 				imageView.setFitHeight(superFrame.height() / displaySizeReduction);
 			}
+		deperspectiver = new Deperspectiver(f, superFrame.getPp());
+		startTimer();
+	}
 
-		double[] pp = superFrame.getPrincipalPoint();
-		deperspectiver = new Deperspectiver(f, pp);
+	private void startTimer() {
 		timer.scheduleAtFixedRate(() -> {
 			try {
-				Image[] images = doWork(pp);
+				Image[] images = doWork();
 				if (images != null)
 					Platform.runLater(() -> {
 						Iterator<Image> it = Arrays.asList(images).iterator();
@@ -76,8 +77,8 @@ public class GraphicApp extends AbstractApp {
 		}, 30, 30, TimeUnit.MILLISECONDS);
 	}
 
-	private Image[] doWork(double[] pp) {
-
+	private Image[] doWork() {
+		System.out.println("do work");
 		if (!stabilizedMode)
 			superFrame = SuperFrameImg.create(capture, f);
 		Image[] images = new Image[6];
@@ -123,12 +124,18 @@ public class GraphicApp extends AbstractApp {
 
 	@Override
 	protected void onS() {
-		System.out.println("s pressed");
+		stabilizedMode = !stabilizedMode;
 	}
 
 	@Override
 	protected void onSpace() {
-		stabilizedMode = !stabilizedMode;
+		if (isOn)
+			timer.shutdown();
+		else {
+			timer = new BoundedScheduledThreadPoolExecutor();
+			startTimer();
+		}
+		isOn = !isOn;
 	}
 
 	@Override
