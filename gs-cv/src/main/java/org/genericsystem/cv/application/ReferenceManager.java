@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Random;
 import java.util.TreeMap;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -49,32 +50,37 @@ public class ReferenceManager {
 		ImgDescriptor bestImgDescriptor = null;
 		Reconciliation bestReconciliation = null;
 
-		Reconciliation reconciliationWithRef = newImgDescriptor.computeReconciliation(reference);
-		if (reconciliationWithRef != null) {
-			bestReconciliation = reconciliationWithRef;
-			bestImgDescriptor = reference;
-		} else {
-			ImgDescriptor lastStored = toReferenceGraphy.lastKey();
-			Reconciliation reconciliationWithlast = newImgDescriptor.computeReconciliation(lastStored);
-			if (reconciliationWithlast != null) {
-				bestReconciliation = reconciliationWithlast;
-				bestImgDescriptor = lastStored;
-			} else {
-				for (ImgDescriptor imgDescriptor : toReferenceGraphy.keySet()) {
-					Reconciliation reconciliation = newImgDescriptor.computeReconciliation(imgDescriptor);
+		ImgDescriptor lastStored = toReferenceGraphy.lastKey();
+		Reconciliation reconciliationWithlast = newImgDescriptor.computeReconciliation(lastStored);
+		if (reconciliationWithlast != null) {
+			bestReconciliation = reconciliationWithlast;
+			bestImgDescriptor = lastStored;
+		} 
+		else {
+			Reconciliation reconciliationWithRef = newImgDescriptor.computeReconciliation(reference);
+			if (reconciliationWithRef != null) {
+				bestReconciliation = reconciliationWithRef;
+				bestImgDescriptor = reference;
+			} 
+			else {
+				int counter = 0;
+				while(counter<5){
+					ImgDescriptor randomImgDescriptor = getRandomDescriptor();
+					Reconciliation reconciliation = newImgDescriptor.computeReconciliation(randomImgDescriptor);
 					if (reconciliation != null) {
 						int matchingPointsCount = reconciliation.getPts().size();
 						if (matchingPointsCount >= bestMatchingPointsCount) {
 							bestMatchingPointsCount = matchingPointsCount;
 							bestReconciliation = reconciliation;
-							bestImgDescriptor = imgDescriptor;
+							bestImgDescriptor = randomImgDescriptor;
 						}
 					}
+					counter++;
 				}
 			}
 		}
 		if (bestReconciliation == null) {
-			// System.out.println("map size: " +toReferenceGraphy.size());
+			System.out.println("no reconciliation found");
 			if (toReferenceGraphy.size() <= 1) {
 				toReferenceGraphy.clear();
 				toReferenceGraphy.put(newImgDescriptor, IDENTITY_MAT);
@@ -90,8 +96,13 @@ public class ReferenceManager {
 		cleanReferenceNeighbours();
 	}
 
+	private ImgDescriptor getRandomDescriptor(){
+		List<ImgDescriptor> list = new ArrayList<>(toReferenceGraphy.keySet());
+		return list.get(new Random().nextInt(list.size()));
+	}
+
 	private void cleanReferenceNeighbours() {
-		if (toReferenceGraphy.size() > 6) {
+		if (toReferenceGraphy.size() > 20) {
 			double bestDistance = Double.MAX_VALUE;
 			ImgDescriptor closestDescriptor = null;
 			for (Entry<ImgDescriptor, Mat> entry : toReferenceGraphy.entrySet()) {
