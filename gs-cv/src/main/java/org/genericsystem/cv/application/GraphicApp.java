@@ -116,13 +116,18 @@ public class GraphicApp extends AbstractApp {
 		referenceTemplate.drawRects(referenceRects, new Scalar(255), -1);
 		images[3] = referenceTemplate.getDisplay().toJfxImage();
 
+		SuperTemplate superReferenceTemplate = new SuperTemplate(superFrame, CvType.CV_8UC1, SuperFrameImg::getFrame);
+		superReferenceTemplate.drawRects(referenceManager.getResizedReferenceRects(), new Scalar(255), -1);
+		images[5] = superReferenceTemplate.getDisplay().toJfxImage();
+
+
 		SuperTemplate layoutTemplate = new SuperTemplate(referenceTemplate, CvType.CV_8UC3, SuperFrameImg::getDisplay);
 		Layout layout = layoutTemplate.layout();
 		layoutTemplate.drawLayout(layout);
 		images[4] = layoutTemplate.getDisplay().toJfxImage();
 
 		return images;
-	}
+	}	
 
 	@Override
 	protected void onS() {
