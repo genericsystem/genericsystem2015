@@ -25,7 +25,7 @@ public class GraphicApp extends AbstractApp {
 
 	private final double f = 6.053 / 0.009;
 	private final GSCapture gsCapture = new GSVideoCapture(0, f, GSVideoCapture.HD, GSVideoCapture.VGA);
-	// private final GSCapture gsCapture = new GSPhotoCapture("resources/14342661748973931.jpg", f);
+	// private final GSCapture gsCapture = new GSPhotoCapture("resources/image.pdf", f);
 	private SuperFrameImg superFrame;
 	private ReferenceManager referenceManager;
 	private Config config = new Config();
@@ -115,6 +115,11 @@ public class GraphicApp extends AbstractApp {
 		SuperTemplate referenceTemplate = new SuperTemplate(referenceManager.getReference().getSuperFrame(), CvType.CV_8UC1, SuperFrameImg::getFrame);
 		referenceTemplate.drawRects(referenceRects, new Scalar(255), -1);
 		images[3] = referenceTemplate.getDisplay().toJfxImage();
+
+		SuperTemplate superReferenceTemplate = new SuperTemplate(superFrame, CvType.CV_8UC1, SuperFrameImg::getFrame);
+		superReferenceTemplate.drawRects(referenceManager.getResizedReferenceRects(), new Scalar(255), -1);
+		images[5] = superReferenceTemplate.getDisplay().toJfxImage();
+
 
 		SuperTemplate layoutTemplate = new SuperTemplate(referenceTemplate, CvType.CV_8UC3, SuperFrameImg::getDisplay);
 		Layout layout = layoutTemplate.layout();
