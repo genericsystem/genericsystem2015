@@ -28,9 +28,7 @@ public class GraphicApp extends AbstractApp {
 	// private final GSCapture gsCapture = new GSPhotoCapture("resources/14342661748973931.jpg", f);
 	private SuperFrameImg superFrame;
 	private ReferenceManager referenceManager;
-	private boolean stabilizedMode = false;
-	private boolean textsEnabledMode = false;
-	private boolean isOn = true;
+	private Config config = new Config();
 	private Deperspectiver deperspectiver;
 	private ScheduledExecutorService timer = new BoundedScheduledThreadPoolExecutor();
 	ImageView[][] imageViews = new ImageView[][] { new ImageView[2], new ImageView[2], new ImageView[2] };
@@ -83,11 +81,11 @@ public class GraphicApp extends AbstractApp {
 	private Image[] doWork() {
 
 		System.out.println("do work");
-		if (!stabilizedMode)
+		if (!config.stabilizedMode)
 			superFrame = gsCapture.read();
 		Image[] images = new Image[6];
 		Lines lines = superFrame.detectLines();
-		AngleCalibrated[] calibratedVps = deperspectiver.computeCalibratedVps(superFrame, textsEnabledMode, lines);
+		AngleCalibrated[] calibratedVps = deperspectiver.computeCalibratedVps(superFrame, config.textsEnabledMode, lines);
 		if (calibratedVps == null)
 			return null;
 		Mat deperspectiveHomography = deperspectiver.findHomography(superFrame, calibratedVps);
@@ -128,18 +126,18 @@ public class GraphicApp extends AbstractApp {
 
 	@Override
 	protected void onS() {
-		stabilizedMode = !stabilizedMode;
+		config.stabilizedMode = !config.stabilizedMode;
 	}
 
 	@Override
 	protected void onSpace() {
-		if (isOn)
+		if (config.isOn)
 			timer.shutdown();
 		else {
 			timer = new BoundedScheduledThreadPoolExecutor();
 			startTimer();
 		}
-		isOn = !isOn;
+		config.isOn = !config.isOn;
 	}
 
 	@Override
@@ -149,7 +147,7 @@ public class GraphicApp extends AbstractApp {
 
 	@Override
 	protected void onT() {
-		textsEnabledMode = !textsEnabledMode;
+		config.textsEnabledMode = !config.textsEnabledMode;
 	}
 
 	@Override
