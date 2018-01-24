@@ -91,7 +91,7 @@ public class ReferenceManager {
 		Mat homographyToReference = new Mat();
 		Core.gemm(bestReconciliation.getHomography(), toReferenceGraphy.get(bestImgDescriptor), 1, new Mat(), 0, homographyToReference);
 		toReferenceGraphy.put(newImgDescriptor, homographyToReference);
-		consolidate(shift(detectedrects, homographyToReference));
+		consolidate(shift(detectedrects, homographyToReference), frameSize);
 		updateReference();
 		cleanReferenceNeighbours();
 	}
@@ -198,12 +198,26 @@ public class ReferenceManager {
 			rect = new Rect(res.get(0), res.get(1));
 		}
 
-		public boolean contains(Rect shiftedRect) {
-			return (rect.tl().x <= shiftedRect.tl().x && rect.tl().y <= shiftedRect.tl().y && rect.br().x >= shiftedRect.br().x && rect.br().y >= shiftedRect.br().y);
-		}
+		//		public boolean contains(Rect shiftedRect) {
+		//			return (rect.tl().x <= shiftedRect.tl().x && rect.tl().y <= shiftedRect.tl().y && rect.br().x >= shiftedRect.br().x && rect.br().y >= shiftedRect.br().y);
+		//		}
 
 		public boolean isInner(Rect shiftedRect) {
 			return (rect.tl().x >= shiftedRect.tl().x && rect.tl().y >= shiftedRect.tl().y && rect.br().x <= shiftedRect.br().x && rect.br().y <= shiftedRect.br().y);
+		}
+
+		public boolean isDisplayed(Size frameSize) {
+			Rect frameRect = new Rect(0, 0, (int) frameSize.width, (int) frameSize.height);
+			if(isOutOfFrame(frameRect))
+				return false;
+			else if(isOverlapping(frameRect) && !isInner(frameRect))
+				return false;
+			else 
+				return true;
+		}
+
+		private boolean isOutOfFrame(Rect frameRect) {
+			return rect.tl().x >= frameRect.width || rect.tl().y >= frameRect.height || rect.br().x <= 0 || rect.br().y <= 0;
 		}
 
 	}
@@ -234,9 +248,14 @@ public class ReferenceManager {
 		public void decreaseAll() {
 			fieldsList.forEach(field -> field.decrease());
 		}
+
+		public List<Field> getFields(){
+			return fieldsList;
+		}
 	}
 
-	private void consolidate(List<Rect> shiftedRects) {
+	private void consolidate(List<Rect> shiftedRects, Size frameSize) {
+		List<Field> displayedFields = fields.getFields().stream().filter(f -> f.isDisplayed(frameSize)).collect(Collectors.toList());
 		for (Rect shiftedRect : shiftedRects) {
 			List<Field> targetFields = fields.findOverlapingFields(shiftedRect);
 			boolean toAdd = true;
@@ -255,9 +274,12 @@ public class ReferenceManager {
 				fields.add(newField);
 			}
 		}
-		fields.decreaseAll();
+		decreaseAll(displayedFields);
 		fields.clean(targetField -> targetField.getLevel() < -3);
+	}
 
+	private void decreaseAll(List<Field> displayedFields) {
+		displayedFields.forEach(f -> f.decrease());
 	}
 
 	public List<Rect> getReferenceRects() {
