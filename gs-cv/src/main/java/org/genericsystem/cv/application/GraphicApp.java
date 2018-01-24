@@ -127,7 +127,7 @@ public class GraphicApp extends AbstractApp {
 		images[4] = layoutTemplate.getDisplay().toJfxImage();
 
 		return images;
-	}
+	}	
 
 	@Override
 	protected void onS() {
