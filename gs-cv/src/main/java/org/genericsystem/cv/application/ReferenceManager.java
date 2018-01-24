@@ -61,9 +61,11 @@ public class ReferenceManager {
 				bestReconciliation = reconciliationWithRef;
 				bestImgDescriptor = reference;
 			} else {
-				int counter = 0;
-				while (counter < 3) {
-					ImgDescriptor randomImgDescriptor = getRandomDescriptor();
+				int reconciliationTries = 0;
+				List<ImgDescriptor> list = new ArrayList<>(toReferenceGraphy.keySet());
+				Random randomGenerator = new Random();
+				while (reconciliationTries < 3) {
+					ImgDescriptor randomImgDescriptor = list.get(randomGenerator.nextInt(list.size()));
 					Reconciliation reconciliation = newImgDescriptor.computeReconciliation(randomImgDescriptor);
 					if (reconciliation != null) {
 						int matchingPointsCount = reconciliation.getPts().size();
@@ -73,7 +75,7 @@ public class ReferenceManager {
 							bestImgDescriptor = randomImgDescriptor;
 						}
 					}
-					counter++;
+					reconciliationTries++;
 				}
 			}
 		}
@@ -92,11 +94,6 @@ public class ReferenceManager {
 		consolidate(shift(detectedrects, homographyToReference));
 		updateReference();
 		cleanReferenceNeighbours();
-	}
-
-	private ImgDescriptor getRandomDescriptor() {
-		List<ImgDescriptor> list = new ArrayList<>(toReferenceGraphy.keySet());
-		return list.get(new Random().nextInt(list.size()));
 	}
 
 	private void cleanReferenceNeighbours() {
