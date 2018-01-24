@@ -61,9 +61,11 @@ public class ReferenceManager {
 				bestReconciliation = reconciliationWithRef;
 				bestImgDescriptor = reference;
 			} else {
-				int counter = 0;
-				while (counter < 3) {
-					ImgDescriptor randomImgDescriptor = getRandomDescriptor();
+				int reconciliationTries = 0;
+				List<ImgDescriptor> list = new ArrayList<>(toReferenceGraphy.keySet());
+				Random randomGenerator = new Random();
+				while (reconciliationTries < 3) {
+					ImgDescriptor randomImgDescriptor = list.get(randomGenerator.nextInt(list.size()));
 					Reconciliation reconciliation = newImgDescriptor.computeReconciliation(randomImgDescriptor);
 					if (reconciliation != null) {
 						int matchingPointsCount = reconciliation.getPts().size();
@@ -73,7 +75,7 @@ public class ReferenceManager {
 							bestImgDescriptor = randomImgDescriptor;
 						}
 					}
-					counter++;
+					reconciliationTries++;
 				}
 			}
 		}
@@ -89,14 +91,9 @@ public class ReferenceManager {
 		Mat homographyToReference = new Mat();
 		Core.gemm(bestReconciliation.getHomography(), toReferenceGraphy.get(bestImgDescriptor), 1, new Mat(), 0, homographyToReference);
 		toReferenceGraphy.put(newImgDescriptor, homographyToReference);
-		consolidate(shift(detectedrects, homographyToReference));
+		consolidate(shift(detectedrects, homographyToReference), frameSize);
 		updateReference();
 		cleanReferenceNeighbours();
-	}
-
-	private ImgDescriptor getRandomDescriptor() {
-		List<ImgDescriptor> list = new ArrayList<>(toReferenceGraphy.keySet());
-		return list.get(new Random().nextInt(list.size()));
 	}
 
 	private void cleanReferenceNeighbours() {
@@ -208,7 +205,6 @@ public class ReferenceManager {
 		public boolean isInner(Rect shiftedRect) {
 			return (rect.tl().x >= shiftedRect.tl().x && rect.tl().y >= shiftedRect.tl().y && rect.br().x <= shiftedRect.br().x && rect.br().y <= shiftedRect.br().y);
 		}
-
 	}
 
 	private static class Fields {
@@ -237,9 +233,15 @@ public class ReferenceManager {
 		public void decreaseAll() {
 			fieldsList.forEach(field -> field.decrease());
 		}
+
+		public List<Field> getFields(){
+			return fieldsList;
+		}
 	}
 
-	private void consolidate(List<Rect> shiftedRects) {
+	private void consolidate(List<Rect> shiftedRects, Size frameSize) {
+		Rect frameRect = new Rect(0, 0, (int) frameSize.width, (int) frameSize.height);
+		List<Field> displayedFields = fields.getFields().stream().filter(f -> f.isInner(frameRect)).collect(Collectors.toList());
 		for (Rect shiftedRect : shiftedRects) {
 			List<Field> targetFields = fields.findOverlapingFields(shiftedRect);
 			boolean toAdd = true;
@@ -258,9 +260,12 @@ public class ReferenceManager {
 				fields.add(newField);
 			}
 		}
-		fields.decreaseAll();
+		decreaseAll(displayedFields);
 		fields.clean(targetField -> targetField.getLevel() < -3);
+	}
 
+	private void decreaseAll(List<Field> displayedFields) {
+		displayedFields.forEach(f -> f.decrease());
 	}
 
 	public List<Rect> getReferenceRects() {
