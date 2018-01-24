@@ -25,6 +25,7 @@ public class GraphicApp extends AbstractApp {
 
 	private final double f = 6.053 / 0.009;
 	private final GSCapture gsCapture = new GSVideoCapture(0, f, GSVideoCapture.HD, GSVideoCapture.VGA);
+	// private final GSCapture gsCapture = new GSPhotoCapture("resources/14342661748973931.jpg", f);
 	private SuperFrameImg superFrame;
 	private ReferenceManager referenceManager;
 	private boolean stabilizedMode = false;
@@ -45,8 +46,7 @@ public class GraphicApp extends AbstractApp {
 	public GraphicApp() {
 		superFrame = gsCapture.read();
 		deperspectiver = new Deperspectiver(f, superFrame.getPp());
-		referenceManager = new ReferenceManager(superFrame.size());
-
+		referenceManager = new ReferenceManager(gsCapture.getResize());
 	}
 
 	@Override

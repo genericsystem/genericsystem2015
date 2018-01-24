@@ -43,7 +43,7 @@ public class SuperFrameImg {
 	private Img binaryClosed40;
 
 	public SuperFrameImg(Mat frameMat, double[] pp, double f) {
-		frame = new Img(frameMat, true);
+		frame = new Img(frameMat, false);
 		this.pp = pp;
 		this.f = f;
 	}

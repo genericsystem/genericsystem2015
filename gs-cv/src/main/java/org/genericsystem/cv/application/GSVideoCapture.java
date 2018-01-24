@@ -34,6 +34,11 @@ public class GSVideoCapture implements GSCapture {
 	}
 
 	@Override
+	public Size getResize() {
+		return resize;
+	}
+
+	@Override
 	public SuperFrameImg read() {
 		Mat frameMat = new Mat();
 		videoCapture.read(frameMat);
