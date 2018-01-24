@@ -22,11 +22,11 @@ public class SuperTemplate extends SuperFrameImg {
 	}
 
 	public Layout layout() {
-		return getFrame().buildLayout(new Size(0.01, 0.01), 8);
+		return getFrame().buildLayout(new Size(0.01, 0.01), 15);
 	}
 
 	public void drawLayout(Layout layout) {
-		layout.draw(getDisplay(), new Scalar(255, 0, 0), new Scalar(0, 0, 255), 3, -1);
+		layout.draw(getDisplay(), new Scalar(255, 0, 0), new Scalar(0, 0, 255), 1, -1);
 	}
 
 }

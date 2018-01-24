@@ -1,5 +1,14 @@
 package org.genericsystem.layout;
 
+import java.text.Normalizer;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.function.BiConsumer;
+
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.Ocr;
 import org.genericsystem.cv.utils.OCRPlasty;
@@ -12,15 +21,6 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
-
-import java.text.Normalizer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.function.BiConsumer;
 
 public class Layout {
 
@@ -301,15 +301,15 @@ public class Layout {
 		return "tl : (" + this.x1 + "," + this.y1 + "), br :(" + this.x2 + "," + this.y2 + ")";
 	}
 
-	public Layout tighten(Img binary) {
-		double[] x = getHistoLimits(binary.projectHorizontally());
-		double[] y = getHistoLimits(binary.projectVertically());
-		if (x[0] <= x[1] || y[0] <= y[1]) {
-			return new Layout(this.getParent(), getX1() + x[0] * (getX2() - getX1()), getX1() + x[1] * (getX2() - getX1()), getY1() + y[0] * (getY2() - getY1()), getY1() + y[1] * (getY2() - getY1()));
-		} else {
-			return new Layout(this.getParent(), 0, 0, 0, 0);
-		}
-	}
+	// public Layout tighten(Img binary) {
+	// double[] x = getHistoLimits(binary.projectHorizontally());
+	// double[] y = getHistoLimits(binary.projectVertically());
+	// if (x[0] <= x[1] || y[0] <= y[1]) {
+	// return new Layout(this.getParent(), getX1() + x[0] * (getX2() - getX1()), getX1() + x[1] * (getX2() - getX1()), getY1() + y[0] * (getY2() - getY1()), getY1() + y[1] * (getY2() - getY1()));
+	// } else {
+	// return new Layout(this.getParent(), 0, 0, 0, 0);
+	// }
+	// }
 
 	public static double[] getHistoLimits(List<Boolean> hist) {
 		int start = 0;
@@ -352,10 +352,10 @@ public class Layout {
 		for (double[] shardv : shardsV)
 			for (double[] shardh : shardsH) {
 				Layout target = new Layout(this, shardh[0], shardh[1], shardv[0], shardv[1]);
-				Img roi = target.getRoi(binary);
+				// Img roi = target.getRoi(binary);
 				// System.out.println("roi : rows :" + roi.rows() + " , cols :" + roi.cols());
-				if (roi.rows() != 0 && roi.cols() != 0)
-					shards.add(target.tighten(roi));
+				if (shardh[0] != shardh[1] && shardv[0] != shardv[1])
+					shards.add(target);
 			}
 		return shards;
 	}
@@ -403,9 +403,9 @@ public class Layout {
 			// 255), -1);
 			return this;
 		}
-		if (shards.size() == 1) {
-			return this;
-		}
+		// if (shards.size() == 1) {
+		// return this;
+		// }
 		for (Layout shard : shards) {
 			shard.recursiveSplit(morph, level - 1, shard.getRoi(binary));
 			this.addChild(shard);

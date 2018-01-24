@@ -1,5 +1,22 @@
 package org.genericsystem.cv;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
+
+import javax.swing.ImageIcon;
+
 import org.genericsystem.cv.utils.Tools;
 import org.genericsystem.layout.Layout;
 import org.opencv.core.Core;
@@ -26,23 +43,6 @@ import org.opencv.utils.Converters;
 import org.opencv.ximgproc.Ximgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.stream.Collectors;
-
-import javax.swing.ImageIcon;
 
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -905,13 +905,13 @@ public class Img implements AutoCloseable, Serializable {
 		src.release();
 	}
 
-	public Layout buildLayout() {
-		return this.buildLayout(new Size(0.04, 0.008), 5);
-	}
+	// public Layout buildLayout() {
+	// return this.buildLayout(new Size(0.04, 0.008), 5);
+	// }
 
 	public Layout buildLayout(Size morph, int level) {
-		Layout root = new Layout(null, 0, 1, 0, 1).tighten(this);
-		return root.recursiveSplit(morph, level, root.getRoi(this));
+		Layout root = new Layout(null, 0, 1, 0, 1);// .tighten(this);
+		return root.recursiveSplit(morph, level, this);
 	}
 
 	// public static void main(String[] args) {

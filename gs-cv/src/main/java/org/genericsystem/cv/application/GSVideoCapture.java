@@ -7,8 +7,7 @@ import org.opencv.videoio.VideoCapture;
 import org.opencv.videoio.Videoio;
 
 public class GSVideoCapture implements GSCapture {
-	public static final Size HD = new Size(1280, 1024);
-	public static final Size VGA = new Size(640, 480);
+
 	private final VideoCapture videoCapture;
 	private final double f;
 
