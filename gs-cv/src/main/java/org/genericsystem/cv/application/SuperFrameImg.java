@@ -24,7 +24,6 @@ import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
-import org.opencv.videoio.VideoCapture;
 
 public class SuperFrameImg {
 
@@ -42,16 +41,6 @@ public class SuperFrameImg {
 	private Img binaryClosed20;
 	private Img binaryClosed30;
 	private Img binaryClosed40;
-
-	public static SuperFrameImg create(VideoCapture capture, double f) {
-		Mat frameMat = new Mat();
-		long ts = System.currentTimeMillis();
-		capture.read(frameMat);
-		long ts2 = System.currentTimeMillis();
-		Imgproc.resize(frameMat, frameMat, new Size(640, 480));
-
-		return new SuperFrameImg(frameMat, new double[] { frameMat.width() / 2, frameMat.height() / 2 }, f);
-	}
 
 	public SuperFrameImg(Mat frameMat, double[] pp, double f) {
 		frame = new Img(frameMat, true);

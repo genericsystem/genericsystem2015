@@ -15,8 +15,6 @@ import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
-import org.opencv.videoio.VideoCapture;
-import org.opencv.videoio.Videoio;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -26,9 +24,9 @@ import javafx.scene.layout.GridPane;
 public class GraphicApp extends AbstractApp {
 
 	private final double f = 6.053 / 0.009;
-	private final VideoCapture capture = new VideoCapture(0);
-	private SuperFrameImg superFrame = SuperFrameImg.create(capture, f);
-	private ReferenceManager referenceManager = new ReferenceManager(superFrame.size());
+	private final GSCapture gsCapture = new GSVideoCapture(0, f, GSVideoCapture.HD, GSVideoCapture.VGA);
+	private SuperFrameImg superFrame;
+	private ReferenceManager referenceManager;
 	private boolean stabilizedMode = false;
 	private boolean textsEnabledMode = false;
 	private boolean isOn = true;
@@ -44,12 +42,15 @@ public class GraphicApp extends AbstractApp {
 		NativeLibraryLoader.load();
 	}
 
-	public final static double displayWidth = 400d;
+	public GraphicApp() {
+		superFrame = gsCapture.read();
+		deperspectiver = new Deperspectiver(f, superFrame.getPp());
+		referenceManager = new ReferenceManager(superFrame.size());
+
+	}
 
 	@Override
 	protected void fillGrid(GridPane mainGrid) {
-		capture.set(Videoio.CAP_PROP_FRAME_WIDTH, 1280);
-		capture.set(Videoio.CAP_PROP_FRAME_HEIGHT, 1024);
 		double displaySizeReduction = 1;
 		for (int col = 0; col < imageViews.length; col++)
 			for (int row = 0; row < imageViews[col].length; row++) {
@@ -59,7 +60,6 @@ public class GraphicApp extends AbstractApp {
 				imageView.setFitWidth(superFrame.width() / displaySizeReduction);
 				imageView.setFitHeight(superFrame.height() / displaySizeReduction);
 			}
-		deperspectiver = new Deperspectiver(f, superFrame.getPp());
 		startTimer();
 	}
 
@@ -81,9 +81,10 @@ public class GraphicApp extends AbstractApp {
 	}
 
 	private Image[] doWork() {
+
 		System.out.println("do work");
 		if (!stabilizedMode)
-			superFrame = SuperFrameImg.create(capture, f);
+			superFrame = gsCapture.read();
 		Image[] images = new Image[6];
 		Lines lines = superFrame.detectLines();
 		AngleCalibrated[] calibratedVps = deperspectiver.computeCalibratedVps(superFrame, textsEnabledMode, lines);
@@ -156,6 +157,6 @@ public class GraphicApp extends AbstractApp {
 		super.stop();
 		timer.shutdown();
 		timer.awaitTermination(5000, TimeUnit.MILLISECONDS);
-		capture.release();
+		gsCapture.release();
 	}
 }
