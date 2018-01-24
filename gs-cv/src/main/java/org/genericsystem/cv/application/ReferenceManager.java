@@ -198,28 +198,13 @@ public class ReferenceManager {
 			rect = new Rect(res.get(0), res.get(1));
 		}
 
-		//		public boolean contains(Rect shiftedRect) {
-		//			return (rect.tl().x <= shiftedRect.tl().x && rect.tl().y <= shiftedRect.tl().y && rect.br().x >= shiftedRect.br().x && rect.br().y >= shiftedRect.br().y);
-		//		}
+		public boolean contains(Rect shiftedRect) {
+			return (rect.tl().x <= shiftedRect.tl().x && rect.tl().y <= shiftedRect.tl().y && rect.br().x >= shiftedRect.br().x && rect.br().y >= shiftedRect.br().y);
+		}
 
 		public boolean isInner(Rect shiftedRect) {
 			return (rect.tl().x >= shiftedRect.tl().x && rect.tl().y >= shiftedRect.tl().y && rect.br().x <= shiftedRect.br().x && rect.br().y <= shiftedRect.br().y);
 		}
-
-		public boolean isDisplayed(Size frameSize) {
-			Rect frameRect = new Rect(0, 0, (int) frameSize.width, (int) frameSize.height);
-			if(isOutOfFrame(frameRect))
-				return false;
-			else if(isOverlapping(frameRect) && !isInner(frameRect))
-				return false;
-			else 
-				return true;
-		}
-
-		private boolean isOutOfFrame(Rect frameRect) {
-			return rect.tl().x >= frameRect.width || rect.tl().y >= frameRect.height || rect.br().x <= 0 || rect.br().y <= 0;
-		}
-
 	}
 
 	private static class Fields {
@@ -255,7 +240,8 @@ public class ReferenceManager {
 	}
 
 	private void consolidate(List<Rect> shiftedRects, Size frameSize) {
-		List<Field> displayedFields = fields.getFields().stream().filter(f -> f.isDisplayed(frameSize)).collect(Collectors.toList());
+		Rect frameRect = new Rect(0, 0, (int) frameSize.width, (int) frameSize.height);
+		List<Field> displayedFields = fields.getFields().stream().filter(f -> f.isInner(frameRect)).collect(Collectors.toList());
 		for (Rect shiftedRect : shiftedRects) {
 			List<Field> targetFields = fields.findOverlapingFields(shiftedRect);
 			boolean toAdd = true;
