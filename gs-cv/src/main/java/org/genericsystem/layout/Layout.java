@@ -369,12 +369,12 @@ public class Layout {
 				start = i + 1;
 			else if (result[i] && !result[i + 1]) {
 				shards.add(vertical ? new double[] { Integer.valueOf(start).doubleValue() / result.length, (Integer.valueOf(i).doubleValue() + 1) / result.length }
-						: new double[] { Integer.valueOf(start).doubleValue() / result.length, (Integer.valueOf(i).doubleValue() + 1) / result.length });
+				: new double[] { Integer.valueOf(start).doubleValue() / result.length, (Integer.valueOf(i).doubleValue() + 1) / result.length });
 				start = null;
 			}
 		if (result[result.length - 1]) {
 			shards.add(vertical ? new double[] { Integer.valueOf(start).doubleValue() / result.length, Integer.valueOf(result.length).doubleValue() / result.length }
-					: new double[] { Integer.valueOf(start).doubleValue() / result.length, Integer.valueOf(result.length).doubleValue() / result.length });
+			: new double[] { Integer.valueOf(start).doubleValue() / result.length, Integer.valueOf(result.length).doubleValue() / result.length });
 			start = null;
 		}
 		return shards;
@@ -411,4 +411,15 @@ public class Layout {
 		}
 		return this;
 	}
+
+	public double computeTotalSurface(Img img) {
+		double[] surface = new double[]{0.0};
+		traverse(getRoi(img),
+				(roi, shard) -> {
+					if(shard.getChildren().isEmpty())
+						surface[0] += new Rect(new Point(0, 0), new Point(roi.width() - 1, roi.height() - 1)).area();					
+				});
+		return surface[0];
+	}
+
 }

@@ -1,13 +1,5 @@
 package org.genericsystem.cv.application;
 
-import org.opencv.core.Core;
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
-import org.opencv.core.Point;
-import org.opencv.core.Rect;
-import org.opencv.core.Size;
-import org.opencv.utils.Converters;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -17,6 +9,14 @@ import java.util.Random;
 import java.util.TreeMap;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import org.opencv.core.Core;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.core.Point;
+import org.opencv.core.Rect;
+import org.opencv.core.Size;
+import org.opencv.utils.Converters;
 
 public class ReferenceManager {
 	private static final Mat IDENTITY_MAT = Mat.eye(new Size(3, 3), CvType.CV_64F);
@@ -62,9 +62,9 @@ public class ReferenceManager {
 				bestImgDescriptor = reference;
 			} else {
 				int reconciliationTries = 0;
-				List<ImgDescriptor> list = new ArrayList<>(toReferenceGraphy.keySet());
+				List<ImgDescriptor> list = getRandomPool(lastStored, reference);				
 				Random randomGenerator = new Random();
-				while (reconciliationTries < 5) {
+				while (!list.isEmpty() && reconciliationTries < 5) {
 					ImgDescriptor randomImgDescriptor = list.get(randomGenerator.nextInt(list.size()));
 					Reconciliation reconciliation = newImgDescriptor.computeReconciliation(randomImgDescriptor);
 					if (reconciliation != null) {
@@ -94,6 +94,13 @@ public class ReferenceManager {
 		consolidate(shift(detectedrects, homographyToReference), frameSize);
 		updateReference();
 		cleanReferenceNeighbours();
+	}
+
+	private List<ImgDescriptor> getRandomPool(ImgDescriptor lastStored, ImgDescriptor reference) {
+		List<ImgDescriptor> randomPool = new ArrayList<>(toReferenceGraphy.keySet());
+		randomPool.remove(lastStored);
+		randomPool.remove(reference);
+		return randomPool;
 	}
 
 	private void cleanReferenceNeighbours() {
@@ -132,33 +139,44 @@ public class ReferenceManager {
 	}
 
 	private ImgDescriptor findConsensualDescriptor() {
-		double bestDistance = Double.MAX_VALUE;
+		//		double bestDistance = Double.MAX_VALUE;
+		//		ImgDescriptor bestDescriptor = null;
+		//		for (Entry<ImgDescriptor, Mat> entry : toReferenceGraphy.entrySet()) {
+		//			double distance = 0;
+		//			for (Entry<ImgDescriptor, Mat> entry2 : toReferenceGraphy.entrySet()) {
+		//				if (!entry.getKey().equals(entry2.getKey())) {
+		//					Mat betweenHomography = new Mat();
+		//					Core.gemm(entry.getValue(), entry2.getValue().inv(), 1, new Mat(), 0, betweenHomography);
+		//					distance += distance(betweenHomography);
+		//				}
+		//			}
+		//			if (distance < bestDistance) {
+		//				bestDistance = distance;
+		//				bestDescriptor = entry.getKey();
+		//			}
+		//		}
+		//		return bestDescriptor;
+
+		double minArea = Double.MAX_VALUE;
 		ImgDescriptor bestDescriptor = null;
 		for (Entry<ImgDescriptor, Mat> entry : toReferenceGraphy.entrySet()) {
-			double distance = 0;
-			for (Entry<ImgDescriptor, Mat> entry2 : toReferenceGraphy.entrySet()) {
-				if (!entry.getKey().equals(entry2.getKey())) {
-					Mat betweenHomography = new Mat();
-					Core.gemm(entry.getValue(), entry2.getValue().inv(), 1, new Mat(), 0, betweenHomography);
-					distance += distance(betweenHomography);
-				}
-			}
-			if (distance < bestDistance) {
-				bestDistance = distance;
+			double surface = entry.getKey().getSurface();
+			if (surface < minArea) {
+				minArea = surface;
 				bestDescriptor = entry.getKey();
 			}
 		}
 		return bestDescriptor;
 	}
 
-	public List<Rect> getResizedReferenceRects() {
+	public List<Rect> getResizedFieldsRects() {
 		double minX = fields.getMinX();
 		double maxX = fields.getMaxX();
 		double minY = fields.getMinY();
 		double maxY = fields.getMaxY();
-		double horizontalRatio = frameSize.width / (maxX - minX);
-		double verticalRatio = frameSize.height / (maxY - minY);
-		return rescale(transpose(fields, minX, minY), Math.min(horizontalRatio, verticalRatio));
+		double horizontalRatio = frameSize.width / (maxX - minX) > 1 ? 1 : frameSize.width / (maxX - minX);
+		double verticalRatio = frameSize.height / (maxY - minY) > 1 ? 1 : frameSize.height / (maxY - minY);
+		return rescale(transpose(getReferenceRects(), minX, minY), Math.min(horizontalRatio, verticalRatio));
 	}
 
 	private List<Rect> rescale(List<Rect> rects, double ratio) {
@@ -169,8 +187,9 @@ public class ReferenceManager {
 		return new Rect((int) (rect.x * ratio), (int) (rect.y * ratio), (int) (rect.width * ratio), (int) (rect.height * ratio));
 	}
 
-	private List<Rect> transpose(Fields fields, double minX, double minY) {
-		return fields.getFields().stream().map(f -> transpose(f.getRect(), minX, minY)).collect(Collectors.toList());
+
+	private List<Rect> transpose(List<Rect> rects, double minX, double minY) {
+		return rects.stream().map(r -> transpose(r, minX, minY)).collect(Collectors.toList());
 	}
 
 	private Rect transpose(Rect rect, double minX, double minY) {
@@ -327,7 +346,7 @@ public class ReferenceManager {
 			}
 		}
 		decreaseAll(displayedFields);
-		fields.clean(targetField -> targetField.getLevel() < -3);
+		fields.clean(targetField -> targetField.getLevel() < -5);
 	}
 
 	private void decreaseAll(List<Field> displayedFields) {

@@ -1,5 +1,8 @@
 package org.genericsystem.cv.application;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.opencv.calib3d.Calib3d;
 import org.opencv.core.Core;
 import org.opencv.core.DMatch;
@@ -14,9 +17,6 @@ import org.opencv.features2d.DescriptorMatcher;
 import org.opencv.features2d.FastFeatureDetector;
 import org.opencv.xfeatures2d.BriefDescriptorExtractor;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class ImgDescriptor {
 	private static final BriefDescriptorExtractor briefExtractor = BriefDescriptorExtractor.create(32, false);
 	private static final FastFeatureDetector detector = FastFeatureDetector.create(10, true, FastFeatureDetector.TYPE_9_16);
@@ -26,8 +26,9 @@ public class ImgDescriptor {
 	private final MatOfKeyPoint keypoints = new MatOfKeyPoint();
 	private final Mat descriptors;
 	private final long timeStamp;
+	private final double layoutSurface;
 
-	public ImgDescriptor(SuperFrameImg superFrame) {
+	public ImgDescriptor(SuperFrameImg superFrame, double surface) {
 		this.superFrame = superFrame;
 		detector.detect(superFrame.getFrame().getSrc(), keypoints);
 		// keypoints = detect(deperspectivedImg);
@@ -36,10 +37,15 @@ public class ImgDescriptor {
 		briefExtractor.compute(superFrame.getFrame().getSrc(), keypoints, descriptors);
 		// EXTRACTOR.compute(deperspectivedImg.getSrc(), keypoints, descriptors);
 		timeStamp = System.currentTimeMillis();
+		this.layoutSurface = surface;
 	}
 
 	public SuperFrameImg getSuperFrame() {
 		return superFrame;
+	}
+
+	public double getSurface(){
+		return layoutSurface;
 	}
 
 	public Mat getDescriptors() {

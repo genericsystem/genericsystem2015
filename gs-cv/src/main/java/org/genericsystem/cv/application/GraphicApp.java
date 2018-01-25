@@ -104,9 +104,15 @@ public class GraphicApp extends AbstractApp {
 
 		List<Rect> detectedRects = superDeperspectived.detectRects();
 		superDeperspectived.drawRects(detectedRects, new Scalar(0, 255, 0), -1);
-		images[2] = superDeperspectived.getDisplay().toJfxImage();
 
-		ImgDescriptor newImgDescriptor = new ImgDescriptor(superDeperspectived);
+		SuperTemplate surfaceTemplate = new SuperTemplate(new SuperFrameImg(superDeperspectived.getDisplay().bgr2Gray().getSrc(), superFrame.getPp(), f), CvType.CV_8UC1, SuperFrameImg::getDisplay);
+		Layout surfaceLayout = surfaceTemplate.layout();
+		double surface = surfaceLayout.computeTotalSurface(surfaceTemplate.getFrame());
+		superDeperspectived.putText(String.valueOf(surface));
+
+		images[2] = superDeperspectived.getDisplay().toJfxImage();		
+
+		ImgDescriptor newImgDescriptor = new ImgDescriptor(superDeperspectived, surface);
 		if (newImgDescriptor.getDescriptors().empty()) {
 			System.out.println("Empty descriptors");
 			return null;

@@ -360,4 +360,8 @@ public class SuperFrameImg {
 		return f;
 	}
 
+	public void putText(String text) {
+		Imgproc.putText(getDisplay().getSrc(), text, new Point(getDisplay().width() / 2, 20), Core.FONT_HERSHEY_PLAIN, 1, new Scalar(255, 255, 255), 1);	
+	}
+
 }
