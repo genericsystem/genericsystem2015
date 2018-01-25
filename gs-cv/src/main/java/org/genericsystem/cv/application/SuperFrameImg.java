@@ -24,6 +24,7 @@ import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.imgproc.Moments;
 
 public class SuperFrameImg {
 
@@ -267,6 +268,18 @@ public class SuperFrameImg {
 
 	public List<Rect> detectRects() {
 		return detectRects(getDiffFrame(), 10, 10000, 0.3);
+	}
+
+	public List<Point> detectCentroids() {
+		List<MatOfPoint> contours = new ArrayList<>();
+		Imgproc.findContours(getDiffFrame().getSrc(), contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+		List<Point> result = new ArrayList<>();
+		for (MatOfPoint contour : contours) {
+			Moments moments = Imgproc.moments(contour);
+			result.add(new Point(moments.m10 / moments.m00, moments.m01 / moments.m00));
+		}
+		Collections.reverse(result);
+		return result;
 	}
 
 	List<Rect> detectRects(Img binarized, int minArea, int maxArea, double fillRatio) {

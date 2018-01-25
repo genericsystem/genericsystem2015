@@ -13,6 +13,7 @@ import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.genericsystem.layout.Layout;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 
@@ -116,10 +117,16 @@ public class GraphicApp extends AbstractApp {
 		referenceTemplate.drawRects(referenceRects, new Scalar(255), -1);
 		images[3] = referenceTemplate.getDisplay().toJfxImage();
 
-		SuperTemplate superReferenceTemplate = new SuperTemplate(superFrame, CvType.CV_8UC1, SuperFrameImg::getFrame);
-		superReferenceTemplate.drawRects(referenceManager.getResizedReferenceRects(), new Scalar(255), -1);
+		List<Point> detectedCenroids = superDeperspectived.detectCentroids();
+		SuperTemplate superReferenceTemplate = new SuperTemplate(superDeperspectived, CvType.CV_8UC1, SuperFrameImg::getFrame);
+		superReferenceTemplate.drawCentroids(detectedCenroids, new Scalar(255), -1, 2);
+		new Lines(superReferenceTemplate.getDisplay().houghLinesP(1, Math.PI / 180, 10, 50, 47)).filter(line -> Math.atan2(Math.abs(line.y2 - line.y1), Math.abs(line.x2 - line.x1)) < 5 * Math.PI / 180).draw(superReferenceTemplate.getDisplay().getSrc(),
+				new Scalar(255), 1);
 		images[5] = superReferenceTemplate.getDisplay().toJfxImage();
 
+		// SuperTemplate superReferenceTemplate = new SuperTemplate(superFrame, CvType.CV_8UC1, SuperFrameImg::getFrame);
+		// superReferenceTemplate.drawRects(referenceManager.getResizedReferenceRects(), new Scalar(255), -1);
+		// images[5] = superReferenceTemplate.getDisplay().toJfxImage();
 
 		SuperTemplate layoutTemplate = new SuperTemplate(referenceTemplate, CvType.CV_8UC3, SuperFrameImg::getDisplay);
 		Layout layout = layoutTemplate.layout();
@@ -127,7 +134,7 @@ public class GraphicApp extends AbstractApp {
 		images[4] = layoutTemplate.getDisplay().toJfxImage();
 
 		return images;
-	}	
+	}
 
 	@Override
 	protected void onS() {

@@ -67,9 +67,8 @@ public class Lines {
 		return lines;
 	}
 
-
 	public static class Line {
-		final double x1, y1, x2, y2;
+		public final double x1, x2, y1, y2;
 
 		public Line(Point p1, Point p2) {
 			this(p1.x, p1.y, p2.x, p2.y);

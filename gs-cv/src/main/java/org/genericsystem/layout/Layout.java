@@ -381,7 +381,6 @@ public class Layout {
 	}
 
 	public Layout recursiveSplit(Size morph, int level, Img binary) {
-		assert binary.size().equals(binary.size());
 		// System.out.println("AAA" + binary.size());
 		if (binary.size().height == 0 || binary.size().width == 0)
 			return this;
