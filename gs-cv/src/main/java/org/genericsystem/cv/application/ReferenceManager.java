@@ -1,5 +1,13 @@
 package org.genericsystem.cv.application;
 
+import org.opencv.core.Core;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.core.Point;
+import org.opencv.core.Rect;
+import org.opencv.core.Size;
+import org.opencv.utils.Converters;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -9,14 +17,6 @@ import java.util.Random;
 import java.util.TreeMap;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
-import org.opencv.core.Core;
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
-import org.opencv.core.Point;
-import org.opencv.core.Rect;
-import org.opencv.core.Size;
-import org.opencv.utils.Converters;
 
 public class ReferenceManager {
 	private static final Mat IDENTITY_MAT = Mat.eye(new Size(3, 3), CvType.CV_64F);
@@ -64,7 +64,7 @@ public class ReferenceManager {
 				int reconciliationTries = 0;
 				List<ImgDescriptor> list = new ArrayList<>(toReferenceGraphy.keySet());
 				Random randomGenerator = new Random();
-				while (reconciliationTries < 3) {
+				while (reconciliationTries < 5) {
 					ImgDescriptor randomImgDescriptor = list.get(randomGenerator.nextInt(list.size()));
 					Reconciliation reconciliation = newImgDescriptor.computeReconciliation(randomImgDescriptor);
 					if (reconciliation != null) {
@@ -97,7 +97,7 @@ public class ReferenceManager {
 	}
 
 	private void cleanReferenceNeighbours() {
-		if (toReferenceGraphy.size() > 20) {
+		if (toReferenceGraphy.size() > 30) {
 			double bestDistance = Double.MAX_VALUE;
 			ImgDescriptor closestDescriptor = null;
 			for (Entry<ImgDescriptor, Mat> entry : toReferenceGraphy.entrySet()) {
@@ -161,20 +161,20 @@ public class ReferenceManager {
 		return rescale(transpose(fields, minX, minY), Math.min(horizontalRatio, verticalRatio));
 	}
 
-	private List<Rect> rescale(List<Rect> rects, double ratio) {	
+	private List<Rect> rescale(List<Rect> rects, double ratio) {
 		return rects.stream().map(r -> rescale(r, ratio)).collect(Collectors.toList());
 	}
 
-	public Rect rescale(Rect rect, double ratio){
-		return new Rect((int)(rect.x * ratio), (int)(rect.y * ratio), (int)(rect.width * ratio), (int)(rect.height * ratio));
+	public Rect rescale(Rect rect, double ratio) {
+		return new Rect((int) (rect.x * ratio), (int) (rect.y * ratio), (int) (rect.width * ratio), (int) (rect.height * ratio));
 	}
 
 	private List<Rect> transpose(Fields fields, double minX, double minY) {
-		return fields.getFields().stream().map(f -> transpose(f.getRect(), minX, minY)).collect(Collectors.toList());		
+		return fields.getFields().stream().map(f -> transpose(f.getRect(), minX, minY)).collect(Collectors.toList());
 	}
 
-	private Rect transpose(Rect rect, double minX, double minY){
-		return new Rect((int) (rect.x - minX), (int) (rect.y- minY), rect.width, rect.height);
+	private Rect transpose(Rect rect, double minX, double minY) {
+		return new Rect((int) (rect.x - minX), (int) (rect.y - minY), rect.width, rect.height);
 	}
 
 	private static class Field {
@@ -184,7 +184,7 @@ public class ReferenceManager {
 
 		Field(Rect rect) {
 			this.rect = rect;
-		}		
+		}
 
 		public int getLevel() {
 			return level;
@@ -232,7 +232,7 @@ public class ReferenceManager {
 			return (rect.tl().x >= shiftedRect.tl().x && rect.tl().y >= shiftedRect.tl().y && rect.br().x <= shiftedRect.br().x && rect.br().y <= shiftedRect.br().y);
 		}
 
-		public double getX(){
+		public double getX() {
 			return rect.x;
 		}
 	}
@@ -246,8 +246,8 @@ public class ReferenceManager {
 
 		public double getMinX() {
 			double minX = Double.MAX_VALUE;
-			for(Field f : fieldsList){
-				if(f.getRect().tl().x < minX)
+			for (Field f : fieldsList) {
+				if (f.getRect().tl().x < minX)
 					minX = f.getRect().tl().x;
 			}
 			return minX;
@@ -255,8 +255,8 @@ public class ReferenceManager {
 
 		public double getMaxX() {
 			double maxX = 0.0;
-			for(Field f : fieldsList){
-				if(f.getRect().br().x > maxX)
+			for (Field f : fieldsList) {
+				if (f.getRect().br().x > maxX)
 					maxX = f.getRect().br().x;
 			}
 			return maxX;
@@ -264,8 +264,8 @@ public class ReferenceManager {
 
 		public double getMinY() {
 			double minY = Double.MAX_VALUE;
-			for(Field f : fieldsList){
-				if(f.getRect().tl().y < minY)
+			for (Field f : fieldsList) {
+				if (f.getRect().tl().y < minY)
 					minY = f.getRect().tl().y;
 			}
 			return minY;
@@ -273,8 +273,8 @@ public class ReferenceManager {
 
 		public double getMaxY() {
 			double maxY = 0.0;
-			for(Field f : fieldsList){
-				if(f.getRect().br().y > maxY)
+			for (Field f : fieldsList) {
+				if (f.getRect().br().y > maxY)
 					maxY = f.getRect().br().y;
 			}
 			return maxY;
@@ -300,7 +300,7 @@ public class ReferenceManager {
 			fieldsList.forEach(field -> field.decrease());
 		}
 
-		public List<Field> getFields(){
+		public List<Field> getFields() {
 			return fieldsList;
 		}
 	}
@@ -312,7 +312,7 @@ public class ReferenceManager {
 			List<Field> targetFields = fields.findOverlapingFields(shiftedRect);
 			boolean toAdd = true;
 			for (Field targetField : targetFields) {
-				if (targetField.isEnoughOverlapping(shiftedRect, 5)) {
+				if (targetField.isEnoughOverlapping(shiftedRect, 3)) {
 					targetField.dump(shiftedRect, 3);
 					targetField.increase();
 					targetField.increase();

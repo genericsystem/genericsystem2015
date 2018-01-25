@@ -20,7 +20,7 @@ import java.util.List;
 public class ImgDescriptor {
 	private static final BriefDescriptorExtractor briefExtractor = BriefDescriptorExtractor.create(32, false);
 	private static final FastFeatureDetector detector = FastFeatureDetector.create(10, true, FastFeatureDetector.TYPE_9_16);
-	private static final DescriptorMatcher matcher = BFMatcher.create(DescriptorMatcher.BRUTEFORCE_HAMMING, true);
+	private static final DescriptorMatcher matcher = BFMatcher.create(DescriptorMatcher.BRUTEFORCE_HAMMING, false);
 
 	private final SuperFrameImg superFrame;
 	private final MatOfKeyPoint keypoints = new MatOfKeyPoint();
@@ -67,7 +67,7 @@ public class ImgDescriptor {
 				referencePts.add(referenceKeyPoints.get(goodMatch.trainIdx).pt);
 				pts.add(keyPoints.get(goodMatch.queryIdx).pt);
 			}
-		if (referencePts.size() > 40) {
+		if (referencePts.size() > 50) {
 
 			// List<Point[]> pairedPoints = new ArrayList<>();
 			// for (int i = 0; i < goodNewKeypoints.size(); i++)
