@@ -1,5 +1,12 @@
 package org.genericsystem.cv.application;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Calibrated.AngleCalibrated;
 import org.genericsystem.cv.Lines;
@@ -13,12 +20,6 @@ import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
-
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -135,6 +136,7 @@ public class GraphicApp extends AbstractApp {
 		images[4] = superReferenceTemplate.getDisplay().toJfxImage();
 
 		List<SuperContour> detectedSuperContours = superDeperspectived.detectSuperContours(20);
+		List<SuperContour> detectedSuperContoursCopy = new ArrayList<>(detectedSuperContours);
 		SuperTemplate superReferenceTemplate2 = new SuperTemplate(superDeperspectived, CvType.CV_8UC3, SuperFrameImg::getFrame);
 		// superReferenceTemplate2.drawCentroids(detectedrealCenroids, new Scalar(255), -1, 2);
 		// detectedSuperContours.stream().forEach(c -> Imgproc.line(superReferenceTemplate2.getDisplay().getSrc(), c.point0, c.point1, new Scalar(0, 255, 0), 1));
@@ -168,12 +170,11 @@ public class GraphicApp extends AbstractApp {
 		layoutTemplate.drawLayout(layout);
 		images[7] = layoutTemplate.getDisplay().toJfxImage();
 
-		List<SuperContour> detectedSuperContours2 = superDeperspectived.detectSuperContours(50);
 		SuperTemplate superReferenceTemplate4 = new SuperTemplate(superDeperspectived, CvType.CV_8UC3, SuperFrameImg::getFrame);
-		detectedSuperContours2.stream().forEach(c -> Imgproc.line(superReferenceTemplate4.getDisplay().getSrc(), c.point0, c.point1, new Scalar(255, 255, 255), 1));
-		detectedSuperContours2.stream().map(sc -> sc.center).forEach(pt -> Imgproc.circle(superReferenceTemplate4.getDisplay().getSrc(), pt, 3, new Scalar(255, 0, 0), -1));
-		detectedSuperContours2.stream().map(sc -> sc.point0).forEach(pt -> Imgproc.circle(superReferenceTemplate4.getDisplay().getSrc(), pt, 3, new Scalar(0, 255, 0), -1));
-		detectedSuperContours2.stream().map(sc -> sc.point1).forEach(pt -> Imgproc.circle(superReferenceTemplate4.getDisplay().getSrc(), pt, 3, new Scalar(0, 0, 255), -1));
+		detectedSuperContoursCopy.stream().forEach(c -> Imgproc.line(superReferenceTemplate4.getDisplay().getSrc(), c.point0, c.point1, new Scalar(255, 255, 255), 1));
+		detectedSuperContoursCopy.stream().map(sc -> sc.center).forEach(pt -> Imgproc.circle(superReferenceTemplate4.getDisplay().getSrc(), pt, 3, new Scalar(255, 0, 0), -1));
+		detectedSuperContoursCopy.stream().map(sc -> sc.point0).forEach(pt -> Imgproc.circle(superReferenceTemplate4.getDisplay().getSrc(), pt, 3, new Scalar(0, 255, 0), -1));
+		detectedSuperContoursCopy.stream().map(sc -> sc.point1).forEach(pt -> Imgproc.circle(superReferenceTemplate4.getDisplay().getSrc(), pt, 3, new Scalar(0, 0, 255), -1));
 		images[8] = superReferenceTemplate4.getDisplay().toJfxImage();
 
 		return images;

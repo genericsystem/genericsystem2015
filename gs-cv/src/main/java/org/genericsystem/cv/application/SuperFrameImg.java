@@ -261,7 +261,7 @@ public class SuperFrameImg {
 	@SuppressWarnings("resource")
 	private Img buildDiffFrame() {
 		Mat diffFrame = getGrayFrame().gaussianBlur(new Size(5, 5)).getSrc();
-		Core.absdiff(diffFrame, new Scalar(100), diffFrame);
+		Core.absdiff(diffFrame, new Scalar(0), diffFrame);
 		Imgproc.adaptiveThreshold(diffFrame, diffFrame, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 7, 3);
 		return new Img(diffFrame, false);// .cleanTablesInv(0.05);
 	}
@@ -282,25 +282,55 @@ public class SuperFrameImg {
 		return result;
 	}
 
+	public double getFillRatio(MatOfPoint contour, Rect rect, Img img) {
+		Mat mask = Mat.zeros(rect.size(), CvType.CV_8UC1);
+		Imgproc.drawContours(mask, Arrays.asList(contour), 0, new Scalar(255), 1, Imgproc.LINE_8, new Mat(), Integer.MAX_VALUE, new Point(-rect.tl().x, -rect.tl().y));
+		Mat mask2 = Mat.zeros(rect.size(), CvType.CV_8UC1);
+		Imgproc.drawContours(mask2, Arrays.asList(contour), 0, new Scalar(255), -1, Imgproc.LINE_8, new Mat(), Integer.MAX_VALUE, new Point(-rect.tl().x, -rect.tl().y));
+		Mat mask3 = new Img(mask, false).bitwise_xor(new Img(mask2, false)).getSrc();
+		int white = 0;
+		int all = 0;
+		for (int row = 0; row < mask3.rows(); row++)
+			for (int col = 0; col < mask3.cols(); col++) {
+				if (mask3.get(row, col)[0] != 0) {
+					all++;
+					if (img.get(row, col)[0] != 0)
+						white++;
+				}
+
+			}
+		return ((double) white) / all;
+	}
+
 	public List<SuperContour> detectSuperContours(double minArea) {
 		List<MatOfPoint> contours = new ArrayList<>();
 		Mat hierarchy = new Mat();
-		Imgproc.findContours(getDiffFrame().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(3, 1)).getSrc(), contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_NONE);
+		Img img = getDiffFrame().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(1, 1));
+		Imgproc.findContours(img.getSrc(), contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_NONE);
 		List<SuperContour> result = new ArrayList<>();
 		int row = 0;
-		System.out.println(hierarchy);
+		// System.out.println(hierarchy);
 		for (MatOfPoint contour : contours) {
 			double[] indexes = hierarchy.get(0, row);
-			double fatherIndex = indexes[2];
+			double fatherIndex = indexes[3];
 			double prevBrotherIndex = indexes[1];
 			double nextBrotherIndex = indexes[0];
+			double childIndex = indexes[2];
 			MatOfPoint fatherWrapper = fatherIndex != -1 ? contours.get((int) fatherIndex) : null;
 			if (Imgproc.contourArea(contour) > minArea) {
-				if (hierarchy.get(0, row)[2] == -1) {
-					result.add(new SuperContour(contour, hierarchy.get(0, row)[2] == -1));
+				if (fatherWrapper == null)
+					result.add(new SuperContour(contour, hierarchy.get(0, row)[3] == -1));
+				else {
+					System.out.println("--------------------------------------------------------------");
+					System.out.println("father area : " + Imgproc.contourArea(fatherWrapper) + " son area : " + Imgproc.contourArea(contour) + " ===> " + 100 * Imgproc.contourArea(contour) / Imgproc.contourArea(fatherWrapper) + "%");
+					System.out.println("father box : " + Imgproc.boundingRect(fatherWrapper) + " son box : " + Imgproc.boundingRect(contour));
+					System.out.println("father fill ratio : " + getFillRatio(fatherWrapper, Imgproc.boundingRect(fatherWrapper), img) + " fill ratio : " + getFillRatio(contour, Imgproc.boundingRect(contour), img));
+
+					if (getFillRatio(contour, Imgproc.boundingRect(contour), img) != 0)
+						result.add(new SuperContour(contour, hierarchy.get(0, row)[3] == -1));
 				}
-				row++;
 			}
+			row++;
 		}
 		Collections.sort(result);
 		return result;
@@ -449,7 +479,7 @@ public class SuperFrameImg {
 	private final double EDGE_ANGLE_COST = 5; // cost of angles in edges (tradeoff vs. length)
 	private final double EDGE_MAX_ANGLE = 10;// maximum change in angle allowed between contours
 
-	private final double SPAN_MIN_WIDTH = 60;// minimum reduced px width for span
+	private final double SPAN_MIN_WIDTH = 5;// minimum reduced px width for span
 
 	private Edge generateCandidateEdge(SuperContour c1, SuperContour c2) {
 		if (c1.point0.x > c2.point1.x) {
