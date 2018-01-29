@@ -1,12 +1,5 @@
 package org.genericsystem.cv.application;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import org.genericsystem.cv.Calibrated;
 import org.genericsystem.cv.Calibrated.AngleCalibrated;
 import org.genericsystem.cv.Img;
@@ -25,6 +18,13 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.imgproc.Moments;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class SuperFrameImg {
 
@@ -261,9 +261,9 @@ public class SuperFrameImg {
 	@SuppressWarnings("resource")
 	private Img buildDiffFrame() {
 		Mat diffFrame = getGrayFrame().gaussianBlur(new Size(5, 5)).getSrc();
-		Core.absdiff(diffFrame, new Scalar(90), diffFrame);
+		Core.absdiff(diffFrame, new Scalar(100), diffFrame);
 		Imgproc.adaptiveThreshold(diffFrame, diffFrame, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 7, 3);
-		return new Img(diffFrame, false).cleanTablesInv(0.05);
+		return new Img(diffFrame, false);// .cleanTablesInv(0.05);
 	}
 
 	public List<Rect> detectRects() {
@@ -282,6 +282,197 @@ public class SuperFrameImg {
 		return result;
 	}
 
+	public List<SuperContour> detectSuperContours(double minArea) {
+		List<MatOfPoint> contours = new ArrayList<>();
+		Mat hierarchy = new Mat();
+		Imgproc.findContours(getDiffFrame().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(3, 1)).getSrc(), contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_NONE);
+		List<SuperContour> result = new ArrayList<>();
+		int row = 0;
+		System.out.println(hierarchy);
+		for (MatOfPoint contour : contours) {
+			if (Imgproc.contourArea(contour) > minArea)
+				// if (hierarchy.get(0, row)[2] == -1)
+				result.add(new SuperContour(contour, hierarchy.get(0, row)[2] == -1));
+			row++;
+		}
+		Collections.sort(result);
+		return result;
+	}
+
+	public static class SuperContour implements Comparable<SuperContour> {
+
+		public final MatOfPoint contour;
+		public SuperContour succ;
+		public SuperContour pred;
+		public Point center;
+		public Point tangent;
+		public double angle;
+		public Point point0;
+		public Point point1;
+		public Rect rect;
+		public double lxmin, lxmax;
+		public final boolean isLeaf;
+
+		SuperContour(MatOfPoint contour, boolean isLeaf) {
+
+			this.contour = contour;
+			this.rect = Imgproc.boundingRect(contour);
+			Moments moments = Imgproc.moments(contour);
+			this.center = new Point(moments.m10 / moments.m00, moments.m01 / moments.m00);
+			Mat momentsMatrix = new Mat(new Size(2, 2), CvType.CV_64FC1);
+			momentsMatrix.put(0, 0, moments.mu20 / moments.m00);
+			momentsMatrix.put(0, 1, moments.mu11 / moments.m00);
+			momentsMatrix.put(1, 0, moments.mu11 / moments.m00);
+			momentsMatrix.put(1, 1, moments.mu02 / moments.m00);
+			Mat svdU = new Mat();
+			Core.SVDecomp(momentsMatrix, new Mat(), svdU, new Mat());
+			// Core.PCACompute(data, mean, eigenvectors);
+			this.tangent = new Point(svdU.get(0, 0)[0], svdU.get(1, 0)[0]);
+			this.angle = Math.atan2(tangent.y, tangent.x);
+			this.lxmin = Double.MAX_VALUE;
+			this.lxmax = 0;
+			for (Point pt : contour.toArray()) {
+				double clx = this.tangent.x * (pt.x - center.x) + this.tangent.y * (pt.y - center.y);
+				if (clx < this.lxmin)
+					this.lxmin = clx;
+				if (clx > this.lxmax)
+					this.lxmax = clx;
+			}
+			this.point0 = new Point(center.x + tangent.x * lxmin, center.y + tangent.y * lxmin);
+			this.point1 = new Point(center.x + tangent.x * lxmax, center.y + tangent.y * lxmax);
+			this.isLeaf = isLeaf;
+		}
+
+		@Override
+		public int compareTo(SuperContour c) {
+			return Double.compare(rect.tl().y, c.rect.tl().y);
+			// int compare = Double.compare(rect.tl().x, c.rect.tl().x);
+			// return compare != 0 ? compare : Double.compare(rect.tl().y, c.rect.tl().y);
+		}
+
+		public double local_overlap(SuperContour c2) {
+			double xmin = (c2.point0.x - center.x) * tangent.x + (c2.point0.y - center.y) * tangent.y;
+			double xmax = (c2.point1.x - center.x) * tangent.x + (c2.point1.y - center.y) * tangent.y;
+			return Math.min(lxmax, xmax) - Math.max(lxmin, xmin);
+		}
+
+	}
+
+	public static class Edge implements Comparable<Edge> {
+
+		private final double score;
+		private final SuperContour c1;
+		private final SuperContour c2;
+
+		public Edge(double score, SuperContour c1, SuperContour c2) {
+			this.c1 = c1;
+			this.c2 = c2;
+			this.score = score;
+		}
+
+		@Override
+		public int compareTo(Edge edge) {
+			return Double.compare(score, edge.getScore());
+		}
+
+		private double getScore() {
+			return score;
+		}
+
+		public SuperContour getC1() {
+			return c1;
+		}
+
+		public SuperContour getC2() {
+			return c2;
+		}
+
+	}
+
+	public static class Span {
+
+		private List<SuperContour> contours = new ArrayList<>();
+
+		public void add(SuperContour superContour) {
+			contours.add(superContour);
+		}
+
+		public List<SuperContour> getContours() {
+			return contours;
+		}
+	}
+
+	public List<Span> assembleContours(List<SuperContour> superContours) {
+		Collections.sort(superContours);
+		List<Edge> candidateEdges = new ArrayList<>();
+		for (int i = 0; i < superContours.size(); i++)
+			for (int j = 0; j < i; j++) {
+				Edge edge = generateCandidateEdge(superContours.get(i), superContours.get(j));
+				if (edge != null)
+					candidateEdges.add(edge);
+			}
+		Collections.sort(candidateEdges);
+		for (Edge edge : candidateEdges)
+			if (edge.getC1().succ == null && edge.getC2().pred == null) {
+				edge.getC1().succ = edge.getC2();
+				edge.getC2().pred = edge.getC1();
+			}
+
+		List<Span> spans = new ArrayList<>();
+		while (!superContours.isEmpty()) {
+			SuperContour contour = superContours.get(0);
+			while (contour.pred != null)
+				contour = contour.pred;
+			Span curSpan = new Span();
+			double width = 0.0;
+			while (contour != null) {
+				superContours.remove(contour);
+				curSpan.add(contour);
+				width += contour.lxmax - contour.lxmin;
+				contour = contour.succ;
+			}
+			if (width > SPAN_MIN_WIDTH)
+				spans.add(curSpan);
+		}
+		return spans;
+	}
+
+	private final double EDGE_MAX_OVERLAP = 1; // max reduced px horiz. overlap of contours in span
+	private final double EDGE_MAX_LENGTH = 1000.0; // max reduced px length of edge connecting contours
+	private final double EDGE_ANGLE_COST = 1; // cost of angles in edges (tradeoff vs. length)
+	private final double EDGE_MAX_ANGLE = 4;// maximum change in angle allowed between contours
+
+	private final double SPAN_MIN_WIDTH = 60;// minimum reduced px width for span
+
+	private Edge generateCandidateEdge(SuperContour c1, SuperContour c2) {
+		if (c1.point0.x > c2.point1.x) {
+			SuperContour tmp = c1;
+			c1 = c2;
+			c2 = tmp;
+		}
+
+		double x_overlap = Math.max(c1.local_overlap(c2), c2.local_overlap(c1));
+		double dist = Math.sqrt(Math.pow(c2.point0.x - c1.point1.x, 2) + Math.pow(c2.point0.y - c1.point1.y, 2));
+
+		double[] overall_tangent = new double[] { c2.center.x - c1.center.x, c2.center.y - c1.center.y };
+		double overall_angle = Math.atan2(overall_tangent[1], overall_tangent[0]);
+		double delta_angle = Math.max(angle_dist(c1.angle, overall_angle), angle_dist(c2.angle, overall_angle)) * 180 / Math.PI;
+
+		if (dist > EDGE_MAX_LENGTH || x_overlap > EDGE_MAX_OVERLAP || delta_angle > EDGE_MAX_ANGLE)
+			return null;
+		double score = dist + delta_angle * EDGE_ANGLE_COST * Math.min(c1.lxmax - c1.lxmin, c2.lxmax - c2.lxmin) / 5;
+		return new Edge(score, c1, c2);
+	}
+
+	private double angle_dist(double angle_b, double angle_a) {
+		double diff = angle_b - angle_a;
+		while (diff > Math.PI)
+			diff -= 2 * Math.PI;
+		while (diff < -Math.PI)
+			diff += 2 * Math.PI;
+		return Math.abs(diff);
+	}
+
 	List<Rect> detectRects(Img binarized, int minArea, int maxArea, double fillRatio) {
 		List<MatOfPoint> contours = new ArrayList<>();
 		Imgproc.findContours(binarized.getSrc(), contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
@@ -291,7 +482,7 @@ public class SuperFrameImg {
 			double area = Imgproc.contourArea(contour);
 			if (area > minArea && area < maxArea) {
 				Rect rect = Imgproc.boundingRect(contour);
-				if (rect.tl().x != 0 && rect.tl().y != 0 && rect.br().x != (size.width) && rect.br().y != (size.height))
+				if (rect.tl().x != 0 && rect.tl().y != 0 && rect.br().x != size.width && rect.br().y != size.height)
 					if (getFillRatio(contour, rect) > fillRatio)
 						result.add(rect);
 
@@ -361,7 +552,7 @@ public class SuperFrameImg {
 	}
 
 	public void putText(String text) {
-		Imgproc.putText(getDisplay().getSrc(), text, new Point(getDisplay().width() / 2, 20), Core.FONT_HERSHEY_PLAIN, 1, new Scalar(255, 255, 255), 1);	
+		Imgproc.putText(getDisplay().getSrc(), text, new Point(getDisplay().width() / 2, 20), Core.FONT_HERSHEY_PLAIN, 1, new Scalar(255, 255, 255), 1);
 	}
 
 }
