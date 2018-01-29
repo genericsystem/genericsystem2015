@@ -419,7 +419,7 @@ public class Layout {
 					if(shard.getChildren().isEmpty())
 						surface[0] += new Rect(new Point(0, 0), new Point(roi.width() - 1, roi.height() - 1)).area();					
 				});
-		return surface[0];
+		return surface[0] /(img.width() * img.height());
 	}
 
 }
