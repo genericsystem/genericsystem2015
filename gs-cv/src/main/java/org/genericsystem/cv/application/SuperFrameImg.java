@@ -1,5 +1,12 @@
 package org.genericsystem.cv.application;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.genericsystem.cv.Calibrated;
 import org.genericsystem.cv.Calibrated.AngleCalibrated;
 import org.genericsystem.cv.Img;
@@ -18,13 +25,6 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.imgproc.Moments;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class SuperFrameImg {
 
@@ -439,8 +439,8 @@ public class SuperFrameImg {
 
 	private final double EDGE_MAX_OVERLAP = 1; // max reduced px horiz. overlap of contours in span
 	private final double EDGE_MAX_LENGTH = 1000.0; // max reduced px length of edge connecting contours
-	private final double EDGE_ANGLE_COST = 1; // cost of angles in edges (tradeoff vs. length)
-	private final double EDGE_MAX_ANGLE = 4;// maximum change in angle allowed between contours
+	private final double EDGE_ANGLE_COST = 5; // cost of angles in edges (tradeoff vs. length)
+	private final double EDGE_MAX_ANGLE = 10;// maximum change in angle allowed between contours
 
 	private final double SPAN_MIN_WIDTH = 60;// minimum reduced px width for span
 
@@ -456,11 +456,10 @@ public class SuperFrameImg {
 
 		double[] overall_tangent = new double[] { c2.center.x - c1.center.x, c2.center.y - c1.center.y };
 		double overall_angle = Math.atan2(overall_tangent[1], overall_tangent[0]);
-		double delta_angle = Math.max(angle_dist(c1.angle, overall_angle), angle_dist(c2.angle, overall_angle)) * 180 / Math.PI;
-
+		double delta_angle = ((angle_dist(c1.angle, overall_angle) * (c1.lxmax - c1.lxmin) + angle_dist(c2.angle, overall_angle) * (c2.lxmax - c2.lxmin)) / (c1.lxmax - c1.lxmin + c2.lxmax - c2.lxmin)) * 180 / Math.PI;
 		if (dist > EDGE_MAX_LENGTH || x_overlap > EDGE_MAX_OVERLAP || delta_angle > EDGE_MAX_ANGLE)
 			return null;
-		double score = dist + delta_angle * EDGE_ANGLE_COST * Math.min(c1.lxmax - c1.lxmin, c2.lxmax - c2.lxmin) / 5;
+		double score = dist + delta_angle * EDGE_ANGLE_COST;
 		return new Edge(score, c1, c2);
 	}
 
