@@ -282,24 +282,16 @@ public class SuperFrameImg {
 		return result;
 	}
 
-	public double getFillRatio(MatOfPoint contour, Rect rect, Img img) {
+	public int countWhitePixels(MatOfPoint contour, Rect rect, Img img) {
 		Mat mask = Mat.zeros(rect.size(), CvType.CV_8UC1);
-		Imgproc.drawContours(mask, Arrays.asList(contour), 0, new Scalar(255), 1, Imgproc.LINE_8, new Mat(), Integer.MAX_VALUE, new Point(-rect.tl().x, -rect.tl().y));
-		Mat mask2 = Mat.zeros(rect.size(), CvType.CV_8UC1);
-		Imgproc.drawContours(mask2, Arrays.asList(contour), 0, new Scalar(255), -1, Imgproc.LINE_8, new Mat(), Integer.MAX_VALUE, new Point(-rect.tl().x, -rect.tl().y));
-		Mat mask3 = new Img(mask, false).bitwise_xor(new Img(mask2, false)).getSrc();
+		Imgproc.drawContours(mask, Arrays.asList(contour), 0, new Scalar(255), -1, Imgproc.LINE_8, new Mat(), Integer.MAX_VALUE, new Point(-rect.tl().x, -rect.tl().y));
+		Imgproc.drawContours(mask, Arrays.asList(contour), 0, new Scalar(0), 1, Imgproc.LINE_8, new Mat(), Integer.MAX_VALUE, new Point(-rect.tl().x, -rect.tl().y));
 		int white = 0;
-		int all = 0;
-		for (int row = 0; row < mask3.rows(); row++)
-			for (int col = 0; col < mask3.cols(); col++) {
-				if (mask3.get(row, col)[0] != 0) {
-					all++;
-					if (img.get(row, col)[0] != 0)
-						white++;
-				}
-
-			}
-		return ((double) white) / all;
+		for (int row = 0; row < mask.rows(); row++)
+			for (int col = 0; col < mask.cols(); col++)
+				if (mask.get(row, col)[0] != 0 && img.get(row + (int) rect.tl().y, col + (int) rect.tl().x)[0] != 0)
+					white++;
+		return white;
 	}
 
 	public List<SuperContour> detectSuperContours(double minArea) {
@@ -309,26 +301,16 @@ public class SuperFrameImg {
 		Imgproc.findContours(img.getSrc(), contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_NONE);
 		List<SuperContour> result = new ArrayList<>();
 		int row = 0;
-		// System.out.println(hierarchy);
 		for (MatOfPoint contour : contours) {
 			double[] indexes = hierarchy.get(0, row);
 			double fatherIndex = indexes[3];
-			double prevBrotherIndex = indexes[1];
-			double nextBrotherIndex = indexes[0];
-			double childIndex = indexes[2];
+			// double prevBrotherIndex = indexes[1];
+			// double nextBrotherIndex = indexes[0];
+			// double childIndex = indexes[2];
 			MatOfPoint fatherWrapper = fatherIndex != -1 ? contours.get((int) fatherIndex) : null;
-			if (Imgproc.contourArea(contour) > minArea) {
-				if (fatherWrapper == null)
+			if (fatherWrapper == null || Imgproc.contourArea(contour) > minArea) {
+				if (countWhitePixels(contour, Imgproc.boundingRect(contour), img) != 0)
 					result.add(new SuperContour(contour, hierarchy.get(0, row)[3] == -1));
-				else {
-					System.out.println("--------------------------------------------------------------");
-					System.out.println("father area : " + Imgproc.contourArea(fatherWrapper) + " son area : " + Imgproc.contourArea(contour) + " ===> " + 100 * Imgproc.contourArea(contour) / Imgproc.contourArea(fatherWrapper) + "%");
-					System.out.println("father box : " + Imgproc.boundingRect(fatherWrapper) + " son box : " + Imgproc.boundingRect(contour));
-					System.out.println("father fill ratio : " + getFillRatio(fatherWrapper, Imgproc.boundingRect(fatherWrapper), img) + " fill ratio : " + getFillRatio(contour, Imgproc.boundingRect(contour), img));
-
-					if (getFillRatio(contour, Imgproc.boundingRect(contour), img) != 0)
-						result.add(new SuperContour(contour, hierarchy.get(0, row)[3] == -1));
-				}
 			}
 			row++;
 		}
@@ -343,11 +325,13 @@ public class SuperFrameImg {
 		public SuperContour pred;
 		public Point center;
 		public Point tangent;
+		public Point antiTangent;
 		public double angle;
 		public Point point0;
 		public Point point1;
 		public Rect rect;
 		public double lxmin, lxmax;
+		public double largxmin, largxmax;
 		public final boolean isLeaf;
 
 		SuperContour(MatOfPoint contour, boolean isLeaf) {
@@ -365,16 +349,27 @@ public class SuperFrameImg {
 			Core.SVDecomp(momentsMatrix, new Mat(), svdU, new Mat());
 			// Core.PCACompute(data, mean, eigenvectors);
 			this.tangent = new Point(svdU.get(0, 0)[0], svdU.get(1, 0)[0]);
+			this.antiTangent = new Point(svdU.get(1, 0)[0], -svdU.get(0, 0)[0]);
 			this.angle = Math.atan2(tangent.y, tangent.x);
 			this.lxmin = Double.MAX_VALUE;
 			this.lxmax = 0;
+			this.largxmin = Double.MAX_VALUE;
+			this.largxmax = 0;
 			for (Point pt : contour.toArray()) {
 				double clx = this.tangent.x * (pt.x - center.x) + this.tangent.y * (pt.y - center.y);
 				if (clx < this.lxmin)
-					this.lxmin = clx;
+					this.lxmin = clx;				
 				if (clx > this.lxmax)
 					this.lxmax = clx;
+
+				double anticlx = this.antiTangent.x * (pt.x - center.x) + this.antiTangent.y * (pt.y - center.y);
+				if (anticlx < this.largxmin){
+					this.largxmin = clx;
+				}
+				if (anticlx > this.largxmax)
+					this.largxmax = clx;
 			}
+
 			this.point0 = new Point(center.x + tangent.x * lxmin, center.y + tangent.y * lxmin);
 			this.point1 = new Point(center.x + tangent.x * lxmax, center.y + tangent.y * lxmax);
 			this.isLeaf = isLeaf;
@@ -476,7 +471,7 @@ public class SuperFrameImg {
 
 	private final double EDGE_MAX_OVERLAP = 1; // max reduced px horiz. overlap of contours in span
 	private final double EDGE_MAX_LENGTH = 1000.0; // max reduced px length of edge connecting contours
-	private final double EDGE_ANGLE_COST = 5; // cost of angles in edges (tradeoff vs. length)
+	private final double EDGE_ANGLE_COST = 1; // cost of angles in edges (tradeoff vs. length)
 	private final double EDGE_MAX_ANGLE = 10;// maximum change in angle allowed between contours
 
 	private final double SPAN_MIN_WIDTH = 5;// minimum reduced px width for span
@@ -493,7 +488,12 @@ public class SuperFrameImg {
 
 		double[] overall_tangent = new double[] { c2.center.x - c1.center.x, c2.center.y - c1.center.y };
 		double overall_angle = Math.atan2(overall_tangent[1], overall_tangent[0]);
-		double delta_angle = ((angle_dist(c1.angle, overall_angle) * (c1.lxmax - c1.lxmin) + angle_dist(c2.angle, overall_angle) * (c2.lxmax - c2.lxmin)) / (c1.lxmax - c1.lxmin + c2.lxmax - c2.lxmin)) * 180 / Math.PI;
+
+		double c1Ratio = Math.abs((c1.lxmax - c1.lxmin) / (c1.largxmax - c1.largxmin));
+		double c2Ratio = Math.abs((c2.lxmax - c2.lxmin) / (c2.largxmax - c2.largxmin));
+
+		//double delta_angle = ((angle_dist(c1.angle, overall_angle) * (c1.lxmax - c1.lxmin) + angle_dist(c2.angle, overall_angle) * (c2.lxmax - c2.lxmin)) / (c1.lxmax - c1.lxmin + c2.lxmax - c2.lxmin)) * 180 / Math.PI;
+		double delta_angle = ((angle_dist(c1.angle, overall_angle) * (c1Ratio -1) + angle_dist(c2.angle, overall_angle)  * (c2Ratio -1))/ (c1Ratio + c2Ratio)) * 180 / Math.PI ;
 		if (dist > EDGE_MAX_LENGTH || x_overlap > EDGE_MAX_OVERLAP || delta_angle > EDGE_MAX_ANGLE)
 			return null;
 		double score = dist + delta_angle * EDGE_ANGLE_COST;
