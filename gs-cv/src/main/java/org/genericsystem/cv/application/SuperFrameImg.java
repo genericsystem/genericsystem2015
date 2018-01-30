@@ -382,10 +382,10 @@ public class SuperFrameImg {
 
 				double anticlx = this.antiTangent.x * (pt.x - center.x) + this.antiTangent.y * (pt.y - center.y);
 				if (anticlx < this.largxmin){
-					this.largxmin = clx;
+					this.largxmin = anticlx;
 				}
 				if (anticlx > this.largxmax)
-					this.largxmax = clx;
+					this.largxmax = anticlx;
 			}
 
 			this.point0 = new Point(center.x + tangent.x * lxmin, center.y + tangent.y * lxmin);
@@ -511,7 +511,9 @@ public class SuperFrameImg {
 		double c2Ratio = Math.abs((c2.lxmax - c2.lxmin) / (c2.largxmax - c2.largxmin));
 
 		//double delta_angle = ((angle_dist(c1.angle, overall_angle) * (c1.lxmax - c1.lxmin) + angle_dist(c2.angle, overall_angle) * (c2.lxmax - c2.lxmin)) / (c1.lxmax - c1.lxmin + c2.lxmax - c2.lxmin)) * 180 / Math.PI;
-		double delta_angle = ((angle_dist(c1.angle, overall_angle) * (c1Ratio -1) + angle_dist(c2.angle, overall_angle)  * (c2Ratio -1))/ (c1Ratio + c2Ratio)) * 180 / Math.PI ;
+		double delta_angle = ((angle_dist(c1.angle, overall_angle) * (c1Ratio -1) + angle_dist(c2.angle, overall_angle)  * (c2Ratio -1))) * 180 / Math.PI ;
+		delta_angle /= (c1Ratio + c2Ratio);
+		//System.out.println("delta angle "+delta_angle);
 		if (dist > EDGE_MAX_LENGTH || x_overlap > EDGE_MAX_OVERLAP || delta_angle > EDGE_MAX_ANGLE)
 			return null;
 		double score = dist + delta_angle * EDGE_ANGLE_COST;
