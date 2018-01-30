@@ -362,9 +362,8 @@ public class SuperFrameImg {
 					this.lxmax = clx;
 
 				double anticlx = this.antiTangent.x * (pt.x - center.x) + this.antiTangent.y * (pt.y - center.y);
-				if (anticlx < this.largxmin) {
+				if (anticlx < this.largxmin)
 					this.largxmin = anticlx;
-				}
 				if (anticlx > this.largxmax)
 					this.largxmax = anticlx;
 			}
