@@ -350,7 +350,6 @@ public class SuperFrameImg {
 			// Core.PCACompute(data, mean, eigenvectors);
 			this.tangent = new Point(svdU.get(0, 0)[0], svdU.get(1, 0)[0]);
 			this.antiTangent = new Point(svdU.get(1, 0)[0], -svdU.get(0, 0)[0]);
-			this.angle = Math.atan2(tangent.y, tangent.x);
 			this.lxmin = Double.MAX_VALUE;
 			this.lxmax = 0;
 			this.largxmin = Double.MAX_VALUE;
@@ -358,20 +357,24 @@ public class SuperFrameImg {
 			for (Point pt : contour.toArray()) {
 				double clx = this.tangent.x * (pt.x - center.x) + this.tangent.y * (pt.y - center.y);
 				if (clx < this.lxmin)
-					this.lxmin = clx;				
+					this.lxmin = clx;
 				if (clx > this.lxmax)
 					this.lxmax = clx;
 
 				double anticlx = this.antiTangent.x * (pt.x - center.x) + this.antiTangent.y * (pt.y - center.y);
-				if (anticlx < this.largxmin){
-					this.largxmin = clx;
+				if (anticlx < this.largxmin) {
+					this.largxmin = anticlx;
 				}
 				if (anticlx > this.largxmax)
-					this.largxmax = clx;
+					this.largxmax = anticlx;
 			}
 
 			this.point0 = new Point(center.x + tangent.x * lxmin, center.y + tangent.y * lxmin);
 			this.point1 = new Point(center.x + tangent.x * lxmax, center.y + tangent.y * lxmax);
+
+			this.angle = Math.atan2(tangent.y, tangent.x);
+			if ((lxmax - lxmin) < (largxmax - largxmin) * 2)
+				this.angle = 0;
 			this.isLeaf = isLeaf;
 		}
 
@@ -449,7 +452,6 @@ public class SuperFrameImg {
 				edge.getC1().succ = edge.getC2();
 				edge.getC2().pred = edge.getC1();
 			}
-
 		List<Span> spans = new ArrayList<>();
 		while (!superContours.isEmpty()) {
 			SuperContour contour = superContours.get(0);
@@ -471,7 +473,7 @@ public class SuperFrameImg {
 
 	private final double EDGE_MAX_OVERLAP = 1; // max reduced px horiz. overlap of contours in span
 	private final double EDGE_MAX_LENGTH = 1000.0; // max reduced px length of edge connecting contours
-	private final double EDGE_ANGLE_COST = 1; // cost of angles in edges (tradeoff vs. length)
+	private final double EDGE_ANGLE_COST = 20; // cost of angles in edges (tradeoff vs. length)
 	private final double EDGE_MAX_ANGLE = 10;// maximum change in angle allowed between contours
 
 	private final double SPAN_MIN_WIDTH = 5;// minimum reduced px width for span
@@ -482,6 +484,8 @@ public class SuperFrameImg {
 			c1 = c2;
 			c2 = tmp;
 		}
+		if (c1.point0.x > c2.point1.x)
+			return null;
 
 		double x_overlap = Math.max(c1.local_overlap(c2), c2.local_overlap(c1));
 		double dist = Math.sqrt(Math.pow(c2.point0.x - c1.point1.x, 2) + Math.pow(c2.point0.y - c1.point1.y, 2));
@@ -489,23 +493,20 @@ public class SuperFrameImg {
 		double[] overall_tangent = new double[] { c2.center.x - c1.center.x, c2.center.y - c1.center.y };
 		double overall_angle = Math.atan2(overall_tangent[1], overall_tangent[0]);
 
-		double c1Ratio = Math.abs((c1.lxmax - c1.lxmin) / (c1.largxmax - c1.largxmin));
-		double c2Ratio = Math.abs((c2.lxmax - c2.lxmin) / (c2.largxmax - c2.largxmin));
-
-		//double delta_angle = ((angle_dist(c1.angle, overall_angle) * (c1.lxmax - c1.lxmin) + angle_dist(c2.angle, overall_angle) * (c2.lxmax - c2.lxmin)) / (c1.lxmax - c1.lxmin + c2.lxmax - c2.lxmin)) * 180 / Math.PI;
-		double delta_angle = ((angle_dist(c1.angle, overall_angle) * (c1Ratio -1) + angle_dist(c2.angle, overall_angle)  * (c2Ratio -1))/ (c1Ratio + c2Ratio)) * 180 / Math.PI ;
+		double delta_angle = angle_dist(c1.angle, overall_angle) + angle_dist(c2.angle, overall_angle);
 		if (dist > EDGE_MAX_LENGTH || x_overlap > EDGE_MAX_OVERLAP || delta_angle > EDGE_MAX_ANGLE)
 			return null;
+
 		double score = dist + delta_angle * EDGE_ANGLE_COST;
 		return new Edge(score, c1, c2);
 	}
 
 	private double angle_dist(double angle_b, double angle_a) {
 		double diff = angle_b - angle_a;
-		while (diff > Math.PI)
-			diff -= 2 * Math.PI;
-		while (diff < -Math.PI)
-			diff += 2 * Math.PI;
+		while (diff > Math.PI / 2)
+			diff -= Math.PI;
+		while (diff < -Math.PI / 2)
+			diff += Math.PI;
 		return Math.abs(diff);
 	}
 
