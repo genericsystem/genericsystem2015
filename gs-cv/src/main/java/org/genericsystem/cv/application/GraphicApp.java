@@ -148,6 +148,13 @@ public class GraphicApp extends AbstractApp {
 			double c = Math.random() * 255;
 			Scalar color = new Scalar(a, b, c);
 			sp.getContours().forEach(ct -> Imgproc.drawContours(superReferenceTemplate2.getDisplay().getSrc(), Arrays.asList(ct.contour), 0, color, -1));
+			// sp.getContours().forEach(ct -> {
+			// for (Point pt : ct.contour.toArray()) {
+			// Imgproc.circle(superReferenceTemplate2.getDisplay().getSrc(), pt, 1, color);
+			//
+			// }
+			//
+			// });
 
 			// if (!sp.getContours().isEmpty()) {
 			// Point pt = sp.getContours().get(0).center;

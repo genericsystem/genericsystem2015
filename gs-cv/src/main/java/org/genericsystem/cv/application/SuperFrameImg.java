@@ -347,9 +347,15 @@ public class SuperFrameImg {
 			momentsMatrix.put(1, 1, moments.mu02 / moments.m00);
 			Mat svdU = new Mat();
 			Core.SVDecomp(momentsMatrix, new Mat(), svdU, new Mat());
+			double tx = svdU.get(0, 0)[0];
+			double ty = svdU.get(1, 0)[0];
+			if (tx < 0) {
+				tx = -tx;
+				ty = -ty;
+			}
 			// Core.PCACompute(data, mean, eigenvectors);
-			this.tangent = new Point(svdU.get(0, 0)[0], svdU.get(1, 0)[0]);
-			this.antiTangent = new Point(svdU.get(1, 0)[0], -svdU.get(0, 0)[0]);
+			this.tangent = new Point(tx, ty);
+			this.antiTangent = new Point(ty, -tx);
 			this.lxmin = Double.MAX_VALUE;
 			this.lxmax = 0;
 			this.largxmin = Double.MAX_VALUE;
@@ -372,16 +378,12 @@ public class SuperFrameImg {
 			this.point1 = new Point(center.x + tangent.x * lxmax, center.y + tangent.y * lxmax);
 
 			this.angle = Math.atan2(tangent.y, tangent.x);
-			if ((lxmax - lxmin) < (largxmax - largxmin) * 2)
-				this.angle = 0;
 			this.isLeaf = isLeaf;
 		}
 
 		@Override
 		public int compareTo(SuperContour c) {
 			return Double.compare(rect.tl().y, c.rect.tl().y);
-			// int compare = Double.compare(rect.tl().x, c.rect.tl().x);
-			// return compare != 0 ? compare : Double.compare(rect.tl().y, c.rect.tl().y);
 		}
 
 		public double local_overlap(SuperContour c2) {
@@ -454,8 +456,14 @@ public class SuperFrameImg {
 		List<Span> spans = new ArrayList<>();
 		while (!superContours.isEmpty()) {
 			SuperContour contour = superContours.get(0);
-			while (contour.pred != null)
+			int i = 50;
+			while (contour.pred != null) {
+				if (i < 4)
+					System.out.println(contour.rect + " " + contour.point0 + " " + contour.point1);
+				if (i-- < 0)
+					throw new IllegalStateException();
 				contour = contour.pred;
+			}
 			Span curSpan = new Span();
 			double width = 0.0;
 			while (contour != null) {
@@ -464,20 +472,15 @@ public class SuperFrameImg {
 				width += contour.lxmax - contour.lxmin;
 				contour = contour.succ;
 			}
+			double SPAN_MIN_WIDTH = 30;
 			if (width > SPAN_MIN_WIDTH)
 				spans.add(curSpan);
 		}
 		return spans;
 	}
 
-	private final double EDGE_MAX_OVERLAP = 1; // max reduced px horiz. overlap of contours in span
-	private final double EDGE_MAX_LENGTH = 1000.0; // max reduced px length of edge connecting contours
-	private final double EDGE_ANGLE_COST = 20; // cost of angles in edges (tradeoff vs. length)
-	private final double EDGE_MAX_ANGLE = 10;// maximum change in angle allowed between contours
-
-	private final double SPAN_MIN_WIDTH = 5;// minimum reduced px width for span
-
 	private Edge generateCandidateEdge(SuperContour c1, SuperContour c2) {
+
 		if (c1.point0.x > c2.point1.x) {
 			SuperContour tmp = c1;
 			c1 = c2;
@@ -488,15 +491,14 @@ public class SuperFrameImg {
 
 		double x_overlap = Math.max(c1.local_overlap(c2), c2.local_overlap(c1));
 		double dist = Math.sqrt(Math.pow(c2.point0.x - c1.point1.x, 2) + Math.pow(c2.point0.y - c1.point1.y, 2));
-
 		double[] overall_tangent = new double[] { c2.center.x - c1.center.x, c2.center.y - c1.center.y };
 		double overall_angle = Math.atan2(overall_tangent[1], overall_tangent[0]);
-
 		double delta_angle = angle_dist(c1.angle, overall_angle) + angle_dist(c2.angle, overall_angle);
-		if (dist > EDGE_MAX_LENGTH || x_overlap > EDGE_MAX_OVERLAP || delta_angle > EDGE_MAX_ANGLE)
+
+		if (false)
 			return null;
 
-		double score = dist + delta_angle * EDGE_ANGLE_COST;
+		double score = dist + delta_angle * 2;
 		return new Edge(score, c1, c2);
 	}
 
