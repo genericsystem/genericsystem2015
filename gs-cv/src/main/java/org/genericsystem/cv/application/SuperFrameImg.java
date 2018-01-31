@@ -343,7 +343,7 @@ public class SuperFrameImg {
 			double ty;
 			Moments moments = Imgproc.moments(contour);
 			this.center = new Point(moments.m10 / moments.m00, moments.m01 / moments.m00);
-			if (rect.width < 2 * rect.height) {
+			if (rect.width < (2 * rect.height) || Imgproc.contourArea(contour) < 100) {
 				tx = 1;
 				ty = 0;
 			} else {
@@ -510,8 +510,7 @@ public class SuperFrameImg {
 			c1 = c2;
 			c2 = tmp;
 		}
-		double x_overlap = Math.max(c1.xLocalOverlap(c2), c2.xLocalOverlap(c1));
-		double y_overlap = Math.max(c1.yLocalOverlap(c2), c2.yLocalOverlap(c1));
+
 		if (c1.right.x > c2.left.x) {
 			int result = Double.compare(c1.center.x, c2.center.x);
 			if (result == 0)
@@ -523,28 +522,31 @@ public class SuperFrameImg {
 			}
 			if (c1.center.x > c2.center.x)
 				throw new IllegalStateException(c1.center.x + " " + c2.center.x);
+			double dist = Math.sqrt(Math.pow(c1.center.x - c2.center.x, 2) + Math.pow(c1.center.y - c2.center.y, 2) / 2);
+			double[] overall_tangent = new double[] { c2.center.x - c1.center.x, c2.center.y - c1.center.y };
+			// if (dist > 30) {
+			// double x_overlap = Math.max(c1.xLocalOverlap(c2), c2.xLocalOverlap(c1));
+			// if (x_overlap < -10)
+			// return null;
+			// double y_overlap = Math.max(c1.yLocalOverlap(c2), c2.yLocalOverlap(c1));
+			// if (y_overlap < -10)
+			// return null;
+			// }
 
-			if (x_overlap < 0) {
+			if (dist > 15 && Math.atan2(Math.abs(overall_tangent[1]), Math.abs(overall_tangent[0])) * 180 / Math.PI > 4)
 				return null;
-			}
-			if (y_overlap > 0) {
-				if (c1.center.x > c2.center.x)
-					throw new IllegalStateException();
-				return new Edge(Math.sqrt(Math.pow(c1.center.x - c2.center.x, 2) + Math.pow(c1.center.y - c2.center.y, 2)) / 1000, c1, c2);
-			}
-			return null;
+			return new Edge(dist, c1, c2);
 		}
 
 		double dist = Math.sqrt(Math.pow(c1.right.x - c2.left.x, 2) + Math.pow(c1.right.y - c2.left.y, 2));
 
 		double[] overall_tangent = new double[] { c2.center.x - c1.center.x, c2.center.y - c1.center.y };
 		double overall_angle = Math.atan2(overall_tangent[1], overall_tangent[0]);
-		double delta_angle = angle_dist(c1.angle, overall_angle) + angle_dist(c2.angle, overall_angle);
+		double delta_angle = angle_dist(c1.angle, overall_angle) * (c1.lxmax - c1.lxmin) + angle_dist(c2.angle, overall_angle) * (c2.lxmax - c2.lxmin);
 
-		if (Math.atan2(Math.abs(overall_tangent[1]), Math.abs(overall_tangent[0])) * 180 / Math.PI > 5)
+		if (dist > 15 && Math.atan2(Math.abs(overall_tangent[1]), Math.abs(overall_tangent[0])) * 180 / Math.PI > 4)
 			return null;
-
-		double score = dist + delta_angle * 2;
+		double score = dist;// + delta_angle * 10;
 		return new Edge(score, c1, c2);
 	}
 

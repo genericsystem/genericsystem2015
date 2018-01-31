@@ -156,10 +156,13 @@ public class GraphicApp extends AbstractApp {
 			//
 			// });
 
-			// if (!sp.getContours().isEmpty()) {
-			// Point pt = sp.getContours().get(0).center;
-			// sp.getContours().forEach(ct -> Imgproc.line(superReferenceTemplate2.getDisplay().getSrc(), pt, ct.center, new Scalar(0, 255, 0), 2));
-			// }
+			if (!sp.getContours().isEmpty()) {
+				Point[] pointer = new Point[] { sp.getContours().get(0).center };
+				sp.getContours().forEach(ct -> {
+					Imgproc.line(superReferenceTemplate2.getDisplay().getSrc(), pointer[0], ct.center, color, 1);
+					pointer[0] = ct.center;
+				});
+			}
 		});
 
 		// detectedrealCenroids.stream().map(sc -> sc.point1).forEach(pt -> Imgproc.circle(superReferenceTemplate2.getDisplay().getSrc(), pt, 3, new Scalar(0, 0, 255), -1));
