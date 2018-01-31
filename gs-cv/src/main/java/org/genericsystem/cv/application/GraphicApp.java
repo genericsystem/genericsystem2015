@@ -178,10 +178,10 @@ public class GraphicApp extends AbstractApp {
 		images[7] = layoutTemplate.getDisplay().toJfxImage();
 
 		SuperTemplate superReferenceTemplate4 = new SuperTemplate(superDeperspectived, CvType.CV_8UC3, SuperFrameImg::getFrame);
-		detectedSuperContoursCopy.stream().forEach(c -> Imgproc.line(superReferenceTemplate4.getDisplay().getSrc(), c.point0, c.point1, new Scalar(255, 255, 255), 1));
+		detectedSuperContoursCopy.stream().forEach(c -> Imgproc.line(superReferenceTemplate4.getDisplay().getSrc(), c.left, c.right, new Scalar(255, 255, 255), 1));
 		detectedSuperContoursCopy.stream().map(sc -> sc.center).forEach(pt -> Imgproc.circle(superReferenceTemplate4.getDisplay().getSrc(), pt, 3, new Scalar(255, 0, 0), -1));
-		detectedSuperContoursCopy.stream().map(sc -> sc.point0).forEach(pt -> Imgproc.circle(superReferenceTemplate4.getDisplay().getSrc(), pt, 3, new Scalar(0, 255, 0), -1));
-		detectedSuperContoursCopy.stream().map(sc -> sc.point1).forEach(pt -> Imgproc.circle(superReferenceTemplate4.getDisplay().getSrc(), pt, 3, new Scalar(0, 0, 255), -1));
+		detectedSuperContoursCopy.stream().map(sc -> sc.left).forEach(pt -> Imgproc.circle(superReferenceTemplate4.getDisplay().getSrc(), pt, 3, new Scalar(0, 255, 0), -1));
+		detectedSuperContoursCopy.stream().map(sc -> sc.right).forEach(pt -> Imgproc.circle(superReferenceTemplate4.getDisplay().getSrc(), pt, 3, new Scalar(0, 0, 255), -1));
 		images[8] = superReferenceTemplate4.getDisplay().toJfxImage();
 
 		return images;

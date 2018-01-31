@@ -315,6 +315,7 @@ public class SuperFrameImg {
 			row++;
 		}
 		Collections.sort(result);
+
 		return result;
 	}
 
@@ -327,8 +328,8 @@ public class SuperFrameImg {
 		public Point tangent;
 		public Point antiTangent;
 		public double angle;
-		public Point point0;
-		public Point point1;
+		public Point left;
+		public Point right;
 		public Rect rect;
 		public double lxmin, lxmax;
 		public double lymin, lymax;
@@ -338,23 +339,31 @@ public class SuperFrameImg {
 
 			this.contour = contour;
 			this.rect = Imgproc.boundingRect(contour);
+			double tx;
+			double ty;
 			Moments moments = Imgproc.moments(contour);
 			this.center = new Point(moments.m10 / moments.m00, moments.m01 / moments.m00);
-			Mat momentsMatrix = new Mat(new Size(2, 2), CvType.CV_64FC1);
-			momentsMatrix.put(0, 0, moments.mu20 / moments.m00);
-			momentsMatrix.put(0, 1, moments.mu11 / moments.m00);
-			momentsMatrix.put(1, 0, moments.mu11 / moments.m00);
-			momentsMatrix.put(1, 1, moments.mu02 / moments.m00);
-			Mat svdU = new Mat();
-			Core.SVDecomp(momentsMatrix, new Mat(), svdU, new Mat());
-			double tx = svdU.get(0, 0)[0];
-			double ty = svdU.get(1, 0)[0];
+			if (rect.width < 2 * rect.height) {
+				tx = 1;
+				ty = 0;
+			} else {
+				Mat momentsMatrix = new Mat(new Size(2, 2), CvType.CV_64FC1);
+				momentsMatrix.put(0, 0, moments.mu20 / moments.m00);
+				momentsMatrix.put(0, 1, moments.mu11 / moments.m00);
+				momentsMatrix.put(1, 0, moments.mu11 / moments.m00);
+				momentsMatrix.put(1, 1, moments.mu02 / moments.m00);
+				Mat svdU = new Mat();
+				Core.SVDecomp(momentsMatrix, new Mat(), svdU, new Mat());
+				tx = svdU.get(0, 0)[0];
+				ty = svdU.get(1, 0)[0];
+			}
 			if (tx < 0) {
 				tx = -tx;
 				ty = -ty;
 			}
 			// Core.PCACompute(data, mean, eigenvectors);
 			this.tangent = new Point(tx, ty);
+
 			this.antiTangent = new Point(ty, -tx);
 			this.lxmin = Double.MAX_VALUE;
 			this.lxmax = 0;
@@ -374,8 +383,8 @@ public class SuperFrameImg {
 					this.lymax = anticlx;
 			}
 
-			this.point0 = new Point(center.x + tangent.x * lxmin, center.y + tangent.y * lxmin);
-			this.point1 = new Point(center.x + tangent.x * lxmax, center.y + tangent.y * lxmax);
+			this.left = new Point(center.x + tangent.x * lxmin, center.y + tangent.y * lxmin);
+			this.right = new Point(center.x + tangent.x * lxmax, center.y + tangent.y * lxmax);
 
 			this.angle = Math.atan2(tangent.y, tangent.x);
 			this.isLeaf = isLeaf;
@@ -390,10 +399,16 @@ public class SuperFrameImg {
 			return Double.compare(rect.tl().y, c.rect.tl().y);
 		}
 
-		public double local_overlap(SuperContour c2) {
-			double xmin = (c2.point0.x - center.x) * tangent.x + (c2.point0.y - center.y) * tangent.y;
-			double xmax = (c2.point1.x - center.x) * tangent.x + (c2.point1.y - center.y) * tangent.y;
+		public double xLocalOverlap(SuperContour c2) {
+			double xmin = (c2.left.x - center.x) * tangent.x + (c2.left.y - center.y) * tangent.y;
+			double xmax = (c2.right.x - center.x) * tangent.x + (c2.right.y - center.y) * tangent.y;
 			return Math.min(lxmax, xmax) - Math.max(lxmin, xmin);
+		}
+
+		public double yLocalOverlap(SuperContour c2) {
+			double ymin = (c2.left.x - center.x) * antiTangent.x + (c2.left.y - center.y) * antiTangent.y;
+			double ymax = (c2.right.x - center.x) * antiTangent.x + (c2.right.y - center.y) * antiTangent.y;
+			return Math.min(lymax, ymax) - Math.max(lymin, ymin);
 		}
 
 	}
@@ -460,17 +475,22 @@ public class SuperFrameImg {
 		List<Span> spans = new ArrayList<>();
 		while (!superContours.isEmpty()) {
 			SuperContour contour = superContours.get(0);
-			int i = 50;
+			int i = 100;
 			while (contour.pred != null) {
-				if (i < 4)
-					System.out.println(contour.rect + " " + contour.point0 + " " + contour.point1);
+				if (i < 10)
+					System.out.println("pred" + contour.rect + " " + contour.left + " " + contour.right);
 				if (i-- < 0)
 					throw new IllegalStateException();
 				contour = contour.pred;
 			}
 			Span curSpan = new Span();
 			double width = 0.0;
+			i = 100;
 			while (contour != null) {
+				if (i < 10)
+					System.out.println("succ " + contour.rect + " " + contour.left + " " + contour.right);
+				if (i-- < 0)
+					throw new IllegalStateException();
 				superContours.remove(contour);
 				curSpan.add(contour);
 				width += contour.lxmax - contour.lxmin;
@@ -485,16 +505,37 @@ public class SuperFrameImg {
 
 	private Edge generateCandidateEdge(SuperContour c1, SuperContour c2) {
 
-		if (c1.point1.x > c2.point0.x) {
+		if (c1.right.x > c2.left.x) {
 			SuperContour tmp = c1;
 			c1 = c2;
 			c2 = tmp;
 		}
-		if (c1.point1.x > c2.point0.x)
-			return null;
+		double x_overlap = Math.max(c1.xLocalOverlap(c2), c2.xLocalOverlap(c1));
+		double y_overlap = Math.max(c1.yLocalOverlap(c2), c2.yLocalOverlap(c1));
+		if (c1.right.x > c2.left.x) {
+			int result = Double.compare(c1.center.x, c2.center.x);
+			if (result == 0)
+				result = Double.compare(c1.center.y, c2.center.y);
+			if (result > 0) {
+				SuperContour tmp = c1;
+				c1 = c2;
+				c2 = tmp;
+			}
+			if (c1.center.x > c2.center.x)
+				throw new IllegalStateException(c1.center.x + " " + c2.center.x);
 
-		double x_overlap = Math.max(c1.local_overlap(c2), c2.local_overlap(c1));
-		double dist = Math.sqrt(Math.pow(c1.point1.x - c2.point0.x, 2) + Math.pow(c1.point1.y - c2.point0.y, 2));
+			if (x_overlap < 0) {
+				return null;
+			}
+			if (y_overlap > 0) {
+				if (c1.center.x > c2.center.x)
+					throw new IllegalStateException();
+				return new Edge(Math.sqrt(Math.pow(c1.center.x - c2.center.x, 2) + Math.pow(c1.center.y - c2.center.y, 2)) / 1000, c1, c2);
+			}
+			return null;
+		}
+
+		double dist = Math.sqrt(Math.pow(c1.right.x - c2.left.x, 2) + Math.pow(c1.right.y - c2.left.y, 2));
 
 		double[] overall_tangent = new double[] { c2.center.x - c1.center.x, c2.center.y - c1.center.y };
 		double overall_angle = Math.atan2(overall_tangent[1], overall_tangent[0]);
@@ -503,7 +544,7 @@ public class SuperFrameImg {
 		if (false)
 			return null;
 
-		double score = dist + delta_angle * 2;
+		double score = dist + delta_angle * 5;
 		return new Edge(score, c1, c2);
 	}
 
