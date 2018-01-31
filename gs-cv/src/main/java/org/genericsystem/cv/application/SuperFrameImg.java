@@ -541,10 +541,10 @@ public class SuperFrameImg {
 		double overall_angle = Math.atan2(overall_tangent[1], overall_tangent[0]);
 		double delta_angle = angle_dist(c1.angle, overall_angle) + angle_dist(c2.angle, overall_angle);
 
-		if (false)
+		if (Math.atan2(Math.abs(overall_tangent[1]), Math.abs(overall_tangent[0])) * 180 / Math.PI > 5)
 			return null;
 
-		double score = dist + delta_angle * 5;
+		double score = dist + delta_angle * 2;
 		return new Edge(score, c1, c2);
 	}
 
