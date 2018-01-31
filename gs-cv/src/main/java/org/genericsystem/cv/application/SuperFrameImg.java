@@ -331,7 +331,7 @@ public class SuperFrameImg {
 		public Point point1;
 		public Rect rect;
 		public double lxmin, lxmax;
-		public double largxmin, largxmax;
+		public double lymin, lymax;
 		public final boolean isLeaf;
 
 		SuperContour(MatOfPoint contour, boolean isLeaf) {
@@ -358,8 +358,8 @@ public class SuperFrameImg {
 			this.antiTangent = new Point(ty, -tx);
 			this.lxmin = Double.MAX_VALUE;
 			this.lxmax = 0;
-			this.largxmin = Double.MAX_VALUE;
-			this.largxmax = 0;
+			this.lymin = Double.MAX_VALUE;
+			this.lymax = 0;
 			for (Point pt : contour.toArray()) {
 				double clx = this.tangent.x * (pt.x - center.x) + this.tangent.y * (pt.y - center.y);
 				if (clx < this.lxmin)
@@ -368,10 +368,10 @@ public class SuperFrameImg {
 					this.lxmax = clx;
 
 				double anticlx = this.antiTangent.x * (pt.x - center.x) + this.antiTangent.y * (pt.y - center.y);
-				if (anticlx < this.largxmin)
-					this.largxmin = anticlx;
-				if (anticlx > this.largxmax)
-					this.largxmax = anticlx;
+				if (anticlx < this.lymin)
+					this.lymin = anticlx;
+				if (anticlx > this.lymax)
+					this.lymax = anticlx;
 			}
 
 			this.point0 = new Point(center.x + tangent.x * lxmin, center.y + tangent.y * lxmin);
@@ -379,6 +379,10 @@ public class SuperFrameImg {
 
 			this.angle = Math.atan2(tangent.y, tangent.x);
 			this.isLeaf = isLeaf;
+			if (lxmin >= lxmax)
+				throw new IllegalStateException();
+			if (lymin >= lymax)
+				throw new IllegalStateException();
 		}
 
 		@Override
@@ -481,16 +485,17 @@ public class SuperFrameImg {
 
 	private Edge generateCandidateEdge(SuperContour c1, SuperContour c2) {
 
-		if (c1.point0.x > c2.point1.x) {
+		if (c1.point1.x > c2.point0.x) {
 			SuperContour tmp = c1;
 			c1 = c2;
 			c2 = tmp;
 		}
-		if (c1.point0.x > c2.point1.x)
+		if (c1.point1.x > c2.point0.x)
 			return null;
 
 		double x_overlap = Math.max(c1.local_overlap(c2), c2.local_overlap(c1));
-		double dist = Math.sqrt(Math.pow(c2.point0.x - c1.point1.x, 2) + Math.pow(c2.point0.y - c1.point1.y, 2));
+		double dist = Math.sqrt(Math.pow(c1.point1.x - c2.point0.x, 2) + Math.pow(c1.point1.y - c2.point0.y, 2));
+
 		double[] overall_tangent = new double[] { c2.center.x - c1.center.x, c2.center.y - c1.center.y };
 		double overall_angle = Math.atan2(overall_tangent[1], overall_tangent[0]);
 		double delta_angle = angle_dist(c1.angle, overall_angle) + angle_dist(c2.angle, overall_angle);
@@ -504,10 +509,10 @@ public class SuperFrameImg {
 
 	private double angle_dist(double angle_b, double angle_a) {
 		double diff = angle_b - angle_a;
-		while (diff > Math.PI / 2)
-			diff -= Math.PI;
-		while (diff < -Math.PI / 2)
-			diff += Math.PI;
+		while (diff > Math.PI)
+			diff -= 2 * Math.PI;
+		while (diff < -Math.PI)
+			diff += 2 * Math.PI;
 		return Math.abs(diff);
 	}
 
