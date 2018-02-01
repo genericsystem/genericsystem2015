@@ -258,7 +258,6 @@ public class SuperFrameImg {
 		return CvType.CV_8U != getFrame().type() ? getFrame().bgr2Gray() : getFrame();
 	}
 
-	@SuppressWarnings("resource")
 	private Img buildDiffFrame() {
 		Mat diffFrame = getGrayFrame().gaussianBlur(new Size(5, 5)).getSrc();
 		Core.absdiff(diffFrame, new Scalar(0), diffFrame);
@@ -297,7 +296,7 @@ public class SuperFrameImg {
 	public List<SuperContour> detectSuperContours(double minArea) {
 		List<MatOfPoint> contours = new ArrayList<>();
 		Mat hierarchy = new Mat();
-		Img img = getDiffFrame().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(1, 1));
+		Img img = getDiffFrame().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(3, 3));
 		Imgproc.findContours(img.getSrc(), contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_NONE);
 		List<SuperContour> result = new ArrayList<>();
 		int row = 0;
@@ -308,13 +307,17 @@ public class SuperFrameImg {
 			// double nextBrotherIndex = indexes[0];
 			// double childIndex = indexes[2];
 			MatOfPoint fatherWrapper = fatherIndex != -1 ? contours.get((int) fatherIndex) : null;
-			if (fatherWrapper == null || Imgproc.contourArea(contour) > minArea) {
-				if (countWhitePixels(contour, Imgproc.boundingRect(contour), img) != 0)
+			if (Imgproc.contourArea(contour) > 8 && Imgproc.boundingRect(contour).area() < 4000)
+				if (fatherWrapper != null) {
+					if (countWhitePixels(contour, Imgproc.boundingRect(contour), img) != 0) {
+						result.add(new SuperContour(contour, hierarchy.get(0, row)[3] == -1));
+					}
+				} else {
 					result.add(new SuperContour(contour, hierarchy.get(0, row)[3] == -1));
-			}
+				}
 			row++;
 		}
-		Collections.sort(result);
+		// Collections.sort(result);
 
 		return result;
 	}
@@ -343,20 +346,16 @@ public class SuperFrameImg {
 			double ty;
 			Moments moments = Imgproc.moments(contour);
 			this.center = new Point(moments.m10 / moments.m00, moments.m01 / moments.m00);
-			if (rect.width < (2 * rect.height) || Imgproc.contourArea(contour) < 100) {
-				tx = 1;
-				ty = 0;
-			} else {
-				Mat momentsMatrix = new Mat(new Size(2, 2), CvType.CV_64FC1);
-				momentsMatrix.put(0, 0, moments.mu20 / moments.m00);
-				momentsMatrix.put(0, 1, moments.mu11 / moments.m00);
-				momentsMatrix.put(1, 0, moments.mu11 / moments.m00);
-				momentsMatrix.put(1, 1, moments.mu02 / moments.m00);
-				Mat svdU = new Mat();
-				Core.SVDecomp(momentsMatrix, new Mat(), svdU, new Mat());
-				tx = svdU.get(0, 0)[0];
-				ty = svdU.get(1, 0)[0];
-			}
+			Mat momentsMatrix = new Mat(new Size(2, 2), CvType.CV_64FC1);
+
+			momentsMatrix.put(0, 0, moments.mu20 / moments.m00);
+			momentsMatrix.put(0, 1, moments.mu11 / moments.m00);
+			momentsMatrix.put(1, 0, moments.mu11 / moments.m00);
+			momentsMatrix.put(1, 1, moments.mu02 / moments.m00);
+			Mat svdU = new Mat();
+			Core.SVDecomp(momentsMatrix, new Mat(), svdU, new Mat());
+			tx = svdU.get(0, 0)[0];
+			ty = svdU.get(1, 0)[0];
 			if (tx < 0) {
 				tx = -tx;
 				ty = -ty;
@@ -444,19 +443,6 @@ public class SuperFrameImg {
 
 	}
 
-	public static class Span {
-
-		private List<SuperContour> contours = new ArrayList<>();
-
-		public void add(SuperContour superContour) {
-			contours.add(superContour);
-		}
-
-		public List<SuperContour> getContours() {
-			return contours;
-		}
-	}
-
 	public List<Span> assembleContours(List<SuperContour> superContours) {
 		Collections.sort(superContours);
 		List<Edge> candidateEdges = new ArrayList<>();
@@ -512,51 +498,47 @@ public class SuperFrameImg {
 		}
 
 		if (c1.right.x > c2.left.x) {
-			int result = Double.compare(c1.center.x, c2.center.x);
-			if (result == 0)
-				result = Double.compare(c1.center.y, c2.center.y);
-			if (result > 0) {
-				SuperContour tmp = c1;
-				c1 = c2;
-				c2 = tmp;
-			}
-			if (c1.center.x > c2.center.x)
-				throw new IllegalStateException(c1.center.x + " " + c2.center.x);
-			double dist = Math.sqrt(Math.pow(c1.center.x - c2.center.x, 2) + Math.pow(c1.center.y - c2.center.y, 2) / 2);
-			double[] overall_tangent = new double[] { c2.center.x - c1.center.x, c2.center.y - c1.center.y };
-			// if (dist > 30) {
-			// double x_overlap = Math.max(c1.xLocalOverlap(c2), c2.xLocalOverlap(c1));
-			// if (x_overlap < -10)
-			// return null;
-			// double y_overlap = Math.max(c1.yLocalOverlap(c2), c2.yLocalOverlap(c1));
-			// if (y_overlap < -10)
-			// return null;
-			// }
-
-			if (dist > 15 && Math.atan2(Math.abs(overall_tangent[1]), Math.abs(overall_tangent[0])) * 180 / Math.PI > 4)
-				return null;
-			return new Edge(dist, c1, c2);
+			return null;
 		}
 
 		double dist = Math.sqrt(Math.pow(c1.right.x - c2.left.x, 2) + Math.pow(c1.right.y - c2.left.y, 2));
 
 		double[] overall_tangent = new double[] { c2.center.x - c1.center.x, c2.center.y - c1.center.y };
 		double overall_angle = Math.atan2(overall_tangent[1], overall_tangent[0]);
-		double delta_angle = angle_dist(c1.angle, overall_angle) * (c1.lxmax - c1.lxmin) + angle_dist(c2.angle, overall_angle) * (c2.lxmax - c2.lxmin);
-
-		if (dist > 15 && Math.atan2(Math.abs(overall_tangent[1]), Math.abs(overall_tangent[0])) * 180 / Math.PI > 4)
+		double angle1 = angle_dist(c1.angle, overall_angle);
+		double angle2 = angle_dist(c2.angle, overall_angle);
+		if (angle_dist(overall_angle) * 180 / Math.PI > 3)// || Math.max(angle1, angle2) * 180 / Math.PI > 3)
 			return null;
-		double score = dist;// + delta_angle * 10;
+
+		double delta_angle = angle1 * (c1.lxmax - c1.lxmin) + angle2 * (c2.lxmax - c2.lxmin);
+		double score = dist + 2 * delta_angle;
+		System.out.println(score + " " + dist + " " + 2 * delta_angle);
 		return new Edge(score, c1, c2);
 	}
 
 	private double angle_dist(double angle_b, double angle_a) {
-		double diff = angle_b - angle_a;
+		return angle_dist(angle_b - angle_a);
+	}
+
+	private double angle_dist(double diff) {
 		while (diff > Math.PI)
 			diff -= 2 * Math.PI;
 		while (diff < -Math.PI)
 			diff += 2 * Math.PI;
 		return Math.abs(diff);
+	}
+
+	public static class Span {
+
+		private List<SuperContour> contours = new ArrayList<>();
+
+		public void add(SuperContour superContour) {
+			contours.add(superContour);
+		}
+
+		public List<SuperContour> getContours() {
+			return contours;
+		}
 	}
 
 	List<Rect> detectRects(Img binarized, int minArea, int maxArea, double fillRatio) {
