@@ -28,6 +28,8 @@ import org.opencv.utils.Converters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public abstract class AbstractField {
 
 	protected static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -35,13 +37,17 @@ public abstract class AbstractField {
 	protected static final int MIN_SIZE_CONSOLIDATION = 5;
 	private static final int OCR_CONFIDENCE_THRESH = 0;
 
+	@JsonIgnore
 	protected GSRect rect;
 	protected GSRect ocrRect;
 	protected Map<String, Integer> labels;
+	@JsonIgnore
 	protected String consolidated;
 
 
+	@JsonIgnore
 	protected double confidence;
+	@JsonIgnore
 	protected long attempts;
 
 	public AbstractField() {
@@ -187,6 +193,7 @@ public abstract class AbstractField {
 		return consolidated != null;
 	}
 
+	@JsonIgnore
 	public int getLabelsSize() {
 		return labels.entrySet().stream().mapToInt(entry -> entry.getValue()).sum();
 	}
