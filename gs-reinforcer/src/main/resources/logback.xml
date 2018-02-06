@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <variable name="msgPattern" value="%d [%thread] %-5level %logger{36} - %msg%n" />
+    <variable name="msgPattern" value="%d [%thread] %-5level %green(%logger{36} %method:%line) - %yellow(%msg%n)" />
 
     <!-- Print messages with a level of TRACE, DEBUG or INFO to stdout. -->
     <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
