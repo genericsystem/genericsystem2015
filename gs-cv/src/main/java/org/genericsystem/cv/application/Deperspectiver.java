@@ -18,9 +18,7 @@ public class Deperspectiver {
 		this.pp = pp;
 	}
 
-	public AngleCalibrated[] computeCalibratedVps(SuperFrameImg superFrame, boolean textsEnabledMode, Lines lines) {
-		if (textsEnabledMode)
-			lines.getLines().addAll(superFrame.findTextOrientationLines());
+	public AngleCalibrated[] computeCalibratedVps(SuperFrameImg superFrame, Lines lines) {
 		if (lines.size() > 4) {
 			calibrated0 = superFrame.findVanishingPoint(lines, calibrated0);
 			calibratedVps = superFrame.findOtherVps(calibrated0, lines);

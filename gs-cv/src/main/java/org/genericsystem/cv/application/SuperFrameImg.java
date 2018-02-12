@@ -1,5 +1,15 @@
 package org.genericsystem.cv.application;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.genericsystem.cv.Calibrated;
 import org.genericsystem.cv.Calibrated.AngleCalibrated;
 import org.genericsystem.cv.Img;
@@ -18,17 +28,6 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.imgproc.Moments;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class SuperFrameImg {
 
@@ -264,7 +263,7 @@ public class SuperFrameImg {
 
 	private Img buildDiffFrame() {
 		Mat diffFrame = getGrayFrame().gaussianBlur(new Size(5, 5)).getSrc();
-		Core.absdiff(diffFrame, new Scalar(150), diffFrame);
+		Core.absdiff(diffFrame, new Scalar(50), diffFrame);
 		Imgproc.adaptiveThreshold(diffFrame, diffFrame, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 7, 3);
 		return new Img(diffFrame, false);// .cleanTablesInv(0.05);
 	}
@@ -300,7 +299,7 @@ public class SuperFrameImg {
 	public List<SuperContour> detectSuperContours(double minArea) {
 		List<MatOfPoint> contours = new ArrayList<>();
 		Mat hierarchy = new Mat();
-		Img img = getDiffFrame().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(3, 3));
+		Img img = getDiffFrame().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(1, 1));
 		Imgproc.findContours(img.getSrc(), contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_NONE);
 		List<SuperContour> result = new ArrayList<>();
 		int row = 0;
@@ -311,7 +310,7 @@ public class SuperFrameImg {
 			// double nextBrotherIndex = indexes[0];
 			// double childIndex = indexes[2];
 			MatOfPoint fatherWrapper = fatherIndex != -1 ? contours.get((int) fatherIndex) : null;
-			if (Imgproc.contourArea(contour) > 8 && Imgproc.boundingRect(contour).area() < 4000)
+			if (Imgproc.contourArea(contour) > minArea && Imgproc.boundingRect(contour).area() < 4000)
 				if (fatherWrapper != null) {
 					if (countWhitePixels(contour, Imgproc.boundingRect(contour), img) != 0) {
 						result.add(new SuperContour(contour, hierarchy.get(0, row)[3] == -1));
@@ -335,8 +334,11 @@ public class SuperFrameImg {
 		public Point tangent;
 		public Point antiTangent;
 		public double angle;
+		public double antiAngle;
 		public Point left;
 		public Point right;
+		public Point top;
+		public Point bottom;
 		public Rect rect;
 		public double lxmin, lxmax;
 		public double lymin, lymax;
@@ -389,8 +391,11 @@ public class SuperFrameImg {
 
 			this.left = new Point(center.x + tangent.x * lxmin, center.y + tangent.y * lxmin);
 			this.right = new Point(center.x + tangent.x * lxmax, center.y + tangent.y * lxmax);
+			this.top = new Point(center.x + antiTangent.x * lymin, center.y + antiTangent.y * lymin);
+			this.bottom = new Point(center.x + antiTangent.x * lymax, center.y + antiTangent.y * lymax);
 
 			this.angle = Math.atan2(tangent.y, tangent.x);
+			this.antiAngle = Math.atan2(antiTangent.y, antiTangent.x);
 			this.isLeaf = isLeaf;
 			if (lxmin >= lxmax)
 				throw new IllegalStateException();
@@ -402,7 +407,8 @@ public class SuperFrameImg {
 
 		@Override
 		public int compareTo(SuperContour c) {
-			return Double.compare(rect.tl().y, c.rect.tl().y);
+			int xCompare = Double.compare(center.x, c.center.x);
+			return xCompare != 0 ? xCompare : Double.compare(center.y, c.center.y);
 		}
 
 		public double xLocalOverlap(SuperContour c2) {
@@ -419,38 +425,54 @@ public class SuperFrameImg {
 
 	}
 
-	static Comparator<SuperContour> VERTICAL_COMPARATOR = (c1, c2) -> Double.compare(c1.right.y, c2.left.y);
-	static Comparator<SuperContour> HORIZONTAL_COMPARATOR = (c1, c2) -> Double.compare(c1.right.x, c2.left.x);
-	static Predicate<Double> HORIZONTAL_EDGE_FILTER = angle -> angle * 180 / Math.PI < 5;
-	static Predicate<Double> VERTICAL_EDGE_FILTER = angle -> angle * 180 / Math.PI > 85 && angle * 180 / Math.PI < 95;
+	private Edge generateCandidateEdge(SuperContour c1, SuperContour c2, double maxCentersDistance, double coeffDeltaAngle) {
 
-	static Predicate<SuperContour> HORIZONTAL_FILTER = sc -> toZeroPi(sc.angle) * 180 / Math.PI < 5;
-	static Predicate<SuperContour> VERTICAL_FILTER = sc -> toZeroPi(sc.angle) * 180 / Math.PI > 85;
-
-	private Edge generateCandidateEdge(SuperContour c1, SuperContour c2, Comparator<SuperContour> comparator, Predicate<Double> angleFilter, double maxCentersDistance, double coeffDeltaAngle) {
-
-		if (comparator.compare(c1, c2) > 0) {
+		if (c1.compareTo(c2) > 0) {
 			SuperContour tmp = c1;
 			c1 = c2;
 			c2 = tmp;
 		}
 
-		if (comparator.compare(c1, c2) > 0) {
-			return null;
-		}
-
-		double dist = Math.sqrt(Math.pow(c1.right.x - c2.left.x, 2) + Math.pow(c1.right.y - c2.left.y, 2));
-		if (dist > maxCentersDistance)
-			return null;
-
 		double[] centersTangent = new double[] { c2.center.x - c1.center.x, c2.center.y - c1.center.y };
 		double centersAngle = toZeroPi(Math.atan2(centersTangent[1], centersTangent[0]));
-		if (!angleFilter.test(centersAngle))
-			return null;
 
 		double angle1 = angle_dist(c1.angle, centersAngle);
+		double antiAngle1 = angle_dist(c1.antiAngle, centersAngle);
+
+		Point c1min = c1.left;
+		Point c1max = c1.right;
+		double c1weight = c1.lxmax - c1.lxmin;
+		if (angle1 > antiAngle1) {
+			angle1 = antiAngle1;
+			c1min = c1.top;
+			c1max = c1.bottom;
+			c1weight = c1.lymax - c1.lymin;
+		}
+
 		double angle2 = angle_dist(c2.angle, centersAngle);
-		double delta_angle = Math.min(angle1 * (c1.lxmax - c1.lxmin), angle2 * (c2.lxmax - c2.lxmin));
+		double antiAngle2 = angle_dist(c2.antiAngle, centersAngle);
+
+		Point c2min = c2.left;
+		Point c2max = c2.right;
+		double c2weight = c2.lxmax - c2.lxmin;
+		if (angle2 > antiAngle2) {
+			angle2 = antiAngle2;
+			c2min = c2.top;
+			c2max = c2.bottom;
+			c2weight = c2.lymax - c2.lymin;
+		}
+
+		double delta_angle = Math.min(angle1 * c1weight, angle2 * c2weight);
+
+		double dist = Math.sqrt(Math.pow(c1max.x - c2min.x, 2) + Math.pow(c1max.y - c2min.y, 2));
+		double dist2 = Math.sqrt(Math.pow(c1min.x - c2min.x, 2) + Math.pow(c1min.y - c2min.y, 2));
+		double dist3 = Math.sqrt(Math.pow(c1min.x - c2max.x, 2) + Math.pow(c1min.y - c2max.y, 2));
+		double dist4 = Math.sqrt(Math.pow(c1max.x - c2max.x, 2) + Math.pow(c1max.y - c2max.y, 2));
+		dist = Math.min(Math.min(dist, dist2), Math.min(dist3, dist4));
+		if (dist > maxCentersDistance)
+			return null;
+		if (Math.sin(centersAngle) * dist > 8)
+			return null;
 		double score = dist + coeffDeltaAngle * delta_angle;
 		// System.out.println(score + " " + dist + " " + 2 * delta_angle);
 		return new Edge(score, c1, c2);
@@ -499,13 +521,13 @@ public class SuperFrameImg {
 
 	}
 
-	public List<Span> assembleContours(List<SuperContour> superContours, Predicate<SuperContour> contoursFilter, Comparator<SuperContour> comparator, Predicate<Double> edgeFilter, double maxCentersDistance, double coeffDeltaAngle, double minSpanWidth) {
+	public List<Span> assembleContours(List<SuperContour> superContours, Predicate<SuperContour> contoursFilter, double maxCentersDistance, double coeffDeltaAngle, double minSpanWidth) {
 		superContours = superContours.stream().filter(contoursFilter).collect(Collectors.toList());
 		Collections.sort(superContours);
 		List<Edge> candidateEdges = new ArrayList<>();
 		for (int i = 0; i < superContours.size(); i++)
 			for (int j = 0; j < i; j++) {
-				Edge edge = generateCandidateEdge(superContours.get(i), superContours.get(j), comparator, edgeFilter, maxCentersDistance, coeffDeltaAngle);
+				Edge edge = generateCandidateEdge(superContours.get(i), superContours.get(j), maxCentersDistance, coeffDeltaAngle);
 				if (edge != null)
 					candidateEdges.add(edge);
 			}
@@ -561,7 +583,7 @@ public class SuperFrameImg {
 		BiFunction<double[], double[], Double> error = (xy, params) -> f.apply(xy[0], params) - xy[1];
 
 		public Function<Double, Double> computeApprox() {
-			double[] params = new LevenbergImpl<double[]>(error, contours.stream().map(sc -> new double[] { sc.center.x, sc.center.y }).collect(Collectors.toList()), new double[] { 0, 0, 0 }).getParams();
+			double[] params = new LevenbergImpl<>(error, contours.stream().map(sc -> new double[] { sc.center.x, sc.center.y }).collect(Collectors.toList()), new double[] { 0, 0, 0 }).getParams();
 			return x -> f.apply(x, params);
 		}
 	}

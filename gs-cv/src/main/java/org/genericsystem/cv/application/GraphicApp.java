@@ -1,5 +1,14 @@
 package org.genericsystem.cv.application;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Calibrated.AngleCalibrated;
 import org.genericsystem.cv.Lines;
@@ -13,15 +22,6 @@ import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -93,7 +93,9 @@ public class GraphicApp extends AbstractApp {
 			superFrame = gsCapture.read();
 		Image[] images = new Image[9];
 		Lines lines = superFrame.detectLines();
-		AngleCalibrated[] calibratedVps = deperspectiver.computeCalibratedVps(superFrame, config.textsEnabledMode, lines);
+		if (config.textsEnabledMode)
+			lines.getLines().addAll(superFrame.findTextOrientationLines());
+		AngleCalibrated[] calibratedVps = deperspectiver.computeCalibratedVps(superFrame, lines);
 		if (calibratedVps == null)
 			return null;
 		Mat deperspectiveHomography = deperspectiver.findHomography(superFrame, calibratedVps);
@@ -143,13 +145,13 @@ public class GraphicApp extends AbstractApp {
 		// superReferenceTemplate2.drawCentroids(detectedrealCenroids, new Scalar(255), -1, 2);
 		// detectedSuperContours.stream().forEach(c -> Imgproc.line(superReferenceTemplate2.getDisplay().getSrc(), c.point0, c.point1, new Scalar(0, 255, 0), 1));
 		// detectedSuperContours.stream().map(sc -> sc.center).forEach(pt -> Imgproc.circle(superReferenceTemplate2.getDisplay().getSrc(), pt, 3, new Scalar(255, 0, 0), -1));
-		List<Span> spans = superReferenceTemplate2.assembleContours(detectedSuperContours, SuperTemplate.HORIZONTAL_FILTER, SuperTemplate.HORIZONTAL_COMPARATOR, SuperTemplate.HORIZONTAL_EDGE_FILTER, 200, 2, 100);
+		List<Span> spans = superReferenceTemplate2.assembleContours(detectedSuperContours, c -> true, 300, 3, 100);
 		spans.forEach(sp -> {
 			double a = Math.random() * 255;
 			double b = Math.random() * 255;
 			double c = Math.random() * 255;
 			Scalar color = new Scalar(a, b, c);
-			// sp.getContours().forEach(ct -> Imgproc.drawContours(superReferenceTemplate2.getDisplay().getSrc(), Arrays.asList(ct.contour), 0, color, -1));
+			sp.getContours().forEach(ct -> Imgproc.drawContours(superReferenceTemplate2.getDisplay().getSrc(), Arrays.asList(ct.contour), 0, color, -1));
 			if (!sp.getContours().isEmpty()) {
 				Point[] pointer = new Point[] { sp.getContours().get(0).center };
 				sp.getContours().forEach(ct -> {
@@ -162,7 +164,7 @@ public class GraphicApp extends AbstractApp {
 				Point pointer = new Point(0, approx.apply(0d));
 				for (double x = 10; x < superReferenceTemplate2.size().width; x += 10) {
 					Point tmp = new Point(x, approx.apply(x));
-					Imgproc.line(superReferenceTemplate2.getDisplay().getSrc(), pointer, tmp, new Scalar(0, 0, 255), 3);
+					Imgproc.line(superReferenceTemplate2.getDisplay().getSrc(), pointer, tmp, new Scalar(0, 0, 255), 1);
 					pointer = tmp;
 				}
 			}
@@ -184,17 +186,20 @@ public class GraphicApp extends AbstractApp {
 		images[7] = layoutTemplate.getDisplay().toJfxImage();
 
 		SuperTemplate superReferenceTemplate4 = new SuperTemplate(superDeperspectived, CvType.CV_8UC3, SuperFrameImg::getFrame);
-		List<SuperContour> horizontals = detectedSuperContoursCopy.stream().filter(SuperTemplate.VERTICAL_FILTER).collect(Collectors.toList());
+
+		List<SuperContour> horizontals = detectedSuperContoursCopy.stream().collect(Collectors.toList());
 		horizontals.stream().forEach(c -> Imgproc.line(superReferenceTemplate4.getDisplay().getSrc(), c.left, c.right, new Scalar(255, 255, 255), 1));
 		horizontals.stream().map(sc -> sc.center).forEach(pt -> Imgproc.circle(superReferenceTemplate4.getDisplay().getSrc(), pt, 3, new Scalar(255, 0, 0), -1));
 		horizontals.stream().map(sc -> sc.left).forEach(pt -> Imgproc.circle(superReferenceTemplate4.getDisplay().getSrc(), pt, 3, new Scalar(0, 255, 0), -1));
 		horizontals.stream().map(sc -> sc.right).forEach(pt -> Imgproc.circle(superReferenceTemplate4.getDisplay().getSrc(), pt, 3, new Scalar(0, 0, 255), -1));
+		horizontals.stream().map(sc -> sc.top).forEach(pt -> Imgproc.circle(superReferenceTemplate4.getDisplay().getSrc(), pt, 3, new Scalar(0, 255, 255), -1));
+		horizontals.stream().map(sc -> sc.bottom).forEach(pt -> Imgproc.circle(superReferenceTemplate4.getDisplay().getSrc(), pt, 3, new Scalar(255, 0, 255), -1));
 
-		List<SuperContour> verticals = detectedSuperContoursCopy.stream().filter(SuperTemplate.HORIZONTAL_FILTER).collect(Collectors.toList());
-		verticals.stream().forEach(c -> Imgproc.line(superReferenceTemplate4.getDisplay().getSrc(), c.left, c.right, new Scalar(255, 255, 255), 1));
-		verticals.stream().map(sc -> sc.center).forEach(pt -> Imgproc.circle(superReferenceTemplate4.getDisplay().getSrc(), pt, 3, new Scalar(255, 0, 0), -1));
-		verticals.stream().map(sc -> sc.left).forEach(pt -> Imgproc.circle(superReferenceTemplate4.getDisplay().getSrc(), pt, 3, new Scalar(0, 255, 0), -1));
-		verticals.stream().map(sc -> sc.right).forEach(pt -> Imgproc.circle(superReferenceTemplate4.getDisplay().getSrc(), pt, 3, new Scalar(0, 0, 255), -1));
+		// List<SuperContour> verticals = detectedSuperContoursCopy.stream().filter(SuperTemplate.HORIZONTAL_FILTER).collect(Collectors.toList());
+		// verticals.stream().forEach(c -> Imgproc.line(superReferenceTemplate4.getDisplay().getSrc(), c.left, c.right, new Scalar(255, 255, 255), 1));
+		// verticals.stream().map(sc -> sc.center).forEach(pt -> Imgproc.circle(superReferenceTemplate4.getDisplay().getSrc(), pt, 3, new Scalar(255, 0, 0), -1));
+		// verticals.stream().map(sc -> sc.left).forEach(pt -> Imgproc.circle(superReferenceTemplate4.getDisplay().getSrc(), pt, 3, new Scalar(0, 255, 0), -1));
+		// verticals.stream().map(sc -> sc.right).forEach(pt -> Imgproc.circle(superReferenceTemplate4.getDisplay().getSrc(), pt, 3, new Scalar(0, 0, 255), -1));
 
 		images[8] = superReferenceTemplate4.getDisplay().toJfxImage();
 

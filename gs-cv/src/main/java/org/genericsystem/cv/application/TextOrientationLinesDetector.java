@@ -1,5 +1,12 @@
 package org.genericsystem.cv.application;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.function.BiFunction;
+
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.Lines.Line;
 import org.genericsystem.cv.lm.LevenbergImpl;
@@ -14,17 +21,11 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.function.BiFunction;
-
 public class TextOrientationLinesDetector {
 
 	static List<Line> getTextOrientationLines(SuperFrameImg superFrame) {
-		List<Circle> circles = detectCircles(superFrame.getDiffFrame(), 50, 30, 100);
+		// List<Circle> circles = detectCircles(superFrame.getDiffFrame(), 50, 30, 100);
+		List<Circle> circles = gridCircles(superFrame.size(), (int) (superFrame.size().width / 15));
 		Collection<Circle> selectedCircles = selectRandomObjects(circles, 30);
 		List<Line> result = new ArrayList<>();
 		for (Circle circle : selectedCircles) {
@@ -45,6 +46,15 @@ public class TextOrientationLinesDetector {
 		// }
 		// return result2;
 		return result;
+	}
+
+	private static List<Circle> gridCircles(Size size, double radius) {
+		List<Circle> circles = new ArrayList<>();
+		for (int j = 2; j <= (size.width / radius - 2); j += 2)
+			for (int i = 2; i <= (size.height / radius - 2); i += 2) {
+				circles.add(new Circle(new Point(j * radius, i * radius), (int) radius));
+			}
+		return circles;
 	}
 
 	private static List<MatOfPoint> getContours(Img img) {
@@ -172,12 +182,12 @@ public class TextOrientationLinesDetector {
 	}
 
 	static class Circle {
+		Point center;
+		float radius;
+
 		public Circle(Point center, float radius) {
 			this.center = center;
 			this.radius = radius;
 		}
-
-		Point center;
-		float radius;
 	}
 }
