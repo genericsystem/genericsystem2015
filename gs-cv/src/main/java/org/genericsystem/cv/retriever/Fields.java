@@ -26,6 +26,8 @@ import org.opencv.utils.Converters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class Fields extends AbstractFields<Field> {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -63,6 +65,7 @@ public class Fields extends AbstractFields<Field> {
 		}
 	}
 
+	@JsonIgnore
 	public List<Field> getRoots() {
 		return fields.stream().filter(field -> field.isOrphan()).collect(Collectors.toList());
 	}

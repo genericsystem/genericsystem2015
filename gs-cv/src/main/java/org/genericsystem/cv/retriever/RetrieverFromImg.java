@@ -48,7 +48,7 @@ public class RetrieverFromImg {
 				try (DirectoryStream<Path> files = Files.newDirectoryStream(dir, path -> Files.isRegularFile(path))) {
 					files.forEach(file -> {
 //						logger.debug("Compute fields for file {}", file);
-						computeFields(file, targetDir);
+						computeFields(file, sourceDir, targetDir);
 					});
 				} catch (IOException e) {
 					throw new RuntimeException(e);
@@ -59,8 +59,10 @@ public class RetrieverFromImg {
 		}
 	}
 
-	private void computeFields(Path imgPath, Path targetDir) {
-		Mat frame = new Img(Imgcodecs.imread(imgPath.toAbsolutePath().toString())).resize(1000).getSrc();
+	private void computeFields(Path imgPath, Path sourceDir, Path targetDir) {
+		Img img = new Img(Imgcodecs.imread(imgPath.toAbsolutePath().toString()));
+		Img imgSmall = img.resize(1000);
+		Mat frame = imgSmall.resize(1000).getSrc();
 		ImgDescriptor stabilizedImgDescriptor = null;
 		boolean stabilizationHasChanged = true;
 		int stabilizationErrors = 0;
@@ -126,14 +128,17 @@ public class RetrieverFromImg {
 			} finally {
 				Stats.endTask("frame");
 			}
-
-			Path file = targetDir.resolve(imgPath).resolveSibling(imgPath.getFileName().toString() + ".json");
-			try {
-				Files.createDirectories(file.getParent());
-				mapper.writerWithDefaultPrettyPrinter().writeValue(file.toFile(), fields);
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
+		}
+		Path file = targetDir.resolve(sourceDir.relativize(imgPath)).resolveSibling(imgPath.getFileName().toString() + ".json");
+		logger.debug("Writing to file {}.", file);
+		try {
+			Files.createDirectories(file.getParent());
+			mapper.writerWithDefaultPrettyPrinter().writeValue(file.toFile(), fields);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		} finally {
+			imgSmall.close();
+			img.close();
 		}
 	}
 }

@@ -27,8 +27,11 @@ public class Field extends AbstractField {
 	private static final double CONFIDENCE_THRESHOLD = 0.92;
 	private static final double LOCK_THRESHOLD = 0.90;
 
+	@JsonIgnore
 	private int deadCounter;
+	@JsonIgnore
 	private double locklLevel;
+	@JsonIgnore
 	private boolean validated;
 
 	public Field(GSRect rect) {
@@ -142,6 +145,7 @@ public class Field extends AbstractField {
 		return validated;
 	}
 
+	@JsonIgnore
 	public boolean isLocked() {
 		return getLockLevel() >= LOCK_THRESHOLD;
 	}
@@ -207,6 +211,7 @@ public class Field extends AbstractField {
 		return !getSiblings().isEmpty();
 	}
 
+	@JsonIgnore
 	public boolean isOrphan() {
 		return parent == null;
 	}

@@ -4,6 +4,8 @@ import java.util.Optional;
 
 import org.genericsystem.reinforcer.NormalizedRect;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class GSRect implements Comparable<GSRect> {
 
 	private double x, y, width, height;
@@ -289,6 +291,7 @@ public class GSRect implements Comparable<GSRect> {
 		this.height = height;
 	}
 
+	@JsonIgnore
 	public GSPoint getCenter() {
 		return new GSPoint(x + width / 2, y + height / 2);
 	}

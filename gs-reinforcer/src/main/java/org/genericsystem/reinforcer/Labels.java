@@ -1,5 +1,8 @@
 package org.genericsystem.reinforcer;
 
+import java.io.IOException;
+import java.lang.invoke.MethodHandles;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -7,6 +10,8 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -21,13 +26,57 @@ import org.genericsystem.reinforcer.Template3.LabelDesc;
 import org.genericsystem.reinforcer.Template3.Match;
 import org.genericsystem.reinforcer.tools.GSPoint;
 import org.genericsystem.reinforcer.tools.GSRect;
+import org.genericsystem.reinforcer.tools.JsonLabel;
 import org.genericsystem.reinforcer.tools.StringCompare;
+import org.genericsystem.reinforcer.tools.JsonLabel.JsonLabels;
 import org.genericsystem.reinforcer.tools.StringCompare.SIMILARITY;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class Labels implements Iterable<Label> {
 
-	private final Set<Label> labels = new HashSet<>();
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+	private final List<Label> labels;
 	private static final double THRESHOLD = 0.1; // Error threshold for the computation of the affine transformation in alignWith.
+	private static final ObjectMapper mapper = new ObjectMapper();
+
+	public Labels() {
+		this.labels = new ArrayList<>();
+	}
+
+	public Labels(List<Label> labels) {
+		this.labels = labels;
+	}
+
+	public static Labels from(Path file) {
+		try {
+			JsonLabels jsonLabels = mapper.readValue(file.toFile(), JsonLabels.class);
+			Labels result = new Labels();
+
+			for (JsonLabel label : jsonLabels.getFields())
+				if (label.getChildren().isEmpty() && !label.getLabels().isEmpty()) {
+					String text = bestOcr(label.getLabels());
+					result.addLabel(new Label(label.getOcrRect(), text));
+				}
+
+			return result;
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private static String bestOcr(Map<String, Integer> labels) {
+		String best = null;
+		int bestScore = 0;
+		for (Entry<String, Integer> entry : labels.entrySet())
+			if (entry.getValue() > bestScore) {
+				bestScore = entry.getValue();
+				best = entry.getKey();
+			}
+		return best;
+	}
 
 	public boolean addLabel(double tlx, double tly, double brx, double bry, String candidateLabel) {
 		Label candidate = new Label(tlx, tly, brx, bry, candidateLabel);
@@ -97,6 +146,11 @@ public class Labels implements Iterable<Label> {
 			}
 		}
 		return bestMatches.matchList;
+	}
+
+	public Labels sort() {
+		Collections.sort(labels, labelComparator);
+		return this;
 	}
 
 	private Comparator<Label> labelComparator = (l1, l2) -> {
