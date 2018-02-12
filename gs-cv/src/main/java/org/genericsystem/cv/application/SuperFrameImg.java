@@ -264,7 +264,7 @@ public class SuperFrameImg {
 
 	private Img buildDiffFrame() {
 		Mat diffFrame = getGrayFrame().gaussianBlur(new Size(5, 5)).getSrc();
-		Core.absdiff(diffFrame, new Scalar(0), diffFrame);
+		Core.absdiff(diffFrame, new Scalar(150), diffFrame);
 		Imgproc.adaptiveThreshold(diffFrame, diffFrame, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 7, 3);
 		return new Img(diffFrame, false);// .cleanTablesInv(0.05);
 	}

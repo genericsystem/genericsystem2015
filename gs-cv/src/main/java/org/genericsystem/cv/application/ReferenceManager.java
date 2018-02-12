@@ -1,5 +1,13 @@
 package org.genericsystem.cv.application;
 
+import org.opencv.core.Core;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.core.Point;
+import org.opencv.core.Rect;
+import org.opencv.core.Size;
+import org.opencv.utils.Converters;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -9,14 +17,6 @@ import java.util.Random;
 import java.util.TreeMap;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
-import org.opencv.core.Core;
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
-import org.opencv.core.Point;
-import org.opencv.core.Rect;
-import org.opencv.core.Size;
-import org.opencv.utils.Converters;
 
 public class ReferenceManager {
 	private static final Mat IDENTITY_MAT = Mat.eye(new Size(3, 3), CvType.CV_64F);
@@ -62,7 +62,7 @@ public class ReferenceManager {
 				bestImgDescriptor = reference;
 			} else {
 				int reconciliationTries = 0;
-				List<ImgDescriptor> list = getRandomPool(lastStored, reference);				
+				List<ImgDescriptor> list = getRandomPool(lastStored, reference);
 				Random randomGenerator = new Random();
 				while (!list.isEmpty() && reconciliationTries < 5) {
 					ImgDescriptor randomImgDescriptor = list.get(randomGenerator.nextInt(list.size()));
@@ -139,23 +139,23 @@ public class ReferenceManager {
 	}
 
 	private ImgDescriptor findConsensualDescriptor() {
-		//		double bestDistance = Double.MAX_VALUE;
-		//		ImgDescriptor bestDescriptor = null;
-		//		for (Entry<ImgDescriptor, Mat> entry : toReferenceGraphy.entrySet()) {
-		//			double distance = 0;
-		//			for (Entry<ImgDescriptor, Mat> entry2 : toReferenceGraphy.entrySet()) {
-		//				if (!entry.getKey().equals(entry2.getKey())) {
-		//					Mat betweenHomography = new Mat();
-		//					Core.gemm(entry.getValue(), entry2.getValue().inv(), 1, new Mat(), 0, betweenHomography);
-		//					distance += distance(betweenHomography);
-		//				}
-		//			}
-		//			if (distance < bestDistance) {
-		//				bestDistance = distance;
-		//				bestDescriptor = entry.getKey();
-		//			}
-		//		}
-		//		return bestDescriptor;
+		// double bestDistance = Double.MAX_VALUE;
+		// ImgDescriptor bestDescriptor = null;
+		// for (Entry<ImgDescriptor, Mat> entry : toReferenceGraphy.entrySet()) {
+		// double distance = 0;
+		// for (Entry<ImgDescriptor, Mat> entry2 : toReferenceGraphy.entrySet()) {
+		// if (!entry.getKey().equals(entry2.getKey())) {
+		// Mat betweenHomography = new Mat();
+		// Core.gemm(entry.getValue(), entry2.getValue().inv(), 1, new Mat(), 0, betweenHomography);
+		// distance += distance(betweenHomography);
+		// }
+		// }
+		// if (distance < bestDistance) {
+		// bestDistance = distance;
+		// bestDescriptor = entry.getKey();
+		// }
+		// }
+		// return bestDescriptor;
 
 		double minArea = Double.MAX_VALUE;
 		ImgDescriptor bestDescriptor = null;
@@ -186,7 +186,6 @@ public class ReferenceManager {
 	public Rect rescale(Rect rect, double ratio) {
 		return new Rect((int) (rect.x * ratio), (int) (rect.y * ratio), (int) (rect.width * ratio), (int) (rect.height * ratio));
 	}
-
 
 	private List<Rect> transpose(List<Rect> rects, double minX, double minY) {
 		return rects.stream().map(r -> transpose(r, minX, minY)).collect(Collectors.toList());

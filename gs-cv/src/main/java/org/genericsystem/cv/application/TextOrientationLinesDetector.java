@@ -1,12 +1,5 @@
 package org.genericsystem.cv.application;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.function.BiFunction;
-
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.Lines.Line;
 import org.genericsystem.cv.lm.LevenbergImpl;
@@ -21,11 +14,18 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.function.BiFunction;
+
 public class TextOrientationLinesDetector {
 
 	static List<Line> getTextOrientationLines(SuperFrameImg superFrame) {
-		List<Circle> circles = detectCircles(superFrame, 30, 100);
-		Collection<Circle> selectedCircles = selectRandomCirles(circles, 20);
+		List<Circle> circles = detectCircles(superFrame.getDiffFrame(), 50, 30, 100);
+		Collection<Circle> selectedCircles = selectRandomObjects(circles, 30);
 		List<Line> result = new ArrayList<>();
 		for (Circle circle : selectedCircles) {
 			Img circledImg = getCircledImg(superFrame, (int) circle.radius, circle.center);
@@ -33,37 +33,63 @@ public class TextOrientationLinesDetector {
 			result.add(buildLine(circle.center, angle, circle.radius));
 			Imgproc.circle(superFrame.getDisplay().getSrc(), circle.center, (int) circle.radius, new Scalar(0, 255, 0), 1);
 		}
+
+		// List<Rect> rects = detectRects(superFrame.getDiffFrame(), 50, 60, 200, 10, 50);
+		// Collection<Rect> selectedRects = selectRandomObjects(rects, 30);
+		// List<Line> result2 = new ArrayList<>();
+		// for (Rect rect : selectedRects) {
+		// Img rectImg = getRectImg(superFrame, rect);
+		// double angle = getBestAngle(rectImg, 42, 12, 5, 192, null) / 180 * Math.PI;
+		// result2.add(buildLine(new Point(rect.tl().x + rect.width / 2, rect.tl().y + rect.height / 2), angle, rect.width / 2));
+		// Imgproc.rectangle(superFrame.getDisplay().getSrc(), rect.tl(), rect.br(), new Scalar(0, 0, 255), 1);
+		// }
+		// return result2;
 		return result;
 	}
 
-	private static List<Circle> detectCircles(SuperFrameImg superFrame, int minRadius, int maxRadius) {
+	private static List<MatOfPoint> getContours(Img img) {
 		List<MatOfPoint> contours = new ArrayList<>();
-		Imgproc.findContours(superFrame.getDiffFrame().getSrc(), contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+		Imgproc.findContours(img.getSrc(), contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+		return contours;
+	}
+
+	private static List<Circle> detectCircles(Img img, int maxContourArea, int minRadius, int maxRadius) {
+		List<MatOfPoint> contours = getContours(img);
 		List<Circle> circles = new ArrayList<>();
-		for (int i = 0; i < contours.size(); i++) {
-			MatOfPoint contour = contours.get(i);
+		for (MatOfPoint contour : contours) {
 			double contourarea = Imgproc.contourArea(contour);
 			if (contourarea > 50) {
 				float[] radius = new float[1];
 				Point center = new Point();
 				MatOfPoint2f contour2F = new MatOfPoint2f(contour.toArray());
 				Imgproc.minEnclosingCircle(contour2F, center, radius);
-				if (radius[0] > minRadius && radius[0] < maxRadius && center.x > radius[0] && center.y > radius[0] && ((center.x + radius[0]) < superFrame.width()) && ((center.y + radius[0]) < superFrame.height())) {
+				if (radius[0] > minRadius && radius[0] < maxRadius && center.x > radius[0] && center.y > radius[0] && ((center.x + radius[0]) < img.width()) && ((center.y + radius[0]) < img.height()))
 					circles.add(new Circle(center, radius[0]));
-					// Imgproc.circle(frame, center, (int) radius[0], new Scalar(0, 0, 255));
-				}
-				// Imgproc.drawContours(superFrame.getDisplay().getSrc(), Arrays.asList(contour), 0, new Scalar(0, 0, 255), 1);
 			}
 		}
 		return circles;
 	}
 
-	private static Collection<Circle> selectRandomCirles(List<Circle> circles, int circlesNumber) {
-		if (circles.size() <= circlesNumber)
-			return circles;
-		Set<Circle> result = new HashSet<>();
-		while (result.size() < circlesNumber)
-			result.add(circles.get((int) (Math.random() * circles.size())));
+	private static List<Rect> detectRects(Img img, int maxContourArea, int minWidth, int maxWidth, int minHeight, int maxHeight) {
+		List<MatOfPoint> contours = getContours(img);
+		List<Rect> rects = new ArrayList<>();
+		for (MatOfPoint contour : contours) {
+			double contourarea = Imgproc.contourArea(contour);
+			if (contourarea > 50) {
+				Rect rect = Imgproc.boundingRect(contour);
+				if (rect.width >= minWidth && rect.width <= maxWidth && rect.height >= minHeight && rect.height <= maxHeight)
+					rects.add(rect);
+			}
+		}
+		return rects;
+	}
+
+	private static <T> Collection<T> selectRandomObjects(List<T> objects, int maxReturnObjects) {
+		if (objects.size() <= maxReturnObjects)
+			return objects;
+		Set<T> result = new HashSet<>();
+		while (result.size() < maxReturnObjects)
+			result.add(objects.get((int) (Math.random() * objects.size())));
 		return result;
 	}
 
@@ -76,6 +102,10 @@ public class TextOrientationLinesDetector {
 		roi.copyTo(circled, mask);
 		Img circledImg = new Img(circled, false);
 		return circledImg;
+	}
+
+	private static Img getRectImg(SuperFrameImg superFrame, Rect rect) {
+		return new Img(new Mat(superFrame.getBinarized().getSrc(), rect), false);
 	}
 
 	private static Line buildLine(Point center, double angle, double size) {
