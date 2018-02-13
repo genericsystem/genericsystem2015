@@ -4,12 +4,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
+import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.genericsystem.cv.Calibrated;
 import org.genericsystem.cv.Calibrated.AngleCalibrated;
 import org.genericsystem.cv.Img;
@@ -471,7 +472,7 @@ public class SuperFrameImg {
 		dist = Math.min(Math.min(dist, dist2), Math.min(dist3, dist4));
 		if (dist > maxCentersDistance)
 			return null;
-		if (Math.sin(centersAngle) * dist > 8)
+		if (Math.sin(centersAngle) * dist > 4)
 			return null;
 		double score = dist + coeffDeltaAngle * delta_angle;
 		// System.out.println(score + " " + dist + " " + 2 * delta_angle);
@@ -570,6 +571,7 @@ public class SuperFrameImg {
 	public static class Span {
 
 		private List<SuperContour> contours = new ArrayList<>();
+		private Function<Double, Double> approx;
 
 		public void add(SuperContour superContour) {
 			contours.add(superContour);
@@ -579,12 +581,18 @@ public class SuperFrameImg {
 			return contours;
 		}
 
-		BiFunction<Double, double[], Double> f = (x, params) -> params[0] + params[1] * x + params[2] * x * x;
-		BiFunction<double[], double[], Double> error = (xy, params) -> f.apply(xy[0], params) - xy[1];
+		// BiFunction<Double, double[], Double> f = (x, params) -> params[0] + params[1] * x + params[2] * x * x;
+		// BiFunction<double[], double[], Double> error = (xy, params) -> f.apply(xy[0], params) - xy[1];
 
-		public Function<Double, Double> computeApprox() {
-			double[] params = new LevenbergImpl<>(error, contours.stream().map(sc -> new double[] { sc.center.x, sc.center.y }).collect(Collectors.toList()), new double[] { 0, 0, 0 }).getParams();
-			return x -> f.apply(x, params);
+		public Function<Double, Double> getApprox() {
+			return approx != null ? approx : (approx = computeApprox());
+		}
+
+		private Function<Double, Double> computeApprox() {
+			// double[] params = new LevenbergImpl<>(error, contours.stream().map(sc -> new double[] { sc.center.x, sc.center.y }).collect(Collectors.toList()), new double[] { 0, 0, 0 }).getParams();
+			// return x -> f.apply(x, params);
+			PolynomialSplineFunction psf = new LinearInterpolator().interpolate(contours.stream().mapToDouble(sc -> sc.center.x).toArray(), contours.stream().mapToDouble(sc -> sc.center.y).toArray());
+			return x -> psf.isValidPoint(x) ? psf.value(x) : null;
 		}
 	}
 

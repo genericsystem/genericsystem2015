@@ -6,7 +6,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.genericsystem.cv.AbstractApp;
@@ -159,16 +158,75 @@ public class GraphicApp extends AbstractApp {
 					pointer[0] = ct.center;
 				});
 			}
-			if (sp.getContours().size() >= 4) {
-				Function<Double, Double> approx = sp.computeApprox();
-				Point pointer = new Point(0, approx.apply(0d));
-				for (double x = 10; x < superReferenceTemplate2.size().width; x += 10) {
-					Point tmp = new Point(x, approx.apply(x));
-					Imgproc.line(superReferenceTemplate2.getDisplay().getSrc(), pointer, tmp, new Scalar(0, 0, 255), 1);
-					pointer = tmp;
-				}
-			}
+			;
 		});
+		spans = spans.stream().filter(s -> s.getContours().size() >= 2).collect(Collectors.toList());
+
+		int rows = spans.size();
+		int cols = (int) superReferenceTemplate2.size().width / 10;
+		Double[][] table = new Double[rows][cols];
+		for (int row = 0; row < rows; row++)
+			for (int col = 0; col < cols; col++)
+				table[row][col] = spans.get(row).getApprox().apply((double) col * 10);
+
+		for (int row = 1; row < rows - 1; row++)
+			for (int col = 0; col < cols; col++)
+				if (table[row][col] == null) {
+					if (col > 0 && table[row][col - 1] != null) {
+						int topRow = row - 1;
+
+						while (topRow >= 0 && (table[topRow][col - 1] == null || table[topRow][col] == null))
+							topRow--;
+						if (topRow >= 0) {
+							int bottomRow = row + 1;
+							System.out.println(topRow + " " + col);
+							while (bottomRow < rows && table[bottomRow][col - 1] == null || table[bottomRow][col] == null)
+								bottomRow++;
+							if (bottomRow < rows) {
+								double rapport = (table[row][col - 1] - table[topRow][col - 1]) / (table[bottomRow][col - 1] - table[topRow][col - 1]);
+								table[row][col] = rapport * (table[bottomRow][col] - table[topRow][col]) + table[topRow][col];
+							}
+						}
+					}
+				}
+
+		for (int row = 0; row < rows - 1; row++)
+			for (int col = cols - 1; col >= 0; col--)
+				if (table[row][col] == null) {
+					if (col < cols - 1 && table[row][col + 1] != null) {
+						int topRow = row - 1;
+						while (topRow >= 0 && (table[topRow][col + 1] == null || table[topRow][col] == null))
+							topRow--;
+						if (topRow >= 0) {
+							int bottomRow = row + 1;
+							while (bottomRow < rows && table[bottomRow][col + 1] == null || table[bottomRow][col] == null)
+								bottomRow++;
+							if (bottomRow < rows) {
+								double rapport = (table[row][col + 1] - table[topRow][col + 1]) / (table[bottomRow][col + 1] - table[topRow][col + 1]);
+								table[row][col] = rapport * (table[bottomRow][col] - table[topRow][col]) + table[topRow][col];
+							}
+						}
+					}
+				}
+
+		for (int row = 0; row < rows; row++) {
+
+			Point pointer = table[row][0] != null ? new Point(0, table[row][0]) : null;
+
+			for (int col = 1; col < cols; col++) {
+				Point tmp = table[row][col] != null ? new Point(col * 10, table[row][col]) : null;
+				if (tmp != null && pointer != null)
+					Imgproc.line(superReferenceTemplate2.getDisplay().getSrc(), pointer, tmp, new Scalar(0, 0, 255), 1);
+				pointer = tmp;
+			}
+		}
+
+		// Point pointer = new Point(0, approx.apply(0d));
+		// for (double x = 10; x < superReferenceTemplate2.size().width; x += 10) {
+		// Point tmp = new Point(x, approx.apply(x));
+		// Imgproc.line(superReferenceTemplate2.getDisplay().getSrc(), pointer, tmp, new Scalar(0, 0, 255), 1);
+		// pointer = tmp;
+		// }
 
 		// detectedrealCenroids.stream().map(sc -> sc.point1).forEach(pt -> Imgproc.circle(superReferenceTemplate2.getDisplay().getSrc(), pt, 3, new Scalar(0, 0, 255), -1));
 		// new Lines(superReferenceTemplate2.getDisplay().houghLinesP(1, Math.PI / 180, 10, 50, 47)).filter(line -> Math.atan2(Math.abs(line.y2 - line.y1), Math.abs(line.x2 - line.x1)) < 5 * Math.PI /
