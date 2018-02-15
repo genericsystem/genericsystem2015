@@ -14,6 +14,7 @@ import org.apache.spark.ml.classification.OneVsRest;
 import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator;
 import org.apache.spark.ml.feature.HashingTF;
 import org.apache.spark.ml.feature.IDF;
+import org.apache.spark.ml.feature.IndexToString;
 import org.apache.spark.ml.feature.StringIndexer;
 import org.apache.spark.ml.feature.Tokenizer;
 import org.apache.spark.ml.param.ParamMap;
@@ -76,9 +77,12 @@ public class SVMClassifier {
 				.setClassifier(lsvc)
 				.setFeaturesCol(idf.getOutputCol())
 				.setLabelCol(indexer.getOutputCol());
+		IndexToString converter = new IndexToString()
+				.setInputCol("prediction")
+				.setOutputCol("origPrediction");
 
 		Pipeline pipeline = new Pipeline()
-				.setStages(new PipelineStage[] { indexer, tokenizer, hashingTF, idf, ovr });
+				.setStages(new PipelineStage[] { indexer, tokenizer, hashingTF, idf, ovr, converter });
 
 		ParamMap[] paramGrid = new ParamGridBuilder()
 				.addGrid(hashingTF.numFeatures(), new int[] { 20 , 50, 200, 1000 })
