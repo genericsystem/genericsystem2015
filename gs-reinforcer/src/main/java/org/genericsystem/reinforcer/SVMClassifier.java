@@ -34,7 +34,7 @@ public class SVMClassifier {
 	private static final Logger logger = LoggerFactory.getLogger(SVMClassifier.class);
 
 	public static void main(String[] args) {
-		SparkConf sparkConf = new SparkConf().setMaster("local[2]");
+		SparkConf sparkConf = new SparkConf().setMaster("local[*]");
 		final SparkSession spark = SparkSession
 				.builder()
 				.config(sparkConf)
