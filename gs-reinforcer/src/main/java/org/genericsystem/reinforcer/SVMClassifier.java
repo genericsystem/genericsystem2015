@@ -1,7 +1,9 @@
 package org.genericsystem.reinforcer;
 
+import static org.apache.spark.sql.functions.input_file_name;
+import static org.apache.spark.sql.functions.regexp_extract;
+
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -24,8 +26,6 @@ import org.apache.spark.ml.tuning.ParamGridBuilder;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
-import org.apache.spark.sql.api.java.UDF1;
-import org.apache.spark.sql.types.DataTypes;
 
 public class SVMClassifier {
 
@@ -40,18 +40,13 @@ public class SVMClassifier {
 		spark.stop();
 	}
 
-	public static class LabelComputer {
-		public String computeLabel(String fileName) {
-			return Paths.get(fileName).getParent().getFileName().toString();
-		}
+	public Dataset<Row> loadData(SparkSession spark, String path) {
+		Dataset<Row> data = spark.read().text(path).withColumn("label", input_file_name());
+		return data.withColumn("label", regexp_extract(data.col("label"), ".*/([^/]*)/[^/]*", 1)).cache();
 	}
 
-	public void loadData(SparkSession spark) {
-		UDF1<String, String> labelUDF = t1 -> new LabelComputer().computeLabel(t1);
-		spark.udf().register("label", labelUDF, DataTypes.StringType);
-		Dataset<Row> data = spark.read().text("pieces/text/*").withColumn("label", org.apache.spark.sql.functions.input_file_name());
-		data = data.withColumn("label", org.apache.spark.sql.functions.callUDF("label", data.col("label")));
-
+	public void trainModel(SparkSession spark) {
+		Dataset<Row> data = loadData(spark, "pieces/text/*");
 		Dataset<Row>[] splits = data.randomSplit(new double[] {0.7, 0.3});
 		Dataset<Row> trainData = splits[0];
 		Dataset<Row> validData = splits[1];
