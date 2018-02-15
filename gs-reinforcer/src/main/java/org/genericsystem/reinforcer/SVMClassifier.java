@@ -26,8 +26,12 @@ import org.apache.spark.ml.tuning.ParamGridBuilder;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SVMClassifier {
+
+	private static final Logger logger = LoggerFactory.getLogger(SVMClassifier.class);
 
 	public static void main(String[] args) {
 		SparkConf sparkConf = new SparkConf().setMaster("local[2]");
@@ -99,7 +103,7 @@ public class SVMClassifier {
 
 		Dataset<Row> predictions = cvModel.transform(validData);
 		double accuracy = evaluator.evaluate(predictions);
-		System.out.println("Test error = " + (1 - accuracy));
+		logger.info("Test error = {}.", 1 - accuracy);
 
 		DateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
 		try {
