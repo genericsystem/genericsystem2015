@@ -1,13 +1,5 @@
 package org.genericsystem.cv.application;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Calibrated.AngleCalibrated;
 import org.genericsystem.cv.Lines;
@@ -21,6 +13,14 @@ import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -158,9 +158,7 @@ public class GraphicApp extends AbstractApp {
 					pointer[0] = ct.center;
 				});
 			}
-			;
 		});
-		spans = spans.stream().filter(s -> s.getContours().size() >= 2).collect(Collectors.toList());
 
 		int rows = spans.size();
 		int cols = (int) superReferenceTemplate2.size().width / 10;
@@ -174,13 +172,11 @@ public class GraphicApp extends AbstractApp {
 				if (table[row][col] == null) {
 					if (col > 0 && table[row][col - 1] != null) {
 						int topRow = row - 1;
-
 						while (topRow >= 0 && (table[topRow][col - 1] == null || table[topRow][col] == null))
 							topRow--;
 						if (topRow >= 0) {
 							int bottomRow = row + 1;
-							System.out.println(topRow + " " + col);
-							while (bottomRow < rows && table[bottomRow][col - 1] == null || table[bottomRow][col] == null)
+							while (bottomRow < rows && (table[bottomRow][col - 1] == null || table[bottomRow][col] == null))
 								bottomRow++;
 							if (bottomRow < rows) {
 								double rapport = (table[row][col - 1] - table[topRow][col - 1]) / (table[bottomRow][col - 1] - table[topRow][col - 1]);
@@ -191,7 +187,7 @@ public class GraphicApp extends AbstractApp {
 				}
 
 		for (int row = 0; row < rows - 1; row++)
-			for (int col = cols - 1; col >= 0; col--)
+			for (int col = cols - 2; col >= 0; col--)
 				if (table[row][col] == null) {
 					if (col < cols - 1 && table[row][col + 1] != null) {
 						int topRow = row - 1;
@@ -199,7 +195,7 @@ public class GraphicApp extends AbstractApp {
 							topRow--;
 						if (topRow >= 0) {
 							int bottomRow = row + 1;
-							while (bottomRow < rows && table[bottomRow][col + 1] == null || table[bottomRow][col] == null)
+							while (bottomRow < rows && (table[bottomRow][col + 1] == null || table[bottomRow][col] == null))
 								bottomRow++;
 							if (bottomRow < rows) {
 								double rapport = (table[row][col + 1] - table[topRow][col + 1]) / (table[bottomRow][col + 1] - table[topRow][col + 1]);
@@ -210,9 +206,7 @@ public class GraphicApp extends AbstractApp {
 				}
 
 		for (int row = 0; row < rows; row++) {
-
 			Point pointer = table[row][0] != null ? new Point(0, table[row][0]) : null;
-
 			for (int col = 1; col < cols; col++) {
 				Point tmp = table[row][col] != null ? new Point(col * 10, table[row][col]) : null;
 				if (tmp != null && pointer != null)

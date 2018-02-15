@@ -1,14 +1,5 @@
 package org.genericsystem.cv.application;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.genericsystem.cv.Calibrated;
@@ -29,6 +20,15 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.imgproc.Moments;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class SuperFrameImg {
 
@@ -562,13 +562,14 @@ public class SuperFrameImg {
 				width += contour.lxmax - contour.lxmin;
 				contour = contour.succ;
 			}
-			if (width > minSpanWidth)
+			if (width > minSpanWidth && curSpan.getContours().size() > 1)
 				spans.add(curSpan);
 		}
+		Collections.sort(spans);
 		return spans;
 	}
 
-	public static class Span {
+	public static class Span implements Comparable<Span> {
 
 		private List<SuperContour> contours = new ArrayList<>();
 		private Function<Double, Double> approx;
@@ -593,6 +594,11 @@ public class SuperFrameImg {
 			// return x -> f.apply(x, params);
 			PolynomialSplineFunction psf = new LinearInterpolator().interpolate(contours.stream().mapToDouble(sc -> sc.center.x).toArray(), contours.stream().mapToDouble(sc -> sc.center.y).toArray());
 			return x -> psf.isValidPoint(x) ? psf.value(x) : null;
+		}
+
+		@Override
+		public int compareTo(Span span) {
+			return Double.compare(getContours().stream().mapToDouble(c -> c.center.y).average().getAsDouble(), span.getContours().stream().mapToDouble(c -> c.center.y).average().getAsDouble());
 		}
 	}
 
