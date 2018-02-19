@@ -40,7 +40,7 @@ public class SVMClassifier {
 				.config(sparkConf)
 				.appName("SVMClassifier")
 				.getOrCreate();
-		new SVMClassifier().loadData(spark);
+		new SVMClassifier().trainModel(spark);
 		spark.stop();
 	}
 
