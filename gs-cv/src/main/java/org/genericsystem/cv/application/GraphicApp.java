@@ -115,7 +115,8 @@ public class GraphicApp extends AbstractApp {
 
 		SuperTemplate surfaceTemplate = new SuperTemplate(new SuperFrameImg(superDeperspectived.getDisplay().bgr2Gray().getSrc(), superFrame.getPp(), f), CvType.CV_8UC1, SuperFrameImg::getDisplay);
 		Layout surfaceLayout = surfaceTemplate.layout();
-		double surface = surfaceLayout.computeTotalSurface(surfaceTemplate.getFrame());
+		double surface = surfaceLayout.normalizedArea();
+
 		superDeperspectived.putText(String.valueOf(surface));
 
 		images[2] = superDeperspectived.getDisplay().toJfxImage();

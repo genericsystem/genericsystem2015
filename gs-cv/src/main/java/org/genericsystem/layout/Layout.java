@@ -1,14 +1,5 @@
 package org.genericsystem.layout;
 
-import java.text.Normalizer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.function.BiConsumer;
-
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.Ocr;
 import org.genericsystem.cv.utils.OCRPlasty;
@@ -21,6 +12,15 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
+
+import java.text.Normalizer;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.function.BiConsumer;
 
 public class Layout {
 
@@ -45,21 +45,15 @@ public class Layout {
 		return new Img(img, this);
 	}
 
+	public Point[] getNormalizedTlBr() {
+		Point[] parentRect = getParent() != null ? getParent().getNormalizedTlBr() : new Point[] { new Point(0, 0), new Point(1, 1) };
+		return new Point[] { new Point(parentRect[0].x + (parentRect[1].x - parentRect[0].x) * getX1(), parentRect[0].y + (parentRect[1].y - parentRect[0].y) * getY1()),
+				new Point(parentRect[0].x + (parentRect[1].x - parentRect[0].x) * getX2(), parentRect[0].y + (parentRect[1].y - parentRect[0].y) * getY2()) };
+	}
+
 	public Rect getRect(Img imgRoot) {
 		Rect parentRect = getParent() != null ? getParent().getRect(imgRoot) : new Rect(0, 0, imgRoot.width(), imgRoot.height());
 		return new Rect(new Point(parentRect.tl().x + parentRect.width * getX1(), parentRect.tl().y + parentRect.height * getY1()), new Point(parentRect.tl().x + parentRect.width * getX2(), parentRect.tl().y + parentRect.height * getY2()));
-	}
-
-	public double area(Img imgRoot) {
-		double result = 0;
-		if (this.getChildren().isEmpty()) {
-			result += getRect(imgRoot).area() / (imgRoot.height() * imgRoot.width());
-		} else {
-			for (Layout child : getChildren()) {
-				result += child.area(imgRoot);
-			}
-		}
-		return result;
 	}
 
 	public Rect getLargeRect(Img imgRoot, double deltaW, double deltaH) {
@@ -79,6 +73,47 @@ public class Layout {
 		// System.out.println(String.format("br: %s | rect.br: %s", br, rect.br()));
 		return new Rect(tl, br);
 	}
+
+	public double normalizedArea() {
+		double result = 0;
+		if (this.getChildren().isEmpty()) {
+			Point[] pts = getNormalizedTlBr();
+			return (pts[1].x - pts[0].x) * (pts[1].y - pts[0].y);
+		}
+		for (Layout child : getChildren())
+			result += child.normalizedArea();
+		return result;
+	}
+
+	// public double area(Img imgRoot) {
+	// double result = 0;
+	// if (this.getChildren().isEmpty()) {
+	// // Point[] pts = getRect();
+	// // result += (pts[1].x - pts[0].x) * (pts[1].y - pts[0].y);
+	// return getRect(imgRoot).area() / (imgRoot.height() * imgRoot.width());
+	// } else {
+	// for (Layout child : getChildren()) {
+	// result += child.area(imgRoot);
+	// }
+	// }
+	// return result;
+	// }
+	//
+	// public double computeTotalSurface(Img img) {
+	// double[] surface = new double[] { 0.0 };
+	// traverse(getRoi(img), (roi, shard) -> {
+	// if (shard.getChildren().isEmpty())
+	// surface[0] += roi.height() * roi.width();
+	// });
+	// return surface[0] / (img.width() * img.height());
+	// }
+
+	// public Layout traverse(Size parentSize, BiConsumer<Size, Layout> visitor) {
+	// for (Layout shard : getChildren())
+	// shard.traverse(new Size(parentSize.width * (getX2() - getX1()), parentSize.height * (getY2() - getY1())), visitor);
+	// visitor.accept(parentSize, this);
+	// return this;
+	// }
 
 	public Layout traverse(Img img, BiConsumer<Img, Layout> visitor) {
 		for (Layout shard : getChildren())
@@ -369,12 +404,12 @@ public class Layout {
 				start = i + 1;
 			else if (result[i] && !result[i + 1]) {
 				shards.add(vertical ? new double[] { Integer.valueOf(start).doubleValue() / result.length, (Integer.valueOf(i).doubleValue() + 1) / result.length }
-				: new double[] { Integer.valueOf(start).doubleValue() / result.length, (Integer.valueOf(i).doubleValue() + 1) / result.length });
+						: new double[] { Integer.valueOf(start).doubleValue() / result.length, (Integer.valueOf(i).doubleValue() + 1) / result.length });
 				start = null;
 			}
 		if (result[result.length - 1]) {
 			shards.add(vertical ? new double[] { Integer.valueOf(start).doubleValue() / result.length, Integer.valueOf(result.length).doubleValue() / result.length }
-			: new double[] { Integer.valueOf(start).doubleValue() / result.length, Integer.valueOf(result.length).doubleValue() / result.length });
+					: new double[] { Integer.valueOf(start).doubleValue() / result.length, Integer.valueOf(result.length).doubleValue() / result.length });
 			start = null;
 		}
 		return shards;
@@ -410,16 +445,6 @@ public class Layout {
 			this.addChild(shard);
 		}
 		return this;
-	}
-
-	public double computeTotalSurface(Img img) {
-		double[] surface = new double[]{0.0};
-		traverse(getRoi(img),
-				(roi, shard) -> {
-					if(shard.getChildren().isEmpty())
-						surface[0] += new Rect(new Point(0, 0), new Point(roi.width() - 1, roi.height() - 1)).area();					
-				});
-		return surface[0] /(img.width() * img.height());
 	}
 
 }

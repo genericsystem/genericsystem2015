@@ -1,12 +1,5 @@
 package org.genericsystem.cv.application;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.function.BiFunction;
-
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.Lines.Line;
 import org.genericsystem.cv.lm.LevenbergImpl;
@@ -20,6 +13,13 @@ import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.function.BiFunction;
 
 public class TextOrientationLinesDetector {
 
@@ -156,8 +156,7 @@ public class TextOrientationLinesDetector {
 				new Line((absMinMax + angle) * 10, 0, (absMinMax + angle) * 10, score / 1000).draw(binarized[0].getSrc(), new Scalar(255, 0, 0), 1);
 		}
 		BiFunction<Double, double[], Double> f = (x, params) -> params[0] * x * x * x * x + params[1] * x * x * x + params[2] * x * x + params[3] * x + params[4];
-		BiFunction<double[], double[], Double> e = (xy, params) -> f.apply(xy[0], params) - xy[1];
-		double[] result = new LevenbergImpl<>(e, results, new double[] { 1, 1, 1, 1, 1 }).getParams();
+		double[] result = LevenbergImpl.fromBiFunction((x, params) -> params[0] * x * x * x * x + params[1] * x * x * x + params[2] * x * x + params[3] * x + params[4], results, new double[] { 1, 1, 1, 1, 1 }).getParams();
 		Point point = null;
 		double polynomAngle = 0.0;
 		double max = 0.0;
