@@ -1,5 +1,14 @@
 package org.genericsystem.cv.application;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.genericsystem.cv.Calibrated;
@@ -20,15 +29,6 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.imgproc.Moments;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class SuperFrameImg {
 
@@ -331,64 +331,43 @@ public class SuperFrameImg {
 		public final MatOfPoint contour;
 		public SuperContour succ;
 		public SuperContour pred;
-		public Point center;
-		public Point tangent;
-		public Point antiTangent;
-		public double angle;
-		public double antiAngle;
-		public Point left;
-		public Point right;
-		public Point top;
-		public Point bottom;
-		public Rect rect;
-		public double lxmin, lxmax;
-		public double lymin, lymax;
+		public final Point center;
+		public final double angle;
+		public final double antiAngle;
+		public final Point left;
+		public final Point right;
+		public final Point top;
+		public final Point bottom;
+		public final Rect rect;
+		public final double lxmin, lxmax;
+		public final double lymin, lymax;
 		public final double dx, dy;
 		public final boolean isLeaf;
 
-		SuperContour(MatOfPoint contour, boolean isLeaf) {
+		public SuperContour(MatOfPoint contour, boolean isLeaf) {
 
 			this.contour = contour;
 			this.rect = Imgproc.boundingRect(contour);
-			double tx;
-			double ty;
-			Moments moments = Imgproc.moments(contour);
-			this.center = new Point(moments.m10 / moments.m00, moments.m01 / moments.m00);
-			Mat momentsMatrix = new Mat(new Size(2, 2), CvType.CV_64FC1);
+			Mat dataPts = convertContourToMat(contour);
+			Mat mean = new Mat();
+			Mat eigen = new Mat();
+			Core.PCACompute(dataPts, mean, eigen);
+			Mat project = new Mat();
+			Core.PCAProject(dataPts, mean, eigen, project);
+			Mat min = new Mat();
+			Core.reduce(project, min, 0, Core.REDUCE_MIN);
+			Mat max = new Mat();
+			Core.reduce(project, max, 0, Core.REDUCE_MAX);
 
-			momentsMatrix.put(0, 0, moments.mu20 / moments.m00);
-			momentsMatrix.put(0, 1, moments.mu11 / moments.m00);
-			momentsMatrix.put(1, 0, moments.mu11 / moments.m00);
-			momentsMatrix.put(1, 1, moments.mu02 / moments.m00);
-			Mat svdU = new Mat();
-			Core.SVDecomp(momentsMatrix, new Mat(), svdU, new Mat());
-			tx = svdU.get(0, 0)[0];
-			ty = svdU.get(1, 0)[0];
-			if (tx < 0) {
-				tx = -tx;
-				ty = -ty;
-			}
-			// Core.PCACompute(data, mean, eigenvectors);
-			this.tangent = new Point(tx, ty);
+			this.center = new Point(mean.get(0, 0)[0], mean.get(0, 1)[0]);
 
-			this.antiTangent = new Point(ty, -tx);
-			this.lxmin = Double.MAX_VALUE;
-			this.lxmax = 0;
-			this.lymin = Double.MAX_VALUE;
-			this.lymax = 0;
-			for (Point pt : contour.toArray()) {
-				double clx = this.tangent.x * (pt.x - center.x) + this.tangent.y * (pt.y - center.y);
-				if (clx < this.lxmin)
-					this.lxmin = clx;
-				if (clx > this.lxmax)
-					this.lxmax = clx;
+			this.lxmin = min.get(0, 0)[0];
+			this.lymin = min.get(0, 1)[0];
+			this.lxmax = max.get(0, 0)[0];
+			this.lymax = max.get(0, 1)[0];
 
-				double anticlx = this.antiTangent.x * (pt.x - center.x) + this.antiTangent.y * (pt.y - center.y);
-				if (anticlx < this.lymin)
-					this.lymin = anticlx;
-				if (anticlx > this.lymax)
-					this.lymax = anticlx;
-			}
+			Point tangent = new Point(eigen.get(0, 0)[0], eigen.get(0, 1)[0]);
+			Point antiTangent = new Point(eigen.get(0, 1)[0], -eigen.get(0, 0)[0]);
 
 			this.left = new Point(center.x + tangent.x * lxmin, center.y + tangent.y * lxmin);
 			this.right = new Point(center.x + tangent.x * lxmax, center.y + tangent.y * lxmax);
@@ -397,13 +376,20 @@ public class SuperFrameImg {
 
 			this.angle = Math.atan2(tangent.y, tangent.x);
 			this.antiAngle = Math.atan2(antiTangent.y, antiTangent.x);
+
 			this.isLeaf = isLeaf;
-			if (lxmin >= lxmax)
-				throw new IllegalStateException();
-			if (lymin >= lymax)
-				throw new IllegalStateException();
-			dx = lxmax - lxmin;
-			dy = lymax - lymin;
+			this.dx = lxmax - lxmin;
+			this.dy = lymax - lymin;
+		}
+
+		Mat convertContourToMat(MatOfPoint contour) {
+			Point[] pts = contour.toArray();
+			Mat result = new Mat(pts.length, 2, CvType.CV_64FC1);
+			for (int i = 0; i < result.rows(); ++i) {
+				result.put(i, 0, pts[i].x);
+				result.put(i, 1, pts[i].y);
+			}
+			return result;
 		}
 
 		@Override
@@ -411,75 +397,48 @@ public class SuperFrameImg {
 			int xCompare = Double.compare(center.x, c.center.x);
 			return xCompare != 0 ? xCompare : Double.compare(center.y, c.center.y);
 		}
-
-		public double xLocalOverlap(SuperContour c2) {
-			double xmin = (c2.left.x - center.x) * tangent.x + (c2.left.y - center.y) * tangent.y;
-			double xmax = (c2.right.x - center.x) * tangent.x + (c2.right.y - center.y) * tangent.y;
-			return Math.min(lxmax, xmax) - Math.max(lxmin, xmin);
-		}
-
-		public double yLocalOverlap(SuperContour c2) {
-			double ymin = (c2.left.x - center.x) * antiTangent.x + (c2.left.y - center.y) * antiTangent.y;
-			double ymax = (c2.right.x - center.x) * antiTangent.x + (c2.right.y - center.y) * antiTangent.y;
-			return Math.min(lymax, ymax) - Math.max(lymin, ymin);
-		}
-
 	}
 
-	private Edge generateCandidateEdge(SuperContour c1, SuperContour c2, double maxCentersDistance, double coeffDeltaAngle) {
+	private Edge generateEdge(SuperContour c1, SuperContour c2, double maxDistance, double coeffDeltaAngle) {
 
 		if (c1.compareTo(c2) > 0) {
 			SuperContour tmp = c1;
 			c1 = c2;
 			c2 = tmp;
 		}
+		double minDist = Double.MAX_VALUE;
+		double c1Angle = 0;
+		double c2Angle = 0;
+		for (Point c1Point : new Point[] { c1.top, c1.right, c1.left, c1.bottom })
+			for (Point c2Point : new Point[] { c2.top, c2.right, c2.left, c2.bottom }) {
+				double dist = euclid(c1Point, c2Point);
+				if (dist < minDist) {
+					minDist = dist;
+					c1Angle = toZeroPi((c1Point == c1.top || c1Point == c1.bottom) ? c1.antiAngle : c1.angle);
+					c2Angle = toZeroPi((c2Point == c2.top || c2Point == c2.bottom) ? c2.antiAngle : c2.angle);
+				}
+			}
 
-		double[] centersTangent = new double[] { c2.center.x - c1.center.x, c2.center.y - c1.center.y };
-		double centersAngle = toZeroPi(Math.atan2(centersTangent[1], centersTangent[0]));
+		if (minDist > maxDistance)
+			return null;
 
-		double angle1 = angle_dist(c1.angle, centersAngle);
-		double antiAngle1 = angle_dist(c1.antiAngle, centersAngle);
-
-		Point c1min = c1.left;
-		Point c1max = c1.right;
-		double c1weight = c1.lxmax - c1.lxmin;
-		if (angle1 > antiAngle1) {
-			angle1 = antiAngle1;
-			c1min = c1.top;
-			c1max = c1.bottom;
-			c1weight = c1.lymax - c1.lymin;
+		double centersAngle = toZeroPi(Math.atan2(c2.center.y - c1.center.y, c2.center.x - c1.center.x));
+		double deltaAngle = Math.max(angle_dist(c1Angle, centersAngle), angle_dist(c2Angle, centersAngle));
+		if ((deltaAngle * 180 / Math.PI) > 3) {
+			System.out.println("null  " + c1Angle * 180 / Math.PI + " " + c2Angle * 180 / Math.PI + " " + centersAngle * 180 / Math.PI + " " + deltaAngle * 180 / Math.PI);
+			return null;
 		}
 
-		double angle2 = angle_dist(c2.angle, centersAngle);
-		double antiAngle2 = angle_dist(c2.antiAngle, centersAngle);
-
-		Point c2min = c2.left;
-		Point c2max = c2.right;
-		double c2weight = c2.lxmax - c2.lxmin;
-		if (angle2 > antiAngle2) {
-			angle2 = antiAngle2;
-			c2min = c2.top;
-			c2max = c2.bottom;
-			c2weight = c2.lymax - c2.lymin;
-		}
-
-		double delta_angle = Math.min(angle1 * c1weight, angle2 * c2weight);
-
-		double dist = Math.sqrt(Math.pow(c1max.x - c2min.x, 2) + Math.pow(c1max.y - c2min.y, 2));
-		double dist2 = Math.sqrt(Math.pow(c1min.x - c2min.x, 2) + Math.pow(c1min.y - c2min.y, 2));
-		double dist3 = Math.sqrt(Math.pow(c1min.x - c2max.x, 2) + Math.pow(c1min.y - c2max.y, 2));
-		double dist4 = Math.sqrt(Math.pow(c1max.x - c2max.x, 2) + Math.pow(c1max.y - c2max.y, 2));
-		dist = Math.min(Math.min(dist, dist2), Math.min(dist3, dist4));
-		if (dist > maxCentersDistance)
-			return null;
-		if (Math.sin(centersAngle) * dist > 4)
-			return null;
-		double score = dist + coeffDeltaAngle * delta_angle;
-		// System.out.println(score + " " + dist + " " + 2 * delta_angle);
+		double score = minDist + coeffDeltaAngle * deltaAngle;
+		System.out.println("score " + score + " " + minDist + " " + coeffDeltaAngle * deltaAngle + " " + deltaAngle * 180 / Math.PI);
 		return new Edge(score, c1, c2);
 	}
 
-	private double angle_dist(double angle_b, double angle_a) {
+	private double euclid(Point p1, Point p2) {
+		return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
+	}
+
+	private double angle_dist(double angle_a, double angle_b) {
 		return toZeroPi(angle_b - angle_a);
 	}
 
@@ -528,7 +487,7 @@ public class SuperFrameImg {
 		List<Edge> candidateEdges = new ArrayList<>();
 		for (int i = 0; i < superContours.size(); i++)
 			for (int j = 0; j < i; j++) {
-				Edge edge = generateCandidateEdge(superContours.get(i), superContours.get(j), maxCentersDistance, coeffDeltaAngle);
+				Edge edge = generateEdge(superContours.get(i), superContours.get(j), maxCentersDistance, coeffDeltaAngle);
 				if (edge != null)
 					candidateEdges.add(edge);
 			}
@@ -541,22 +500,11 @@ public class SuperFrameImg {
 		List<Span> spans = new ArrayList<>();
 		while (!superContours.isEmpty()) {
 			SuperContour contour = superContours.get(0);
-			int i = 100;
-			while (contour.pred != null) {
-				if (i < 10)
-					System.out.println("pred" + contour.rect + " " + contour.left + " " + contour.right);
-				if (i-- < 0)
-					throw new IllegalStateException();
+			while (contour.pred != null)
 				contour = contour.pred;
-			}
 			Span curSpan = new Span();
 			double width = 0.0;
-			i = 100;
 			while (contour != null) {
-				if (i < 10)
-					System.out.println("succ " + contour.rect + " " + contour.left + " " + contour.right);
-				if (i-- < 0)
-					throw new IllegalStateException();
 				superContours.remove(contour);
 				curSpan.add(contour);
 				width += contour.lxmax - contour.lxmin;
