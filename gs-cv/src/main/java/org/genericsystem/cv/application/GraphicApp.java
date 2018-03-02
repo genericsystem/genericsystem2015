@@ -1,11 +1,5 @@
 package org.genericsystem.cv.application;
 
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Calibrated.AngleCalibrated;
 import org.genericsystem.cv.Lines;
@@ -19,6 +13,12 @@ import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
+
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -153,7 +153,7 @@ public class GraphicApp extends AbstractApp {
 		// images[4] = superReferenceTemplate.getDisplay().toJfxImage();
 
 		SuperTemplate superReferenceTemplate2 = new SuperTemplate(superReferenceTemplate5, CvType.CV_8UC3, SuperFrameImg::getFrame);
-		List<Span> spans = superReferenceTemplate2.assembleContours(detectedSuperContours2, c -> true, 300, 300, 100);
+		List<Span> spans = superReferenceTemplate2.assembleContours(detectedSuperContours2, c -> true, 100, 5, 100);
 		spans.forEach(sp -> {
 			double a = Math.random() * 255;
 			double b = Math.random() * 255;

@@ -1,14 +1,5 @@
 package org.genericsystem.cv.application;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.genericsystem.cv.Calibrated;
@@ -29,6 +20,15 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.imgproc.Moments;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class SuperFrameImg {
 
@@ -414,23 +414,24 @@ public class SuperFrameImg {
 				double dist = euclid(c1Point, c2Point);
 				if (dist < minDist) {
 					minDist = dist;
-					c1Angle = toZeroPi((c1Point == c1.top || c1Point == c1.bottom) ? c1.antiAngle : c1.angle);
-					c2Angle = toZeroPi((c2Point == c2.top || c2Point == c2.bottom) ? c2.antiAngle : c2.angle);
+					c1Angle = toDemiPis((c1Point == c1.top || c1Point == c1.bottom) ? c1.antiAngle : c1.angle);
+					c2Angle = toDemiPis((c2Point == c2.top || c2Point == c2.bottom) ? c2.antiAngle : c2.angle);
 				}
 			}
 
 		if (minDist > maxDistance)
 			return null;
 
-		double centersAngle = toZeroPi(Math.atan2(c2.center.y - c1.center.y, c2.center.x - c1.center.x));
-		double deltaAngle = Math.max(angle_dist(c1Angle, centersAngle), angle_dist(c2Angle, centersAngle));
-		if ((deltaAngle * 180 / Math.PI) > 3) {
-			System.out.println("null  " + c1Angle * 180 / Math.PI + " " + c2Angle * 180 / Math.PI + " " + centersAngle * 180 / Math.PI + " " + deltaAngle * 180 / Math.PI);
+		double centersAngle = toDemiPis(Math.atan2(c2.center.y - c1.center.y, c2.center.x - c1.center.x));
+		if ((Math.abs(centersAngle) * 180 / Math.PI) > 45)
+			return null;
+		double deltaAngle = Math.max(toZeroDemiPi(centersAngle - c1Angle), toZeroDemiPi(centersAngle - c2Angle));
+		if (minDist * Math.sin(deltaAngle) > 8) {
 			return null;
 		}
-
-		double score = minDist + coeffDeltaAngle * deltaAngle;
-		System.out.println("score " + score + " " + minDist + " " + coeffDeltaAngle * deltaAngle + " " + deltaAngle * 180 / Math.PI);
+		// System.out.println("not null " + c1Angle * 180 / Math.PI + " " + c2Angle * 180 / Math.PI + " " + centersAngle * 180 / Math.PI + " " + deltaAngle * 180 / Math.PI);
+		double score = minDist + minDist * Math.sin(deltaAngle) * coeffDeltaAngle;
+		// System.out.println("score " + score + " " + minDist + " " + minDist * Math.sin(deltaAngle) * coeffDeltaAngle + " " + deltaAngle * 180 / Math.PI);
 		return new Edge(score, c1, c2);
 	}
 
@@ -438,16 +439,28 @@ public class SuperFrameImg {
 		return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
 	}
 
-	private double angle_dist(double angle_a, double angle_b) {
-		return toZeroPi(angle_b - angle_a);
+	// private static double toZeroPi(double diff) {
+	// while (diff > Math.PI)
+	// diff -= 2 * Math.PI;
+	// while (diff < -Math.PI)
+	// diff += 2 * Math.PI;
+	// return Math.abs(diff);
+	// }
+
+	private static double toZeroDemiPi(double diff) {
+		while (diff > Math.PI / 2)
+			diff -= Math.PI;
+		while (diff < -Math.PI / 2)
+			diff += Math.PI;
+		return Math.abs(diff);
 	}
 
-	private static double toZeroPi(double diff) {
-		while (diff > Math.PI)
-			diff -= 2 * Math.PI;
-		while (diff < -Math.PI)
-			diff += 2 * Math.PI;
-		return Math.abs(diff);
+	private static double toDemiPis(double diff) {
+		while (diff > Math.PI / 2)
+			diff -= Math.PI;
+		while (diff < -Math.PI / 2)
+			diff += Math.PI;
+		return diff;
 	}
 
 	public static class Edge implements Comparable<Edge> {

@@ -156,7 +156,7 @@ public class TextOrientationLinesDetector {
 				new Line((absMinMax + angle) * 10, 0, (absMinMax + angle) * 10, score / 1000).draw(binarized[0].getSrc(), new Scalar(255, 0, 0), 1);
 		}
 		BiFunction<Double, double[], Double> f = (x, params) -> params[0] * x * x * x * x + params[1] * x * x * x + params[2] * x * x + params[3] * x + params[4];
-		double[] result = LevenbergImpl.fromBiFunction((x, params) -> params[0] * x * x * x * x + params[1] * x * x * x + params[2] * x * x + params[3] * x + params[4], results, new double[] { 1, 1, 1, 1, 1 }).getParams();
+		double[] result = LevenbergImpl.fromBiFunction(f, results, new double[] { 1, 1, 1, 1, 1 }).getParams();
 		Point point = null;
 		double polynomAngle = 0.0;
 		double max = 0.0;

@@ -21,8 +21,8 @@ public class LevenbergImpl<T> implements Levenberg {
 	private final double jac[][];
 	private final BiFunction<T, double[], Double> error;
 
-	public static <T> LevenbergImpl<T> fromBiFunction(BiFunction<Double, double[], Double> f, Collection<T> datas, double[] guess) {
-		return new LevenbergImpl<>((params, xy) -> f.apply(xy[0], (double[]) params) - xy[1], datas, guess);
+	public static LevenbergImpl<double[]> fromBiFunction(BiFunction<Double, double[], Double> f, Collection<double[]> datas, double[] guess) {
+		return new LevenbergImpl<double[]>((xy, params) -> f.apply(xy[0], params) - xy[1], datas, guess);
 	}
 
 	public LevenbergImpl(BiFunction<T, double[], Double> error, Collection<T> datas, double[] guess) {
