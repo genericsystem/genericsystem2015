@@ -1,12 +1,12 @@
 package org.genericsystem.cv;
 
+import java.util.Arrays;
+
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
-
-import java.util.Arrays;
 
 public class Svd {
 	static {
@@ -14,9 +14,9 @@ public class Svd {
 	}
 
 	public static void main(String[] args) {
-		double[][] pts = { { 2, 4, 1 }, { 3, 4, 1 }, { 4, 4, 1 }, { 3, 4, 1 }, { 3, 3, 1 }, { 4, 3, 1 }, { 2, 2, 1 }, { 3, 2, 1 }, { 4, 2, 1 } };
+		double[][] pts = { { 2, 4, 1 }, { 3, 4, 1 }, { 4, 4, 1 }, { 2, 3, 1 }, { 3, 3, 1 }, { 4, 3, 1 }, { 2, 2, 1 }, { 3, 2, 1 }, { 4, 2, 1 } };
 
-		int[][] rects = { { 0, 1, 4, 3 }, { 1, 2, 5, 4 }, { 2, 3, 7, 6 }, { 4, 5, 7, 8 } };
+		int[][] rects = { { 3, 4, 1, 0 }, { 4, 5, 2, 1 }, { 6, 7, 4, 3 }, { 7, 8, 5, 4 } };
 
 		double[][] result = solve(pts, rects);
 		System.out.println(Arrays.deepToString(result));
@@ -24,7 +24,9 @@ public class Svd {
 	}
 
 	public static double[][] solve(double[][] srcPts, int[][] rects) {
-		double[][] pts = srcPts.clone();
+		double[][] pts = new double[srcPts.length][srcPts[0].length];
+		for (int i = 0; i < srcPts.length; i++)
+			pts[i] = Arrays.copyOf(srcPts[i], srcPts[i].length);
 		// options = argutil_setdefaults(options, 'lambda', [], 'z_constraint', true, 'scale', 1);
 
 		double[] stdxy = { Math.sqrt(Arrays.stream(pts).mapToDouble(pt -> pt[0] * pt[0]).average().getAsDouble()), Math.sqrt(Arrays.stream(pts).mapToDouble(pt -> pt[1] * pt[1]).average().getAsDouble()) };
@@ -47,7 +49,7 @@ public class Svd {
 				ymin = pt[1];
 			if (pt[0] > xmax)
 				xmax = pt[0];
-			if (pt[1] < ymax)
+			if (pt[1] > ymax)
 				ymax = pt[1];
 		}
 
@@ -125,23 +127,20 @@ public class Svd {
 		// [minEigValue, minIndex] = min(diag(D));
 		// sol = V(:, minIndex);
 
-		Mat sum = new Mat();
-		Core.reduce(result, sum, 0, Core.REDUCE_SUM, CvType.CV_64FC1);
-
-		double sum_ = sum.get(0, 0)[0];
-
-		Mat error = new Mat();
+		double sum = 0;
+		for (int i = 0; i < pts.length; i++)
+			sum += result.get(3 * i + 2, 0)[0];
 
 		for (int i = 0; i < pts.length; i++) {
-			pts[i][0] = sum_ > 0 ? -result.get(3 * i, 0)[0] : result.get(3 * i, 0)[0];
-			pts[i][1] = sum_ > 0 ? -result.get(3 * i + 1, 0)[0] : result.get(3 * i + 1, 0)[0];
-			pts[i][2] = sum_ > 0 ? -result.get(3 * i + 2, 0)[0] : result.get(3 * i + 2, 0)[0];
+			pts[i][0] = sum > 0 ? -result.get(3 * i, 0)[0] : result.get(3 * i, 0)[0];
+			pts[i][1] = sum > 0 ? -result.get(3 * i + 1, 0)[0] : result.get(3 * i + 1, 0)[0];
+			pts[i][2] = sum > 0 ? -result.get(3 * i + 2, 0)[0] : result.get(3 * i + 2, 0)[0];
 		}
 
 		// % normalze it back
 		for (int i = 0; i < pts.length; i++) {
-			pts[i][0] = result.get(3 * i, 0)[0] * stdxy[0];
-			pts[i][1] = result.get(3 * i + 1, 0)[0] * stdxy[1];
+			pts[i][0] *= stdxy[0];
+			pts[i][1] *= stdxy[1];
 		}
 
 		// Core.gemm(A, result, 1, new Mat(), 0, error);
