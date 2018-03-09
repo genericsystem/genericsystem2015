@@ -1,24 +1,23 @@
 package org.genericsystem.cv.application;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class WeightedOrientedPointsInterpolator {
 	
 	private final double pow;
-	private final double [] [] weightedOrientedPoints;
+	private List<WeightedOrientedPoint> weightedOrientedPoints;
 	
-	public WeightedOrientedPointsInterpolator(double [] [] weightedOrientedPoints, double pow) {
+	public WeightedOrientedPointsInterpolator(List<WeightedOrientedPoint> weightedOrientedPoints, double pow) {
 		this.weightedOrientedPoints = weightedOrientedPoints;
 		this.pow = pow;
 	}
 	
-	private double squaredEuclidianDistance(double x, double y, double[] orientedPoint) { // distance euclidienne au carré
-		return Math.pow(x-orientedPoint[0], 2)+Math.pow(y-orientedPoint[1], 2); 
+	private double squaredEuclidianDistance(double x, double y, WeightedOrientedPoint p) { // distance euclidienne au carré
+		return Math.pow(x-p.x, 2)+Math.pow(y-p.y, 2); 
 	}
 	
-	private double coefficient(List<Double> distances, int n, double pow){
+	private double geoCoef(List<Double> distances, int n, double pow){ // coefficient lié à la distance
 		double coef = 1;
 		int k = 0;
 		for(double distance : distances) {
@@ -30,18 +29,25 @@ public class WeightedOrientedPointsInterpolator {
 		return coef;
 	}
 	
-	public double interpolate(double x, double y) {
+	public double [] interpolate(double x, double y) { // retourne les angles horizontal et vertical interpolés
 		
-		List<Double> distances = Arrays.stream(weightedOrientedPoints).map(p -> squaredEuclidianDistance(x, y, p)).collect(Collectors.toList());
-		double coef;
-		double sumCoefs = 0;
-		double theta = 0;
-		for(int p = 0 ; p < weightedOrientedPoints.length ; p++) {
-			coef = coefficient(distances, p, pow) * weightedOrientedPoints[p][3]; // multiplication par l'indice de confiance
-			theta += coef * weightedOrientedPoints[p][2];
-			sumCoefs += coef;
+		List<Double> distances = weightedOrientedPoints.stream().map(p -> squaredEuclidianDistance(x, y, p)).collect(Collectors.toList());
+		double hCoef; // coefficient pour l'angle horizontal
+		double vCoef; // coefficient pour l'angle vertical
+		double sumHCoefs = 0; // somme des coefficients pour l'angle horizontal
+		double sumVCoefs = 0;
+		double hAngle = 0; // angle horizontal
+		double vAngle = 0; // angle vertical
+		for(int p = 0 ; p < weightedOrientedPoints.size() ; p++) {
+			double geoCoef = geoCoef(distances, p, pow);
+			hCoef = geoCoef * weightedOrientedPoints.get(p).hAngleConfidence; // multiplication par l'indice de confiance
+			hAngle += hCoef * weightedOrientedPoints.get(p).hAngle;
+			vCoef = geoCoef * weightedOrientedPoints.get(p).vAngleConfidence;
+			vAngle += vCoef * weightedOrientedPoints.get(p).vAngle;
+			sumHCoefs += hCoef;
+			sumVCoefs += vCoef;
 		};
-		return theta / sumCoefs;
+		return new double[] { hAngle / sumHCoefs, vAngle / sumVCoefs };
 	
 	}
 		
