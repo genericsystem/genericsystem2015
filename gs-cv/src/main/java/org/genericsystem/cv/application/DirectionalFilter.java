@@ -7,6 +7,7 @@ import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
@@ -26,21 +27,21 @@ public class DirectionalFilter {
 
 	public DirectionalFilter() {
 		for (int i = 0; i < filterGauss.rows(); i++)
-			filterGauss.put(i, 0, Math.exp(-Math.pow(i - u, 2) / 2 / Math.pow(difScl, 2) / difScl / Math.sqrt(2 * Math.PI)));
+			filterGauss.put(i, 0, Math.exp(-Math.pow(i - u, 2) / 2 / Math.pow(difScl, 2)) / difScl / Math.sqrt(2 * Math.PI));
 
 		for (int i = 0; i < filterGaussDerivative.rows(); i++)
-			filterGaussDerivative.put(i, 0, -(i - u) * Math.exp(-Math.pow(i - u, 2) / 2 / Math.pow(difScl, 2) / Math.pow(difScl, 3) / Math.sqrt(2 * Math.PI)));
+			filterGaussDerivative.put(i, 0, -(i - u) * Math.exp(-Math.pow(i - u, 2) / 2 / Math.pow(difScl, 2)) / Math.pow(difScl, 3) / Math.sqrt(2 * Math.PI));
 	}
 
 	public Mat gx(Mat frame) {
 		Mat gx = new Mat();
-		Imgproc.sepFilter2D(frame, gx, CvType.CV_64FC1, filterGauss, filterGaussDerivative);
+		Imgproc.sepFilter2D(frame, gx, CvType.CV_64FC1, filterGauss, filterGaussDerivative, new Point(-1, -1), 0, Core.BORDER_REPLICATE);
 		return gx;
 	}
 
 	public Mat gy(Mat frame) {
 		Mat gy = new Mat();
-		Imgproc.sepFilter2D(frame, gy, CvType.CV_64FC1, filterGaussDerivative, filterGauss);
+		Imgproc.sepFilter2D(frame, gy, CvType.CV_64FC1, filterGaussDerivative, filterGauss, new Point(-1, -1), 0, Core.BORDER_REPLICATE);
 		return gy;
 	}
 
@@ -74,16 +75,36 @@ public class DirectionalFilter {
 		}
 
 		double max = edgesBoundary.get(nBin);
+		// System.out.println("" + nBin + " " + max);
 		Mat mask = new Mat();
 		Core.inRange(ori, new Scalar(max), new Scalar(Double.MAX_VALUE), mask);
+
 		Mat toCopy = Mat.ones(ori.size(), CvType.CV_64FC1);
 		toCopy.copyTo(binning, mask);
 		toCopy.release();
+		// for (int row = 0; row < ori.rows(); row++) {
+		// for (int col = 0; col < ori.cols(); col++) {
+		// System.out.print(ori.get(row, col)[0] + " ");
+		// }
+		// System.out.println();
+		// }
 
-		Core.inRange(binning, new Scalar(Integer.valueOf(nBin).doubleValue() / 2), new Scalar(1000), mask);
+		// for (int row = 0; row < mask.rows(); row++) {
+		// for (int col = 0; col < mask.cols(); col++) {
+		// System.out.print(mask.get(row, col)[0] + " ");
+		// }
+		// System.out.println();
+		// }
+
+		Core.inRange(binning, new Scalar(Integer.valueOf(nBin).doubleValue() / 2 + 1), new Scalar(Double.MAX_VALUE), mask);
 		Core.add(binning, new Scalar(-Integer.valueOf(nBin).doubleValue() / 2), binning, mask);
 		mask.release();
-
+		// for (int row = 0; row < binning.rows(); row++) {
+		// for (int col = 0; col < binning.cols(); col++) {
+		// System.out.print(binning.get(row, col)[0] + " ");
+		// }
+		// System.out.println();
+		// }
 		return binning;
 	}
 
@@ -103,6 +124,7 @@ public class DirectionalFilter {
 			Mat ori = new Mat();
 			Core.cartToPolar(gx, gy, mag, ori);
 			Mat bin = df.bin(ori, 2 * 64);
+
 			Mat histo = df.getHistogram(mag, bin, 64);
 
 			double maxValue = Double.MIN_VALUE;
@@ -115,9 +137,7 @@ public class DirectionalFilter {
 					nbin = row;
 				}
 			}
-			// c System.out.println();
-			// System.out.println("max : " + maxValue);
-			System.out.println("Result : " + nbin / 64 * 180);
+			System.out.println("Result : " + nbin);
 			frame.release();
 			scaledFrame.release();
 			gx.release();
@@ -133,7 +153,7 @@ public class DirectionalFilter {
 		Mat histogram = Mat.zeros(nBin, 1, CvType.CV_64FC1);
 		for (int i = 1; i <= nBin; i++) {
 			Mat mask = new Mat();
-			Core.inRange(binning, new Scalar(i), new Scalar(i), mask);
+			Core.inRange(binning, new Scalar(Integer.valueOf(i).doubleValue()), new Scalar(Integer.valueOf(i).doubleValue()), mask);
 			Mat result = Mat.zeros(binning.size(), CvType.CV_64FC1);
 			mag.copyTo(result, mask);
 			double resul = Core.sumElems(result).val[0];
@@ -148,11 +168,13 @@ public class DirectionalFilter {
 		Mat gx = gx(layer);
 		Mat gy = gy(layer);
 		Mat mag = new Mat();
-		Core.cartToPolar(gx, gy, mag, new Mat());// original mag is square
+		Mat ori = new Mat();
+		Core.cartToPolar(gx, gy, mag, ori);// original mag is square
 		gx.release();
 		gy.release();
 		double result = Core.mean(mag).val[0];
 		mag.release();
+		ori.release();
 		return result;
 	}
 
@@ -179,7 +201,7 @@ public class DirectionalFilter {
 		}
 
 		double scale = Math.pow(scaleFactor, maxIndex);
-		System.out.println("Index : " + maxIndex + " Scale : " + scale);
+		// System.out.println("Index : " + maxIndex + " Scale : " + scale);
 		Mat imgD = new Mat();
 		Imgproc.resize(img, imgD, new Size(img.width() * scale, img.height() * scale));
 		for (Mat layer : imgLayers)
