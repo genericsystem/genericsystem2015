@@ -149,7 +149,11 @@ public class DirectionalFilter {
 		Mat gy = gy(layer);
 		Mat mag = new Mat();
 		Core.cartToPolar(gx, gy, mag, new Mat());// original mag is square
-		return Core.mean(mag).val[0];
+		gx.release();
+		gy.release();
+		double result = Core.mean(mag).val[0];
+		mag.release();
+		return result;
 	}
 
 	public Mat scale(Mat img) {
