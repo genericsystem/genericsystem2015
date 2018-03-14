@@ -96,9 +96,9 @@ public class DirectionalFilter {
 
 			Imgproc.cvtColor(frame, frame, Imgproc.COLOR_BGR2GRAY);
 
-			frame = df.scale(frame);
-			Mat gx = df.gx(frame);
-			Mat gy = df.gy(frame);
+			Mat scaledFrame = df.scale(frame);
+			Mat gx = df.gx(scaledFrame);
+			Mat gy = df.gy(scaledFrame);
 			Mat mag = new Mat();
 			Mat ori = new Mat();
 			Core.cartToPolar(gx, gy, mag, ori);
@@ -109,16 +109,17 @@ public class DirectionalFilter {
 			double nbin = Double.MIN_VALUE;
 			for (int row = 0; row < histo.rows(); row++) {
 				double value = histo.get(row, 0)[0];
-				System.out.print((int) value + " ");
+				// System.out.print((int) value + " ");
 				if (value > maxValue) {
 					maxValue = value;
 					nbin = row;
 				}
 			}
-			System.out.println();
-			System.out.println("max : " + maxValue);
+			// c System.out.println();
+			// System.out.println("max : " + maxValue);
 			System.out.println("Result : " + nbin / 64 * 180);
 			frame.release();
+			scaledFrame.release();
 			gx.release();
 			gy.release();
 			mag.release();
@@ -161,10 +162,10 @@ public class DirectionalFilter {
 		Double[] meanMags = new Double[nScale];
 		for (int i = 0; i < nScale; i++) {
 			meanMags[i] = getMeanMag(imgLayers[i]);
-			System.out.println("Mean : " + meanMags[i]);
+			// System.out.println("Mean : " + meanMags[i]);
 			if (i < nScale - 1) {
 				imgLayers[i + 1] = new Mat();
-				Imgproc.resize(imgLayers[i], imgLayers[i + 1], new Size(imgLayers[i].width() * scaleFactor, imgLayers[i].height() * scaleFactor));
+				Imgproc.resize(imgLayers[i], imgLayers[i + 1], new Size(imgLayers[i].width() * scaleFactor, imgLayers[i].height() * scaleFactor), 0, 0, Imgproc.INTER_CUBIC);
 			}
 		}
 		int maxIndex;
@@ -177,6 +178,8 @@ public class DirectionalFilter {
 		System.out.println("Index : " + maxIndex + " Scale : " + scale);
 		Mat imgD = new Mat();
 		Imgproc.resize(img, imgD, new Size(img.width() * scale, img.height() * scale));
+		for (Mat layer : imgLayers)
+			layer.release();
 		return imgD;
 	}
 
