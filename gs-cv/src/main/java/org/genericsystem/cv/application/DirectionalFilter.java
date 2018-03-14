@@ -69,15 +69,19 @@ public class DirectionalFilter {
 			Mat filtered = new Mat();
 			Imgproc.threshold(ori, filtered, edgesBoundary.get(i), 1, Imgproc.THRESH_BINARY);
 			Core.addWeighted(binning, 1, filtered, 1, 0, binning);
+			filtered.release();
 		}
 
 		double max = edgesBoundary.get(nBin);
 		Mat mask = new Mat();
 		Core.inRange(ori, new Scalar(max), new Scalar(Double.MAX_VALUE), mask);
-		Mat.ones(ori.size(), CvType.CV_64FC1).copyTo(binning, mask);
+		Mat toCopy = Mat.ones(ori.size(), CvType.CV_64FC1);
+		toCopy.copyTo(binning, mask);
+		toCopy.release();
 
 		Core.inRange(binning, new Scalar(Integer.valueOf(nBin).doubleValue() / 2), new Scalar(1000), mask);
 		Core.add(binning, new Scalar(-Integer.valueOf(nBin).doubleValue() / 2), binning, mask);
+		mask.release();
 
 		return binning;
 	}
@@ -85,6 +89,7 @@ public class DirectionalFilter {
 	public static void main(String[] args) {
 		VideoCapture vc = new VideoCapture(0);
 		Mat frame = new Mat();
+		DirectionalFilter df = new DirectionalFilter();
 		for (;;) {
 			vc.read(frame);
 			Imgproc.cvtColor(frame, frame, Imgproc.COLOR_BGR2GRAY);
@@ -111,13 +116,14 @@ public class DirectionalFilter {
 			System.out.println();
 			System.out.println("max : " + maxValue);
 			System.out.println("Result : " + nbin / 64 * 180);
-			try {
-				Thread.sleep(300);
-			} catch (InterruptedException e) {
-				throw new IllegalStateException(e);
-			}
+			frame.release();
+			gx.release();
+			gy.release();
+			mag.release();
+			ori.release();
+			bin.release();
+			histo.release();
 		}
-
 	}
 
 	public Mat getHistogram(Mat mag, Mat binning, int nBin) {
@@ -129,6 +135,8 @@ public class DirectionalFilter {
 			mag.copyTo(result, mask);
 			double resul = Core.sumElems(result).val[0];
 			histogram.put(i - 1, 0, resul);
+			result.release();
+			mask.release();
 		}
 		return histogram;
 	}
