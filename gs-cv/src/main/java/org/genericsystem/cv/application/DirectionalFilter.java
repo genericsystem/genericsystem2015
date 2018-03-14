@@ -172,6 +172,7 @@ public class DirectionalFilter {
 		Core.cartToPolar(gx, gy, mag, ori);// original mag is square
 		gx.release();
 		gy.release();
+		Core.pow(mag, 2, mag);
 		double result = Core.mean(mag).val[0];
 		mag.release();
 		ori.release();
@@ -179,7 +180,7 @@ public class DirectionalFilter {
 	}
 
 	public Mat scale(Mat img) {
-		int nScale = 15;
+		int nScale = 10;
 		double scaleFactor = 0.8;
 
 		Mat[] imgLayers = new Mat[nScale];
@@ -191,7 +192,8 @@ public class DirectionalFilter {
 			// System.out.println("Mean : " + meanMags[i]);
 			if (i < nScale - 1) {
 				imgLayers[i + 1] = new Mat();
-				Imgproc.resize(imgLayers[i], imgLayers[i + 1], new Size(imgLayers[i].width() * scaleFactor, imgLayers[i].height() * scaleFactor), 0, 0, Imgproc.INTER_CUBIC);
+				double scale = Math.pow(scaleFactor, i + 1);
+				Imgproc.resize(imgLayers[0], imgLayers[i + 1], new Size(0, 0), scale, scale, Imgproc.INTER_CUBIC);
 			}
 		}
 		int maxIndex;
@@ -200,13 +202,13 @@ public class DirectionalFilter {
 				break;
 		}
 
-		double scale = Math.pow(scaleFactor, maxIndex);
-		// System.out.println("Index : " + maxIndex + " Scale : " + scale);
-		Mat imgD = new Mat();
-		Imgproc.resize(img, imgD, new Size(img.width() * scale, img.height() * scale));
+		double scale = Math.pow(scaleFactor, Integer.valueOf(maxIndex).doubleValue());
+		// System.out.println(" Scale : " + scale);
+		Mat result = new Mat();
+		Imgproc.resize(img, result, new Size(0, 0), scale, scale, Imgproc.INTER_CUBIC);
 		for (Mat layer : imgLayers)
 			layer.release();
-		return imgD;
+		return result;
 	}
 
 }
