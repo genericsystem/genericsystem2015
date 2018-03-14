@@ -1,15 +1,16 @@
 package org.genericsystem.cv.application;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class DirectionalFilter {
 
@@ -92,9 +93,10 @@ public class DirectionalFilter {
 		DirectionalFilter df = new DirectionalFilter();
 		for (;;) {
 			vc.read(frame);
-			Imgproc.cvtColor(frame, frame, Imgproc.COLOR_BGR2GRAY);
-			DirectionalFilter df = new DirectionalFilter();
 
+			Imgproc.cvtColor(frame, frame, Imgproc.COLOR_BGR2GRAY);
+
+			frame = df.scale(frame);
 			Mat gx = df.gx(frame);
 			Mat gy = df.gy(frame);
 			Mat mag = new Mat();
@@ -141,41 +143,41 @@ public class DirectionalFilter {
 		return histogram;
 	}
 
-	// public void scale(Mat img,double scale) {
-	// int nScale = 15;
-	// double scaleFactor = 0.8;
-	//
-	// Mat[] imgLayers = new Mat[nScale];
-	// imgLayers[0] = img;
-	//
-	// double[] meanMags = new double [nScale];
-	// for (int i = 0;i<nScale;i++) {
-	// //fprintf(1, 'scale = %d\n', i);
-	// // % compute the mean edge density...
-	// Mat gx = gx(imgLayers[i-1]);
-	// Mat gy = gy(imgLayers[i-1]);
-	// Mat mag = new Mat();
-	// Mat ori = new Mat();
-	// Core.cartToPolar(gx, gy, mag, ori);// original mag is square
-	// meanMags[i] = Core.mean(mag).val[0];
-	// if( i < nScale)
-	// imgLayers [i] = imresize(imgLayers[i-1], scaleFactor);
-	// }
-	//
-	// //% find the first peak from the left..
-	// localmax = ( meanMags(2:end-1) > meanMags(1:end-2) ) & ( meanMags(2:end-1) > meanMags(3:end) );
-	// maxIndex = find(localmax, 1) + 1;
-	// //%[maxVal, maxIndex] = max(meanMags);
-	// //% plus 4, is the factor ideal for
-	//
-	// //our approach (-_-||)
-	// if ~isempty(maxIndex)
-	// scale = scaleFactor ^ (maxIndex);
-	// else
-	// scale = scaleFactor ^ 3;
-	// //end;
-	//
-	// imgD = imresize(img, scale);
-	// }
+	public double getMeanMag(Mat layer) {
+		Mat gx = gx(layer);
+		Mat gy = gy(layer);
+		Mat mag = new Mat();
+		Core.cartToPolar(gx, gy, mag, new Mat());// original mag is square
+		return Core.mean(mag).val[0];
+	}
+
+	public Mat scale(Mat img) {
+		int nScale = 15;
+		double scaleFactor = 0.8;
+
+		Mat[] imgLayers = new Mat[nScale];
+		imgLayers[0] = img;
+
+		Double[] meanMags = new Double[nScale];
+		for (int i = 0; i < nScale; i++) {
+			meanMags[i] = getMeanMag(imgLayers[i]);
+			System.out.println("Mean : " + meanMags[i]);
+			if (i < nScale - 1) {
+				imgLayers[i + 1] = new Mat();
+				Imgproc.resize(imgLayers[i], imgLayers[i + 1], new Size(imgLayers[i].width() * scaleFactor, imgLayers[i].height() * scaleFactor));
+			}
+		}
+		int maxIndex;
+		for (maxIndex = 1; maxIndex < meanMags.length - 1; maxIndex++) {
+			if (meanMags[maxIndex] > meanMags[maxIndex - 1] && meanMags[maxIndex] > meanMags[maxIndex + 1])
+				break;
+		}
+
+		double scale = Math.pow(scaleFactor, maxIndex);
+		System.out.println("Index : " + maxIndex + " Scale : " + scale);
+		Mat imgD = new Mat();
+		Imgproc.resize(img, imgD, new Size(img.width() * scale, img.height() * scale));
+		return imgD;
+	}
 
 }
