@@ -5,15 +5,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.opencv.core.Core;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
+import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 public class MeshGrid {
 
 	
 	public Mat image;
+	public int size; // nombre de polygones par côté
 	public List<Point> points = new ArrayList<>();
 	public List<Integer[]> polygons = new ArrayList<>(); // les polygones dans une liste
 	private Map<Key, Integer[]> mesh = new HashMap<>(); // les mêmes polygones mais en i, j
@@ -22,27 +28,97 @@ public class MeshGrid {
 	
 	private final int nbIter = 40; // nombre d'itérations à chaque déplacement
 	private int iP = 0, jP = 0; // polygone courant
+	private int minIndex, maxIndex; // indices min et max des polygones
+	private double rectWidth, rectHeight; // taille d'un polygone après redressement
 	
-	public MeshGrid(Mat image, SuperContourInterpolator interpolator, double deltaX, double deltaY) {
+	public MeshGrid(int size, Mat image, SuperContourInterpolator interpolator, double deltaX, double deltaY) {
+		this.size = size;
 		this.image = image;
 		this.interpolator = interpolator;
 		this.deltaX = deltaX;
 		this.deltaY = deltaY;
 	}
 
-	public void build(int n) {
+	public void build() {
 		addPolygon(iP, jP);
-		for(int k = 1 ; k < n ; k++) {
+		for(int k = 1 ; k < size ; k++) {
 			int dir = k%2 == 0 ? -1 : 1;
 			horizontalSpiral(k, dir);
 			verticalSpiral(k, dir);
 		}
-		horizontalSpiral(n - 1, n%2 == 0 ? -1 : 1);
+		horizontalSpiral(size - 1, size%2 == 0 ? -1 : 1);
+	}
+		
+	public void draw(Scalar color) {
+		polygons.forEach(p -> drawPolygon(p, color));
+	}
+	
+	public Mat dewarp(int dewarpedImageSize) {
+		
+		minIndex = (int) -Math.floor((size - 1)/2);
+		maxIndex = (int) Math.floor(size/2);
+		rectWidth = dewarpedImageSize/size;
+		rectHeight = dewarpedImageSize/size;
+		Mat dewarpedImage = new Mat(new Size(dewarpedImageSize, dewarpedImageSize), CvType.CV_8UC3);
+		for(int iP = minIndex ; iP <= maxIndex ; iP++) {
+			for(int jP = minIndex ; jP <= maxIndex ; jP++) {
+				Mat homography = dewarpPolygon(iP, jP);
+				double x = (jP - minIndex) * rectWidth;
+				double y = (iP - minIndex) * rectHeight;
+				Point dewarpedTopLeft = new Point(x, y);
+				Point dewarpedBottomRight = new Point(x + rectWidth, y + rectHeight);
+				Mat subDewarpedImage = new Mat(dewarpedImage, new Rect(dewarpedTopLeft, dewarpedBottomRight));
+				Mat subImage = subImage(iP, jP);
+				Imgproc.warpPerspective(subImage, subDewarpedImage, homography, new Size(rectWidth, rectHeight), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(0));
+			}
+		}
+		return dewarpedImage;
 		
 	}
 	
-	public void draw(Scalar color) {
-		polygons.forEach(p -> drawPolygon(p, color));
+	private Rect subImageRect(int iP, int jP) {
+		
+		Integer[] polygon = mesh.get(new Key(iP, jP));
+		Point warpedTopLeft = points.get(polygon[0]);
+		Point warpedTopRight = points.get(polygon[1]);
+		Point warpedBottomRight = points.get(polygon[2]);
+		Point warpedBottomLeft = points.get(polygon[3]);
+		double xMin, xMax, yMin, yMax; 
+		xMin = Math.min(warpedTopLeft.x, warpedBottomLeft.x);
+		xMax = Math.max(warpedBottomRight.x, warpedTopRight.x);
+		yMin = Math.min(warpedTopRight.y, warpedTopLeft.y);
+		yMax = Math.max(warpedBottomLeft.y, warpedBottomRight.y);
+		return new Rect(new Point(xMin, yMin), new Point(xMax, yMax));
+		
+	}
+	
+	private Mat subImage(int iP, int jP){
+		
+		Rect subImageRect = subImageRect(iP, jP);
+    	//Imgproc.rectangle(image, new Point(subImageRect.x, subImageRect.y), new Point(subImageRect.x+subImageRect.width, subImageRect.y+subImageRect.height), new Scalar(255, 0, 0));
+		return new Mat(image, subImageRect);
+		
+	}
+	
+	private Mat dewarpPolygon(int iP, int iJ) {
+		
+		Rect subImageRect = subImageRect(iP, jP);
+		Integer[] polygon = mesh.get(new Key(iP, jP));
+		Point warpedTopLeft = changeOrigin(subImageRect, points.get(polygon[0]));
+		Point warpedTopRight = changeOrigin(subImageRect, points.get(polygon[1]));
+		Point warpedBottomRight = changeOrigin(subImageRect, points.get(polygon[2]));
+		Point warpedBottomLeft = changeOrigin(subImageRect, points.get(polygon[3]));	
+		Point dewarpedTopLeft = new Point(0, 0);
+		Point dewarpedTopRight = new Point(rectWidth, 0);
+		Point dewarpedBottomRight = new Point(rectWidth, rectHeight);
+		Point dewarpedBottomLeft = new Point(0, rectHeight);
+		return Imgproc.getPerspectiveTransform(new MatOfPoint2f(warpedTopLeft, warpedTopRight, warpedBottomRight, warpedBottomLeft), 
+				new MatOfPoint2f(dewarpedTopLeft, dewarpedTopRight, dewarpedBottomRight, dewarpedBottomLeft));
+	
+	}
+	
+	private Point changeOrigin(Rect subImageRect, Point point) {
+		return new Point(point.x-subImageRect.x, point.y-subImageRect.y);
 	}
 	
 	private void drawPolygon(Integer[] polygon, Scalar color) {

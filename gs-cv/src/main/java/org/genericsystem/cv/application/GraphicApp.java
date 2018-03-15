@@ -156,10 +156,15 @@ public class GraphicApp extends AbstractApp {
 
 		
 		SuperContourInterpolator interpolator = new SuperContourInterpolator(filteredSuperContour, 1);
-		MeshGrid meshGrid = new MeshGrid(image, interpolator, 30, 30);
-		meshGrid.build(21);
-		meshGrid.draw(new Scalar(0, 255, 0));
+		MeshGrid meshGrid = new MeshGrid(7, image, interpolator, 30, 30);
+		meshGrid.build();
 		
+		Img dewarped = new Img(meshGrid.dewarp(300), false);
+		
+		
+		images[5] = dewarped.toJfxImage();
+		
+		meshGrid.draw(new Scalar(0, 255, 0));
 		
 		images[4] = superReferenceTemplate5.getDisplay().toJfxImage();
 
@@ -253,7 +258,7 @@ public class GraphicApp extends AbstractApp {
 		// new Lines(superReferenceTemplate2.getDisplay().houghLinesP(1, Math.PI / 180, 10, 50, 47)).filter(line -> Math.atan2(Math.abs(line.y2 - line.y1), Math.abs(line.x2 - line.x1)) < 5 * Math.PI /
 		// 180).draw(superReferenceTemplate2.getDisplay().getSrc(),
 		// new Scalar(255), 1);
-		images[5] = superReferenceTemplate2.getDisplay().toJfxImage();
+		//images[5] = superReferenceTemplate2.getDisplay().toJfxImage();
 
 		ImgDescriptor newImgDescriptor = new ImgDescriptor(superDeperspectived, surface);
 		if (newImgDescriptor.getDescriptors().empty()) {
