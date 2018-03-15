@@ -1,5 +1,12 @@
 package org.genericsystem.cv.application;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.function.BiFunction;
+
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.Lines.Line;
 import org.genericsystem.cv.lm.LevenbergImpl;
@@ -13,13 +20,6 @@ import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.function.BiFunction;
 
 public class TextOrientationLinesDetector {
 
@@ -94,7 +94,7 @@ public class TextOrientationLinesDetector {
 		return rects;
 	}
 
-	private static <T> Collection<T> selectRandomObjects(List<T> objects, int maxReturnObjects) {
+	public static <T> Collection<T> selectRandomObjects(List<T> objects, int maxReturnObjects) {
 		if (objects.size() <= maxReturnObjects)
 			return objects;
 		Set<T> result = new HashSet<>();

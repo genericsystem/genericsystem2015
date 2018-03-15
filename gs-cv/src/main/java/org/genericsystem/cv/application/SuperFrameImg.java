@@ -1,5 +1,14 @@
 package org.genericsystem.cv.application;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.genericsystem.cv.Calibrated;
@@ -20,15 +29,6 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.imgproc.Moments;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class SuperFrameImg {
 
@@ -264,7 +264,7 @@ public class SuperFrameImg {
 
 	private Img buildDiffFrame() {
 		Mat diffFrame = getGrayFrame().gaussianBlur(new Size(5, 5)).getSrc();
-		Core.absdiff(diffFrame, new Scalar(50), diffFrame);
+		Core.absdiff(diffFrame, new Scalar(100), diffFrame);
 		Imgproc.adaptiveThreshold(diffFrame, diffFrame, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 7, 3);
 		return new Img(diffFrame, false);// .cleanTablesInv(0.05);
 	}
