@@ -146,6 +146,17 @@ public class GraphicApp extends AbstractApp {
 		//filteredSuperContour = filteredSuperContour.stream().filter(sc -> Math.abs(sc.angle) < Math.PI/4 && sc.dx > 2*sc.dy).collect(Collectors.toList());
 		
 		Mat image = superReferenceTemplate5.getDisplay().getSrc();
+				
+		SuperContourInterpolator interpolator = new SuperContourInterpolator(filteredSuperContour, 1);
+		MeshGrid meshGrid = new MeshGrid(50, image, interpolator, 10, 10);
+		meshGrid.build();
+		
+		Img dewarped = new Img(meshGrid.dewarp(400), false);
+		
+		
+		images[5] = dewarped.toJfxImage();
+		
+		
 		filteredSuperContour.stream().forEach(c -> Imgproc.line(image, c.top, c.bottom, new Scalar(255, 255, 255), 1));
 		filteredSuperContour.stream().forEach(c -> Imgproc.line(image, c.left, c.right, new Scalar(255, 255, 255), 1));
 		/*detectedSuperContours2.stream().map(sc -> sc.center).forEach(pt -> Imgproc.circle(image, pt, 3, new Scalar(255, 0, 0), -1));
@@ -153,16 +164,6 @@ public class GraphicApp extends AbstractApp {
 		detectedSuperContours2.stream().map(sc -> sc.right).forEach(pt -> Imgproc.circle(image, pt, 3, new Scalar(0, 0, 255), -1));
 		detectedSuperContours2.stream().map(sc -> sc.top).forEach(pt -> Imgproc.circle(image, pt, 3, new Scalar(0, 255, 255), -1));
 		detectedSuperContours2.stream().map(sc -> sc.bottom).forEach(pt -> Imgproc.circle(image, pt, 3, new Scalar(255, 0, 255), -1));*/
-
-		
-		SuperContourInterpolator interpolator = new SuperContourInterpolator(filteredSuperContour, 1);
-		MeshGrid meshGrid = new MeshGrid(7, image, interpolator, 30, 30);
-		meshGrid.build();
-		
-		Img dewarped = new Img(meshGrid.dewarp(300), false);
-		
-		
-		images[5] = dewarped.toJfxImage();
 		
 		meshGrid.draw(new Scalar(0, 255, 0));
 		

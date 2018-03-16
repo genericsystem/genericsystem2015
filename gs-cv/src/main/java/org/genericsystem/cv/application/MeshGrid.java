@@ -26,7 +26,7 @@ public class MeshGrid {
 	SuperContourInterpolator interpolator;
 	public double deltaX, deltaY; // déplacement d'un polygone
 	
-	private final int nbIter = 40; // nombre d'itérations à chaque déplacement
+	private int nbIter; // nombre d'itérations à chaque déplacement
 	private int iP = 0, jP = 0; // polygone courant
 	private int minIndex, maxIndex; // indices min et max des polygones
 	private double rectWidth, rectHeight; // taille d'un polygone après redressement
@@ -40,6 +40,7 @@ public class MeshGrid {
 	}
 
 	public void build() {
+		nbIter = (int) Math.round(deltaY); // avance d'un pixel à chaque itération
 		addPolygon(iP, jP);
 		for(int k = 1 ; k < size ; k++) {
 			int dir = k%2 == 0 ? -1 : 1;
@@ -62,14 +63,18 @@ public class MeshGrid {
 		Mat dewarpedImage = new Mat(new Size(dewarpedImageSize, dewarpedImageSize), CvType.CV_8UC3);
 		for(int iP = minIndex ; iP <= maxIndex ; iP++) {
 			for(int jP = minIndex ; jP <= maxIndex ; jP++) {
-				Mat homography = dewarpPolygon(iP, jP);
-				double x = (jP - minIndex) * rectWidth;
-				double y = (iP - minIndex) * rectHeight;
-				Point dewarpedTopLeft = new Point(x, y);
-				Point dewarpedBottomRight = new Point(x + rectWidth, y + rectHeight);
-				Mat subDewarpedImage = new Mat(dewarpedImage, new Rect(dewarpedTopLeft, dewarpedBottomRight));
-				Mat subImage = subImage(iP, jP);
-				Imgproc.warpPerspective(subImage, subDewarpedImage, homography, new Size(rectWidth, rectHeight), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(0));
+				Rect subImageRect = subImageRect(iP, jP);
+				double xInf = subImageRect.x, yInf = subImageRect.y;
+				if(xInf > 0 && yInf > 0 && xInf + subImageRect.width < image.width() && yInf + subImageRect.height < image.height()) {
+					Mat homography = dewarpPolygon(mesh.get(new Key(iP, jP)), subImageRect);
+					double x = (jP - minIndex) * rectWidth;
+					double y = (iP - minIndex) * rectHeight;
+					Point dewarpedTopLeft = new Point(x, y);
+					Point dewarpedBottomRight = new Point(x + rectWidth, y + rectHeight);
+					Mat subDewarpedImage = new Mat(dewarpedImage, new Rect(dewarpedTopLeft, dewarpedBottomRight));
+					Mat subImage = new Mat(image, subImageRect);
+					Imgproc.warpPerspective(subImage, subDewarpedImage, homography, new Size(rectWidth, rectHeight), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(0));
+				}
 			}
 		}
 		return dewarpedImage;
@@ -92,18 +97,8 @@ public class MeshGrid {
 		
 	}
 	
-	private Mat subImage(int iP, int jP){
+	private Mat dewarpPolygon(Integer[] polygon, Rect subImageRect) {
 		
-		Rect subImageRect = subImageRect(iP, jP);
-    	//Imgproc.rectangle(image, new Point(subImageRect.x, subImageRect.y), new Point(subImageRect.x+subImageRect.width, subImageRect.y+subImageRect.height), new Scalar(255, 0, 0));
-		return new Mat(image, subImageRect);
-		
-	}
-	
-	private Mat dewarpPolygon(int iP, int iJ) {
-		
-		Rect subImageRect = subImageRect(iP, jP);
-		Integer[] polygon = mesh.get(new Key(iP, jP));
 		Point warpedTopLeft = changeOrigin(subImageRect, points.get(polygon[0]));
 		Point warpedTopRight = changeOrigin(subImageRect, points.get(polygon[1]));
 		Point warpedBottomRight = changeOrigin(subImageRect, points.get(polygon[2]));
@@ -261,7 +256,7 @@ public class MeshGrid {
 	}
 	
 	private Point verticalMove(Point startingPoint, double deltaY) {
-		double dY = deltaY/nbIter;
+		double dY = deltaY/nbIter; // proche de 1 pixel
 		double x = startingPoint.x, y = startingPoint.y;
 		for(int i = 0 ; i < nbIter ; i++) {
 			double [] angles = interpolator.interpolate(x, y);
@@ -273,7 +268,7 @@ public class MeshGrid {
 	}
 	
 	private Point horizontalMove(Point startingPoint, double deltaX) {
-		double dX = deltaX/nbIter;
+		double dX = deltaX/nbIter; // proche de 1 pixel
 		double x = startingPoint.x, y = startingPoint.y;
 		for(int i = 0 ; i < nbIter ; i++) {
 			double [] angles = interpolator.interpolate(x, y);
