@@ -147,8 +147,8 @@ public class GraphicApp extends AbstractApp {
 		
 		Mat image = superReferenceTemplate5.getDisplay().getSrc();
 				
-		SuperContourInterpolator interpolator = new SuperContourInterpolator(filteredSuperContour, 1);
-		MeshGrid meshGrid = new MeshGrid(50, image, interpolator, 10, 10);
+		SuperContourInterpolator interpolator = new SuperContourInterpolator(filteredSuperContour, 2);
+		MeshGrid meshGrid = new MeshGrid(20, image, interpolator, 20, 20);
 		meshGrid.build();
 		
 		Img dewarped = new Img(meshGrid.dewarp(400), false);
