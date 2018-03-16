@@ -18,7 +18,7 @@ public class Ocr {
 	// Get the OcrTesseract instance from the tesseractInstancePool to prevent multi-threading problems
 	private static final GenericObjectPool<OCRTesseract> tesseractInstancePool = new GenericObjectPool<>(new OCRTesseractInstanceFactory(), Ocr.buildPoolConfig());
 
-	private static final String TESSDATA_PATH = "/usr/share/tesseract-ocr/4.00/";
+	private static final String TESSDATA_PATH = "/usr/share/tesseract-ocr/4.00/tessdata/";
 	private static final String TESSDATA_ALT_PATH = System.getenv("TESSDATA_PREFIX");
 	private static final String TESSERACT_LANGUAGE = "fra";
 	private static final String TESSERACT_CHAR_WHITE_LIST = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM0123456789.-,<>!?;éèàçÉÈÀÇ€£$œ'";
