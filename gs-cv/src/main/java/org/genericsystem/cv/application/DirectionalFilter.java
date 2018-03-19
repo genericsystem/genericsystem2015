@@ -75,15 +75,11 @@ public class DirectionalFilter {
 		// }
 		// System.out.println("--------------------------------------------------------------------");
 
-		List<Double> edges = new ArrayList<>();
-		for (double angle = -Math.PI; angle < Math.PI + 0.000001; angle += 2 * Math.PI / (nBin + 1)) {
-			edges.add(angle);
-		}
 
 		List<Double> edgesBoundary = new ArrayList<>();
-		for (int i = 0; i <= nBin; i++) {
-			edgesBoundary.add((edges.get(i) + edges.get(i + 1)) / 2);
-		}
+		double step = 2 * Math.PI / nBin;
+		for (double boundary = -Math.PI + step / 2; boundary < Math.PI; boundary += step)
+			edgesBoundary.add(boundary);
 
 		Mat binning = Mat.ones(ori.size(), CvType.CV_64FC1);
 		for (int i = 0; i < nBin - 1; i++) {
@@ -93,7 +89,7 @@ public class DirectionalFilter {
 			filtered.release();
 		}
 
-		double max = edgesBoundary.get(nBin);
+		double max = edgesBoundary.get(nBin - 1);
 		// System.out.println("" + nBin + " " + max);
 		Mat mask = new Mat();
 		Core.inRange(ori, new Scalar(max), new Scalar(Double.MAX_VALUE), mask);
@@ -115,8 +111,8 @@ public class DirectionalFilter {
 		// System.out.println();
 		// }
 
-		Core.inRange(binning, new Scalar(Integer.valueOf(nBin).doubleValue() / 2 + 1), new Scalar(Double.MAX_VALUE), mask);
-		Core.add(binning, new Scalar(-Integer.valueOf(nBin).doubleValue() / 2), binning, mask);
+		Core.inRange(binning, new Scalar(nBin / 2 + 1), new Scalar(Double.MAX_VALUE), mask);
+		Core.add(binning, new Scalar(- nBin / 2), binning, mask);
 		mask.release();
 		// for (int row = 0; row < binning.rows(); row++) {
 		// for (int col = 0; col < binning.cols(); col++) {
