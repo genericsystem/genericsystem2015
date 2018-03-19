@@ -18,7 +18,6 @@ import org.opencv.videoio.VideoCapture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class DirectionalFilter {
 
 	private static final Logger logger = LoggerFactory.getLogger(DirectionalFilter.class);
@@ -44,13 +43,25 @@ public class DirectionalFilter {
 	public Mat gx(Mat frame) {
 		Mat gx = new Mat();
 		Imgproc.sepFilter2D(frame, gx, CvType.CV_64FC1, filterGauss, filterGaussDerivative, new Point(-1, -1), 0, Core.BORDER_REPLICATE);
-		return gx;
+		return cleanContour(gx);
 	}
 
 	public Mat gy(Mat frame) {
 		Mat gy = new Mat();
 		Imgproc.sepFilter2D(frame, gy, CvType.CV_64FC1, filterGaussDerivative, filterGauss, new Point(-1, -1), 0, Core.BORDER_REPLICATE);
-		return gy;
+		return cleanContour(gy);
+	}
+
+	public Mat cleanContour(Mat mat) {
+		for (int row = 0; row < mat.rows(); row++) {
+			mat.put(row, 0, 0);
+			mat.put(row, mat.cols() - 1, 0);
+		}
+		for (int col = 0; col < mat.cols(); col++) {
+			mat.put(0, col, 0);
+			mat.put(mat.rows() - 1, col, 0);
+		}
+		return mat;
 	}
 
 	public Mat bin(Mat ori, int nBin) {
@@ -146,14 +157,14 @@ public class DirectionalFilter {
 				}
 			}
 			System.out.println("Result : " + nbin);
-
-			//		Mat dirs = df.findSecondDirection(scaledFrame, bin, mag, 20, 64, 7);
-			//		System.out.println("Directions: ");
-			//		for (int row = 0; row < dirs.rows(); row++) {
-			//			for (int col = 0; col < dirs.cols(); col++)
-			//				System.out.printf("%2d ", (int) dirs.get(row, col)[0]);
-			//			System.out.println();
-			//		}
+			System.out.println(scaledFrame);
+			Mat dirs = df.findSecondDirection(scaledFrame, bin, mag, 20, 64, 7);
+			System.out.println("Directions: ");
+			for (int row = 0; row < dirs.rows(); row++) {
+				for (int col = 0; col < dirs.cols(); col++)
+					System.out.printf("%2d ", (int) dirs.get(row, col)[0]);
+				System.out.println();
+			}
 			frame.release();
 			scaledFrame.release();
 			gx.release();
@@ -250,7 +261,7 @@ public class DirectionalFilter {
 			List<Mat> histos = new ArrayList<>();
 			for (int j = 0; j < nYs; j++) {
 				Range ySel = new Range(patchYs.get(j), patchYs.get(j) + nSide);
-				histos.add(getHistogram(new Mat(mag, ySel, xSel), new Mat(binning,  ySel, xSel), nBin));
+				histos.add(getHistogram(new Mat(mag, ySel, xSel), new Mat(binning, ySel, xSel), nBin));
 			}
 			Core.hconcat(histos, rowOfHist);
 			hists[i] = rowOfHist;
@@ -277,7 +288,7 @@ public class DirectionalFilter {
 						if (i1 == i2 && j1 == j2 || ySel.empty())
 							continue;
 
-						histsIntersectLabels.add(new int[]{ i1, j1, i2, j2});
+						histsIntersectLabels.add(new int[] { i1, j1, i2, j2 });
 						histsIntersect.add(getHistogram(new Mat(mag, ySel, xSel), new Mat(binning, ySel, xSel), nBin));
 					}
 				}
@@ -290,7 +301,7 @@ public class DirectionalFilter {
 		int maxIter = 100;
 		double funcVal = Double.MAX_VALUE;
 
-		for (int iter = 0; iter  < maxIter; iter++) {
+		for (int iter = 0; iter < maxIter; iter++) {
 			double prevFuncVal = funcVal;
 			funcVal = computeObjective(dirs, mag, binning, nBin, patchXs, patchYs, nSide, lambda);
 
