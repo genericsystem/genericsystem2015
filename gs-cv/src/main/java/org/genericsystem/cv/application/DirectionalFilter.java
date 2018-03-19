@@ -233,8 +233,8 @@ public class DirectionalFilter {
 		// System.out.println(" Scale : " + scale);
 		Mat result = new Mat();
 		Imgproc.resize(img, result, new Size(0, 0), scale, scale, Imgproc.INTER_CUBIC);
-		for (Mat layer : imgLayers)
-			layer.release();
+		for (int i = 1; i < imgLayers.length; i++)
+			imgLayers[i].release();
 		return result;
 	}
 
