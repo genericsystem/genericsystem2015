@@ -297,7 +297,7 @@ public class DirectionalFilter {
 
 		// Step 3: Coordinate descent.
 		int initGuess = 32;
-		Mat dirs = new Mat(new Size(nYs, nXs), CvType.CV_32S, new Scalar(initGuess));
+		Mat dirs = new Mat(nYs, nXs, CvType.CV_32S, new Scalar(initGuess));
 		int maxIter = 100;
 		double funcVal = Double.MAX_VALUE;
 
@@ -329,7 +329,7 @@ public class DirectionalFilter {
 							histograms.put(r, k, histsIntersect.get(histIndex).get(r, 0)[0]);
 						int intersectI = histsIntersectLabels.get(histIndex)[2];
 						int intersectJ = histsIntersectLabels.get(histIndex)[3];
-						dirsThis[k] = (int) dirs.get(intersectI, intersectJ)[0];
+						dirsThis[k] = (int) dirs.get(intersectJ, intersectI)[0];
 					}
 					// Histogram of this region.
 					for (int r = 0; r < nBin; r++)
@@ -386,7 +386,7 @@ public class DirectionalFilter {
 			Range xSel = new Range(patchXs.get(i), patchXs.get(i) + nSide);
 			for (int j = 0; j < nYs; j++) {
 				Range ySel = new Range(patchYs.get(j), patchYs.get(j) + nSide);
-				List<Integer> distance = orientDistance((int) dirs.get(i, j)[0], inds);
+				List<Integer> distance = orientDistance((int) dirs.get(j, i)[0], inds);
 				for (int k = ySel.start; k < ySel.end; k++)
 					for (int l = xSel.start; l < xSel.end; l++)
 						dists.put(k, l, dists.get(k, l)[0] + (distance.get((int) binning.get(k, l)[0]) - lambda) * mag.get(k, l)[0]);
