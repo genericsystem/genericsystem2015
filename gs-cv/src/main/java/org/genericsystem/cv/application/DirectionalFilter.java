@@ -176,7 +176,7 @@ public class DirectionalFilter {
 		Mat histogram = Mat.zeros(nBin, 1, CvType.CV_64FC1);
 		for (int i = 0; i < nBin; i++) {
 			Mat mask = new Mat();
-			Core.inRange(binning, new Scalar(i), new Scalar(i), mask);
+			Core.inRange(binning, new Scalar(i + 1), new Scalar(i + 1), mask);
 			Mat result = Mat.zeros(binning.size(), CvType.CV_64FC1);
 			mag.copyTo(result, mask);
 			double resul = Core.sumElems(result).val[0];
@@ -236,13 +236,6 @@ public class DirectionalFilter {
 
 	// TODO: Split
 	public Mat findSecondDirection(Mat img, Mat binning, Mat mag, int nSide, int nBin, int lambda) {
-		for (int r = 0; r < binning.rows(); r++)
-			for (int c = 0; c < binning.cols(); c++) {
-				int curr = (int) binning.get(r, c)[0];
-				if (curr >= 64)
-					binning.put(r, c, curr - 64);
-			}
-
 		float ratio = .5f;
 		List<Integer> patchXs = imgPartition(img, nSide, ratio, false);
 		List<Integer> patchYs = imgPartition(img, nSide, ratio, true);
@@ -356,7 +349,7 @@ public class DirectionalFilter {
 		int nBin = histograms.rows();
 		int nHist = histograms.cols();
 		double[] dists = new double[nBin];
-		List<Integer> inds = IntStream.range(0, nBin).mapToObj(i -> i).collect(Collectors.toList());
+		List<Integer> inds = IntStream.range(1, nBin + 1).mapToObj(i -> i).collect(Collectors.toList());
 
 		for (int i = 0; i < nHist; i++) {
 			List<Integer> distance = orientDistance(dirs[i], inds);
@@ -375,7 +368,7 @@ public class DirectionalFilter {
 		int nXs = patchXs.size();
 		int nYs = patchYs.size();
 		Mat dists = new Mat(mag.size(), CvType.CV_64FC1);
-		List<Integer> inds = IntStream.range(0, nBin).mapToObj(i -> i).collect(Collectors.toList());
+		List<Integer> inds = IntStream.range(1, nBin + 1).mapToObj(i -> i).collect(Collectors.toList());
 		Mat binPatch = new Mat();
 
 		for (int i = 0; i < nXs; i++) {
@@ -385,7 +378,7 @@ public class DirectionalFilter {
 				List<Integer> distance = orientDistance((int) dirs.get(j, i)[0], inds);
 				for (int k = ySel.start; k < ySel.end; k++)
 					for (int l = xSel.start; l < xSel.end; l++)
-						dists.put(k, l, dists.get(k, l)[0] + (distance.get((int) binning.get(k, l)[0]) - lambda) * mag.get(k, l)[0]);
+						dists.put(k, l, dists.get(k, l)[0] + (distance.get((int) binning.get(k, l)[0] - 1) - lambda) * mag.get(k, l)[0]);
 			}
 		}
 		binPatch.release();
