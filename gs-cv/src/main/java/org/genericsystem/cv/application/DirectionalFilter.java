@@ -40,6 +40,28 @@ public class DirectionalFilter {
 			filterGaussDerivative.put(i, 0, -(i - u) * Math.exp(-Math.pow(i - u, 2) / 2 / Math.pow(difScl, 2)) / Math.pow(difScl, 3) / Math.sqrt(2 * Math.PI));
 	}
 
+	public Mat addDirs(Mat img, Mat dirs, int nSide, int nBin) {
+		// TODO: Modify findSecondDirection so it returns these lists.
+		List<Integer> patchXs = imgPartition(img, nSide, .5f, false);
+		List<Integer> patchYs = imgPartition(img, nSide, .5f, true);
+		Mat imgDirs = new Mat();
+		img.copyTo(imgDirs);
+		imgDirs.convertTo(imgDirs, CvType.CV_8SC3);
+		for (int j = 0; j < patchXs.size(); j++)
+			for (int i = 0; i < patchYs.size(); i++) {
+				int centerX = patchXs.get(j) + nSide / 2;
+				int centerY = patchYs.get(i) + nSide / 2;
+				Imgproc.line(imgDirs, new Point(centerX, centerY), getLineEnd(centerX, centerY, (int) dirs.get(i, j)[0], nBin, 5), new Scalar(0, 0, 0), 2);
+			}
+		return imgDirs;
+	}
+
+	public Point getLineEnd(int startX, int startY, int dir, int nBin, int length) {
+		double step = 2 * Math.PI / nBin;
+		double theta = -Math.PI + (dir - .5) * step;
+		return new Point(startX + length * Math.cos(theta), startY + length * Math.sin(theta));
+	}
+
 	public Mat gx(Mat frame) {
 		Mat gx = new Mat();
 		Imgproc.sepFilter2D(frame, gx, CvType.CV_64FC1, filterGauss, filterGaussDerivative, new Point(-1, -1), 0, Core.BORDER_REPLICATE);
