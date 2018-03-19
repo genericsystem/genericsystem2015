@@ -146,6 +146,9 @@ public class DirectionalFilter {
 	}
 
 	public static void main(String[] args) {
+		int nBin = 64;
+		int nSide = 20;
+		int lambda = 7;
 		VideoCapture vc = new VideoCapture(0);
 		Mat frame = new Mat();
 		DirectionalFilter df = new DirectionalFilter();
@@ -160,9 +163,9 @@ public class DirectionalFilter {
 			Mat mag = new Mat();
 			Mat ori = new Mat();
 			Core.cartToPolar(gx, gy, mag, ori);
-			Mat bin = df.bin(ori, 2 * 64);
+			Mat bin = df.bin(ori, 2 * nBin);
 
-			Mat histo = df.getHistogram(mag, bin, 64);
+			Mat histo = df.getHistogram(mag, bin, nBin);
 
 			double maxValue = Double.MIN_VALUE;
 			double nbin = Double.MIN_VALUE;
@@ -176,7 +179,7 @@ public class DirectionalFilter {
 			}
 			System.out.println("Result : " + nbin);
 			System.out.println(scaledFrame);
-			Mat dirs = df.findSecondDirection(scaledFrame, bin, mag, 20, 64, 7);
+			Mat dirs = df.findSecondDirection(scaledFrame, bin, mag, nSide, nBin, lambda);
 			System.out.println("Directions: ");
 			for (int row = 0; row < dirs.rows(); row++) {
 				for (int col = 0; col < dirs.cols(); col++)
