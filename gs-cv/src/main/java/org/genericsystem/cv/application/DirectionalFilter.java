@@ -66,7 +66,7 @@ public class DirectionalFilter extends AbstractApp {
 			Mat mag = new Mat();
 			Mat ori = new Mat();
 			Core.cartToPolar(gx, gy, mag, ori);
-			Mat bin = bin(ori, 2 * nBin);
+			Mat bin = bin(ori, nBin);
 
 			double[] histo = getHistogram(mag, bin, nBin);
 
@@ -147,62 +147,34 @@ public class DirectionalFilter extends AbstractApp {
 		return mat;
 	}
 
+	// Returns table of ints between 1 and nBin.
+	// Return value at indices (i, j) == b iff
+	// (b - 1) Pi / nBin < ori(i, j) + Pi / (2 nBin) mod Pi <= b Pi / nBin
 	public Mat bin(Mat ori, int nBin) {
-		Core.add(ori, new Scalar(-Math.PI), ori);
+		double step = Math.PI / nBin;
+		Mat binning = Mat.zeros(ori.size(), CvType.CV_64FC1);
+		for (int r = 0; r < binning.rows(); r++)
+			for (int c = 0; c < binning.cols(); c++) {
+				double angle = ori.get(r, c)[0] + step / 2;
+				int bin = (int) Math.ceil(angle / step);
+				while (bin > nBin)
+					bin -= nBin;
+				binning.put(r, c, bin);
+			}
 
-		// for (int row = 0; row < ori.rows(); row++) {
-		// for (int col = 0; col < ori.cols(); col++) {
-		// System.out.print(ori.get(row, col)[0] + " ");
-		// }
-		// System.out.println();
-		// }
-		// System.out.println("--------------------------------------------------------------------");
+		//		for (int row = 0; row < ori.rows(); row++) {
+		//			for (int col = 0; col < ori.cols(); col++) {
+		//				System.out.printf("%3d ", (int) (ori.get(row, col)[0] * 360 / (2 * Math.PI)));
+		//			}
+		//			System.out.println();
+		//		}
 
-
-		List<Double> edgesBoundary = new ArrayList<>();
-		double step = 2 * Math.PI / nBin;
-		for (double boundary = -Math.PI + step / 2; boundary < Math.PI; boundary += step)
-			edgesBoundary.add(boundary);
-
-		Mat binning = Mat.ones(ori.size(), CvType.CV_64FC1);
-		for (int i = 0; i < nBin - 1; i++) {
-			Mat filtered = new Mat();
-			Imgproc.threshold(ori, filtered, edgesBoundary.get(i), 1, Imgproc.THRESH_BINARY);
-			Core.addWeighted(binning, 1, filtered, 1, 0, binning);
-			filtered.release();
-		}
-
-		double max = edgesBoundary.get(nBin - 1);
-		// System.out.println("" + nBin + " " + max);
-		Mat mask = new Mat();
-		Core.inRange(ori, new Scalar(max), new Scalar(Double.MAX_VALUE), mask);
-
-		Mat toCopy = Mat.ones(ori.size(), CvType.CV_64FC1);
-		toCopy.copyTo(binning, mask);
-		toCopy.release();
-		// for (int row = 0; row < ori.rows(); row++) {
-		// for (int col = 0; col < ori.cols(); col++) {
-		// System.out.print(ori.get(row, col)[0] + " ");
-		// }
-		// System.out.println();
-		// }
-
-		// for (int row = 0; row < mask.rows(); row++) {
-		// for (int col = 0; col < mask.cols(); col++) {
-		// System.out.print(mask.get(row, col)[0] + " ");
-		// }
-		// System.out.println();
-		// }
-
-		Core.inRange(binning, new Scalar(nBin / 2 + 1), new Scalar(Double.MAX_VALUE), mask);
-		Core.add(binning, new Scalar(- nBin / 2), binning, mask);
-		mask.release();
-		// for (int row = 0; row < binning.rows(); row++) {
-		// for (int col = 0; col < binning.cols(); col++) {
-		// System.out.print(binning.get(row, col)[0] + " ");
-		// }
-		// System.out.println();
-		// }
+		//		for (int row = 0; row < binning.rows(); row++) {
+		//			for (int col = 0; col < binning.cols(); col++) {
+		//				System.out.printf("%2d ", (int) binning.get(row, col)[0]);
+		//			}
+		//			System.out.println();
+		//		}
 		return binning;
 	}
 
