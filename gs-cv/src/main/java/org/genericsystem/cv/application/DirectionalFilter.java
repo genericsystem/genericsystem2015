@@ -68,12 +68,12 @@ public class DirectionalFilter extends AbstractApp {
 			Core.cartToPolar(gx, gy, mag, ori);
 			Mat bin = bin(ori, 2 * nBin);
 
-			Mat histo = getHistogram(mag, bin, nBin);
+			double[] histo = getHistogram(mag, bin, nBin);
 
 			double maxValue = Double.MIN_VALUE;
 			double nbin = Double.MIN_VALUE;
-			for (int row = 0; row < histo.rows(); row++) {
-				double value = histo.get(row, 0)[0];
+			for (int row = 0; row < histo.length; row++) {
+				double value = histo[row];
 				// System.out.print((int) value + " ");
 				if (value > maxValue) {
 					maxValue = value;
@@ -97,7 +97,6 @@ public class DirectionalFilter extends AbstractApp {
 			mag.release();
 			ori.release();
 			bin.release();
-			histo.release();
 			imgDirs.release();
 		}
 	}
@@ -211,15 +210,15 @@ public class DirectionalFilter extends AbstractApp {
 		launch(args);
 	}
 
-	public Mat getHistogram(Mat mag, Mat binning, int nBin) {
-		Mat histogram = Mat.zeros(nBin, 1, CvType.CV_64FC1);
+	public double[] getHistogram(Mat mag, Mat binning, int nBin) {
+		double[] histogram = new double[nBin];
 		for (int i = 0; i < nBin; i++) {
 			Mat mask = new Mat();
 			Core.inRange(binning, new Scalar(i + 1), new Scalar(i + 1), mask);
 			Mat result = Mat.zeros(binning.size(), CvType.CV_64FC1);
 			mag.copyTo(result, mask);
 			double resul = Core.sumElems(result).val[0];
-			histogram.put(i, 0, resul);
+			histogram[i] = resul;
 			result.release();
 			mask.release();
 		}
@@ -282,22 +281,18 @@ public class DirectionalFilter extends AbstractApp {
 		int nYs = patchYs.size();
 
 		// Step 1: Find local histograms.
-		Mat[] hists = new Mat[nXs]; // No 3-dimensional Mat’s in Java…
+		double[][][] hists = new double[nXs][nYs][nBin];
 		for (int i = 0; i < nXs; i++) {
 			Range xSel = new Range(patchXs.get(i), patchXs.get(i) + nSide);
-			Mat rowOfHist = new Mat(nYs, nBin, CvType.CV_64FC1);
-			List<Mat> histos = new ArrayList<>();
 			for (int j = 0; j < nYs; j++) {
 				Range ySel = new Range(patchYs.get(j), patchYs.get(j) + nSide);
-				histos.add(getHistogram(new Mat(mag, ySel, xSel), new Mat(binning, ySel, xSel), nBin));
+				hists[i][j] = getHistogram(new Mat(mag, ySel, xSel), new Mat(binning, ySel, xSel), nBin);
 			}
-			Core.hconcat(histos, rowOfHist);
-			hists[i] = rowOfHist;
 		}
 
 		// Step 2: Find intersecting histograms.
 		List<int[]> histsIntersectLabels = new ArrayList<>();
-		List<Mat> histsIntersect = new ArrayList<>();
+		List<double[]> histsIntersect = new ArrayList<>();
 		for (int i1 = 0; i1 < nXs; i1++) {
 			Range xSel1 = new Range(patchXs.get(i1), patchXs.get(i1) + nSide);
 			for (int i2 = 0; i2 < nXs; i2++) {
@@ -348,20 +343,20 @@ public class DirectionalFilter extends AbstractApp {
 					}
 					int nNeighbor = indices.size();
 
-					Mat histograms = Mat.zeros(nBin, nNeighbor + 1, CvType.CV_64FC1);
+					double[][] histograms = new double[nBin][nNeighbor + 1];
 					int[] dirsThis = new int[nNeighbor + 1];
 
 					for (int k = 0; k < nNeighbor; k++) {
 						int histIndex = indices.get(k);
 						for (int r = 0; r < nBin; r++)
-							histograms.put(r, k, histsIntersect.get(histIndex).get(r, 0)[0]);
+							histograms[r][k] = histsIntersect.get(histIndex)[r];
 						int intersectI = histsIntersectLabels.get(histIndex)[2];
 						int intersectJ = histsIntersectLabels.get(histIndex)[3];
 						dirsThis[k] = (int) dirs.get(intersectJ, intersectI)[0];
 					}
 					// Histogram of this region.
 					for (int r = 0; r < nBin; r++)
-						histograms.put(r, nNeighbor, hists[i].get(r, j)[0]);
+						histograms[r][nNeighbor] = hists[i][j][r];
 
 					double[] incValues = new double[nBin];
 					for (int candidateDir = 0; candidateDir < nBin; candidateDir++) {
@@ -378,21 +373,20 @@ public class DirectionalFilter extends AbstractApp {
 						}
 
 					dirs.put(i, j, minDir);
-					histograms.release();
 				}
 		}
 		return dirs;
 	}
 
-	public double computeObjectiveIJ(Mat histograms, int[] dirs, int lambda, int firstBin) {
-		int nBin = histograms.rows();
-		int nHist = histograms.cols();
+	public double computeObjectiveIJ(double[][] histograms, int[] dirs, int lambda, int firstBin) {
+		int nBin = histograms.length;
+		int nHist = histograms[0].length;
 		double[] dists = new double[nBin];
 
 		for (int i = 0; i < nHist; i++) {
 			int[] distance = orientDistance(dirs[i], firstBin, nBin);
 			for (int j = 0; j < nBin; j++)
-				dists[j] = dists[j] + (distance[j] - lambda) * (int) histograms.get(j, i)[0];
+				dists[j] = dists[j] + (distance[j] - lambda) * (int) histograms[j][i];
 		}
 		double sum = 0;
 		for (double elt : dists)
