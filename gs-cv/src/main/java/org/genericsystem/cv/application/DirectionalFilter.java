@@ -1,7 +1,9 @@
 package org.genericsystem.cv.application;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -31,6 +33,8 @@ public class DirectionalFilter {
 	private final Mat filterGauss = Mat.zeros(2 * hSz + 1, 1, CvType.CV_64FC1);
 	private final Mat filterGaussDerivative = Mat.zeros(2 * hSz + 1, 1, CvType.CV_64FC1);
 	private double u = hSz + 1;
+	// Store results of orientDistance for speed (works because the second argument of orientDistance is always the same).
+	private final Map<Integer, int[]> orientDistances = new HashMap<>();
 
 	public DirectionalFilter() {
 		for (int i = 0; i < filterGauss.rows(); i++)
@@ -377,9 +381,9 @@ public class DirectionalFilter {
 		List<Integer> inds = IntStream.range(1, nBin + 1).mapToObj(i -> i).collect(Collectors.toList());
 
 		for (int i = 0; i < nHist; i++) {
-			List<Integer> distance = orientDistance(dirs[i], inds);
+			int[] distance = orientDistance(dirs[i], inds);
 			for (int j = 0; j < nBin; j++)
-				dists[j] = dists[j] + (distance.get(j) - lambda) * (int) histograms.get(j, i)[0];
+				dists[j] = dists[j] + (distance[j] - lambda) * (int) histograms.get(j, i)[0];
 		}
 		double sum = 0;
 		for (double elt : dists)
@@ -400,10 +404,10 @@ public class DirectionalFilter {
 			Range xSel = new Range(patchXs.get(i), patchXs.get(i) + nSide);
 			for (int j = 0; j < nYs; j++) {
 				Range ySel = new Range(patchYs.get(j), patchYs.get(j) + nSide);
-				List<Integer> distance = orientDistance((int) dirs.get(j, i)[0], inds);
+				int[] distance = orientDistance((int) dirs.get(j, i)[0], inds);
 				for (int k = ySel.start; k < ySel.end; k++)
 					for (int l = xSel.start; l < xSel.end; l++)
-						dists.put(k, l, dists.get(k, l)[0] + (distance.get((int) binning.get(k, l)[0] - 1) - lambda) * mag.get(k, l)[0]);
+						dists.put(k, l, dists.get(k, l)[0] + (distance[(int) binning.get(k, l)[0] - 1] - lambda) * mag.get(k, l)[0]);
 			}
 		}
 		binPatch.release();
@@ -418,12 +422,19 @@ public class DirectionalFilter {
 		return sum;
 	}
 
-	public List<Integer> orientDistance(int ind, List<Integer> inds) {
-		int nBin = inds.size();
-		List<Integer> list1 = inds.stream().map(i -> Math.abs(ind - i) % nBin).collect(Collectors.toList());
-		List<Integer> list2 = inds.stream().map(i -> Math.abs(ind - i + nBin)).collect(Collectors.toList());
-		List<Integer> list3 = inds.stream().map(i -> Math.abs(ind - i - nBin)).collect(Collectors.toList());
-		return IntStream.range(0, nBin).mapToObj(i -> Math.min(Math.min(list1.get(i), list2.get(i)), list3.get(i))).collect(Collectors.toList());
+	public int[] orientDistance(int ind, List<Integer> inds) {
+		if (!orientDistances.containsKey(ind)) {
+			int nBin = inds.size();
+			int[] distances = new int[nBin];
+			for (int i = 0; i < inds.size(); i++)
+				distances[i] = computeDistance(ind, inds.get(i), nBin);
+			orientDistances.put(ind, distances);
+		}
+		return orientDistances.get(ind);
+	}
+
+	private int computeDistance(int ind, int other, int nBin) {
+		return Math.min(Math.min(Math.abs(ind - other), Math.abs(ind - other - nBin)), Math.abs(ind - other + nBin));
 	}
 
 	public Range intersect(Range r1, Range r2) {
