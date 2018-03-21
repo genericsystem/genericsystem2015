@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.opencv.core.Core;
@@ -150,6 +148,7 @@ public class DirectionalFilter {
 	}
 
 	public static void main(String[] args) {
+		int firstBin = 1;
 		int nBin = 64;
 		int nSide = 20;
 		int lambda = 7;
@@ -183,7 +182,7 @@ public class DirectionalFilter {
 			}
 			System.out.println("Result : " + nbin);
 			System.out.println(scaledFrame);
-			Mat dirs = df.findSecondDirection(scaledFrame, bin, mag, nSide, nBin, lambda);
+			Mat dirs = df.findSecondDirection(scaledFrame, bin, mag, nSide, firstBin, nBin, lambda);
 			System.out.println("Directions: ");
 			for (int row = 0; row < dirs.rows(); row++) {
 				for (int col = 0; col < dirs.cols(); col++)
@@ -264,7 +263,7 @@ public class DirectionalFilter {
 	}
 
 	// TODO: Split
-	public Mat findSecondDirection(Mat img, Mat binning, Mat mag, int nSide, int nBin, int lambda) {
+	public Mat findSecondDirection(Mat img, Mat binning, Mat mag, int nSide, int firstBin, int nBin, int lambda) {
 		float ratio = .5f;
 		List<Integer> patchXs = imgPartition(img, nSide, ratio, false);
 		List<Integer> patchYs = imgPartition(img, nSide, ratio, true);
@@ -321,7 +320,7 @@ public class DirectionalFilter {
 
 		for (int iter = 0; iter < maxIter; iter++) {
 			double prevFuncVal = funcVal;
-			funcVal = computeObjective(dirs, mag, binning, nBin, patchXs, patchYs, nSide, lambda);
+			funcVal = computeObjective(dirs, mag, binning, firstBin, nBin, patchXs, patchYs, nSide, lambda);
 
 			logger.info("Iteration {}, funcVal = {}.", iter, funcVal);
 
@@ -356,7 +355,7 @@ public class DirectionalFilter {
 					double[] incValues = new double[nBin];
 					for (int candidateDir = 0; candidateDir < nBin; candidateDir++) {
 						dirsThis[nNeighbor] = candidateDir;
-						incValues[candidateDir] = computeObjectiveIJ(histograms, dirsThis, lambda);
+						incValues[candidateDir] = computeObjectiveIJ(histograms, dirsThis, lambda, firstBin);
 					}
 
 					double minValue = Double.MAX_VALUE;
@@ -374,14 +373,13 @@ public class DirectionalFilter {
 		return dirs;
 	}
 
-	public double computeObjectiveIJ(Mat histograms, int[] dirs, int lambda) {
+	public double computeObjectiveIJ(Mat histograms, int[] dirs, int lambda, int firstBin) {
 		int nBin = histograms.rows();
 		int nHist = histograms.cols();
 		double[] dists = new double[nBin];
-		List<Integer> inds = IntStream.range(1, nBin + 1).mapToObj(i -> i).collect(Collectors.toList());
 
 		for (int i = 0; i < nHist; i++) {
-			int[] distance = orientDistance(dirs[i], inds);
+			int[] distance = orientDistance(dirs[i], firstBin, nBin);
 			for (int j = 0; j < nBin; j++)
 				dists[j] = dists[j] + (distance[j] - lambda) * (int) histograms.get(j, i)[0];
 		}
@@ -393,21 +391,20 @@ public class DirectionalFilter {
 	}
 
 	// TODO: Return mask of selected pixels.
-	public double computeObjective(Mat dirs, Mat mag, Mat binning, int nBin, List<Integer> patchXs, List<Integer> patchYs, int nSide, int lambda) {
+	public double computeObjective(Mat dirs, Mat mag, Mat binning, int firstBin, int nBin, List<Integer> patchXs, List<Integer> patchYs, int nSide, int lambda) {
 		int nXs = patchXs.size();
 		int nYs = patchYs.size();
 		Mat dists = new Mat(mag.size(), CvType.CV_64FC1);
-		List<Integer> inds = IntStream.range(1, nBin + 1).mapToObj(i -> i).collect(Collectors.toList());
 		Mat binPatch = new Mat();
 
 		for (int i = 0; i < nXs; i++) {
 			Range xSel = new Range(patchXs.get(i), patchXs.get(i) + nSide);
 			for (int j = 0; j < nYs; j++) {
 				Range ySel = new Range(patchYs.get(j), patchYs.get(j) + nSide);
-				int[] distance = orientDistance((int) dirs.get(j, i)[0], inds);
+				int[] distance = orientDistance((int) dirs.get(j, i)[0], firstBin, nBin);
 				for (int k = ySel.start; k < ySel.end; k++)
 					for (int l = xSel.start; l < xSel.end; l++)
-						dists.put(k, l, dists.get(k, l)[0] + (distance[(int) binning.get(k, l)[0] - 1] - lambda) * mag.get(k, l)[0]);
+						dists.put(k, l, dists.get(k, l)[0] + (distance[(int) binning.get(k, l)[0] - firstBin] - lambda) * mag.get(k, l)[0]);
 			}
 		}
 		binPatch.release();
@@ -422,12 +419,11 @@ public class DirectionalFilter {
 		return sum;
 	}
 
-	public int[] orientDistance(int ind, List<Integer> inds) {
+	public int[] orientDistance(int ind, int firstBin, int nBin) {
 		if (!orientDistances.containsKey(ind)) {
-			int nBin = inds.size();
 			int[] distances = new int[nBin];
-			for (int i = 0; i < inds.size(); i++)
-				distances[i] = computeDistance(ind, inds.get(i), nBin);
+			for (int i = 0; i < nBin; i++)
+				distances[i] = computeDistance(ind, firstBin + i, nBin);
 			orientDistances.put(ind, distances);
 		}
 		return orientDistances.get(ind);
