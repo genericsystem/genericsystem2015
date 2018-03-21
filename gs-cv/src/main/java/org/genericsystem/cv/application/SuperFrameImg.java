@@ -264,7 +264,7 @@ public class SuperFrameImg {
 
 	private Img buildDiffFrame() {
 		Mat diffFrame = getGrayFrame().gaussianBlur(new Size(5, 5)).getSrc();
-		Core.absdiff(diffFrame, new Scalar(100), diffFrame);
+		Core.absdiff(diffFrame, new Scalar(0), diffFrame);
 		Imgproc.adaptiveThreshold(diffFrame, diffFrame, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 7, 3);
 		return new Img(diffFrame, false);// .cleanTablesInv(0.05);
 	}
@@ -300,7 +300,7 @@ public class SuperFrameImg {
 	public List<SuperContour> detectSuperContours(double minArea) {
 		List<MatOfPoint> contours = new ArrayList<>();
 		Mat hierarchy = new Mat();
-		Img img = getDiffFrame().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(1, 1));
+		Img img = getDiffFrame().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(5, 5));
 		Imgproc.findContours(img.getSrc(), contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_NONE);
 		List<SuperContour> result = new ArrayList<>();
 		int row = 0;
@@ -311,7 +311,7 @@ public class SuperFrameImg {
 			// double nextBrotherIndex = indexes[0];
 			// double childIndex = indexes[2];
 			MatOfPoint fatherWrapper = fatherIndex != -1 ? contours.get((int) fatherIndex) : null;
-			if (Imgproc.contourArea(contour) > minArea && Imgproc.boundingRect(contour).area() < 4000)
+			if (Imgproc.contourArea(contour) > minArea && Imgproc.boundingRect(contour).area() < 10000)
 				if (fatherWrapper != null) {
 					if (countWhitePixels(contour, Imgproc.boundingRect(contour), img) != 0) {
 						result.add(new SuperContour(contour, hierarchy.get(0, row)[3] == -1));
@@ -343,6 +343,7 @@ public class SuperFrameImg {
 		public final double lymin, lymax;
 		public final double dx, dy;
 		public final boolean isLeaf;
+		public double vertical;
 
 		public SuperContour(MatOfPoint contour, boolean isLeaf) {
 
@@ -367,7 +368,7 @@ public class SuperFrameImg {
 			this.lymax = max.get(0, 1)[0];
 
 			Point tangent = new Point(eigen.get(0, 0)[0], eigen.get(0, 1)[0]);
-			Point antiTangent = new Point(eigen.get(0, 1)[0], -eigen.get(0, 0)[0]);
+			Point antiTangent = new Point(-eigen.get(0, 1)[0], eigen.get(0, 0)[0]);
 
 			this.left = new Point(center.x + tangent.x * lxmin, center.y + tangent.y * lxmin);
 			this.right = new Point(center.x + tangent.x * lxmax, center.y + tangent.y * lxmax);
@@ -380,6 +381,52 @@ public class SuperFrameImg {
 			this.isLeaf = isLeaf;
 			this.dx = lxmax - lxmin;
 			this.dy = lymax - lymin;
+		}
+
+		int computeHisto(Mat mag, Mat bin, int nBin) {
+			// Mat mask = Mat.zeros(rect.size(), CvType.CV_8UC1);
+			// Imgproc.drawContours(mask, Arrays.asList(contour), 0, new Scalar(255), -1, Imgproc.LINE_8, new Mat(), Integer.MAX_VALUE, new Point(-rect.tl().x, -rect.tl().y));
+
+			// Mat localMag = Mat.zeros(rect.size(), CvType.CV_64FC1);
+			// new Mat(mag, rect).copyTo(localMag);
+			// Mat localBin = Mat.zeros(rect.size(), CvType.CV_8UC1);
+			// new Mat(bin, rect).copyTo(localBin);
+
+			double[] histos = getHisto(new Mat(mag, rect), new Mat(bin, rect), nBin);
+
+			// mask.release();
+			// localMag.release();
+			// localBin.release();
+			double targetAngle = antiAngle / Math.PI * 64;
+			System.out.println("Angle " + angle / Math.PI * 180 + " Antiangle : " + antiAngle / Math.PI * 180);
+			double max = Double.MIN_VALUE;
+			int k = -1;
+			for (int i = 0; i < histos.length; i++) {
+				if (Math.abs(i - targetAngle) < 16)
+					if (histos[i] > max) {
+						max = histos[i];
+						k = i;
+					}
+			}
+			vertical = (Integer.valueOf(k).doubleValue() / 64) * Math.PI;
+			// vertical = vertical - Math.PI;
+			// System.out.println(Arrays.toString(histos));
+			System.out.println(vertical / Math.PI * 180 + " " + antiAngle / Math.PI * 180);
+			return k;
+		}
+
+		private double[] getHisto(Mat mag, Mat binning, int nBin) {
+			double[] histo = new double[nBin];
+			for (int i = 0; i < nBin; i++) {
+				Mat mask = new Mat();
+				Core.inRange(binning, new Scalar(i + 1), new Scalar(i + 1), mask);
+				Mat result = Mat.zeros(binning.size(), CvType.CV_64FC1);
+				mag.copyTo(result, mask);
+				histo[i] = Core.sumElems(result).val[0];
+				result.release();
+				mask.release();
+			}
+			return histo;
 		}
 
 		Mat convertContourToMat(MatOfPoint contour) {
