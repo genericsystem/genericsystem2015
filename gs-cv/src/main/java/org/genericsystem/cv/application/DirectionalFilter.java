@@ -15,7 +15,6 @@ import org.opencv.core.Point;
 import org.opencv.core.Range;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
-import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
 import org.slf4j.Logger;
@@ -36,16 +35,15 @@ public class DirectionalFilter extends AbstractApp {
 	private final int hSz = (int) Math.ceil(3 * difScl);
 	private final Mat filterGauss = Mat.zeros(2 * hSz + 1, 1, CvType.CV_64FC1);
 	private final Mat filterGaussDerivative = Mat.zeros(2 * hSz + 1, 1, CvType.CV_64FC1);
-	private double u = hSz + 1;
 	// Store results of orientDistance for speed (works because the second argument of orientDistance is always the same).
 	private final Map<Integer, int[]> orientDistances = new HashMap<>();
 
 	public DirectionalFilter() {
 		for (int i = 0; i < filterGauss.rows(); i++)
-			filterGauss.put(i, 0, Math.exp(-Math.pow(i - u, 2) / 2 / Math.pow(difScl, 2)) / difScl / Math.sqrt(2 * Math.PI));
+			filterGauss.put(i, 0, Math.exp(-Math.pow(i - hSz, 2) / 2 / Math.pow(difScl, 2)) / difScl / Math.sqrt(2 * Math.PI));
 
 		for (int i = 0; i < filterGaussDerivative.rows(); i++)
-			filterGaussDerivative.put(i, 0, -(i - u) * Math.exp(-Math.pow(i - u, 2) / 2 / Math.pow(difScl, 2)) / Math.pow(difScl, 3) / Math.sqrt(2 * Math.PI));
+			filterGaussDerivative.put(i, 0, -(i - hSz) * Math.exp(-Math.pow(i - hSz, 2) / 2 / Math.pow(difScl, 2)) / Math.pow(difScl, 3) / Math.sqrt(2 * Math.PI));
 	}
 
 	@Override
@@ -162,19 +160,19 @@ public class DirectionalFilter extends AbstractApp {
 				binning.put(r, c, bin);
 			}
 
-		//		for (int row = 0; row < ori.rows(); row++) {
-		//			for (int col = 0; col < ori.cols(); col++) {
-		//				System.out.printf("%3d ", (int) (ori.get(row, col)[0] * 360 / (2 * Math.PI)));
-		//			}
-		//			System.out.println();
-		//		}
+		// for (int row = 0; row < ori.rows(); row++) {
+		// for (int col = 0; col < ori.cols(); col++) {
+		// System.out.printf("%3d ", (int) (ori.get(row, col)[0] * 360 / (2 * Math.PI)));
+		// }
+		// System.out.println();
+		// }
 
-		//		for (int row = 0; row < binning.rows(); row++) {
-		//			for (int col = 0; col < binning.cols(); col++) {
-		//				System.out.printf("%2d ", (int) binning.get(row, col)[0]);
-		//			}
-		//			System.out.println();
-		//		}
+		// for (int row = 0; row < binning.rows(); row++) {
+		// for (int col = 0; col < binning.cols(); col++) {
+		// System.out.printf("%2d ", (int) binning.get(row, col)[0]);
+		// }
+		// System.out.println();
+		// }
 		return binning;
 	}
 
