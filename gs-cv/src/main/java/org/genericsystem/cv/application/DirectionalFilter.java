@@ -53,7 +53,7 @@ public class DirectionalFilter {
 			for (int i = 0; i < patchYs.size(); i++) {
 				int centerX = patchXs.get(j) + nSide / 2;
 				int centerY = patchYs.get(i) + nSide / 2;
-				Imgproc.line(imgDirs, new Point(centerX, centerY), getLineEnd(centerX, centerY, (int) dirs.get(i, j)[0], nBin, 5), new Scalar(0, 0, 0), 2);
+				Imgproc.line(imgDirs, new Point(centerX, centerY), getLineEnd(centerX, centerY, (int) dirs.get(i, j)[0], nBin, nSide / 3), new Scalar(0, 0, 0), 2);
 			}
 		return imgDirs;
 	}
