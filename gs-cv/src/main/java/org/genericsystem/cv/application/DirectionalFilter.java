@@ -59,8 +59,8 @@ public class DirectionalFilter {
 	}
 
 	public Point getLineEnd(int startX, int startY, int dir, int nBin, int length) {
-		double step = 2 * Math.PI / nBin;
-		double theta = -Math.PI + (dir - .5) * step;
+		double step = Math.PI / nBin;
+		double theta = (dir - .5) * step;
 		return new Point(startX + length * Math.cos(theta), startY + length * Math.sin(theta));
 	}
 
