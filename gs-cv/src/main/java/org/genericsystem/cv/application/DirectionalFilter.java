@@ -5,7 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
+import org.genericsystem.cv.utils.Tools;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -13,12 +15,16 @@ import org.opencv.core.Point;
 import org.opencv.core.Range;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
+import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DirectionalFilter {
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
+
+public class DirectionalFilter extends AbstractApp {
 
 	private static final Logger logger = LoggerFactory.getLogger(DirectionalFilter.class);
 
@@ -40,6 +46,60 @@ public class DirectionalFilter {
 
 		for (int i = 0; i < filterGaussDerivative.rows(); i++)
 			filterGaussDerivative.put(i, 0, -(i - u) * Math.exp(-Math.pow(i - u, 2) / 2 / Math.pow(difScl, 2)) / Math.pow(difScl, 3) / Math.sqrt(2 * Math.PI));
+	}
+
+	@Override
+	protected void fillGrid(GridPane mainGrid) {
+		int firstBin = 1;
+		int nBin = 64;
+		int nSide = 20;
+		int lambda = 7;
+		VideoCapture vc = new VideoCapture(0);
+		Mat frame = new Mat();
+		for (;;) {
+			vc.read(frame);
+			Imgproc.cvtColor(frame, frame, Imgproc.COLOR_BGR2GRAY);
+
+			Mat scaledFrame = scale(frame);
+			Mat gx = gx(scaledFrame);
+			Mat gy = gy(scaledFrame);
+			Mat mag = new Mat();
+			Mat ori = new Mat();
+			Core.cartToPolar(gx, gy, mag, ori);
+			Mat bin = bin(ori, 2 * nBin);
+
+			Mat histo = getHistogram(mag, bin, nBin);
+
+			double maxValue = Double.MIN_VALUE;
+			double nbin = Double.MIN_VALUE;
+			for (int row = 0; row < histo.rows(); row++) {
+				double value = histo.get(row, 0)[0];
+				// System.out.print((int) value + " ");
+				if (value > maxValue) {
+					maxValue = value;
+					nbin = row;
+				}
+			}
+			System.out.println("Result : " + nbin);
+			System.out.println(scaledFrame);
+			Mat dirs = findSecondDirection(scaledFrame, bin, mag, nSide, firstBin, nBin, lambda);
+			System.out.println("Directions: ");
+			for (int row = 0; row < dirs.rows(); row++) {
+				for (int col = 0; col < dirs.cols(); col++)
+					System.out.printf("%2d ", (int) dirs.get(row, col)[0]);
+				System.out.println();
+			}
+			Mat imgDirs = addDirs(scaledFrame, dirs, nSide, nBin);
+			mainGrid.add(new ImageView(Tools.mat2jfxImage(scaledFrame)), 0, 0);
+			mainGrid.add(new ImageView(Tools.mat2jfxImage(imgDirs)), 1, 0);
+			gx.release();
+			gy.release();
+			mag.release();
+			ori.release();
+			bin.release();
+			histo.release();
+			imgDirs.release();
+		}
 	}
 
 	public Mat addDirs(Mat img, Mat dirs, int nSide, int nBin) {
@@ -148,56 +208,7 @@ public class DirectionalFilter {
 	}
 
 	public static void main(String[] args) {
-		int firstBin = 1;
-		int nBin = 64;
-		int nSide = 20;
-		int lambda = 7;
-		VideoCapture vc = new VideoCapture(0);
-		Mat frame = new Mat();
-		DirectionalFilter df = new DirectionalFilter();
-		for (;;) {
-			vc.read(frame);
-
-			Imgproc.cvtColor(frame, frame, Imgproc.COLOR_BGR2GRAY);
-
-			Mat scaledFrame = df.scale(frame);
-			Mat gx = df.gx(scaledFrame);
-			Mat gy = df.gy(scaledFrame);
-			Mat mag = new Mat();
-			Mat ori = new Mat();
-			Core.cartToPolar(gx, gy, mag, ori);
-			Mat bin = df.bin(ori, 2 * nBin);
-
-			Mat histo = df.getHistogram(mag, bin, nBin);
-
-			double maxValue = Double.MIN_VALUE;
-			double nbin = Double.MIN_VALUE;
-			for (int row = 0; row < histo.rows(); row++) {
-				double value = histo.get(row, 0)[0];
-				// System.out.print((int) value + " ");
-				if (value > maxValue) {
-					maxValue = value;
-					nbin = row;
-				}
-			}
-			System.out.println("Result : " + nbin);
-			System.out.println(scaledFrame);
-			Mat dirs = df.findSecondDirection(scaledFrame, bin, mag, nSide, firstBin, nBin, lambda);
-			System.out.println("Directions: ");
-			for (int row = 0; row < dirs.rows(); row++) {
-				for (int col = 0; col < dirs.cols(); col++)
-					System.out.printf("%2d ", (int) dirs.get(row, col)[0]);
-				System.out.println();
-			}
-			frame.release();
-			scaledFrame.release();
-			gx.release();
-			gy.release();
-			mag.release();
-			ori.release();
-			bin.release();
-			histo.release();
-		}
+		launch(args);
 	}
 
 	public Mat getHistogram(Mat mag, Mat binning, int nBin) {
