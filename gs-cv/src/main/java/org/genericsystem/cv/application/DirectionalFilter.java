@@ -245,11 +245,11 @@ public class DirectionalFilter extends AbstractApp {
 		int nYs = patchYs.size();
 
 		// Step 1: Find local histograms.
-		double[][][] hists = new double[nXs][nYs][nBin];
-		for (int i = 0; i < nXs; i++) {
-			Range xSel = new Range(patchXs.get(i), patchXs.get(i) + nSide);
-			for (int j = 0; j < nYs; j++) {
-				Range ySel = new Range(patchYs.get(j), patchYs.get(j) + nSide);
+		double[][][] hists = new double[nYs][nXs][nBin];
+		for (int i = 0; i < nYs; i++) {
+			Range ySel = new Range(patchYs.get(i), patchYs.get(i) + nSide);
+			for (int j = 0; j < nXs; j++) {
+				Range xSel = new Range(patchXs.get(j), patchXs.get(j) + nSide);
 				hists[i][j] = getHistogram(new Mat(mag, ySel, xSel), subArray(binning, ySel, xSel), nBin);
 			}
 		}
@@ -257,22 +257,22 @@ public class DirectionalFilter extends AbstractApp {
 		// Step 2: Find intersecting histograms.
 		List<int[]> histsIntersectLabels = new ArrayList<>();
 		List<double[]> histsIntersect = new ArrayList<>();
-		for (int i1 = 0; i1 < nXs; i1++) {
-			Range xSel1 = new Range(patchXs.get(i1), patchXs.get(i1) + nSide);
-			for (int i2 = 0; i2 < nXs; i2++) {
-				Range xSel2 = new Range(patchXs.get(i2), patchXs.get(i2) + nSide);
+		for (int i1 = 0; i1 < nYs; i1++) {
+			Range ySel1 = new Range(patchYs.get(i1), patchYs.get(i1) + nSide);
+			for (int i2 = 0; i2 < nYs; i2++) {
+				Range ySel2 = new Range(patchYs.get(i2), patchYs.get(i2) + nSide);
 
-				Range xSel = intersect(xSel1, xSel2);
-				if (xSel.empty())
+				Range ySel = intersect(ySel1, ySel2);
+				if (ySel.empty())
 					continue;
 
-				for (int j1 = 0; j1 < nYs; j1++) {
-					Range ySel1 = new Range(patchYs.get(j1), patchYs.get(j1) + nSide);
-					for (int j2 = 0; j2 < nYs; j2++) {
-						Range ySel2 = new Range(patchYs.get(j2), patchYs.get(j2) + nSide);
+				for (int j1 = 0; j1 < nXs; j1++) {
+					Range xSel1 = new Range(patchXs.get(j1), patchXs.get(j1) + nSide);
+					for (int j2 = 0; j2 < nXs; j2++) {
+						Range xSel2 = new Range(patchXs.get(j2), patchXs.get(j2) + nSide);
 
-						Range ySel = intersect(ySel1, ySel2);
-						if (i1 == i2 && j1 == j2 || ySel.empty())
+						Range xSel = intersect(xSel1, xSel2);
+						if (i1 == i2 && j1 == j2 || xSel.empty())
 							continue;
 
 						histsIntersectLabels.add(new int[] { i1, j1, i2, j2 });
@@ -300,8 +300,8 @@ public class DirectionalFilter extends AbstractApp {
 			if (Math.abs(prevFuncVal - funcVal) < Math.pow(10, -8) * Math.abs(funcVal))
 				break;
 
-			for (int i = 0; i < nXs; i++)
-				for (int j = 0; j < nYs; j++) {
+			for (int i = 0; i < nYs; i++)
+				for (int j = 0; j < nXs; j++) {
 					List<Integer> indices = new ArrayList<>();
 					for (int ind = 0; ind < histsIntersectLabels.size(); ind++) {
 						int[] labels = histsIntersectLabels.get(ind);
@@ -319,7 +319,7 @@ public class DirectionalFilter extends AbstractApp {
 							histograms[r][k] = histsIntersect.get(histIndex)[r];
 						int intersectI = histsIntersectLabels.get(histIndex)[2];
 						int intersectJ = histsIntersectLabels.get(histIndex)[3];
-						dirsThis[k] = dirs[intersectJ][intersectI];
+						dirsThis[k] = dirs[intersectI][intersectJ];
 					}
 					// Histogram of this region.
 					for (int r = 0; r < nBin; r++)
@@ -336,7 +336,7 @@ public class DirectionalFilter extends AbstractApp {
 						}
 					}
 
-					dirs[j][i] = minDir;
+					dirs[i][j] = minDir;
 				}
 		}
 		return dirs;
