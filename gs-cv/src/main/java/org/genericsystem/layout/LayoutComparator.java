@@ -9,8 +9,11 @@ import java.util.concurrent.TimeUnit;
 
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
+import org.genericsystem.cv.application.DirectionalFilter;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.genericsystem.cv.utils.Tools;
+import org.opencv.core.Core;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
@@ -61,51 +64,73 @@ public class LayoutComparator extends AbstractApp {
 		ImageView src9 = new ImageView(Tools.mat2jfxImage(frame));
 		mainGrid.add(src9, 4, 1);
 
-		timer.scheduleAtFixedRate(
-				() -> {
-					try {
-						capture.read(frame);
-						Img frameImg = new Img(frame, false);
+		DirectionalFilter df = new DirectionalFilter();
 
-						Img img0 = frameImg.bilateralFilter(10, 80, 80).bgr2Gray().adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY_INV, 11, 3).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(11, 3));
-						Img img1 = frameImg.canny(60, 180).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(11, 3));
-						Img img2 = frameImg.bgr2Gray().grad(2.0d, 2.0d).thresHold(0, 255, Imgproc.THRESH_BINARY_INV + Imgproc.THRESH_OTSU).bitwise_not().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(11, 3));
-						Img img3 = frameImg.sauvolaThreshold().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(11, 3));
-						Img img4 = frameImg.bgr2Gray().gaussianBlur(new Size(3, 3)).absDiff(new Scalar(255.0)).adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY, 11, 3).bitwise_not()
-								.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(11, 3));
+		timer.scheduleAtFixedRate(() -> {
+			try {
+				capture.read(frame);
+				Img frameImg = new Img(frame, false);
+				Img gray = frameImg.bgr2Gray();
 
-						// Layout layout = img0.buildLayout();
-						// Layout layout1 = img1.buildLayout();
-						// Layout layout2 = img2.buildLayout();
-						// Layout layout3 = img3.buildLayout();
-						// Layout layout4 = img4.buildLayout();
-						//
-						// Img out = new Img(frame, true);
-						// layout.draw(img0, new Scalar(0), 1);
-						// Img out1 = new Img(frame, true);
-						// layout1.draw(img1, new Scalar(0), 1);
-						// Img out2 = new Img(frame, true);
-						// layout2.draw(img2, new Scalar(0), 1);
-						// Img out3 = new Img(frame, true);
-						// layout3.draw(img3, new Scalar(0), 1);
-						// Img out4 = new Img(frame, true);
-						// layout4.draw(img4, new Scalar(0), 1);
+				Mat gx = df.gx(gray.getSrc());
+				Mat gy = df.gy(gray.getSrc());
+				Core.subtract(Mat.zeros(gy.size(), gy.type()), gy, gy);
+				Mat mag = new Mat();
+				Mat ori = new Mat();
+				// Core.subtract(Mat.zeros(gy.size(), gy.type()), gy, gy);
+				// Core.subtract(Mat.zeros(gx.size(), gx.type()), gx, gx);
+				Core.cartToPolar(gx, gy, mag, ori);
 
-						src.setImage(img0.toJfxImage());
-						src1.setImage(img1.toJfxImage());
-						src2.setImage(img2.toJfxImage());
-						src3.setImage(img3.toJfxImage());
-						src4.setImage(img4.toJfxImage());
-						src5.setImage(detectContours(frameImg, img0).toJfxImage());
-						src6.setImage(detectContours(frameImg, img1).toJfxImage());
-						src7.setImage(detectContours(frameImg, img2).toJfxImage());
-						src8.setImage(detectContours(frameImg, img3).toJfxImage());
-						src9.setImage(detectContours(frameImg, img4).toJfxImage());
+				int[][] binning = df.bin(ori, 64);
 
-					} catch (Throwable t) {
-						t.printStackTrace();
-					}
-				}, 400, 10, TimeUnit.MILLISECONDS);
+				Mat mask = new Mat();
+
+				Mat result = Mat.zeros(mag.size(), CvType.CV_64FC1);
+				mag.copyTo(result, mask);
+				System.out.println((int) Core.sumElems(result).val[0]);
+				Core.multiply(result, new Scalar(10), result, 1);
+
+				Img img0 = new Img(result, false);
+				// Img img0 = frameImg.bilateralFilter(10, 80, 80).bgr2Gray().adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY_INV, 11, 3).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(11, 3));
+
+				Img img1 = frameImg.canny(60, 180).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(11, 3));
+				Img img2 = frameImg.bgr2Gray().grad(2.0d, 2.0d).thresHold(0, 255, Imgproc.THRESH_BINARY_INV + Imgproc.THRESH_OTSU).bitwise_not().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(11, 3));
+				Img img3 = frameImg.sauvolaThreshold().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(11, 3));
+				Img img4 = frameImg.bgr2Gray().gaussianBlur(new Size(3, 3)).absDiff(new Scalar(255.0)).adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY, 11, 3).bitwise_not().morphologyEx(Imgproc.MORPH_CLOSE,
+						Imgproc.MORPH_RECT, new Size(11, 3));
+
+				// Layout layout = img0.buildLayout();
+				// Layout layout1 = img1.buildLayout();
+				// Layout layout2 = img2.buildLayout();
+				// Layout layout3 = img3.buildLayout();
+				// Layout layout4 = img4.buildLayout();
+				//
+				// Img out = new Img(frame, true);
+				// layout.draw(img0, new Scalar(0), 1);
+				// Img out1 = new Img(frame, true);
+				// layout1.draw(img1, new Scalar(0), 1);
+				// Img out2 = new Img(frame, true);
+				// layout2.draw(img2, new Scalar(0), 1);
+				// Img out3 = new Img(frame, true);
+				// layout3.draw(img3, new Scalar(0), 1);
+				// Img out4 = new Img(frame, true);
+				// layout4.draw(img4, new Scalar(0), 1);
+
+				src.setImage(img0.toJfxImage());
+				src1.setImage(img1.toJfxImage());
+				src2.setImage(img2.toJfxImage());
+				src3.setImage(img3.toJfxImage());
+				src4.setImage(img4.toJfxImage());
+				// src5.setImage(detectContours(frameImg, img0).toJfxImage());
+				src6.setImage(detectContours(frameImg, img1).toJfxImage());
+				src7.setImage(detectContours(frameImg, img2).toJfxImage());
+				src8.setImage(detectContours(frameImg, img3).toJfxImage());
+				src9.setImage(detectContours(frameImg, img4).toJfxImage());
+
+			} catch (Throwable t) {
+				t.printStackTrace();
+			}
+		}, 400, 10, TimeUnit.MILLISECONDS);
 	}
 
 	Img detectContours(Img frame, Img binary) {

@@ -143,34 +143,30 @@ public class GraphicApp extends AbstractApp {
 			};
 		};
 
-		List<SuperContour> filteredSuperContour = new ArrayList(
+		List<SuperContour> filteredSuperContour = new ArrayList<>(
 				TextOrientationLinesDetector.selectRandomObjects(superReferenceTemplate5.detectSuperContours(20).stream().filter(sc -> Math.abs(sc.angle) < Math.PI / 4 && sc.dx > 2 * sc.dy).collect(Collectors.toList()), 100));
-		// filteredSuperContour = filteredSuperContour.stream().filter(sc -> Math.abs(sc.angle) < Math.PI/4 && sc.dx > 2*sc.dy).collect(Collectors.toList());
-
 		DirectionalFilter df = new DirectionalFilter();
 		int nBin = 64;
 		Mat gray = superReferenceTemplate5.getGrayFrame().getSrc();
 		Mat gx = df.gx(gray);
+		// Core.subtract(Mat.zeros(gx.size(), gx.type()), gx, gx);
 		Mat gy = df.gy(gray);
 		Mat mag = new Mat();
 		Mat ori = new Mat();
 		Core.cartToPolar(gy, gx, mag, ori);
 
-		Mat bin = df.bin(ori, 2 * nBin);
-		filteredSuperContour.forEach(sc -> sc.computeHisto(mag, bin, nBin));
+		int[][] bin = df.bin(ori, nBin);
+		filteredSuperContour.forEach(sc -> sc.computeHisto(mag, bin, nBin, df));
 
 		Mat image = superReferenceTemplate5.getDisplay().getSrc();
 
 		SuperContourInterpolator interpolator = new SuperContourInterpolator(filteredSuperContour, 2);
 		MeshGrid meshGrid = new MeshGrid(20, image, interpolator, 20, 20);
 		meshGrid.build();
-
-		Img dewarped = new Img(meshGrid.dewarp(400), false);
-
-		images[5] = dewarped.toJfxImage();
+		images[5] = new Img(meshGrid.dewarp(400), false).toJfxImage();
 
 		filteredSuperContour.stream().forEach(c -> Imgproc.line(image, c.top, c.bottom, new Scalar(255, 255, 255), 1));
-		filteredSuperContour.stream().forEach(c -> Imgproc.line(image, c.left, c.right, new Scalar(255, 255, 255), 1));
+		filteredSuperContour.stream().forEach(c -> Imgproc.line(image, c.v1, c.v2, new Scalar(0, 0, 255), 2));
 		/*
 		 * detectedSuperContours2.stream().map(sc -> sc.center).forEach(pt -> Imgproc.circle(image, pt, 3, new Scalar(255, 0, 0), -1)); detectedSuperContours2.stream().map(sc -> sc.left).forEach(pt -> Imgproc.circle(image, pt, 3, new Scalar(0, 255, 0),
 		 * -1)); detectedSuperContours2.stream().map(sc -> sc.right).forEach(pt -> Imgproc.circle(image, pt, 3, new Scalar(0, 0, 255), -1)); detectedSuperContours2.stream().map(sc -> sc.top).forEach(pt -> Imgproc.circle(image, pt, 3, new Scalar(0, 255,
