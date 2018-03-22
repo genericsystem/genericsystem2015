@@ -328,19 +328,16 @@ public class DirectionalFilter extends AbstractApp {
 					for (int r = 0; r < nBin; r++)
 						histograms[r][nNeighbor] = hists[i][j][r];
 
-					double[] incValues = new double[nBin];
-					for (int candidateDir = 0; candidateDir < nBin; candidateDir++) {
-						dirsThis[nNeighbor] = candidateDir;
-						incValues[candidateDir] = computeObjectiveIJ(histograms, dirsThis, lambda, firstBin);
-					}
-
 					double minValue = Double.MAX_VALUE;
 					int minDir = -1;
-					for (int k = 0; k < incValues.length; k++)
-						if (incValues[k] < minValue) {
-							minValue = incValues[k];
-							minDir = k;
+					for (int candidateDir = 0; candidateDir < nBin; candidateDir++) {
+						dirsThis[nNeighbor] = candidateDir;
+						double currValue = computeObjectiveIJ(histograms, dirsThis, lambda, firstBin);
+						if (currValue < minValue) {
+							minValue = currValue;
+							minDir = candidateDir;
 						}
+					}
 
 					dirs.put(i, j, minDir);
 				}
