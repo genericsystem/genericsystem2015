@@ -1,6 +1,7 @@
 package org.genericsystem.cv.application;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,7 +65,7 @@ public class DirectionalFilter extends AbstractApp {
 			Mat mag = new Mat();
 			Mat ori = new Mat();
 			Core.cartToPolar(gx, gy, mag, ori);
-			Mat bin = bin(ori, nBin);
+			int[][] bin = bin(ori, nBin);
 
 			double[] histo = getHistogram(mag, bin, nBin);
 
@@ -79,12 +80,12 @@ public class DirectionalFilter extends AbstractApp {
 				}
 			}
 			System.out.println("Result : " + nbin);
-			System.out.println(scaledFrame);
-			Mat dirs = findSecondDirection(scaledFrame, bin, mag, nSide, firstBin, nBin, lambda);
+
+			int[][] dirs = findSecondDirection(scaledFrame, bin, mag, nSide, firstBin, nBin, lambda);
 			System.out.println("Directions: ");
-			for (int row = 0; row < dirs.rows(); row++) {
-				for (int col = 0; col < dirs.cols(); col++)
-					System.out.printf("%2d ", (int) dirs.get(row, col)[0]);
+			for (int row = 0; row < dirs.length; row++) {
+				for (int col = 0; col < dirs[0].length; col++)
+					System.out.printf("%2d ", dirs[row][col]);
 				System.out.println();
 			}
 			Mat imgDirs = addDirs(scaledFrame, dirs, nSide, nBin);
@@ -94,12 +95,11 @@ public class DirectionalFilter extends AbstractApp {
 			gy.release();
 			mag.release();
 			ori.release();
-			bin.release();
 			imgDirs.release();
 		}
 	}
 
-	public Mat addDirs(Mat img, Mat dirs, int nSide, int nBin) {
+	public Mat addDirs(Mat img, int[][] dirs, int nSide, int nBin) {
 		// TODO: Modify findSecondDirection so it returns these lists.
 		List<Integer> patchXs = imgPartition(img, nSide, .5f, false);
 		List<Integer> patchYs = imgPartition(img, nSide, .5f, true);
@@ -110,7 +110,7 @@ public class DirectionalFilter extends AbstractApp {
 			for (int i = 0; i < patchYs.size(); i++) {
 				int centerX = patchXs.get(j) + nSide / 2;
 				int centerY = patchYs.get(i) + nSide / 2;
-				Imgproc.line(imgDirs, new Point(centerX, centerY), getLineEnd(centerX, centerY, (int) dirs.get(i, j)[0], nBin, nSide / 3), new Scalar(0, 0, 0), 2);
+				Imgproc.line(imgDirs, new Point(centerX, centerY), getLineEnd(centerX, centerY, dirs[i][j], nBin, nSide / 3), new Scalar(0, 0, 0), 2);
 			}
 		return imgDirs;
 	}
@@ -145,34 +145,36 @@ public class DirectionalFilter extends AbstractApp {
 		return mat;
 	}
 
-	// Returns table of ints between 1 and nBin.
+	// Returns an array of the same size as ori containing ints between 1 and nBin.
 	// Return value at indices (i, j) == b iff
-	// (b - 1) Pi / nBin < ori(i, j) + Pi / (2 nBin) mod Pi <= b Pi / nBin
-	public Mat bin(Mat ori, int nBin) {
+	// (b - 1) Pi / nBin < (ori(i, j) + Pi / (2 nBin)) mod Pi <= b Pi / nBin
+	public int[][] bin(Mat ori, int nBin) {
 		double step = Math.PI / nBin;
-		Mat binning = Mat.zeros(ori.size(), CvType.CV_64FC1);
-		for (int r = 0; r < binning.rows(); r++)
-			for (int c = 0; c < binning.cols(); c++) {
+		int[][] binning = new int[ori.rows()][ori.cols()];
+		for (int r = 0; r < ori.rows(); r++)
+			for (int c = 0; c < ori.cols(); c++) {
+				double angle = ori.get(r, c)[0] + step / 2;
+				int bin = (int) Math.ceil(angle / step);
+				while (bin > nBin)
+					bin -= nBin;
+				binning[r][c] = bin;
+				assert bin > 0 && bin <= nBin;
+			}
+		return binning;
+	}
+
+	public Mat binMat(Mat ori, int nBin) {
+		double step = Math.PI / nBin;
+		Mat binning = new Mat(ori.size(), CvType.CV_64FC1);
+		for (int r = 0; r < ori.rows(); r++)
+			for (int c = 0; c < ori.cols(); c++) {
 				double angle = ori.get(r, c)[0] + step / 2;
 				int bin = (int) Math.ceil(angle / step);
 				while (bin > nBin)
 					bin -= nBin;
 				binning.put(r, c, bin);
+				assert bin > 0 && bin <= nBin;
 			}
-
-		// for (int row = 0; row < ori.rows(); row++) {
-		// for (int col = 0; col < ori.cols(); col++) {
-		// System.out.printf("%3d ", (int) (ori.get(row, col)[0] * 360 / (2 * Math.PI)));
-		// }
-		// System.out.println();
-		// }
-
-		// for (int row = 0; row < binning.rows(); row++) {
-		// for (int col = 0; col < binning.cols(); col++) {
-		// System.out.printf("%2d ", (int) binning.get(row, col)[0]);
-		// }
-		// System.out.println();
-		// }
 		return binning;
 	}
 
@@ -180,18 +182,11 @@ public class DirectionalFilter extends AbstractApp {
 		launch(args);
 	}
 
-	public double[] getHistogram(Mat mag, Mat binning, int nBin) {
+	public double[] getHistogram(Mat mag, int[][] binning, int nBin) {
 		double[] histogram = new double[nBin];
-		for (int i = 0; i < nBin; i++) {
-			Mat mask = new Mat();
-			Core.inRange(binning, new Scalar(i + 1), new Scalar(i + 1), mask);
-			Mat result = Mat.zeros(binning.size(), CvType.CV_64FC1);
-			mag.copyTo(result, mask);
-			double resul = Core.sumElems(result).val[0];
-			histogram[i] = resul;
-			result.release();
-			mask.release();
-		}
+		for (int i = 0; i < binning.length; i++)
+			for (int j = 0; j < binning[0].length; j++)
+				histogram[binning[i][j] - 1] += mag.get(i, j)[0];
 		return histogram;
 	}
 
@@ -220,7 +215,6 @@ public class DirectionalFilter extends AbstractApp {
 		Double[] meanMags = new Double[nScale];
 		for (int i = 0; i < nScale; i++) {
 			meanMags[i] = getMeanMag(imgLayers[i]);
-			// System.out.println("Mean : " + meanMags[i]);
 			if (i < nScale - 1) {
 				imgLayers[i + 1] = new Mat();
 				double scale = Math.pow(scaleFactor, i + 1);
@@ -243,7 +237,7 @@ public class DirectionalFilter extends AbstractApp {
 	}
 
 	// TODO: Split
-	public Mat findSecondDirection(Mat img, Mat binning, Mat mag, int nSide, int firstBin, int nBin, int lambda) {
+	public int[][] findSecondDirection(Mat img, int[][] binning, Mat mag, int nSide, int firstBin, int nBin, int lambda) {
 		float ratio = .5f;
 		List<Integer> patchXs = imgPartition(img, nSide, ratio, false);
 		List<Integer> patchYs = imgPartition(img, nSide, ratio, true);
@@ -256,7 +250,7 @@ public class DirectionalFilter extends AbstractApp {
 			Range xSel = new Range(patchXs.get(i), patchXs.get(i) + nSide);
 			for (int j = 0; j < nYs; j++) {
 				Range ySel = new Range(patchYs.get(j), patchYs.get(j) + nSide);
-				hists[i][j] = getHistogram(new Mat(mag, ySel, xSel), new Mat(binning, ySel, xSel), nBin);
+				hists[i][j] = getHistogram(new Mat(mag, ySel, xSel), subArray(binning, ySel, xSel), nBin);
 			}
 		}
 
@@ -282,15 +276,18 @@ public class DirectionalFilter extends AbstractApp {
 							continue;
 
 						histsIntersectLabels.add(new int[] { i1, j1, i2, j2 });
-						histsIntersect.add(getHistogram(new Mat(mag, ySel, xSel), new Mat(binning, ySel, xSel), nBin));
+						histsIntersect.add(getHistogram(new Mat(mag, ySel, xSel), subArray(binning, ySel, xSel), nBin));
 					}
 				}
 			}
 		}
 
 		// Step 3: Coordinate descent.
-		int initGuess = 32;
-		Mat dirs = new Mat(nYs, nXs, CvType.CV_32S, new Scalar(initGuess));
+		int initGuess = nBin / 2;
+		int[][] dirs = new int[nYs][nXs];
+		for (int i = 0; i < nYs; i++)
+			for (int j = 0; j < nXs; j++)
+				dirs[i][j] = initGuess;
 		int maxIter = 100;
 		double funcVal = Double.MAX_VALUE;
 
@@ -322,7 +319,7 @@ public class DirectionalFilter extends AbstractApp {
 							histograms[r][k] = histsIntersect.get(histIndex)[r];
 						int intersectI = histsIntersectLabels.get(histIndex)[2];
 						int intersectJ = histsIntersectLabels.get(histIndex)[3];
-						dirsThis[k] = (int) dirs.get(intersectJ, intersectI)[0];
+						dirsThis[k] = dirs[intersectJ][intersectI];
 					}
 					// Histogram of this region.
 					for (int r = 0; r < nBin; r++)
@@ -339,10 +336,17 @@ public class DirectionalFilter extends AbstractApp {
 						}
 					}
 
-					dirs.put(i, j, minDir);
+					dirs[j][i] = minDir;
 				}
 		}
 		return dirs;
+	}
+
+	private int[][] subArray(int[][] array, Range rowRange, Range colRange) {
+		int[][] result = new int[rowRange.size()][colRange.size()];
+		for (int i = 0; i < result.length; i++)
+			result[i] = Arrays.copyOfRange(array[rowRange.start + i], colRange.start, colRange.end);
+		return result;
 	}
 
 	public double computeObjectiveIJ(double[][] histograms, int[] dirs, int lambda, int firstBin) {
@@ -363,32 +367,29 @@ public class DirectionalFilter extends AbstractApp {
 	}
 
 	// TODO: Return mask of selected pixels.
-	public double computeObjective(Mat dirs, Mat mag, Mat binning, int firstBin, int nBin, List<Integer> patchXs, List<Integer> patchYs, int nSide, int lambda) {
+	public double computeObjective(int[][] dirs, Mat mag, int[][] binning, int firstBin, int nBin, List<Integer> patchXs, List<Integer> patchYs, int nSide, int lambda) {
 		int nXs = patchXs.size();
 		int nYs = patchYs.size();
-		Mat dists = new Mat(mag.size(), CvType.CV_64FC1);
+		double[][] dists = new double[mag.rows()][mag.cols()];
 		Mat binPatch = new Mat();
 
 		for (int i = 0; i < nXs; i++) {
 			Range xSel = new Range(patchXs.get(i), patchXs.get(i) + nSide);
 			for (int j = 0; j < nYs; j++) {
 				Range ySel = new Range(patchYs.get(j), patchYs.get(j) + nSide);
-				int[] distance = orientDistance((int) dirs.get(j, i)[0], firstBin, nBin);
+				int[] distance = orientDistance(dirs[j][i], firstBin, nBin);
 				for (int k = ySel.start; k < ySel.end; k++)
 					for (int l = xSel.start; l < xSel.end; l++)
-						dists.put(k, l, dists.get(k, l)[0] + (distance[(int) binning.get(k, l)[0] - firstBin] - lambda) * mag.get(k, l)[0]);
+						dists[k][l] += (distance[binning[k][l] - firstBin] - lambda) * mag.get(k, l)[0];
 			}
 		}
 		binPatch.release();
 		double sum = 0;
-		for (int i = 0; i < dists.rows(); i++)
-			for (int j = 0; j < dists.cols(); j++) {
-				double c = dists.get(i, j)[0];
-				sum += c < 0 ? c : 0;
-			}
+		for (int i = 0; i < dists.length; i++)
+			for (int j = 0; j < dists[0].length; j++)
+				sum += dists[i][j] < 0 ? dists[i][j] : 0;
 
-		dists.release();
-		return sum;
+				return sum;
 	}
 
 	public int[] orientDistance(int ind, int firstBin, int nBin) {
