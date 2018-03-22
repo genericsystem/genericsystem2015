@@ -157,8 +157,9 @@ public class DirectionalFilter extends AbstractApp {
 				int bin = (int) Math.ceil(angle / step);
 				while (bin > nBin)
 					bin -= nBin;
+				while (bin <= 0)
+					bin += nBin;
 				binning[r][c] = bin;
-				assert bin > 0 && bin <= nBin;
 			}
 		return binning;
 	}
