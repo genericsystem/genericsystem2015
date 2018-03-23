@@ -349,7 +349,7 @@ public class DirectionalFilter extends AbstractApp {
 
 					double minValue = Double.MAX_VALUE;
 					int minDir = -1;
-					for (int candidateDir = 0; candidateDir < nBin; candidateDir++) {
+					for (int candidateDir = firstBin; candidateDir < nBin + firstBin; candidateDir++) {
 						dirsThis[dirsThis.length - 1] = candidateDir;
 						double currValue = computeObjectiveIJ(histograms[i][j], dirsThis, lambda, firstBin);
 						if (currValue < minValue) {
