@@ -292,6 +292,40 @@ public class DirectionalFilter extends AbstractApp {
 		int maxIter = 100;
 		double funcVal = Double.MAX_VALUE;
 
+		List<Integer>[][] indices = new List[nYs][nXs];
+		double[][][][] histograms = new double[nYs][nXs][][];
+
+		for (int i = 0; i < nYs; i++)
+			for (int j = 0; j < nXs; j++) {
+				List<Integer> localIndices = new ArrayList<>();
+				for (int ind = 0; ind < histsIntersectLabels.size(); ind++) {
+					int[] labels = histsIntersectLabels.get(ind);
+					assert 0 <= labels[0] && labels[0] < nYs;
+					assert 0 <= labels[1] && labels[1] < nXs;
+					if (labels[0] == i && labels[1] == j)
+						localIndices.add(ind);
+				}
+				indices[i][j] = localIndices;
+				int nNeighbor = localIndices.size();
+
+				double[][] localHistograms = new double[nBin][nNeighbor + 1];
+
+				for (int k = 0; k < nNeighbor; k++) {
+					int histIndex = localIndices.get(k);
+					for (int r = 0; r < nBin; r++)
+						localHistograms[r][k] = histsIntersect.get(histIndex)[r];
+					int intersectI = histsIntersectLabels.get(histIndex)[2];
+					int intersectJ = histsIntersectLabels.get(histIndex)[3];
+					assert 0 <= intersectI && intersectI < nYs;
+					assert 0 <= intersectJ && intersectJ < nXs;
+				}
+				// Histogram of this region.
+				for (int r = 0; r < nBin; r++)
+					localHistograms[r][nNeighbor] = hists[i][j][r];
+
+				histograms[i][j] = localHistograms;
+			}
+
 		for (int iter = 0; iter < maxIter; iter++) {
 			double prevFuncVal = funcVal;
 			funcVal = computeObjective(dirs, mag, binning, firstBin, nBin, patchXs, patchYs, nSide, lambda);
@@ -303,34 +337,21 @@ public class DirectionalFilter extends AbstractApp {
 
 			for (int i = 0; i < nYs; i++)
 				for (int j = 0; j < nXs; j++) {
-					List<Integer> indices = new ArrayList<>();
-					for (int ind = 0; ind < histsIntersectLabels.size(); ind++) {
-						int[] labels = histsIntersectLabels.get(ind);
-						if (labels[0] == i && labels[1] == j)
-							indices.add(ind);
-					}
-					int nNeighbor = indices.size();
-
-					double[][] histograms = new double[nBin][nNeighbor + 1];
+					int nNeighbor = indices[i][j].size();
 					int[] dirsThis = new int[nNeighbor + 1];
 
 					for (int k = 0; k < nNeighbor; k++) {
-						int histIndex = indices.get(k);
-						for (int r = 0; r < nBin; r++)
-							histograms[r][k] = histsIntersect.get(histIndex)[r];
+						int histIndex = indices[i][j].get(k);
 						int intersectI = histsIntersectLabels.get(histIndex)[2];
 						int intersectJ = histsIntersectLabels.get(histIndex)[3];
 						dirsThis[k] = dirs[intersectI][intersectJ];
 					}
-					// Histogram of this region.
-					for (int r = 0; r < nBin; r++)
-						histograms[r][nNeighbor] = hists[i][j][r];
 
 					double minValue = Double.MAX_VALUE;
 					int minDir = -1;
 					for (int candidateDir = 0; candidateDir < nBin; candidateDir++) {
-						dirsThis[nNeighbor] = candidateDir;
-						double currValue = computeObjectiveIJ(histograms, dirsThis, lambda, firstBin);
+						dirsThis[dirsThis.length - 1] = candidateDir;
+						double currValue = computeObjectiveIJ(histograms[i][j], dirsThis, lambda, firstBin);
 						if (currValue < minValue) {
 							minValue = currValue;
 							minDir = candidateDir;
