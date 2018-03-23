@@ -22,6 +22,7 @@ import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 import javafx.application.Platform;
@@ -144,26 +145,26 @@ public class GraphicApp extends AbstractApp {
 		};
 
 		List<SuperContour> filteredSuperContour = new ArrayList<>(
-				TextOrientationLinesDetector.selectRandomObjects(superReferenceTemplate5.detectSuperContours(20).stream().filter(sc -> Math.abs(sc.angle) < Math.PI / 4 && sc.dx > 2 * sc.dy).collect(Collectors.toList()), 100));
+				TextOrientationLinesDetector.selectRandomObjects(superReferenceTemplate5.detectSuperContours(20).stream().filter(sc -> Math.abs(sc.angle) < Math.PI / 4 && sc.dx > 2 * sc.dy).collect(Collectors.toList()), 200));
 		DirectionalFilter df = new DirectionalFilter();
 		int nBin = 64;
 		Mat gray = superReferenceTemplate5.getGrayFrame().getSrc();
 		Mat gx = df.gx(gray);
-		// Core.subtract(Mat.zeros(gx.size(), gx.type()), gx, gx);
+		Core.subtract(Mat.zeros(gx.size(), gx.type()), gx, gx);
 		Mat gy = df.gy(gray);
 		Mat mag = new Mat();
 		Mat ori = new Mat();
-		Core.cartToPolar(gy, gx, mag, ori);
+		Core.cartToPolar(gx, gy, mag, ori);
 
 		int[][] bin = df.bin(ori, nBin);
 		filteredSuperContour.forEach(sc -> sc.computeHisto(mag, bin, nBin, df));
 
 		Mat image = superReferenceTemplate5.getDisplay().getSrc();
 
-		SuperContourInterpolator interpolator = new SuperContourInterpolator(filteredSuperContour, 2);
+		SuperContourInterpolator interpolator = new SuperContourInterpolator(filteredSuperContour, 3);
 		MeshGrid meshGrid = new MeshGrid(20, image, interpolator, 20, 20);
 		meshGrid.build();
-		images[5] = new Img(meshGrid.dewarp(400), false).toJfxImage();
+		images[5] = new Img(meshGrid.dewarp(new Size(640, 360)), false).toJfxImage();
 
 		filteredSuperContour.stream().forEach(c -> Imgproc.line(image, c.top, c.bottom, new Scalar(255, 255, 255), 1));
 		filteredSuperContour.stream().forEach(c -> Imgproc.line(image, c.v1, c.v2, new Scalar(0, 0, 255), 2));

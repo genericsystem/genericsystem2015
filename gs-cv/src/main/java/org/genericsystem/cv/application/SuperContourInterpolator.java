@@ -22,7 +22,9 @@ public class SuperContourInterpolator {
 	}
 
 	private double squaredEuclidianDistance(double x, double y, SuperContour sc) { // distance euclidienne au carré
-		return Math.pow(x - sc.center.x, 2) + Math.pow(y - sc.center.y, 2);
+		double result = Math.pow(x - sc.center.x, 2) + Math.pow(y - sc.center.y, 2);
+
+		return result >= 400 ? result : 400;
 	}
 
 	public double[] interpolate(double x, double y) { // retourne les angles horizontal et vertical interpolés
@@ -35,7 +37,7 @@ public class SuperContourInterpolator {
 			double geoCoef = Math.pow(1 / (squaredEuclidianDistance(x, y, sc) + 0.00001), pow / 2); // on ajoute un epsilon pour éviter les divisions par 0
 			hCoef = geoCoef * sc.dx; // la largeur comme indice de confiance dans le coefficient
 			hAngle += hCoef * sc.angle;
-			vCoef = geoCoef * sc.dy;// * indice de confiance dy ?
+			vCoef = geoCoef * sc.dx;// * indice de confiance dy ?
 			vAngle += vCoef * sc.vertical;
 			sumHCoefs += hCoef;
 			sumVCoefs += vCoef;

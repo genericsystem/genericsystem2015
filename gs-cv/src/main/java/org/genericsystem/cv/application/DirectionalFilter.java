@@ -364,7 +364,7 @@ public class DirectionalFilter extends AbstractApp {
 		return dirs;
 	}
 
-	private int[][] subArray(int[][] array, Range rowRange, Range colRange) {
+	int[][] subArray(int[][] array, Range rowRange, Range colRange) {
 		int[][] result = new int[rowRange.size()][colRange.size()];
 		for (int i = 0; i < result.length; i++)
 			result[i] = Arrays.copyOfRange(array[rowRange.start + i], colRange.start, colRange.end);
@@ -411,7 +411,7 @@ public class DirectionalFilter extends AbstractApp {
 			for (int j = 0; j < dists[0].length; j++)
 				sum += dists[i][j] < 0 ? dists[i][j] : 0;
 
-				return sum;
+		return sum;
 	}
 
 	public int[] orientDistance(int ind, int firstBin, int nBin) {
