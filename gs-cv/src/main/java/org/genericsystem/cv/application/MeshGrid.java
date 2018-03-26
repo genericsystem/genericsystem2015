@@ -75,7 +75,7 @@ public class MeshGrid {
 					Mat homography = dewarpPolygon(mesh.get(new Key(iP, jP)), subImageRect);
 					double x = (int) Math.floor(image.width() / 2) + (jP - 1) * rectHeight;
 					double y = (int) Math.floor(image.height() / 2) + (iP - 1) * rectHeight;
-					if (x >= 0 && y >= 0 && (x + rectHeight) < image.width() && (y + rectHeight) < image.height()) {
+					if (x >= 0 && y >= 0 && (x + rectHeight) <= image.width() && (y + rectHeight) <= image.height()) {
 						Mat subDewarpedImage = new Mat(dewarpedImage, new Rect(new Point(x, y), new Point(x + rectHeight, y + rectHeight)));
 						Mat subImage = new Mat(image, subImageRect);
 						Imgproc.warpPerspective(subImage, subDewarpedImage, homography, new Size(rectHeight, rectHeight), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(0));

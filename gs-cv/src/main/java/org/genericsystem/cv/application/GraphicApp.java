@@ -160,7 +160,7 @@ public class GraphicApp extends AbstractApp {
 
 		SuperContourInterpolator interpolator = new SuperContourInterpolator(filteredSuperContour, 3);
 		Point center = new Point(image.width() / 2, image.height() / 2);
-		MeshGrid meshGrid = new MeshGrid(30, interpolator, 20, 20);
+		MeshGrid meshGrid = new MeshGrid(20, interpolator, 30, 30);
 		meshGrid.build(center);
 
 		filteredSuperContour.stream().forEach(c -> Imgproc.line(image, c.top, c.bottom, new Scalar(255, 255, 255), 1));
@@ -170,7 +170,7 @@ public class GraphicApp extends AbstractApp {
 
 		images[4] = superReferenceTemplate5.getDisplay().toJfxImage();
 
-		images[5] = new Img(meshGrid.dewarp(superReferenceTemplate5.getFrame().getSrc(), 18), false).toJfxImage();
+		images[5] = new Img(meshGrid.dewarp(superReferenceTemplate5.getFrame().getSrc(), 10), false).toJfxImage();
 
 		// List<Point> detectedCenroids = superDeperspectived.detectCentroids();
 		// SuperTemplate superReferenceTemplate = new SuperTemplate(superDeperspectived, CvType.CV_8UC1, SuperFrameImg::getFrame);
