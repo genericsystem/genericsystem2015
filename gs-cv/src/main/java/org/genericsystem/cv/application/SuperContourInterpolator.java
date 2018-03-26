@@ -2,8 +2,6 @@ package org.genericsystem.cv.application;
 
 import java.util.List;
 
-import org.genericsystem.cv.application.SuperFrameImg.SuperContour;
-
 public class SuperContourInterpolator {
 
 	private final double pow;
@@ -23,8 +21,8 @@ public class SuperContourInterpolator {
 
 	private double squaredEuclidianDistance(double x, double y, SuperContour sc) { // distance euclidienne au carré
 		double result = Math.pow(x - sc.center.x, 2) + Math.pow(y - sc.center.y, 2);
-
-		return result >= 400 ? result : 400;
+		double minDist = 30;
+		return result >= Math.pow(minDist, 2) ? result : Math.pow(minDist, 2);
 	}
 
 	public double[] interpolate(double x, double y) { // retourne les angles horizontal et vertical interpolés

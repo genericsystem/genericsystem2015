@@ -1,10 +1,5 @@
 package org.genericsystem.cv.application;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -15,45 +10,58 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class MeshGrid {
 
-	public Mat image;
 	public int size; // nombre de polygones par côté
 	public List<Point> points = new ArrayList<>();
-	public List<Integer[]> polygons = new ArrayList<>(); // les polygones dans une liste
 	private Map<Key, Integer[]> mesh = new HashMap<>(); // les mêmes polygones mais en i, j
 	SuperContourInterpolator interpolator;
 	public double deltaX, deltaY; // déplacement d'un polygone
 
 	private int nbIter; // nombre d'itérations à chaque déplacement
-	private int iP = 0, jP = 0; // polygone courant
+	// private int iP = 0, jP = 0; // polygone courant
 	private int minIndex, maxIndex; // indices min et max des polygones
 	private double rectWidth, rectHeight; // taille d'un polygone après redressement
 
-	public MeshGrid(int size, Mat image, SuperContourInterpolator interpolator, double deltaX, double deltaY) {
+	public MeshGrid(int size, SuperContourInterpolator interpolator, double deltaX, double deltaY) {
 		this.size = size;
-		this.image = image;
 		this.interpolator = interpolator;
 		this.deltaX = deltaX;
 		this.deltaY = deltaY;
 	}
 
-	public void build() {
+	public void build(Point imgCenter) {
 		nbIter = (int) Math.round(deltaY); // avance d'un pixel à chaque itération
-		addPolygon(iP, jP);
+		int iP = 0;
+		int jP = 0;
+		addFirstPoly(imgCenter);
 		for (int k = 1; k < size; k++) {
 			int dir = k % 2 == 0 ? -1 : 1;
-			horizontalSpiral(k, dir);
-			verticalSpiral(k, dir);
+			for (int l = 1; l <= k; l++) {
+				jP += dir;
+				addPolygon(iP, jP);
+			}
+			for (int l = 1; l <= k; l++) {
+				iP += dir;
+				addPolygon(iP, jP);
+			}
 		}
-		horizontalSpiral(size - 1, size % 2 == 0 ? -1 : 1);
+		for (int l = 1; l < size; l++) {
+			jP += size % 2 == 0 ? -1 : 1;
+			addPolygon(iP, jP);
+		}
 	}
 
-	public void draw(Scalar color) {
-		polygons.forEach(p -> drawPolygon(p, color));
+	public void draw(Mat img, Scalar color) {
+		mesh.values().forEach(p -> drawPolygon(img, p, color));
 	}
 
-	public Mat dewarp(Size dewarpedSize) {
+	public Mat dewarp(Mat image, Size dewarpedSize) {
 
 		minIndex = -size / 2 + 1;
 		maxIndex = size / 2;
@@ -112,7 +120,7 @@ public class MeshGrid {
 		return new Point(point.x - subImageRect.x, point.y - subImageRect.y);
 	}
 
-	private void drawPolygon(Integer[] polygon, Scalar color) {
+	private void drawPolygon(Mat image, Integer[] polygon, Scalar color) {
 		Point topLeft = points.get(polygon[0]);
 		Point topRight = points.get(polygon[1]);
 		Point bottomRight = points.get(polygon[2]);
@@ -127,18 +135,13 @@ public class MeshGrid {
 		return mesh.get(new Key(i, j));
 	}
 
-	private void horizontalSpiral(int n, int dir) { // avance horizontale de n polygones dans la spirale, vers la droite (dir = +1) ou la gauche (dir = -1)
-		for (int k = 1; k <= n; k++) {
-			jP += dir;
-			addPolygon(iP, jP);
-		}
-	}
-
-	private void verticalSpiral(int n, int dir) { // avance verticale de n polygones dans la spirale, vers le haut (dir = -1) ou le bas (dir = +1);
-		for (int k = 1; k <= n; k++) {
-			iP += dir;
-			addPolygon(iP, jP);
-		}
+	private void addFirstPoly(Point imgCenter) {
+		int bottomRight = addPoint(imgCenter);
+		int topRight = addPoint(verticalMove(points.get(bottomRight), -deltaY));
+		int bottomLeft = addPoint(horizontalMove(points.get(bottomRight), -deltaX));
+		int topLeft = intersect(topRight, bottomLeft);
+		Integer[] polygon = { topLeft, topRight, bottomRight, bottomLeft };
+		mesh.put(new Key(0, 0), polygon);
 	}
 
 	private void addPolygon(int i, int j) { // ajoute un polygone compte tenu des polygones voisins
@@ -191,15 +194,15 @@ public class MeshGrid {
 			topRight = horizontalNext(topLeft);
 			bottomRight = horizontalNext(bottomLeft);
 		} else { // s'il n'y a aucun autre polygone, c'est le premier
-			bottomRight = addPoint(new Point(image.size().width / 2, image.size().height / 2));
-			topRight = verticalPrevious(bottomRight);
-			bottomLeft = horizontalPrevious(bottomRight);
-			topLeft = intersect(topRight, bottomLeft);
+			throw new IllegalStateException();
+			// bottomRight = addPoint(imgCenter);
+			// topRight = verticalPrevious(bottomRight);
+			// bottomLeft = horizontalPrevious(bottomRight);
+			// topLeft = intersect(topRight, bottomLeft);
 		}
 
 		Integer[] polygon = new Integer[] { topLeft, topRight, bottomRight, bottomLeft };
 		mesh.put(new Key(i, j), polygon);
-		polygons.add(polygon);
 
 	}
 
@@ -216,10 +219,10 @@ public class MeshGrid {
 			vPoint = verticalMove(vPoint, yDiff);
 			if (Math.abs(xDiff) < 0.5 && Math.abs(yDiff) < 0.5) {
 				intersection = new Point(0.5 * (hPoint.x + vPoint.x), 0.5 * (hPoint.y + vPoint.y));
-				break;
+				return addPoint(intersection);
 			}
 		}
-		return addPoint(intersection);
+		throw new IllegalStateException();
 	}
 
 	private double xDiff(Point pt1, Point pt2) {

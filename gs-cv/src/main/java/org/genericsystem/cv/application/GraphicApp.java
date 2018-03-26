@@ -1,19 +1,10 @@
 package org.genericsystem.cv.application;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Calibrated.AngleCalibrated;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.Lines;
 import org.genericsystem.cv.application.SuperFrameImg.Span;
-import org.genericsystem.cv.application.SuperFrameImg.SuperContour;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.genericsystem.layout.Layout;
 import org.opencv.core.Core;
@@ -24,6 +15,14 @@ import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -162,19 +161,20 @@ public class GraphicApp extends AbstractApp {
 		Mat image = superReferenceTemplate5.getDisplay().getSrc();
 
 		SuperContourInterpolator interpolator = new SuperContourInterpolator(filteredSuperContour, 3);
-		MeshGrid meshGrid = new MeshGrid(20, image, interpolator, 20, 20);
-		meshGrid.build();
-		images[5] = new Img(meshGrid.dewarp(new Size(640, 360)), false).toJfxImage();
+		Point center = new Point(image.width() / 2, image.height() / 2);
+		MeshGrid meshGrid = new MeshGrid(20, interpolator, 20, 20);
+		meshGrid.build(center);
+		images[5] = new Img(meshGrid.dewarp(image, new Size(640, 360)), false).toJfxImage();
 
 		filteredSuperContour.stream().forEach(c -> Imgproc.line(image, c.top, c.bottom, new Scalar(255, 255, 255), 1));
-		filteredSuperContour.stream().forEach(c -> Imgproc.line(image, c.v1, c.v2, new Scalar(0, 0, 255), 2));
+		filteredSuperContour.stream().forEach(c -> Imgproc.line(image, c.vBottom, c.vTop, new Scalar(0, 0, 255), 2));
 		/*
 		 * detectedSuperContours2.stream().map(sc -> sc.center).forEach(pt -> Imgproc.circle(image, pt, 3, new Scalar(255, 0, 0), -1)); detectedSuperContours2.stream().map(sc -> sc.left).forEach(pt -> Imgproc.circle(image, pt, 3, new Scalar(0, 255, 0),
 		 * -1)); detectedSuperContours2.stream().map(sc -> sc.right).forEach(pt -> Imgproc.circle(image, pt, 3, new Scalar(0, 0, 255), -1)); detectedSuperContours2.stream().map(sc -> sc.top).forEach(pt -> Imgproc.circle(image, pt, 3, new Scalar(0, 255,
 		 * 255), -1)); detectedSuperContours2.stream().map(sc -> sc.bottom).forEach(pt -> Imgproc.circle(image, pt, 3, new Scalar(255, 0, 255), -1));
 		 */
 
-		meshGrid.draw(new Scalar(0, 255, 0));
+		meshGrid.draw(image, new Scalar(0, 255, 0));
 
 		images[4] = superReferenceTemplate5.getDisplay().toJfxImage();
 

@@ -1,14 +1,5 @@
 package org.genericsystem.cv.application;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.genericsystem.cv.Calibrated;
@@ -29,6 +20,15 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.imgproc.Moments;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class SuperFrameImg {
 
@@ -324,126 +324,6 @@ public class SuperFrameImg {
 		// Collections.sort(result);
 
 		return result;
-	}
-
-	public static class SuperContour implements Comparable<SuperContour> {
-
-		public final MatOfPoint contour;
-		public SuperContour succ;
-		public SuperContour pred;
-		public final Point center;
-		public final double angle;
-		public final double antiAngle;
-		public final Point left;
-		public final Point right;
-		public final Point top;
-		public final Point bottom;
-		public final Rect rect;
-		public final double lxmin, lxmax;
-		public final double lymin, lymax;
-		public final double dx, dy;
-		public final boolean isLeaf;
-		public double vertical;
-
-		public SuperContour(MatOfPoint contour, boolean isLeaf) {
-
-			this.contour = contour;
-			this.rect = Imgproc.boundingRect(contour);
-			Mat dataPts = convertContourToMat(contour);
-			Mat mean = new Mat();
-			Mat eigen = new Mat();
-			Core.PCACompute(dataPts, mean, eigen);
-			Mat project = new Mat();
-			Core.PCAProject(dataPts, mean, eigen, project);
-			Mat min = new Mat();
-			Core.reduce(project, min, 0, Core.REDUCE_MIN);
-			Mat max = new Mat();
-			Core.reduce(project, max, 0, Core.REDUCE_MAX);
-
-			this.center = new Point(mean.get(0, 0)[0], mean.get(0, 1)[0]);
-
-			this.lxmin = min.get(0, 0)[0];
-			this.lymin = min.get(0, 1)[0];
-			this.lxmax = max.get(0, 0)[0];
-			this.lymax = max.get(0, 1)[0];
-
-			Point tangent = new Point(eigen.get(0, 0)[0], eigen.get(0, 1)[0]);
-			Point antiTangent = new Point(-eigen.get(0, 1)[0], eigen.get(0, 0)[0]);
-
-			this.left = new Point(center.x + tangent.x * lxmin, center.y + tangent.y * lxmin);
-			this.right = new Point(center.x + tangent.x * lxmax, center.y + tangent.y * lxmax);
-			this.top = new Point(center.x + antiTangent.x * lymin, center.y + antiTangent.y * lymin);
-			this.bottom = new Point(center.x + antiTangent.x * lymax, center.y + antiTangent.y * lymax);
-
-			this.angle = Math.atan2(tangent.y, tangent.x);
-			this.antiAngle = Math.atan2(antiTangent.y, antiTangent.x);
-
-			this.isLeaf = isLeaf;
-			this.dx = lxmax - lxmin;
-			this.dy = lymax - lymin;
-		}
-
-		int computeHisto(Mat mag, Mat bin, int nBin) {
-			// Mat mask = Mat.zeros(rect.size(), CvType.CV_8UC1);
-			// Imgproc.drawContours(mask, Arrays.asList(contour), 0, new Scalar(255), -1, Imgproc.LINE_8, new Mat(), Integer.MAX_VALUE, new Point(-rect.tl().x, -rect.tl().y));
-
-			// Mat localMag = Mat.zeros(rect.size(), CvType.CV_64FC1);
-			// new Mat(mag, rect).copyTo(localMag);
-			// Mat localBin = Mat.zeros(rect.size(), CvType.CV_8UC1);
-			// new Mat(bin, rect).copyTo(localBin);
-
-			double[] histos = getHisto(new Mat(mag, rect), new Mat(bin, rect), nBin);
-
-			// mask.release();
-			// localMag.release();
-			// localBin.release();
-			double targetAngle = antiAngle / Math.PI * 64;
-			System.out.println("Angle " + angle / Math.PI * 180 + " Antiangle : " + antiAngle / Math.PI * 180);
-			double max = Double.MIN_VALUE;
-			int k = -1;
-			for (int i = 0; i < histos.length; i++) {
-				if (Math.abs(i - targetAngle) < 16)
-					if (histos[i] > max) {
-						max = histos[i];
-						k = i;
-					}
-			}
-			vertical = (Integer.valueOf(k).doubleValue() / 64) * Math.PI;
-			// vertical = vertical - Math.PI;
-			// System.out.println(Arrays.toString(histos));
-			System.out.println(vertical / Math.PI * 180 + " " + antiAngle / Math.PI * 180);
-			return k;
-		}
-
-		private double[] getHisto(Mat mag, Mat binning, int nBin) {
-			double[] histo = new double[nBin];
-			for (int i = 0; i < nBin; i++) {
-				Mat mask = new Mat();
-				Core.inRange(binning, new Scalar(i + 1), new Scalar(i + 1), mask);
-				Mat result = Mat.zeros(binning.size(), CvType.CV_64FC1);
-				mag.copyTo(result, mask);
-				histo[i] = Core.sumElems(result).val[0];
-				result.release();
-				mask.release();
-			}
-			return histo;
-		}
-
-		Mat convertContourToMat(MatOfPoint contour) {
-			Point[] pts = contour.toArray();
-			Mat result = new Mat(pts.length, 2, CvType.CV_64FC1);
-			for (int i = 0; i < result.rows(); ++i) {
-				result.put(i, 0, pts[i].x);
-				result.put(i, 1, pts[i].y);
-			}
-			return result;
-		}
-
-		@Override
-		public int compareTo(SuperContour c) {
-			int xCompare = Double.compare(center.x, c.center.x);
-			return xCompare != 0 ? xCompare : Double.compare(center.y, c.center.y);
-		}
 	}
 
 	private Edge generateEdge(SuperContour c1, SuperContour c2, double maxDistance, double coeffDeltaAngle) {
