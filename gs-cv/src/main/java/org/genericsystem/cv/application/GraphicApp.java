@@ -21,6 +21,7 @@ import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 import javafx.application.Platform;
@@ -160,7 +161,7 @@ public class GraphicApp extends AbstractApp {
 
 		SuperContourInterpolator interpolator = new SuperContourInterpolator(filteredSuperContour, 3);
 		Point center = new Point(image.width() / 2, image.height() / 2);
-		MeshGrid meshGrid = new MeshGrid(20, interpolator, 30, 30);
+		MeshGrid meshGrid = new MeshGrid(new Size(8, 3), interpolator, 50, 50);
 		meshGrid.build(center);
 
 		filteredSuperContour.stream().forEach(c -> Imgproc.line(image, c.top, c.bottom, new Scalar(255, 255, 255), 1));
@@ -170,7 +171,7 @@ public class GraphicApp extends AbstractApp {
 
 		images[4] = superReferenceTemplate5.getDisplay().toJfxImage();
 
-		images[5] = new Img(meshGrid.dewarp(superReferenceTemplate5.getFrame().getSrc(), 10), false).toJfxImage();
+		images[5] = new Img(meshGrid.dewarp(superReferenceTemplate5.getFrame().getSrc()), false).toJfxImage();
 
 		// List<Point> detectedCenroids = superDeperspectived.detectCentroids();
 		// SuperTemplate superReferenceTemplate = new SuperTemplate(superDeperspectived, CvType.CV_8UC1, SuperFrameImg::getFrame);
