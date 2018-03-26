@@ -1,5 +1,13 @@
 package org.genericsystem.cv.application;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Calibrated.AngleCalibrated;
 import org.genericsystem.cv.Img;
@@ -16,14 +24,6 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
 import javafx.application.Platform;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -39,7 +39,7 @@ public class GraphicApp extends AbstractApp {
 	private Config config = new Config();
 	private Deperspectiver deperspectiver;
 	private ScheduledExecutorService timer = new BoundedScheduledThreadPoolExecutor();
-	ImageView[][] imageViews = new ImageView[][] { new ImageView[3], new ImageView[3], new ImageView[3] };
+	ImageView[][] imageViews = new ImageView[][] { new ImageView[3], new ImageView[3], new ImageView[3], new ImageView[3] };
 
 	public static void main(String[] args) {
 		launch(args);
@@ -92,7 +92,7 @@ public class GraphicApp extends AbstractApp {
 		System.out.println("do work");
 		if (!config.stabilizedMode)
 			superFrame = gsCapture.read();
-		Image[] images = new Image[9];
+		Image[] images = new Image[10];
 		Lines lines = superFrame.detectLines();
 		if (config.textsEnabledMode)
 			lines.getLines().addAll(superFrame.findTextOrientationLines());
@@ -118,10 +118,9 @@ public class GraphicApp extends AbstractApp {
 		SuperTemplate surfaceTemplate = new SuperTemplate(new SuperFrameImg(superDeperspectived.getDisplay().bgr2Gray().getSrc(), superFrame.getPp(), f), CvType.CV_8UC1, SuperFrameImg::getDisplay);
 		Layout surfaceLayout = surfaceTemplate.layout();
 		double surface = surfaceLayout.normalizedArea();
-
 		superDeperspectived.putText(String.valueOf(surface));
 
-		images[2] = superDeperspectived.getDisplay().toJfxImage();
+		images[2] = superDeperspectived.getFrame().toJfxImage();
 
 		SuperTemplate superReferenceTemplate4 = new SuperTemplate(superFrame, CvType.CV_8UC3, SuperFrameImg::getFrame);
 
@@ -164,19 +163,15 @@ public class GraphicApp extends AbstractApp {
 		Point center = new Point(image.width() / 2, image.height() / 2);
 		MeshGrid meshGrid = new MeshGrid(20, interpolator, 20, 20);
 		meshGrid.build(center);
-		images[5] = new Img(meshGrid.dewarp(image, new Size(640, 360)), false).toJfxImage();
 
 		filteredSuperContour.stream().forEach(c -> Imgproc.line(image, c.top, c.bottom, new Scalar(255, 255, 255), 1));
 		filteredSuperContour.stream().forEach(c -> Imgproc.line(image, c.vBottom, c.vTop, new Scalar(0, 0, 255), 2));
-		/*
-		 * detectedSuperContours2.stream().map(sc -> sc.center).forEach(pt -> Imgproc.circle(image, pt, 3, new Scalar(255, 0, 0), -1)); detectedSuperContours2.stream().map(sc -> sc.left).forEach(pt -> Imgproc.circle(image, pt, 3, new Scalar(0, 255, 0),
-		 * -1)); detectedSuperContours2.stream().map(sc -> sc.right).forEach(pt -> Imgproc.circle(image, pt, 3, new Scalar(0, 0, 255), -1)); detectedSuperContours2.stream().map(sc -> sc.top).forEach(pt -> Imgproc.circle(image, pt, 3, new Scalar(0, 255,
-		 * 255), -1)); detectedSuperContours2.stream().map(sc -> sc.bottom).forEach(pt -> Imgproc.circle(image, pt, 3, new Scalar(255, 0, 255), -1));
-		 */
 
 		meshGrid.draw(image, new Scalar(0, 255, 0));
 
 		images[4] = superReferenceTemplate5.getDisplay().toJfxImage();
+
+		images[5] = new Img(meshGrid.dewarp(image, new Size(640, 360)), false).toJfxImage();
 
 		// List<Point> detectedCenroids = superDeperspectived.detectCentroids();
 		// SuperTemplate superReferenceTemplate = new SuperTemplate(superDeperspectived, CvType.CV_8UC1, SuperFrameImg::getFrame);
@@ -202,73 +197,7 @@ public class GraphicApp extends AbstractApp {
 			}
 		});
 
-		int rows = spans.size();
-		int cols = (int) superReferenceTemplate2.size().width / 10;
-		Double[][] table = new Double[rows][cols];
-		for (int row = 0; row < rows; row++)
-			for (int col = 0; col < cols; col++)
-				table[row][col] = spans.get(row).getApprox().apply((double) col * 10);
-
-		for (int row = 1; row < rows - 1; row++)
-			for (int col = 0; col < cols; col++)
-				if (table[row][col] == null) {
-					if (col > 0 && table[row][col - 1] != null) {
-						int topRow = row - 1;
-						while (topRow >= 0 && (table[topRow][col - 1] == null || table[topRow][col] == null))
-							topRow--;
-						if (topRow >= 0) {
-							int bottomRow = row + 1;
-							while (bottomRow < rows && (table[bottomRow][col - 1] == null || table[bottomRow][col] == null))
-								bottomRow++;
-							if (bottomRow < rows) {
-								double rapport = (table[row][col - 1] - table[topRow][col - 1]) / (table[bottomRow][col - 1] - table[topRow][col - 1]);
-								table[row][col] = rapport * (table[bottomRow][col] - table[topRow][col]) + table[topRow][col];
-							}
-						}
-					}
-				}
-
-		for (int row = 0; row < rows - 1; row++)
-			for (int col = cols - 2; col >= 0; col--)
-				if (table[row][col] == null) {
-					if (col < cols - 1 && table[row][col + 1] != null) {
-						int topRow = row - 1;
-						while (topRow >= 0 && (table[topRow][col + 1] == null || table[topRow][col] == null))
-							topRow--;
-						if (topRow >= 0) {
-							int bottomRow = row + 1;
-							while (bottomRow < rows && (table[bottomRow][col + 1] == null || table[bottomRow][col] == null))
-								bottomRow++;
-							if (bottomRow < rows) {
-								double rapport = (table[row][col + 1] - table[topRow][col + 1]) / (table[bottomRow][col + 1] - table[topRow][col + 1]);
-								table[row][col] = rapport * (table[bottomRow][col] - table[topRow][col]) + table[topRow][col];
-							}
-						}
-					}
-				}
-
-		for (int row = 0; row < rows; row++) {
-			Point pointer = table[row][0] != null ? new Point(0, table[row][0]) : null;
-			for (int col = 1; col < cols; col++) {
-				Point tmp = table[row][col] != null ? new Point(col * 10, table[row][col]) : null;
-				if (tmp != null && pointer != null)
-					Imgproc.line(superReferenceTemplate2.getDisplay().getSrc(), pointer, tmp, new Scalar(0, 0, 255), 1);
-				pointer = tmp;
-			}
-		}
-
-		// Point pointer = new Point(0, approx.apply(0d));
-		// for (double x = 10; x < superReferenceTemplate2.size().width; x += 10) {
-		// Point tmp = new Point(x, approx.apply(x));
-		// Imgproc.line(superReferenceTemplate2.getDisplay().getSrc(), pointer, tmp, new Scalar(0, 0, 255), 1);
-		// pointer = tmp;
-		// }
-
-		// detectedrealCenroids.stream().map(sc -> sc.point1).forEach(pt -> Imgproc.circle(superReferenceTemplate2.getDisplay().getSrc(), pt, 3, new Scalar(0, 0, 255), -1));
-		// new Lines(superReferenceTemplate2.getDisplay().houghLinesP(1, Math.PI / 180, 10, 50, 47)).filter(line -> Math.atan2(Math.abs(line.y2 - line.y1), Math.abs(line.x2 - line.x1)) < 5 * Math.PI /
-		// 180).draw(superReferenceTemplate2.getDisplay().getSrc(),
-		// new Scalar(255), 1);
-		// images[5] = superReferenceTemplate2.getDisplay().toJfxImage();
+		images[6] = superReferenceTemplate2.getDisplay().toJfxImage();
 
 		ImgDescriptor newImgDescriptor = new ImgDescriptor(superDeperspectived, surface);
 		if (newImgDescriptor.getDescriptors().empty()) {
@@ -279,16 +208,16 @@ public class GraphicApp extends AbstractApp {
 		List<Rect> referenceRects = referenceManager.getReferenceRects();
 		SuperTemplate referenceTemplate = new SuperTemplate(referenceManager.getReference().getSuperFrame(), CvType.CV_8UC1, SuperFrameImg::getFrame);
 		referenceTemplate.drawRects(referenceRects, new Scalar(255), -1);
-		images[6] = referenceTemplate.getDisplay().toJfxImage();
+		images[7] = referenceTemplate.getDisplay().toJfxImage();
 
 		SuperTemplate superReferenceTemplate3 = new SuperTemplate(superFrame, CvType.CV_8UC1, SuperFrameImg::getFrame);
 		superReferenceTemplate3.drawRects(referenceManager.getResizedFieldsRects(), new Scalar(255), -1);
-		images[7] = superReferenceTemplate3.getDisplay().toJfxImage();
+		images[8] = superReferenceTemplate3.getDisplay().toJfxImage();
 
 		SuperTemplate layoutTemplate = new SuperTemplate(referenceTemplate, CvType.CV_8UC3, SuperFrameImg::getDisplay);
 		Layout layout = layoutTemplate.layout();
 		layoutTemplate.drawLayout(layout);
-		images[8] = layoutTemplate.getDisplay().toJfxImage();
+		images[9] = layoutTemplate.getDisplay().toJfxImage();
 
 		return images;
 	}

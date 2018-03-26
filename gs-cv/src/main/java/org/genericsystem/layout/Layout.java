@@ -1,5 +1,14 @@
 package org.genericsystem.layout;
 
+import java.text.Normalizer;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.function.BiConsumer;
+
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.Ocr;
 import org.genericsystem.cv.utils.OCRPlasty;
@@ -12,15 +21,6 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
-
-import java.text.Normalizer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.function.BiConsumer;
 
 public class Layout {
 
