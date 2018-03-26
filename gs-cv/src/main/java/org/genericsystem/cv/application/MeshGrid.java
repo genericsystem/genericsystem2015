@@ -1,5 +1,10 @@
 package org.genericsystem.cv.application;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -9,11 +14,6 @@ import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class MeshGrid {
 
@@ -61,24 +61,25 @@ public class MeshGrid {
 		mesh.values().forEach(p -> drawPolygon(img, p, color));
 	}
 
-	public Mat dewarp(Mat image, Size dewarpedSize) {
+	public Mat dewarp(Mat image, int verticalCellNumber) {
 
 		minIndex = -size / 2 + 1;
 		maxIndex = size / 2;
-		rectHeight = dewarpedSize.height / size;
+		rectHeight = image.height() / verticalCellNumber;
 		// rectWidth = dewarpedSize.width / size;
-		Mat dewarpedImage = new Mat(dewarpedSize, CvType.CV_8UC3, new Scalar(255, 255, 255));
+		Mat dewarpedImage = new Mat(image.size(), CvType.CV_8UC3, new Scalar(255, 255, 255));
 		for (int iP = minIndex; iP <= maxIndex; iP++) {
 			for (int jP = minIndex; jP <= maxIndex; jP++) {
 				Rect subImageRect = subImageRect(iP, jP);
-				double xInf = subImageRect.x, yInf = subImageRect.y;
-				if (xInf > 0 && yInf > 0 && xInf + subImageRect.width < image.width() && yInf + subImageRect.height < image.height()) {
+				if (subImageRect.tl().x >= 0 && subImageRect.tl().y >= 0 && subImageRect.br().x < image.width() && subImageRect.br().y < image.height()) {
 					Mat homography = dewarpPolygon(mesh.get(new Key(iP, jP)), subImageRect);
-					double x = (int) Math.floor(dewarpedSize.width / 2) + (jP - 1) * rectHeight;
-					double y = (int) Math.floor(dewarpedSize.height / 2) + (iP - 1) * rectHeight;
-					Mat subDewarpedImage = new Mat(dewarpedImage, new Rect(new Point(x, y), new Point(x + rectHeight, y + rectHeight)));
-					Mat subImage = new Mat(image, subImageRect);
-					Imgproc.warpPerspective(subImage, subDewarpedImage, homography, new Size(rectHeight, rectHeight), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(0));
+					double x = (int) Math.floor(image.width() / 2) + (jP - 1) * rectHeight;
+					double y = (int) Math.floor(image.height() / 2) + (iP - 1) * rectHeight;
+					if (x >= 0 && y >= 0 && (x + rectHeight) < image.width() && (y + rectHeight) < image.height()) {
+						Mat subDewarpedImage = new Mat(dewarpedImage, new Rect(new Point(x, y), new Point(x + rectHeight, y + rectHeight)));
+						Mat subImage = new Mat(image, subImageRect);
+						Imgproc.warpPerspective(subImage, subDewarpedImage, homography, new Size(rectHeight, rectHeight), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(0));
+					}
 				}
 			}
 		}
