@@ -155,13 +155,13 @@ public class GraphicApp extends AbstractApp {
 		Core.cartToPolar(gx, gy, mag, ori);
 
 		int[][] bin = df.bin(ori, nBin);
-		filteredSuperContour.forEach(sc -> sc.computeHisto(mag, bin, nBin, df));
+		filteredSuperContour.forEach(sc -> sc.computeHisto(mag, bin, nBin, df, 50));
 
 		Mat image = superReferenceTemplate5.getDisplay().getSrc();
 
-		SuperContourInterpolator interpolator = new SuperContourInterpolator(filteredSuperContour, 3);
+		SuperContourInterpolator interpolator = new SuperContourInterpolator(filteredSuperContour, 4);
 		Point center = new Point(image.width() / 2, image.height() / 2);
-		MeshGrid meshGrid = new MeshGrid(new Size(8, 3), interpolator, 50, 50);
+		MeshGrid meshGrid = new MeshGrid(new Size(16, 9), interpolator, 20, 20);
 		meshGrid.build(center);
 
 		filteredSuperContour.stream().forEach(c -> Imgproc.line(image, c.top, c.bottom, new Scalar(255, 255, 255), 1));
@@ -173,15 +173,8 @@ public class GraphicApp extends AbstractApp {
 
 		images[5] = new Img(meshGrid.dewarp(superReferenceTemplate5.getFrame().getSrc()), false).toJfxImage();
 
-		// List<Point> detectedCenroids = superDeperspectived.detectCentroids();
-		// SuperTemplate superReferenceTemplate = new SuperTemplate(superDeperspectived, CvType.CV_8UC1, SuperFrameImg::getFrame);
-		// superReferenceTemplate.drawCentroids(detectedCenroids, new Scalar(255), -1, 2);
-		// new Lines(superReferenceTemplate.getDisplay().houghLinesP(1, Math.PI / 180, 10, 50, 47)).filter(line -> Math.atan2(Math.abs(line.y2 - line.y1), Math.abs(line.x2 - line.x1)) < 5 * Math.PI / 180).draw(superReferenceTemplate.getDisplay().getSrc(),
-		// new Scalar(255), 1);
-		// images[4] = superReferenceTemplate.getDisplay().toJfxImage();
-
 		SuperTemplate superReferenceTemplate2 = new SuperTemplate(superReferenceTemplate5, CvType.CV_8UC3, SuperFrameImg::getFrame);
-		List<Span> spans = superReferenceTemplate2.assembleContours(filteredSuperContour, c -> true, 100, 5, 100);
+		List<Span> spans = superReferenceTemplate2.assembleContours(filteredSuperContour, c -> true, 100, 20, 70);
 		spans.forEach(sp -> {
 			double a = Math.random() * 255;
 			double b = Math.random() * 255;

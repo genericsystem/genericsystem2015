@@ -68,8 +68,11 @@ public class SuperContour implements Comparable<SuperContour> {
 		this.dy = lymax - lymin;
 	}
 
-	int computeHisto(Mat mag, int[][] bin, int nBin, DirectionalFilter df) {
-		double squareSize = 160;
+	private int computeDistance(int ind, int other, int nBin) {
+		return Math.min(Math.min(Math.abs(ind - other), Math.abs(ind - other - nBin)), Math.abs(ind - other + nBin));
+	}
+
+	int computeHisto(Mat mag, int[][] bin, int nBin, DirectionalFilter df, double squareSize) {
 		double tlx = center.x - squareSize / 2;
 		double tly = center.y - squareSize / 2;
 		double brx = center.x + squareSize / 2;
@@ -85,18 +88,24 @@ public class SuperContour implements Comparable<SuperContour> {
 		Range rangex = new Range((int) tlx, (int) brx);
 
 		double[] histos = df.getHistogram(new Mat(mag, rangey, rangex), df.subArray(bin, rangey, rangex), nBin);
-		double targetAngle = antiAngle / Math.PI * 64;
+		int targetAngle = (int) (antiAngle / Math.PI * 64);
 		// System.out.println("Angle " + angle / Math.PI * 180 + " Antiangle : " + antiAngle / Math.PI * 180);
 		double max = Double.MIN_VALUE;
 		int k = -1;
+		System.out.println(targetAngle);
 		for (int i = 0; i < histos.length; i++) {
-			if (Math.abs(i - targetAngle) < 16)
+
+			if (computeDistance(i, targetAngle, nBin) < 12) {
+				System.out.println(i);
 				if (histos[i] > max) {
 					max = histos[i];
 					k = i;
 				}
+			}
 		}
 		vertical = (Integer.valueOf(k).doubleValue() / 64) * Math.PI;
+		// if (vertical > Math.PI)
+		// vertical = vertical - Math.PI;
 		vTop = new Point(center.x - dy * Math.cos(vertical), center.y - dy * Math.sin(vertical));
 		vBottom = new Point(center.x + dy * Math.cos(vertical), center.y + dy * Math.sin(vertical));
 		// System.out.println(vertical / Math.PI * 180 + " " + antiAngle / Math.PI * 180);
