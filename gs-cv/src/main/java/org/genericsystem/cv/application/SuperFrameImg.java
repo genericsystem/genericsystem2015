@@ -1,5 +1,14 @@
 package org.genericsystem.cv.application;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.genericsystem.cv.Calibrated;
@@ -20,15 +29,6 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.imgproc.Moments;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class SuperFrameImg {
 
@@ -263,9 +263,10 @@ public class SuperFrameImg {
 	}
 
 	private Img buildDiffFrame() {
-		Mat diffFrame = getGrayFrame().gaussianBlur(new Size(5, 5)).getSrc();
+		Mat diffFrame = getGrayFrame().gaussianBlur(new Size(3, 3)).getSrc();
 		Core.absdiff(diffFrame, new Scalar(0), diffFrame);
 		Imgproc.adaptiveThreshold(diffFrame, diffFrame, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 7, 3);
+		Imgproc.morphologyEx(diffFrame, diffFrame, Imgproc.MORPH_DILATE, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(2, 2)));
 		return new Img(diffFrame, false);// .cleanTablesInv(0.05);
 	}
 
@@ -300,7 +301,7 @@ public class SuperFrameImg {
 	public List<SuperContour> detectSuperContours(double minArea) {
 		List<MatOfPoint> contours = new ArrayList<>();
 		Mat hierarchy = new Mat();
-		Img img = getDiffFrame().morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(5, 5));
+		Img img = getDiffFrame();
 		Imgproc.findContours(img.getSrc(), contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_NONE);
 		List<SuperContour> result = new ArrayList<>();
 		int row = 0;
@@ -326,7 +327,7 @@ public class SuperFrameImg {
 		return result;
 	}
 
-	private Edge generateEdge(SuperContour c1, SuperContour c2, double maxDistance, double coeffDeltaAngle) {
+	private Edge generateEdge(SuperContour c1, SuperContour c2, double maxScore, double coeffDeltaAngle) {
 
 		if (c1.compareTo(c2) > 0) {
 			SuperContour tmp = c1;
@@ -346,9 +347,6 @@ public class SuperFrameImg {
 				}
 			}
 
-		if (minDist > maxDistance)
-			return null;
-
 		double centersAngle = toDemiPis(Math.atan2(c2.center.y - c1.center.y, c2.center.x - c1.center.x));
 		if ((Math.abs(centersAngle) * 180 / Math.PI) > 45)
 			return null;
@@ -359,7 +357,7 @@ public class SuperFrameImg {
 		// System.out.println("not null " + c1Angle * 180 / Math.PI + " " + c2Angle * 180 / Math.PI + " " + centersAngle * 180 / Math.PI + " " + deltaAngle * 180 / Math.PI);
 		double score = minDist + minDist * Math.sin(deltaAngle) * coeffDeltaAngle;
 		// System.out.println("score " + score + " " + minDist + " " + minDist * Math.sin(deltaAngle) * coeffDeltaAngle + " " + deltaAngle * 180 / Math.PI);
-		return new Edge(score, c1, c2);
+		return score < maxScore ? new Edge(score, c1, c2) : null;
 	}
 
 	private double euclid(Point p1, Point p2) {
@@ -421,13 +419,13 @@ public class SuperFrameImg {
 
 	}
 
-	public List<Span> assembleContours(List<SuperContour> superContours, Predicate<SuperContour> contoursFilter, double maxCentersDistance, double coeffDeltaAngle, double minSpanWidth) {
+	public List<Span> assembleContours(List<SuperContour> superContours, Predicate<SuperContour> contoursFilter, double maxScore, double coeffDeltaAngle, double minSpanWidth) {
 		superContours = superContours.stream().filter(contoursFilter).collect(Collectors.toList());
 		Collections.sort(superContours);
 		List<Edge> candidateEdges = new ArrayList<>();
 		for (int i = 0; i < superContours.size(); i++)
 			for (int j = 0; j < i; j++) {
-				Edge edge = generateEdge(superContours.get(i), superContours.get(j), maxCentersDistance, coeffDeltaAngle);
+				Edge edge = generateEdge(superContours.get(i), superContours.get(j), maxScore, coeffDeltaAngle);
 				if (edge != null)
 					candidateEdges.add(edge);
 			}

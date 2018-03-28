@@ -33,6 +33,7 @@ public class GraphicApp extends AbstractApp {
 
 	private final double f = 6.053 / 0.009;
 	private final GSCapture gsCapture = new GSVideoCapture(0, f, GSVideoCapture.HD, GSVideoCapture.VGA);
+	// private final GSCapture gsCapture = new GSVideoCapture("http://192.168.1.13:8080/video", f, GSVideoCapture.HD, GSVideoCapture.VGA);
 	// private final GSCapture gsCapture = new GSPhotoCapture("resources/image.pdf", f);
 	private SuperFrameImg superFrame;
 	private ReferenceManager referenceManager;
@@ -110,7 +111,7 @@ public class GraphicApp extends AbstractApp {
 		images[0] = superFrame.getDisplay().toJfxImage();
 
 		SuperTemplate superDeperspectived = superFrame.deperspective(deperspectiveHomography);
-		images[1] = superDeperspectived.getDiffFrame().toJfxImage();
+		images[1] = superFrame.getDiffFrame().toJfxImage();
 
 		List<Rect> detectedRects = superDeperspectived.detectRects();
 		superDeperspectived.drawRects(detectedRects, new Scalar(0, 255, 0), -1);
@@ -144,6 +145,7 @@ public class GraphicApp extends AbstractApp {
 
 		List<SuperContour> filteredSuperContour = new ArrayList<>(
 				TextOrientationLinesDetector.selectRandomObjects(superReferenceTemplate5.detectSuperContours(20).stream().filter(sc -> Math.abs(sc.angle) < Math.PI / 4 && sc.dx > 2 * sc.dy).collect(Collectors.toList()), 200));
+
 		DirectionalFilter df = new DirectionalFilter();
 		int nBin = 64;
 		Mat gray = superReferenceTemplate5.getGrayFrame().getSrc();
@@ -155,11 +157,13 @@ public class GraphicApp extends AbstractApp {
 		Core.cartToPolar(gx, gy, mag, ori);
 
 		int[][] bin = df.bin(ori, nBin);
-		filteredSuperContour.forEach(sc -> sc.computeHisto(mag, bin, nBin, df, 50));
+		List<Span> spans = superReferenceTemplate5.assembleContours(filteredSuperContour, c -> true, 100, 30, 70);
+		// filteredSuperContour = spans.stream().flatMap(span -> span.getContours().stream()).collect(Collectors.toList());
+		filteredSuperContour.forEach(sc -> sc.computeHisto(mag, bin, nBin, df, 150));
 
 		Mat image = superReferenceTemplate5.getDisplay().getSrc();
 
-		SuperContourInterpolator interpolator = new SuperContourInterpolator(filteredSuperContour, 4);
+		SuperContourInterpolator interpolator = new SuperContourInterpolator(filteredSuperContour, 2);
 		Point center = new Point(image.width() / 2, image.height() / 2);
 		MeshGrid meshGrid = new MeshGrid(new Size(16, 9), interpolator, 20, 20);
 		meshGrid.build(center);
@@ -174,7 +178,7 @@ public class GraphicApp extends AbstractApp {
 		images[5] = new Img(meshGrid.dewarp(superReferenceTemplate5.getFrame().getSrc()), false).toJfxImage();
 
 		SuperTemplate superReferenceTemplate2 = new SuperTemplate(superReferenceTemplate5, CvType.CV_8UC3, SuperFrameImg::getFrame);
-		List<Span> spans = superReferenceTemplate2.assembleContours(filteredSuperContour, c -> true, 100, 20, 70);
+		// List<Span> spans = superReferenceTemplate2.assembleContours(filteredSuperContour, c -> true, 100, 30, 70);
 		spans.forEach(sp -> {
 			double a = Math.random() * 255;
 			double b = Math.random() * 255;
