@@ -194,21 +194,6 @@ public class DirectionalFilter extends AbstractApp {
 		return binning;
 	}
 
-	public Mat binMat(Mat ori, int nBin) {
-		double step = Math.PI / nBin;
-		Mat binning = new Mat(ori.size(), CvType.CV_64FC1);
-		for (int r = 0; r < ori.rows(); r++)
-			for (int c = 0; c < ori.cols(); c++) {
-				double angle = ori.get(r, c)[0] + step / 2;
-				int bin = (int) Math.ceil(angle / step);
-				while (bin > nBin)
-					bin -= nBin;
-				binning.put(r, c, bin);
-				assert bin > 0 && bin <= nBin;
-			}
-		return binning;
-	}
-
 	public static void main(String[] args) {
 		launch(args);
 	}
