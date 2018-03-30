@@ -132,12 +132,11 @@ public class MeshGrid {
 
 		double rectHeight = totalHeight / heights.length;
 
-		Mat dewarpedImage = new Mat((int) totalHeight, (int) totalWidth, CvType.CV_8UC3, new Scalar(255, 255, 255));
+		Mat dewarpedImage = new Mat((int) totalHeight + 1, (int) totalWidth + 1, CvType.CV_8UC3, new Scalar(255, 255, 255));
 		logger.info("Column widths: {}", Arrays.toString(widths));
 
-		double xInit = image.width() / 2 - sum(widths, (int) kSize.width);
 		for (int i = (int) -kSize.height; i <= kSize.height; i++) {
-			double currX = xInit;
+			double currX = 0;
 			for (int j = (int) -kSize.width; j <= kSize.width; j++) {
 				int wJ = j + (int) kSize.width;
 				if (wJ > 0)
@@ -146,10 +145,10 @@ public class MeshGrid {
 					double rectWidth = widths[wJ];
 					Rect subImageRect = subImageRect(i, j);
 					double x = currX;
-					double y = Math.floor(image.height() / 2) + i * rectHeight;
+					double y = (i + (int) kSize.height) * rectHeight;
 					Mat homography = dewarpPolygon(mesh.get(new Key(i, j)), subImageRect, rectHeight, rectWidth);
 					//					logger.info("i {}, j {}, x {}, y {}, width {}", i, j, x, y, rectWidth);
-					if (x >= 0 && y >= 0 && ((x + rectWidth) <= dewarpedImage.width()) && ((y + rectHeight) <= dewarpedImage.height())) {
+					if ((x + rectWidth) <= dewarpedImage.width() && (y + rectHeight) <= dewarpedImage.height()) {
 						Rect dewarpedRect = new Rect(new Point(x, y), new Point(x + rectWidth, y + rectHeight));
 						Mat subDewarpedImage = new Mat(dewarpedImage, dewarpedRect);
 						Mat subImage = new Mat(image, subImageRect);
