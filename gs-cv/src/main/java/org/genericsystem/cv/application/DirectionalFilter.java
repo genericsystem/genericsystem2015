@@ -5,8 +5,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.genericsystem.cv.AbstractApp;
+import org.genericsystem.cv.Img;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.genericsystem.cv.utils.Tools;
 import org.opencv.core.Core;
@@ -21,6 +23,7 @@ import org.opencv.videoio.VideoCapture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 
@@ -57,11 +60,12 @@ public class DirectionalFilter extends AbstractApp {
 		Mat frame = new Mat();
 		for (;;) {
 			vc.read(frame);
-			Imgproc.cvtColor(frame, frame, Imgproc.COLOR_BGR2GRAY);
+			Mat grayFrame = new Mat();
+			Imgproc.cvtColor(frame, grayFrame, Imgproc.COLOR_BGR2GRAY);
 
-			Mat scaledFrame = scale(frame);
-			Mat gx = gx(scaledFrame);
-			Mat gy = gy(scaledFrame);
+			Mat gx = gx(grayFrame);
+			Core.subtract(Mat.zeros(gx.size(), gx.type()), gx, gx);
+			Mat gy = gy(grayFrame);
 			Mat mag = new Mat();
 			Mat ori = new Mat();
 			Core.cartToPolar(gx, gy, mag, ori);
@@ -81,16 +85,44 @@ public class DirectionalFilter extends AbstractApp {
 			}
 			System.out.println("Result : " + nbin);
 
-			int[][] dirs = findSecondDirection(scaledFrame, bin, mag, nSide, firstBin, nBin, lambda);
-			System.out.println("Directions: ");
-			for (int row = 0; row < dirs.length; row++) {
-				for (int col = 0; col < dirs[0].length; col++)
-					System.out.printf("%2d ", dirs[row][col]);
-				System.out.println();
-			}
-			Mat imgDirs = addDirs(scaledFrame, dirs, nSide, nBin);
-			mainGrid.add(new ImageView(Tools.mat2jfxImage(scaledFrame)), 0, 0);
+			List<Integer> patchXs = imgPartition(grayFrame, nSide, .5f, false);
+			List<Integer> patchYs = imgPartition(grayFrame, nSide, .5f, true);
+			// Second image displayed, showing the directions for each region.
+			int[][] dirs = findSecondDirection(grayFrame, bin, mag, nSide, firstBin, nBin, lambda, patchXs, patchYs);
+			Mat imgDirs = addDirs(grayFrame, dirs, nSide, nBin, patchXs, patchYs);
+			mainGrid.add(new ImageView(Tools.mat2jfxImage(grayFrame)), 0, 0);
 			mainGrid.add(new ImageView(Tools.mat2jfxImage(imgDirs)), 1, 0);
+
+			// Third image displayed, showing the grid.
+			SuperTemplate superReferenceTemplate = new SuperTemplate(new SuperFrameImg(frame, new double[] { frame.width() / 2, frame.height() / 2 },  6.053 / 0.009), CvType.CV_8UC3, SuperFrameImg::getFrame) {
+				@Override
+				protected org.genericsystem.cv.Img buildDisplay() {
+					return new Img(getFrame().getSrc(), true);
+				};
+			};
+			List<SuperContour> filteredSuperContour = new ArrayList<>(superReferenceTemplate
+					.detectSuperContours(20)
+					.stream()
+					.filter(sc -> Math.abs(sc.angle) < Math.PI / 4 && sc.dx > 2 * sc.dy)
+					.collect(Collectors.toList()));
+			GridInterpolator interpolator = new GridInterpolator(filteredSuperContour, patchXs, patchYs, dirs, nSide, nBin);
+			Point center = new Point(grayFrame.width() / 2, grayFrame.height() / 2);
+			MeshGrid meshGrid = new MeshGrid(new Size(10, 10), interpolator, 15, 15);
+			meshGrid.build(center);
+
+			Mat contoursMat = superReferenceTemplate.getDisplay().getSrc();
+			meshGrid.draw(contoursMat, new Scalar(0, 255, 0));
+			mainGrid.add(new ImageView(Tools.mat2jfxImage(contoursMat)), 2, 0);
+
+			// Fourth image, dewarping, method 1 (homography on each grid cell).
+			Image dewarped = new Img(meshGrid.dewarp(frame), false).toJfxImage();
+			mainGrid.add(new ImageView(dewarped), 0, 1);
+
+			// Fifth image, dewarping, method 2 (homography on each grid cell
+			// using 3D surface to find the size of the target rectangle.
+			Image dewarped2 = new Img(meshGrid.dewarp2(frame), false).toJfxImage();
+			mainGrid.add(new ImageView(dewarped2), 1, 1);
+
 			gx.release();
 			gy.release();
 			mag.release();
@@ -99,10 +131,8 @@ public class DirectionalFilter extends AbstractApp {
 		}
 	}
 
-	public Mat addDirs(Mat img, int[][] dirs, int nSide, int nBin) {
+	public Mat addDirs(Mat img, int[][] dirs, int nSide, int nBin, List<Integer> patchXs, List<Integer> patchYs) {
 		// TODO: Modify findSecondDirection so it returns these lists.
-		List<Integer> patchXs = imgPartition(img, nSide, .5f, false);
-		List<Integer> patchYs = imgPartition(img, nSide, .5f, true);
 		Mat imgDirs = new Mat();
 		img.copyTo(imgDirs);
 		imgDirs.convertTo(imgDirs, CvType.CV_8SC3);
@@ -238,10 +268,8 @@ public class DirectionalFilter extends AbstractApp {
 	}
 
 	// TODO: Split
-	public int[][] findSecondDirection(Mat img, int[][] binning, Mat mag, int nSide, int firstBin, int nBin, int lambda) {
-		float ratio = .5f;
-		List<Integer> patchXs = imgPartition(img, nSide, ratio, false);
-		List<Integer> patchYs = imgPartition(img, nSide, ratio, true);
+	public int[][] findSecondDirection(Mat img, int[][] binning, Mat mag, int nSide, int firstBin, int nBin,
+			int lambda, List<Integer> patchXs, List<Integer> patchYs) {
 		int nXs = patchXs.size();
 		int nYs = patchYs.size();
 

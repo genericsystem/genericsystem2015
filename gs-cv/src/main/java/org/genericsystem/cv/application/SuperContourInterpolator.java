@@ -2,7 +2,7 @@ package org.genericsystem.cv.application;
 
 import java.util.List;
 
-public class SuperContourInterpolator {
+public class SuperContourInterpolator implements Interpolator {
 
 	private final double pow;
 	private List<SuperContour> superContours;
@@ -25,8 +25,8 @@ public class SuperContourInterpolator {
 		return result >= Math.pow(minDist, 2) ? result : Math.pow(minDist, 2);
 	}
 
+	@Override
 	public double[] interpolate(double x, double y) { // retourne les angles horizontal et vertical interpolés
-
 		sumHCoefs = 0; // somme des coefficients pour l'angle horizontal
 		sumVCoefs = 0;
 		hAngle = 0; // angle horizontal
