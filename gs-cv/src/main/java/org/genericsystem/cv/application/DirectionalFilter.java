@@ -243,8 +243,7 @@ public class DirectionalFilter extends AbstractApp {
 				break;
 		}
 
-		double scale = Math.pow(scaleFactor, Integer.valueOf(maxIndex).doubleValue());
-		// System.out.println(" Scale : " + scale);
+		double scale = Math.pow(scaleFactor, maxIndex);
 		Mat result = new Mat();
 		Imgproc.resize(img, result, new Size(0, 0), scale, scale, Imgproc.INTER_CUBIC);
 		for (int i = 1; i < imgLayers.length; i++)
@@ -392,7 +391,7 @@ public class DirectionalFilter extends AbstractApp {
 		for (int i = 0; i < nHist; i++) {
 			int[] distance = orientDistance(dirs[i], firstBin, nBin);
 			for (int j = 0; j < nBin; j++)
-				dists[j] = dists[j] + (distance[j] - lambda) * (int) histograms[j][i];
+				dists[j] = dists[j] + (distance[j] - lambda) * histograms[j][i];
 		}
 		double sum = 0;
 		for (double elt : dists)
@@ -406,7 +405,6 @@ public class DirectionalFilter extends AbstractApp {
 		int nXs = patchXs.size();
 		int nYs = patchYs.size();
 		double[][] dists = new double[mag.rows()][mag.cols()];
-		Mat binPatch = new Mat();
 
 		for (int i = 0; i < nXs; i++) {
 			Range xSel = new Range(patchXs.get(i), patchXs.get(i) + nSide);
@@ -418,7 +416,6 @@ public class DirectionalFilter extends AbstractApp {
 						dists[k][l] += (distance[binning[k][l] - firstBin] - lambda) * mag.get(k, l)[0];
 			}
 		}
-		binPatch.release();
 		double sum = 0;
 		for (int i = 0; i < dists.length; i++)
 			for (int j = 0; j < dists[0].length; j++)
