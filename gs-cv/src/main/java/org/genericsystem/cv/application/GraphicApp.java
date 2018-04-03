@@ -148,7 +148,7 @@ public class GraphicApp extends AbstractApp {
 
 		DirectionalFilter df = new DirectionalFilter();
 		int nBin = 64;
-		Mat gray = superReferenceTemplate5.getGrayFrame().getSrc();
+		Mat gray = superReferenceTemplate5.getFrame().bgr2Gray().getSrc();
 		Mat gx = df.gx(gray);
 		Core.subtract(Mat.zeros(gx.size(), gx.type()), gx, gx);
 		Mat gy = df.gy(gray);
@@ -159,6 +159,11 @@ public class GraphicApp extends AbstractApp {
 		int[][] bin = df.bin(ori, nBin);
 		List<Span> spans = superReferenceTemplate5.assembleContours(filteredSuperContour, c -> true, 100, 30, 70);
 		// filteredSuperContour = spans.stream().flatMap(span -> span.getContours().stream()).collect(Collectors.toList());
+		double regionSize = 100;
+		filteredSuperContour = filteredSuperContour.stream()
+				.filter(sc -> sc.center.x - regionSize > 0 && sc.center.x + regionSize / 2 < superReferenceTemplate5.getFrame().width() && sc.center.y - regionSize / 2 > 0 && sc.center.y + regionSize / 2 < superReferenceTemplate5.getFrame().height())
+				.collect(Collectors.toList());
+
 		filteredSuperContour.forEach(sc -> sc.computeHisto(mag, bin, nBin, df, 150));
 
 		Mat image = superReferenceTemplate5.getDisplay().getSrc();

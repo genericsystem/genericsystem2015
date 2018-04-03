@@ -3,6 +3,8 @@ package org.genericsystem.cv.application;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.Point;
+import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
@@ -10,38 +12,38 @@ import org.opencv.imgproc.Imgproc;
 public class RadonTransform {
 
 	public static Mat transform(Mat src) {
-		Mat dst = new Mat();
-		src.convertTo(dst, CvType.CV_64FC1);
-		int angle = 360;
-		Mat radon_image = new Mat(dst.rows(), angle, CvType.CV_64FC1, new Scalar(0));
+		Mat dst = new Mat(src.rows(), src.rows(), CvType.CV_64FC1, new Scalar(0));
 		int center = dst.rows() / 2;
-		Mat m0 = Mat.eye(3, 3, CvType.CV_64FC1);
-		m0.put(0, 2, -center);
-		m0.put(1, 2, -center);
-		Mat m1 = Mat.eye(3, 3, CvType.CV_64FC1);
-		m1.put(0, 2, center);
-		m1.put(1, 2, center);
-
-		for (int t = 0; t < 45; t++) {
-			double theta = (t) * Math.PI / angle;
-			Mat mR = new Mat(3, 3, CvType.CV_64FC1);
-			mR.put(0, 0, Math.cos(theta));
-			mR.put(0, 1, Math.sin(theta));
-			mR.put(1, 0, -Math.sin(theta));
-			mR.put(1, 1, Math.cos(theta));
-			mR.put(2, 2, 1);
-			Mat tmp = new Mat();
-			Core.gemm(m1, mR, 1, new Mat(), 0, tmp);// m1*mR*m0;
-			Mat rotation = new Mat();
-			Core.gemm(tmp, m0, 1, new Mat(), 0, rotation);// m1*mR*m0;
+		Mat src64 = new Mat();
+		src.convertTo(src64, CvType.CV_64FC1);
+		src64.copyTo(new Mat(dst, new Rect(new Point(center - src64.cols() / 2, 0), new Point(center + src64.cols() / 2, src64.rows()))));
+		Mat radon_image = new Mat(dst.rows(), 90, CvType.CV_64FC1, new Scalar(0));
+		for (int t = -45; t < 45; t++) {
 			Mat rotated = new Mat();
-			Imgproc.warpPerspective(dst, rotated, rotation, new Size(dst.rows(), dst.cols()), Imgproc.WARP_INVERSE_MAP);
-			for (int i = 0; i < rotated.rows(); i++)
-				for (int j = 0; j < rotated.cols(); j++)
-					radon_image.put(j, t, radon_image.get(j, t)[0] + rotated.get(i, j)[0]);
+			Mat rotation = Imgproc.getRotationMatrix2D(new Point(center, center), t, 1);
+			Imgproc.warpAffine(dst, rotated, rotation, new Size(dst.cols(), dst.rows()), Imgproc.INTER_NEAREST);
+			Core.reduce(rotated, rotated, 1, Core.REDUCE_SUM);
+			for (int row = 0; row < rotated.rows(); row++)
+				radon_image.put(row, t + 45, rotated.get(row, 0)[0]);
 		}
-		// Core.normalize(radon_image, radon_image, 0, 1, Core.NORM_MINMAX);
-		// radon_image.convertTo(radon_image, CvType.CV_8UC1);
+		Core.normalize(radon_image, radon_image, 0, 255, Core.NORM_MINMAX);
+		radon_image.convertTo(radon_image, CvType.CV_8UC1);
 		return radon_image;
+	}
+
+	public static Mat projectionMap(Mat radon) {
+		System.out.println(radon);
+		Mat projectionMap = Mat.zeros((int) (radon.rows() / Math.sqrt(2)), radon.cols(), CvType.CV_8UC1);
+		for (int k = 0; k < projectionMap.rows(); k++) {
+			for (int tetha = 0; tetha < projectionMap.cols(); tetha++) {
+				System.out.println((k - projectionMap.rows() / 2));
+				System.out.println(Math.sin(((double) tetha - 45) / 180 * Math.PI));
+				System.out.println((k - projectionMap.rows() / 2) * Math.sin(((double) tetha - 45) / 180 * Math.PI));
+				int p = (int) ((projectionMap.rows() / 2 - k) * Math.sin(((double) tetha - 45) / 180 * Math.PI) + radon.rows() / 2);
+				System.out.println(k + " " + tetha + " " + p + " " + radon.get(p, tetha)[0]);
+				projectionMap.put(k, tetha, radon.get(p, tetha)[0]);
+			}
+		}
+		return projectionMap;
 	}
 }
