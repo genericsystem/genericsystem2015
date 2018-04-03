@@ -1,7 +1,6 @@
 package org.genericsystem.cv.application;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -95,7 +94,7 @@ public class MeshGrid {
 		Map<Key, Point3[]> mesh3D = toPoint3d();
 
 		// Average width of the 3D edges for each column.
-		double[] widths = new double[2 * (int) kSize.width + 1];
+		int[] widths = new int[2 * (int) kSize.width + 1];
 		for (int j = 0; j < widths.length; j++) {
 			double sum = 0;
 			for (int i = (int) -kSize.height; i <= kSize.height; i++) {
@@ -105,11 +104,11 @@ public class MeshGrid {
 			// Last line, bottom edge.
 			Point3[] para = mesh3D.get(new Key((int) kSize.height, j - (int) kSize.width));
 			sum += euclideanDistance(para[2], para[3]);
-			widths[j] = sum / (2 * kSize.height + 2);
+			widths[j] = (int) Math.round(sum / (2 * kSize.height + 2));
 		}
 
-		// Averaghe height of the 3D edges for each line.
-		double[] heights = new double[2 * (int) kSize.height + 1];
+		// Average height of the 3D edges for each line.
+		int[] heights = new int[2 * (int) kSize.height + 1];
 		for (int i = 0; i < heights.length; i++) {
 			double sum = 0;
 			for (int j = (int) -kSize.width; j <= kSize.width; j++) {
@@ -119,14 +118,13 @@ public class MeshGrid {
 			// Last column, right edge.
 			Point3[] para = mesh3D.get(new Key(i - (int) kSize.height, (int) kSize.width));
 			sum += euclideanDistance(para[1], para[2]);
-			heights[i] = sum / (2 * kSize.width + 2);
+			heights[i] = (int) Math.round(sum / (2 * kSize.width + 2));
 		}
 
 		// Rescaling ratio.
-		double totalHeight = sum(heights, heights.length);
-		double textSep = 20;
-		double ratio = (totalHeight / heights.length) / textSep;
-		System.out.println("ratio " + ratio);
+		int totalHeight = sum(heights, heights.length);
+		int textSep = 20;
+		double ratio = ((double) totalHeight / heights.length) / textSep;
 
 		for (int i = 0; i < widths.length; i++)
 			widths[i] /= ratio;
@@ -135,25 +133,24 @@ public class MeshGrid {
 			heights[i] /= ratio;
 
 		// New sizes
-		double totalWidth = sum(widths, widths.length);
+		int totalWidth = sum(widths, widths.length);
 		totalHeight = sum(heights, heights.length);
 
-		double rectHeight = totalHeight / heights.length;
+		int rectHeight = totalHeight / heights.length;
 
-		Mat dewarpedImage = new Mat((int) totalHeight + 1, (int) totalWidth + 1, CvType.CV_8UC3, new Scalar(255, 255, 255));
-		logger.info("Column widths: {}", Arrays.toString(widths));
+		Mat dewarpedImage = new Mat(totalHeight + 1, totalWidth + 1, CvType.CV_8UC3, new Scalar(255, 255, 255));
 
 		for (int i = (int) -kSize.height; i <= kSize.height; i++) {
-			double currX = 0;
+			int currX = 0;
 			for (int j = (int) -kSize.width; j <= kSize.width; j++) {
 				int wJ = j + (int) kSize.width;
 				if (wJ > 0)
 					currX += widths[wJ - 1];
 				if (inImageBorders(mesh.get(new Key(i, j)))) {
-					double rectWidth = widths[wJ];
+					int rectWidth = widths[wJ];
 					Rect subImageRect = subImageRect(i, j);
-					double x = currX;
-					double y = (i + (int) kSize.height) * rectHeight;
+					int x = currX;
+					int y = (i + (int) kSize.height) * rectHeight;
 					Mat homography = dewarpPolygon(mesh.get(new Key(i, j)), subImageRect, rectHeight, rectWidth);
 					//					logger.info("i {}, j {}, x {}, y {}, width {}", i, j, x, y, rectWidth);
 					if ((x + rectWidth) <= dewarpedImage.width() && (y + rectHeight) <= dewarpedImage.height()) {
@@ -173,8 +170,8 @@ public class MeshGrid {
 		return dewarpedImage;
 	}
 
-	private double sum(double[] array, int end) {
-		double sum = 0;
+	private int sum(int[] array, int end) {
+		int sum = 0;
 		for (int i = 0; i < end; i++)
 			sum += array[i];
 		return sum;
