@@ -202,22 +202,24 @@ public class MeshGrid {
 	}
 
 	public Mat dewarp() {
-
-		int rectHeight = (int) Math.floor(image.height() / (2 * kSize.height));
+		int rectHeight = (int) Math.floor(image.height() / (2 * kSize.height + 1));
+		int rectWidth = (int) Math.floor(image.width() / (2 * kSize.width + 1));
 
 		Mat dewarpedImage = new Mat(image.size(), CvType.CV_8UC3, new Scalar(255, 255, 255));
 		for (int i = (int) -kSize.height; i <= kSize.height; i++) {
 			for (int j = (int) -kSize.width; j <= kSize.width; j++) {
-				Rect subImageRect = subImageRect(i, j);
-				if (inImageBorders(subImageRect.tl()) && inImageBorders(subImageRect.br())) {
-					Mat homography = dewarpPolygon(mesh.get(new Key(i, j)), subImageRect, rectHeight);
-					double x = Math.floor(image.width() / 2) + (j - 1) * rectHeight;
-					double y = Math.floor(image.height() / 2) + (i - 1) * rectHeight;
-					if (x >= 0 && y >= 0 && ((x + rectHeight) <= image.width()) && ((y + rectHeight) <= image.height())) {
-						Mat subDewarpedImage = new Mat(dewarpedImage, new Rect(new Point(x, y), new Point(x + rectHeight, y + rectHeight)));
-						Mat subImage = new Mat(image, subImageRect);
-						Imgproc.warpPerspective(subImage, subDewarpedImage, homography, new Size(rectHeight, rectHeight), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(0));
-					}
+				if (inImageBorders(mesh.get(new Key(i, j)))) {
+					Rect subImageRect = subImageRect(i, j);
+					Mat homography = dewarpPolygon(mesh.get(new Key(i, j)), subImageRect, rectHeight, rectWidth);
+					int x = (j + (int) kSize.width) * rectWidth;
+					int y = (i + (int) kSize.height) * rectHeight;
+					assert x >= 0 && y >= 0 && ((x + rectWidth) < image.width()) && ((y + rectHeight) < image.height()) : "x: " + x + ", y: " + y + ", width: " + image.width() + ", height: " + image.height();
+					Mat subDewarpedImage = new Mat(dewarpedImage, new Rect(new Point(x, y), new Point(x + rectWidth, y + rectHeight)));
+					Mat subImage = new Mat(image, subImageRect);
+					Imgproc.warpPerspective(subImage, subDewarpedImage, homography, new Size(rectWidth, rectHeight), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(0));
+					subImage.release();
+					subDewarpedImage.release();
+					homography.release();
 				}
 			}
 		}
@@ -238,10 +240,6 @@ public class MeshGrid {
 		yMin = Math.min(warpedTopRight.y, warpedTopLeft.y);
 		yMax = Math.max(warpedBottomLeft.y, warpedBottomRight.y);
 		return new Rect(new Point(xMin, yMin), new Point(xMax, yMax));
-	}
-
-	private Mat dewarpPolygon(Point[] polygon, Rect subImageRect, double rectHeight) {
-		return dewarpPolygon(polygon, subImageRect, rectHeight, rectHeight);
 	}
 
 	private Mat dewarpPolygon(Point[] polygon, Rect subImageRect, double rectHeight, double rectWidth) {
