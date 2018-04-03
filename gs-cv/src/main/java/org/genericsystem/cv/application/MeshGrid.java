@@ -30,14 +30,21 @@ public class MeshGrid {
 	private Map<Key, Point[]> mesh = new HashMap<>(); // les mêmes polygones mais en i, j
 	private Interpolator interpolator;
 	public double deltaX, deltaY; // déplacement d'un polygone
+	private final int xBorder;
+	private final int yBorder;
+	private final Mat image;
 
 	private int nbIter; // nombre d'itérations à chaque déplacement
 
-	public MeshGrid(Size kSize, Interpolator interpolator, double deltaX, double deltaY) {
+	public MeshGrid(Size kSize, Interpolator interpolator, double deltaX, double deltaY, Mat image) {
 		this.kSize = kSize;
 		this.interpolator = interpolator;
 		this.deltaX = deltaX;
 		this.deltaY = deltaY;
+		this.image = image;
+		xBorder = 2 * (int) deltaX;
+		yBorder = 2 * (int) deltaY;
+		Core.copyMakeBorder(image, this.image, yBorder, yBorder, xBorder, xBorder, Core.BORDER_CONSTANT, new Scalar(255, 255, 255));
 		nbIter = (int) Math.round(deltaY); // avance d'un pixel à chaque itération
 	}
 
@@ -62,7 +69,8 @@ public class MeshGrid {
 		return mesh3D;
 	}
 
-	public void build(Point imgCenter) {
+	public void build() {
+		Point imgCenter = new Point(image.width() / 2, image.height() / 2);
 		addFirstPoly(imgCenter);
 		for (int i = 0; i <= kSize.height; i++) {
 			for (int j = 0; j <= (int) kSize.width; j++)
@@ -83,7 +91,7 @@ public class MeshGrid {
 		mesh.values().forEach(p -> drawPolygon(img, p, color));
 	}
 
-	public Mat dewarp2(Mat image) {
+	public Mat dewarp2() {
 		Map<Key, Point3[]> mesh3D = toPoint3d();
 
 		// Average width of the 3D edges for each column.
@@ -141,7 +149,7 @@ public class MeshGrid {
 				int wJ = j + (int) kSize.width;
 				if (wJ > 0)
 					currX += widths[wJ - 1];
-				if (inImage(mesh.get(new Key(i, j)), image)) {
+				if (inImageBorders(mesh.get(new Key(i, j)))) {
 					double rectWidth = widths[wJ];
 					Rect subImageRect = subImageRect(i, j);
 					double x = currX;
@@ -172,10 +180,18 @@ public class MeshGrid {
 		return sum;
 	}
 
-	private boolean inImage(Point[] p, Mat image) {
+	// Returns true if at least a corner of the polygon is in the image proper,
+	// that is, not outside and not in one of the borders whose size is defined by xBorder and yBorder.
+	private boolean inImageBorders(Point[] p) {
 		// Array of points: top left, top right, bottom right, bottom left.
-		return p[0].x >= 0 && p[3].x >= 0 && p[1].x < image.width() && p[2].x < image.width()
-				&  p[0].y >= 0 && p[1].y >= 0 && p[2].y < image.height() && p[3].y < image.height();
+		for (Point pt : p)
+			if (inImageBorders(pt))
+				return true;
+		return false;
+	}
+
+	private boolean inImageBorders(Point p) {
+		return p.x >= xBorder && p.x < image.width() - xBorder && p.y >= yBorder && p.y < image.height() - yBorder;
 	}
 
 	public double ratio(Point3[] parallelogram) {
@@ -193,7 +209,7 @@ public class MeshGrid {
 		return Math.sqrt((p2.x - p1.x) * (p2.x - p1.x) + (p2.y - p1.y) * (p2.y - p1.y) + (p2.z - p1.z) * (p2.z - p1.z));
 	}
 
-	public Mat dewarp(Mat image) {
+	public Mat dewarp() {
 
 		int rectHeight = (int) Math.floor(image.height() / (2 * kSize.height));
 
@@ -201,7 +217,7 @@ public class MeshGrid {
 		for (int i = (int) -kSize.height; i <= kSize.height; i++) {
 			for (int j = (int) -kSize.width; j <= kSize.width; j++) {
 				Rect subImageRect = subImageRect(i, j);
-				if (subImageRect.tl().x >= 0 && subImageRect.tl().y >= 0 && subImageRect.br().x < image.width() && subImageRect.br().y < image.height()) {
+				if (inImageBorders(subImageRect.tl()) && inImageBorders(subImageRect.br())) {
 					Mat homography = dewarpPolygon(mesh.get(new Key(i, j)), subImageRect, rectHeight);
 					double x = Math.floor(image.width() / 2) + (j - 1) * rectHeight;
 					double y = Math.floor(image.height() / 2) + (i - 1) * rectHeight;
@@ -214,11 +230,9 @@ public class MeshGrid {
 			}
 		}
 		return dewarpedImage;
-
 	}
 
 	private Rect subImageRect(int iP, int jP) {
-
 		Point[] polygon = mesh.get(new Key(iP, jP));
 		assert polygon != null : iP + " " + jP;
 
