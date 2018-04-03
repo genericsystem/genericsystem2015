@@ -169,9 +169,8 @@ public class GraphicApp extends AbstractApp {
 		Mat image = superReferenceTemplate5.getDisplay().getSrc();
 
 		SuperContourInterpolator interpolator = new SuperContourInterpolator(filteredSuperContour, 2);
-		Point center = new Point(image.width() / 2, image.height() / 2);
-		MeshGrid meshGrid = new MeshGrid(new Size(16, 9), interpolator, 20, 20);
-		meshGrid.build(center);
+		MeshGrid meshGrid = new MeshGrid(new Size(16, 9), interpolator, 20, 20, image);
+		meshGrid.build();
 
 		filteredSuperContour.stream().forEach(c -> Imgproc.line(image, c.top, c.bottom, new Scalar(255, 255, 255), 1));
 		filteredSuperContour.stream().forEach(c -> Imgproc.line(image, c.vBottom, c.vTop, new Scalar(0, 0, 255), 2));
@@ -180,7 +179,7 @@ public class GraphicApp extends AbstractApp {
 
 		images[4] = superReferenceTemplate5.getDisplay().toJfxImage();
 
-		images[5] = new Img(meshGrid.dewarp(superReferenceTemplate5.getFrame().getSrc()), false).toJfxImage();
+		images[5] = new Img(meshGrid.dewarp(), false).toJfxImage();
 
 		SuperTemplate superReferenceTemplate2 = new SuperTemplate(superReferenceTemplate5, CvType.CV_8UC3, SuperFrameImg::getFrame);
 		// List<Span> spans = superReferenceTemplate2.assembleContours(filteredSuperContour, c -> true, 100, 30, 70);

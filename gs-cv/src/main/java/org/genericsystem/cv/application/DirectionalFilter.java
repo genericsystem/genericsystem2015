@@ -106,21 +106,20 @@ public class DirectionalFilter extends AbstractApp {
 					.filter(sc -> Math.abs(sc.angle) < Math.PI / 4 && sc.dx > 2 * sc.dy)
 					.collect(Collectors.toList()));
 			GridInterpolator interpolator = new GridInterpolator(filteredSuperContour, patchXs, patchYs, dirs, nSide, nBin);
-			Point center = new Point(grayFrame.width() / 2, grayFrame.height() / 2);
-			MeshGrid meshGrid = new MeshGrid(new Size(10, 10), interpolator, 15, 15);
-			meshGrid.build(center);
+			MeshGrid meshGrid = new MeshGrid(new Size(20, 20), interpolator, 15, 15, frame);
+			meshGrid.build();
 
 			Mat contoursMat = superReferenceTemplate.getDisplay().getSrc();
 			meshGrid.draw(contoursMat, new Scalar(0, 255, 0));
 			mainGrid.add(new ImageView(Tools.mat2jfxImage(contoursMat)), 2, 0);
 
 			// Fourth image, dewarping, method 1 (homography on each grid cell).
-			Image dewarped = new Img(meshGrid.dewarp(frame), false).toJfxImage();
+			Image dewarped = new Img(meshGrid.dewarp(), false).toJfxImage();
 			mainGrid.add(new ImageView(dewarped), 0, 1);
 
 			// Fifth image, dewarping, method 2 (homography on each grid cell
 			// using 3D surface to find the size of the target rectangle.
-			Image dewarped2 = new Img(meshGrid.dewarp2(frame), false).toJfxImage();
+			Image dewarped2 = new Img(meshGrid.dewarp2(), false).toJfxImage();
 			mainGrid.add(new ImageView(dewarped2), 1, 1);
 
 			gx.release();
