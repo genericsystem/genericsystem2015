@@ -152,21 +152,16 @@ public class MeshGrid {
 					int x = currX;
 					int y = (i + (int) kSize.height) * rectHeight;
 					Mat homography = dewarpPolygon(mesh.get(new Key(i, j)), subImageRect, rectHeight, rectWidth);
-					//					logger.info("i {}, j {}, x {}, y {}, width {}", i, j, x, y, rectWidth);
-					if ((x + rectWidth) <= dewarpedImage.width() && (y + rectHeight) <= dewarpedImage.height()) {
-						Rect dewarpedRect = new Rect(new Point(x, y), new Point(x + rectWidth, y + rectHeight));
-						Mat subDewarpedImage = new Mat(dewarpedImage, dewarpedRect);
-						Mat subImage = new Mat(image, subImageRect);
-						logger.info("Sending rect {} to rect {}", subImageRect, dewarpedRect);
-						Imgproc.warpPerspective(subImage, subDewarpedImage, homography, subDewarpedImage.size(), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(0));
-						subImage.release();
-						subDewarpedImage.release();
-					}
+					Rect dewarpedRect = new Rect(new Point(x, y), new Point(x + rectWidth, y + rectHeight));
+					Mat subDewarpedImage = new Mat(dewarpedImage, dewarpedRect);
+					Mat subImage = new Mat(image, subImageRect);
+					Imgproc.warpPerspective(subImage, subDewarpedImage, homography, subDewarpedImage.size(), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(0));
+					subImage.release();
+					subDewarpedImage.release();
 					homography.release();
 				}
 			}
 		}
-		System.out.println("Dewarped " + dewarpedImage);
 		return dewarpedImage;
 	}
 
