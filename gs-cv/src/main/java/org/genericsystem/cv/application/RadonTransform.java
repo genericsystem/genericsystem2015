@@ -32,15 +32,10 @@ public class RadonTransform {
 	}
 
 	public static Mat projectionMap(Mat radon) {
-		System.out.println(radon);
-		Mat projectionMap = Mat.zeros((int) (radon.rows() / Math.sqrt(2)), radon.cols(), CvType.CV_8UC1);
+		Mat projectionMap = Mat.zeros(radon.rows(), radon.cols(), CvType.CV_8UC1);
 		for (int k = 0; k < projectionMap.rows(); k++) {
 			for (int tetha = 0; tetha < projectionMap.cols(); tetha++) {
-				// System.out.println((k - projectionMap.rows() / 2));
-				// System.out.println(Math.sin(((double) tetha - 45) / 180 * Math.PI));
-				System.out.println((k - projectionMap.rows() / 2) * Math.sin(((double) tetha - 45) / 180 * Math.PI));
-				int p = (int) ((projectionMap.rows() / 2 - k) * Math.sin(((double) tetha + 45) / 180 * Math.PI) + radon.rows() / 2);
-				// System.out.println(k + " " + tetha + " " + p + " " + radon.get(p, tetha)[0]);
+				int p = (int) ((k - projectionMap.rows() / 2) * Math.sin(((double) tetha + 45) / 180 * Math.PI) + radon.rows() / 2);
 				projectionMap.put(k, tetha, radon.get(p, tetha > 90 ? tetha - 90 : tetha)[0]);
 			}
 		}
