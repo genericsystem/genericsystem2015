@@ -169,7 +169,7 @@ public class GraphicApp extends AbstractApp {
 		Mat image = superReferenceTemplate5.getDisplay().getSrc();
 
 		SuperContourInterpolator interpolator = new SuperContourInterpolator(filteredSuperContour, 2);
-		MeshGrid meshGrid = new MeshGrid(new Size(16, 9), interpolator, 20, 20, image);
+		MeshGrid meshGrid = new MeshGrid(new Size(16, 9), interpolator, 20, 20, superReferenceTemplate5.getFrame().getSrc());
 		meshGrid.build();
 
 		filteredSuperContour.stream().forEach(c -> Imgproc.line(image, c.top, c.bottom, new Scalar(255, 255, 255), 1));
