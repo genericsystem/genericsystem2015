@@ -141,15 +141,14 @@ public class MeshGrid {
 		Mat dewarpedImage = new Mat(totalHeight + 1, totalWidth + 1, CvType.CV_8UC3, new Scalar(255, 255, 255));
 
 		for (int i = (int) -kSize.height; i <= kSize.height; i++) {
-			int currX = 0;
+			int x = 0;
 			for (int j = (int) -kSize.width; j <= kSize.width; j++) {
 				int wJ = j + (int) kSize.width;
 				if (wJ > 0)
-					currX += widths[wJ - 1];
+					x += widths[wJ - 1];
 				if (inImageBorders(mesh.get(new Key(i, j)))) {
 					int rectWidth = widths[wJ];
 					Rect subImageRect = subImageRect(i, j);
-					int x = currX;
 					int y = (i + (int) kSize.height) * rectHeight;
 					Mat homography = dewarpPolygon(mesh.get(new Key(i, j)), subImageRect, rectHeight, rectWidth);
 					Rect dewarpedRect = new Rect(new Point(x, y), new Point(x + rectWidth, y + rectHeight));
