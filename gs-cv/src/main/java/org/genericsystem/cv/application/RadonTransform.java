@@ -10,8 +10,6 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
-import java.util.Arrays;
-
 public class RadonTransform {
 
 	static {
@@ -47,63 +45,5 @@ public class RadonTransform {
 			}
 		}
 		return projectionMap;
-	}
-
-	public static void main(String[] args) {
-		Mat projectionMat = Mat.eye(new Size(3, 3), CvType.CV_64FC1);
-		System.out.println(Arrays.toString(bestTraject(projectionMat, 0)));
-	}
-
-	public static int[] bestTraject(Mat projectionMap, double anglePenality) {
-		double[][] score = new double[projectionMap.rows()][projectionMap.cols()];
-		int[][] thetaPrev = new int[projectionMap.rows()][projectionMap.cols()];
-		for (int k = 1; k < projectionMap.rows(); k++) {
-			for (int theta = 0; theta < projectionMap.cols(); theta++) {
-				double magnitude = projectionMap.get(k, theta)[0];
-
-				double scoreFromPrevTheta = theta != 0 ? score[k - 1][theta - 1] : Double.NEGATIVE_INFINITY;
-				double scoreFromSameTheta = score[k - 1][theta];
-				double scoreFromNextTheta = theta < projectionMap.cols() - 1 ? score[k - 1][theta + 1] : Double.NEGATIVE_INFINITY;
-
-				double bestScore4Pos = -1;
-
-				if (scoreFromSameTheta >= (scoreFromPrevTheta + anglePenality) && scoreFromSameTheta >= (scoreFromNextTheta + anglePenality)) {
-					bestScore4Pos = scoreFromSameTheta;
-					thetaPrev[k][theta] = theta;
-				} else if ((scoreFromPrevTheta + anglePenality) >= scoreFromSameTheta && ((scoreFromPrevTheta + anglePenality) >= (scoreFromNextTheta + anglePenality))) {
-					bestScore4Pos = scoreFromPrevTheta + anglePenality;
-					thetaPrev[k][theta] = theta - 1;
-				} else {
-					bestScore4Pos = scoreFromNextTheta + anglePenality;
-					thetaPrev[k][theta] = theta + 1;
-				}
-				score[k][theta] = magnitude + bestScore4Pos;
-			}
-		}
-
-		// System.out.println(Arrays.toString(score[projectionMap.rows() - 1]));
-		// System.out.println(Arrays.deepToString(thetaPrev));
-		double maxScore = Double.NEGATIVE_INFINITY;
-		int prevTheta = -1;
-		int[] thetas = new int[projectionMap.rows()];
-		for (int theta = 0; theta < projectionMap.cols(); theta++) {
-			double lastScore = score[projectionMap.rows() - 1][theta];
-			// System.out.println(lastScore);
-			if (lastScore > maxScore) {
-				maxScore = lastScore;
-				prevTheta = theta;
-			}
-		}
-		assert prevTheta != -1;
-
-		// System.out.println(maxScore + " for theta : " + prevTheta);
-		for (int k = projectionMap.rows() - 1; k >= 0; k--) {
-			thetas[k] = prevTheta;
-			// System.out.println(prevTheta);
-			prevTheta = thetaPrev[k][prevTheta];
-			assert prevTheta != -1 : k + " " + prevTheta;
-		}
-
-		return thetas;
 	}
 }
