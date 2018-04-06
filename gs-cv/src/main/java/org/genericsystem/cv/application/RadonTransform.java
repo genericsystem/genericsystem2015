@@ -1,5 +1,7 @@
 package org.genericsystem.cv.application;
 
+import java.util.Arrays;
+
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
@@ -9,8 +11,6 @@ import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
-
-import java.util.Arrays;
 
 public class RadonTransform {
 
@@ -77,7 +77,7 @@ public class RadonTransform {
 					bestScore4Pos = scoreFromNextTheta + anglePenality;
 					thetaPrev[k][theta] = theta + 1;
 				}
-				score[k][theta] = magnitude + bestScore4Pos;
+				score[k][theta] = Math.pow(magnitude, 3) + bestScore4Pos;
 			}
 		}
 
