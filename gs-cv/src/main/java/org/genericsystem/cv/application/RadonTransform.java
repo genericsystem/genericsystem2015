@@ -57,6 +57,8 @@ public class RadonTransform {
 	public static int[] bestTraject(Mat projectionMap, double anglePenality) {
 		double[][] score = new double[projectionMap.rows()][projectionMap.cols()];
 		int[][] thetaPrev = new int[projectionMap.rows()][projectionMap.cols()];
+		for (int theta = 0; theta < projectionMap.cols(); theta++)
+			score[0][theta] = Math.pow(projectionMap.get(0, theta)[0], 3);
 		for (int k = 1; k < projectionMap.rows(); k++) {
 			for (int theta = 0; theta < projectionMap.cols(); theta++) {
 				double magnitude = projectionMap.get(k, theta)[0];
@@ -101,7 +103,6 @@ public class RadonTransform {
 			thetas[k] = prevTheta;
 			// System.out.println(prevTheta);
 			prevTheta = thetaPrev[k][prevTheta];
-			assert prevTheta != -1 : k + " " + prevTheta;
 		}
 
 		return thetas;

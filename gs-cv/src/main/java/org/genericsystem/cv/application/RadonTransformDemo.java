@@ -99,12 +99,12 @@ public class RadonTransformDemo extends AbstractApp {
 		images[3] = new Img(projectionMap, false).toJfxImage();
 
 		// Imgproc.Sobel(projectionMap, projectionMap, CvType.CV_64FC1, 0, 1);
-		DirectionalFilter.cleanContour(projectionMap);
+		// DirectionalFilter.cleanContour(projectionMap);
 		// Imgproc.morphologyEx(projectionMap, projectionMap, Imgproc.MORPH_GRADIENT, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(1, 2)));
 		// Imgproc.threshold(projectionMap, projectionMap, 50, 100000, Imgproc.THRESH_BINARY);
 		images[4] = new Img(projectionMap, false).toJfxImage();
 
-		int[] traj = RadonTransform.bestTraject(projectionMap, -10000);
+		int[] traj = RadonTransform.bestTraject(projectionMap, -1000000);
 		// System.out.println(Arrays.toString(traj));
 
 		Mat trajs = Mat.zeros(projectionMap.size(), CvType.CV_8UC3);
