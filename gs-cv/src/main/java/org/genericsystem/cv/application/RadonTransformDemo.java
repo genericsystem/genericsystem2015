@@ -74,7 +74,7 @@ public class RadonTransformDemo extends AbstractApp {
 		System.out.println("do work");
 		if (!config.stabilizedMode)
 			superFrame = gsCapture.read();
-		Image[] images = new Image[7];
+		Image[] images = new Image[8];
 
 		Img binarized = superFrame.getFrame().adaptativeGaussianInvThreshold(7, 3);
 		Rect roi = new Rect(new Point(300, 0), new Point(360, 360));
@@ -119,6 +119,8 @@ public class RadonTransformDemo extends AbstractApp {
 
 		images[5] = new Img(trajs, false).toJfxImage();
 		images[6] = new Img(superFrame.getFrame().getSrc(), false).toJfxImage();
+
+		//		images[7] = new Img(RadonTransform.estimateBaselines(superFrame.getFrame().getSrc(), 0), false).toJfxImage();
 
 		return images;
 	}
