@@ -1,19 +1,21 @@
 package org.genericsystem.cv.application;
 
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
+import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
+
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -90,7 +92,7 @@ public class RadonTransformDemo extends AbstractApp {
 		// System.out.println(mat);
 		images[1] = new Img(mat, false).toJfxImage();
 
-		Mat radon = RadonTransform.transform(strip.getSrc());
+		Mat radon = RadonTransform.transform(strip.getSrc(), 45);
 		images[2] = new Img(radon, false).toJfxImage();
 
 		Mat projectionMap = RadonTransform.projectionMap(radon);
@@ -100,15 +102,17 @@ public class RadonTransformDemo extends AbstractApp {
 
 		// Imgproc.Sobel(projectionMap, projectionMap, CvType.CV_64FC1, 0, 1);
 		// DirectionalFilter.cleanContour(projectionMap);
-		// Imgproc.morphologyEx(projectionMap, projectionMap, Imgproc.MORPH_GRADIENT, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(1, 2)));
-		// Imgproc.threshold(projectionMap, projectionMap, 50, 100000, Imgproc.THRESH_BINARY);
+		Imgproc.morphologyEx(projectionMap, projectionMap, Imgproc.MORPH_GRADIENT, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(1, 3)));
+		Imgproc.threshold(projectionMap, projectionMap, 50, 100000, Imgproc.THRESH_BINARY);
+
+		Imgproc.GaussianBlur(projectionMap, projectionMap, new Size(21, 21), 0);
+		Core.normalize(projectionMap, projectionMap, 0, 255, Core.NORM_MINMAX);
 		images[4] = new Img(projectionMap, false).toJfxImage();
 
-		int[] traj = RadonTransform.bestTraject(projectionMap, -1000000);
+		int[] traj = RadonTransform.bestTraject(projectionMap, -3000);
 		// System.out.println(Arrays.toString(traj));
 
 		Mat trajs = Mat.zeros(projectionMap.size(), CvType.CV_8UC3);
-		// Mat lines = Mat.zeros(superFrame.getFrame().size(), CvType.CV_8UC3);
 		for (int k = 0; k < trajs.rows(); k++) {
 			trajs.put(k, traj[k], 0, 0, 255);
 			if (projectionMap.get(k, traj[k])[0] > 70) {
@@ -116,11 +120,11 @@ public class RadonTransformDemo extends AbstractApp {
 				Imgproc.line(superFrame.getFrame().getSrc(), new Point(330 - Math.cos(angle) * 30, k - Math.sin(angle) * 30), new Point(330 + Math.cos(angle) * 30, k + Math.sin(angle) * 30), new Scalar(0, 255, 0));
 			}
 		}
-
 		images[5] = new Img(trajs, false).toJfxImage();
+
 		images[6] = new Img(superFrame.getFrame().getSrc(), false).toJfxImage();
 
-		//		images[7] = new Img(RadonTransform.estimateBaselines(superFrame.getFrame().getSrc(), 0), false).toJfxImage();
+		// images[7] = new Img(RadonTransform.estimateBaselines(superFrame.getFrame().getSrc(), -3000, 45), false).toJfxImage();
 
 		return images;
 	}

@@ -1,7 +1,5 @@
 package org.genericsystem.cv.application;
 
-import java.util.Arrays;
-
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
@@ -15,28 +13,53 @@ import org.opencv.imgproc.Imgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RadonTransform {
+import java.util.Arrays;
 
-	private static final Logger logger = LoggerFactory.getLogger(RadonTransform.class);
+public class RadonTransform {
 
 	static {
 		NativeLibraryLoader.load();
 	}
 
-	public static Mat transform(Mat src) {
+	private static final Logger logger = LoggerFactory.getLogger(RadonTransform.class);
+
+	public static Mat transform(Mat src, int minMaxAngle) {
 		Mat dst = new Mat(src.rows(), src.rows(), CvType.CV_64FC1, new Scalar(0));
 		int center = dst.rows() / 2;
 		Mat src64 = new Mat();
 		src.convertTo(src64, CvType.CV_64FC1);
 		src64.copyTo(new Mat(dst, new Rect(new Point(center - src64.cols() / 2, 0), new Point(center + src64.cols() / 2, src64.rows()))));
-		Mat radon_image = new Mat(dst.rows(), 90, CvType.CV_64FC1, new Scalar(0));
-		for (int t = -45; t < 45; t++) {
+		Mat radon_image = new Mat(dst.rows(), 2 * minMaxAngle, CvType.CV_64FC1, new Scalar(0));
+		for (int t = -minMaxAngle; t < minMaxAngle; t++) {
 			Mat rotated = new Mat();
 			Mat rotation = Imgproc.getRotationMatrix2D(new Point(center, center), t, 1);
 			Imgproc.warpAffine(dst, rotated, rotation, new Size(dst.cols(), dst.rows()), Imgproc.INTER_LINEAR);
 			Core.reduce(rotated, rotated, 1, Core.REDUCE_SUM);
 			for (int row = 0; row < rotated.rows(); row++)
-				radon_image.put(row, t + 45, rotated.get(row, 0)[0]);
+				radon_image.put(row, t + minMaxAngle, rotated.get(row, 0)[0]);
+		}
+		Core.normalize(radon_image, radon_image, 0, 255, Core.NORM_MINMAX);
+		// radon_image.convertTo(radon_image, CvType.CV_8UC1);
+		return radon_image;
+	}
+
+	public static Mat transformV(Mat src, Size boxFilterSize, double thresHold, int minMaxAngle) {
+		Mat dst = new Mat(src.cols(), src.cols(), CvType.CV_64FC1, new Scalar(0));
+		int center = dst.cols() / 2;
+		Mat src64 = new Mat();
+		src.convertTo(src64, CvType.CV_64FC1);
+		src64.copyTo(new Mat(dst, new Rect(new Point(0, center - src64.rows() / 2), new Point(src64.cols(), center + src64.rows() / 2))));
+		Mat radon_image = new Mat(2 * minMaxAngle, dst.cols(), CvType.CV_64FC1, new Scalar(0));
+		for (int t = -minMaxAngle; t < minMaxAngle; t++) {
+			Mat rotated = new Mat();
+			Mat rotation = Imgproc.getRotationMatrix2D(new Point(center, center), t, 1);
+			Imgproc.warpAffine(dst, rotated, rotation, new Size(dst.cols(), dst.rows()), Imgproc.INTER_NEAREST);
+			Imgproc.boxFilter(rotated, rotated, CvType.CV_64FC1, boxFilterSize);
+			Imgproc.threshold(rotated, rotated, thresHold, 255, Imgproc.THRESH_BINARY);
+
+			Core.reduce(rotated, rotated, 0, Core.REDUCE_SUM);
+			for (int col = 0; col < rotated.cols(); col++)
+				radon_image.put(t + minMaxAngle, col, rotated.get(0, col)[0]);
 		}
 		Core.normalize(radon_image, radon_image, 0, 255, Core.NORM_MINMAX);
 		// radon_image.convertTo(radon_image, CvType.CV_8UC1);
@@ -49,6 +72,17 @@ public class RadonTransform {
 			for (int tetha = 0; tetha < projectionMap.cols(); tetha++) {
 				int p = (int) ((k - projectionMap.rows() / 2) * Math.sin(((double) tetha + 45) / 180 * Math.PI) + radon.rows() / 2);
 				projectionMap.put(k, tetha, radon.get(p, tetha)[0]);
+			}
+		}
+		return projectionMap;
+	}
+
+	public static Mat projectionMapV(Mat radon) {
+		Mat projectionMap = Mat.zeros(radon.rows(), radon.cols(), CvType.CV_64FC1);
+		for (int k = 0; k < projectionMap.cols(); k++) {
+			for (int tetha = 0; tetha < projectionMap.rows(); tetha++) {
+				int p = (int) ((k - projectionMap.cols() / 2) * Math.sin(((double) tetha - 35 + 90) / 180 * Math.PI) + radon.cols() / 2);
+				projectionMap.put(tetha, k, radon.get(tetha, p)[0]);
 			}
 		}
 		return projectionMap;
@@ -113,33 +147,65 @@ public class RadonTransform {
 		return thetas;
 	}
 
+	public static int[] bestTrajectV(Mat projectionMap, double anglePenality) {
+		double[][] score = new double[projectionMap.rows()][projectionMap.cols()];
+		int[][] thetaPrev = new int[projectionMap.rows()][projectionMap.cols()];
+		for (int theta = 0; theta < projectionMap.rows(); theta++)
+			score[theta][0] = Math.pow(projectionMap.get(theta, 0)[0], 3);
+		for (int k = 1; k < projectionMap.cols(); k++) {
+			for (int theta = 0; theta < projectionMap.rows(); theta++) {
+				double magnitude = projectionMap.get(theta, k)[0];
+
+				double scoreFromPrevTheta = theta != 0 ? score[theta - 1][k - 1] : Double.NEGATIVE_INFINITY;
+				double scoreFromSameTheta = score[theta][k - 1];
+				double scoreFromNextTheta = theta < projectionMap.rows() - 1 ? score[theta + 1][k - 1] : Double.NEGATIVE_INFINITY;
+
+				double bestScore4Pos = -1;
+
+				if (scoreFromSameTheta >= (scoreFromPrevTheta + anglePenality) && scoreFromSameTheta >= (scoreFromNextTheta + anglePenality)) {
+					bestScore4Pos = scoreFromSameTheta;
+					thetaPrev[theta][k] = theta;
+				} else if ((scoreFromPrevTheta + anglePenality) >= scoreFromSameTheta && ((scoreFromPrevTheta + anglePenality) >= (scoreFromNextTheta + anglePenality))) {
+					bestScore4Pos = scoreFromPrevTheta + anglePenality;
+					thetaPrev[theta][k] = theta - 1;
+				} else {
+					bestScore4Pos = scoreFromNextTheta + anglePenality;
+					thetaPrev[theta][k] = theta + 1;
+				}
+				score[theta][k] = Math.pow(magnitude, 3) + bestScore4Pos;
+			}
+		}
+
+		// System.out.println(Arrays.toString(score[projectionMap.rows() - 1]));
+		// System.out.println(Arrays.deepToString(thetaPrev));
+		double maxScore = Double.NEGATIVE_INFINITY;
+		int prevTheta = -1;
+		int[] thetas = new int[projectionMap.cols()];
+		for (int theta = 0; theta < projectionMap.rows(); theta++) {
+			double lastScore = score[theta][projectionMap.cols() - 1];
+			// System.out.println(lastScore);
+			if (lastScore > maxScore) {
+				maxScore = lastScore;
+				prevTheta = theta;
+			}
+		}
+		assert prevTheta != -1;
+
+		// System.out.println(maxScore + " for theta : " + prevTheta);
+		for (int k = projectionMap.cols() - 1; k >= 0; k--) {
+			thetas[k] = prevTheta;
+			// System.out.println(prevTheta);
+			prevTheta = thetaPrev[prevTheta][k];
+		}
+
+		return thetas;
+	}
+
 	public static Mat extractStrip(Mat src, int startX, int width) {
 		return new Mat(src, new Range(0, src.rows()), new Range(startX, startX + width));
 	}
 
-	public static Mat radonTransform(Mat strip) {
-		Mat dst = new Mat(strip.rows(), strip.rows(), CvType.CV_64FC1, new Scalar(0));
-		Mat src64 = new Mat();
-		strip.convertTo(src64, CvType.CV_64FC1);
-		int xStart = strip.rows() / 2 - strip.width() / 2;
-		for (int i = 0; i < strip.width(); i++)
-			for (int j = 0; j < strip.height(); j++)
-				dst.put(j, xStart + i, src64.get(j, i)[0]);
-
-		Mat radon_image = new Mat(strip.rows(), 90, CvType.CV_64FC1, new Scalar(0));
-		for (int t = -45; t < 45; t++) {
-			Mat rotated = new Mat();
-			Mat rotation = Imgproc.getRotationMatrix2D(new Point(strip.width() / 2, strip.height() / 2), t, 1);
-			Imgproc.warpAffine(dst, rotated, rotation, dst.size(), Imgproc.INTER_NEAREST);
-			Core.reduce(rotated, rotated, 1, Core.REDUCE_SUM);
-			for (int row = 0; row < rotated.rows(); row++)
-				radon_image.put(row, t + 45, rotated.get(row, 0)[0]);
-		}
-		Core.normalize(radon_image, radon_image, 0, 255, Core.NORM_MINMAX);
-		return radon_image;
-	}
-
-	public static Mat estimateBaselines(Mat image, double anglePenalty) {
+	public static Mat estimateBaselines(Mat image, double anglePenalty, int minMaxAngle) {
 		Mat result = image.clone();
 		// Number of overlapping vertical strips.
 		int n = 20;
@@ -152,7 +218,7 @@ public class RadonTransform {
 		int[][] angles = new int[n][];
 		int x = 0;
 		for (int i = 0; i < n; i++) {
-			Mat radonTransform = radonTransform(extractStrip(image, x, w));
+			Mat radonTransform = transform(extractStrip(image, x, w), minMaxAngle);
 			Mat projMap = projectionMap(radonTransform);
 			angles[i] = bestTraject(projMap, anglePenalty);
 			x += step;
@@ -165,7 +231,7 @@ public class RadonTransform {
 			xs[j] = (j + .5) * step;
 
 		for (int i = 0; i < lines; i++) {
-			int currY = i * yStep + (int)(.5 * yStep);
+			int currY = i * yStep + (int) (.5 * yStep);
 			double[] ys = new double[n];
 			logger.info("Line {}", i);
 			for (int j = 0; j < n; j++) {
