@@ -119,8 +119,7 @@ public class RadonTransformDemo extends AbstractApp {
 		List<double[]> values = new ArrayList<>();
 		for (int k = 0; k < traj.length; k++)
 			values.add(new double[] { k, traj[k] });
-		double[] params = new LevenbergImpl<>(error, values, new double[] { 0, 0, 0 }).getParams();
-
+		double[] params = LevenbergImpl.fromBiFunction(f, values, new double[] { 0, 0, 0 }).getParams();
 		// System.out.println(Arrays.toString(traj));
 
 		Mat trajs = Mat.zeros(projectionMap.size(), CvType.CV_8UC3);
@@ -128,6 +127,10 @@ public class RadonTransformDemo extends AbstractApp {
 		for (int k = 0; k < trajs.rows(); k++) {
 			trajs.put(k, traj[k], 0, 0, 255);
 			double approx = f.apply((double) k, params);
+			if (approx < 0)
+				approx = 0;
+			if (approx >= 2 * 45)
+				approx = 2 * 45 - 1;
 			trajs.put(k, (int) Math.round(approx), 0, 255, 0);
 			if (projectionMap.get(k, (int) Math.round(approx))[0] > 70) {
 				double angle = (approx - 45) / 180 * Math.PI;
