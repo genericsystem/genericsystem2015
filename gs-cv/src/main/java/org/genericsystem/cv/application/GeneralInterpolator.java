@@ -58,7 +58,6 @@ public class GeneralInterpolator implements Interpolator {
 			double geoCoef = Math.pow(1 / (squaredEuclidianDistance(x, y, v) + 0.00001), pow / 2); // on ajoute un epsilon pour éviter les divisions par 0
 			vCoef = geoCoef * v.strenght;// * indice de confiance dy ?
 			vAngle += vCoef * v.angle;
-			sumHCoefs += hCoef;
 			sumVCoefs += vCoef;
 		});
 
