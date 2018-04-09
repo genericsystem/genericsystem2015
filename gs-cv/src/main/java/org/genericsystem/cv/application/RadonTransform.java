@@ -1,5 +1,7 @@
 package org.genericsystem.cv.application;
 
+import java.util.Arrays;
+
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
@@ -12,8 +14,6 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Arrays;
 
 public class RadonTransform {
 
@@ -33,7 +33,7 @@ public class RadonTransform {
 		for (int t = -minMaxAngle; t < minMaxAngle; t++) {
 			Mat rotated = new Mat();
 			Mat rotation = Imgproc.getRotationMatrix2D(new Point(center, center), t, 1);
-			Imgproc.warpAffine(dst, rotated, rotation, new Size(dst.cols(), dst.rows()), Imgproc.INTER_LINEAR);
+			Imgproc.warpAffine(dst, rotated, rotation, new Size(dst.cols(), dst.rows()), Imgproc.INTER_NEAREST);
 			Core.reduce(rotated, rotated, 1, Core.REDUCE_SUM);
 			for (int row = 0; row < rotated.rows(); row++)
 				radon_image.put(row, t + minMaxAngle, rotated.get(row, 0)[0]);
@@ -90,14 +90,14 @@ public class RadonTransform {
 
 	public static void main(String[] args) {
 		Mat projectionMat = Mat.eye(new Size(3, 3), CvType.CV_64FC1);
-		System.out.println(Arrays.toString(bestTraject(projectionMat, 0)));
+		System.out.println(Arrays.toString(bestTraject(projectionMat, 0, 2)));
 	}
 
-	public static int[] bestTraject(Mat projectionMap, double anglePenality) {
+	public static int[] bestTraject(Mat projectionMap, double anglePenality, double pow) {
 		double[][] score = new double[projectionMap.rows()][projectionMap.cols()];
 		int[][] thetaPrev = new int[projectionMap.rows()][projectionMap.cols()];
 		for (int theta = 0; theta < projectionMap.cols(); theta++)
-			score[0][theta] = Math.pow(projectionMap.get(0, theta)[0], 3);
+			score[0][theta] = Math.pow(projectionMap.get(0, theta)[0], pow);
 		for (int k = 1; k < projectionMap.rows(); k++) {
 			for (int theta = 0; theta < projectionMap.cols(); theta++) {
 				double magnitude = projectionMap.get(k, theta)[0];
@@ -118,7 +118,7 @@ public class RadonTransform {
 					bestScore4Pos = scoreFromNextTheta + anglePenality;
 					thetaPrev[k][theta] = theta + 1;
 				}
-				score[k][theta] = Math.pow(magnitude, 3) + bestScore4Pos;
+				score[k][theta] = Math.pow(magnitude, pow) + bestScore4Pos;
 			}
 		}
 
@@ -205,7 +205,7 @@ public class RadonTransform {
 		return new Mat(src, new Range(0, src.rows()), new Range(startX, startX + width));
 	}
 
-	public static Mat estimateBaselines(Mat image, double anglePenalty, int minMaxAngle) {
+	public static Mat estimateBaselines(Mat image, double anglePenalty, int minMaxAngle, double magnitudePow) {
 		Mat result = image.clone();
 		// Number of overlapping vertical strips.
 		int n = 20;
@@ -220,7 +220,7 @@ public class RadonTransform {
 		for (int i = 0; i < n; i++) {
 			Mat radonTransform = transform(extractStrip(image, x, w), minMaxAngle);
 			Mat projMap = projectionMap(radonTransform);
-			angles[i] = bestTraject(projMap, anglePenalty);
+			angles[i] = bestTraject(projMap, anglePenalty, magnitudePow);
 			x += step;
 		}
 
