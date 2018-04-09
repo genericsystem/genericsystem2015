@@ -26,46 +26,33 @@ public class RadonTransform {
 	private static final Logger logger = LoggerFactory.getLogger(RadonTransform.class);
 
 	public static Mat transform(Mat src, int minMaxAngle) {
-		Mat dst = new Mat(src.rows(), src.rows(), CvType.CV_64FC1, new Scalar(0));
+		Mat dst = Mat.zeros(src.rows(), src.rows(), CvType.CV_64FC1);
 		int center = dst.rows() / 2;
-		Mat src64 = new Mat();
-		src.convertTo(src64, CvType.CV_64FC1);
-		src64.copyTo(new Mat(dst, new Rect(new Point(center - src64.cols() / 2, 0), new Point(center + src64.cols() / 2, src64.rows()))));
-		Mat radon_image = new Mat(dst.rows(), 2 * minMaxAngle, CvType.CV_64FC1, new Scalar(0));
+		src.convertTo(new Mat(dst, new Rect(new Point(center - src.cols() / 2, 0), new Point(center + src.cols() / 2, src.rows()))), CvType.CV_64FC1);
+		Mat radon = Mat.zeros(dst.rows(), 2 * minMaxAngle, CvType.CV_64FC1);
 		for (int t = -minMaxAngle; t < minMaxAngle; t++) {
 			Mat rotated = new Mat();
 			Mat rotation = Imgproc.getRotationMatrix2D(new Point(center, center), t, 1);
 			Imgproc.warpAffine(dst, rotated, rotation, new Size(dst.cols(), dst.rows()), Imgproc.INTER_NEAREST);
-			Core.reduce(rotated, rotated, 1, Core.REDUCE_SUM);
-			for (int row = 0; row < rotated.rows(); row++)
-				radon_image.put(row, t + minMaxAngle, rotated.get(row, 0)[0]);
+			Core.reduce(rotated, radon.col(t + minMaxAngle), 1, Core.REDUCE_SUM);
 		}
-		Core.normalize(radon_image, radon_image, 0, 255, Core.NORM_MINMAX);
-		// radon_image.convertTo(radon_image, CvType.CV_8UC1);
-		return radon_image;
+		Core.normalize(radon, radon, 0, 255, Core.NORM_MINMAX);
+		return radon;
 	}
 
 	public static Mat transformV(Mat src, Size boxFilterSize, double thresHold, int minMaxAngle) {
-		Mat dst = new Mat(src.cols(), src.cols(), CvType.CV_64FC1, new Scalar(0));
+		Mat dst = Mat.zeros(src.cols(), src.cols(), CvType.CV_64FC1);
 		int center = dst.cols() / 2;
-		Mat src64 = new Mat();
-		src.convertTo(src64, CvType.CV_64FC1);
-		src64.copyTo(new Mat(dst, new Rect(new Point(0, center - src64.rows() / 2), new Point(src64.cols(), center + src64.rows() / 2))));
-		Mat radon_image = new Mat(2 * minMaxAngle, dst.cols(), CvType.CV_64FC1, new Scalar(0));
+		src.convertTo(new Mat(dst, new Rect(new Point(0, center - src.rows() / 2), new Point(src.cols(), center + src.rows() / 2))), CvType.CV_64FC1);
+		Mat radon = Mat.zeros(2 * minMaxAngle, dst.cols(), CvType.CV_64FC1);
 		for (int t = -minMaxAngle; t < minMaxAngle; t++) {
 			Mat rotated = new Mat();
 			Mat rotation = Imgproc.getRotationMatrix2D(new Point(center, center), t, 1);
 			Imgproc.warpAffine(dst, rotated, rotation, new Size(dst.cols(), dst.rows()), Imgproc.INTER_NEAREST);
-			Imgproc.boxFilter(rotated, rotated, CvType.CV_64FC1, boxFilterSize);
-			Imgproc.threshold(rotated, rotated, thresHold, 255, Imgproc.THRESH_BINARY);
-
-			Core.reduce(rotated, rotated, 0, Core.REDUCE_SUM);
-			for (int col = 0; col < rotated.cols(); col++)
-				radon_image.put(t + minMaxAngle, col, rotated.get(0, col)[0]);
+			Core.reduce(rotated, radon.row(t + minMaxAngle), 0, Core.REDUCE_SUM);
 		}
-		Core.normalize(radon_image, radon_image, 0, 255, Core.NORM_MINMAX);
-		// radon_image.convertTo(radon_image, CvType.CV_8UC1);
-		return radon_image;
+		Core.normalize(radon, radon, 0, 255, Core.NORM_MINMAX);
+		return radon;
 	}
 
 	public static Mat projectionMap(Mat radon) {

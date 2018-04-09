@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
+import org.genericsystem.cv.application.GeneralInterpolator.OrientedPoint;
 import org.genericsystem.cv.lm.LevenbergImpl;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.opencv.core.Mat;
@@ -80,18 +81,31 @@ public class RadonTransformDemo extends AbstractApp {
 			superFrame = gsCapture.read();
 		Image[] images = new Image[8];
 
+		long ref = System.currentTimeMillis();
+
 		Img binarized = superFrame.getFrame().gaussianBlur(new Size(3, 3)).adaptativeGaussianInvThreshold(3, 2);
 		// Rect roi = new Rect(new Point(300, 0), new Point(360, 360));
 
 		// Img display = new Img(binarized.getSrc(), true);
 		// Imgproc.rectangle(display.getSrc(), roi.br(), roi.tl(), new Scalar(255));
 		images[0] = binarized.toJfxImage();
+		long last = System.currentTimeMillis();
+		System.out.println("Binarization : " + (last - ref));
+		ref = last;
 
-		int stripWidth = 40;
+		int stripWidth = 80;
 		List<Mat> strips = RadonTransform.extractStrips(binarized.getSrc(), stripWidth);
+		last = System.currentTimeMillis();
+		System.out.println("Extract strips : " + (last - ref));
+		ref = last;
 		List<Mat> radons = strips.stream().map(strip -> RadonTransform.transform(strip, 45)).collect(Collectors.toList());
+		last = System.currentTimeMillis();
+		System.out.println("Compute radons : " + (last - ref));
+		ref = last;
 		List<Mat> projectionMaps = radons.stream().map(radon -> RadonTransform.projectionMap(radon)).collect(Collectors.toList());
-
+		last = System.currentTimeMillis();
+		System.out.println("Compute projections : " + (last - ref));
+		ref = last;
 		// Mat projectionMapLarge = Mat.zeros(360, 640, CvType.CV_64FC1);
 		// projectionMap.copyTo(new Mat(projectionMapLarge, new Rect(new Point(0, 0), new Point(projectionMap.width(), projectionMap.height()))));
 		// images[1] = new Img(projectionMap, false).toJfxImage();
@@ -103,7 +117,9 @@ public class RadonTransformDemo extends AbstractApp {
 
 		// Imgproc.threshold(projectionMap, projectionMap, 50, 255, Imgproc.THRESH_TOZERO);
 		// images[4] = new Img(projectionMap, false).toJfxImage();
-
+		last = System.currentTimeMillis();
+		System.out.println("Compute gradients : " + (last - ref));
+		ref = last;
 		List<int[]> trajs = projectionMaps.stream().map(projectionMap -> RadonTransform.bestTraject(projectionMap, -5000, 2)).collect(Collectors.toList());
 
 		BiFunction<Double, double[], Double> f = (x, params) -> params[0] + params[1] * x + params[2] * x * x;
@@ -116,7 +132,9 @@ public class RadonTransformDemo extends AbstractApp {
 			approxParams.add(LevenbergImpl.fromBiFunction(f, values, new double[] { 0, 0, 0 }).getParams());
 		}
 		// System.out.println(Arrays.toString(traj));
-
+		last = System.currentTimeMillis();
+		System.out.println("Compute approx : " + (last - ref));
+		ref = last;
 		Img frameDisplay = superFrame.getDisplay();
 		int strip = 0;
 		for (double[] approxParam : approxParams) {
@@ -128,24 +146,34 @@ public class RadonTransformDemo extends AbstractApp {
 			strip++;
 		}
 		images[1] = frameDisplay.toJfxImage();
+		last = System.currentTimeMillis();
+		System.out.println("Display lines : " + (last - ref));
+		ref = last;
+		strip = 0;
+		List<OrientedPoint> horizontals = new ArrayList<>();
+		for (double[] approxParam : approxParams) {
+			for (int k = 0; k < binarized.height(); k += 20) {
+				double angle = (f.apply((double) k, approxParam) - 45) / 180 * Math.PI;
+				horizontals.add(new OrientedPoint(new Point((strip + 1) * stripWidth / 2, k), angle, 1));
+			}
+			strip++;
+		}
+		strip = 0;
+		List<OrientedPoint> verticals = new ArrayList<>();
+		for (double[] approxParam : approxParams) {
+			for (int k = 0; k < binarized.height(); k += 20) {
+				double angle = (f.apply((double) k, approxParam) - 45) / 180 * Math.PI;
+				verticals.add(new OrientedPoint(new Point((strip + 1) * stripWidth / 2, k), Math.PI / 2, 1));
+			}
+			strip++;
+		}
+		Mat frame2 = superFrame.getFrame().getSrc().clone();
+		GeneralInterpolator interpolator = new GeneralInterpolator(horizontals, verticals, 2);
+		MeshGrid meshGrid = new MeshGrid(new Size(16, 9), interpolator, 20, 20, frame2);
+		meshGrid.build();
+		meshGrid.draw(frame2, new Scalar(0, 255, 0));
 
-		// // Mat lines = Mat.zeros(superFrame.getFrame().size(), CvType.CV_8UC3);
-		// for (int k = 0; k < trajs.rows(); k++) {
-		// trajs.put(k, traj[k], 0, 0, 255);
-		// double approx = f.apply((double) k, params);
-		// if (approx < 0)
-		// approx = 0;
-		// if (approx >= 2 * 45)
-		// approx = 2 * 45 - 1;
-		// trajs.put(k, (int) Math.round(approx), 0, 255, 0);
-		// if (k % 10 == 0) {
-		// double angle = (approx - 45) / 180 * Math.PI;
-		// Imgproc.line(superFrame.getFrame().getSrc(), new Point(330 - Math.cos(angle) * 30, k - Math.sin(angle) * 30), new Point(330 + Math.cos(angle) * 30, k + Math.sin(angle) * 30), new Scalar(0, 255, 0), 2);
-		// }
-		// }
-		//
-		// images[5] = new Img(trajs, false).toJfxImage();
-		// images[6] = new Img(superFrame.getFrame().getSrc(), false).toJfxImage();
+		images[3] = new Img(frame2, false).toJfxImage();
 
 		// images[7] = new Img(RadonTransform.estimateBaselines(superFrame.getFrame().getSrc(), 0), false).toJfxImage();
 
