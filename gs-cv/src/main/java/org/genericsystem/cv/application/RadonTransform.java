@@ -1,6 +1,8 @@
 package org.genericsystem.cv.application;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.opencv.core.Core;
@@ -199,6 +201,13 @@ public class RadonTransform {
 		}
 
 		return thetas;
+	}
+
+	public static List<Mat> extractStrips(Mat src, int stripWidth) {
+		List<Mat> strips = new ArrayList<>();
+		for (int col = 0; col + stripWidth <= src.cols(); col += stripWidth / 2)
+			strips.add(extractStrip(src, col, stripWidth));
+		return strips;
 	}
 
 	public static Mat extractStrip(Mat src, int startX, int width) {
