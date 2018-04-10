@@ -167,12 +167,21 @@ public class RadonTransformDemo extends AbstractApp {
 			}
 			strip++;
 		}
+
 		Mat frame2 = superFrame.getFrame().getSrc().clone();
 		GeneralInterpolator interpolator = new GeneralInterpolator(horizontals, verticals, 2);
+		last = System.currentTimeMillis();
+		System.out.println("Prepare interpolator : " + (last - ref));
+		ref = last;
 		MeshGrid meshGrid = new MeshGrid(new Size(16, 9), interpolator, 20, 20, frame2);
 		meshGrid.build();
+		last = System.currentTimeMillis();
+		System.out.println("Build mesh : " + (last - ref));
+		ref = last;
 		meshGrid.draw(frame2, new Scalar(0, 255, 0));
-
+		last = System.currentTimeMillis();
+		System.out.println("Draw mesh : " + (last - ref));
+		ref = last;
 		images[3] = new Img(frame2, false).toJfxImage();
 
 		// images[7] = new Img(RadonTransform.estimateBaselines(superFrame.getFrame().getSrc(), 0), false).toJfxImage();
