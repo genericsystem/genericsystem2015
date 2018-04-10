@@ -3,7 +3,10 @@ package org.genericsystem.cv.application;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
+import org.genericsystem.cv.lm.LevenbergImpl;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
@@ -257,5 +260,14 @@ public class RadonTransform {
 		}
 
 		return result;
+	}
+
+	public static Function<Double, Double> approxTraject(int[] traj) {
+		List<double[]> values = new ArrayList<>();
+		for (int k = 0; k < traj.length; k++)
+			values.add(new double[] { k, traj[k] });
+		BiFunction<Double, double[], Double> f = (x, params) -> params[0] + params[1] * x + params[2] * x * x;
+		double[] params = LevenbergImpl.fromBiFunction(f, values, new double[] { 0, 0, 0 }).getParams();
+		return x -> f.apply(x, params);
 	}
 }

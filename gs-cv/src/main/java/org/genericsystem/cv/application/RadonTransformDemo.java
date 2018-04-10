@@ -6,13 +6,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.application.GeneralInterpolator.OrientedPoint;
-import org.genericsystem.cv.lm.LevenbergImpl;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
@@ -84,85 +83,76 @@ public class RadonTransformDemo extends AbstractApp {
 		long ref = System.currentTimeMillis();
 
 		Img binarized = superFrame.getFrame().gaussianBlur(new Size(3, 3)).adaptativeGaussianInvThreshold(3, 2);
-		// Rect roi = new Rect(new Point(300, 0), new Point(360, 360));
-
-		// Img display = new Img(binarized.getSrc(), true);
-		// Imgproc.rectangle(display.getSrc(), roi.br(), roi.tl(), new Scalar(255));
 		images[0] = binarized.toJfxImage();
+
 		long last = System.currentTimeMillis();
 		System.out.println("Binarization : " + (last - ref));
 		ref = last;
 
-		int stripWidth = 80;
+		int stripWidth = 100;
 		List<Mat> strips = RadonTransform.extractStrips(binarized.getSrc(), stripWidth);
+
 		last = System.currentTimeMillis();
 		System.out.println("Extract strips : " + (last - ref));
 		ref = last;
+
 		List<Mat> radons = strips.stream().map(strip -> RadonTransform.transform(strip, 45)).collect(Collectors.toList());
+
 		last = System.currentTimeMillis();
 		System.out.println("Compute radons : " + (last - ref));
 		ref = last;
+
 		List<Mat> projectionMaps = radons.stream().map(radon -> RadonTransform.projectionMap(radon)).collect(Collectors.toList());
+
 		last = System.currentTimeMillis();
 		System.out.println("Compute projections : " + (last - ref));
 		ref = last;
-		// Mat projectionMapLarge = Mat.zeros(360, 640, CvType.CV_64FC1);
-		// projectionMap.copyTo(new Mat(projectionMapLarge, new Rect(new Point(0, 0), new Point(projectionMap.width(), projectionMap.height()))));
-		// images[1] = new Img(projectionMap, false).toJfxImage();
 
-		// Imgproc.Sobel(projectionMap, projectionMap, CvType.CV_64FC1, 0, 1);
-		// DirectionalFilter.cleanContour(projectionMap);
 		projectionMaps.stream().forEach(projectionMap -> Imgproc.morphologyEx(projectionMap, projectionMap, Imgproc.MORPH_GRADIENT, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(1, 2))));
-		// Imgproc.GaussianBlur(projectionMap, projectionMap, new Size(21, 21), 0);
 
-		// Imgproc.threshold(projectionMap, projectionMap, 50, 255, Imgproc.THRESH_TOZERO);
-		// images[4] = new Img(projectionMap, false).toJfxImage();
 		last = System.currentTimeMillis();
 		System.out.println("Compute gradients : " + (last - ref));
 		ref = last;
+
 		List<int[]> trajs = projectionMaps.stream().map(projectionMap -> RadonTransform.bestTraject(projectionMap, -5000, 2)).collect(Collectors.toList());
 
-		BiFunction<Double, double[], Double> f = (x, params) -> params[0] + params[1] * x + params[2] * x * x;
+		List<Function<Double, Double>> approxFunctions = trajs.stream().map(traj -> RadonTransform.approxTraject(traj)).collect(Collectors.toList());
 
-		List<double[]> approxParams = new ArrayList<>();
-		for (int[] traj : trajs) {
-			List<double[]> values = new ArrayList<>();
-			for (int k = 0; k < binarized.height(); k++)
-				values.add(new double[] { k, traj[k] });
-			approxParams.add(LevenbergImpl.fromBiFunction(f, values, new double[] { 0, 0, 0 }).getParams());
-		}
-		// System.out.println(Arrays.toString(traj));
 		last = System.currentTimeMillis();
 		System.out.println("Compute approx : " + (last - ref));
 		ref = last;
+
 		Img frameDisplay = superFrame.getDisplay();
 		int strip = 0;
-		for (double[] approxParam : approxParams) {
-			for (int k = 0; k < binarized.height(); k += 20) {
-				double angle = (f.apply((double) k, approxParam) - 45) / 180 * Math.PI;
+		for (Function<Double, Double> f : approxFunctions) {
+			for (int k = 0; k < binarized.height(); k += 50) {
+				double angle = (f.apply((double) k) - 45) / 180 * Math.PI;
 				Imgproc.line(frameDisplay.getSrc(), new Point((strip + 1) * stripWidth / 2 - Math.cos(angle) * stripWidth / 2, k - Math.sin(angle) * stripWidth / 2),
 						new Point((strip + 1) * stripWidth / 2 + Math.cos(angle) * stripWidth / 2, k + Math.sin(angle) * stripWidth / 2), new Scalar(0, 255, 0), 1);
 			}
 			strip++;
 		}
 		images[1] = frameDisplay.toJfxImage();
+
 		last = System.currentTimeMillis();
 		System.out.println("Display lines : " + (last - ref));
 		ref = last;
+
 		strip = 0;
 		List<OrientedPoint> horizontals = new ArrayList<>();
-		for (double[] approxParam : approxParams) {
-			for (int k = 0; k < binarized.height(); k += 20) {
-				double angle = (f.apply((double) k, approxParam) - 45) / 180 * Math.PI;
+		for (Function<Double, Double> f : approxFunctions) {
+			for (int k = 0; k < binarized.height(); k += 50) {
+				double angle = (f.apply((double) k) - 45) / 180 * Math.PI;
 				horizontals.add(new OrientedPoint(new Point((strip + 1) * stripWidth / 2, k), angle, 1));
 			}
 			strip++;
 		}
+
 		strip = 0;
 		List<OrientedPoint> verticals = new ArrayList<>();
-		for (double[] approxParam : approxParams) {
+		for (Function<Double, Double> f : approxFunctions) {
 			for (int k = 0; k < binarized.height(); k += 20) {
-				double angle = (f.apply((double) k, approxParam) - 45) / 180 * Math.PI;
+				double angle = (f.apply((double) k) - 45) / 180 * Math.PI;
 				verticals.add(new OrientedPoint(new Point((strip + 1) * stripWidth / 2, k), Math.PI / 2, 1));
 			}
 			strip++;
@@ -173,7 +163,7 @@ public class RadonTransformDemo extends AbstractApp {
 		last = System.currentTimeMillis();
 		System.out.println("Prepare interpolator : " + (last - ref));
 		ref = last;
-		MeshGrid meshGrid = new MeshGrid(new Size(16, 9), interpolator, 20, 20, frame2);
+		MeshGrid meshGrid = new MeshGrid(new Size(3, 2), interpolator, 100, 100, frame2);
 		meshGrid.build();
 		last = System.currentTimeMillis();
 		System.out.println("Build mesh : " + (last - ref));
