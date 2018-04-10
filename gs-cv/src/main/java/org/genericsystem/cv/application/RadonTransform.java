@@ -252,30 +252,31 @@ public class RadonTransform {
 		logger.info("Image width {}, xs {}, step {}, w {}", image.width(), Arrays.toString(xs), step, w);
 
 		for (int i = 0; i < lines; i++) {
-			double currY = i * yStep + .5 * yStep;
 			double[] ys = new double[n + 2];
-			ys[1] = currY;
-			for (int j = 1; j <= n; j++) {
-				double theta = (f.apply(currY, approxParams[j - 1]) - minMaxAngle) / 180 * Math.PI;
+			// Start building line from the middle.
+			ys[n / 2] = i * yStep + .5 * yStep;
+			for (int j = n / 2; j <= n; j++) {
+				double theta = (f.apply(ys[j], approxParams[j - 1]) - minMaxAngle) / 180 * Math.PI;
 				// Line passing by the point G at the middle of the strip with ordinate currY (x_G, y_G),
 				// making an angle of theta with the horizontal:
 				// y = y_G + (x - x_G) tan theta
-				if (j == 1)
-					ys[0] = currY - step * Math.tan(theta);
 				if (j == n)
-					ys[n + 1] = currY + (image.width() - 1 - xs[j]) * Math.tan(theta);
+					ys[n + 1] = ys[n] + (image.width() - 1 - xs[j]) * Math.tan(theta);
 				else {
 					// Ordinate of the next point:
-					currY += step * Math.tan(theta);
-					ys[j + 1] = currY;
+					ys[j + 1] = ys[j] + step * Math.tan(theta);
 				}
+			}
+			for (int j = n / 2; j > 0; j--) {
+				double theta = (f.apply(ys[j], approxParams[j - 1]) - minMaxAngle) / 180 * Math.PI;
+				ys[j - 1] = ys[j] - step * Math.tan(theta);
 			}
 
 			// Draw line segments.
 			for (int j = 0; j < xs.length - 1; j++)
 				Imgproc.line(result, new Point(xs[j], ys[j]), new Point(xs[j + 1], ys[j + 1]), new Scalar(255, 0, 255));
 
-			// Approximate line with cubic curve.
+			// Approximate line with polynomial curve.
 			PolynomialSplineFunction psf = new LinearInterpolator().interpolate(xs, ys);
 			int currX = 0;
 			Point prevPoint = new Point(currX, psf.value(currX));
