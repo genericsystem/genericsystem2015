@@ -877,9 +877,9 @@ public class Img implements AutoCloseable, Serializable {
 		return new Img(result, false);
 	}
 
-	public Mat houghLinesP(int rho, double theta, int threshold, double mineLineLenght, double maxLineGap) {
+	public Mat houghLinesP(int rho, double theta, int threshold, double minLineLength, double maxLineGap) {
 		Mat result = new Mat();
-		Imgproc.HoughLinesP(src, result, rho, theta, threshold, mineLineLenght, maxLineGap);
+		Imgproc.HoughLinesP(src, result, rho, theta, threshold, minLineLength, maxLineGap);
 		return result;
 	}
 
