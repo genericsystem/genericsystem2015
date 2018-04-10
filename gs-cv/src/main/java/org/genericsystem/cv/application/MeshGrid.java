@@ -75,13 +75,13 @@ public class MeshGrid {
 			for (int j = 0; j <= (int) kSize.width; j++)
 				if (i != 0 || j != 0)
 					addPolygon(i, j);
-			for (int j = -1; j >= -(int) kSize.width; j--)
+			for (int j = -1; j > -(int) kSize.width; j--)
 				addPolygon(i, j);
 		}
-		for (int i = -1; i >= -kSize.height; i--) {
+		for (int i = -1; i > -kSize.height; i--) {
 			for (int j = 0; j <= (int) kSize.width; j++)
 				addPolygon(i, j);
-			for (int j = -1; j >= -(int) kSize.width; j--)
+			for (int j = -1; j > -(int) kSize.width; j--)
 				addPolygon(i, j);
 		}
 	}
@@ -201,18 +201,19 @@ public class MeshGrid {
 	}
 
 	public Mat dewarp() {
-		int rectHeight = (int) Math.floor(image.height() / (2 * kSize.height + 1));
-		int rectWidth = (int) Math.floor(image.width() / (2 * kSize.width + 1));
+		int rectHeight = (int) Math.floor(image.height() / (2 * kSize.height));
+		int rectWidth = (int) Math.floor(image.width() / (2 * kSize.width));
 
 		Mat dewarpedImage = new Mat(image.size(), CvType.CV_8UC3, new Scalar(255, 255, 255));
-		for (int i = (int) -kSize.height; i <= kSize.height; i++) {
-			for (int j = (int) -kSize.width; j <= kSize.width; j++) {
+		for (int i = (int) -kSize.height + 1; i <= kSize.height; i++) {
+			for (int j = (int) -kSize.width + 1; j <= kSize.width; j++) {
 				if (inImageBorders(mesh.get(new Key(i, j)))) {
 					Rect subImageRect = subImageRect(i, j);
 					Mat homography = dewarpPolygon(mesh.get(new Key(i, j)), subImageRect, rectHeight, rectWidth);
-					int x = (j + (int) kSize.width) * rectWidth;
-					int y = (i + (int) kSize.height) * rectHeight;
-					assert x >= 0 && y >= 0 && ((x + rectWidth) < image.width()) && ((y + rectHeight) < image.height()) : "x: " + x + ", y: " + y + ", width: " + image.width() + ", height: " + image.height();
+					int x = (j + (int) kSize.width - 1) * rectWidth;
+					int y = (i + (int) kSize.height - 1) * rectHeight;
+					assert x >= 0 && y >= 0 && ((x + rectWidth) <= dewarpedImage.width()) && ((y + rectHeight) <= dewarpedImage.height()) : "x: " + x + ", y: " + y + ", width: " + image.width() + ", height: " + image.height() + " , rectWidth : "
+							+ rectWidth + " , rectHeight : " + rectHeight;
 					Mat subDewarpedImage = new Mat(dewarpedImage, new Rect(new Point(x, y), new Point(x + rectWidth, y + rectHeight)));
 					Mat subImage = new Mat(image, subImageRect);
 					Imgproc.warpPerspective(subImage, subDewarpedImage, homography, new Size(rectWidth, rectHeight), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(0));
