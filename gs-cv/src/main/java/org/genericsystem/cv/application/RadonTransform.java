@@ -38,6 +38,8 @@ public class RadonTransform {
 			Mat rotation = Imgproc.getRotationMatrix2D(new Point(center, center), t, 1);
 			Imgproc.warpAffine(dst, rotated, rotation, new Size(dst.cols(), dst.rows()), Imgproc.INTER_NEAREST);
 			Core.reduce(rotated, radon.col(t + minMaxAngle), 1, Core.REDUCE_SUM);
+			rotated.release();
+			rotation.release();
 		}
 		Core.normalize(radon, radon, 0, 255, Core.NORM_MINMAX);
 		return radon;
