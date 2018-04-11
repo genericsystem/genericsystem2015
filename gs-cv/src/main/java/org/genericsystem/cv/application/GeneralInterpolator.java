@@ -49,7 +49,7 @@ public class GeneralInterpolator implements Interpolator {
 		hAngle = 0; // angle horizontal
 		vAngle = 0;
 		horizontals.forEach(h -> {
-			double geoCoef = Math.pow(1 / (squaredEuclidianDistance(x, y, h) + 0.00001), pow / 2); // on ajoute un epsilon pour éviter les divisions par 0
+			double geoCoef = Math.pow(1 / (squaredEuclidianDistance(x, y, h)), pow / 2);
 			hCoef = geoCoef * h.strenght; // la largeur comme indice de confiance dans le coefficient
 			hAngle += hCoef * h.angle;
 			sumHCoefs += hCoef;

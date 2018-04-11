@@ -85,7 +85,7 @@ public class GraphicApp extends AbstractApp {
 			} catch (Throwable e) {
 				e.printStackTrace();
 			}
-		}, 30, 30, TimeUnit.MILLISECONDS);
+		}, 300, 30, TimeUnit.MILLISECONDS);
 	}
 
 	private Image[] doWork() {

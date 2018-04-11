@@ -91,9 +91,9 @@ public class RadonTransformDemo extends AbstractApp {
 		System.out.println("Binarization : " + (last - ref));
 		ref = last;
 
-		int stripWidth = 100;
+		int stripWidth = 80;
 		List<Mat> vStrips = RadonTransform.extractStrips(binarized.getSrc(), stripWidth);
-		int stripHeight = 100;
+		int stripHeight = 80;
 		List<Mat> htrips = RadonTransform.extractStrips(transposedBinarized.getSrc(), stripHeight);
 
 		last = System.currentTimeMillis();
