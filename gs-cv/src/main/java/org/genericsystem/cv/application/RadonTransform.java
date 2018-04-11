@@ -1,14 +1,9 @@
 package org.genericsystem.cv.application;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.genericsystem.cv.Img;
+import org.genericsystem.cv.application.GeneralInterpolator.OrientedPoint;
 import org.genericsystem.cv.lm.LevenbergImpl;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.opencv.core.Core;
@@ -22,6 +17,12 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public class RadonTransform {
 
@@ -44,21 +45,7 @@ public class RadonTransform {
 			rotated.release();
 			rotation.release();
 		}
-		Core.normalize(radon, radon, 0, 255, Core.NORM_MINMAX);
-		return radon;
-	}
-
-	public static Mat transformV(Mat src, Size boxFilterSize, double thresHold, int minMaxAngle) {
-		Mat dst = Mat.zeros(src.cols(), src.cols(), CvType.CV_64FC1);
-		int center = dst.cols() / 2;
-		src.convertTo(new Mat(dst, new Rect(new Point(0, center - src.rows() / 2), new Point(src.cols(), center + src.rows() / 2))), CvType.CV_64FC1);
-		Mat radon = Mat.zeros(2 * minMaxAngle, dst.cols(), CvType.CV_64FC1);
-		for (int t = -minMaxAngle; t < minMaxAngle; t++) {
-			Mat rotated = new Mat();
-			Mat rotation = Imgproc.getRotationMatrix2D(new Point(center, center), t, 1);
-			Imgproc.warpAffine(dst, rotated, rotation, new Size(dst.cols(), dst.rows()), Imgproc.INTER_NEAREST);
-			Core.reduce(rotated, radon.row(t + minMaxAngle), 0, Core.REDUCE_SUM);
-		}
+		dst.release();
 		Core.normalize(radon, radon, 0, 255, Core.NORM_MINMAX);
 		return radon;
 	}
@@ -72,22 +59,6 @@ public class RadonTransform {
 			}
 		}
 		return projectionMap;
-	}
-
-	public static Mat projectionMapV(Mat radon) {
-		Mat projectionMap = Mat.zeros(radon.rows(), radon.cols(), CvType.CV_64FC1);
-		for (int k = 0; k < projectionMap.cols(); k++) {
-			for (int tetha = 0; tetha < projectionMap.rows(); tetha++) {
-				int p = (int) ((k - projectionMap.cols() / 2) * Math.sin(((double) tetha - 35 + 90) / 180 * Math.PI) + radon.cols() / 2);
-				projectionMap.put(tetha, k, radon.get(tetha, p)[0]);
-			}
-		}
-		return projectionMap;
-	}
-
-	public static void main(String[] args) {
-		Mat projectionMat = Mat.eye(new Size(3, 3), CvType.CV_64FC1);
-		System.out.println(Arrays.toString(bestTraject(projectionMat, 0, 2)));
 	}
 
 	public static int[] bestTraject(Mat projectionMap, double anglePenality, double pow) {
@@ -139,60 +110,6 @@ public class RadonTransform {
 			thetas[k] = prevTheta;
 			// System.out.println(prevTheta);
 			prevTheta = thetaPrev[k][prevTheta];
-		}
-
-		return thetas;
-	}
-
-	public static int[] bestTrajectV(Mat projectionMap, double anglePenality) {
-		double[][] score = new double[projectionMap.rows()][projectionMap.cols()];
-		int[][] thetaPrev = new int[projectionMap.rows()][projectionMap.cols()];
-		for (int theta = 0; theta < projectionMap.rows(); theta++)
-			score[theta][0] = Math.pow(projectionMap.get(theta, 0)[0], 3);
-		for (int k = 1; k < projectionMap.cols(); k++) {
-			for (int theta = 0; theta < projectionMap.rows(); theta++) {
-				double magnitude = projectionMap.get(theta, k)[0];
-
-				double scoreFromPrevTheta = theta != 0 ? score[theta - 1][k - 1] : Double.NEGATIVE_INFINITY;
-				double scoreFromSameTheta = score[theta][k - 1];
-				double scoreFromNextTheta = theta < projectionMap.rows() - 1 ? score[theta + 1][k - 1] : Double.NEGATIVE_INFINITY;
-
-				double bestScore4Pos = -1;
-
-				if (scoreFromSameTheta >= (scoreFromPrevTheta + anglePenality) && scoreFromSameTheta >= (scoreFromNextTheta + anglePenality)) {
-					bestScore4Pos = scoreFromSameTheta;
-					thetaPrev[theta][k] = theta;
-				} else if ((scoreFromPrevTheta + anglePenality) >= scoreFromSameTheta && ((scoreFromPrevTheta + anglePenality) >= (scoreFromNextTheta + anglePenality))) {
-					bestScore4Pos = scoreFromPrevTheta + anglePenality;
-					thetaPrev[theta][k] = theta - 1;
-				} else {
-					bestScore4Pos = scoreFromNextTheta + anglePenality;
-					thetaPrev[theta][k] = theta + 1;
-				}
-				score[theta][k] = Math.pow(magnitude, 3) + bestScore4Pos;
-			}
-		}
-
-		// System.out.println(Arrays.toString(score[projectionMap.rows() - 1]));
-		// System.out.println(Arrays.deepToString(thetaPrev));
-		double maxScore = Double.NEGATIVE_INFINITY;
-		int prevTheta = -1;
-		int[] thetas = new int[projectionMap.cols()];
-		for (int theta = 0; theta < projectionMap.rows(); theta++) {
-			double lastScore = score[theta][projectionMap.cols() - 1];
-			// System.out.println(lastScore);
-			if (lastScore > maxScore) {
-				maxScore = lastScore;
-				prevTheta = theta;
-			}
-		}
-		assert prevTheta != -1;
-
-		// System.out.println(maxScore + " for theta : " + prevTheta);
-		for (int k = projectionMap.cols() - 1; k >= 0; k--) {
-			thetas[k] = prevTheta;
-			// System.out.println(prevTheta);
-			prevTheta = thetaPrev[prevTheta][k];
 		}
 
 		return thetas;
@@ -302,6 +219,24 @@ public class RadonTransform {
 		BiFunction<Double, double[], Double> f = (x, params) -> params[0] + params[1] * x + params[2] * x * x;
 		double[] params = LevenbergImpl.fromBiFunction(f, values, new double[] { 0, 0, 0 }).getParams();
 		return x -> f.apply(x, params);
+	}
+
+	public static List<OrientedPoint> toHorizontalOrientedPoints(Function<Double, Double> f, int vStrip, int stripWidth, int height, int step) {
+		List<OrientedPoint> orientedPoints = new ArrayList<>();
+		for (int k = 0; k < height; k += step) {
+			double angle = (f.apply((double) k) - 45) / 180 * Math.PI;
+			orientedPoints.add(new OrientedPoint(new Point((vStrip + 1) * stripWidth / 2, k), angle, 1));
+		}
+		return orientedPoints;
+	}
+
+	public static List<OrientedPoint> toVerticalOrientedPoints(Function<Double, Double> f, int hStrip, int stripHeight, int width, int step) {
+		List<OrientedPoint> orientedPoints = new ArrayList<>();
+		for (int k = 0; k < width; k += step) {
+			double angle = (90 + 45 - f.apply((double) k)) / 180 * Math.PI;
+			orientedPoints.add(new OrientedPoint(new Point(k, (hStrip + 1) * stripHeight / 2), angle, 1));
+		}
+		return orientedPoints;
 	}
 
 	private static boolean inImage(Point p, Mat img) {
