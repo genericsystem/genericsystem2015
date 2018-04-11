@@ -121,8 +121,8 @@ public class RadonTransformDemo extends AbstractApp {
 		System.out.println("Compute gradients : " + (last - ref));
 		ref = last;
 
-		List<int[]> vTrajs = vProjectionMaps.stream().map(projectionMap -> RadonTransform.bestTraject(projectionMap, -5000, 2)).collect(Collectors.toList());
-		List<int[]> hTrajs = hProjectionMaps.stream().map(projectionMap -> RadonTransform.bestTraject(projectionMap, -3000, 2)).collect(Collectors.toList());
+		List<int[]> vTrajs = vProjectionMaps.stream().map(projectionMap -> RadonTransform.bestTraject(projectionMap, -1000, 2)).collect(Collectors.toList());
+		List<int[]> hTrajs = hProjectionMaps.stream().map(projectionMap -> RadonTransform.bestTraject(projectionMap, -1000, 2)).collect(Collectors.toList());
 
 		List<Function<Double, Double>> approxVFunctions = vTrajs.stream().map(traj -> RadonTransform.approxTraject(traj)).collect(Collectors.toList());
 		List<Function<Double, Double>> approxHFunctions = hTrajs.stream().map(traj -> RadonTransform.approxTraject(traj)).collect(Collectors.toList());
@@ -130,23 +130,51 @@ public class RadonTransformDemo extends AbstractApp {
 		last = System.currentTimeMillis();
 		System.out.println("Compute approx : " + (last - ref));
 		ref = last;
+		int hStep = 50;
+		int vStrip = 0;
+		List<OrientedPoint> horizontals = new ArrayList<>();
+		for (Function<Double, Double> f : approxVFunctions) {
+			horizontals.addAll(RadonTransform.toHorizontalOrientedPoints(f, vStrip, stripWidth, binarized.height(), hStep));
+			vStrip++;
+		}
+		int vStep = 50;
+		int hStrip = 0;
+		List<OrientedPoint> verticals = new ArrayList<>();
+		for (Function<Double, Double> f : approxHFunctions) {
+			verticals.addAll(RadonTransform.toVerticalOrientedPoints(f, hStrip, stripHeight, binarized.width(), vStep));
+			hStrip++;
+		}
+
+		Mat frame2 = superFrame.getFrame().getSrc().clone();
+		GeneralInterpolator interpolator = new GeneralInterpolator(horizontals, verticals, 4);
+
+		last = System.currentTimeMillis();
+		System.out.println("Prepare interpolator : " + (last - ref));
+		ref = last;
 
 		Img frameDisplay = superFrame.getDisplay();
-		int vStrip = 0;
+		vStrip = 0;
 		for (Function<Double, Double> f : approxVFunctions) {
-			for (int k = 0; k < binarized.height(); k += 50) {
+			for (int k = hStep; k < binarized.height(); k += hStep) {
 				double angle = (f.apply((double) k) - 45) / 180 * Math.PI;
-				Imgproc.line(frameDisplay.getSrc(), new Point((vStrip + 1) * stripWidth / 2 - Math.cos(angle) * stripWidth / 2, k - Math.sin(angle) * stripWidth / 2),
-						new Point((vStrip + 1) * stripWidth / 2 + Math.cos(angle) * stripWidth / 2, k + Math.sin(angle) * stripWidth / 2), new Scalar(0, 255, 0), 1);
+				Imgproc.line(frameDisplay.getSrc(), new Point((vStrip + 1) * stripWidth / 2 - Math.cos(angle) * stripWidth / 4, k - Math.sin(angle) * stripWidth / 4),
+						new Point((vStrip + 1) * stripWidth / 2 + Math.cos(angle) * stripWidth / 4, k + Math.sin(angle) * stripWidth / 4), new Scalar(0, 255, 0), 1);
+				angle = interpolator.interpolate((vStrip + 1) * stripWidth / 2, k)[0];
+				Imgproc.line(frameDisplay.getSrc(), new Point((vStrip + 1) * stripWidth / 2 - Math.cos(angle) * stripWidth / 4, k - Math.sin(angle) * stripWidth / 4),
+						new Point((vStrip + 1) * stripWidth / 2 + Math.cos(angle) * stripWidth / 4, k + Math.sin(angle) * stripWidth / 4), new Scalar(255, 0, 0), 1);
 			}
 			vStrip++;
 		}
-		int hStrip = 0;
+		hStrip = 0;
 		for (Function<Double, Double> f : approxHFunctions) {
-			for (int k = 0; k < binarized.width(); k += 50) {
+			for (int k = vStep; k < binarized.width(); k += vStep) {
 				double angle = (90 + 45 - f.apply((double) k)) / 180 * Math.PI;
-				Imgproc.line(frameDisplay.getSrc(), new Point(k - Math.cos(angle) * stripHeight / 2, (hStrip + 1) * stripHeight / 2 - Math.sin(angle) * stripHeight / 2),
-						new Point(k + Math.cos(angle) * stripHeight / 2, (hStrip + 1) * stripHeight / 2 + Math.sin(angle) * stripHeight / 2), new Scalar(0, 0, 255), 1);
+				Imgproc.line(frameDisplay.getSrc(), new Point(k - Math.cos(angle) * stripHeight / 4, (hStrip + 1) * stripHeight / 2 - Math.sin(angle) * stripHeight / 4),
+						new Point(k + Math.cos(angle) * stripHeight / 4, (hStrip + 1) * stripHeight / 2 + Math.sin(angle) * stripHeight / 4), new Scalar(0, 0, 255), 1);
+				angle = interpolator.interpolate(k, (hStrip + 1) * stripHeight / 2)[1];
+				Imgproc.line(frameDisplay.getSrc(), new Point(k - Math.cos(angle) * stripHeight / 4, (hStrip + 1) * stripHeight / 2 - Math.sin(angle) * stripHeight / 4),
+						new Point(k + Math.cos(angle) * stripHeight / 4, (hStrip + 1) * stripHeight / 2 + Math.sin(angle) * stripHeight / 4), new Scalar(255, 0, 0), 1);
+
 			}
 			hStrip++;
 		}
@@ -156,27 +184,6 @@ public class RadonTransformDemo extends AbstractApp {
 		System.out.println("Display lines : " + (last - ref));
 		ref = last;
 
-		vStrip = 0;
-		int hStep = 50;
-		List<OrientedPoint> horizontals = new ArrayList<>();
-		for (Function<Double, Double> f : approxVFunctions) {
-			horizontals.addAll(RadonTransform.toHorizontalOrientedPoints(f, vStrip, stripWidth, binarized.height(), hStep));
-			vStrip++;
-		}
-
-		hStrip = 0;
-		int vStep = 50;
-		List<OrientedPoint> verticals = new ArrayList<>();
-		for (Function<Double, Double> f : approxHFunctions) {
-			verticals.addAll(RadonTransform.toVerticalOrientedPoints(f, hStrip, stripHeight, binarized.width(), vStep));
-			hStrip++;
-		}
-
-		Mat frame2 = superFrame.getFrame().getSrc().clone();
-		GeneralInterpolator interpolator = new GeneralInterpolator(horizontals, verticals, 4);
-		last = System.currentTimeMillis();
-		System.out.println("Prepare interpolator : " + (last - ref));
-		ref = last;
 		MeshGrid meshGrid = new MeshGrid(new Size(6, 4), interpolator, 50, 50, frame2);
 		meshGrid.build();
 		last = System.currentTimeMillis();

@@ -1,5 +1,11 @@
 package org.genericsystem.cv.application;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.genericsystem.cv.Img;
@@ -17,12 +23,6 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 
 public class RadonTransform {
 
@@ -216,14 +216,14 @@ public class RadonTransform {
 		List<double[]> values = new ArrayList<>();
 		for (int k = 0; k < traj.length; k++)
 			values.add(new double[] { k, traj[k] });
-		BiFunction<Double, double[], Double> f = (x, params) -> params[0] + params[1] * x + params[2] * x * x;
-		double[] params = LevenbergImpl.fromBiFunction(f, values, new double[] { 0, 0, 0 }).getParams();
+		BiFunction<Double, double[], Double> f = (x, params) -> params[0] + params[1] * x + params[2] * x * x + params[3] * x * x * x;
+		double[] params = LevenbergImpl.fromBiFunction(f, values, new double[] { 0, 0, 0, 0 }).getParams();
 		return x -> f.apply(x, params);
 	}
 
 	public static List<OrientedPoint> toHorizontalOrientedPoints(Function<Double, Double> f, int vStrip, int stripWidth, int height, int step) {
 		List<OrientedPoint> orientedPoints = new ArrayList<>();
-		for (int k = 0; k < height; k += step) {
+		for (int k = step; k < height; k += step) {
 			double angle = (f.apply((double) k) - 45) / 180 * Math.PI;
 			orientedPoints.add(new OrientedPoint(new Point((vStrip + 1) * stripWidth / 2, k), angle, 1));
 		}
@@ -232,7 +232,7 @@ public class RadonTransform {
 
 	public static List<OrientedPoint> toVerticalOrientedPoints(Function<Double, Double> f, int hStrip, int stripHeight, int width, int step) {
 		List<OrientedPoint> orientedPoints = new ArrayList<>();
-		for (int k = 0; k < width; k += step) {
+		for (int k = step; k < width; k += step) {
 			double angle = (90 + 45 - f.apply((double) k)) / 180 * Math.PI;
 			orientedPoints.add(new OrientedPoint(new Point(k, (hStrip + 1) * stripHeight / 2), angle, 1));
 		}

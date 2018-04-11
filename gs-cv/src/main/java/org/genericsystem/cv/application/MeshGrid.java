@@ -43,7 +43,7 @@ public class MeshGrid {
 		this.image = image;
 		xBorder = 2 * (int) deltaX;
 		yBorder = 2 * (int) deltaY;
-		Core.copyMakeBorder(image, this.image, yBorder, yBorder, xBorder, xBorder, Core.BORDER_CONSTANT, new Scalar(255, 255, 255));
+		Core.copyMakeBorder(image, this.image, yBorder, yBorder, xBorder, xBorder, Core.BORDER_REPLICATE);
 		nbIter = (int) Math.round(deltaY); // avance d'un pixel à chaque itération
 	}
 
@@ -176,13 +176,13 @@ public class MeshGrid {
 	private boolean inImageBorders(Point[] p) {
 		// Array of points: top left, top right, bottom right, bottom left.
 		for (Point pt : p)
-			if (inImageBorders(pt))
-				return true;
-		return false;
+			if (!inImageBorders(pt))
+				return false;
+		return true;
 	}
 
 	private boolean inImageBorders(Point p) {
-		return p.x >= xBorder && p.x < image.width() - xBorder && p.y >= yBorder && p.y < image.height() - yBorder;
+		return p.x >= 0 && p.x < image.width() && p.y >= 0 && p.y < image.height();
 	}
 
 	public double ratio(Point3[] parallelogram) {
@@ -287,7 +287,6 @@ public class MeshGrid {
 	}
 
 	private void addPolygon(int i, int j) { // ajoute un polygone compte tenu des polygones voisins
-		// System.out.println(i + " " + j);
 		// les polygones au dessus, à droite, en dessous et à gauche
 		Point[] abovePolygon = getPolygon(i - 1, j);
 		Point[] rightPolygon = getPolygon(i, j + 1);
@@ -309,8 +308,14 @@ public class MeshGrid {
 				bottomLeft = intersect(bottomRight, topLeft);
 				points.add(bottomLeft);
 			} else { // s'il n'y a que le polygone du dessus
-				bottomLeft = verticalMove(topLeft, deltaY);
-				bottomRight = verticalMove(topRight, deltaY);
+				assert j == 0;
+				if (i > 0) {
+					bottomLeft = verticalMove(topLeft, deltaY);
+					bottomRight = intersect(bottomLeft, topRight);
+				} else {
+					bottomRight = verticalMove(topRight, deltaY);
+					bottomLeft = intersect(topLeft, bottomRight);
+				}
 				points.add(bottomLeft);
 				points.add(bottomRight);
 			}
@@ -322,10 +327,17 @@ public class MeshGrid {
 				topLeft = intersect(topRight, bottomLeft);
 				points.add(topLeft);
 			} else { // s'il n'y a que le polygone de droite
-				topLeft = horizontalMove(topRight, -deltaX);
-				bottomLeft = horizontalMove(bottomRight, -deltaX);
+				assert i == 0;
+				if (j > 0) {
+					topLeft = horizontalMove(topRight, -deltaX);
+					bottomLeft = intersect(bottomRight, topLeft);
+				} else {
+					bottomLeft = horizontalMove(bottomRight, -deltaX);
+					topLeft = intersect(topRight, bottomLeft);
+				}
 				points.add(topLeft);
-				points.add(bottomLeft);
+				points.add(topRight);
+
 			}
 		} else if (belowPolygon != null) { // si le polygone du dessous existe
 			bottomLeft = belowPolygon[0];
@@ -335,16 +347,28 @@ public class MeshGrid {
 				topRight = intersect(topLeft, bottomRight);
 				points.add(topRight);
 			} else { // s'il n'y a que le polygone du dessous
-				topLeft = verticalMove(bottomLeft, -deltaY);
-				topRight = verticalMove(bottomRight, -deltaY);
+				assert j == 0;
+				if (i > 0) {
+					topLeft = verticalMove(bottomLeft, -deltaY);
+					topRight = intersect(bottomRight, topLeft);
+				} else {
+					topRight = verticalMove(bottomRight, -deltaY);
+					topLeft = intersect(topRight, bottomLeft);
+				}
 				points.add(topLeft);
 				points.add(topRight);
 			}
 		} else if (leftPolygon != null) { // s'il n'y a que le polygone de gauche
+			assert i == 0;
 			topLeft = leftPolygon[1];
 			bottomLeft = leftPolygon[2];
-			topRight = horizontalMove(topLeft, deltaX);
-			bottomRight = horizontalMove(bottomLeft, deltaX);
+			if (j > 0) {
+				topRight = horizontalMove(topLeft, deltaX);
+				bottomRight = intersect(bottomLeft, topRight);
+			} else {
+				bottomRight = horizontalMove(bottomLeft, deltaX);
+				topRight = intersect(topLeft, bottomRight);
+			}
 			points.add(topRight);
 			points.add(bottomRight);
 		} else { // s'il n'y a aucun autre polygone, c'est le premier
