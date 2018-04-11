@@ -86,8 +86,10 @@ public class MeshGrid {
 		}
 	}
 
-	public void draw(Mat img, Scalar color) {
-		mesh.values().forEach(p -> drawPolygon(img, p, color));
+	public Mat drawOnCopy(Scalar color) {
+		Mat clone = image.clone();
+		mesh.values().forEach(p -> drawPolygon(clone, p, color));
+		return clone;
 	}
 
 	public Mat dewarp2() {

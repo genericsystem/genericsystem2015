@@ -175,9 +175,7 @@ public class GraphicApp extends AbstractApp {
 		filteredSuperContour.stream().forEach(c -> Imgproc.line(image, c.top, c.bottom, new Scalar(255, 255, 255), 1));
 		filteredSuperContour.stream().forEach(c -> Imgproc.line(image, c.vBottom, c.vTop, new Scalar(0, 0, 255), 2));
 
-		meshGrid.draw(image, new Scalar(0, 255, 0));
-
-		images[4] = superReferenceTemplate5.getDisplay().toJfxImage();
+		images[4] = new Img(meshGrid.drawOnCopy(new Scalar(0, 255, 0))).toJfxImage();
 
 		images[5] = new Img(meshGrid.dewarp(), false).toJfxImage();
 

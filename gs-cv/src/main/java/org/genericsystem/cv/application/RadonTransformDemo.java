@@ -184,16 +184,15 @@ public class RadonTransformDemo extends AbstractApp {
 		System.out.println("Display lines : " + (last - ref));
 		ref = last;
 
-		MeshGrid meshGrid = new MeshGrid(new Size(6, 4), interpolator, 50, 50, frame2);
+		MeshGrid meshGrid = new MeshGrid(new Size(6, 4), interpolator, 50, 50, superFrame.getFrame().getSrc());
 		meshGrid.build();
 		last = System.currentTimeMillis();
 		System.out.println("Build mesh : " + (last - ref));
 		ref = last;
-		meshGrid.draw(frame2, new Scalar(0, 255, 0));
+		images[3] = new Img(meshGrid.drawOnCopy(new Scalar(0, 255, 0)), false).toJfxImage();
 		last = System.currentTimeMillis();
 		System.out.println("Draw mesh : " + (last - ref));
 		ref = last;
-		images[3] = new Img(frame2, false).toJfxImage();
 
 		images[4] = new Img(meshGrid.dewarp(), false).toJfxImage();
 		// images[7] = new Img(RadonTransform.estimateBaselines(superFrame.getFrame().getSrc(), 0), false).toJfxImage();

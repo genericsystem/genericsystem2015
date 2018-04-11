@@ -25,9 +25,8 @@ public class GeneralInterpolator implements Interpolator {
 
 	private double squaredEuclidianDistance(double x, double y, OrientedPoint op) { // distance euclidienne au carré
 		double result = Math.pow(x - op.center.x, 2) + Math.pow(y - op.center.y, 2);
-		return result;
-		// double minDist = 0;
-		// return result >= Math.pow(minDist, 2) ? result : Math.pow(minDist, 2);
+		double minDist = 10;
+		return result >= Math.pow(minDist, 2) ? result : Math.pow(minDist, 2);
 	}
 
 	public static class OrientedPoint {

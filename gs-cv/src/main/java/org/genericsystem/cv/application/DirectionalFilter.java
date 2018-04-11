@@ -94,24 +94,17 @@ public class DirectionalFilter extends AbstractApp {
 			mainGrid.add(new ImageView(Tools.mat2jfxImage(imgDirs)), 1, 0);
 
 			// Third image displayed, showing the grid.
-			SuperTemplate superReferenceTemplate = new SuperTemplate(new SuperFrameImg(frame, new double[] { frame.width() / 2, frame.height() / 2 },  6.053 / 0.009), CvType.CV_8UC3, SuperFrameImg::getFrame) {
+			SuperTemplate superReferenceTemplate = new SuperTemplate(new SuperFrameImg(frame, new double[] { frame.width() / 2, frame.height() / 2 }, 6.053 / 0.009), CvType.CV_8UC3, SuperFrameImg::getFrame) {
 				@Override
 				protected org.genericsystem.cv.Img buildDisplay() {
 					return new Img(getFrame().getSrc(), true);
 				};
 			};
-			List<SuperContour> filteredSuperContour = new ArrayList<>(superReferenceTemplate
-					.detectSuperContours(20)
-					.stream()
-					.filter(sc -> Math.abs(sc.angle) < Math.PI / 4 && sc.dx > 2 * sc.dy)
-					.collect(Collectors.toList()));
+			List<SuperContour> filteredSuperContour = new ArrayList<>(superReferenceTemplate.detectSuperContours(20).stream().filter(sc -> Math.abs(sc.angle) < Math.PI / 4 && sc.dx > 2 * sc.dy).collect(Collectors.toList()));
 			GridInterpolator interpolator = new GridInterpolator(filteredSuperContour, patchXs, patchYs, dirs, nSide, nBin);
 			MeshGrid meshGrid = new MeshGrid(new Size(20, 20), interpolator, 15, 15, frame);
 			meshGrid.build();
-
-			Mat contoursMat = superReferenceTemplate.getDisplay().getSrc();
-			meshGrid.draw(contoursMat, new Scalar(0, 255, 0));
-			mainGrid.add(new ImageView(Tools.mat2jfxImage(contoursMat)), 2, 0);
+			mainGrid.add(new ImageView(Tools.mat2jfxImage(meshGrid.drawOnCopy(new Scalar(0, 255, 0)))), 2, 0);
 
 			// Fourth image, dewarping, method 1 (homography on each grid cell).
 			Image dewarped = new Img(meshGrid.dewarp(), false).toJfxImage();
@@ -162,7 +155,7 @@ public class DirectionalFilter extends AbstractApp {
 		return cleanContour(gy);
 	}
 
-	public Mat cleanContour(Mat mat) {
+	public static Mat cleanContour(Mat mat) {
 		for (int row = 0; row < mat.rows(); row++) {
 			mat.put(row, 0, 0);
 			mat.put(row, mat.cols() - 1, 0);
@@ -251,8 +244,7 @@ public class DirectionalFilter extends AbstractApp {
 	}
 
 	// TODO: Split
-	public int[][] findSecondDirection(Mat img, int[][] binning, Mat mag, int nSide, int firstBin, int nBin,
-			int lambda, List<Integer> patchXs, List<Integer> patchYs) {
+	public int[][] findSecondDirection(Mat img, int[][] binning, Mat mag, int nSide, int firstBin, int nBin, int lambda, List<Integer> patchXs, List<Integer> patchYs) {
 		int nXs = patchXs.size();
 		int nYs = patchYs.size();
 
