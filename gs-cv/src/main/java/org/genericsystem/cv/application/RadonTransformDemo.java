@@ -1,5 +1,14 @@
 package org.genericsystem.cv.application;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.application.GeneralInterpolator.OrientedPoint;
@@ -9,15 +18,6 @@ import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -173,11 +173,11 @@ public class RadonTransformDemo extends AbstractApp {
 		}
 
 		Mat frame2 = superFrame.getFrame().getSrc().clone();
-		GeneralInterpolator interpolator = new GeneralInterpolator(horizontals, verticals, 1);
+		GeneralInterpolator interpolator = new GeneralInterpolator(horizontals, verticals, 4);
 		last = System.currentTimeMillis();
 		System.out.println("Prepare interpolator : " + (last - ref));
 		ref = last;
-		MeshGrid meshGrid = new MeshGrid(new Size(3, 2), interpolator, 100, 100, frame2);
+		MeshGrid meshGrid = new MeshGrid(new Size(6, 4), interpolator, 50, 50, frame2);
 		meshGrid.build();
 		last = System.currentTimeMillis();
 		System.out.println("Build mesh : " + (last - ref));
