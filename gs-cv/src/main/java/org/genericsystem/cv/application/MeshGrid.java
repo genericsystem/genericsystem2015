@@ -96,31 +96,31 @@ public class MeshGrid {
 		Map<Key, Point3[]> mesh3D = toPoint3d();
 
 		// Average width of the 3D edges for each column.
-		int[] widths = new int[2 * (int) kSize.width + 1];
+		int[] widths = new int[2 * (int) kSize.width];
 		for (int j = 0; j < widths.length; j++) {
 			double sum = 0;
-			for (int i = (int) -kSize.height; i <= kSize.height; i++) {
-				Point3[] para = mesh3D.get(new Key(i, j - (int) kSize.width));
+			for (int i = (int) -kSize.height + 1; i <= kSize.height; i++) {
+				Point3[] para = mesh3D.get(new Key(i, j - (int) kSize.width + 1));
 				sum += euclideanDistance(para[0], para[1]);
 			}
 			// Last line, bottom edge.
-			Point3[] para = mesh3D.get(new Key((int) kSize.height, j - (int) kSize.width));
+			Point3[] para = mesh3D.get(new Key((int) kSize.height, j - (int) kSize.width + 1));
 			sum += euclideanDistance(para[2], para[3]);
-			widths[j] = (int) Math.round(sum / (2 * kSize.height + 2));
+			widths[j] = (int) Math.round(sum / (2 * kSize.height + 1));
 		}
 
 		// Average height of the 3D edges for each line.
-		int[] heights = new int[2 * (int) kSize.height + 1];
+		int[] heights = new int[2 * (int) kSize.height];
 		for (int i = 0; i < heights.length; i++) {
 			double sum = 0;
-			for (int j = (int) -kSize.width; j <= kSize.width; j++) {
-				Point3[] para = mesh3D.get(new Key(i - (int) kSize.height, j));
+			for (int j = (int) -kSize.width + 1; j <= kSize.width; j++) {
+				Point3[] para = mesh3D.get(new Key(i - (int) kSize.height + 1, j));
 				sum += euclideanDistance(para[0], para[3]);
 			}
 			// Last column, right edge.
-			Point3[] para = mesh3D.get(new Key(i - (int) kSize.height, (int) kSize.width));
+			Point3[] para = mesh3D.get(new Key(i - (int) kSize.height + 1, (int) kSize.width));
 			sum += euclideanDistance(para[1], para[2]);
-			heights[i] = (int) Math.round(sum / (2 * kSize.width + 2));
+			heights[i] = (int) Math.round(sum / (2 * kSize.width + 1));
 		}
 
 		// Rescaling ratio.
@@ -142,10 +142,10 @@ public class MeshGrid {
 
 		Mat dewarpedImage = new Mat(totalHeight + 1, totalWidth + 1, CvType.CV_8UC3, new Scalar(255, 255, 255));
 
-		for (int i = (int) -kSize.height; i <= kSize.height; i++) {
+		for (int i = (int) -kSize.height + 1; i <= kSize.height; i++) {
 			int x = 0;
-			for (int j = (int) -kSize.width; j <= kSize.width; j++) {
-				int wJ = j + (int) kSize.width;
+			for (int j = (int) -kSize.width + 1; j <= kSize.width; j++) {
+				int wJ = j + (int) kSize.width - 1;
 				if (wJ > 0)
 					x += widths[wJ - 1];
 				if (inImageBorders(mesh.get(new Key(i, j)))) {
@@ -338,8 +338,7 @@ public class MeshGrid {
 					topLeft = intersect(topRight, bottomLeft);
 				}
 				points.add(topLeft);
-				points.add(topRight);
-
+				points.add(bottomLeft);
 			}
 		} else if (belowPolygon != null) { // si le polygone du dessous existe
 			bottomLeft = belowPolygon[0];
