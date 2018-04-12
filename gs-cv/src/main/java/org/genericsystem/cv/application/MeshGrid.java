@@ -40,11 +40,15 @@ public class MeshGrid {
 		this.interpolator = interpolator;
 		this.deltaX = deltaX;
 		this.deltaY = deltaY;
-		this.image = image;
+		this.image = new Mat();
 		xBorder = 2 * (int) deltaX;
 		yBorder = 2 * (int) deltaY;
 		Core.copyMakeBorder(image, this.image, yBorder, yBorder, xBorder, xBorder, Core.BORDER_REPLICATE);
 		nbIter = (int) Math.round(deltaY); // avance d'un pixel à chaque itération
+	}
+
+	private Size getOldSize() {
+		return new Size(image.width() - 2 * xBorder, image.height() - 2 * yBorder);
 	}
 
 	private int[][] toRectIndices() {
@@ -203,10 +207,10 @@ public class MeshGrid {
 	}
 
 	public Mat dewarp() {
-		int rectHeight = (int) Math.floor(image.height() / (2 * kSize.height));
-		int rectWidth = (int) Math.floor(image.width() / (2 * kSize.width));
+		int rectHeight = (int) Math.floor(getOldSize().height / (2 * kSize.height));
+		int rectWidth = (int) Math.floor(getOldSize().width / (2 * kSize.width));
 
-		Mat dewarpedImage = new Mat(image.size(), CvType.CV_8UC3, new Scalar(255, 255, 255));
+		Mat dewarpedImage = new Mat(getOldSize(), CvType.CV_8UC3, new Scalar(255, 255, 255));
 		for (int i = (int) -kSize.height + 1; i <= kSize.height; i++) {
 			for (int j = (int) -kSize.width + 1; j <= kSize.width; j++) {
 				if (inImageBorders(mesh.get(new Key(i, j)))) {
@@ -409,7 +413,7 @@ public class MeshGrid {
 	}
 
 	private Point verticalMove(Point startingPoint, double deltaY) {
-		double dY = deltaY / nbIter; // proche de 1 pixel
+		double dY = deltaY / nbIter;
 		double x = startingPoint.x, y = startingPoint.y;
 		for (int i = 0; i < nbIter; i++) {
 			double dX = dY / Math.tan(interpolator.interpolateVerticals(x - xBorder, y - yBorder));
@@ -420,7 +424,7 @@ public class MeshGrid {
 	}
 
 	private Point horizontalMove(Point startingPoint, double deltaX) {
-		double dX = deltaX / nbIter; // proche de 1 pixel
+		double dX = deltaX / nbIter;
 		double x = startingPoint.x, y = startingPoint.y;
 		for (int i = 0; i < nbIter; i++) {
 			double dY = Math.tan(interpolator.interpolateHorizontals(x - xBorder, y - yBorder)) * dX;
