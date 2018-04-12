@@ -166,16 +166,18 @@ public class GraphicApp extends AbstractApp {
 
 		filteredSuperContour.forEach(sc -> sc.computeHisto(mag, bin, nBin, df, 150));
 
-		Mat image = superReferenceTemplate5.getDisplay().getSrc();
+		// Mat image = superReferenceTemplate5.getDisplay().getSrc();
 
 		SuperContourInterpolator interpolator = new SuperContourInterpolator(filteredSuperContour, 2);
 		MeshGrid meshGrid = new MeshGrid(new Size(16, 9), interpolator, 20, 20, superReferenceTemplate5.getFrame().getSrc());
 		meshGrid.build();
 
-		filteredSuperContour.stream().forEach(c -> Imgproc.line(image, c.top, c.bottom, new Scalar(255, 255, 255), 1));
-		filteredSuperContour.stream().forEach(c -> Imgproc.line(image, c.vBottom, c.vTop, new Scalar(0, 0, 255), 2));
+		Mat image = meshGrid.drawOnCopy(new Scalar(0, 255, 0));
+		Mat internal = new Mat(image, new Rect(new Point(20, 20), new Point(image.width() - 20, image.height() - 20)));
+		filteredSuperContour.stream().forEach(c -> Imgproc.line(internal, c.top, c.bottom, new Scalar(255, 255, 255), 1));
+		filteredSuperContour.stream().forEach(c -> Imgproc.line(internal, c.vBottom, c.vTop, new Scalar(0, 0, 255), 2));
 
-		images[4] = new Img(meshGrid.drawOnCopy(new Scalar(0, 255, 0))).toJfxImage();
+		images[4] = new Img(internal).toJfxImage();
 
 		images[5] = new Img(meshGrid.dewarp(), false).toJfxImage();
 

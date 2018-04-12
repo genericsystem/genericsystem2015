@@ -12,10 +12,6 @@ public class GeneralInterpolator implements Interpolator {
 
 	private double hCoef; // coefficient pour l'angle horizontal
 	private double vCoef; // coefficient pour l'angle vertical
-	private double sumHCoefs; // somme des coefficients pour l'angle horizontal
-	private double sumVCoefs;
-	private double hAngle; // angle horizontal
-	private double vAngle; // angle vertical
 
 	public GeneralInterpolator(List<OrientedPoint> horizontals, List<OrientedPoint> verticals, double pow) {
 		this.horizontals = horizontals;
@@ -25,7 +21,7 @@ public class GeneralInterpolator implements Interpolator {
 
 	private double squaredEuclidianDistance(double x, double y, OrientedPoint op) { // distance euclidienne au carré
 		double result = Math.pow(x - op.center.x, 2) + Math.pow(y - op.center.y, 2);
-		double minDist = 10;
+		double minDist = 100;
 		return result >= Math.pow(minDist, 2) ? result : Math.pow(minDist, 2);
 	}
 
@@ -43,26 +39,28 @@ public class GeneralInterpolator implements Interpolator {
 	}
 
 	@Override
-	public double[] interpolate(double x, double y) { // retourne les angles horizontal et vertical interpolés
-		sumHCoefs = 0; // somme des coefficients pour l'angle horizontal
-		sumVCoefs = 0;
-		hAngle = 0; // angle horizontal
-		vAngle = 0;
-		horizontals.forEach(h -> {
-			double geoCoef = Math.pow(1 / (squaredEuclidianDistance(x, y, h)), pow / 2);
-			hCoef = geoCoef * h.strenght; // la largeur comme indice de confiance dans le coefficient
-			hAngle += hCoef * h.angle;
+	public double interpolateHorizontals(double x, double y) {
+		double sumHCoefs = 0; // somme des coefficients pour l'angle horizontal
+		double hAngle = 0; // angle horizontal
+		for (OrientedPoint op : horizontals) {
+			double geoCoef = Math.pow(1 / (squaredEuclidianDistance(x, y, op)), pow / 2);
+			hCoef = geoCoef * op.strenght;
+			hAngle += hCoef * op.angle;
 			sumHCoefs += hCoef;
-		});
-		verticals.forEach(v -> {
-			double geoCoef = Math.pow(1 / (squaredEuclidianDistance(x, y, v) + 0.00001), pow / 2); // on ajoute un epsilon pour éviter les divisions par 0
-			vCoef = geoCoef * v.strenght;// * indice de confiance dy ?
-			vAngle += vCoef * v.angle;
-			sumVCoefs += vCoef;
-		});
-
-		return new double[] { hAngle / sumHCoefs, vAngle / sumVCoefs };
-
+		}
+		return hAngle / sumHCoefs;
 	}
 
+	@Override
+	public double interpolateVerticals(double x, double y) {
+		double vAngle = 0;
+		double sumVCoefs = 0;
+		for (OrientedPoint op : verticals) {
+			double geoCoef = Math.pow(1 / (squaredEuclidianDistance(x, y, op)), pow / 2);
+			vCoef = geoCoef * op.strenght;
+			vAngle += vCoef * op.angle;
+			sumVCoefs += vCoef;
+		}
+		return vAngle / sumVCoefs;
+	}
 }

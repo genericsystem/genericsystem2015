@@ -26,22 +26,29 @@ public class SuperContourInterpolator implements Interpolator {
 	}
 
 	@Override
-	public double[] interpolate(double x, double y) { // retourne les angles horizontal et vertical interpolés
-		sumHCoefs = 0; // somme des coefficients pour l'angle horizontal
-		sumVCoefs = 0;
-		hAngle = 0; // angle horizontal
-		vAngle = 0;
-		superContours.forEach(sc -> {
-			double geoCoef = Math.pow(1 / (squaredEuclidianDistance(x, y, sc) + 0.00001), pow / 2); // on ajoute un epsilon pour éviter les divisions par 0
-			hCoef = geoCoef * sc.dx; // la largeur comme indice de confiance dans le coefficient
-			hAngle += hCoef * sc.angle;
-			vCoef = geoCoef * sc.dx;// * indice de confiance dy ?
-			vAngle += vCoef * sc.vertical;
+	public double interpolateHorizontals(double x, double y) {
+		double sumHCoefs = 0; // somme des coefficients pour l'angle horizontal
+		double hAngle = 0; // angle horizontal
+		for (SuperContour op : superContours) {
+			double geoCoef = Math.pow(1 / (squaredEuclidianDistance(x, y, op)), pow / 2);
+			hCoef = geoCoef * op.dx;
+			hAngle += hCoef * op.angle;
 			sumHCoefs += hCoef;
-			sumVCoefs += vCoef;
-		});
-		return new double[] { hAngle / sumHCoefs, vAngle / sumVCoefs };
+		}
+		return hAngle / sumHCoefs;
+	}
 
+	@Override
+	public double interpolateVerticals(double x, double y) {
+		double vAngle = 0;
+		double sumVCoefs = 0;
+		for (SuperContour op : superContours) {
+			double geoCoef = Math.pow(1 / (squaredEuclidianDistance(x, y, op)), pow / 2);
+			vCoef = geoCoef * op.dx;
+			vAngle += vCoef * op.vertical;
+			sumVCoefs += vCoef;
+		}
+		return vAngle / sumVCoefs;
 	}
 
 }

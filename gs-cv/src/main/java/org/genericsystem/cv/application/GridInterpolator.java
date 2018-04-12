@@ -5,7 +5,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class GridInterpolator implements Interpolator {
 
 	private static final Logger logger = LoggerFactory.getLogger(GridInterpolator.class);
@@ -43,13 +42,8 @@ public class GridInterpolator implements Interpolator {
 		return result >= Math.pow(minDist, 2) ? result : Math.pow(minDist, 2);
 	}
 
-	// Change only the computation of the vertical angles from SuperContourInterpolator.
 	@Override
-	public double[] interpolate(double x, double y) {
-		LambdaSearchResult xLambda = lambdaSearch(sampleSkewXs, x);
-		LambdaSearchResult yLambda = lambdaSearch(sampleSkewYs, y);
-		double vAngle = (1 - xLambda.lambda) * ((1 - yLambda.lambda) * skewDirs[yLambda.indB][xLambda.indB] + yLambda.lambda * skewDirs[yLambda.indE][xLambda.indB])
-				+ xLambda.lambda * ((1 - yLambda.lambda) * skewDirs[yLambda.indB][xLambda.indE] + yLambda.lambda * skewDirs[yLambda.indE][xLambda.indE]);
+	public double interpolateHorizontals(double x, double y) {
 		sumHCoefs = 0; // somme des coefficients pour l'angle horizontal
 		hAngle = 0; // angle horizontal
 		superContours.forEach(sc -> {
@@ -58,7 +52,15 @@ public class GridInterpolator implements Interpolator {
 			hAngle += hCoef * sc.angle;
 			sumHCoefs += hCoef;
 		});
-		return new double[] { hAngle / sumHCoefs, vAngle };
+		return hAngle / sumHCoefs;
+	}
+
+	@Override
+	public double interpolateVerticals(double x, double y) {
+		LambdaSearchResult xLambda = lambdaSearch(sampleSkewXs, x);
+		LambdaSearchResult yLambda = lambdaSearch(sampleSkewYs, y);
+		return (1 - xLambda.lambda) * ((1 - yLambda.lambda) * skewDirs[yLambda.indB][xLambda.indB] + yLambda.lambda * skewDirs[yLambda.indE][xLambda.indB])
+				+ xLambda.lambda * ((1 - yLambda.lambda) * skewDirs[yLambda.indB][xLambda.indE] + yLambda.lambda * skewDirs[yLambda.indE][xLambda.indE]);
 	}
 
 	static class LambdaSearchResult {
@@ -92,6 +94,6 @@ public class GridInterpolator implements Interpolator {
 			indE = indB + 1;
 			lambda = (x - xs[indB]) / (xs[indE] - xs[indB]);
 		}
-		return new LambdaSearchResult(indB, indE, lambda);	
+		return new LambdaSearchResult(indB, indE, lambda);
 	}
 }

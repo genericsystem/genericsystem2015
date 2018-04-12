@@ -92,11 +92,11 @@ public class SuperContour implements Comparable<SuperContour> {
 		// System.out.println("Angle " + angle / Math.PI * 180 + " Antiangle : " + antiAngle / Math.PI * 180);
 		double max = Double.MIN_VALUE;
 		int k = -1;
-		System.out.println(targetAngle);
+		// System.out.println(targetAngle);
 		for (int i = 0; i < histos.length; i++) {
 
 			if (computeDistance(i, targetAngle, nBin) < 12) {
-				System.out.println(i);
+				// System.out.println(i);
 				if (histos[i] > max) {
 					max = histos[i];
 					k = i;

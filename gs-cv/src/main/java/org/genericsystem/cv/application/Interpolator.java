@@ -1,5 +1,8 @@
 package org.genericsystem.cv.application;
 
 public interface Interpolator {
-	public double[] interpolate(double x, double y);
+
+	double interpolateVerticals(double x, double y);
+
+	double interpolateHorizontals(double x, double y);
 }
