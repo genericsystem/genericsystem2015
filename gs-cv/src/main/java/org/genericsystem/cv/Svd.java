@@ -37,10 +37,10 @@ public class Svd {
 			pt[0] /= stdxy[0];
 			pt[1] /= stdxy[1];
 		}
-		double xmin = Double.MAX_VALUE;
-		double ymin = Double.MAX_VALUE;
-		double xmax = Double.MIN_VALUE;
-		double ymax = Double.MIN_VALUE;
+		double xmin = Double.POSITIVE_INFINITY;
+		double ymin = Double.POSITIVE_INFINITY;
+		double xmax = Double.NEGATIVE_INFINITY;
+		double ymax = Double.NEGATIVE_INFINITY;
 
 		for (double[] pt : pts) {
 			if (pt[0] < xmin)
@@ -169,5 +169,4 @@ public class Svd {
 		}
 		return result;
 	}
-
 }
