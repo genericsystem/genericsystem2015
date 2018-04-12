@@ -634,6 +634,10 @@ public class Img implements AutoCloseable, Serializable {
 		return bgr2Gray().adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY_INV, blockSize, C);
 	}
 
+	public Img adaptativeMeanInvThreshold(int blockSize, double C) {
+		return bgr2Gray().adaptativeThresHold(255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY_INV, blockSize, C);
+	}
+
 	public Img niblackThreshold(int blockSize, double k) {
 		Mat result = new Mat();
 		Ximgproc.niBlackThreshold(bgr2Gray().getSrc(), result, 255, Imgproc.THRESH_BINARY, blockSize, k, Ximgproc.BINARIZATION_NIBLACK);
