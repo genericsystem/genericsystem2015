@@ -85,7 +85,7 @@ public class GraphicApp extends AbstractApp {
 			} catch (Throwable e) {
 				e.printStackTrace();
 			}
-		}, 300, 30, TimeUnit.MILLISECONDS);
+		}, 2000, 30, TimeUnit.MILLISECONDS);
 	}
 
 	private Image[] doWork() {
@@ -160,11 +160,11 @@ public class GraphicApp extends AbstractApp {
 		List<Span> spans = superReferenceTemplate5.assembleContours(filteredSuperContour, c -> true, 100, 30, 70);
 		// filteredSuperContour = spans.stream().flatMap(span -> span.getContours().stream()).collect(Collectors.toList());
 		double regionSize = 100;
-		filteredSuperContour = filteredSuperContour.stream()
-				.filter(sc -> sc.center.x - regionSize > 0 && sc.center.x + regionSize / 2 < superReferenceTemplate5.getFrame().width() && sc.center.y - regionSize / 2 > 0 && sc.center.y + regionSize / 2 < superReferenceTemplate5.getFrame().height())
-				.collect(Collectors.toList());
+		// filteredSuperContour = filteredSuperContour.stream()
+		// .filter(sc -> sc.center.x - regionSize > 0 && sc.center.x + regionSize / 2 < superReferenceTemplate5.getFrame().width() && sc.center.y - regionSize / 2 > 0 && sc.center.y + regionSize / 2 < superReferenceTemplate5.getFrame().height())
+		// .collect(Collectors.toList());
 
-		filteredSuperContour.forEach(sc -> sc.computeHisto(mag, bin, nBin, df, 150));
+		filteredSuperContour.forEach(sc -> sc.computeHisto(mag, bin, nBin, df, 100));
 
 		// Mat image = superReferenceTemplate5.getDisplay().getSrc();
 

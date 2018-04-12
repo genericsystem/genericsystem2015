@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -13,7 +14,6 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 
 import org.genericsystem.cv.utils.NativeLibraryLoader;
-import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
 import org.opencv.core.MatOfPoint;
@@ -43,13 +43,29 @@ public class MotionDetector {
 		jframe.setSize(frame.width(), frame.height());
 		jframe.setVisible(true);
 		while (camera.read(frame)) {
-			Mat diffFrame = new Mat();
-			Core.absdiff(adjust(frame), new Scalar(255), diffFrame);
-			Imgproc.adaptiveThreshold(diffFrame, diffFrame, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 7, 3);
-			for (Rect rect : detection_contours(frame, diffFrame))
-				Imgproc.rectangle(frame, rect.br(), rect.tl(), new Scalar(0, 0, 255), 1);
+			Mat copy = frame.clone();
+			Imgproc.cvtColor(frame, frame, Imgproc.COLOR_BGR2GRAY);
+			Imgproc.GaussianBlur(frame, frame, new Size(13, 13), 0);
+			Imgproc.adaptiveThreshold(frame, frame, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 51, 2);
+			Imgproc.morphologyEx(frame, frame, Imgproc.MORPH_CLOSE, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(9, 9)));
+			Imgproc.morphologyEx(frame, frame, Imgproc.MORPH_OPEN, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(5, 5)));
 
-			ImageIcon image = new ImageIcon(mat2bufferedImage(frame));
+			List<MatOfPoint> contours = new ArrayList<>();
+			Imgproc.findContours(frame, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+			for (MatOfPoint contour : contours)
+				Imgproc.drawContours(frame, Arrays.asList(new MatOfPoint(contour)), 0, new Scalar(255, 0, 0), -1);
+
+			Imgproc.morphologyEx(frame, frame, Imgproc.MORPH_GRADIENT, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(4, 4)));
+			Mat houghLines = new Mat();
+			Imgproc.HoughLinesP(frame, houghLines, 1, Math.PI / 180, 10, 100, 10);
+			Mat result = copy;
+			Lines horizontals = new Lines(new Lines(houghLines).getLines().stream().filter(l -> Math.abs(l.y2 - l.y1) < Math.abs(l.x2 - l.x1)).collect(Collectors.toList()));
+			horizontals.draw(result, new Scalar(0, 0, 255), 1);
+
+			Lines verticals = new Lines(new Lines(houghLines).getLines().stream().filter(l -> Math.abs(l.y2 - l.y1) > Math.abs(l.x2 - l.x1)).collect(Collectors.toList()));
+			verticals.draw(result, new Scalar(0, 255, 0), 1);
+
+			ImageIcon image = new ImageIcon(mat2bufferedImage(result));
 			vidpanel.setIcon(image);
 			vidpanel.repaint();
 		}

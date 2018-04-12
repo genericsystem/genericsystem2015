@@ -6,23 +6,21 @@ import org.opencv.core.Point;
 
 public class GeneralInterpolator implements Interpolator {
 
+	private final List<OrientedPoint> horizontals;
+	private final List<OrientedPoint> verticals;
 	private final double pow;
-	private List<OrientedPoint> horizontals;
-	private List<OrientedPoint> verticals;
+	private final double minDist;
 
-	private double hCoef; // coefficient pour l'angle horizontal
-	private double vCoef; // coefficient pour l'angle vertical
-
-	public GeneralInterpolator(List<OrientedPoint> horizontals, List<OrientedPoint> verticals, double pow) {
+	public GeneralInterpolator(List<OrientedPoint> horizontals, List<OrientedPoint> verticals, double pow, double minDist) {
 		this.horizontals = horizontals;
 		this.verticals = verticals;
 		this.pow = pow;
+		this.minDist = minDist;
 	}
 
 	private double squaredEuclidianDistance(double x, double y, OrientedPoint op) { // distance euclidienne au carré
 		double result = Math.pow(x - op.center.x, 2) + Math.pow(y - op.center.y, 2);
-		double minDist = 100;
-		return result >= Math.pow(minDist, 2) ? result : Math.pow(minDist, 2);
+		return result >= minDist * minDist ? result : minDist * minDist;
 	}
 
 	public static class OrientedPoint {
@@ -44,7 +42,7 @@ public class GeneralInterpolator implements Interpolator {
 		double hAngle = 0; // angle horizontal
 		for (OrientedPoint op : horizontals) {
 			double geoCoef = Math.pow(1 / (squaredEuclidianDistance(x, y, op)), pow / 2);
-			hCoef = geoCoef * op.strenght;
+			double hCoef = geoCoef * op.strenght;
 			hAngle += hCoef * op.angle;
 			sumHCoefs += hCoef;
 		}
@@ -57,7 +55,7 @@ public class GeneralInterpolator implements Interpolator {
 		double sumVCoefs = 0;
 		for (OrientedPoint op : verticals) {
 			double geoCoef = Math.pow(1 / (squaredEuclidianDistance(x, y, op)), pow / 2);
-			vCoef = geoCoef * op.strenght;
+			double vCoef = geoCoef * op.strenght;
 			vAngle += vCoef * op.angle;
 			sumVCoefs += vCoef;
 		}

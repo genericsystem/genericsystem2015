@@ -36,7 +36,7 @@ public class RadonTransformDemo extends AbstractApp {
 
 	private final double f = 6.053 / 0.009;
 
-	private final GSCapture gsCapture = new GSVideoCapture(0, f, GSVideoCapture.HD, GSVideoCapture.VGA);
+	private GSCapture gsCapture = new GSVideoCapture(0, f, GSVideoCapture.HD, GSVideoCapture.VGA);
 	private SuperFrameImg superFrame = gsCapture.read();
 	private ScheduledExecutorService timer = new BoundedScheduledThreadPoolExecutor();
 	private Config config = new Config();
@@ -76,50 +76,41 @@ public class RadonTransformDemo extends AbstractApp {
 
 	private Image[] doWork() {
 		System.out.println("do work");
-		if (!config.stabilizedMode)
+		if (!config.stabilizedMode) {
 			superFrame = gsCapture.read();
+		}
 		Image[] images = new Image[8];
 
 		long ref = System.currentTimeMillis();
 
-		Img binarized = superFrame.getFrame().gaussianBlur(new Size(3, 3)).adaptativeGaussianInvThreshold(3, 2);
+		Img binarized = superFrame.getFrame().adaptativeGaussianInvThreshold(7, 5);
 		images[0] = binarized.toJfxImage();
 
 		Img transposedBinarized = binarized.transpose();
 
-		long last = System.currentTimeMillis();
-		System.out.println("Binarization : " + (last - ref));
-		ref = last;
+		ref = trace("Binarization", ref);
 
-		int stripWidth = 60;
+		int stripWidth = 40;
 		List<Mat> vStrips = RadonTransform.extractStrips(binarized.getSrc(), stripWidth);
-		int stripHeight = 60;
+		int stripHeight = 40;
 		List<Mat> htrips = RadonTransform.extractStrips(transposedBinarized.getSrc(), stripHeight);
 
-		last = System.currentTimeMillis();
-		System.out.println("Extract strips : " + (last - ref));
-		ref = last;
+		ref = trace("Extract strips", ref);
 
 		List<Mat> vRadons = vStrips.stream().map(strip -> RadonTransform.transform(strip, 45)).collect(Collectors.toList());
 		List<Mat> hRadons = htrips.stream().map(strip -> RadonTransform.transform(strip, 45)).collect(Collectors.toList());
 
-		last = System.currentTimeMillis();
-		System.out.println("Compute radons : " + (last - ref));
-		ref = last;
+		ref = trace("Compute radons", ref);
 
 		List<Mat> vProjectionMaps = vRadons.stream().map(radon -> RadonTransform.projectionMap(radon)).collect(Collectors.toList());
 		List<Mat> hProjectionMaps = hRadons.stream().map(radon -> RadonTransform.projectionMap(radon)).collect(Collectors.toList());
 
-		last = System.currentTimeMillis();
-		System.out.println("Compute projections : " + (last - ref));
-		ref = last;
+		ref = trace("Compute projections", ref);
 
 		vProjectionMaps.stream().forEach(projectionMap -> Imgproc.morphologyEx(projectionMap, projectionMap, Imgproc.MORPH_GRADIENT, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(1, 2))));
 		hProjectionMaps.stream().forEach(projectionMap -> Imgproc.morphologyEx(projectionMap, projectionMap, Imgproc.MORPH_GRADIENT, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(1, 2))));
 
-		last = System.currentTimeMillis();
-		System.out.println("Compute gradients : " + (last - ref));
-		ref = last;
+		ref = trace("Compute gradients", ref);
 
 		List<int[]> vTrajs = vProjectionMaps.stream().map(projectionMap -> RadonTransform.bestTraject(projectionMap, -1000, 2)).collect(Collectors.toList());
 		List<int[]> hTrajs = hProjectionMaps.stream().map(projectionMap -> RadonTransform.bestTraject(projectionMap, -1000, 2)).collect(Collectors.toList());
@@ -127,9 +118,8 @@ public class RadonTransformDemo extends AbstractApp {
 		List<Function<Double, Double>> approxVFunctions = vTrajs.stream().map(traj -> RadonTransform.approxTraject(traj)).collect(Collectors.toList());
 		List<Function<Double, Double>> approxHFunctions = hTrajs.stream().map(traj -> RadonTransform.approxTraject(traj)).collect(Collectors.toList());
 
-		last = System.currentTimeMillis();
-		System.out.println("Compute approx : " + (last - ref));
-		ref = last;
+		ref = trace("Compute approx", ref);
+
 		int hStep = 30;
 		int vStrip = 0;
 		List<OrientedPoint> horizontals = new ArrayList<>();
@@ -145,11 +135,9 @@ public class RadonTransformDemo extends AbstractApp {
 			hStrip++;
 		}
 
-		GeneralInterpolator interpolator = new GeneralInterpolator(horizontals, verticals, 4);
+		GeneralInterpolator interpolator = new GeneralInterpolator(horizontals, verticals, 4, 50);
 
-		last = System.currentTimeMillis();
-		System.out.println("Prepare interpolator : " + (last - ref));
-		ref = last;
+		ref = trace("Prepare interpolator", ref);
 
 		Img frameDisplay = superFrame.getDisplay();
 		vStrip = 0;
@@ -179,25 +167,28 @@ public class RadonTransformDemo extends AbstractApp {
 		}
 		images[1] = frameDisplay.toJfxImage();
 
-		last = System.currentTimeMillis();
-		System.out.println("Display lines : " + (last - ref));
-		ref = last;
+		ref = trace("Display lines", ref);
 
-		MeshGrid meshGrid = new MeshGrid(new Size(8, 6), interpolator, 40, 40, superFrame.getFrame().getSrc());
+		MeshGrid meshGrid = new MeshGrid(new Size(16, 9), interpolator, 20, 20, superFrame.getFrame().getSrc());
 		meshGrid.build();
-		last = System.currentTimeMillis();
-		System.out.println("Build mesh : " + (last - ref));
-		ref = last;
+		ref = trace("Build mesh", ref);
 		images[3] = new Img(meshGrid.drawOnCopy(new Scalar(0, 255, 0)), false).toJfxImage();
-		last = System.currentTimeMillis();
-		System.out.println("Draw mesh : " + (last - ref));
-		ref = last;
+		ref = trace("Draw mesh", ref);
 
-		images[4] = new Img(meshGrid.dewarp(), false).toJfxImage();
+		Img dewarp = new Img(meshGrid.dewarp()).adaptativeGaussianInvThreshold(7, 3);
+		images[4] = dewarp.toJfxImage();
+		ref = trace("Dewarp", ref);
+
 		// images[7] = new Img(RadonTransform.estimateBaselines(superFrame.getFrame().getSrc(), 0), false).toJfxImage();
 
 		return images;
 
+	}
+
+	private long trace(String message, long ref) {
+		long last = System.currentTimeMillis();
+		System.out.println(message + " : " + (last - ref));
+		return last;
 	}
 
 	@Override
@@ -207,10 +198,12 @@ public class RadonTransformDemo extends AbstractApp {
 
 	@Override
 	protected void onSpace() {
-		if (config.isOn)
+		if (config.isOn) {
 			timer.shutdown();
-		else {
+			gsCapture.release();
+		} else {
 			timer = new BoundedScheduledThreadPoolExecutor();
+			gsCapture = new GSVideoCapture(0, f, GSVideoCapture.HD, GSVideoCapture.VGA);
 			startTimer();
 		}
 		config.isOn = !config.isOn;
