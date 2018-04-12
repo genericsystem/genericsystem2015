@@ -412,8 +412,7 @@ public class MeshGrid {
 		double dY = deltaY / nbIter; // proche de 1 pixel
 		double x = startingPoint.x, y = startingPoint.y;
 		for (int i = 0; i < nbIter; i++) {
-			double[] angles = interpolator.interpolate(x - xBorder, y - yBorder);
-			double dX = dY / Math.tan(angles[1]);
+			double dX = dY / Math.tan(interpolator.interpolateVerticals(x - xBorder, y - yBorder));
 			x += dX;
 			y += dY;
 		}
@@ -424,8 +423,7 @@ public class MeshGrid {
 		double dX = deltaX / nbIter; // proche de 1 pixel
 		double x = startingPoint.x, y = startingPoint.y;
 		for (int i = 0; i < nbIter; i++) {
-			double[] angles = interpolator.interpolate(x - xBorder, y - yBorder);
-			double dY = Math.tan(angles[0]) * dX;
+			double dY = Math.tan(interpolator.interpolateHorizontals(x - xBorder, y - yBorder)) * dX;
 			x += dX;
 			y += dY;
 		}

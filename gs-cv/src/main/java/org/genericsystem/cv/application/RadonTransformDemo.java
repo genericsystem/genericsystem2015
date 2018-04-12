@@ -57,7 +57,7 @@ public class RadonTransformDemo extends AbstractApp {
 			} catch (Throwable e) {
 				e.printStackTrace();
 			}
-		}, 30, 30, TimeUnit.MILLISECONDS);
+		}, 1000, 30, TimeUnit.MILLISECONDS);
 	}
 
 	@Override
@@ -91,9 +91,9 @@ public class RadonTransformDemo extends AbstractApp {
 		System.out.println("Binarization : " + (last - ref));
 		ref = last;
 
-		int stripWidth = 80;
+		int stripWidth = 60;
 		List<Mat> vStrips = RadonTransform.extractStrips(binarized.getSrc(), stripWidth);
-		int stripHeight = 80;
+		int stripHeight = 60;
 		List<Mat> htrips = RadonTransform.extractStrips(transposedBinarized.getSrc(), stripHeight);
 
 		last = System.currentTimeMillis();
@@ -130,14 +130,14 @@ public class RadonTransformDemo extends AbstractApp {
 		last = System.currentTimeMillis();
 		System.out.println("Compute approx : " + (last - ref));
 		ref = last;
-		int hStep = 50;
+		int hStep = 30;
 		int vStrip = 0;
 		List<OrientedPoint> horizontals = new ArrayList<>();
 		for (Function<Double, Double> f : approxVFunctions) {
 			horizontals.addAll(RadonTransform.toHorizontalOrientedPoints(f, vStrip, stripWidth, binarized.height(), hStep));
 			vStrip++;
 		}
-		int vStep = 50;
+		int vStep = 30;
 		int hStrip = 0;
 		List<OrientedPoint> verticals = new ArrayList<>();
 		for (Function<Double, Double> f : approxHFunctions) {
@@ -145,7 +145,6 @@ public class RadonTransformDemo extends AbstractApp {
 			hStrip++;
 		}
 
-		Mat frame2 = superFrame.getFrame().getSrc().clone();
 		GeneralInterpolator interpolator = new GeneralInterpolator(horizontals, verticals, 4);
 
 		last = System.currentTimeMillis();
@@ -159,7 +158,7 @@ public class RadonTransformDemo extends AbstractApp {
 				double angle = (f.apply((double) k) - 45) / 180 * Math.PI;
 				Imgproc.line(frameDisplay.getSrc(), new Point((vStrip + 1) * stripWidth / 2 - Math.cos(angle) * stripWidth / 4, k - Math.sin(angle) * stripWidth / 4),
 						new Point((vStrip + 1) * stripWidth / 2 + Math.cos(angle) * stripWidth / 4, k + Math.sin(angle) * stripWidth / 4), new Scalar(0, 255, 0), 1);
-				angle = interpolator.interpolate((vStrip + 1) * stripWidth / 2, k)[0];
+				angle = interpolator.interpolateHorizontals((vStrip + 1) * stripWidth / 2, k);
 				Imgproc.line(frameDisplay.getSrc(), new Point((vStrip + 1) * stripWidth / 2 - Math.cos(angle) * stripWidth / 4, k - Math.sin(angle) * stripWidth / 4),
 						new Point((vStrip + 1) * stripWidth / 2 + Math.cos(angle) * stripWidth / 4, k + Math.sin(angle) * stripWidth / 4), new Scalar(255, 0, 0), 1);
 			}
@@ -171,7 +170,7 @@ public class RadonTransformDemo extends AbstractApp {
 				double angle = (90 + 45 - f.apply((double) k)) / 180 * Math.PI;
 				Imgproc.line(frameDisplay.getSrc(), new Point(k - Math.cos(angle) * stripHeight / 4, (hStrip + 1) * stripHeight / 2 - Math.sin(angle) * stripHeight / 4),
 						new Point(k + Math.cos(angle) * stripHeight / 4, (hStrip + 1) * stripHeight / 2 + Math.sin(angle) * stripHeight / 4), new Scalar(0, 0, 255), 1);
-				angle = interpolator.interpolate(k, (hStrip + 1) * stripHeight / 2)[1];
+				angle = interpolator.interpolateVerticals(k, (hStrip + 1) * stripHeight / 2);
 				Imgproc.line(frameDisplay.getSrc(), new Point(k - Math.cos(angle) * stripHeight / 4, (hStrip + 1) * stripHeight / 2 - Math.sin(angle) * stripHeight / 4),
 						new Point(k + Math.cos(angle) * stripHeight / 4, (hStrip + 1) * stripHeight / 2 + Math.sin(angle) * stripHeight / 4), new Scalar(255, 0, 0), 1);
 
@@ -184,7 +183,7 @@ public class RadonTransformDemo extends AbstractApp {
 		System.out.println("Display lines : " + (last - ref));
 		ref = last;
 
-		MeshGrid meshGrid = new MeshGrid(new Size(6, 4), interpolator, 50, 50, superFrame.getFrame().getSrc());
+		MeshGrid meshGrid = new MeshGrid(new Size(8, 6), interpolator, 40, 40, superFrame.getFrame().getSrc());
 		meshGrid.build();
 		last = System.currentTimeMillis();
 		System.out.println("Build mesh : " + (last - ref));
