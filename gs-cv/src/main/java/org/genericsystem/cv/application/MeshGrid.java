@@ -40,7 +40,7 @@ public class MeshGrid {
 		this.interpolator = interpolator;
 		this.deltaX = deltaX;
 		this.deltaY = deltaY;
-		this.image = image;
+		this.image = new Mat();
 		xBorder = 2 * (int) deltaX;
 		yBorder = 2 * (int) deltaY;
 		Core.copyMakeBorder(image, this.image, yBorder, yBorder, xBorder, xBorder, Core.BORDER_REPLICATE);
