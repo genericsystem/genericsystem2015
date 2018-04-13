@@ -162,7 +162,7 @@ public class RadonTransform {
 		}
 		xs[n + 1] = image.width() - 1;
 
-		int lines = image.height() / yStep;
+		int lines = (image.height() - 1) / yStep + 1;
 
 		logger.info("Image width {}, xs {}, step {}, w {}", image.width(), Arrays.toString(xs), step, w);
 

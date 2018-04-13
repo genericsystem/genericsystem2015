@@ -5,10 +5,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.genericsystem.cv.AbstractApp;
-import org.genericsystem.cv.Img;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.genericsystem.cv.utils.Tools;
 import org.opencv.core.Core;
@@ -23,7 +21,6 @@ import org.opencv.videoio.VideoCapture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 
@@ -92,28 +89,6 @@ public class DirectionalFilter extends AbstractApp {
 			Mat imgDirs = addDirs(grayFrame, dirs, nSide, nBin, patchXs, patchYs);
 			mainGrid.add(new ImageView(Tools.mat2jfxImage(grayFrame)), 0, 0);
 			mainGrid.add(new ImageView(Tools.mat2jfxImage(imgDirs)), 1, 0);
-
-			// Third image displayed, showing the grid.
-			SuperTemplate superReferenceTemplate = new SuperTemplate(new SuperFrameImg(frame, new double[] { frame.width() / 2, frame.height() / 2 }, 6.053 / 0.009), CvType.CV_8UC3, SuperFrameImg::getFrame) {
-				@Override
-				protected org.genericsystem.cv.Img buildDisplay() {
-					return new Img(getFrame().getSrc(), true);
-				};
-			};
-			List<SuperContour> filteredSuperContour = new ArrayList<>(superReferenceTemplate.detectSuperContours(20).stream().filter(sc -> Math.abs(sc.angle) < Math.PI / 4 && sc.dx > 2 * sc.dy).collect(Collectors.toList()));
-			GridInterpolator interpolator = new GridInterpolator(filteredSuperContour, patchXs, patchYs, dirs, nSide, nBin);
-			MeshGrid meshGrid = new MeshGrid(new Size(20, 20), interpolator, 15, 15, frame);
-			meshGrid.build();
-			mainGrid.add(new ImageView(Tools.mat2jfxImage(meshGrid.drawOnCopy(new Scalar(0, 255, 0)))), 2, 0);
-
-			// Fourth image, dewarping, method 1 (homography on each grid cell).
-			Image dewarped = new Img(meshGrid.dewarp(), false).toJfxImage();
-			mainGrid.add(new ImageView(dewarped), 0, 1);
-
-			// Fifth image, dewarping, method 2 (homography on each grid cell
-			// using 3D surface to find the size of the target rectangle.
-			Image dewarped2 = new Img(meshGrid.dewarp2(), false).toJfxImage();
-			mainGrid.add(new ImageView(dewarped2), 1, 1);
 
 			gx.release();
 			gy.release();

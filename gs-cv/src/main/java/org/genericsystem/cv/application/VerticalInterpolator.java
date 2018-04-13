@@ -2,22 +2,14 @@ package org.genericsystem.cv.application;
 
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class GridInterpolator implements Interpolator {
+public class VerticalInterpolator {
 
-	private static final Logger logger = LoggerFactory.getLogger(GridInterpolator.class);
 	private int[] sampleSkewXs;
 	private int[] sampleSkewYs;
 	private double[][] skewDirs;
-	private final List<SuperContour> superContours;
-	private double hCoef = 0;
-	private double hAngle = 0;
-	private double sumHCoefs = 0;
 
-	public GridInterpolator(List<SuperContour> superContours, List<Integer> patchXs, List<Integer> patchYs, int[][] dirs, int nSide, int nBin) {
-		this.superContours = superContours;
+	public VerticalInterpolator(List<Integer> patchXs, List<Integer> patchYs, int[][] dirs, int nSide, int nBin) {
 		sampleSkewXs = new int[patchXs.size()];
 		for (int i = 0; i < patchXs.size(); i++)
 			sampleSkewXs[i] = patchXs.get(i) + nSide / 2;
@@ -36,31 +28,13 @@ public class GridInterpolator implements Interpolator {
 			}
 	}
 
-	private double squaredEuclidianDistance(double x, double y, SuperContour sc) { // Squared euclidean distance
-		double result = Math.pow(x - sc.center.x, 2) + Math.pow(y - sc.center.y, 2);
-		double minDist = 30;
-		return result >= Math.pow(minDist, 2) ? result : Math.pow(minDist, 2);
-	}
-
-	@Override
-	public double interpolateHorizontals(double x, double y) {
-		sumHCoefs = 0; // somme des coefficients pour l'angle horizontal
-		hAngle = 0; // angle horizontal
-		superContours.forEach(sc -> {
-			double geoCoef = Math.pow(1 / (squaredEuclidianDistance(x, y, sc) + 0.00001), 3.0 / 2); // on ajoute un epsilon pour éviter les divisions par 0
-			hCoef = geoCoef * sc.dx; // la largeur comme indice de confiance dans le coefficient
-			hAngle += hCoef * sc.angle;
-			sumHCoefs += hCoef;
-		});
-		return hAngle / sumHCoefs;
-	}
-
-	@Override
-	public double interpolateVerticals(double x, double y) {
+	// Change only the computation of the vertical angles from SuperContourInterpolator.
+	public double interpolate(double x, double y) {
 		LambdaSearchResult xLambda = lambdaSearch(sampleSkewXs, x);
 		LambdaSearchResult yLambda = lambdaSearch(sampleSkewYs, y);
-		return (1 - xLambda.lambda) * ((1 - yLambda.lambda) * skewDirs[yLambda.indB][xLambda.indB] + yLambda.lambda * skewDirs[yLambda.indE][xLambda.indB])
+		double vAngle = (1 - xLambda.lambda) * ((1 - yLambda.lambda) * skewDirs[yLambda.indB][xLambda.indB] + yLambda.lambda * skewDirs[yLambda.indE][xLambda.indB])
 				+ xLambda.lambda * ((1 - yLambda.lambda) * skewDirs[yLambda.indB][xLambda.indE] + yLambda.lambda * skewDirs[yLambda.indE][xLambda.indE]);
+		return vAngle;
 	}
 
 	static class LambdaSearchResult {
@@ -94,6 +68,6 @@ public class GridInterpolator implements Interpolator {
 			indE = indB + 1;
 			lambda = (x - xs[indB]) / (xs[indE] - xs[indB]);
 		}
-		return new LambdaSearchResult(indB, indE, lambda);
+		return new LambdaSearchResult(indB, indE, lambda);	
 	}
 }

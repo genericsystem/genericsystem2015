@@ -4,15 +4,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
-import org.genericsystem.cv.Svd2;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
-import org.opencv.core.Point3;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
@@ -23,17 +20,24 @@ import org.slf4j.LoggerFactory;
 public class MeshGrid {
 
 	private static final Logger logger = LoggerFactory.getLogger(MeshGrid.class);
-	private final Size kSize;
-	public List<Point> points = new ArrayList<>();
+	private Size kSize;
+	protected List<Point> points = new ArrayList<>();
 	// Array of points: top left, top right, bottom right, bottom left.
-	private Map<Key, Point[]> mesh = new HashMap<>(); // les mêmes polygones mais en i, j
+	protected Map<Key, Point[]> mesh = new HashMap<>(); // les mêmes polygones mais en i, j
 	private Interpolator interpolator;
 	public double deltaX, deltaY; // déplacement d'un polygone
-	private final int xBorder;
-	private final int yBorder;
-	private final Mat image;
+	protected int xBorder;
+	protected int yBorder;
+	protected Mat image;
 
 	private int nbIter; // nombre d'itérations à chaque déplacement
+
+	public MeshGrid(Mat image, int xBorder, int yBorder) {
+		this.xBorder = xBorder;
+		this.yBorder = yBorder;
+		this.image = new Mat();
+		Core.copyMakeBorder(image, this.image, yBorder, yBorder, xBorder, xBorder, Core.BORDER_REPLICATE);
+	}
 
 	public MeshGrid(Size kSize, Interpolator interpolator, double deltaX, double deltaY, Mat image) {
 		this.kSize = kSize;
@@ -49,27 +53,6 @@ public class MeshGrid {
 
 	private Size getOldSize() {
 		return new Size(image.width() - 2 * xBorder, image.height() - 2 * yBorder);
-	}
-
-	private int[][] toRectIndices() {
-		int[][] rects = new int[mesh.size()][4];
-		List<Point[]> meshPoints = new ArrayList<>(mesh.values());
-		for (int i = 0; i < rects.length; i++)
-			for (int j = 0; j < 4; j++)
-				rects[i][j] = points.indexOf(meshPoints.get(i)[j]);
-		return rects;
-	}
-
-	private Map<Key, Point3[]> toPoint3d() {
-		List<Point3> points3D = Svd2.solve(points, toRectIndices());
-		Map<Key, Point3[]> mesh3D = new HashMap<>();
-		for (Entry<Key, Point[]> entry : mesh.entrySet()) {
-			Point3[] para3D = new Point3[4];
-			for (int j = 0; j < 4; j++)
-				para3D[j] = points3D.get(points.indexOf(entry.getValue()[j]));
-			mesh3D.put(entry.getKey(), para3D);
-		}
-		return mesh3D;
 	}
 
 	public void build() {
@@ -96,87 +79,6 @@ public class MeshGrid {
 		return clone;
 	}
 
-	public Mat dewarp2() {
-		Map<Key, Point3[]> mesh3D = toPoint3d();
-
-		// Average width of the 3D edges for each column.
-		int[] widths = new int[2 * (int) kSize.width];
-		for (int j = 0; j < widths.length; j++) {
-			double sum = 0;
-			for (int i = (int) -kSize.height + 1; i <= kSize.height; i++) {
-				Point3[] para = mesh3D.get(new Key(i, j - (int) kSize.width + 1));
-				sum += euclideanDistance(para[0], para[1]);
-			}
-			// Last line, bottom edge.
-			Point3[] para = mesh3D.get(new Key((int) kSize.height, j - (int) kSize.width + 1));
-			sum += euclideanDistance(para[2], para[3]);
-			widths[j] = (int) Math.round(sum / (2 * kSize.height + 1));
-		}
-
-		// Average height of the 3D edges for each line.
-		int[] heights = new int[2 * (int) kSize.height];
-		for (int i = 0; i < heights.length; i++) {
-			double sum = 0;
-			for (int j = (int) -kSize.width + 1; j <= kSize.width; j++) {
-				Point3[] para = mesh3D.get(new Key(i - (int) kSize.height + 1, j));
-				sum += euclideanDistance(para[0], para[3]);
-			}
-			// Last column, right edge.
-			Point3[] para = mesh3D.get(new Key(i - (int) kSize.height + 1, (int) kSize.width));
-			sum += euclideanDistance(para[1], para[2]);
-			heights[i] = (int) Math.round(sum / (2 * kSize.width + 1));
-		}
-
-		// Rescaling ratio.
-		int totalHeight = sum(heights, heights.length);
-		int textSep = 20;
-		double ratio = ((double) totalHeight / heights.length) / textSep;
-
-		for (int i = 0; i < widths.length; i++)
-			widths[i] /= ratio;
-
-		for (int i = 0; i < heights.length; i++)
-			heights[i] /= ratio;
-
-		// New sizes
-		int totalWidth = sum(widths, widths.length);
-		totalHeight = sum(heights, heights.length);
-
-		int rectHeight = totalHeight / heights.length;
-
-		Mat dewarpedImage = new Mat(totalHeight + 1, totalWidth + 1, CvType.CV_8UC3, new Scalar(255, 255, 255));
-
-		for (int i = (int) -kSize.height + 1; i <= kSize.height; i++) {
-			int x = 0;
-			for (int j = (int) -kSize.width + 1; j <= kSize.width; j++) {
-				int wJ = j + (int) kSize.width - 1;
-				if (wJ > 0)
-					x += widths[wJ - 1];
-				if (inImageBorders(mesh.get(new Key(i, j)))) {
-					int rectWidth = widths[wJ];
-					Rect subImageRect = subImageRect(i, j);
-					int y = (i + (int) kSize.height) * rectHeight;
-					Mat homography = dewarpPolygon(mesh.get(new Key(i, j)), subImageRect, rectHeight, rectWidth);
-					Rect dewarpedRect = new Rect(new Point(x, y), new Point(x + rectWidth, y + rectHeight));
-					Mat subDewarpedImage = new Mat(dewarpedImage, dewarpedRect);
-					Mat subImage = new Mat(image, subImageRect);
-					Imgproc.warpPerspective(subImage, subDewarpedImage, homography, subDewarpedImage.size(), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(0));
-					subImage.release();
-					subDewarpedImage.release();
-					homography.release();
-				}
-			}
-		}
-		return dewarpedImage;
-	}
-
-	private int sum(int[] array, int end) {
-		int sum = 0;
-		for (int i = 0; i < end; i++)
-			sum += array[i];
-		return sum;
-	}
-
 	// Returns true if at least a corner of the polygon is in the image proper,
 	// that is, not outside and not in one of the borders whose size is defined by xBorder and yBorder.
 	private boolean inImageBorders(Point[] p) {
@@ -189,21 +91,6 @@ public class MeshGrid {
 
 	private boolean inImageBorders(Point p) {
 		return p.x >= 0 && p.x < image.width() && p.y >= 0 && p.y < image.height();
-	}
-
-	public double ratio(Point3[] parallelogram) {
-		double width1 = euclideanDistance(parallelogram[0], parallelogram[1]);
-		double width2 = euclideanDistance(parallelogram[2], parallelogram[3]);
-		double height1 = euclideanDistance(parallelogram[0], parallelogram[3]);
-		double height2 = euclideanDistance(parallelogram[2], parallelogram[1]);
-		double width = (width1 + width2) / 2;
-		double height = (height1 + height2) / 2;
-		double ratio = width / height;
-		return ratio;
-	}
-
-	private double euclideanDistance(Point3 p1, Point3 p2) {
-		return Math.sqrt((p2.x - p1.x) * (p2.x - p1.x) + (p2.y - p1.y) * (p2.y - p1.y) + (p2.z - p1.z) * (p2.z - p1.z));
 	}
 
 	public Mat dewarp() {
@@ -232,7 +119,7 @@ public class MeshGrid {
 		return dewarpedImage;
 	}
 
-	private Rect subImageRect(int iP, int jP) {
+	protected Rect subImageRect(int iP, int jP) {
 		Point[] polygon = mesh.get(new Key(iP, jP));
 		assert polygon != null : iP + " " + jP;
 
@@ -248,7 +135,7 @@ public class MeshGrid {
 		return new Rect(new Point(xMin, yMin), new Point(xMax, yMax));
 	}
 
-	private Mat dewarpPolygon(Point[] polygon, Rect subImageRect, double rectHeight, double rectWidth) {
+	protected Mat dewarpPolygon(Point[] polygon, Rect subImageRect, double rectHeight, double rectWidth) {
 		Point warpedTopLeft = changeOrigin(subImageRect, polygon[0]);
 		Point warpedTopRight = changeOrigin(subImageRect, polygon[1]);
 		Point warpedBottomRight = changeOrigin(subImageRect, polygon[2]);
@@ -260,11 +147,11 @@ public class MeshGrid {
 		return Imgproc.getPerspectiveTransform(new MatOfPoint2f(warpedTopLeft, warpedTopRight, warpedBottomRight, warpedBottomLeft), new MatOfPoint2f(dewarpedTopLeft, dewarpedTopRight, dewarpedBottomRight, dewarpedBottomLeft));
 	}
 
-	private Point changeOrigin(Rect subImageRect, Point point) {
+	protected Point changeOrigin(Rect subImageRect, Point point) {
 		return new Point(point.x - subImageRect.x, point.y - subImageRect.y);
 	}
 
-	private void drawPolygon(Mat image, Point[] polygon, Scalar color) {
+	protected void drawPolygon(Mat image, Point[] polygon, Scalar color) {
 		Point topLeft = polygon[0];
 		Point topRight = polygon[1];
 		Point bottomRight = polygon[2];
@@ -434,7 +321,7 @@ public class MeshGrid {
 		return new Point(x, y);
 	}
 
-	private class Key { // tableau multidimensionnel
+	protected static class Key { // tableau multidimensionnel
 
 		public int i, j; // i = numero de ligne, j = numero de colonne
 
