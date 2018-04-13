@@ -126,10 +126,9 @@ public class RadonTransform {
 		return new Mat(src, new Range(0, src.rows()), new Range(startX, startX + width));
 	}
 
-	public static Mat[] estimateBaselines(Mat image, double anglePenalty, int minMaxAngle, double magnitudePow) {
-		Mat result = image.clone();
-		Mat curve = image.clone();
-		Mat preprocessed = new Img(result, false).gaussianBlur(new Size(5, 5)).adaptativeGaussianInvThreshold(5, 3).canny(60, 180).getSrc();
+	public static List<PolynomialSplineFunction> estimateBaselines(Mat image, double anglePenalty, int minMaxAngle, double magnitudePow, int yStep) {
+		Mat preprocessed = new Img(image, false).adaptativeGaussianInvThreshold(5, 3).getSrc();
+		List<PolynomialSplineFunction> hLines = new ArrayList<>();
 		// Number of overlapping vertical strips.
 		int n = 20;
 		// Overlap ratio between two consecutive strips.
@@ -163,8 +162,7 @@ public class RadonTransform {
 		}
 		xs[n + 1] = image.width() - 1;
 
-		int lines = image.height() / 15;
-		double yStep = image.height() / lines;
+		int lines = image.height() / yStep;
 
 		logger.info("Image width {}, xs {}, step {}, w {}", image.width(), Arrays.toString(xs), step, w);
 
@@ -189,27 +187,12 @@ public class RadonTransform {
 				ys[j - 1] = ys[j] - step * Math.tan(theta);
 			}
 
-			// Draw line segments.
-			for (int j = 0; j < xs.length - 1; j++)
-				Imgproc.line(result, new Point(xs[j], ys[j]), new Point(xs[j + 1], ys[j + 1]), new Scalar(255, 0, 255));
-
 			// Approximate line with polynomial curve.
 			PolynomialSplineFunction psf = new LinearInterpolator().interpolate(xs, ys);
-			int currX = 0;
-			Point prevPoint = new Point(currX, psf.value(currX));
-			while (currX < image.width()) {
-				currX += 5;
-				Point newPoint = new Point(currX, 0);
-				if (psf.isValidPoint(currX)) {
-					newPoint.y = psf.value(currX);
-					if (psf.isValidPoint(prevPoint.x) && inImage(prevPoint, result) && inImage(newPoint, result))
-						Imgproc.line(curve, prevPoint, newPoint, new Scalar(255, 255, 0));
-				}
-				prevPoint = newPoint;
-			}
+			hLines.add(psf);
 		}
 
-		return new Mat[] { result, curve };
+		return hLines;
 	}
 
 	public static Function<Double, Double> approxTraject(int[] traj) {
