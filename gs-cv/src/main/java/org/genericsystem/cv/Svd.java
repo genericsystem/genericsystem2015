@@ -2,6 +2,7 @@ package org.genericsystem.cv;
 
 import java.util.Arrays;
 
+import org.apache.commons.math3.util.Precision;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
@@ -122,19 +123,27 @@ public class Svd {
 		Mat eigenVectors = new Mat();
 		Core.eigen(M, eigenValues, eigenVectors);
 
-		Mat result = eigenVectors.col(eigenVectors.cols() - 1);
+		int minIndex = -1;
+		double minValue = Double.POSITIVE_INFINITY;
+		for (int i = 0; i < eigenValues.rows(); i++) {
+			if (eigenValues.get(i, 0)[0] > Precision.EPSILON && eigenValues.get(i, 0)[0] < minValue) {
+				minValue = eigenValues.get(i, 0)[0];
+				minIndex = i;
+			}
+		}
+		Mat result = eigenVectors.row(minIndex);
 		// [V, D] = eigs(M, 1, 'SM');
 		// [minEigValue, minIndex] = min(diag(D));
 		// sol = V(:, minIndex);
 
 		double sum = 0;
 		for (int i = 0; i < pts.length; i++)
-			sum += result.get(3 * i + 2, 0)[0];
+			sum += result.get(0, 3 * i + 2)[0];
 
 		for (int i = 0; i < pts.length; i++) {
-			pts[i][0] = sum > 0 ? -result.get(3 * i, 0)[0] : result.get(3 * i, 0)[0];
-			pts[i][1] = sum > 0 ? -result.get(3 * i + 1, 0)[0] : result.get(3 * i + 1, 0)[0];
-			pts[i][2] = sum > 0 ? -result.get(3 * i + 2, 0)[0] : result.get(3 * i + 2, 0)[0];
+			pts[i][0] = sum > 0 ? -result.get(0, 3 * i)[0] : result.get(0, 3 * i)[0];
+			pts[i][1] = sum > 0 ? -result.get(0, 3 * i + 1)[0] : result.get(0, 3 * i + 1)[0];
+			pts[i][2] = sum > 0 ? -result.get(0, 3 * i + 2)[0] : result.get(0, 3 * i + 2)[0];
 		}
 
 		// % normalze it back
