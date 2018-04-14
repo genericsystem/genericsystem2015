@@ -1,11 +1,5 @@
 package org.genericsystem.cv.application;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.genericsystem.cv.Img;
@@ -24,6 +18,12 @@ import org.opencv.imgproc.Imgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+
 public class RadonTransform {
 
 	static {
@@ -32,16 +32,16 @@ public class RadonTransform {
 
 	private static final Logger logger = LoggerFactory.getLogger(RadonTransform.class);
 
-	public static Mat transform(Mat src, int minMaxAngle) {
+	public static Mat transform(Mat src, int minAngle, int maxAngle) {
 		Mat dst = Mat.zeros(src.rows(), src.rows(), CvType.CV_64FC1);
 		int center = dst.rows() / 2;
 		src.convertTo(new Mat(dst, new Rect(new Point(center - src.cols() / 2, 0), new Point(center + src.cols() / 2, src.rows()))), CvType.CV_64FC1);
-		Mat radon = Mat.zeros(dst.rows(), 2 * minMaxAngle, CvType.CV_64FC1);
-		for (int t = -minMaxAngle; t < minMaxAngle; t++) {
+		Mat radon = Mat.zeros(dst.rows(), minAngle + maxAngle, CvType.CV_64FC1);
+		for (int t = -minAngle; t < maxAngle; t++) {
 			Mat rotated = new Mat();
 			Mat rotation = Imgproc.getRotationMatrix2D(new Point(center, center), t, 1);
 			Imgproc.warpAffine(dst, rotated, rotation, new Size(dst.cols(), dst.rows()), Imgproc.INTER_NEAREST);
-			Core.reduce(rotated, radon.col(t + minMaxAngle), 1, Core.REDUCE_SUM);
+			Core.reduce(rotated, radon.col(t + minAngle), 1, Core.REDUCE_SUM);
 			rotated.release();
 			rotation.release();
 		}
@@ -50,11 +50,11 @@ public class RadonTransform {
 		return radon;
 	}
 
-	public static Mat projectionMap(Mat radon) {
+	public static Mat projectionMap(Mat radon, int minAngle) {
 		Mat projectionMap = Mat.zeros(radon.rows(), radon.cols(), CvType.CV_64FC1);
 		for (int k = 0; k < projectionMap.rows(); k++) {
 			for (int tetha = 0; tetha < projectionMap.cols(); tetha++) {
-				int p = (int) ((k - projectionMap.rows() / 2) * Math.sin(((double) tetha + 45) / 180 * Math.PI) + radon.rows() / 2);
+				int p = (int) ((k - projectionMap.rows() / 2) * Math.sin(((double) tetha + minAngle) / 180 * Math.PI) + radon.rows() / 2);
 				projectionMap.put(k, tetha, radon.get(p, tetha)[0]);
 			}
 		}
@@ -126,10 +126,9 @@ public class RadonTransform {
 		return new Mat(src, new Range(0, src.rows()), new Range(startX, startX + width));
 	}
 
-	public static Mat[] estimateBaselines(Mat image, double anglePenalty, int minMaxAngle, double magnitudePow) {
-		Mat result = image.clone();
-		Mat curve = image.clone();
-		Mat preprocessed = new Img(result, false).gaussianBlur(new Size(5, 5)).adaptativeGaussianInvThreshold(5, 3).canny(60, 180).getSrc();
+	public static List<PolynomialSplineFunction> estimateBaselines(Mat image, double anglePenalty, int minMaxAngle, double magnitudePow, int yStep) {
+		Mat preprocessed = new Img(image, false).adaptativeGaussianInvThreshold(5, 3).getSrc();
+		List<PolynomialSplineFunction> hLines = new ArrayList<>();
 		// Number of overlapping vertical strips.
 		int n = 20;
 		// Overlap ratio between two consecutive strips.
@@ -147,8 +146,8 @@ public class RadonTransform {
 		double[][] approxParams = new double[n][];
 		int x = 0;
 		for (int i = 0; i < n; i++) {
-			Mat radonTransform = transform(extractStrip(preprocessed, x, (int) w), minMaxAngle);
-			Mat projMap = projectionMap(radonTransform);
+			Mat radonTransform = transform(extractStrip(preprocessed, x, (int) w), minAngle, maxAngle);
+			Mat projMap = projectionMap(radonTransform, minAngle);
 			Imgproc.morphologyEx(projMap, projMap, Imgproc.MORPH_GRADIENT, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(2, 4)));
 			angles[i] = bestTraject(projMap, anglePenalty, magnitudePow);
 			projMap.release();
@@ -163,8 +162,7 @@ public class RadonTransform {
 		}
 		xs[n + 1] = image.width() - 1;
 
-		int lines = image.height() / 15;
-		double yStep = image.height() / lines;
+		int lines = (image.height() - 1) / yStep + 1;
 
 		logger.info("Image width {}, xs {}, step {}, w {}", image.width(), Arrays.toString(xs), step, w);
 
@@ -173,7 +171,7 @@ public class RadonTransform {
 			// Start building line from the middle.
 			ys[n / 2] = i * yStep + .5 * yStep;
 			for (int j = n / 2; j <= n; j++) {
-				double theta = (f.apply(ys[j], approxParams[j - 1]) - minMaxAngle) / 180 * Math.PI;
+				double theta = (f.apply(ys[j], approxParams[j - 1]) - minAngle) / 180 * Math.PI;
 				// Line passing by the point G at the middle of the strip with ordinate currY (x_G, y_G),
 				// making an angle of theta with the horizontal:
 				// y = y_G + (x - x_G) tan theta
@@ -185,55 +183,40 @@ public class RadonTransform {
 				}
 			}
 			for (int j = n / 2; j > 0; j--) {
-				double theta = (f.apply(ys[j], approxParams[j - 1]) - minMaxAngle) / 180 * Math.PI;
+				double theta = (f.apply(ys[j], approxParams[j - 1]) - minAngle) / 180 * Math.PI;
 				ys[j - 1] = ys[j] - step * Math.tan(theta);
 			}
 
-			// Draw line segments.
-			for (int j = 0; j < xs.length - 1; j++)
-				Imgproc.line(result, new Point(xs[j], ys[j]), new Point(xs[j + 1], ys[j + 1]), new Scalar(255, 0, 255));
-
 			// Approximate line with polynomial curve.
 			PolynomialSplineFunction psf = new LinearInterpolator().interpolate(xs, ys);
-			int currX = 0;
-			Point prevPoint = new Point(currX, psf.value(currX));
-			while (currX < image.width()) {
-				currX += 5;
-				Point newPoint = new Point(currX, 0);
-				if (psf.isValidPoint(currX)) {
-					newPoint.y = psf.value(currX);
-					if (psf.isValidPoint(prevPoint.x) && inImage(prevPoint, result) && inImage(newPoint, result))
-						Imgproc.line(curve, prevPoint, newPoint, new Scalar(255, 255, 0));
-				}
-				prevPoint = newPoint;
-			}
+			hLines.add(psf);
 		}
 
-		return new Mat[] { result, curve };
+		return hLines;
 	}
 
 	public static Function<Double, Double> approxTraject(int[] traj) {
 		List<double[]> values = new ArrayList<>();
 		for (int k = 0; k < traj.length; k++)
 			values.add(new double[] { k, traj[k] });
-		BiFunction<Double, double[], Double> f = (x, params) -> params[0] + params[1] * x + params[2] * x * x + params[3] * x * x * x;
-		double[] params = LevenbergImpl.fromBiFunction(f, values, new double[] { 0, 0, 0, 0 }).getParams();
+		BiFunction<Double, double[], Double> f = (x, params) -> params[0] + params[1] * x + params[2] * x * x;
+		double[] params = LevenbergImpl.fromBiFunction(f, values, new double[] { 0, 0, 0 }).getParams();
 		return x -> f.apply(x, params);
 	}
 
-	public static List<OrientedPoint> toHorizontalOrientedPoints(Function<Double, Double> f, int vStrip, int stripWidth, int height, int step) {
+	public static List<OrientedPoint> toHorizontalOrientedPoints(Function<Double, Double> f, int vStrip, int stripWidth, int height, int step, int minAngle) {
 		List<OrientedPoint> orientedPoints = new ArrayList<>();
-		for (int k = step; k < height; k += step) {
-			double angle = (f.apply((double) k) - 45) / 180 * Math.PI;
+		for (int k = 0; k <= height; k += step) {
+			double angle = (f.apply((double) k) - minAngle) / 180 * Math.PI;
 			orientedPoints.add(new OrientedPoint(new Point((vStrip + 1) * stripWidth / 2, k), angle, 1));
 		}
 		return orientedPoints;
 	}
 
-	public static List<OrientedPoint> toVerticalOrientedPoints(Function<Double, Double> f, int hStrip, int stripHeight, int width, int step) {
+	public static List<OrientedPoint> toVerticalOrientedPoints(Function<Double, Double> f, int hStrip, int stripHeight, int width, int step, int minAngle) {
 		List<OrientedPoint> orientedPoints = new ArrayList<>();
-		for (int k = step; k < width; k += step) {
-			double angle = (90 + 45 - f.apply((double) k)) / 180 * Math.PI;
+		for (int k = 0; k <= width; k += step) {
+			double angle = (90 + minAngle - f.apply((double) k)) / 180 * Math.PI;
 			orientedPoints.add(new OrientedPoint(new Point(k, (hStrip + 1) * stripHeight / 2), angle, 1));
 		}
 		return orientedPoints;
