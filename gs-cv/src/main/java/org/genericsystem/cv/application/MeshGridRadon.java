@@ -1,13 +1,5 @@
 package org.genericsystem.cv.application;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
-
 import org.apache.commons.math3.analysis.FunctionUtils;
 import org.apache.commons.math3.analysis.differentiation.UnivariateDifferentiableFunction;
 import org.apache.commons.math3.analysis.function.Constant;
@@ -26,6 +18,14 @@ import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 public class MeshGridRadon extends MeshGrid {
 
@@ -71,7 +71,7 @@ public class MeshGridRadon extends MeshGrid {
 	}
 
 	// TODO: Possibility to configure all the parameters.
-	public void build(double anglePenalty, int minMaxAngle, double magnitudePow) {
+	public void build(double anglePenalty, int minAngle, int maxAngle, double magnitudePow) {
 		// Compute Vertical directions.
 		DirectionalFilter df = new DirectionalFilter();
 		int firstBin = 1;
@@ -93,7 +93,7 @@ public class MeshGridRadon extends MeshGrid {
 		VerticalInterpolator interpolator = new VerticalInterpolator(patchXs, patchYs, dirs, nSide, nBin);
 
 		// Compute lines.
-		List<PolynomialSplineFunction> hLines = RadonTransform.estimateBaselines(image, anglePenalty, minMaxAngle, magnitudePow, yStep);
+		List<PolynomialSplineFunction> hLines = RadonTransform.estimateBaselines(image, anglePenalty, minAngle, maxAngle, magnitudePow, yStep);
 
 		Point[] prevLine = null;
 		double angleTolerance = Math.PI / 180;
@@ -114,8 +114,7 @@ public class MeshGridRadon extends MeshGrid {
 					double d = Math.tan(theta);
 					// Equation of the “vertical” line:
 					// y = yPrev + (x - xPrev) tan(theta) = yPrev - xPrev * tan(theta) + tan(theta) * x
-					UnivariateDifferentiableFunction vLine = FunctionUtils.add(new Constant(p.y - p.x * d),
-							FunctionUtils.multiply((UnivariateDifferentiableFunction) new Identity(), new Constant(d)));
+					UnivariateDifferentiableFunction vLine = FunctionUtils.add(new Constant(p.y - p.x * d), FunctionUtils.multiply((UnivariateDifferentiableFunction) new Identity(), new Constant(d)));
 					// The intersection is at the point where the following function is zero:
 					UnivariateDifferentiableFunction f = FunctionUtils.add(hLine, FunctionUtils.compose(new Minus(), vLine));
 					double newX = new BisectionSolver().solve(100, f, Math.max(p.x - xStep, 0), Math.min(p.x + xStep, image.width() - 1), p.x);
@@ -264,7 +263,7 @@ public class MeshGridRadon extends MeshGrid {
 		}
 		// Draw lines and columns on dewarped image
 		int y = 0;
-		for (int i = 0; i < nLines - 1; y+= heights[i], i++)
+		for (int i = 0; i < nLines - 1; y += heights[i], i++)
 			Imgproc.line(dewarpedImage, new Point(0, y), new Point(dewarpedImage.width() - 1, y), new Scalar(255, 0, 255), 1);
 		// Last horizontal line.
 		Imgproc.line(dewarpedImage, new Point(0, y), new Point(dewarpedImage.width() - 1, y), new Scalar(255, 0, 255), 1);
