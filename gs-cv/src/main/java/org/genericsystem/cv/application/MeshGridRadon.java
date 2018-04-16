@@ -7,7 +7,7 @@ import org.apache.commons.math3.analysis.function.Identity;
 import org.apache.commons.math3.analysis.function.Minus;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.apache.commons.math3.analysis.solvers.BisectionSolver;
-import org.genericsystem.cv.Svd2;
+import org.genericsystem.cv.Svd;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -58,7 +58,7 @@ public class MeshGridRadon extends MeshGrid {
 
 	private Map<Key, Point3[]> toPoint3d() {
 		if (mesh3D == null) {
-			points3D = Svd2.solve(points, toRectIndices());
+			points3D = Svd.solve(points, toRectIndices());
 			mesh3D = new HashMap<>();
 			for (Entry<Key, Point[]> entry : mesh.entrySet()) {
 				Point3[] para3D = new Point3[4];
