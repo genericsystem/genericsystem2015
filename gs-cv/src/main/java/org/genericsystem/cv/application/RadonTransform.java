@@ -12,9 +12,9 @@ import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Range;
 import org.opencv.core.Rect;
-import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.ximgproc.Ximgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,7 +61,7 @@ public class RadonTransform {
 		return projectionMap;
 	}
 
-	public static int[] bestTraject(Mat projectionMap, double anglePenality, double pow) {
+	public static TrajectStep[] bestTraject(Mat projectionMap, double anglePenality, double pow) {
 		double[][] score = new double[projectionMap.rows()][projectionMap.cols()];
 		int[][] thetaPrev = new int[projectionMap.rows()][projectionMap.cols()];
 		for (int theta = 0; theta < projectionMap.cols(); theta++)
@@ -93,8 +93,9 @@ public class RadonTransform {
 		// System.out.println(Arrays.toString(score[projectionMap.rows() - 1]));
 		// System.out.println(Arrays.deepToString(thetaPrev));
 		double maxScore = Double.NEGATIVE_INFINITY;
+
 		int prevTheta = -1;
-		int[] thetas = new int[projectionMap.rows()];
+
 		for (int theta = 0; theta < projectionMap.cols(); theta++) {
 			double lastScore = score[projectionMap.rows() - 1][theta];
 			// System.out.println(lastScore);
@@ -104,10 +105,10 @@ public class RadonTransform {
 			}
 		}
 		assert prevTheta != -1;
-
 		// System.out.println(maxScore + " for theta : " + prevTheta);
+		TrajectStep[] thetas = new TrajectStep[projectionMap.rows()];
 		for (int k = projectionMap.rows() - 1; k >= 0; k--) {
-			thetas[k] = prevTheta;
+			thetas[k] = new TrajectStep(k, prevTheta, projectionMap.get(k, prevTheta)[0]);
 			// System.out.println(prevTheta);
 			prevTheta = thetaPrev[k][prevTheta];
 		}
@@ -126,7 +127,7 @@ public class RadonTransform {
 		return new Mat(src, new Range(0, src.rows()), new Range(startX, startX + width));
 	}
 
-	public static List<PolynomialSplineFunction> estimateBaselines(Mat image, double anglePenalty, int minMaxAngle, double magnitudePow, int yStep) {
+	public static List<PolynomialSplineFunction> estimateBaselines(Mat image, double anglePenalty, int minAngle, int maxAngle, double magnitudePow, int yStep) {
 		Mat preprocessed = new Img(image, false).adaptativeGaussianInvThreshold(5, 3).getSrc();
 		List<PolynomialSplineFunction> hLines = new ArrayList<>();
 		// Number of overlapping vertical strips.
@@ -137,7 +138,7 @@ public class RadonTransform {
 		// Image width = [n(1 - r) + r] w
 		double w = (image.width() / (n * (1 - r) + r));
 		double step = (int) ((1 - r) * w);
-		int[][] angles = new int[n][];
+		TrajectStep[][] angles = new TrajectStep[n][];
 
 		// 0, center of each vertical strip, image.width() - 1
 		double[] xs = new double[n + 2];
@@ -155,7 +156,7 @@ public class RadonTransform {
 
 			List<double[]> values = new ArrayList<>();
 			for (int k = 0; k < image.height(); k++)
-				values.add(new double[] { k, angles[i][k] });
+				values.add(new double[] { k, angles[i][k].theta, angles[i][k].magnitude });
 			approxParams[i] = LevenbergImpl.fromBiFunction(f, values, new double[] { 0, 0, 0 }).getParams();
 			xs[i + 1] = x + .5 * w;
 			x += step;
@@ -195,12 +196,13 @@ public class RadonTransform {
 		return hLines;
 	}
 
-	public static Function<Double, Double> approxTraject(int[] traj) {
+	public static Function<Double, Double> approxTraject(TrajectStep[] traj) {
 		List<double[]> values = new ArrayList<>();
 		for (int k = 0; k < traj.length; k++)
-			values.add(new double[] { k, traj[k] });
+			values.add(new double[] { k, traj[k].theta, traj[k].magnitude });
 		BiFunction<Double, double[], Double> f = (x, params) -> params[0] + params[1] * x + params[2] * x * x;
-		double[] params = LevenbergImpl.fromBiFunction(f, values, new double[] { 0, 0, 0 }).getParams();
+		BiFunction<double[], double[], Double> error = (xy, params) -> (f.apply(xy[0], params) - xy[1]);
+		double[] params = new LevenbergImpl<>(error, values, new double[] { 0, 0, 0 }).getParams();
 		return x -> f.apply(x, params);
 	}
 
@@ -222,7 +224,33 @@ public class RadonTransform {
 		return orientedPoints;
 	}
 
+	public static List<OrientedPoint> toHorizontalFHTOrientedPoints(Function<Double, Double> f, int vStrip, int stripWidth, int height, int step, int minAngle) {
+		List<OrientedPoint> orientedPoints = new ArrayList<>();
+		for (int k = 0; k <= height; k += step) {
+			double angle = ((f.apply((double) k) / (2 * stripWidth - 1) * 90) - minAngle) / 180 * Math.PI;
+			orientedPoints.add(new OrientedPoint(new Point((vStrip + 1) * stripWidth / 2, k), angle, 1));
+		}
+		return orientedPoints;
+	}
+
+	public static List<OrientedPoint> toVerticalFHTOrientedPoints(Function<Double, Double> f, int hStrip, int stripHeight, int width, int step, int minAngle) {
+		List<OrientedPoint> orientedPoints = new ArrayList<>();
+		for (int k = 0; k <= width; k += step) {
+			double angle = (90 + minAngle - (f.apply((double) k) / (2 * stripHeight - 1) * 90)) / 180 * Math.PI;
+			orientedPoints.add(new OrientedPoint(new Point(k, (hStrip + 1) * stripHeight / 2), angle, 1));
+		}
+		return orientedPoints;
+	}
+
 	private static boolean inImage(Point p, Mat img) {
 		return p.x >= 0 && p.y >= 0 && p.x < img.width() && p.y < img.height();
+	}
+
+	public static Mat fastHoughTransform(Mat vStrip, int stripSize) {
+		Mat houghTransform = new Mat();
+		Ximgproc.FastHoughTransform(vStrip, houghTransform, CvType.CV_64FC1, Ximgproc.ARO_45_135, Ximgproc.FHT_ADD, Ximgproc.HDO_DESKEW);
+		Core.transpose(houghTransform, houghTransform);
+		Core.normalize(houghTransform, houghTransform, 0, 255, Core.NORM_MINMAX);
+		return new Mat(houghTransform, new Range(stripSize / 2, houghTransform.height() - stripSize / 2), new Range(0, houghTransform.width()));
 	}
 }
