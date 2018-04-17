@@ -9,7 +9,6 @@ import java.util.function.Function;
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
-import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Range;
@@ -103,20 +102,26 @@ public class RadonTransformDemo2 extends AbstractApp {
 		Mat houghTransform = RadonTransform.fastHoughTransform(vStrip);
 		ref = trace("FHT", ref);
 
-		Mat hough = RadonTransform.fhtRemap(houghTransform, stripWidth);
-		images[3] = new Img(hough, false).toJfxImage();
-		ref = trace("FHT Remap", ref);
-		System.out.println(hough);
-		Imgproc.morphologyEx(hough, hough, Imgproc.MORPH_GRADIENT, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(1, 2)));
-		Core.normalize(hough, hough, 0, 255, Core.NORM_MINMAX);
-		images[4] = new Img(hough, false).toJfxImage();
+		// Mat hough = RadonTransform.fhtRemap(houghTransform, stripWidth);
+		images[3] = new Img(houghTransform, false).toJfxImage();
 
-		TrajectStep[] houghVtraj = RadonTransform.bestTraject(hough, -10000, 3);
-		Mat vHoughColor = Mat.zeros(hough.size(), CvType.CV_8UC3);
-		hough.release();
+		System.out.println(houghTransform);
+		Imgproc.morphologyEx(houghTransform, houghTransform, Imgproc.MORPH_GRADIENT, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(1, 2)));
+		// Core.normalize(houghTransform, houghTransform, 0, 255, Core.NORM_MINMAX);
+		images[4] = new Img(houghTransform, false).toJfxImage();
+
+		ref = trace("FHT compute", ref);
+		TrajectStep[] houghVtraj = RadonTransform.bestTraject(houghTransform, -5000, 3);
+		int stripSize = (houghTransform.width() + 1) / 2;
+		for (int y = 0; y < houghVtraj.length; y++)
+			houghVtraj[y].theta = (int) Math.round(Math.atan((double) (houghVtraj[y].theta - stripSize + 1) / (stripSize - 1)) / Math.PI * 180 + 45);
+
+		Mat vHoughColor = Mat.zeros(houghTransform.height() - stripWidth, 91, CvType.CV_8UC3);
+		houghTransform.release();
 		for (int y = 0; y < vHoughColor.height(); y++)
 			vHoughColor.put(y, houghVtraj[y].theta, 0, 0, 255);
 		ref = trace("Best traject hough", ref);
+
 		Function<Double, Double> approxHoughVFunction = RadonTransform.approxTraject(houghVtraj);
 		for (int y = 0; y < vHoughColor.height(); y++) {
 			int x = (int) Math.round(approxHoughVFunction.apply((double) y));
@@ -126,17 +131,16 @@ public class RadonTransformDemo2 extends AbstractApp {
 				x = vHoughColor.width() - 1;
 			vHoughColor.put(y, x, 0, 255, 0);
 		}
-		ref = trace("Display approx radon", ref);
+		ref = trace("Display approx hough", ref);
 		images[5] = new Img(vHoughColor, false).toJfxImage();
 
 		Mat vTransform = RadonTransform.radonTransform(vStrip, -45, 45);
 		Mat vProjection = RadonTransform.radonRemap(vTransform, -45);
 		images[6] = new Img(vProjection, false).toJfxImage();
 		System.out.println(vProjection);
-		ref = trace("Radon + Projection", ref);
-
 		Imgproc.morphologyEx(vProjection, vProjection, Imgproc.MORPH_GRADIENT, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(1, 2)));
-		Core.normalize(vProjection, vProjection, 0, 255, Core.NORM_MINMAX);
+		// Core.normalize(vProjection, vProjection, 0, 255, Core.NORM_MINMAX);
+		ref = trace("Radon + Projection", ref);
 		images[7] = new Img(vProjection, false).toJfxImage();
 
 		TrajectStep[] vtraj = RadonTransform.bestTraject(vProjection, -10000, 3);

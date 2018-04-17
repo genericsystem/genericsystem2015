@@ -66,19 +66,20 @@ public class RadonTransform {
 		Ximgproc.FastHoughTransform(vStrip, houghTransform, CvType.CV_64FC1, Ximgproc.ARO_45_135, Ximgproc.FHT_ADD, Ximgproc.HDO_DESKEW);
 		Core.transpose(houghTransform, houghTransform);
 		Core.normalize(houghTransform, houghTransform, 0, 255, Core.NORM_MINMAX);
-		return houghTransform;
+		return new Mat(houghTransform, new Range(vStrip.width() / 2, houghTransform.height() - vStrip.width() / 2), new Range(0, houghTransform.width()));
 	}
 
-	public static Mat fhtRemap(Mat houghTransform, int stripSize) {
-		Mat result = Mat.zeros(houghTransform.rows() - stripSize, 91, CvType.CV_64FC1);
+	public static Mat fhtRemap(Mat houghTransform) {
+		Mat result = Mat.zeros(houghTransform.rows(), 91, CvType.CV_64FC1);
 		// System.out.println(houghTransform);
-		for (double col = 0; col < 2 * stripSize - 1; col += 0.25)
-			for (int row = stripSize / 2; row < houghTransform.rows() - stripSize / 2; row++) {
+		for (double col = 0; col < houghTransform.width(); col += 0.25)
+			for (int row = 0; row < houghTransform.rows(); row++) {
+				int stripSize = (houghTransform.width() + 1) / 2;
 				double angle = Math.round(Math.atan((col - stripSize + 1) / (stripSize - 1)) / Math.PI * 180 + 45);
 				if (angle < 0 || angle > 90)
 					throw new IllegalStateException("Angle : " + angle);
 				else
-					result.put(row - stripSize / 2, (int) angle, Math.max(result.get(row - stripSize / 2, (int) Math.round(angle))[0], houghTransform.get(row, (int) col)[0]));
+					result.put(row, (int) angle, Math.max(result.get(row, (int) Math.round(angle))[0], houghTransform.get(row, (int) col)[0]));
 			}
 		return result;
 	}

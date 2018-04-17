@@ -119,19 +119,30 @@ public class RadonTransformDemo extends AbstractApp {
 		List<Mat> vHoughs = vStrips.stream().map(strip -> RadonTransform.fastHoughTransform(strip)).collect(Collectors.toList());
 		List<Mat> hHoughs = hStrips.stream().map(strip -> RadonTransform.fastHoughTransform(strip)).collect(Collectors.toList());
 
+		vHoughs.stream().forEach(projectionMap -> Imgproc.morphologyEx(projectionMap, projectionMap, Imgproc.MORPH_GRADIENT, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(1, 2))));
+		hHoughs.stream().forEach(projectionMap -> Imgproc.morphologyEx(projectionMap, projectionMap, Imgproc.MORPH_GRADIENT, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(1, 2))));
+
 		ref = trace("Compute FHT", ref);
 
-		List<Mat> vHoughProjections = vHoughs.stream().map(radon -> RadonTransform.fhtRemap(radon, stripWidth)).collect(Collectors.toList());
-		List<Mat> hHoughProjections = hHoughs.stream().map(radon -> RadonTransform.fhtRemap(radon, stripHeight)).collect(Collectors.toList());
+		// List<Mat> vHoughProjections = vHoughs.stream().map(radon -> RadonTransform.fhtRemap(radon)).collect(Collectors.toList());
+		// List<Mat> hHoughProjections = hHoughs.stream().map(radon -> RadonTransform.fhtRemap(radon)).collect(Collectors.toList());
 
 		ref = trace("Compute FHT remap", ref);
 
 		// List<TrajectStep[]> vTrajs = vProjectionMaps.stream().map(projectionMap -> RadonTransform.bestTraject(projectionMap, -10000, 3)).collect(Collectors.toList());
 		// List<TrajectStep[]> hTrajs = hProjectionMaps.stream().map(projectionMap -> RadonTransform.bestTraject(projectionMap, -10000, 3)).collect(Collectors.toList());
-		List<TrajectStep[]> vHoughTrajs = vHoughProjections.stream().map(projectionMap -> RadonTransform.bestTraject(projectionMap, -10000, 3)).collect(Collectors.toList());
-		List<TrajectStep[]> hHoughTrajs = hHoughProjections.stream().map(projectionMap -> RadonTransform.bestTraject(projectionMap, -10000, 3)).collect(Collectors.toList());
-
+		List<TrajectStep[]> vHoughTrajs = vHoughs.stream().map(projectionMap -> RadonTransform.bestTraject(projectionMap, -5000, 3)).collect(Collectors.toList());
+		List<TrajectStep[]> hHoughTrajs = hHoughs.stream().map(projectionMap -> RadonTransform.bestTraject(projectionMap, -5000, 3)).collect(Collectors.toList());
 		ref = trace("Compute trajects", ref);
+		for (TrajectStep[] houghVtraj : vHoughTrajs)
+			for (int y = 0; y < houghVtraj.length; y++)
+				houghVtraj[y].theta = (int) Math.round(Math.atan((double) (houghVtraj[y].theta - stripWidth + 1) / (stripWidth - 1)) / Math.PI * 180 + 45);
+
+		for (TrajectStep[] houghHtraj : hHoughTrajs)
+			for (int y = 0; y < houghHtraj.length; y++)
+				houghHtraj[y].theta = (int) Math.round(Math.atan((double) (houghHtraj[y].theta - stripHeight + 1) / (stripHeight - 1)) / Math.PI * 180 + 45);
+
+		ref = trace("Transform trajects", ref);
 		// List<Function<Double, Double>> approxVFunctions = vTrajs.stream().map(traj -> RadonTransform.approxTraject(traj)).collect(Collectors.toList());
 		// List<Function<Double, Double>> approxHFunctions = hTrajs.stream().map(traj -> RadonTransform.approxTraject(traj)).collect(Collectors.toList());
 		List<Function<Double, Double>> approxVFHTFunctions = vHoughTrajs.stream().map(traj -> RadonTransform.approxTraject(traj)).collect(Collectors.toList());
