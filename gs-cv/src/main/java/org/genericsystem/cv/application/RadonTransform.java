@@ -1,5 +1,11 @@
 package org.genericsystem.cv.application;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.genericsystem.cv.Img;
@@ -18,12 +24,6 @@ import org.opencv.ximgproc.Ximgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-
 public class RadonTransform {
 
 	static {
@@ -32,16 +32,16 @@ public class RadonTransform {
 
 	private static final Logger logger = LoggerFactory.getLogger(RadonTransform.class);
 
-	public static Mat transform(Mat src, int minAngle, int maxAngle) {
+	public static Mat radonTransform(Mat src, int minAngle, int maxAngle) {
 		Mat dst = Mat.zeros(src.rows(), src.rows(), CvType.CV_64FC1);
 		int center = dst.rows() / 2;
 		src.convertTo(new Mat(dst, new Rect(new Point(center - src.cols() / 2, 0), new Point(center + src.cols() / 2, src.rows()))), CvType.CV_64FC1);
-		Mat radon = Mat.zeros(dst.rows(), minAngle + maxAngle, CvType.CV_64FC1);
-		for (int t = -minAngle; t < maxAngle; t++) {
+		Mat radon = Mat.zeros(dst.rows(), -minAngle + maxAngle + 1, CvType.CV_64FC1);
+		for (int t = minAngle; t <= maxAngle; t++) {
 			Mat rotated = new Mat();
 			Mat rotation = Imgproc.getRotationMatrix2D(new Point(center, center), t, 1);
 			Imgproc.warpAffine(dst, rotated, rotation, new Size(dst.cols(), dst.rows()), Imgproc.INTER_NEAREST);
-			Core.reduce(rotated, radon.col(t + minAngle), 1, Core.REDUCE_SUM);
+			Core.reduce(rotated, radon.col(t - minAngle), 1, Core.REDUCE_SUM);
 			rotated.release();
 			rotation.release();
 		}
@@ -50,15 +50,37 @@ public class RadonTransform {
 		return radon;
 	}
 
-	public static Mat projectionMap(Mat radon, int minAngle) {
+	public static Mat radonRemap(Mat radon, int minAngle) {
 		Mat projectionMap = Mat.zeros(radon.rows(), radon.cols(), CvType.CV_64FC1);
 		for (int k = 0; k < projectionMap.rows(); k++) {
 			for (int tetha = 0; tetha < projectionMap.cols(); tetha++) {
-				int p = (int) ((k - projectionMap.rows() / 2) * Math.sin(((double) tetha + minAngle) / 180 * Math.PI) + radon.rows() / 2);
+				int p = (int) ((k - projectionMap.rows() / 2) * Math.sin(((double) tetha - minAngle) / 180 * Math.PI) + radon.rows() / 2);
 				projectionMap.put(k, tetha, radon.get(p, tetha)[0]);
 			}
 		}
 		return projectionMap;
+	}
+
+	public static Mat fastHoughTransform(Mat vStrip) {
+		Mat houghTransform = new Mat();
+		Ximgproc.FastHoughTransform(vStrip, houghTransform, CvType.CV_64FC1, Ximgproc.ARO_45_135, Ximgproc.FHT_ADD, Ximgproc.HDO_DESKEW);
+		Core.transpose(houghTransform, houghTransform);
+		Core.normalize(houghTransform, houghTransform, 0, 255, Core.NORM_MINMAX);
+		return houghTransform;
+	}
+
+	public static Mat fhtRemap(Mat houghTransform, int stripSize) {
+		Mat result = Mat.zeros(houghTransform.rows() - stripSize, 91, CvType.CV_64FC1);
+		// System.out.println(houghTransform);
+		for (double col = 0; col < 2 * stripSize - 1; col += 0.25)
+			for (int row = stripSize / 2; row < houghTransform.rows() - stripSize / 2; row++) {
+				double angle = Math.round(Math.atan((col - stripSize + 1) / (stripSize - 1)) / Math.PI * 180 + 45);
+				if (angle < 0 || angle > 90)
+					throw new IllegalStateException("Angle : " + angle);
+				else
+					result.put(row - stripSize / 2, (int) angle, Math.max(result.get(row - stripSize / 2, (int) Math.round(angle))[0], houghTransform.get(row, (int) col)[0]));
+			}
+		return result;
 	}
 
 	public static TrajectStep[] bestTraject(Mat projectionMap, double anglePenality, double pow) {
@@ -147,8 +169,8 @@ public class RadonTransform {
 		double[][] approxParams = new double[n][];
 		int x = 0;
 		for (int i = 0; i < n; i++) {
-			Mat radonTransform = transform(extractStrip(preprocessed, x, (int) w), minAngle, maxAngle);
-			Mat projMap = projectionMap(radonTransform, minAngle);
+			Mat radonTransform = radonTransform(extractStrip(preprocessed, x, (int) w), minAngle, maxAngle);
+			Mat projMap = radonRemap(radonTransform, minAngle);
 			Imgproc.morphologyEx(projMap, projMap, Imgproc.MORPH_GRADIENT, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(2, 4)));
 			angles[i] = bestTraject(projMap, anglePenalty, magnitudePow);
 			projMap.release();
@@ -209,7 +231,7 @@ public class RadonTransform {
 	public static List<OrientedPoint> toHorizontalOrientedPoints(Function<Double, Double> f, int vStrip, int stripWidth, int height, int step, int minAngle) {
 		List<OrientedPoint> orientedPoints = new ArrayList<>();
 		for (int k = 0; k <= height; k += step) {
-			double angle = (f.apply((double) k) - minAngle) / 180 * Math.PI;
+			double angle = (f.apply((double) k) + minAngle) / 180 * Math.PI;
 			orientedPoints.add(new OrientedPoint(new Point((vStrip + 1) * stripWidth / 2, k), angle, 1));
 		}
 		return orientedPoints;
@@ -218,39 +240,32 @@ public class RadonTransform {
 	public static List<OrientedPoint> toVerticalOrientedPoints(Function<Double, Double> f, int hStrip, int stripHeight, int width, int step, int minAngle) {
 		List<OrientedPoint> orientedPoints = new ArrayList<>();
 		for (int k = 0; k <= width; k += step) {
-			double angle = (90 + minAngle - f.apply((double) k)) / 180 * Math.PI;
+			double angle = (90 - minAngle - f.apply((double) k)) / 180 * Math.PI;
 			orientedPoints.add(new OrientedPoint(new Point(k, (hStrip + 1) * stripHeight / 2), angle, 1));
 		}
 		return orientedPoints;
 	}
 
-	public static List<OrientedPoint> toHorizontalFHTOrientedPoints(Function<Double, Double> f, int vStrip, int stripWidth, int height, int step, int minAngle) {
-		List<OrientedPoint> orientedPoints = new ArrayList<>();
-		for (int k = 0; k <= height; k += step) {
-			double angle = ((f.apply((double) k) / (2 * stripWidth - 1) * 90) - minAngle) / 180 * Math.PI;
-			orientedPoints.add(new OrientedPoint(new Point((vStrip + 1) * stripWidth / 2, k), angle, 1));
-		}
-		return orientedPoints;
-	}
-
-	public static List<OrientedPoint> toVerticalFHTOrientedPoints(Function<Double, Double> f, int hStrip, int stripHeight, int width, int step, int minAngle) {
-		List<OrientedPoint> orientedPoints = new ArrayList<>();
-		for (int k = 0; k <= width; k += step) {
-			double angle = (90 + minAngle - (f.apply((double) k) / (2 * stripHeight - 1) * 90)) / 180 * Math.PI;
-			orientedPoints.add(new OrientedPoint(new Point(k, (hStrip + 1) * stripHeight / 2), angle, 1));
-		}
-		return orientedPoints;
-	}
+	// public static List<OrientedPoint> toHorizontalFHTOrientedPoints(Function<Double, Double> f, int vStrip, int stripWidth, int height, int step, int minAngle) {
+	// List<OrientedPoint> orientedPoints = new ArrayList<>();
+	// for (int k = 0; k <= height; k += step) {
+	// double angle = ((f.apply((double) k) / (2 * stripWidth - 1) * 90) - minAngle) / 180 * Math.PI;
+	// orientedPoints.add(new OrientedPoint(new Point((vStrip + 1) * stripWidth / 2, k), angle, 1));
+	// }
+	// return orientedPoints;
+	// }
+	//
+	// public static List<OrientedPoint> toVerticalFHTOrientedPoints(Function<Double, Double> f, int hStrip, int stripHeight, int width, int step, int minAngle) {
+	// List<OrientedPoint> orientedPoints = new ArrayList<>();
+	// for (int k = 0; k <= width; k += step) {
+	// double angle = (90 + minAngle - (f.apply((double) k) / (2 * stripHeight - 1) * 90)) / 180 * Math.PI;
+	// orientedPoints.add(new OrientedPoint(new Point(k, (hStrip + 1) * stripHeight / 2), angle, 1));
+	// }
+	// return orientedPoints;
+	// }
 
 	private static boolean inImage(Point p, Mat img) {
 		return p.x >= 0 && p.y >= 0 && p.x < img.width() && p.y < img.height();
 	}
 
-	public static Mat fastHoughTransform(Mat vStrip, int stripSize) {
-		Mat houghTransform = new Mat();
-		Ximgproc.FastHoughTransform(vStrip, houghTransform, CvType.CV_64FC1, Ximgproc.ARO_45_135, Ximgproc.FHT_ADD, Ximgproc.HDO_DESKEW);
-		Core.transpose(houghTransform, houghTransform);
-		Core.normalize(houghTransform, houghTransform, 0, 255, Core.NORM_MINMAX);
-		return new Mat(houghTransform, new Range(stripSize / 2, houghTransform.height() - stripSize / 2), new Range(0, houghTransform.width()));
-	}
 }
