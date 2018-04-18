@@ -55,10 +55,25 @@ public class RadonTransform {
 		for (int k = 0; k < projectionMap.rows(); k++) {
 			for (int tetha = 0; tetha < projectionMap.cols(); tetha++) {
 				int p = (int) ((k - projectionMap.rows() / 2) * Math.sin(((double) tetha - minAngle) / 180 * Math.PI) + radon.rows() / 2);
-				projectionMap.put(k, tetha, radon.get(p, tetha)[0]);
+				projectionMap.put(k, tetha, Math.max(projectionMap.get(k, tetha)[0], radon.get(p, tetha)[0]));
 			}
 		}
 		return projectionMap;
+
+		// Mat projectionMap = Mat.zeros(radon.rows(), radon.cols(), CvType.CV_32FC1);
+		// Mat map_x = new Mat(radon.size(), CvType.CV_32FC1);
+		// Mat map_y = new Mat(radon.size(), CvType.CV_32FC1);
+		//
+		// for (float col = 0; col < radon.cols(); col++)
+		// for (int row = 0; row < radon.rows(); row++) {
+		// // float newCol = (int) Math.round((Math.asin(((double) row - radon.rows() / 2) / (col - radon.rows() / 2)) / Math.PI * 180 + minAngle));
+		// float newCol = (float) (((double) row - projectionMap.rows() / 2) * Math.sin((col - minAngle) / 180 * Math.PI) + radon.rows() / 2);
+		// map_x.put(row, (int) col, newCol);
+		// map_y.put(row, (int) col, row);
+		// }
+		// Imgproc.remap(radon, projectionMap, map_x, map_y, Imgproc.INTER_LINEAR, Core.BORDER_CONSTANT, new Scalar(0, 0, 0));
+		// return projectionMap;
+
 	}
 
 	public static Mat fastHoughTransform(Mat vStrip) {
@@ -195,7 +210,7 @@ public class RadonTransform {
 			// Start building line from the middle.
 			ys[n / 2] = i * yStep + .5 * yStep;
 			for (int j = n / 2; j <= n; j++) {
-				double theta = (f.apply(ys[j], approxParams[j - 1]) - minAngle) / 180 * Math.PI;
+				double theta = (f.apply(ys[j], approxParams[j - 1]) + minAngle) / 180 * Math.PI;
 				// Line passing by the point G at the middle of the strip with ordinate currY (x_G, y_G),
 				// making an angle of theta with the horizontal:
 				// y = y_G + (x - x_G) tan theta
@@ -207,7 +222,7 @@ public class RadonTransform {
 				}
 			}
 			for (int j = n / 2; j > 0; j--) {
-				double theta = (f.apply(ys[j], approxParams[j - 1]) - minAngle) / 180 * Math.PI;
+				double theta = (f.apply(ys[j], approxParams[j - 1]) + minAngle) / 180 * Math.PI;
 				ys[j - 1] = ys[j] - step * Math.tan(theta);
 			}
 
@@ -223,9 +238,9 @@ public class RadonTransform {
 		List<double[]> values = new ArrayList<>();
 		for (int k = 0; k < traj.length; k++)
 			values.add(new double[] { k, traj[k].theta, traj[k].magnitude });
-		BiFunction<Double, double[], Double> f = (x, params) -> params[0] + params[1] * x + params[2] * x * x;
+		BiFunction<Double, double[], Double> f = (x, params) -> params[0] + params[1] * x + params[2] * x * x + params[3] * x * x * x;
 		BiFunction<double[], double[], Double> error = (xy, params) -> (f.apply(xy[0], params) - xy[1]);
-		double[] params = new LevenbergImpl<>(error, values, new double[] { 0, 0, 0 }).getParams();
+		double[] params = new LevenbergImpl<>(error, values, new double[] { 0, 0, 0, 0 }).getParams();
 		return x -> f.apply(x, params);
 	}
 
