@@ -109,7 +109,7 @@ public class MeshGridRadon extends MeshGrid {
 				// of theta with the horizontal.
 				if (Math.abs(theta - Math.PI / 2) < angleTolerance || Math.abs(theta + Math.PI / 2) < angleTolerance) {
 					// Vertical line.
-					currLine[i] = new Point(p.x, hLine.value(x));
+					currLine[i] = new Point(p.x, hLine.value(p.x));
 				} else {
 					double d = Math.tan(theta);
 					// Equation of the “vertical” line:
