@@ -18,11 +18,11 @@ public class NativeLibraryLoader {
 	/**
 	 * Default library path. Can be overridden using {@link #load(String)} and providing the new path.
 	 */
-	private static final String libraryPath = "/usr/local/share/OpenCV/java/libopencv_java330.so";
+	private static final String libraryPath = "/usr/local/share/OpenCV/java/libopencv_java400.so";
 	/**
 	 * Path that is used when all other attempts have failed. Defaults to the folder where opencv was built.
 	 */
-	private static final String fallbackPath = System.getenv("HOME") + "/opencv/build/lib/libopencv_java330.so";
+	private static final String fallbackPath = System.getenv("HOME") + "/opencv/build/lib/libopencv_java400.so";
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
