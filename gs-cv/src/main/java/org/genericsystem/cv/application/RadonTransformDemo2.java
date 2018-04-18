@@ -1,5 +1,11 @@
 package org.genericsystem.cv.application;
 
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
@@ -8,12 +14,6 @@ import org.opencv.core.Mat;
 import org.opencv.core.Range;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
-
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -80,12 +80,17 @@ public class RadonTransformDemo2 extends AbstractApp {
 		long ref = System.currentTimeMillis();
 
 		Img binarized = superFrame.getFrame().adaptativeGaussianInvThreshold(7, 5);
+		// Img binarized = new Img(Mat.zeros(360, 640, CvType.CV_8UC1), false);
+		// double angle = -0 / 180 * Math.PI;
+		// Imgproc.line(binarized.getSrc(), new Point(320 - 40 * Math.cos(angle), 100 - 40 * Math.sin(angle)), new Point(320 + 40 * Math.cos(angle), 100 + 40 * Math.sin(angle)), new Scalar(255));
+		// Imgproc.line(binarized.getSrc(), new Point(320 - 40 * Math.cos(angle), 180 - 40 * Math.sin(angle)), new Point(320 + 40 * Math.cos(angle), 180 + 40 * Math.sin(angle)), new Scalar(255));
+		// Imgproc.line(binarized.getSrc(), new Point(320 - 40 * Math.cos(angle), 260 - 40 * Math.sin(angle)), new Point(320 + 40 * Math.cos(angle), 260 + 40 * Math.sin(angle)), new Scalar(255));
 
 		images[0] = binarized.toJfxImage();
 
 		ref = trace("Binarization", ref);
 
-		int stripWidth = 46;
+		int stripWidth = 72;
 		Mat vStrip = RadonTransform.extractStrip(binarized.getSrc(), binarized.width() / 2 - stripWidth / 2, stripWidth);
 
 		Mat vStripDisplay = Mat.zeros(binarized.size(), binarized.type());
@@ -94,37 +99,48 @@ public class RadonTransformDemo2 extends AbstractApp {
 		images[1] = new Img(vStripDisplay, false).toJfxImage();
 		ref = trace("Extract strip", ref);
 
-		Mat hough = RadonTransform.fastHoughTransform(vStrip, stripWidth);
-		images[3] = new Img(hough, false).toJfxImage();
-		ref = trace("FastHoughTransform", ref);
-		System.out.println(hough);
-		Imgproc.morphologyEx(hough, hough, Imgproc.MORPH_GRADIENT, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(1, 2)));
-		// Core.normalize(houghTransform, houghTransform, 0, 255, Core.NORM_MINMAX);
-		images[4] = new Img(hough, false).toJfxImage();
+		Mat houghTransform = RadonTransform.fastHoughTransform(vStrip);
+		ref = trace("FHT", ref);
 
-		TrajectStep[] houghVtraj = RadonTransform.bestTraject(hough, -10000, 3);
-		Mat vHoughColor = Mat.zeros(hough.size(), CvType.CV_8UC3);
-		hough.release();
+		// Mat hough = RadonTransform.fhtRemap(houghTransform, stripWidth);
+		images[3] = new Img(houghTransform, false).toJfxImage();
+
+		System.out.println(houghTransform);
+		Imgproc.morphologyEx(houghTransform, houghTransform, Imgproc.MORPH_GRADIENT, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(1, 2)));
+		// Core.normalize(houghTransform, houghTransform, 0, 255, Core.NORM_MINMAX);
+		images[4] = new Img(houghTransform, false).toJfxImage();
+
+		ref = trace("FHT compute", ref);
+		TrajectStep[] houghVtraj = RadonTransform.bestTraject(houghTransform, -5000, 3);
+		int stripSize = (houghTransform.width() + 1) / 2;
+		for (int y = 0; y < houghVtraj.length; y++)
+			houghVtraj[y].theta = (int) Math.round(Math.atan((double) (houghVtraj[y].theta - stripSize + 1) / (stripSize - 1)) / Math.PI * 180 + 45);
+
+		Mat vHoughColor = Mat.zeros(houghTransform.height() - stripWidth, 91, CvType.CV_8UC3);
+		houghTransform.release();
 		for (int y = 0; y < vHoughColor.height(); y++)
 			vHoughColor.put(y, houghVtraj[y].theta, 0, 0, 255);
 		ref = trace("Best traject hough", ref);
+
 		Function<Double, Double> approxHoughVFunction = RadonTransform.approxTraject(houghVtraj);
 		for (int y = 0; y < vHoughColor.height(); y++) {
 			int x = (int) Math.round(approxHoughVFunction.apply((double) y));
-			assert x >= 0 && x < vHoughColor.width() : x + " " + vHoughColor.width();
+			if (x < 0)
+				x = 0;
+			if (x >= vHoughColor.width())
+				x = vHoughColor.width() - 1;
 			vHoughColor.put(y, x, 0, 255, 0);
 		}
-		ref = trace("Display approx radon", ref);
+		ref = trace("Display approx hough", ref);
 		images[5] = new Img(vHoughColor, false).toJfxImage();
 
-		Mat vTransform = RadonTransform.transform(vStrip, 45, 45);
-		Mat vProjection = RadonTransform.projectionMap(vTransform, 45);
+		Mat vTransform = RadonTransform.radonTransform(vStrip, -45, 45);
+		Mat vProjection = RadonTransform.radonRemap(vTransform, -45);
 		images[6] = new Img(vProjection, false).toJfxImage();
 		System.out.println(vProjection);
-		ref = trace("Radon + Projection", ref);
-
 		Imgproc.morphologyEx(vProjection, vProjection, Imgproc.MORPH_GRADIENT, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(1, 2)));
 		// Core.normalize(vProjection, vProjection, 0, 255, Core.NORM_MINMAX);
+		ref = trace("Radon + Projection", ref);
 		images[7] = new Img(vProjection, false).toJfxImage();
 
 		TrajectStep[] vtraj = RadonTransform.bestTraject(vProjection, -10000, 3);
@@ -135,90 +151,23 @@ public class RadonTransformDemo2 extends AbstractApp {
 		Function<Double, Double> approxRadonVFunction = RadonTransform.approxTraject(vtraj);
 		for (int y = 0; y < vProjectionColor.height(); y++) {
 			int x = (int) Math.round(approxRadonVFunction.apply((double) y));
-			assert x >= 0 && x < vProjectionColor.width() : x + " " + vProjectionColor.width();
+			if (x < 0)
+				x = 0;
+			if (x >= vProjectionColor.width())
+				x = vProjectionColor.width() - 1;
 			vProjectionColor.put(y, x, 255, 0, 0);
-			x = (int) Math.round(approxHoughVFunction.apply((double) y) / (2 * stripWidth - 1) * 90);
-			assert x >= 0 && x < vProjectionColor.width() : x + " " + vProjectionColor.width();
+			x = (int) Math.round(approxHoughVFunction.apply((double) y));
+			if (x < 0)
+				x = 0;
+			if (x >= vProjectionColor.width())
+				x = vProjectionColor.width() - 1;
 			vProjectionColor.put(y, x, 0, 255, 0);
 		}
+		System.out.println("Radon : " + (vtraj[100].theta - 45));
+		System.out.println("Hough : " + (houghVtraj[100].theta - 45));
 		ref = trace("Display approx radon", ref);
 		images[8] = new Img(vProjectionColor, false).toJfxImage();
 
-		// ref = trace("Compute radons", ref);
-		//
-		// List<Mat> vProjectionMaps = vRadons.stream().map(radon -> RadonTransform.projectionMap(radon, minAngle)).collect(Collectors.toList());
-		// List<Mat> hProjectionMaps = hRadons.stream().map(radon -> RadonTransform.projectionMap(radon, minAngle)).collect(Collectors.toList());
-		//
-		// ref = trace("Compute projections", ref);
-		//
-		// vProjectionMaps.stream().forEach(projectionMap -> Imgproc.morphologyEx(projectionMap, projectionMap, Imgproc.MORPH_GRADIENT, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(1, 2))));
-		// hProjectionMaps.stream().forEach(projectionMap -> Imgproc.morphologyEx(projectionMap, projectionMap, Imgproc.MORPH_GRADIENT, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(1, 2))));
-		//
-		// ref = trace("Compute gradients", ref);
-		//
-		// List<int[]> vTrajs = vProjectionMaps.stream().map(projectionMap -> RadonTransform.bestTraject(projectionMap, -10000, 3)).collect(Collectors.toList());
-		// List<int[]> hTrajs = hProjectionMaps.stream().map(projectionMap -> RadonTransform.bestTraject(projectionMap, -10000, 3)).collect(Collectors.toList());
-		// ref = trace("Compute trajects", ref);
-		// List<Function<Double, Double>> approxVFunctions = vTrajs.stream().map(traj -> RadonTransform.approxTraject(traj)).collect(Collectors.toList());
-		// List<Function<Double, Double>> approxHFunctions = hTrajs.stream().map(traj -> RadonTransform.approxTraject(traj)).collect(Collectors.toList());
-		//
-		// ref = trace("Compute approxs", ref);
-		//
-		// int hStep = stripHeight / 2;
-		// int vStrip = 0;
-		// List<OrientedPoint> horizontals = new ArrayList<>();
-		// for (Function<Double, Double> f : approxVFunctions)
-		// horizontals.addAll(RadonTransform.toHorizontalOrientedPoints(f, vStrip++, stripWidth, binarized.height(), hStep, minAngle));
-		// int vStep = stripWidth / 2;
-		// int hStrip = 0;
-		// List<OrientedPoint> verticals = new ArrayList<>();
-		// for (Function<Double, Double> f : approxHFunctions)
-		// verticals.addAll(RadonTransform.toVerticalOrientedPoints(f, hStrip++, stripHeight, binarized.width(), vStep, minAngle));
-		//
-		// GeneralInterpolator interpolator = new GeneralInterpolator(horizontals, verticals, 6, 20);
-		//
-		// ref = trace("Prepare interpolator", ref);
-		//
-		// Img frameDisplay = superFrame.getDisplay();
-		// vStrip = 0;
-		// for (Function<Double, Double> f : approxVFunctions) {
-		// for (int k = hStep; k + hStep <= binarized.height(); k += hStep) {
-		// double angle = (f.apply((double) k) - minAngle) / 180 * Math.PI;
-		// Imgproc.line(frameDisplay.getSrc(), new Point((vStrip + 1) * stripWidth / 2 - Math.cos(angle) * stripWidth / 6, k - Math.sin(angle) * stripWidth / 6),
-		// new Point((vStrip + 1) * stripWidth / 2 + Math.cos(angle) * stripWidth / 6, k + Math.sin(angle) * stripWidth / 6), new Scalar(0, 255, 0), 2);
-		// angle = interpolator.interpolateHorizontals((vStrip + 1) * stripWidth / 2, k);
-		// Imgproc.line(frameDisplay.getSrc(), new Point((vStrip + 1) * stripWidth / 2 - Math.cos(angle) * stripWidth / 6, k - Math.sin(angle) * stripWidth / 6),
-		// new Point((vStrip + 1) * stripWidth / 2 + Math.cos(angle) * stripWidth / 6, k + Math.sin(angle) * stripWidth / 6), new Scalar(255, 0, 0), 2);
-		// }
-		// vStrip++;
-		// }
-		// hStrip = 0;
-		// for (Function<Double, Double> f : approxHFunctions) {
-		// for (int k = vStep; k + vStep <= binarized.width(); k += vStep) {
-		// double angle = (90 + minAngle - f.apply((double) k)) / 180 * Math.PI;
-		// Imgproc.line(frameDisplay.getSrc(), new Point(k - Math.cos(angle) * stripHeight / 6, (hStrip + 1) * stripHeight / 2 - Math.sin(angle) * stripHeight / 6),
-		// new Point(k + Math.cos(angle) * stripHeight / 6, (hStrip + 1) * stripHeight / 2 + Math.sin(angle) * stripHeight / 6), new Scalar(0, 0, 255), 2);
-		// angle = interpolator.interpolateVerticals(k, (hStrip + 1) * stripHeight / 2);
-		// Imgproc.line(frameDisplay.getSrc(), new Point(k - Math.cos(angle) * stripHeight / 6, (hStrip + 1) * stripHeight / 2 - Math.sin(angle) * stripHeight / 6),
-		// new Point(k + Math.cos(angle) * stripHeight / 6, (hStrip + 1) * stripHeight / 2 + Math.sin(angle) * stripHeight / 6), new Scalar(255, 0, 0), 2);
-		//
-		// }
-		// hStrip++;
-		// }
-		// images[1] = frameDisplay.toJfxImage();
-		//
-		// ref = trace("Display lines", ref);
-		//
-		// MeshGrid meshGrid = new MeshGrid(new Size(16, 9), interpolator, 20, 20, superFrame.getFrame().getSrc());
-		// meshGrid.build();
-		// ref = trace("Build mesh", ref);
-		// images[3] = new Img(meshGrid.drawOnCopy(new Scalar(0, 255, 0)), false).toJfxImage();
-		// ref = trace("Draw mesh", ref);
-		//
-		// Img dewarp = new Img(meshGrid.dewarp()).adaptativeGaussianInvThreshold(7, 3);
-		// images[4] = dewarp.toJfxImage();
-		// ref = trace("Dewarp", ref);
-		//
 		// // images[7] = new Img(RadonTransform.estimateBaselines(superFrame.getFrame().getSrc(), 0), false).toJfxImage();
 
 		return images;

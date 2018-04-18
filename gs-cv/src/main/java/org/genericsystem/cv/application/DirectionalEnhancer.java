@@ -1,15 +1,16 @@
 package org.genericsystem.cv.application;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.genericsystem.cv.Lines;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class DirectionalEnhancer {
 
@@ -23,6 +24,15 @@ public class DirectionalEnhancer {
 		return lines;
 	}
 
+	public static void drawFilteredLines(Mat binarized, Lines houghLines) {
+
+		Lines horizontalLines = new Lines(houghLines.getLines().stream().filter(l -> Math.abs(l.y2 - l.y1) < Math.abs(l.x2 - l.x1)).collect(Collectors.toList()));
+		horizontalLines.draw(binarized, new Scalar(255), 1);
+
+		Lines verticalLines = new Lines(houghLines.getLines().stream().filter(l -> Math.abs(l.y2 - l.y1) > Math.abs(l.x2 - l.x1)).collect(Collectors.toList()));
+		verticalLines.draw(binarized, new Scalar(255), 1);
+	}
+
 	public static Mat prepare(Mat frame) {
 		Mat mat = new Mat();
 		Imgproc.cvtColor(frame, mat, Imgproc.COLOR_BGR2GRAY);
@@ -30,10 +40,12 @@ public class DirectionalEnhancer {
 		Imgproc.adaptiveThreshold(mat, mat, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 51, 2);
 		Imgproc.morphologyEx(mat, mat, Imgproc.MORPH_CLOSE, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(9, 9)));
 		Imgproc.morphologyEx(mat, mat, Imgproc.MORPH_OPEN, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(5, 5)));
+
 		List<MatOfPoint> contours = new ArrayList<>();
 		Imgproc.findContours(mat, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 		for (MatOfPoint contour : contours)
 			Imgproc.drawContours(mat, Arrays.asList(contour), 0, new Scalar(255, 0, 0), -1);
+
 		Imgproc.morphologyEx(mat, mat, Imgproc.MORPH_GRADIENT, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(4, 4)));
 		return mat;
 	}

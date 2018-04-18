@@ -2,7 +2,7 @@ package org.genericsystem.cv.application;
 
 class TrajectStep {
 	public final int k;
-	public final int theta;
+	public int theta;
 	public final double magnitude;
 
 	public TrajectStep(int k, int theta, double magnitude) {
