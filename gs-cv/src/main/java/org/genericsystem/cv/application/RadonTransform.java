@@ -195,7 +195,7 @@ public class RadonTransform {
 			// Start building line from the middle.
 			ys[n / 2] = i * yStep + .5 * yStep;
 			for (int j = n / 2; j <= n; j++) {
-				double theta = (f.apply(ys[j], approxParams[j - 1]) - minAngle) / 180 * Math.PI;
+				double theta = (f.apply(ys[j], approxParams[j - 1]) + minAngle) / 180 * Math.PI;
 				// Line passing by the point G at the middle of the strip with ordinate currY (x_G, y_G),
 				// making an angle of theta with the horizontal:
 				// y = y_G + (x - x_G) tan theta
@@ -207,7 +207,7 @@ public class RadonTransform {
 				}
 			}
 			for (int j = n / 2; j > 0; j--) {
-				double theta = (f.apply(ys[j], approxParams[j - 1]) - minAngle) / 180 * Math.PI;
+				double theta = (f.apply(ys[j], approxParams[j - 1]) + minAngle) / 180 * Math.PI;
 				ys[j - 1] = ys[j] - step * Math.tan(theta);
 			}
 
