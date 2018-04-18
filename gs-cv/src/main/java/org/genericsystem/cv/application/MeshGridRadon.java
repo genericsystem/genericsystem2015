@@ -133,7 +133,6 @@ public class MeshGridRadon extends MeshGrid {
 	}
 
 	public Mat draw3Dsurface(Scalar colorStart, Scalar colorEnd) {
-		Mat clone = image.clone();
 		Map<Key, Point3[]> mesh3D = toPoint3d();
 		double xMin = Double.POSITIVE_INFINITY;
 		double yMin = Double.POSITIVE_INFINITY;
@@ -155,6 +154,9 @@ public class MeshGridRadon extends MeshGrid {
 			if (p3.z < zMin)
 				zMin = p3.z;
 		}
+		int newWidth = image.width();
+		int newHeight = (int) Math.ceil((yMax - yMin) * image.width() / (xMax - xMin));
+		Mat result = new Mat(newHeight, newWidth, CvType.CV_16SC3, new Scalar(0, 0, 0));
 		// Useless variables because of Java’s lack of closures...
 		double xMin_ = xMin;
 		double xMax_ = xMax;
@@ -162,14 +164,14 @@ public class MeshGridRadon extends MeshGrid {
 		double yMax_ = yMax;
 		double zMin_ = zMin;
 		double zMax_ = zMax;
-		List<Point3> normalizedPoints = points3D.stream().map(p -> normalize(p, 0, image.width() - 1, 0, image.height() - 1, xMin_, xMax_, yMin_, yMax_)).collect(Collectors.toList());
+		List<Point3> normalizedPoints = points3D.stream().map(p -> normalize(p, 0, result.width() - 1, 0, result.height() - 1, xMin_, xMax_, yMin_, yMax_)).collect(Collectors.toList());
 		Map<Key, Point3[]> normalizedMesh = normalize(mesh3D, normalizedPoints);
 		normalizedMesh.values().forEach(p -> {
 			Point[] p2 = new Point[] { new Point(p[0].x, p[0].y), new Point(p[1].x, p[1].y), new Point(p[2].x, p[2].y), new Point(p[3].x, p[3].y) };
 			double lambda = (p[0].z - zMin_) / (zMax_ - zMin_);
-			drawPolygon(clone, p2, combine(colorStart, colorEnd, lambda));
+			drawPolygon(result, p2, combine(colorStart, colorEnd, lambda));
 		});
-		return clone;
+		return result;
 	}
 
 	private Map<Key, Point3[]> normalize(Map<Key, Point3[]> mesh, List<Point3> newPoints) {
