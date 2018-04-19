@@ -1,5 +1,15 @@
 package org.genericsystem.cv.application;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.application.GeneralInterpolator.OrientedPoint;
@@ -9,15 +19,6 @@ import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -79,7 +80,7 @@ public class RadonTransformDemo extends AbstractApp {
 		if (!config.stabilizedMode) {
 			superFrame = gsCapture.read();
 		}
-		Image[] images = new Image[9];
+		Image[] images = new Image[20];
 
 		long ref = System.currentTimeMillis();
 
@@ -150,6 +151,23 @@ public class RadonTransformDemo extends AbstractApp {
 
 		ref = trace("Compute approxs", ref);
 
+		List<PolynomialSplineFunction> vRadonSplinesFunctions = RadonTransform.toPolynomialSplineFunction(approxVFunctions, binarized.getSrc().size(), 20, minAngle, vStrips.size(), 0.5f);
+		List<PolynomialSplineFunction> hRadonSplinesFunctions = RadonTransform.toPolynomialSplineFunction(approxHFunctions, transposedBinarized.getSrc().size(), 20, minAngle, hStrips.size(), 0.5f);
+		List<PolynomialSplineFunction> vFHTSplinesFunctions = RadonTransform.toPolynomialSplineFunction(approxVFHTFunctions, binarized.getSrc().size(), 20, minAngle, vStrips.size(), 0.5f);
+		List<PolynomialSplineFunction> hFHTSplinesFunctions = RadonTransform.toPolynomialSplineFunction(approxHFHTFunctions, transposedBinarized.getSrc().size(), 20, minAngle, hStrips.size(), 0.5f);
+
+		Mat image = superFrame.getFrame().getSrc().clone();
+		RadonTransform.displayHSplines(vRadonSplinesFunctions, image);
+		RadonTransform.displayVSplines(hRadonSplinesFunctions, image);
+		images[10] = new Img(image, false).toJfxImage();
+
+		Mat image2 = superFrame.getFrame().getSrc().clone();
+		RadonTransform.displayHSplines(vFHTSplinesFunctions, image2);
+		RadonTransform.displayVSplines(hFHTSplinesFunctions, image2);
+		images[11] = new Img(image2, false).toJfxImage();
+
+		ref = trace("Compute cubic spline lines", ref);
+
 		int hStep = stripHeight / 2;
 		int vStrip = 0;
 		List<OrientedPoint> horizontals = new ArrayList<>();
@@ -183,7 +201,7 @@ public class RadonTransformDemo extends AbstractApp {
 				double angle = (f.apply((double) k) - minAngle) / 180 * Math.PI;
 				Imgproc.line(frameDisplay.getSrc(), new Point((vStrip + 1) * stripWidth / 2 - Math.cos(angle) * stripWidth / 6, k - Math.sin(angle) * stripWidth / 6),
 						new Point((vStrip + 1) * stripWidth / 2 + Math.cos(angle) * stripWidth / 6, k + Math.sin(angle) * stripWidth / 6), new Scalar(0, 255, 0), 2);
-				angle = interpolator.interpolateHorizontals((vStrip + 1) * stripWidth / 2, k);
+				angle = interpolator.interpolateVerticals((vStrip + 1) * stripWidth / 2, k);
 				Imgproc.line(frameDisplay.getSrc(), new Point((vStrip + 1) * stripWidth / 2 - Math.cos(angle) * stripWidth / 6, k - Math.sin(angle) * stripWidth / 6),
 						new Point((vStrip + 1) * stripWidth / 2 + Math.cos(angle) * stripWidth / 6, k + Math.sin(angle) * stripWidth / 6), new Scalar(255, 0, 0), 2);
 			}
@@ -196,7 +214,7 @@ public class RadonTransformDemo extends AbstractApp {
 				double angle = (90 + minAngle - f.apply((double) k)) / 180 * Math.PI;
 				Imgproc.line(frameDisplay.getSrc(), new Point(k - Math.cos(angle) * stripHeight / 6, (hStrip + 1) * stripHeight / 2 - Math.sin(angle) * stripHeight / 6),
 						new Point(k + Math.cos(angle) * stripHeight / 6, (hStrip + 1) * stripHeight / 2 + Math.sin(angle) * stripHeight / 6), new Scalar(0, 0, 255), 2);
-				angle = interpolator.interpolateVerticals(k, (hStrip + 1) * stripHeight / 2);
+				angle = interpolator.interpolateHorizontals(k, (hStrip + 1) * stripHeight / 2);
 				Imgproc.line(frameDisplay.getSrc(), new Point(k - Math.cos(angle) * stripHeight / 6, (hStrip + 1) * stripHeight / 2 - Math.sin(angle) * stripHeight / 6),
 						new Point(k + Math.cos(angle) * stripHeight / 6, (hStrip + 1) * stripHeight / 2 + Math.sin(angle) * stripHeight / 6), new Scalar(255, 0, 0), 2);
 
@@ -213,7 +231,7 @@ public class RadonTransformDemo extends AbstractApp {
 				double angle = (f.apply((double) k) - minAngle) / 180 * Math.PI;
 				Imgproc.line(frameDisplayFHT.getSrc(), new Point((vStrip + 1) * stripWidth / 2 - Math.cos(angle) * stripWidth / 6, k - Math.sin(angle) * stripWidth / 6),
 						new Point((vStrip + 1) * stripWidth / 2 + Math.cos(angle) * stripWidth / 6, k + Math.sin(angle) * stripWidth / 6), new Scalar(0, 255, 0), 2);
-				angle = interpolatorFHT.interpolateHorizontals((vStrip + 1) * stripWidth / 2, k);
+				angle = interpolatorFHT.interpolateVerticals((vStrip + 1) * stripWidth / 2, k);
 				Imgproc.line(frameDisplayFHT.getSrc(), new Point((vStrip + 1) * stripWidth / 2 - Math.cos(angle) * stripWidth / 6, k - Math.sin(angle) * stripWidth / 6),
 						new Point((vStrip + 1) * stripWidth / 2 + Math.cos(angle) * stripWidth / 6, k + Math.sin(angle) * stripWidth / 6), new Scalar(255, 0, 0), 2);
 			}
@@ -225,7 +243,7 @@ public class RadonTransformDemo extends AbstractApp {
 				double angle = (90 + minAngle - (f.apply((double) k))) / 180 * Math.PI;
 				Imgproc.line(frameDisplayFHT.getSrc(), new Point(k - Math.cos(angle) * stripHeight / 6, (hStrip + 1) * stripHeight / 2 - Math.sin(angle) * stripHeight / 6),
 						new Point(k + Math.cos(angle) * stripHeight / 6, (hStrip + 1) * stripHeight / 2 + Math.sin(angle) * stripHeight / 6), new Scalar(0, 0, 255), 2);
-				angle = interpolatorFHT.interpolateVerticals(k, (hStrip + 1) * stripHeight / 2);
+				angle = interpolatorFHT.interpolateHorizontals(k, (hStrip + 1) * stripHeight / 2);
 				Imgproc.line(frameDisplayFHT.getSrc(), new Point(k - Math.cos(angle) * stripHeight / 6, (hStrip + 1) * stripHeight / 2 - Math.sin(angle) * stripHeight / 6),
 						new Point(k + Math.cos(angle) * stripHeight / 6, (hStrip + 1) * stripHeight / 2 + Math.sin(angle) * stripHeight / 6), new Scalar(255, 0, 0), 2);
 
