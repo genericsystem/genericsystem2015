@@ -200,6 +200,7 @@ public class RadonTransform {
 			xs[i + 1] = x + .5 * w;
 			x += step;
 		}
+		xs[n + 1] = imageSize.width - 1;
 		int lines = (int) ((imageSize.height - 1) / yStep + 1);
 		List<PolynomialSplineFunction> hLines = new ArrayList<>();
 		for (int i = 0; i < lines; i++) {
