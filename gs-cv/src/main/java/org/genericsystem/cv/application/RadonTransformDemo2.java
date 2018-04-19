@@ -1,19 +1,20 @@
 package org.genericsystem.cv.application;
 
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
-
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
+import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Range;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
+
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -107,11 +108,12 @@ public class RadonTransformDemo2 extends AbstractApp {
 
 		System.out.println(houghTransform);
 		Imgproc.morphologyEx(houghTransform, houghTransform, Imgproc.MORPH_GRADIENT, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(1, 2)));
-		// Core.normalize(houghTransform, houghTransform, 0, 255, Core.NORM_MINMAX);
+		Core.normalize(houghTransform, houghTransform, 0, 255, Core.NORM_MINMAX);
 		images[4] = new Img(houghTransform, false).toJfxImage();
 
 		ref = trace("FHT compute", ref);
-		TrajectStep[] houghVtraj = RadonTransform.bestTraject(houghTransform, -5000, 3);
+		TrajectStep[] houghVtraj = RadonTransform.bestTraject(houghTransform, -10000, 3);
+
 		int stripSize = (houghTransform.width() + 1) / 2;
 		for (int y = 0; y < houghVtraj.length; y++)
 			houghVtraj[y].theta = (int) Math.round(Math.atan((double) (houghVtraj[y].theta - stripSize + 1) / (stripSize - 1)) / Math.PI * 180 + 45);
@@ -139,7 +141,7 @@ public class RadonTransformDemo2 extends AbstractApp {
 		images[6] = new Img(vProjection, false).toJfxImage();
 		System.out.println(vProjection);
 		Imgproc.morphologyEx(vProjection, vProjection, Imgproc.MORPH_GRADIENT, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(1, 2)));
-		// Core.normalize(vProjection, vProjection, 0, 255, Core.NORM_MINMAX);
+		Core.normalize(vProjection, vProjection, 0, 255, Core.NORM_MINMAX);
 		ref = trace("Radon + Projection", ref);
 		images[7] = new Img(vProjection, false).toJfxImage();
 
@@ -167,8 +169,6 @@ public class RadonTransformDemo2 extends AbstractApp {
 		System.out.println("Hough : " + (houghVtraj[100].theta - 45));
 		ref = trace("Display approx radon", ref);
 		images[8] = new Img(vProjectionColor, false).toJfxImage();
-
-		// // images[7] = new Img(RadonTransform.estimateBaselines(superFrame.getFrame().getSrc(), 0), false).toJfxImage();
 
 		return images;
 

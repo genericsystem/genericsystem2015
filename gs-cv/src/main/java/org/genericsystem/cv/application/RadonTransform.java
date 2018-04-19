@@ -1,11 +1,5 @@
 package org.genericsystem.cv.application;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.genericsystem.cv.Img;
@@ -23,6 +17,11 @@ import org.opencv.imgproc.Imgproc;
 import org.opencv.ximgproc.Ximgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public class RadonTransform {
 
@@ -166,71 +165,63 @@ public class RadonTransform {
 	}
 
 	public static List<PolynomialSplineFunction> estimateBaselines(Mat image, double anglePenalty, int minAngle, int maxAngle, double magnitudePow, int yStep) {
-		Mat preprocessed = new Img(image, false).adaptativeGaussianInvThreshold(5, 3).getSrc();
-		List<PolynomialSplineFunction> hLines = new ArrayList<>();
-		// Number of overlapping vertical strips.
-		int n = 20;
-		// Overlap ratio between two consecutive strips.
-		float r = .5f;
-		// w = width of a vertical strip.
-		// Image width = [n(1 - r) + r] w
-		double w = (image.width() / (n * (1 - r) + r));
-		double step = (int) ((1 - r) * w);
-		TrajectStep[][] angles = new TrajectStep[n][];
 
-		// 0, center of each vertical strip, image.width() - 1
-		double[] xs = new double[n + 2];
+		int n = 20;// Number of overlapping vertical strips.
+		float r = .5f;// Overlap ratio between two consecutive strips.
+		double w = (image.width() / (n * (1 - r) + r));// w = width of a vertical strip.
+		double step = (int) ((1 - r) * w);// Image width = [n(1 - r) + r] w
 
-		BiFunction<Double, double[], Double> f = (y, params) -> params[0] + params[1] * y + params[2] * y * y;
-		double[][] approxParams = new double[n][];
 		int x = 0;
+		Function<Double, Double>[] approxFunctions = new Function[n];
+		Mat preprocessed = new Img(image, false).adaptativeGaussianInvThreshold(5, 3).getSrc();
 		for (int i = 0; i < n; i++) {
 			Mat radonTransform = radonTransform(extractStrip(preprocessed, x, (int) w), minAngle, maxAngle);
 			Mat projMap = radonRemap(radonTransform, minAngle);
 			Imgproc.morphologyEx(projMap, projMap, Imgproc.MORPH_GRADIENT, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(2, 4)));
-			angles[i] = bestTraject(projMap, anglePenalty, magnitudePow);
+			TrajectStep[] angles = bestTraject(projMap, anglePenalty, magnitudePow);
 			projMap.release();
 			radonTransform.release();
+			approxFunctions[i] = approxTraject(angles);
+			x += step;
+		}
 
-			List<double[]> values = new ArrayList<>();
-			for (int k = 0; k < image.height(); k++)
-				values.add(new double[] { k, angles[i][k].theta, angles[i][k].magnitude });
-			approxParams[i] = LevenbergImpl.fromBiFunction(f, values, new double[] { 0, 0, 0 }).getParams();
+		return toPolynomialSplineFunction(approxFunctions, image.size(), yStep, minAngle, n, r);
+	}
+
+	static List<PolynomialSplineFunction> toPolynomialSplineFunction(Function<Double, Double>[] approxFunctions, Size imageSize, int yStep, int minAngle, int n, float recover) {
+		double w = (imageSize.width / (n * (1 - recover) + recover));
+		double step = (int) ((1 - recover) * w);
+
+		// 0, center of each vertical strip, image.width() - 1
+		double[] xs = new double[n + 2];
+
+		int x = 0;
+		for (int i = 0; i < n; i++) {
 			xs[i + 1] = x + .5 * w;
 			x += step;
 		}
-		xs[n + 1] = image.width() - 1;
-
-		int lines = (image.height() - 1) / yStep + 1;
-
-		logger.info("Image width {}, xs {}, step {}, w {}", image.width(), Arrays.toString(xs), step, w);
-
+		int lines = (int) ((imageSize.height - 1) / yStep + 1);
+		List<PolynomialSplineFunction> hLines = new ArrayList<>();
 		for (int i = 0; i < lines; i++) {
 			double[] ys = new double[n + 2];
 			// Start building line from the middle.
 			ys[n / 2] = i * yStep + .5 * yStep;
 			for (int j = n / 2; j <= n; j++) {
-				double theta = (f.apply(ys[j], approxParams[j - 1]) + minAngle) / 180 * Math.PI;
+				double theta = (approxFunctions[j - 1].apply(ys[j]) + minAngle) / 180 * Math.PI;
 				// Line passing by the point G at the middle of the strip with ordinate currY (x_G, y_G),
 				// making an angle of theta with the horizontal:
 				// y = y_G + (x - x_G) tan theta
 				if (j == n)
-					ys[n + 1] = ys[n] + (image.width() - 1 - xs[j]) * Math.tan(theta);
-				else {
-					// Ordinate of the next point:
+					ys[n + 1] = ys[n] + (imageSize.width - 1 - xs[j]) * Math.tan(theta);
+				else
 					ys[j + 1] = ys[j] + step * Math.tan(theta);
-				}
 			}
 			for (int j = n / 2; j > 0; j--) {
-				double theta = (f.apply(ys[j], approxParams[j - 1]) + minAngle) / 180 * Math.PI;
+				double theta = (approxFunctions[j - 1].apply(ys[j]) + minAngle) / 180 * Math.PI;
 				ys[j - 1] = ys[j] - step * Math.tan(theta);
 			}
-
-			// Approximate line with polynomial curve.
-			PolynomialSplineFunction psf = new LinearInterpolator().interpolate(xs, ys);
-			hLines.add(psf);
+			hLines.add(new LinearInterpolator().interpolate(xs, ys));
 		}
-
 		return hLines;
 	}
 
