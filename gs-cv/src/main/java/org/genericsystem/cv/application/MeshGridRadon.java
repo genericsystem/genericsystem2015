@@ -7,6 +7,7 @@ import org.apache.commons.math3.analysis.function.Identity;
 import org.apache.commons.math3.analysis.function.Minus;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.apache.commons.math3.analysis.solvers.BisectionSolver;
+import org.apache.commons.math3.analysis.solvers.UnivariateSolverUtils;
 import org.genericsystem.cv.Svd;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
@@ -100,26 +101,12 @@ public class MeshGridRadon extends MeshGrid {
 		// Build j-th vertical line.
 		for (int j = 0, x = 0; j < nVerts; j++, x += xStep) {
 			Point[] currLine = new Point[nLines];
-			currLine[0] = new Point(x, hLines.get(0).value(x));
-			for (int i = 1; i < nLines; i++) {
-				double theta = interpolator.interpolate(currLine[i - 1].x, currLine[i - 1].y);
-				Point p = currLine[i - 1];
-				PolynomialSplineFunction hLine = hLines.get(i);
-				// Find intersection between hLine and a line through p making an angle
-				// of theta with the horizontal.
-				if (Math.abs(theta - Math.PI / 2) < angleTolerance || Math.abs(theta + Math.PI / 2) < angleTolerance) {
-					// Vertical line.
-					currLine[i] = new Point(p.x, hLine.value(p.x));
-				} else {
-					double d = Math.tan(theta);
-					// Equation of the “vertical” line:
-					// y = yPrev + (x - xPrev) tan(theta) = yPrev - xPrev * tan(theta) + tan(theta) * x
-					UnivariateDifferentiableFunction vLine = FunctionUtils.add(new Constant(p.y - p.x * d), FunctionUtils.multiply((UnivariateDifferentiableFunction) new Identity(), new Constant(d)));
-					// The intersection is at the point where the following function is zero:
-					UnivariateDifferentiableFunction f = FunctionUtils.add(hLine, FunctionUtils.compose(new Minus(), vLine));
-					double newX = new BisectionSolver().solve(100, f, Math.max(p.x - xStep, 0), Math.min(p.x + xStep, image.width() - 1), p.x);
-					currLine[i] = new Point(newX, vLine.value(newX));
-				}
+			currLine[nLines / 2] = new Point(x, hLines.get(nLines / 2).value(x));
+			for (int i = nLines / 2 + 1; i < nLines; i++) {
+				currLine[i] = findIntersection(i, currLine[i - 1], prevLine, interpolator, hLines);
+			}
+			for (int i = nLines / 2 - 1; i >= 0; i--) {
+				currLine[i] = findIntersection(i, currLine[i + 1], prevLine, interpolator, hLines);
 			}
 
 			// Add the quadrilaterals to the mesh.
@@ -130,6 +117,32 @@ public class MeshGridRadon extends MeshGrid {
 			points.addAll(Arrays.asList(currLine));
 			prevLine = currLine;
 		}
+	}
+
+	private Point findIntersection(int hLineNum, Point prevPoint, Point[] prevLine, VerticalInterpolator interpolator, List<PolynomialSplineFunction> hLines) {
+		double newX;
+		double angleTolerance = Math.PI / 360;
+		double theta = interpolator.interpolate(prevPoint.x, prevPoint.y);
+		PolynomialSplineFunction hLine = hLines.get(hLineNum);
+		// Find intersection between hLine and a line through p making an angle
+		// of theta with the horizontal.
+		if (Math.abs(theta - Math.PI / 2) < angleTolerance || Math.abs(theta + Math.PI / 2) < angleTolerance) {
+			// Vertical line.
+			newX = prevPoint.x;
+		} else {
+			double d = Math.tan(theta);
+			// Equation of the “vertical” line:
+			// y = yPrev + (x - xPrev) tan(theta) = yPrev - xPrev * tan(theta) + tan(theta) * x
+			UnivariateDifferentiableFunction vLine = FunctionUtils.add(new Constant(prevPoint.y - prevPoint.x * d), FunctionUtils.multiply((UnivariateDifferentiableFunction) new Identity(), new Constant(d)));
+			// The intersection is at the point where the following function is zero:
+			UnivariateDifferentiableFunction f = FunctionUtils.add(hLine, FunctionUtils.compose(new Minus(), vLine));
+
+			if (UnivariateSolverUtils.isBracketing(f, Math.max(prevPoint.x - xStep, 0), Math.min(prevPoint.x + xStep, image.width() - 1))) {
+				newX = new BisectionSolver().solve(100, f, Math.max(prevPoint.x - xStep, 0), Math.min(prevPoint.x + xStep, image.width() - 1), prevPoint.x);
+			} else
+				newX = prevPoint.x;
+		}
+		return new Point(newX, hLine.value(newX));
 	}
 
 	public Mat draw3Dsurface(Scalar colorStart, Scalar colorEnd) {
