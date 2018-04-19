@@ -42,6 +42,7 @@ public class RadonTransformDemo extends AbstractApp {
 	private ScheduledExecutorService timer = new BoundedScheduledThreadPoolExecutor();
 	private Config config = new Config();
 	private final ImageView[][] imageViews = new ImageView[][] { new ImageView[3], new ImageView[3], new ImageView[3], new ImageView[3] };
+	private int frameCount = 0;
 
 	private void startTimer() {
 		timer.scheduleAtFixedRate(() -> {
@@ -79,6 +80,7 @@ public class RadonTransformDemo extends AbstractApp {
 		System.out.println("do work");
 		if (!config.stabilizedMode) {
 			superFrame = gsCapture.read();
+			frameCount++;
 		}
 		Image[] images = new Image[20];
 
@@ -91,6 +93,8 @@ public class RadonTransformDemo extends AbstractApp {
 
 		images[0] = binarized.toJfxImage();
 
+		if (frameCount < 20)
+			return images;
 		Img transposedBinarized = binarized.transpose();
 
 		ref = trace("Binarization", ref);
@@ -159,6 +163,13 @@ public class RadonTransformDemo extends AbstractApp {
 		Mat image = superFrame.getFrame().getSrc().clone();
 		RadonTransform.displayHSplines(vRadonSplinesFunctions, image);
 		RadonTransform.displayVSplines(hRadonSplinesFunctions, image);
+
+		Point[][] intersections = new SplineMeshGrid(20, 20, image).build(hRadonSplinesFunctions, vRadonSplinesFunctions);
+		for (int col = 0; col < intersections.length; col++)
+			for (int row = 0; row < intersections[col].length; row++)
+				if (intersections[col][row] != null)
+					Imgproc.circle(image, intersections[col][row], 3, new Scalar(0, 0, 255), -1);
+
 		images[10] = new Img(image, false).toJfxImage();
 
 		Mat image2 = superFrame.getFrame().getSrc().clone();
