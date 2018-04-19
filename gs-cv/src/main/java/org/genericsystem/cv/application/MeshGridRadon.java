@@ -44,8 +44,9 @@ public class MeshGridRadon extends MeshGrid {
 		super(image, border, border);
 		this.xStep = xStep;
 		this.yStep = yStep;
-		nLines = (image.height() - 1) / yStep + 1;
-		nVerts = (image.width() - 1) / xStep + 1;
+		// Use this.image to take the borders into account.
+		nLines = (this.image.height() - 1) / yStep + 1;
+		nVerts = (this.image.width() - 1) / xStep + 1;
 	}
 
 	private int[][] toRectIndices() {
