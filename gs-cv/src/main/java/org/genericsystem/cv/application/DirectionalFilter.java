@@ -99,7 +99,6 @@ public class DirectionalFilter extends AbstractApp {
 	}
 
 	public Mat addDirs(Mat img, int[][] dirs, int nSide, int nBin, List<Integer> patchXs, List<Integer> patchYs) {
-		// TODO: Modify findSecondDirection so it returns these lists.
 		Mat imgDirs = new Mat();
 		img.copyTo(imgDirs);
 		imgDirs.convertTo(imgDirs, CvType.CV_8SC3);
