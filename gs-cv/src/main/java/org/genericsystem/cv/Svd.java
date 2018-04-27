@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.math3.util.Precision;
+import org.genericsystem.cv.utils.GPUTools;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
@@ -88,15 +89,9 @@ public class Svd {
 		// solve the homogenous equation Az = 0
 		// [U, D, V] = svd(A + sqrt(lambda) * B);
 		// [minSingularValue, minIndex] = min(diag(D));
-		Mat dst = new Mat();
-		Core.gemm(A.t(), A, 1, new Mat(), 0, dst);
-		Mat dst2 = new Mat();
-
-		Core.gemm(B.t(), B, 1, new Mat(), 0, dst2);
-		Mat M = new Mat();
-
-		// Mat M = A.t() * A + lambda * B.t() * B;
-		Core.addWeighted(dst, 1, dst2, lambda, 0, M);
+		Mat dst = GPUTools.gemm(A, A, Core.GEMM_1_T);
+		Mat dst2 = GPUTools.gemm(B, B, Core.GEMM_1_T);
+		Mat M = GPUTools.addWeighted(dst, 1, dst2, lambda, 0);
 
 		Mat eigenValues = new Mat();
 		Mat eigenVectors = new Mat();
