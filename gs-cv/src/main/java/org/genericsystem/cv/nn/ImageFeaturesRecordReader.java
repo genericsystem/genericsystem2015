@@ -8,15 +8,15 @@ import org.datavec.api.util.ndarray.RecordConverter;
 import org.datavec.api.writable.Writable;
 import org.datavec.image.recordreader.BaseImageRecordReader;
 import org.genericsystem.cv.Img;
+import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
-import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Size;
 
 public class ImageFeaturesRecordReader extends BaseImageRecordReader {
 	static {
-		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+		NativeLibraryLoader.load();
 	}
 
 	private static final long serialVersionUID = 4031311017700609257L;
