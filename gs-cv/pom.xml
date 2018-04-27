@@ -19,6 +19,11 @@
 		<opencv-libraries>/usr/local/share/OpenCV/java/</opencv-libraries>
 		<opencv-jar>${opencv-libraries}/opencv-400.jar</opencv-jar>
 		<opencv-native-library>${opencv-libraries}/libopencv_java400.so</opencv-native-library>
+		<javacpp.version>1.4.1-SNAPSHOT</javacpp.version>
+		<javacpp.parser.skip>true</javacpp.parser.skip>     <!-- To skip header file parsing phase: -Djavacpp.parser.skip=true -->
+		<!-- Set the following to false to activate Java CPP. -->
+		<javacpp.compiler.skip>true</javacpp.compiler.skip> <!-- To skip native compilation phase: -Djavacpp.compiler.skip=true -->
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
 	<build>
@@ -119,21 +124,28 @@
 							<pluginExecutions>
 								<pluginExecution>
 									<pluginExecutionFilter>
-										<groupId>
-											org.apache.maven.plugins
-										</groupId>
-										<artifactId>
-											maven-install-plugin
-										</artifactId>
-										<versionRange>
-											[2.5.2,)
-										</versionRange>
+										<groupId>org.apache.maven.plugins</groupId>
+										<artifactId>maven-install-plugin</artifactId>
+										<versionRange>[2.5.2,)</versionRange>
 										<goals>
 											<goal>install-file</goal>
 										</goals>
 									</pluginExecutionFilter>
 									<action>
 										<ignore></ignore>
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>org.bytedeco</groupId>
+										<artifactId>javacpp</artifactId>
+										<versionRange>[1.4,)</versionRange>
+										<goals>
+											<goal>build</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<execute></execute>
 									</action>
 								</pluginExecution>
 							</pluginExecutions>
@@ -143,6 +155,65 @@
 			</plugins>
 		</pluginManagement>
 
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.7.0</version>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.bytedeco</groupId>
+				<artifactId>javacpp</artifactId>
+				<version>${javacpp.version}</version>
+				<configuration>
+					<properties>${javacpp.platform}</properties>
+					<propertyKeysAndValues>
+						<property>
+							<name>platform.root</name>
+							<value>${javacpp.platform.root}</value>
+						</property>
+						<property>
+							<name>platform.compiler</name>
+							<value>${javacpp.platform.compiler}</value>
+						</property>
+					</propertyKeysAndValues>
+					<classPath>${project.build.outputDirectory}</classPath>
+					<includePath>${basedir}/src/include/</includePath>
+					<linkPath>${basedir}/cppbuild/${javacpp.platform}/lib/</linkPath>
+					<preloadPath>${basedir}/cppbuild/${javacpp.platform}/bin/</preloadPath>
+				</configuration>
+				<executions>
+					<execution>
+						<id>javacpp.parser</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>build</goal>
+						</goals>
+						<configuration>
+							<skip>${javacpp.parser.skip}</skip>
+							<outputDirectory>${project.build.sourceDirectory}</outputDirectory>
+							<classOrPackageName>org.genericsystem.cv.utils.NativeMethods</classOrPackageName>
+						</configuration>
+					</execution>
+					<execution>
+						<id>javacpp.compiler</id>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>build</goal>
+						</goals>
+						<configuration>
+							<skip>${javacpp.compiler.skip}</skip>
+							<classOrPackageName>org.genericsystem.cv.utils.NativeMethods</classOrPackageName>
+							<copyLibs>true</copyLibs>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
 	</build>
 
 	<dependencies>
@@ -178,7 +249,7 @@
 			<artifactId>gs-reactor</artifactId>
 			<version>4.0-SNAPSHOT</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.genericsystem</groupId>
 			<artifactId>gs-reinforcer</artifactId>
@@ -189,6 +260,12 @@
 			<groupId>org.deeplearning4j</groupId>
 			<artifactId>deeplearning4j-core</artifactId>
 			<version>${deeplearning4j.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.bytedeco.javacpp-presets</groupId>
+					<artifactId>opencv-platform</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<dependency>
@@ -204,6 +281,12 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.bytedeco</groupId>
+			<artifactId>javacpp</artifactId>
+			<version>${javacpp.version}</version>
+		</dependency>
+
+		<dependency>
 			<groupId>org.testng</groupId>
 			<artifactId>testng</artifactId>
 			<scope>test</scope>
@@ -215,6 +298,5 @@
 			<artifactId>commons-pool2</artifactId>
 			<version>2.4.2</version>
 		</dependency>
-
 	</dependencies>
 </project>
