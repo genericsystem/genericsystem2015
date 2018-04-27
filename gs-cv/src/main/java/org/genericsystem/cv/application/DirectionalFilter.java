@@ -70,8 +70,8 @@ public class DirectionalFilter extends AbstractApp {
 
 			double[] histo = getHistogram(mag, bin, nBin);
 
-			double maxValue = Double.MIN_VALUE;
-			double nbin = Double.MIN_VALUE;
+			double maxValue = Double.NEGATIVE_INFINITY;
+			double nbin = Double.NEGATIVE_INFINITY;
 			for (int row = 0; row < histo.length; row++) {
 				double value = histo[row];
 				// System.out.print((int) value + " ");

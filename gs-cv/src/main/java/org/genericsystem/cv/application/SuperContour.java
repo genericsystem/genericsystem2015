@@ -90,7 +90,7 @@ public class SuperContour implements Comparable<SuperContour> {
 		double[] histos = df.getHistogram(new Mat(mag, rangey, rangex), df.subArray(bin, rangey, rangex), nBin);
 		int targetAngle = (int) (antiAngle / Math.PI * 64);
 		// System.out.println("Angle " + angle / Math.PI * 180 + " Antiangle : " + antiAngle / Math.PI * 180);
-		double max = Double.MIN_VALUE;
+		double max = Double.NEGATIVE_INFINITY;
 		int k = -1;
 		// System.out.println(targetAngle);
 		for (int i = 0; i < histos.length; i++) {
