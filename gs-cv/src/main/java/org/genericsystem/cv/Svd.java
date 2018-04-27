@@ -112,9 +112,9 @@ public class Svd {
 			sum += result.get(0, 3 * i + 2)[0];
 
 		for (int i = 0; i < pts.size(); i++) {
-			pts.get(i).x = sum > 0 ? -result.get(0, 3 * i)[0] : result.get(0, 3 * i)[0];
-			pts.get(i).y = sum > 0 ? -result.get(0, 3 * i + 1)[0] : result.get(0, 3 * i + 1)[0];
-			pts.get(i).z = sum > 0 ? -result.get(0, 3 * i + 2)[0] : result.get(0, 3 * i + 2)[0];
+			pts.get(i).x = sum > 0 ? result.get(0, 3 * i)[0] : -result.get(0, 3 * i)[0];
+			pts.get(i).y = sum > 0 ? result.get(0, 3 * i + 1)[0] : -result.get(0, 3 * i + 1)[0];
+			pts.get(i).z = sum > 0 ? result.get(0, 3 * i + 2)[0] : -result.get(0, 3 * i + 2)[0];
 		}
 
 		// normalize it back
