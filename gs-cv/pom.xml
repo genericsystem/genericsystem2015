@@ -19,7 +19,7 @@
 		<opencv-libraries>/usr/local/share/OpenCV/java/</opencv-libraries>
 		<opencv-jar>${opencv-libraries}/opencv-400.jar</opencv-jar>
 		<opencv-native-library>${opencv-libraries}/libopencv_java400.so</opencv-native-library>
-		<javacpp.version>1.4.1-SNAPSHOT</javacpp.version>
+		<javacpp.version>1.4.1</javacpp.version>
 		<javacpp.parser.skip>true</javacpp.parser.skip>     <!-- To skip header file parsing phase: -Djavacpp.parser.skip=true -->
 		<!-- Set the following to false to activate Java CPP. -->
 		<javacpp.compiler.skip>true</javacpp.compiler.skip> <!-- To skip native compilation phase: -Djavacpp.compiler.skip=true -->
