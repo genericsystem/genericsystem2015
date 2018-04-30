@@ -1,5 +1,10 @@
 package org.genericsystem.cv.application;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.genericsystem.cv.Img;
@@ -14,14 +19,10 @@ import org.opencv.core.Range;
 import org.opencv.core.Rect;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.utils.Converters;
 import org.opencv.ximgproc.Ximgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 
 public class RadonTransform {
 
@@ -123,7 +124,7 @@ public class RadonTransform {
 					bestScore4Pos = scoreFromNextTheta + anglePenality;
 					thetaPrev[k][theta] = theta + 1;
 				}
-				score[k][theta] = Math.pow(magnitude, pow) + bestScore4Pos;
+				score[k][theta] = magnitude + bestScore4Pos;
 			}
 		}
 
@@ -155,7 +156,7 @@ public class RadonTransform {
 
 	public static List<Mat> extractStrips(Mat src, int stripWidth) {
 		List<Mat> strips = new ArrayList<>();
-		for (int col = 0; col + stripWidth <= src.cols(); col += stripWidth / 2)
+		for (int col = 0; col + stripWidth < src.cols(); col += stripWidth / 2)
 			strips.add(extractStrip(src, col, stripWidth));
 		return strips;
 	}
@@ -222,7 +223,7 @@ public class RadonTransform {
 		for (int k = 0; k < traj.length; k++)
 			values.add(new double[] { k, traj[k].theta, traj[k].magnitude });
 		BiFunction<Double, double[], Double> f = (x, params) -> params[0] + params[1] * x + params[2] * x * x + params[3] * x * x * x;
-		BiFunction<double[], double[], Double> error = (xy, params) -> (f.apply(xy[0], params) - xy[1]);
+		BiFunction<double[], double[], Double> error = (xy, params) -> (f.apply(xy[0], params) - xy[1]) * Math.pow(Math.max(xy[2] / 255, 0.2), 0.5);
 		double[] params = new LevenbergImpl<>(error, values, new double[] { 0, 0, 0, 0 }).getParams();
 		return x -> f.apply(x, params);
 	}
@@ -283,6 +284,52 @@ public class RadonTransform {
 				if (col >= 0 && col < image.cols())
 					image.put(row, col, 0d, 255d, 0d);
 			}
+	}
+
+	public static List<Pair> getLocalExtr(Mat fht, double minWeight) {
+		List<Pair> weightedPoints = new ArrayList<>();
+		for (int y = 0; y < fht.rows(); ++y) {
+			List<Double> pLine = new ArrayList<>();
+			Converters.Mat_to_vector_double(fht.row(Math.max(y - 1, 0)).t(), pLine);
+			List<Double> cLine = new ArrayList<>();
+			Converters.Mat_to_vector_double(fht.row(Math.max(y, 0)).t(), cLine);
+			List<Double> nLine = new ArrayList<>();
+			Converters.Mat_to_vector_double(fht.row(Math.min(y + 1, fht.rows() - 1)).t(), nLine);
+			for (int x = 0; x < fht.cols(); ++x) {
+				double value = cLine.get(x);
+				if (value >= minWeight) {
+					int[] isLocalMax = new int[] { 0 };
+					for (int xx = Math.max(x - 2, 0); xx <= Math.min(x + 2, fht.cols() - 1); ++xx) {
+						if (!incIfGreater(value, pLine.get(xx), isLocalMax) || !incIfGreater(value, cLine.get(xx), isLocalMax) || !incIfGreater(value, nLine.get(xx), isLocalMax)) {
+							isLocalMax[0] = 0;
+							break;
+						}
+					}
+					if (isLocalMax[0] > 0)
+						weightedPoints.add(new Pair(value, new Point(x, y)));
+				}
+			}
+		}
+		return weightedPoints;
+	}
+
+	private static boolean incIfGreater(double a, double b, int[] value) {
+		if (a < b)
+			return false;
+		if (a > b)
+			++value[0];
+		return true;
+	}
+
+	static class Pair {
+
+		double value;
+		Point point;
+
+		private Pair(double value, Point point) {
+			this.value = value;
+			this.point = point;
+		}
 	}
 
 }

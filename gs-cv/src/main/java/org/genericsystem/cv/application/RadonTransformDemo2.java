@@ -1,22 +1,20 @@
 package org.genericsystem.cv.application;
 
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.core.Point;
 import org.opencv.core.Range;
-import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
-
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -82,13 +80,13 @@ public class RadonTransformDemo2 extends AbstractApp {
 
 		long ref = System.currentTimeMillis();
 
-		// Img binarized = superFrame.getFrame().adaptativeGaussianInvThreshold(7, 5);
-		Img binarized = new Img(Mat.zeros(360, 640, CvType.CV_8UC1), false);
+		Img binarized = superFrame.getFrame().adaptativeGaussianInvThreshold(7, 5);
+		// Img binarized = new Img(Mat.zeros(360, 640, CvType.CV_8UC1), false);
 		double[] angles = { -10, -25, -5 };
 		int count = 0;
 		for (int y = 100; y <= 260; y += 80) {
 			double angle = angles[count] / 180 * Math.PI;
-			Imgproc.line(binarized.getSrc(), new Point(320 - 40 * Math.cos(angle), y - 40 * Math.sin(angle)), new Point(320 + 40 * Math.cos(angle), y + 40 * Math.sin(angle)), new Scalar(255));
+			// Imgproc.line(binarized.getSrc(), new Point(320 - 40 * Math.cos(angle), y - 40 * Math.sin(angle)), new Point(320 + 40 * Math.cos(angle), y + 40 * Math.sin(angle)), new Scalar(255));
 			count++;
 		}
 
@@ -107,7 +105,7 @@ public class RadonTransformDemo2 extends AbstractApp {
 
 		Mat houghTransform = RadonTransform.fastHoughTransform(vStrip);
 		ref = trace("FHT", ref);
-		Imgproc.resize(houghTransform, houghTransform, new Size(91, houghTransform.height()), 0, 0, Imgproc.INTER_LINEAR);
+		// Imgproc.resize(houghTransform, houghTransform, new Size(91, houghTransform.height()), 0, 0, Imgproc.INTER_LINEAR);
 		// Mat hough = RadonTransform.fhtRemap(houghTransform, stripWidth);
 		images[3] = new Img(houghTransform, false).toJfxImage();
 
@@ -116,15 +114,18 @@ public class RadonTransformDemo2 extends AbstractApp {
 		images[4] = new Img(houghTransform, false).toJfxImage();
 
 		ref = trace("FHT compute", ref);
-		TrajectStep[] houghVtraj = RadonTransform.bestTraject(houghTransform, -2000, 2);
+		TrajectStep[] houghVtraj = RadonTransform.bestTraject(houghTransform, -1000, 2);
 
 		for (int y = 0; y < houghVtraj.length; y++)
-			houghVtraj[y].theta = (int) Math.round(Math.atan((double) (houghVtraj[y].theta - 45) / 45) / Math.PI * 180 + 45);
+			houghVtraj[y].theta = (int) Math.round(Math.atan((double) (houghVtraj[y].theta - stripWidth + 1) / (stripWidth - 1)) / Math.PI * 180 + 45);
 
 		Mat vHoughColor = Mat.zeros(houghTransform.height(), 91, CvType.CV_8UC3);
-		houghTransform.release();
-		for (int y = 0; y < vHoughColor.height(); y++)
+		for (int y = 0; y < vHoughColor.height(); y++) {
 			vHoughColor.put(y, houghVtraj[y].theta, 0, 0, 255);
+			if (houghVtraj[y].magnitude >= 20) {
+				vHoughColor.put(y, houghVtraj[y].theta, 255, 0, 0);
+			}
+		}
 		ref = trace("Best traject hough", ref);
 
 		Function<Double, Double> approxHoughVFunction = RadonTransform.approxTraject(houghVtraj);
@@ -136,11 +137,26 @@ public class RadonTransformDemo2 extends AbstractApp {
 				x = vHoughColor.width() - 1;
 			vHoughColor.put(y, x, 0, 255, 0);
 		}
+		System.out.println(houghTransform);
+
+		// for (Pair pair : RadonTransform.getLocalExtr(houghTransform, 200)) {
+		// Imgproc.circle(vHoughColor, new Point((Math.atan((pair.point.x - stripWidth + 1) / (stripWidth - 1)) / Math.PI * 180) + 45, pair.point.y), 2, new Scalar(255, 0, 0), -1);
+		// System.out.println((Math.atan((pair.point.x - stripWidth + 1) / (stripWidth - 1)) / Math.PI * 180) + " " + pair.point.y + " " + pair.value);
+		// }
+
+		houghTransform.release();
+
 		ref = trace("Display approx hough", ref);
 		images[5] = new Img(vHoughColor, false).toJfxImage();
 
 		Mat vTransform = RadonTransform.radonTransform(vStrip, -45, 45);
 		Mat vProjection = RadonTransform.radonRemap(vTransform, -45);
+
+		// for (Pair pair : RadonTransform.getLocalExtr(vProjection, 100)) {
+		// Imgproc.circle(vHoughColor, pair.point, 2, new Scalar(255, 0, 0), -1);
+		// System.out.println((Math.atan((pair.point.x - 45) / (45)) / Math.PI * 180) + " " + pair.point.y + " " + pair.value);
+		// }
+
 		images[6] = new Img(vProjection, false).toJfxImage();
 		System.out.println(vProjection);
 		Imgproc.morphologyEx(vProjection, vProjection, Imgproc.MORPH_GRADIENT, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(1, 2)));

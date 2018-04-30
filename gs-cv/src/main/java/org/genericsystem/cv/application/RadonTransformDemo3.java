@@ -1,5 +1,14 @@
 package org.genericsystem.cv.application;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.application.GeneralInterpolator.OrientedPoint;
@@ -10,15 +19,6 @@ import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -100,15 +100,14 @@ public class RadonTransformDemo3 extends AbstractApp {
 		Img transposedBinarized = binarized.transpose();
 		ref = trace("Binarization", ref);
 
-		int stripWidth = 64;
+		int stripWidth = 62;
 		List<Mat> vStrips = RadonTransform.extractStrips(binarized.getSrc(), stripWidth);
-		int stripHeight = 64;
+		int stripHeight = 82;
 		List<Mat> hStrips = RadonTransform.extractStrips(transposedBinarized.getSrc(), stripHeight);
 		ref = trace("Extract strips", ref);
 
 		List<Mat> vHoughs = vStrips.stream().map(strip -> RadonTransform.fastHoughTransform(strip)).collect(Collectors.toList());
 		List<Mat> hHoughs = hStrips.stream().map(strip -> RadonTransform.fastHoughTransform(strip)).collect(Collectors.toList());
-		// vHoughs.stream().forEach(projectionMap -> System.out.println("zzz " + projectionMap.width()));
 		vHoughs.stream().forEach(projectionMap -> Imgproc.resize(projectionMap, projectionMap, new Size(91, projectionMap.height()), 0, 0, Imgproc.INTER_LINEAR));
 		hHoughs.stream().forEach(projectionMap -> Imgproc.resize(projectionMap, projectionMap, new Size(91, projectionMap.height()), 0, 0, Imgproc.INTER_LINEAR));
 		vHoughs.stream().forEach(projectionMap -> Imgproc.morphologyEx(projectionMap, projectionMap, Imgproc.MORPH_GRADIENT, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(1, 2))));
@@ -117,17 +116,17 @@ public class RadonTransformDemo3 extends AbstractApp {
 		hHoughs.stream().forEach(projectionMap -> Core.normalize(projectionMap, projectionMap, 0, 255, Core.NORM_MINMAX));
 		ref = trace("Compute FHT", ref);
 
-		List<TrajectStep[]> vHoughTrajs = vHoughs.stream().map(projectionMap -> RadonTransform.bestTraject(projectionMap, -1000, 2)).collect(Collectors.toList());
-		List<TrajectStep[]> hHoughTrajs = hHoughs.stream().map(projectionMap -> RadonTransform.bestTraject(projectionMap, -1000, 2)).collect(Collectors.toList());
+		List<TrajectStep[]> vHoughTrajs = vHoughs.stream().map(projectionMap -> RadonTransform.bestTraject(projectionMap, -40, 2)).collect(Collectors.toList());
+		List<TrajectStep[]> hHoughTrajs = hHoughs.stream().map(projectionMap -> RadonTransform.bestTraject(projectionMap, -20, 2)).collect(Collectors.toList());
 		ref = trace("Compute trajects", ref);
 
 		for (TrajectStep[] houghVtraj : vHoughTrajs)
 			for (int y = 0; y < houghVtraj.length; y++)
-				houghVtraj[y].theta = (int) Math.round(Math.atan((double) (houghVtraj[y].theta - 45) / 45) / Math.PI * 180 + 45);
+				houghVtraj[y].theta = (int) Math.round(Math.atan((double) (houghVtraj[y].theta - 45) / (45)) / Math.PI * 180 + 45);
 
 		for (TrajectStep[] houghHtraj : hHoughTrajs)
 			for (int y = 0; y < houghHtraj.length; y++)
-				houghHtraj[y].theta = (int) Math.round(Math.atan((double) (houghHtraj[y].theta - 45) / 45) / Math.PI * 180 + 45);
+				houghHtraj[y].theta = (int) Math.round(Math.atan((double) (houghHtraj[y].theta - 45) / (45)) / Math.PI * 180 + 45);
 
 		ref = trace("Transform trajects", ref);
 
@@ -181,69 +180,69 @@ public class RadonTransformDemo3 extends AbstractApp {
 		images[4] = dewarpFHT.toJfxImage();
 		ref = trace("Dewarp", ref);
 
+		Img binarized2 = dewarpFHT.adaptativeGaussianInvThreshold(7, 5);// .canny(20, 80);
+		images[5] = binarized2.toJfxImage();
+		ref = trace("Binarize dewarp", ref);
 		// ---------------------------------------------------------------------------
 
-		Img binarized2 = dewarpFHT.adaptativeGaussianInvThreshold(7, 5);// .canny(20, 80);
-
-		images[5] = binarized2.toJfxImage();
-
-		Img transposedBinarized2 = binarized2.transpose();
-		ref = trace("Binarization2", ref);
-
-		List<Mat> vStrips2 = RadonTransform.extractStrips(binarized2.getSrc(), stripWidth);
-		List<Mat> hStrips2 = RadonTransform.extractStrips(transposedBinarized2.getSrc(), stripHeight);
-		ref = trace("Extract strips2", ref);
-
-		List<Mat> vHoughs2 = vStrips2.stream().map(strip -> RadonTransform.fastHoughTransform(strip)).collect(Collectors.toList());
-		List<Mat> hHoughs2 = hStrips2.stream().map(strip -> RadonTransform.fastHoughTransform(strip)).collect(Collectors.toList());
-		vHoughs2.stream().forEach(projectionMap -> Imgproc.resize(projectionMap, projectionMap, new Size(91, projectionMap.height()), 0, 0, Imgproc.INTER_LINEAR));
-		hHoughs2.stream().forEach(projectionMap -> Imgproc.resize(projectionMap, projectionMap, new Size(91, projectionMap.height()), 0, 0, Imgproc.INTER_LINEAR));
-		vHoughs2.stream().forEach(projectionMap -> Imgproc.morphologyEx(projectionMap, projectionMap, Imgproc.MORPH_GRADIENT, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(1, 2))));
-		hHoughs2.stream().forEach(projectionMap -> Imgproc.morphologyEx(projectionMap, projectionMap, Imgproc.MORPH_GRADIENT, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(1, 2))));
-		vHoughs2.stream().forEach(projectionMap -> Core.normalize(projectionMap, projectionMap, 0, 255, Core.NORM_MINMAX));
-		hHoughs2.stream().forEach(projectionMap -> Core.normalize(projectionMap, projectionMap, 0, 255, Core.NORM_MINMAX));
-		ref = trace("Compute FHT2", ref);
-
-		List<TrajectStep[]> vHoughTrajs2 = vHoughs2.stream().map(projectionMap -> RadonTransform.bestTraject(projectionMap, -1000, 2)).collect(Collectors.toList());
-		List<TrajectStep[]> hHoughTrajs2 = hHoughs2.stream().map(projectionMap -> RadonTransform.bestTraject(projectionMap, -1000, 2)).collect(Collectors.toList());
-		ref = trace("Compute trajects2", ref);
-
-		for (TrajectStep[] houghVtraj : vHoughTrajs2)
-			for (int y = 0; y < houghVtraj.length; y++)
-				houghVtraj[y].theta = (int) Math.round(Math.atan((double) (houghVtraj[y].theta - 45) / 45) / Math.PI * 180 + 45);
-
-		for (TrajectStep[] houghHtraj : hHoughTrajs2)
-			for (int y = 0; y < houghHtraj.length; y++)
-				houghHtraj[y].theta = (int) Math.round(Math.atan((double) (houghHtraj[y].theta - 45) / 45) / Math.PI * 180 + 45);
-
-		ref = trace("Transform trajects2", ref);
-
-		List<Function<Double, Double>> approxVFHTFunctions2 = vHoughTrajs2.stream().map(traj -> RadonTransform.approxTraject(traj)).collect(Collectors.toList());
-		List<Function<Double, Double>> approxHFHTFunctions2 = hHoughTrajs2.stream().map(traj -> RadonTransform.approxTraject(traj)).collect(Collectors.toList());
-
-		ref = trace("Compute approxs2", ref);
-
-		List<OrientedPoint> fhtHorizontals2 = new ArrayList<>();
-		for (int vStrip = 0; vStrip < approxVFHTFunctions2.size(); vStrip++)
-			fhtHorizontals2.addAll(RadonTransform.toHorizontalOrientedPoints(approxVFHTFunctions2.get(vStrip), (vStrip + 1) * vStep, binarized2.height(), hStep));
-		List<OrientedPoint> fhtVerticals2 = new ArrayList<>();
-		for (int hStrip = 0; hStrip < approxHFHTFunctions2.size(); hStrip++)
-			fhtVerticals2.addAll(RadonTransform.toVerticalOrientedPoints(approxHFHTFunctions2.get(hStrip), (hStrip + 1) * hStep, binarized2.width(), vStep));
-
-		GeneralInterpolator interpolatorFHT2 = new GeneralInterpolator(fhtHorizontals2, fhtVerticals2, 3, 10);
-
-		ref = trace("Prepare interpolator2", ref);
-
-		MeshGrid meshGridFHT2 = new MeshGrid(new Size(16, 9), interpolatorFHT2, 20, 20, dewarpFHT.getSrc());
-		meshGridFHT2.build();
-		ref = trace("Build mesh2", ref);
-
-		images[6] = new Img(meshGridFHT2.drawOnCopy(new Scalar(0, 255, 0)), false).toJfxImage();
-		ref = trace("Draw mesh2", ref);
-
-		Img dewarpFHT2 = new Img(meshGridFHT2.dewarp());
-		images[7] = dewarpFHT2.toJfxImage();
-		ref = trace("Dewarp2", ref);
+		//
+		// Img transposedBinarized2 = binarized2.transpose();
+		// ref = trace("Binarization2", ref);
+		//
+		// List<Mat> vStrips2 = RadonTransform.extractStrips(binarized2.getSrc(), stripWidth);
+		// List<Mat> hStrips2 = RadonTransform.extractStrips(transposedBinarized2.getSrc(), stripHeight);
+		// ref = trace("Extract strips2", ref);
+		//
+		// List<Mat> vHoughs2 = vStrips2.stream().map(strip -> RadonTransform.fastHoughTransform(strip)).collect(Collectors.toList());
+		// List<Mat> hHoughs2 = hStrips2.stream().map(strip -> RadonTransform.fastHoughTransform(strip)).collect(Collectors.toList());
+		// // vHoughs2.stream().forEach(projectionMap -> Imgproc.resize(projectionMap, projectionMap, new Size(91, projectionMap.height()), 0, 0, Imgproc.INTER_LINEAR));
+		// // hHoughs2.stream().forEach(projectionMap -> Imgproc.resize(projectionMap, projectionMap, new Size(91, projectionMap.height()), 0, 0, Imgproc.INTER_LINEAR));
+		// vHoughs2.stream().forEach(projectionMap -> Imgproc.morphologyEx(projectionMap, projectionMap, Imgproc.MORPH_GRADIENT, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(1, 2))));
+		// hHoughs2.stream().forEach(projectionMap -> Imgproc.morphologyEx(projectionMap, projectionMap, Imgproc.MORPH_GRADIENT, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(1, 2))));
+		// vHoughs2.stream().forEach(projectionMap -> Core.normalize(projectionMap, projectionMap, 0, 255, Core.NORM_MINMAX));
+		// hHoughs2.stream().forEach(projectionMap -> Core.normalize(projectionMap, projectionMap, 0, 255, Core.NORM_MINMAX));
+		// ref = trace("Compute FHT2", ref);
+		//
+		// List<TrajectStep[]> vHoughTrajs2 = vHoughs2.stream().map(projectionMap -> RadonTransform.bestTraject(projectionMap, -1000, 2)).collect(Collectors.toList());
+		// List<TrajectStep[]> hHoughTrajs2 = hHoughs2.stream().map(projectionMap -> RadonTransform.bestTraject(projectionMap, -1000, 2)).collect(Collectors.toList());
+		// ref = trace("Compute trajects2", ref);
+		//
+		// for (TrajectStep[] houghVtraj : vHoughTrajs2)
+		// for (int y = 0; y < houghVtraj.length; y++)
+		// houghVtraj[y].theta = (int) Math.round(Math.atan((double) (houghVtraj[y].theta - stripWidth + 1) / (stripWidth - 1)) / Math.PI * 180 + 45);
+		//
+		// for (TrajectStep[] houghHtraj : hHoughTrajs2)
+		// for (int y = 0; y < houghHtraj.length; y++)
+		// houghHtraj[y].theta = (int) Math.round(Math.atan((double) (houghHtraj[y].theta - stripHeight + 1) / (stripHeight - 1)) / Math.PI * 180 + 45);
+		//
+		// ref = trace("Transform trajects2", ref);
+		//
+		// List<Function<Double, Double>> approxVFHTFunctions2 = vHoughTrajs2.stream().map(traj -> RadonTransform.approxTraject(traj)).collect(Collectors.toList());
+		// List<Function<Double, Double>> approxHFHTFunctions2 = hHoughTrajs2.stream().map(traj -> RadonTransform.approxTraject(traj)).collect(Collectors.toList());
+		//
+		// ref = trace("Compute approxs2", ref);
+		//
+		// List<OrientedPoint> fhtHorizontals2 = new ArrayList<>();
+		// for (int vStrip = 0; vStrip < approxVFHTFunctions2.size(); vStrip++)
+		// fhtHorizontals2.addAll(RadonTransform.toHorizontalOrientedPoints(approxVFHTFunctions2.get(vStrip), (vStrip + 1) * vStep, binarized2.height(), hStep));
+		// List<OrientedPoint> fhtVerticals2 = new ArrayList<>();
+		// for (int hStrip = 0; hStrip < approxHFHTFunctions2.size(); hStrip++)
+		// fhtVerticals2.addAll(RadonTransform.toVerticalOrientedPoints(approxHFHTFunctions2.get(hStrip), (hStrip + 1) * hStep, binarized2.width(), vStep));
+		//
+		// GeneralInterpolator interpolatorFHT2 = new GeneralInterpolator(fhtHorizontals2, fhtVerticals2, 3, 10);
+		//
+		// ref = trace("Prepare interpolator2", ref);
+		//
+		// MeshGrid meshGridFHT2 = new MeshGrid(new Size(16, 9), interpolatorFHT2, 20, 20, dewarpFHT.getSrc());
+		// meshGridFHT2.build();
+		// ref = trace("Build mesh2", ref);
+		//
+		// images[6] = new Img(meshGridFHT2.drawOnCopy(new Scalar(0, 255, 0)), false).toJfxImage();
+		// ref = trace("Draw mesh2", ref);
+		//
+		// Img dewarpFHT2 = new Img(meshGridFHT2.dewarp());
+		// images[7] = dewarpFHT2.toJfxImage();
+		// ref = trace("Dewarp2", ref);
 
 		return images;
 
