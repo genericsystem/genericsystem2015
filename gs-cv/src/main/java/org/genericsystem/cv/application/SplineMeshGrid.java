@@ -1,7 +1,5 @@
 package org.genericsystem.cv.application;
 
-import java.util.List;
-
 import org.apache.commons.math3.analysis.FunctionUtils;
 import org.apache.commons.math3.analysis.differentiation.UnivariateDifferentiableFunction;
 import org.apache.commons.math3.analysis.function.Identity;
@@ -12,6 +10,8 @@ import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 public class SplineMeshGrid {
 
@@ -43,12 +43,22 @@ public class SplineMeshGrid {
 
 				UnivariateDifferentiableFunction f = FunctionUtils.add(FunctionUtils.compose(new UnivariateDifferentiableFunction[] { vLine, hLine }), FunctionUtils.compose(new UnivariateDifferentiableFunction[] { new Minus(), new Identity() }));
 				try {
-					double x = new BisectionSolver().solve(100, f, 0, image.width());
+					double[] knots = hLine.getKnots();
+					double x = new BisectionSolver().solve(100, f, knots[0], knots[knots.length - 1]);
 					intersections[row][col] = new Point(x, hLine.value(x));
 					System.out.println(col + " " + row + " " + intersections[row][col]);
 				} catch (Exception ignore) {
-					System.out.println(col + " " + row + " None ");
+					try {
+						f = FunctionUtils.add(FunctionUtils.compose(new UnivariateDifferentiableFunction[] { hLine, vLine }), FunctionUtils.compose(new UnivariateDifferentiableFunction[] { new Minus(), new Identity() }));
+						double[] knots = vLine.getKnots();
+						double y = new BisectionSolver().solve(100, f, knots[0], knots[knots.length - 1]);
+						intersections[row][col] = new Point(vLine.value(y), y);
+						System.out.println(col + " " + row + " " + intersections[row][col]);
+					} catch (Exception ignore2) {
+						System.out.println(col + " " + row + " None ");
+					}
 				}
+
 			}
 		}
 		return intersections;

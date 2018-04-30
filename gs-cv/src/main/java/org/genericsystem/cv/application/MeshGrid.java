@@ -1,10 +1,5 @@
 package org.genericsystem.cv.application;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -16,6 +11,11 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class MeshGrid {
 
@@ -30,7 +30,7 @@ public class MeshGrid {
 	protected int yBorder;
 	protected Mat image;
 
-	private int nbIter; // nombre d'itérations à chaque déplacement
+	// private int nbIter; // nombre d'itérations à chaque déplacement
 
 	public MeshGrid(Mat image, int xBorder, int yBorder) {
 		this.xBorder = xBorder;
@@ -48,7 +48,7 @@ public class MeshGrid {
 		xBorder = 2 * (int) deltaX;
 		yBorder = 2 * (int) deltaY;
 		Core.copyMakeBorder(image, this.image, yBorder, yBorder, xBorder, xBorder, Core.BORDER_REPLICATE);
-		nbIter = (int) Math.round(deltaY); // avance d'un pixel à chaque itération
+		// nbIter = (int) Math.round(deltaY); // avance d'un pixel à chaque itération
 	}
 
 	private Size getOldSize() {
@@ -277,16 +277,17 @@ public class MeshGrid {
 
 	private Point intersect(Point hPoint, Point vPoint) { // intersection de la ligne horizontale partant de hPoint avec la ligne verticale partant de vPoint
 		Point intersection = null;
-		double xDiff, yDiff;
-		for (int i = 0; i < 1000; i++) {
+		double xDiff = xDiff(hPoint, vPoint);
+		double yDiff = yDiff(vPoint, hPoint);
+		while (Math.abs(xDiff) > 1 || Math.abs(yDiff) > 1) {
 			xDiff = xDiff(hPoint, vPoint);
 			yDiff = yDiff(vPoint, hPoint);
 			hPoint = horizontalMove(hPoint, xDiff);
 			vPoint = verticalMove(vPoint, yDiff);
-			if (Math.abs(xDiff) < 0.5 && Math.abs(yDiff) < 0.5) {
-				intersection = new Point(0.5 * (hPoint.x + vPoint.x), 0.5 * (hPoint.y + vPoint.y));
-				return intersection;
-			}
+		}
+		if (Math.abs(xDiff) < 1 && Math.abs(yDiff) < 1) {
+			intersection = new Point(0.5 * (hPoint.x + vPoint.x), 0.5 * (hPoint.y + vPoint.y));
+			return intersection;
 		}
 		throw new IllegalStateException();
 	}
@@ -300,9 +301,9 @@ public class MeshGrid {
 	}
 
 	private Point verticalMove(Point startingPoint, double deltaY) {
-		double dY = deltaY / nbIter;
+		double dY = 0.5 * Math.signum(deltaY);
 		double x = startingPoint.x, y = startingPoint.y;
-		for (int i = 0; i < nbIter; i++) {
+		while (Math.abs(y - startingPoint.y - deltaY) >= 1) {
 			double dX = dY / Math.tan(interpolator.interpolateVerticals(x - xBorder, y - yBorder));
 			x += dX;
 			y += dY;
@@ -311,9 +312,9 @@ public class MeshGrid {
 	}
 
 	private Point horizontalMove(Point startingPoint, double deltaX) {
-		double dX = deltaX / nbIter;
+		double dX = 0.5 * Math.signum(deltaX);
 		double x = startingPoint.x, y = startingPoint.y;
-		for (int i = 0; i < nbIter; i++) {
+		while (Math.abs(x - startingPoint.x - deltaX) >= 1) {
 			double dY = Math.tan(interpolator.interpolateHorizontals(x - xBorder, y - yBorder)) * dX;
 			x += dX;
 			y += dY;

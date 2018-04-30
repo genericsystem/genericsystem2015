@@ -1,10 +1,5 @@
 package org.genericsystem.cv.application;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.genericsystem.cv.Img;
@@ -22,6 +17,11 @@ import org.opencv.imgproc.Imgproc;
 import org.opencv.ximgproc.Ximgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public class RadonTransform {
 
@@ -195,27 +195,18 @@ public class RadonTransform {
 		// 0, center of each vertical strip, image.width() - 1
 		double[] xs = new double[vStripsNumber + 2];
 
-		int x = 0;
-		for (int i = 0; i < vStripsNumber; i++) {
-			xs[i + 1] = x + .5 * w;
-			x += xStep;
-		}
+		for (int i = 0; i < vStripsNumber; i++)
+			xs[i + 1] = i * xStep + w / 2;
+
 		xs[vStripsNumber + 1] = imageSize.width - 1;
 		int lines = (int) ((imageSize.height - 1) / yMeshStep + 1);
 		List<PolynomialSplineFunction> hLines = new ArrayList<>();
-		for (int i = 0; i < lines; i++) {
+		for (int line = 0; line < lines; line++) {
 			double[] ys = new double[vStripsNumber + 2];
-			// Start building line from the middle.
-			ys[vStripsNumber / 2] = i * yMeshStep + .5 * yMeshStep;
+			ys[vStripsNumber / 2] = line * yMeshStep + yMeshStep / 2;
 			for (int j = vStripsNumber / 2; j <= vStripsNumber; j++) {
 				double theta = (approxFunctions.get(j - 1).apply(ys[j]) + minAngle) / 180 * Math.PI;
-				// Line passing by the point G at the middle of the strip with ordinate currY (x_G, y_G),
-				// making an angle of theta with the horizontal:
-				// y = y_G + (x - x_G) tan theta
-				if (j == vStripsNumber)
-					ys[vStripsNumber + 1] = ys[vStripsNumber] + (imageSize.width - 1 - xs[j]) * Math.tan(theta);
-				else
-					ys[j + 1] = ys[j] + xStep * Math.tan(theta);
+				ys[j + 1] = ys[j] + xStep * Math.tan(theta);
 			}
 			for (int j = vStripsNumber / 2; j > 0; j--) {
 				double theta = (approxFunctions.get(j - 1).apply(ys[j]) + minAngle) / 180 * Math.PI;
@@ -236,20 +227,20 @@ public class RadonTransform {
 		return x -> f.apply(x, params);
 	}
 
-	public static List<OrientedPoint> toHorizontalOrientedPoints(Function<Double, Double> f, int vStrip, int stripWidth, int height, int step, int minAngle) {
+	public static List<OrientedPoint> toHorizontalOrientedPoints(Function<Double, Double> f, double x, int height, int hStep) {
 		List<OrientedPoint> orientedPoints = new ArrayList<>();
-		for (int k = 0; k <= height; k += step) {
-			double angle = (f.apply((double) k) + minAngle) / 180 * Math.PI;
-			orientedPoints.add(new OrientedPoint(new Point((vStrip + 1) * stripWidth / 2, k), angle, 1));
+		for (int y = hStep; y <= height; y += hStep) {
+			double angle = (f.apply((double) y) - 45) / 180 * Math.PI;
+			orientedPoints.add(new OrientedPoint(new Point(x, y), angle, 1));
 		}
 		return orientedPoints;
 	}
 
-	public static List<OrientedPoint> toVerticalOrientedPoints(Function<Double, Double> f, int hStrip, int stripHeight, int width, int step, int minAngle) {
+	public static List<OrientedPoint> toVerticalOrientedPoints(Function<Double, Double> f, double y, int width, int vStep) {
 		List<OrientedPoint> orientedPoints = new ArrayList<>();
-		for (int k = 0; k <= width; k += step) {
-			double angle = (90 - minAngle - f.apply((double) k)) / 180 * Math.PI;
-			orientedPoints.add(new OrientedPoint(new Point(k, (hStrip + 1) * stripHeight / 2), angle, 1));
+		for (int x = vStep; x <= width; x += vStep) {
+			double angle = (135 - f.apply((double) x)) / 180 * Math.PI;
+			orientedPoints.add(new OrientedPoint(new Point(x, y), angle, 1));
 		}
 		return orientedPoints;
 	}
