@@ -13,3 +13,5 @@
 /tmp/
 /bin/
 /test-output/
+/pieces/
+/SVMModel-*
