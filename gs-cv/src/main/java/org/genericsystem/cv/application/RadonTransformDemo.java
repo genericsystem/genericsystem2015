@@ -137,10 +137,10 @@ public class RadonTransformDemo extends AbstractApp {
 
 		ref = trace("Compute FHT remap", ref);
 
-		List<TrajectStep[]> vTrajs = vProjectionMaps.stream().map(projectionMap -> RadonTransform.bestTraject(projectionMap, -1000, 2)).collect(Collectors.toList());
-		List<TrajectStep[]> hTrajs = hProjectionMaps.stream().map(projectionMap -> RadonTransform.bestTraject(projectionMap, -1000, 2)).collect(Collectors.toList());
-		List<TrajectStep[]> vHoughTrajs = vHoughs.stream().map(projectionMap -> RadonTransform.bestTraject(projectionMap, -1000, 2)).collect(Collectors.toList());
-		List<TrajectStep[]> hHoughTrajs = hHoughs.stream().map(projectionMap -> RadonTransform.bestTraject(projectionMap, -1000, 2)).collect(Collectors.toList());
+		List<TrajectStep[]> vTrajs = vProjectionMaps.stream().map(projectionMap -> RadonTransform.bestTraject(projectionMap, -1000)).collect(Collectors.toList());
+		List<TrajectStep[]> hTrajs = hProjectionMaps.stream().map(projectionMap -> RadonTransform.bestTraject(projectionMap, -1000)).collect(Collectors.toList());
+		List<TrajectStep[]> vHoughTrajs = vHoughs.stream().map(projectionMap -> RadonTransform.bestTraject(projectionMap, -1000)).collect(Collectors.toList());
+		List<TrajectStep[]> hHoughTrajs = hHoughs.stream().map(projectionMap -> RadonTransform.bestTraject(projectionMap, -1000)).collect(Collectors.toList());
 		ref = trace("Compute trajects", ref);
 		for (TrajectStep[] houghVtraj : vHoughTrajs)
 			for (int y = 0; y < houghVtraj.length; y++)

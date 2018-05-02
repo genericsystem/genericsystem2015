@@ -1,5 +1,14 @@
 package org.genericsystem.cv.application;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.application.GeneralInterpolator.OrientedPoint;
@@ -10,15 +19,6 @@ import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -110,19 +110,28 @@ public class RadonTransformDemo3 extends AbstractApp {
 		List<Mat> hHoughs = hStrips.stream().map(strip -> RadonTransform.fastHoughTransform(strip)).collect(Collectors.toList());
 		vHoughs.stream().forEach(projectionMap -> Imgproc.resize(projectionMap, projectionMap, new Size(91, projectionMap.height()), 0, 0, Imgproc.INTER_LINEAR));
 		hHoughs.stream().forEach(projectionMap -> Imgproc.resize(projectionMap, projectionMap, new Size(91, projectionMap.height()), 0, 0, Imgproc.INTER_LINEAR));
-		vHoughs.stream().forEach(projectionMap -> Imgproc.morphologyEx(projectionMap, projectionMap, Imgproc.MORPH_GRADIENT, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(1, 2))));
-		hHoughs.stream().forEach(projectionMap -> Imgproc.morphologyEx(projectionMap, projectionMap, Imgproc.MORPH_GRADIENT, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(1, 2))));
-		vHoughs.stream().forEach(projectionMap -> Core.normalize(projectionMap, projectionMap, 0, 255, Core.NORM_MINMAX));
-		hHoughs.stream().forEach(projectionMap -> Core.normalize(projectionMap, projectionMap, 0, 255, Core.NORM_MINMAX));
+		vHoughs.stream().forEach(projectionMap -> {
+			Core.absdiff(projectionMap, new Scalar(0.2), projectionMap);
+			Core.pow(projectionMap, 2.5, projectionMap);
+		});
+		hHoughs.stream().forEach(projectionMap -> {
+			Core.absdiff(projectionMap, new Scalar(0.2), projectionMap);
+			Core.pow(projectionMap, 2.5, projectionMap);
+		});
+		// vHoughs.stream().forEach(projectionMap -> Imgproc.morphologyEx(projectionMap, projectionMap, Imgproc.MORPH_GRADIENT, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(1, 2))));
+		// hHoughs.stream().forEach(projectionMap -> Imgproc.morphologyEx(projectionMap, projectionMap, Imgproc.MORPH_GRADIENT, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(1, 2))));
+
+		vHoughs.stream().forEach(projectionMap -> Core.normalize(projectionMap, projectionMap, 0, 1, Core.NORM_MINMAX));
+		hHoughs.stream().forEach(projectionMap -> Core.normalize(projectionMap, projectionMap, 0, 1, Core.NORM_MINMAX));
 		ref = trace("Compute FHT", ref);
 
-		List<TrajectStep[]> vHoughTrajs = vHoughs.stream().map(projectionMap -> RadonTransform.bestTraject(projectionMap, -20, 2)).collect(Collectors.toList());
-		List<TrajectStep[]> hHoughTrajs = hHoughs.stream().map(projectionMap -> RadonTransform.bestTraject(projectionMap, -20, 2)).collect(Collectors.toList());
+		List<TrajectStep[]> vHoughTrajs = vHoughs.stream().map(projectionMap -> RadonTransform.bestTraject(projectionMap, -0.01)).collect(Collectors.toList());
+		List<TrajectStep[]> hHoughTrajs = hHoughs.stream().map(projectionMap -> RadonTransform.bestTraject(projectionMap, -0.01)).collect(Collectors.toList());
 		ref = trace("Compute trajects", ref);
 
 		for (TrajectStep[] houghVtraj : vHoughTrajs) {
 			for (int y = 0; y < houghVtraj.length; y++)
-				houghVtraj[y].theta = (int) Math.round(Math.atan((double) (houghVtraj[y].theta - 45) / (44)) / Math.PI * 180 + 45);
+				houghVtraj[y].theta = (int) Math.round(Math.atan((double) (houghVtraj[y].theta - 45) / (45)) / Math.PI * 180 + 45);
 
 			for (int y = 0; y < houghVtraj.length; y++) {
 				if (houghVtraj[y].magnitude == 0)
@@ -139,7 +148,7 @@ public class RadonTransformDemo3 extends AbstractApp {
 
 		for (TrajectStep[] houghHtraj : hHoughTrajs) {
 			for (int y = 0; y < houghHtraj.length; y++)
-				houghHtraj[y].theta = (int) Math.round(Math.atan((double) (houghHtraj[y].theta - 45) / (44)) / Math.PI * 180 + 45);
+				houghHtraj[y].theta = (int) Math.round(Math.atan((double) (houghHtraj[y].theta - 45) / (45)) / Math.PI * 180 + 45);
 
 			for (int y = 0; y < houghHtraj.length; y++) {
 				if (houghHtraj[y].magnitude == 0)

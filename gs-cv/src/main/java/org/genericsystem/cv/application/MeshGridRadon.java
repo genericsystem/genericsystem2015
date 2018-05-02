@@ -1,5 +1,13 @@
 package org.genericsystem.cv.application;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
+
 import org.apache.commons.math3.analysis.FunctionUtils;
 import org.apache.commons.math3.analysis.differentiation.UnivariateDifferentiableFunction;
 import org.apache.commons.math3.analysis.function.Constant;
@@ -19,14 +27,6 @@ import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
 
 public class MeshGridRadon extends MeshGrid {
 
@@ -73,7 +73,7 @@ public class MeshGridRadon extends MeshGrid {
 	}
 
 	// TODO: Possibility to configure all the parameters.
-	public void build(double anglePenalty, int minAngle, int maxAngle, double magnitudePow) {
+	public void build(double anglePenalty, int minAngle, int maxAngle) {
 		// Compute Vertical directions.
 		DirectionalFilter df = new DirectionalFilter();
 		int firstBin = 1;
@@ -95,7 +95,7 @@ public class MeshGridRadon extends MeshGrid {
 		VerticalInterpolator interpolator = new VerticalInterpolator(patchXs, patchYs, dirs, nSide, nBin);
 
 		// Compute lines.
-		List<PolynomialSplineFunction> hLines = RadonTransform.estimateBaselines(image, anglePenalty, minAngle, maxAngle, magnitudePow, yStep);
+		List<PolynomialSplineFunction> hLines = RadonTransform.estimateBaselines(image, anglePenalty, minAngle, maxAngle, yStep);
 
 		Point[] prevLine = null;
 		double angleTolerance = Math.PI / 180;

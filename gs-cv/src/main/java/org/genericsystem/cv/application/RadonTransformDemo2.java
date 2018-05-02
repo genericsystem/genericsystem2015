@@ -1,22 +1,21 @@
 package org.genericsystem.cv.application;
 
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.core.Point;
 import org.opencv.core.Range;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
-
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -82,13 +81,13 @@ public class RadonTransformDemo2 extends AbstractApp {
 
 		long ref = System.currentTimeMillis();
 
-		// Img binarized = superFrame.getFrame().adaptativeGaussianInvThreshold(7, 5);
-		Img binarized = new Img(Mat.zeros(360, 640, CvType.CV_8UC1), false);
+		Img binarized = superFrame.getFrame().adaptativeGaussianInvThreshold(7, 5);
+		// Img binarized = new Img(Mat.zeros(360, 640, CvType.CV_8UC1), false);
 		double[] angles = { -10, -20, -5 };
 		int count = 0;
 		for (int y = 100; y <= 260; y += 80) {
 			double angle = angles[count] / 180 * Math.PI;
-			Imgproc.line(binarized.getSrc(), new Point(320 - 40 * Math.cos(angle), y - 40 * Math.sin(angle)), new Point(320 + 40 * Math.cos(angle), y + 40 * Math.sin(angle)), new Scalar(255), 1);
+			// Imgproc.line(binarized.getSrc(), new Point(320 - 40 * Math.cos(angle), y - 40 * Math.sin(angle)), new Point(320 + 40 * Math.cos(angle), y + 40 * Math.sin(angle)), new Scalar(255), 1);
 			count++;
 		}
 
@@ -111,12 +110,15 @@ public class RadonTransformDemo2 extends AbstractApp {
 		// Mat hough = RadonTransform.fhtRemap(houghTransform, stripWidth);
 		images[3] = new Img(houghTransform, false).toJfxImage();
 
-		Imgproc.morphologyEx(houghTransform, houghTransform, Imgproc.MORPH_GRADIENT, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(1, 2)));
+		Scalar mean = Core.mean(houghTransform);
+		Core.absdiff(houghTransform, mean, houghTransform);
+
+		// Imgproc.morphologyEx(houghTransform, houghTransform, Imgproc.MORPH_GRADIENT, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(1, 2)));
 		Core.normalize(houghTransform, houghTransform, 0, 255, Core.NORM_MINMAX);
 		images[4] = new Img(houghTransform, false).toJfxImage();
 
 		ref = trace("FHT compute", ref);
-		TrajectStep[] houghVtraj = RadonTransform.bestTraject(houghTransform, -20, 2);
+		TrajectStep[] houghVtraj = RadonTransform.bestTraject(houghTransform, -20);
 
 		for (int y = 0; y < houghVtraj.length; y++)
 			houghVtraj[y].theta = (int) Math.round(Math.atan((double) (houghVtraj[y].theta - stripWidth + 1) / (stripWidth - 1)) / Math.PI * 180 + 45);
@@ -178,7 +180,7 @@ public class RadonTransformDemo2 extends AbstractApp {
 		ref = trace("Radon + Projection", ref);
 		images[7] = new Img(vProjection, false).toJfxImage();
 
-		TrajectStep[] vtraj = RadonTransform.bestTraject(vProjection, -20, 2);
+		TrajectStep[] vtraj = RadonTransform.bestTraject(vProjection, -20);
 
 		for (int y = 0; y < vtraj.length; y++) {
 			if (vtraj[y].magnitude == 0)

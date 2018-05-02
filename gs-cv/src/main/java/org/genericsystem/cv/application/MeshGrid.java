@@ -1,5 +1,10 @@
 package org.genericsystem.cv.application;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -11,11 +16,6 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class MeshGrid {
 
@@ -285,11 +285,11 @@ public class MeshGrid {
 			hPoint = horizontalMove(hPoint, xDiff);
 			vPoint = verticalMove(vPoint, yDiff);
 		}
-		if (Math.abs(xDiff) < 1 && Math.abs(yDiff) < 1) {
+		if (Math.abs(xDiff) <= 1 && Math.abs(yDiff) <= 1) {
 			intersection = new Point(0.5 * (hPoint.x + vPoint.x), 0.5 * (hPoint.y + vPoint.y));
 			return intersection;
 		}
-		throw new IllegalStateException();
+		throw new IllegalStateException(xDiff + " " + yDiff);
 	}
 
 	private double xDiff(Point pt1, Point pt2) {
@@ -301,24 +301,40 @@ public class MeshGrid {
 	}
 
 	private Point verticalMove(Point startingPoint, double deltaY) {
+		assert Double.isFinite(startingPoint.x);
+		assert Double.isFinite(startingPoint.y);
+		if (deltaY == 0)
+			return startingPoint;
 		double dY = Math.max(0.5, deltaY) * Math.signum(deltaY);
 		double x = startingPoint.x, y = startingPoint.y;
 		while (Math.abs(y - startingPoint.y - deltaY) >= 1) {
 			double dX = dY / Math.tan(interpolator.interpolateVerticals(x - xBorder, y - yBorder) + Math.PI / 2);
+			if (!Double.isFinite(dX))
+				dX = 0;
 			x += dX;
 			y += dY;
 		}
+		assert Double.isFinite(x);
+		assert Double.isFinite(y);
 		return new Point(x, y);
 	}
 
 	private Point horizontalMove(Point startingPoint, double deltaX) {
+		assert Double.isFinite(startingPoint.x);
+		assert Double.isFinite(startingPoint.y);
+		if (deltaX == 0)
+			return startingPoint;
 		double dX = Math.max(0.5, deltaX) * Math.signum(deltaX);
 		double x = startingPoint.x, y = startingPoint.y;
 		while (Math.abs(x - startingPoint.x - deltaX) >= 1) {
 			double dY = Math.tan(interpolator.interpolateHorizontals(x - xBorder, y - yBorder)) * dX;
+			if (!Double.isFinite(dY))
+				dY = 0;
 			x += dX;
 			y += dY;
 		}
+		assert Double.isFinite(x);
+		assert Double.isFinite(y);
 		return new Point(x, y);
 	}
 

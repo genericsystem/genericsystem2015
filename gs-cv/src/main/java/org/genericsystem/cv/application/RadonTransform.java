@@ -1,5 +1,10 @@
 package org.genericsystem.cv.application;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.genericsystem.cv.Img;
@@ -18,11 +23,6 @@ import org.opencv.utils.Converters;
 import org.opencv.ximgproc.Ximgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 
 public class RadonTransform {
 
@@ -80,7 +80,7 @@ public class RadonTransform {
 		Mat houghTransform = new Mat();
 		Ximgproc.FastHoughTransform(vStrip, houghTransform, CvType.CV_64FC1, Ximgproc.ARO_45_135, Ximgproc.FHT_ADD, Ximgproc.HDO_DESKEW);
 		Core.transpose(houghTransform, houghTransform);
-		Core.normalize(houghTransform, houghTransform, 0, 255, Core.NORM_MINMAX);
+		Core.normalize(houghTransform, houghTransform, 0, 1, Core.NORM_MINMAX);
 		return new Mat(houghTransform, new Range(vStrip.width() / 2, houghTransform.height() - vStrip.width() / 2), new Range(0, houghTransform.width()));
 	}
 
@@ -99,11 +99,35 @@ public class RadonTransform {
 		return result;
 	}
 
-	public static TrajectStep[] bestTraject(Mat projectionMap, double anglePenality, double pow) {
+	// public static Function<Double, Double> approxTraject(Mat houghTransform) {
+	// List<double[]> values = new ArrayList<>();
+	// for (int row = 0; row < houghTransform.rows(); row++) {
+	// List<Double> houghLine = new ArrayList<>();
+	// Converters.Mat_to_vector_double(houghTransform.row(row).t(), houghLine);
+	// houghLine.add((double) row);
+	// values.add(houghLine.toArray(new double[houghLine.size() - 1]));
+	// }
+	// BiFunction<Double, double[], Double> f = (x, params) -> params[0] + params[1] * x + params[2] * x * x + params[3] * x * x * x + params[4] * x * x * x * x + params[5] * x * x * x * x * x;
+	// BiFunction<double[], double[], Double> error = (xy, params) -> {
+	// double[] magnitudes = new double[houghTransform.rows()];
+	// for (int row = 0; row < houghTransform.rows(); row++)
+	// magnitudes[row] = params[(int) Math.round(f.apply((double) row, params))];
+	//
+	// double average = Arrays.stream(magnitudes).average().getAsDouble();
+	// double variance = 0;
+	//
+	// return Math.sqrt(variance);
+	// };
+	//
+	// double[] params = new LevenbergImpl<>(error, values, new double[] { 0, 0, 0, 0, 0, 0 }).getParams();
+	// return x -> f.apply(x, params);
+	// }
+
+	public static TrajectStep[] bestTraject(Mat projectionMap, double anglePenality) {
 		double[][] score = new double[projectionMap.rows()][projectionMap.cols()];
 		int[][] thetaPrev = new int[projectionMap.rows()][projectionMap.cols()];
 		for (int theta = 0; theta < projectionMap.cols(); theta++)
-			score[0][theta] = Math.pow(projectionMap.get(0, theta)[0], pow);
+			score[0][theta] = projectionMap.get(0, theta)[0];
 		for (int k = 1; k < projectionMap.rows(); k++) {
 			for (int theta = 0; theta < projectionMap.cols(); theta++) {
 				double magnitude = projectionMap.get(k, theta)[0];
@@ -165,7 +189,7 @@ public class RadonTransform {
 		return new Mat(src, new Range(0, src.rows()), new Range(startX, startX + width));
 	}
 
-	public static List<PolynomialSplineFunction> estimateBaselines(Mat image, double anglePenalty, int minAngle, int maxAngle, double magnitudePow, int yStep) {
+	public static List<PolynomialSplineFunction> estimateBaselines(Mat image, double anglePenalty, int minAngle, int maxAngle, int yStep) {
 
 		int n = 20;// Number of overlapping vertical strips.
 		float r = .5f;// Overlap ratio between two consecutive strips.
@@ -179,7 +203,7 @@ public class RadonTransform {
 			Mat radonTransform = radonTransform(extractStrip(preprocessed, x, (int) w), minAngle, maxAngle);
 			Mat projMap = radonRemap(radonTransform, minAngle);
 			Imgproc.morphologyEx(projMap, projMap, Imgproc.MORPH_GRADIENT, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(2, 4)));
-			TrajectStep[] angles = bestTraject(projMap, anglePenalty, magnitudePow);
+			TrajectStep[] angles = bestTraject(projMap, anglePenalty);
 			projMap.release();
 			radonTransform.release();
 			approxFunctions.add(approxTraject(angles));
@@ -223,7 +247,7 @@ public class RadonTransform {
 		for (int k = 0; k < traj.length; k++)
 			values.add(new double[] { k, traj[k].theta, traj[k].magnitude });
 		BiFunction<Double, double[], Double> f = (x, params) -> params[0] + params[1] * x + params[2] * x * x + params[3] * x * x * x + params[4] * x * x * x * x + params[5] * x * x * x * x * x;
-		BiFunction<double[], double[], Double> error = (xy, params) -> (f.apply(xy[0], params) - xy[1]) * Math.pow(Math.max(xy[2] / 255, 0.33), 3);
+		BiFunction<double[], double[], Double> error = (xy, params) -> (f.apply(xy[0], params) - xy[1]) * xy[2];
 		double[] params = new LevenbergImpl<>(error, values, new double[] { 0, 0, 0, 0, 0, 0 }).getParams();
 		return x -> f.apply(x, params);
 	}
