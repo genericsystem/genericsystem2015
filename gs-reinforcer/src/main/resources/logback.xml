@@ -29,6 +29,9 @@
         </encoder>
     </appender>
 
+	<logger name="org.apache.spark" level="WARN" />
+	<logger name="org.apache.hadoop" level="WARN" />
+	<logger name="breeze.optimize" level="WARN" />
     <logger name="org.genericsystem" level="DEBUG" />
 
     <root level="INFO">
