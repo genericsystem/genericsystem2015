@@ -41,6 +41,7 @@ public class SVMClassifier {
 				.appName("SVMClassifier")
 				.getOrCreate();
 		new SVMClassifier().trainModel(spark);
+		// new SVMClassifier().testModel(spark, CrossValidatorModel.load("SVMModel-20180502141837"), "pieces/text/class/file.txt");
 		spark.stop();
 	}
 
@@ -51,7 +52,7 @@ public class SVMClassifier {
 
 	public void trainModel(SparkSession spark) {
 		Dataset<Row> data = loadData(spark, "pieces/text/*");
-		Dataset<Row>[] splits = data.randomSplit(new double[] {0.7, 0.3});
+		Dataset<Row>[] splits = data.randomSplit(new double[] { 0.7, 0.3 });
 		Dataset<Row> trainData = splits[0];
 		Dataset<Row> validData = splits[1];
 
@@ -77,6 +78,7 @@ public class SVMClassifier {
 				.setFeaturesCol(idf.getOutputCol())
 				.setLabelCol(indexer.getOutputCol());
 		IndexToString converter = new IndexToString()
+				.setLabels(indexer.fit(trainData).labels())
 				.setInputCol("prediction")
 				.setOutputCol("origPrediction");
 
@@ -112,4 +114,10 @@ public class SVMClassifier {
 			throw new RuntimeException("Exception while saving trained model", e);
 		}
 	}	
+
+	public void testModel(SparkSession spark, CrossValidatorModel model, String file) {
+		Dataset<Row> data = loadData(spark, file);
+		Dataset<Row> prediction = model.transform(data);
+		prediction.select("labelIndex", "label", "prediction").show();
+	}
 }
