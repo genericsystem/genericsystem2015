@@ -9,13 +9,14 @@
 		<version>4.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>gs-reinforcer</artifactId>
-	<name>gs-reinforcer</name>
+        <name>gs-reinforcer</name>
 	<url>http://maven.apache.org</url>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<deeplearning4j.version>0.9.1</deeplearning4j.version>
 		<nd4j.version>0.9.1</nd4j.version>
 	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.testng</groupId>
@@ -52,13 +53,11 @@
 			<artifactId>deeplearning4j-core</artifactId>
 			<version>${deeplearning4j.version}</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.deeplearning4j</groupId>
 			<artifactId>deeplearning4j-ui_2.11</artifactId>
 			<version>${deeplearning4j.version}</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.nd4j</groupId>
 			<artifactId>nd4j-cuda-8.0-platform</artifactId>
@@ -69,6 +68,26 @@
 			<groupId>org.apache.spark</groupId>
 			<artifactId>spark-mllib_2.11</artifactId>
 			<version>2.2.1</version>
+			<exclusions>
+				<exclusion>
+					<groupId>log4j</groupId>
+					<artifactId>log4j</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-log4j12</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+                <!-- Use a more recent version of hadoop-client than in spark 
+                     dependencies (2.6.5), because there is an error when loading 
+                     a saved model from disk otherwise. -->
+		<dependency>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId>hadoop-client</artifactId>
+			<version>3.0.0</version>
+			<scope>compile</scope>
 			<exclusions>
 				<exclusion>
 					<groupId>log4j</groupId>
