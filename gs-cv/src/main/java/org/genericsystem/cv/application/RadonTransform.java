@@ -1,10 +1,5 @@
 package org.genericsystem.cv.application;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.genericsystem.cv.Img;
@@ -23,6 +18,11 @@ import org.opencv.utils.Converters;
 import org.opencv.ximgproc.Ximgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public class RadonTransform {
 
@@ -156,7 +156,7 @@ public class RadonTransform {
 
 	public static List<Mat> extractStrips(Mat src, int stripWidth) {
 		List<Mat> strips = new ArrayList<>();
-		for (int col = 0; col + stripWidth < src.cols(); col += stripWidth / 2)
+		for (int col = 0; col + stripWidth <= src.cols(); col += stripWidth / 2)
 			strips.add(extractStrip(src, col, stripWidth));
 		return strips;
 	}
@@ -222,15 +222,15 @@ public class RadonTransform {
 		List<double[]> values = new ArrayList<>();
 		for (int k = 0; k < traj.length; k++)
 			values.add(new double[] { k, traj[k].theta, traj[k].magnitude });
-		BiFunction<Double, double[], Double> f = (x, params) -> params[0] + params[1] * x + params[2] * x * x + params[3] * x * x * x;
-		BiFunction<double[], double[], Double> error = (xy, params) -> (f.apply(xy[0], params) - xy[1]) * Math.pow(Math.max(xy[2] / 255, 0.2), 0.5);
-		double[] params = new LevenbergImpl<>(error, values, new double[] { 0, 0, 0, 0 }).getParams();
+		BiFunction<Double, double[], Double> f = (x, params) -> params[0] + params[1] * x + params[2] * x * x + params[3] * x * x * x + params[4] * x * x * x * x + params[5] * x * x * x * x * x;
+		BiFunction<double[], double[], Double> error = (xy, params) -> (f.apply(xy[0], params) - xy[1]) * Math.pow(Math.max(xy[2] / 255, 0.33), 3);
+		double[] params = new LevenbergImpl<>(error, values, new double[] { 0, 0, 0, 0, 0, 0 }).getParams();
 		return x -> f.apply(x, params);
 	}
 
 	public static List<OrientedPoint> toHorizontalOrientedPoints(Function<Double, Double> f, double x, int height, int hStep) {
 		List<OrientedPoint> orientedPoints = new ArrayList<>();
-		for (int y = hStep; y <= height; y += hStep) {
+		for (int y = hStep; y + hStep <= height; y += hStep) {
 			double angle = (f.apply((double) y) - 45) / 180 * Math.PI;
 			orientedPoints.add(new OrientedPoint(new Point(x, y), angle, 1));
 		}
@@ -239,8 +239,8 @@ public class RadonTransform {
 
 	public static List<OrientedPoint> toVerticalOrientedPoints(Function<Double, Double> f, double y, int width, int vStep) {
 		List<OrientedPoint> orientedPoints = new ArrayList<>();
-		for (int x = vStep; x <= width; x += vStep) {
-			double angle = (135 - f.apply((double) x)) / 180 * Math.PI;
+		for (int x = vStep; x + vStep <= width; x += vStep) {
+			double angle = -(f.apply((double) x) - 45) / 180 * Math.PI;
 			orientedPoints.add(new OrientedPoint(new Point(x, y), angle, 1));
 		}
 		return orientedPoints;

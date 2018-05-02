@@ -1,14 +1,5 @@
 package org.genericsystem.cv.application;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.application.GeneralInterpolator.OrientedPoint;
@@ -19,6 +10,15 @@ import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -100,9 +100,9 @@ public class RadonTransformDemo3 extends AbstractApp {
 		Img transposedBinarized = binarized.transpose();
 		ref = trace("Binarization", ref);
 
-		int stripWidth = 62;
+		int stripWidth = 75;
 		List<Mat> vStrips = RadonTransform.extractStrips(binarized.getSrc(), stripWidth);
-		int stripHeight = 82;
+		int stripHeight = 72;
 		List<Mat> hStrips = RadonTransform.extractStrips(transposedBinarized.getSrc(), stripHeight);
 		ref = trace("Extract strips", ref);
 
@@ -116,17 +116,43 @@ public class RadonTransformDemo3 extends AbstractApp {
 		hHoughs.stream().forEach(projectionMap -> Core.normalize(projectionMap, projectionMap, 0, 255, Core.NORM_MINMAX));
 		ref = trace("Compute FHT", ref);
 
-		List<TrajectStep[]> vHoughTrajs = vHoughs.stream().map(projectionMap -> RadonTransform.bestTraject(projectionMap, -40, 2)).collect(Collectors.toList());
+		List<TrajectStep[]> vHoughTrajs = vHoughs.stream().map(projectionMap -> RadonTransform.bestTraject(projectionMap, -20, 2)).collect(Collectors.toList());
 		List<TrajectStep[]> hHoughTrajs = hHoughs.stream().map(projectionMap -> RadonTransform.bestTraject(projectionMap, -20, 2)).collect(Collectors.toList());
 		ref = trace("Compute trajects", ref);
 
-		for (TrajectStep[] houghVtraj : vHoughTrajs)
+		for (TrajectStep[] houghVtraj : vHoughTrajs) {
 			for (int y = 0; y < houghVtraj.length; y++)
-				houghVtraj[y].theta = (int) Math.round(Math.atan((double) (houghVtraj[y].theta - 45) / (45)) / Math.PI * 180 + 45);
+				houghVtraj[y].theta = (int) Math.round(Math.atan((double) (houghVtraj[y].theta - 45) / (44)) / Math.PI * 180 + 45);
 
-		for (TrajectStep[] houghHtraj : hHoughTrajs)
+			for (int y = 0; y < houghVtraj.length; y++) {
+				if (houghVtraj[y].magnitude == 0)
+					for (int end = y + 1; end < houghVtraj.length; end++) {
+						if (houghVtraj[end].magnitude != 0) {
+							for (int current = y; current < end; current++)
+								houghVtraj[current].theta = houghVtraj[y == 0 ? 0 : y - 1].theta + (houghVtraj[end].theta - houghVtraj[y == 0 ? 0 : y - 1].theta) * (current - y) / (end - y + 1);
+							y = end;
+							break;
+						}
+					}
+			}
+		}
+
+		for (TrajectStep[] houghHtraj : hHoughTrajs) {
 			for (int y = 0; y < houghHtraj.length; y++)
-				houghHtraj[y].theta = (int) Math.round(Math.atan((double) (houghHtraj[y].theta - 45) / (45)) / Math.PI * 180 + 45);
+				houghHtraj[y].theta = (int) Math.round(Math.atan((double) (houghHtraj[y].theta - 45) / (44)) / Math.PI * 180 + 45);
+
+			for (int y = 0; y < houghHtraj.length; y++) {
+				if (houghHtraj[y].magnitude == 0)
+					for (int end = y + 1; end < houghHtraj.length; end++) {
+						if (houghHtraj[end].magnitude != 0) {
+							for (int current = y; current < end; current++)
+								houghHtraj[current].theta = houghHtraj[y == 0 ? 0 : y - 1].theta + (houghHtraj[end].theta - houghHtraj[y == 0 ? 0 : y - 1].theta) * (current - y) / (end - y + 1);
+							y = end;
+							break;
+						}
+					}
+			}
+		}
 
 		ref = trace("Transform trajects", ref);
 
@@ -145,15 +171,16 @@ public class RadonTransformDemo3 extends AbstractApp {
 		for (int hStrip = 0; hStrip < approxHFHTFunctions.size(); hStrip++)
 			fhtVerticals.addAll(RadonTransform.toVerticalOrientedPoints(approxHFHTFunctions.get(hStrip), (hStrip + 1) * hStep, binarized.width(), vStep));
 
-		GeneralInterpolator interpolatorFHT = new GeneralInterpolator(fhtHorizontals, fhtVerticals, 3, 10);
+		GeneralInterpolator interpolatorFHT = new GeneralInterpolator(fhtHorizontals, fhtVerticals, 3, 20);
 
 		ref = trace("Prepare interpolator", ref);
 
 		Img frameDisplayFHT = new Img(superFrame.getFrame().getSrc().clone(), false);
 		for (OrientedPoint op : fhtVerticals) {
-			Imgproc.line(frameDisplayFHT.getSrc(), new Point(op.center.x - Math.cos(op.angle) * stripWidth / 6, op.center.y - Math.sin(op.angle) * stripHeight / 6),
-					new Point(op.center.x + Math.cos(op.angle) * stripWidth / 6, op.center.y + Math.sin(op.angle) * stripHeight / 6), new Scalar(0, 0, 255), 2);
-			double angle = interpolatorFHT.interpolateVerticals(op.center.x, op.center.y);
+			double angle = op.angle + Math.PI / 2;
+			Imgproc.line(frameDisplayFHT.getSrc(), new Point(op.center.x - Math.cos(angle) * stripWidth / 6, op.center.y - Math.sin(angle) * stripHeight / 6),
+					new Point(op.center.x + Math.cos(angle) * stripWidth / 6, op.center.y + Math.sin(angle) * stripHeight / 6), new Scalar(0, 0, 255), 2);
+			angle = interpolatorFHT.interpolateVerticals(op.center.x, op.center.y) + Math.PI / 2;
 			Imgproc.line(frameDisplayFHT.getSrc(), new Point(op.center.x - Math.cos(angle) * stripWidth / 6, op.center.y - Math.sin(angle) * stripHeight / 6),
 					new Point(op.center.x + Math.cos(angle) * stripWidth / 6, op.center.y + Math.sin(angle) * stripHeight / 6), new Scalar(255, 0, 0), 2);
 		}
@@ -169,7 +196,7 @@ public class RadonTransformDemo3 extends AbstractApp {
 		images[2] = frameDisplayFHT.toJfxImage();
 		ref = trace("Display lines", ref);
 
-		MeshGrid meshGridFHT = new MeshGrid(new Size(16, 9), interpolatorFHT, 20, 20, superFrame.getFrame().getSrc());
+		MeshGrid meshGridFHT = new MeshGrid(new Size(8, 4), interpolatorFHT, 40, 40, superFrame.getFrame().getSrc());
 		meshGridFHT.build();
 		ref = trace("Build mesh", ref);
 
