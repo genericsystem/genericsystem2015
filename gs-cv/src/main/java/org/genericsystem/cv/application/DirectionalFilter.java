@@ -86,7 +86,7 @@ public class DirectionalFilter extends AbstractApp {
 			List<Integer> patchYs = imgPartition(grayFrame, nSide, .5f, true);
 			// Second image displayed, showing the directions for each region.
 			int[][] dirs = findSecondDirection(grayFrame, bin, mag, nSide, firstBin, nBin, lambda, patchXs, patchYs);
-			Mat imgDirs = addDirs(grayFrame, dirs, nSide, nBin, patchXs, patchYs);
+			Mat imgDirs = addDirs(grayFrame, dirs, nSide, nBin, patchXs, patchYs, new Scalar(0, 0, 0));
 			mainGrid.add(new ImageView(Tools.mat2jfxImage(grayFrame)), 0, 0);
 			mainGrid.add(new ImageView(Tools.mat2jfxImage(imgDirs)), 1, 0);
 
@@ -98,7 +98,7 @@ public class DirectionalFilter extends AbstractApp {
 		}
 	}
 
-	public Mat addDirs(Mat img, int[][] dirs, int nSide, int nBin, List<Integer> patchXs, List<Integer> patchYs) {
+	public Mat addDirs(Mat img, int[][] dirs, int nSide, int nBin, List<Integer> patchXs, List<Integer> patchYs, Scalar color) {
 		Mat imgDirs = new Mat();
 		img.copyTo(imgDirs);
 		imgDirs.convertTo(imgDirs, CvType.CV_8SC3);
@@ -106,7 +106,7 @@ public class DirectionalFilter extends AbstractApp {
 			for (int i = 0; i < patchYs.size(); i++) {
 				int centerX = patchXs.get(j) + nSide / 2;
 				int centerY = patchYs.get(i) + nSide / 2;
-				Imgproc.line(imgDirs, new Point(centerX, centerY), getLineEnd(centerX, centerY, dirs[i][j], nBin, nSide / 3), new Scalar(0, 0, 0), 2);
+				Imgproc.line(imgDirs, new Point(centerX, centerY), getLineEnd(centerX, centerY, dirs[i][j], nBin, nSide / 3), color, 2);
 			}
 		return imgDirs;
 	}
