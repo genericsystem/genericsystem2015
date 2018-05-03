@@ -39,6 +39,14 @@ public class MeshGridRadon extends MeshGrid {
 	private final int yStep;
 	private final int nVerts;
 	private final int nLines;
+	// Data stored here to be used by drawBaselines and drawVerticalDirs.
+	private List<PolynomialSplineFunction> hLines;
+	private DirectionalFilter df;
+	private int nBin = 64;
+	private int nSide = 50;
+	private List<Integer> patchXs;
+	private List<Integer> patchYs;
+	private int[][] dirs;
 
 	public MeshGridRadon(int border, int xStep, int yStep, Mat image) {
 		super(image, border, border);
@@ -72,18 +80,43 @@ public class MeshGridRadon extends MeshGrid {
 		return mesh3D;
 	}
 
+	public Mat drawBaselines(Scalar color) {
+		if (hLines == null)
+			throw new RuntimeException("The meshgrid must be built before the base lines can be drawn.");
+
+		Mat baseLines = image.clone();
+		hLines.forEach(hLine -> {
+			int currX = 0;
+			Point prevPoint = new Point(currX, hLine.value(currX));
+			currX += 5;
+			while(currX < image.width()) {
+				Point newPoint = new Point(currX, hLine.value(currX));
+				if (inImage(prevPoint) && inImage(newPoint))
+					Imgproc.line(baseLines, prevPoint, newPoint, color);
+				prevPoint = newPoint;
+				currX += 5;
+			}
+		});
+		return baseLines;
+	}
+
+	public Mat drawVerticalDirs(Scalar color) {
+		if (df == null)
+			throw new RuntimeException("The meshgrid must be built before the vertical directions can be drawn.");
+
+		return df.addDirs(image, dirs, nSide, nBin, patchXs, patchYs, color);
+	}
+
 	// TODO: Possibility to configure all the parameters.
 	public void build(double anglePenalty, int minAngle, int maxAngle) {
 		// Compute Vertical directions.
-		DirectionalFilter df = new DirectionalFilter();
+		df = new DirectionalFilter();
 		int firstBin = 1;
-		int nBin = 64;
-		int nSide = 50;
 		int lambda = 7;
 		Mat grayFrame = new Mat();
 		Imgproc.cvtColor(image, grayFrame, Imgproc.COLOR_BGR2GRAY);
-		List<Integer> patchXs = df.imgPartition(grayFrame, nSide, .5f, false);
-		List<Integer> patchYs = df.imgPartition(grayFrame, nSide, .5f, true);
+		patchXs = df.imgPartition(grayFrame, nSide, .5f, false);
+		patchYs = df.imgPartition(grayFrame, nSide, .5f, true);
 		Mat gx = df.gx(grayFrame);
 		Core.subtract(Mat.zeros(gx.size(), gx.type()), gx, gx);
 		Mat gy = df.gy(grayFrame);
@@ -91,11 +124,11 @@ public class MeshGridRadon extends MeshGrid {
 		Mat ori = new Mat();
 		Core.cartToPolar(gx, gy, mag, ori);
 		int[][] bin = df.bin(ori, nBin);
-		int[][] dirs = df.findSecondDirection(grayFrame, bin, mag, nSide, firstBin, nBin, lambda, patchXs, patchYs);
+		dirs = df.findSecondDirection(grayFrame, bin, mag, nSide, firstBin, nBin, lambda, patchXs, patchYs);
 		VerticalInterpolator interpolator = new VerticalInterpolator(patchXs, patchYs, dirs, nSide, nBin);
 
 		// Compute lines.
-		List<PolynomialSplineFunction> hLines = RadonTransform.estimateBaselines(image, anglePenalty, minAngle, maxAngle, yStep);
+		hLines = RadonTransform.estimateBaselines(image, anglePenalty, minAngle, maxAngle, yStep);
 
 		Point[] prevLine = null;
 		double angleTolerance = Math.PI / 180;
