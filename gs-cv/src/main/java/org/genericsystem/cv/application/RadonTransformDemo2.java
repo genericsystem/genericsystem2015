@@ -13,7 +13,6 @@ import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Range;
-import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
@@ -110,15 +109,23 @@ public class RadonTransformDemo2 extends AbstractApp {
 		// Mat hough = RadonTransform.fhtRemap(houghTransform, stripWidth);
 		images[3] = new Img(houghTransform, false).toJfxImage();
 
-		Scalar mean = Core.mean(houghTransform);
-		Core.absdiff(houghTransform, mean, houghTransform);
+		// Scalar mean = Core.mean(houghTransform);
+		// Core.absdiff(houghTransform, mean, houghTransform);
+		// Mat gradient = new Mat();
+		// Imgproc.Sobel(houghTransform, gradient, CvType.CV_64FC1, 0, 1);
+		// Imgproc.Sobel(houghTransform, gradient, CvType.CV_64FC1, 1, 0);
+		// Core.absdiff(gradient, new Scalar(0), gradient);
+		Imgproc.morphologyEx(houghTransform, houghTransform, Imgproc.MORPH_GRADIENT, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(1, 2)));
 
-		// Imgproc.morphologyEx(houghTransform, houghTransform, Imgproc.MORPH_GRADIENT, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(1, 2)));
-		Core.normalize(houghTransform, houghTransform, 0, 255, Core.NORM_MINMAX);
+		// Imgproc.threshold(houghTransform, houghTransform, 0, 1, Imgproc.THRESH_TOZERO);
+
+		// Core.addWeighted(houghTransform, 0, gradient, 1, 0, houghTransform);
+		Core.normalize(houghTransform, houghTransform, 0, 1, Core.NORM_MINMAX);
+
+		// Imgproc.threshold(houghTransform, houghTransform, 150, 255, Imgproc.THRESH_BINARY);
 		images[4] = new Img(houghTransform, false).toJfxImage();
-
 		ref = trace("FHT compute", ref);
-		TrajectStep[] houghVtraj = RadonTransform.bestTraject(houghTransform, -20);
+		TrajectStep[] houghVtraj = RadonTransform.bestTraject(houghTransform, -0.3);
 
 		for (int y = 0; y < houghVtraj.length; y++)
 			houghVtraj[y].theta = (int) Math.round(Math.atan((double) (houghVtraj[y].theta - stripWidth + 1) / (stripWidth - 1)) / Math.PI * 180 + 45);

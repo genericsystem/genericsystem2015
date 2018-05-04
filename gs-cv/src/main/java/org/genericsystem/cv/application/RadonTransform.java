@@ -80,7 +80,7 @@ public class RadonTransform {
 		Mat houghTransform = new Mat();
 		Ximgproc.FastHoughTransform(vStrip, houghTransform, CvType.CV_64FC1, Ximgproc.ARO_45_135, Ximgproc.FHT_ADD, Ximgproc.HDO_DESKEW);
 		Core.transpose(houghTransform, houghTransform);
-		Core.normalize(houghTransform, houghTransform, 0, 1, Core.NORM_MINMAX);
+		Core.normalize(houghTransform, houghTransform, 0, 255, Core.NORM_MINMAX);
 		return new Mat(houghTransform, new Range(vStrip.width() / 2, houghTransform.height() - vStrip.width() / 2), new Range(0, houghTransform.width()));
 	}
 
@@ -246,9 +246,12 @@ public class RadonTransform {
 		List<double[]> values = new ArrayList<>();
 		for (int k = 0; k < traj.length; k++)
 			values.add(new double[] { k, traj[k].theta, traj[k].magnitude });
-		BiFunction<Double, double[], Double> f = (x, params) -> params[0] + params[1] * x + params[2] * x * x + params[3] * x * x * x + params[4] * x * x * x * x + params[5] * x * x * x * x * x;
+		double firstTheta = traj[0].theta;
+		double k = traj.length - 1;
+		double lastTheta = traj[traj.length - 1].theta;
+		BiFunction<Double, double[], Double> f = (x, params) -> traj[0].theta + ((lastTheta - firstTheta - params[0] * k * k - params[1] * k * k * k - params[2] * k * k * k) / k) * x + params[0] * x * x + params[1] * x * x * x + params[2] * x * x * x * x;
 		BiFunction<double[], double[], Double> error = (xy, params) -> (f.apply(xy[0], params) - xy[1]) * xy[2];
-		double[] params = new LevenbergImpl<>(error, values, new double[] { 0, 0, 0, 0, 0, 0 }).getParams();
+		double[] params = new LevenbergImpl<>(error, values, new double[] { 0, 0, 0 }).getParams();
 		return x -> f.apply(x, params);
 	}
 
