@@ -1,9 +1,14 @@
 package org.genericsystem.cv.application;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
@@ -202,6 +207,85 @@ public class RadonTransform {
 		return angles;
 	}
 
+	private static class Node {
+		double distance = Double.NEGATIVE_INFINITY;
+		Map<Integer, Double> children = new HashMap<>();
+		Integer parent;
+	}
+
+	// Works sometimes…
+	public static TrajectStep[] bestTraject2(Mat projectionMap, int minAngle, int maxAngle, double w) {
+		int deltaK = 20;
+		int n = projectionMap.rows() / deltaK + 1;
+		int[] ks = new int[n];
+		for (int i = 0; i < n - 1; i++)
+			ks[i] = i * deltaK;
+		ks[n - 1] = projectionMap.rows() - 1;
+
+		Node[][] nodes = new Node[n][maxAngle - minAngle + 1];
+		for (int s = n - 1; s >= 0; s--)
+			for (int theta = minAngle; theta < projectionMap.cols() + minAngle; theta++) {
+				Node node = new Node();
+				nodes[s][theta - minAngle] = node;
+				if (s < n - 1) {
+					List<Integer> allowedNextAngles = allowedNextAngles(theta, deltaK, minAngle, maxAngle, w);
+					for (int nextAngle : allowedNextAngles) {
+						double h = (nextAngle - theta) / (double)deltaK;
+						double weight = 0;
+						for (int t = 0; t < deltaK; t++)
+							weight += Math.pow(projectionMap.get(ks[s] + t, (int) Math.round(theta + t * h))[0], 3);
+						weight += deltaK * Math.exp(-h * h / 2);
+						node.children.put(nextAngle, weight);
+						if (s == 0)
+							node.distance = 0;
+					}
+				}
+			}
+
+		for (int i = 0; i < ks.length - 1; i++) {
+			for (int theta = minAngle; theta <= maxAngle; theta++) {
+				Node node = nodes[i][theta - minAngle];
+				if (node.distance != Double.NEGATIVE_INFINITY)
+					for (Entry<Integer, Double> child : node.children.entrySet()) {
+						if (nodes[i + 1][child.getKey() - minAngle].distance < node.distance + child.getValue()) {
+							nodes[i + 1][child.getKey() - minAngle].distance = node.distance + child.getValue();
+							nodes[i + 1][child.getKey() - minAngle].parent = theta;
+						}
+					}
+			}
+		}
+		TrajectStep[] bestSteps = new TrajectStep[n];
+		int nextTheta = 0;
+		double maxDistance = Double.NEGATIVE_INFINITY;
+		for (int theta = minAngle; theta <= maxAngle; theta++)
+			if (nodes[n - 1][theta - minAngle].distance > maxDistance) {
+				maxDistance = nodes[n - 1][theta - minAngle].distance;
+				nextTheta = theta;
+			}
+		bestSteps[n - 1] = new TrajectStep(ks[n - 1], nextTheta, projectionMap.get(ks[n - 1], nextTheta - minAngle)[0]);
+		for (int i = n - 2; i >= 0; i--) {
+			int theta = nodes[i + 1][nextTheta - minAngle].parent;
+			bestSteps[i] = new TrajectStep(ks[i], theta, projectionMap.get(ks[i], theta - minAngle)[0]);
+			nextTheta = theta;
+		}
+		logger.info("Best steps found: {}.", Arrays.asList(bestSteps).stream().map(s -> s.theta).collect(Collectors.toList()));
+		return bestSteps;
+	}
+
+	// Use a cache if actually used.
+	private static List<Integer> allowedNextAngles(int prevTheta, int deltaK, int minAngle, int maxAngle, double w) {
+		List<Integer> angles = new ArrayList<>();
+		double vA = -w * Math.tan(prevTheta * Math.PI / 180) / 2;
+		double vB = -vA;
+		double hypothenuse1 = Math.sqrt(w * w / 4 + (deltaK - vA) * (deltaK - vA));
+		double maxTheta = 180 * Math.asin((deltaK - vA) / hypothenuse1) / Math.PI;
+		double hypothenuse2 = Math.sqrt(w * w / 4 + (deltaK - vB) * (deltaK - vB));
+		double minTheta = 180 * Math.asin((vB - deltaK) / hypothenuse2) / Math.PI;
+		for (int theta = Math.max(minAngle, (int) Math.ceil(minTheta)); theta <= Math.min(maxAngle, Math.floor(maxTheta)); theta++)
+			angles.add(theta);
+		return angles;
+	}
+
 	public static TrajectStep[] bestTraject(Mat projectionMap, double anglePenality) {
 		double[][] score = new double[projectionMap.rows()][projectionMap.cols()];
 		int[][] thetaPrev = new int[projectionMap.rows()][projectionMap.cols()];
@@ -283,6 +367,7 @@ public class RadonTransform {
 			Mat projMap = radonRemap(radonTransform, minAngle);
 			Imgproc.morphologyEx(projMap, projMap, Imgproc.MORPH_GRADIENT, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(2, 4)));
 			TrajectStep[] angles = bestTraject(projMap, anglePenalty);
+			// TrajectStep[] angles = bestTraject2(projMap, minAngle, maxAngle, w);
 			projMap.release();
 			radonTransform.release();
 			approxFunctions.add(approxTraject(angles));

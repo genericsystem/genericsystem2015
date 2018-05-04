@@ -97,11 +97,10 @@ public class Svd {
 		Mat eigenVectors = new Mat();
 		Core.eigen(M, eigenValues, eigenVectors);
 		int minIndex = -1;
-		double minValue = Double.POSITIVE_INFINITY;
-		for (int i = 0; i < eigenValues.rows(); i++) {
-			if (eigenValues.get(i, 0)[0] > Precision.EPSILON && eigenValues.get(i, 0)[0] < minValue) {
-				minValue = eigenValues.get(i, 0)[0];
+		for (int i = eigenValues.rows() - 1; i >= 0; i--) {
+			if (eigenValues.get(i, 0)[0] > Precision.EPSILON) {
 				minIndex = i;
+				break;
 			}
 		}
 
