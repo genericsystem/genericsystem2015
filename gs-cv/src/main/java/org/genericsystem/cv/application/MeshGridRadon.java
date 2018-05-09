@@ -1,13 +1,5 @@
 package org.genericsystem.cv.application;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
-
 import org.apache.commons.math3.analysis.FunctionUtils;
 import org.apache.commons.math3.analysis.differentiation.UnivariateDifferentiableFunction;
 import org.apache.commons.math3.analysis.function.Constant;
@@ -27,6 +19,14 @@ import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 public class MeshGridRadon extends MeshGrid {
 
@@ -56,6 +56,8 @@ public class MeshGridRadon extends MeshGrid {
 		nLines = (this.image.height() - 1) / yStep + 1;
 		nVerts = (this.image.width() - 1) / xStep + 1;
 	}
+
+	protected List<Point> points = new ArrayList<>();
 
 	private int[][] toRectIndices() {
 		int[][] rects = new int[mesh.size()][4];
@@ -89,7 +91,7 @@ public class MeshGridRadon extends MeshGrid {
 			int currX = 0;
 			Point prevPoint = new Point(currX, hLine.value(currX));
 			currX += 5;
-			while(currX < image.width()) {
+			while (currX < image.width()) {
 				Point newPoint = new Point(currX, hLine.value(currX));
 				if (inImage(prevPoint) && inImage(newPoint))
 					Imgproc.line(baseLines, prevPoint, newPoint, color);

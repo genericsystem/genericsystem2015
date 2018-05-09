@@ -1,10 +1,5 @@
 package org.genericsystem.cv.application;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -16,6 +11,11 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class MeshGrid {
 
@@ -305,7 +305,7 @@ public class MeshGrid {
 		assert Double.isFinite(startingPoint.y);
 		if (deltaY == 0)
 			return startingPoint;
-		double dY = Math.max(0.5, deltaY) * Math.signum(deltaY);
+		double dY = Math.max(1, deltaY / 2) * Math.signum(deltaY);
 		double x = startingPoint.x, y = startingPoint.y;
 		while (Math.abs(y - startingPoint.y - deltaY) >= 1) {
 			double dX = dY / Math.tan(interpolator.interpolateVerticals(x - xBorder, y - yBorder) + Math.PI / 2);
@@ -324,7 +324,7 @@ public class MeshGrid {
 		assert Double.isFinite(startingPoint.y);
 		if (deltaX == 0)
 			return startingPoint;
-		double dX = Math.max(0.5, deltaX) * Math.signum(deltaX);
+		double dX = Math.max(1, deltaX / 2) * Math.signum(deltaX);
 		double x = startingPoint.x, y = startingPoint.y;
 		while (Math.abs(x - startingPoint.x - deltaX) >= 1) {
 			double dY = Math.tan(interpolator.interpolateHorizontals(x - xBorder, y - yBorder)) * dX;

@@ -1,14 +1,5 @@
 package org.genericsystem.cv.application;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
@@ -19,6 +10,15 @@ import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -99,10 +99,20 @@ public class RadonTransformDemo extends AbstractApp {
 
 		ref = trace("Binarization", ref);
 
-		int stripWidth = 64;
-		List<Mat> vStrips = RadonTransform.extractStrips(binarized.getSrc(), stripWidth);
-		int stripHeight = 64;
-		List<Mat> hStrips = RadonTransform.extractStrips(transposedBinarized.getSrc(), stripHeight);
+		double vRecover = 0.5;
+		int vStripsNumber = 16;
+		double stripWidth = (binarized.width() / (vStripsNumber * (1 - vRecover) + vRecover));
+		double vStep = ((1 - vRecover) * stripWidth);
+		System.out.println(vStripsNumber + " verticals strips with width : " + stripWidth + " each step : " + vStep);
+
+		double hRecover = 0.5;
+		int hStripsNumber = 9;
+		double stripHeight = (binarized.height() / (hStripsNumber * (1 - hRecover) + hRecover));
+		double hStep = ((1 - hRecover) * stripHeight);
+		System.out.println(hStripsNumber + " horizontal strips with width : " + stripHeight + " each step : " + hStep);
+
+		List<Mat> vStrips = RadonTransform.extractStrips(binarized.getSrc(), vStripsNumber, stripWidth, vStep);
+		List<Mat> hStrips = RadonTransform.extractStrips(transposedBinarized.getSrc(), hStripsNumber, stripHeight, hStep);
 
 		ref = trace("Extract strips", ref);
 
@@ -137,10 +147,10 @@ public class RadonTransformDemo extends AbstractApp {
 
 		ref = trace("Compute FHT remap", ref);
 
-		List<TrajectStep[]> vTrajs = vProjectionMaps.stream().map(projectionMap -> RadonTransform.bestTraject(projectionMap, -1000)).collect(Collectors.toList());
-		List<TrajectStep[]> hTrajs = hProjectionMaps.stream().map(projectionMap -> RadonTransform.bestTraject(projectionMap, -1000)).collect(Collectors.toList());
-		List<TrajectStep[]> vHoughTrajs = vHoughs.stream().map(projectionMap -> RadonTransform.bestTraject(projectionMap, -1000)).collect(Collectors.toList());
-		List<TrajectStep[]> hHoughTrajs = hHoughs.stream().map(projectionMap -> RadonTransform.bestTraject(projectionMap, -1000)).collect(Collectors.toList());
+		List<TrajectStep[]> vTrajs = vProjectionMaps.stream().map(projectionMap -> RadonTransform.bestTrajectRadon(projectionMap, -1000)).collect(Collectors.toList());
+		List<TrajectStep[]> hTrajs = hProjectionMaps.stream().map(projectionMap -> RadonTransform.bestTrajectRadon(projectionMap, -1000)).collect(Collectors.toList());
+		List<TrajectStep[]> vHoughTrajs = vHoughs.stream().map(projectionMap -> RadonTransform.bestTrajectFHT(projectionMap, -1000)).collect(Collectors.toList());
+		List<TrajectStep[]> hHoughTrajs = hHoughs.stream().map(projectionMap -> RadonTransform.bestTrajectFHT(projectionMap, -1000)).collect(Collectors.toList());
 		ref = trace("Compute trajects", ref);
 		for (TrajectStep[] houghVtraj : vHoughTrajs)
 			for (int y = 0; y < houghVtraj.length; y++)
@@ -188,36 +198,35 @@ public class RadonTransformDemo extends AbstractApp {
 
 		ref = trace("Compute cubic spline lines", ref);
 
-		int hStep = stripHeight / 2;
 		int vStrip = 0;
 		List<OrientedPoint> horizontals = new ArrayList<>();
 		for (Function<Double, Double> f : approxVFunctions)
-			horizontals.addAll(RadonTransform.toHorizontalOrientedPoints(f, (vStrip++ + 1) * hStep, binarized.height(), hStep));
-		int vStep = stripWidth / 2;
+			horizontals.addAll(RadonTransform.toHorizontalOrientedPoints(f, (vStrip++ + 1) * hStep, binarized.height(), (int) hStep));
+
 		int hStrip = 0;
 		List<OrientedPoint> verticals = new ArrayList<>();
 		for (Function<Double, Double> f : approxHFunctions)
-			verticals.addAll(RadonTransform.toVerticalOrientedPoints(f, (hStrip++ + 1) * vStep, binarized.width(), vStep));
+			verticals.addAll(RadonTransform.toVerticalOrientedPoints(f, (hStrip++ + 1) * vStep, binarized.width(), (int) vStep));
 
 		GeneralInterpolator interpolator = new GeneralInterpolator(horizontals, verticals, 6, 20);
 
 		vStrip = 0;
 		List<OrientedPoint> fhtHorizontals = new ArrayList<>();
 		for (Function<Double, Double> f : approxVFHTFunctions)
-			fhtHorizontals.addAll(RadonTransform.toHorizontalOrientedPoints(f, (vStrip++ + 1) * hStep, binarized.height(), hStep));
+			fhtHorizontals.addAll(RadonTransform.toHorizontalOrientedPoints(f, (vStrip++ + 1) * hStep, binarized.height(), (int) hStep));
 		hStrip = 0;
 		List<OrientedPoint> fhtVerticals = new ArrayList<>();
 		for (Function<Double, Double> f : approxHFHTFunctions)
-			fhtVerticals.addAll(RadonTransform.toVerticalOrientedPoints(f, (hStrip++ + 1) * vStep, binarized.width(), vStep));
+			fhtVerticals.addAll(RadonTransform.toVerticalOrientedPoints(f, (hStrip++ + 1) * vStep, binarized.width(), (int) vStep));
 
-		GeneralInterpolator interpolatorFHT = new GeneralInterpolator(fhtHorizontals, fhtVerticals, 6, 20);
+		GeneralInterpolator interpolatorFHT = new GeneralInterpolator(fhtHorizontals, fhtVerticals, 3, 10);
 
 		ref = trace("Prepare interpolator", ref);
 
 		Img frameDisplay = new Img(superFrame.getFrame().getSrc().clone(), false);
 		vStrip = 0;
 		for (Function<Double, Double> f : approxVFunctions) {
-			for (int y = hStep; y <= binarized.height(); y += hStep) {
+			for (int y = (int) hStep; y <= binarized.height(); y += hStep) {
 				double angle = (f.apply((double) y) - minAngle) / 180 * Math.PI;
 				Imgproc.line(frameDisplay.getSrc(), new Point((vStrip + 1) * stripWidth / 2 - Math.cos(angle) * stripWidth / 6, y - Math.sin(angle) * stripWidth / 6),
 						new Point((vStrip + 1) * stripWidth / 2 + Math.cos(angle) * stripWidth / 6, y + Math.sin(angle) * stripWidth / 6), new Scalar(0, 255, 0), 2);
@@ -230,7 +239,7 @@ public class RadonTransformDemo extends AbstractApp {
 
 		hStrip = 0;
 		for (Function<Double, Double> f : approxHFunctions) {
-			for (int x = vStep; x <= binarized.width(); x += vStep) {
+			for (int x = (int) vStep; x <= binarized.width(); x += vStep) {
 				double angle = (90 + minAngle - f.apply((double) x)) / 180 * Math.PI;
 				Imgproc.line(frameDisplay.getSrc(), new Point(x - Math.cos(angle) * stripHeight / 6, (hStrip + 1) * stripHeight / 2 - Math.sin(angle) * stripHeight / 6),
 						new Point(x + Math.cos(angle) * stripHeight / 6, (hStrip + 1) * stripHeight / 2 + Math.sin(angle) * stripHeight / 6), new Scalar(0, 0, 255), 2);
@@ -247,7 +256,7 @@ public class RadonTransformDemo extends AbstractApp {
 		Img frameDisplayFHT = new Img(superFrame.getFrame().getSrc().clone(), false);
 		vStrip = 0;
 		for (Function<Double, Double> f : approxVFHTFunctions) {
-			for (int k = hStep; k + hStep <= binarized.height(); k += hStep) {
+			for (int k = (int) hStep; k + hStep <= binarized.height(); k += hStep) {
 				double angle = (f.apply((double) k) - minAngle) / 180 * Math.PI;
 				Imgproc.line(frameDisplayFHT.getSrc(), new Point((vStrip + 1) * stripWidth / 2 - Math.cos(angle) * stripWidth / 6, k - Math.sin(angle) * stripWidth / 6),
 						new Point((vStrip + 1) * stripWidth / 2 + Math.cos(angle) * stripWidth / 6, k + Math.sin(angle) * stripWidth / 6), new Scalar(0, 255, 0), 2);
@@ -259,7 +268,7 @@ public class RadonTransformDemo extends AbstractApp {
 		}
 		hStrip = 0;
 		for (Function<Double, Double> f : approxHFHTFunctions) {
-			for (int k = vStep; k + vStep <= binarized.width(); k += vStep) {
+			for (int k = (int) vStep; k + vStep <= binarized.width(); k += vStep) {
 				double angle = (90 + minAngle - (f.apply((double) k))) / 180 * Math.PI;
 				Imgproc.line(frameDisplayFHT.getSrc(), new Point(k - Math.cos(angle) * stripHeight / 6, (hStrip + 1) * stripHeight / 2 - Math.sin(angle) * stripHeight / 6),
 						new Point(k + Math.cos(angle) * stripHeight / 6, (hStrip + 1) * stripHeight / 2 + Math.sin(angle) * stripHeight / 6), new Scalar(0, 0, 255), 2);
