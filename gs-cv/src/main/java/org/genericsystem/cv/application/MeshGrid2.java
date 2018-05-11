@@ -47,7 +47,6 @@ public class MeshGrid2 {
 		private HashMap<Key, Point[]> internal = new HashMap<>();
 
 		public void put(int i, int j, Point... points) {
-			System.out.println("put : " + i + " " + j);
 			internal.put(new Key(i, j), points);
 		}
 
@@ -305,6 +304,8 @@ public class MeshGrid2 {
 		return clone;
 	}
 
+	// --------------------------------------------------
+
 	private List<Point3> points3D;
 	private Map<Key, Point3[]> mesh3D;
 
@@ -442,8 +443,9 @@ public class MeshGrid2 {
 		double totalHeight = sum(heights, heights.length);
 		for (int i = 0; i < heights.length; i++)
 			heights[i] *= image.height() / totalHeight;
+		double totalWidth = sum(widths, widths.length);
 		for (int i = 0; i < widths.length; i++)
-			widths[i] *= image.width() / totalHeight;
+			widths[i] *= image.width() / totalWidth;
 
 		Mat dewarpedImage = new Mat(image.height(), (int) Math.round(sum(widths, widths.length)) + 1, CvType.CV_8UC3, new Scalar(255, 255, 255));
 

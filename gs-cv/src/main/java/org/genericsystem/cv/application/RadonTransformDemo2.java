@@ -81,14 +81,14 @@ public class RadonTransformDemo2 extends AbstractApp {
 
 		long ref = System.currentTimeMillis();
 
-		// Img binarized = superFrame.getFrame().adaptativeGaussianInvThreshold(7, 5);
-		Img binarized = new Img(Mat.zeros(360, 640, CvType.CV_8UC1), false);
+		Img binarized = superFrame.getFrame().adaptativeGaussianInvThreshold(7, 5);
+		// Img binarized = new Img(Mat.zeros(360, 640, CvType.CV_8UC1), false);
 		double[] angles = { -10, -25, -5 };
 		int count = 0;
 		for (int y = 100; y <= 260; y += 80) {
 			double angle = angles[count] / 180 * Math.PI;
 			// Imgproc.line(binarized.getSrc(), new Point(320 - 40 * Math.cos(angle), y - 40 * Math.sin(angle)), new Point(320 + 40 * Math.cos(angle), y + 40 * Math.sin(angle)), new Scalar(255), 1);
-			Imgproc.putText(binarized.getSrc(), "Hello boy", new Point(320 - 40 * Math.cos(angle), y - 40 * Math.sin(angle)), Core.FONT_HERSHEY_PLAIN, 2, new Scalar(255), 1);
+			// Imgproc.putText(binarized.getSrc(), "Hello boy", new Point(320 - 40 * Math.cos(angle), y - 40 * Math.sin(angle)), Core.FONT_HERSHEY_PLAIN, 2, new Scalar(255), 1);
 			count++;
 		}
 
@@ -96,7 +96,7 @@ public class RadonTransformDemo2 extends AbstractApp {
 
 		ref = trace("Binarization", ref);
 
-		int stripWidth = 200;
+		int stripWidth = 100;
 		Mat vStrip = RadonTransform.extractStrip(binarized.getSrc(), binarized.width() / 2 - stripWidth / 2, stripWidth);
 
 		Mat vStripDisplay = Mat.zeros(binarized.size(), binarized.type());
@@ -107,7 +107,13 @@ public class RadonTransformDemo2 extends AbstractApp {
 
 		Mat houghTransform = RadonTransform.fastHoughTransform(vStrip);
 		Imgproc.resize(houghTransform, houghTransform, new Size(91, houghTransform.height()), 0, 0, Imgproc.INTER_LINEAR);
+		// Core.pow(houghTransform, 2, houghTransform);
 		Core.normalize(houghTransform, houghTransform, 0, 255, Core.NORM_MINMAX);
+		// Mat gray = new Mat();
+		// houghTransform.convertTo(gray, CvType.CV_8UC1);
+		// Imgproc.threshold(gray, houghTransform, 0, 255, Imgproc.THRESH_BINARY_INV + Imgproc.THRESH_OTSU);
+
+		// Core.absdiff(houghTransform, new Scalar(255), houghTransform);
 		// Mat hough = RadonTransform.fhtRemap(houghTransform, stripWidth);
 		images[3] = new Img(houghTransform, false).toJfxImage();
 		ref = trace("FHT", ref);
@@ -119,13 +125,16 @@ public class RadonTransformDemo2 extends AbstractApp {
 		// Imgproc.Sobel(houghTransform, gradient, CvType.CV_64FC1, 1, 0);
 		// Core.absdiff(gradient, new Scalar(0), gradient);
 
-		Imgproc.morphologyEx(houghTransform, houghTransform, Imgproc.MORPH_GRADIENT, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(1, 2)));
-		Core.pow(houghTransform, 4, houghTransform);
-		houghTransform.row(0).setTo(new Scalar(0));
-		houghTransform.row(houghTransform.rows() - 1).setTo(new Scalar(0));
+		// Imgproc.morphologyEx(houghTransform, gradient, Imgproc.MORPH_GRADIENT, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(1, 2)));
+		// Core.normalize(gradient, gradient, 0, 255, Core.NORM_MINMAX);
+		// wImgproc.adaptiveThreshold(gray, houghTransform, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY_INV, 7, 10);
 
-		Core.normalize(houghTransform, houghTransform, 0, 255, Core.NORM_MINMAX);
+		// Core.pow(houghTransform, 4, houghTransform);
+		// gradient.row(0).setTo(new Scalar(0));
+		// gradient.row(houghTransform.rows() - 1).setTo(new Scalar(0));
 
+		// Core.normalize(houghTransform, houghTransform, 0, 255, Core.NORM_MINMAX);
+		// houghTransform = new Img(houghTransform, false).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(1, 7)).getSrc();
 		// Imgproc.threshold(houghTransform, houghTransform, 0, 1, Imgproc.THRESH_TOZERO);
 		// Core.addWeighted(houghTransform, 0, gradient, 1, 0, houghTransform);
 		// Core.normalize(houghTransform, houghTransform, 0, 1, Core.NORM_MINMAX);
@@ -133,7 +142,7 @@ public class RadonTransformDemo2 extends AbstractApp {
 
 		images[4] = new Img(houghTransform, false).toJfxImage();
 		ref = trace("FHT compute", ref);
-		TrajectStep[] houghVtraj = RadonTransform.bestTrajectFHT(houghTransform, -40);
+		TrajectStep[] houghVtraj = RadonTransform.bestTrajectFHT(houghTransform, -20);
 
 		for (int y = 0; y < houghVtraj.length; y++)
 			houghVtraj[y].theta = (int) Math.round(Math.atan((double) (houghVtraj[y].theta - 45) / (45)) / Math.PI * 180 + 45);
@@ -150,11 +159,20 @@ public class RadonTransformDemo2 extends AbstractApp {
 				}
 		}
 
+		Mat lines = Mat.zeros(houghVtraj.length, 255, CvType.CV_8UC1);
+		for (int row = 0; row < lines.rows(); row++) {
+			Imgproc.line(lines, new Point(0, row), new Point(houghVtraj[row].magnitude, row), new Scalar(255));
+		}
+		Core.normalize(lines, lines, 0, 255, Core.NORM_MINMAX);
+		// Imgproc.adaptiveThreshold(lines, lines, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY_INV, 5, 15);
+		Imgproc.threshold(lines, lines, 100, 255, Imgproc.THRESH_BINARY);
 		Mat vHoughColor = Mat.zeros(houghTransform.height(), 91, CvType.CV_8UC3);
+		// double average = Arrays.stream(houghVtraj).mapToDouble(traj -> traj.magnitude).average().getAsDouble();
 		for (int y = 0; y < vHoughColor.height(); y++) {
 			vHoughColor.put(y, houghVtraj[y].theta, 0, 0, 255);
 			if (houghVtraj[y].magnitude != 0) {
 				vHoughColor.put(y, houghVtraj[y].theta, 255, 0, 0);
+				Imgproc.line(vHoughColor, new Point(0, y), new Point(91, y), new Scalar(255, 0, 0));
 			}
 		}
 		ref = trace("Best traject hough", ref);
@@ -179,7 +197,7 @@ public class RadonTransformDemo2 extends AbstractApp {
 		houghTransform.release();
 
 		ref = trace("Display approx hough", ref);
-		images[5] = new Img(vHoughColor, false).toJfxImage();
+		images[5] = new Img(lines, false).toJfxImage();
 
 		Mat vTransform = RadonTransform.radonTransform(vStrip, -45, 45);
 		Mat vProjection = RadonTransform.radonRemap(vTransform, -45);

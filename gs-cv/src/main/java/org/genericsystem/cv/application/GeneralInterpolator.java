@@ -26,7 +26,7 @@ public class GeneralInterpolator implements Interpolator {
 	public static class OrientedPoint {
 
 		Point center;
-		private double strenght;
+		double strenght;
 		double angle;
 
 		public OrientedPoint(Point center, double angle, double strenght) {

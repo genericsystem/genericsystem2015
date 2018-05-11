@@ -287,7 +287,7 @@ public class RadonTransform {
 					bestScore4Pos = scoreFromNextTheta + nextPenality;
 					thetaPrev[k][theta] = theta + 1;
 				}
-				score[k][theta] = magnitude + bestScore4Pos;
+				score[k][theta] = Math.pow(magnitude, 2) + bestScore4Pos;
 			}
 		}
 

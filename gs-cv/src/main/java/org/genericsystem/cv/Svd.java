@@ -1,8 +1,5 @@
 package org.genericsystem.cv;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.commons.math3.util.Precision;
 import org.genericsystem.cv.utils.GPUTools;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
@@ -14,6 +11,9 @@ import org.opencv.core.Point3;
 import org.opencv.core.Scalar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Svd {
 
@@ -62,7 +62,7 @@ public class Svd {
 		int nDim = 3;
 		System.out.println("n = " + n);
 		// m * nDim constraints....
-		Mat A = new Mat(nDim * m, 3 * n, CvType.CV_64FC1, new Scalar(0));
+		Mat A = new Mat(nDim * m, 3 * n, CvType.CV_32FC1, new Scalar(0));
 		// coplanar terms...
 		for (int i = 0; i < m; i++) {
 			// % rect i: rects(i, 1) --- rects(i, 2)
@@ -76,7 +76,7 @@ public class Svd {
 		}
 
 		// data-terms...
-		Mat B = new Mat(2 * n, 3 * n, CvType.CV_64FC1, new Scalar(0));
+		Mat B = new Mat(2 * n, 3 * n, CvType.CV_32FC1, new Scalar(0));
 		for (int i = 0; i < n; i++) {
 			// % X - x_i Z...
 			B.put(2 * i, 3 * i, 1d);
@@ -89,13 +89,16 @@ public class Svd {
 		// solve the homogenous equation Az = 0
 		// [U, D, V] = svd(A + sqrt(lambda) * B);
 		// [minSingularValue, minIndex] = min(diag(D));
+		long ref = System.currentTimeMillis();
 		Mat dst = GPUTools.gemm(A, A, Core.GEMM_1_T);
 		Mat dst2 = GPUTools.gemm(B, B, Core.GEMM_1_T);
 		Mat M = GPUTools.addWeighted(dst, 1, dst2, lambda, 0);
+		System.out.println("gemm cuda : " + (System.currentTimeMillis() - ref));
+		ref = System.currentTimeMillis();
 
 		Mat eigenValues = new Mat();
 		Mat eigenVectors = new Mat();
-		Core.eigen(M, eigenValues, eigenVectors);
+		Core.eigenNonSymmetric(M, eigenValues, eigenVectors);
 		int minIndex = -1;
 		for (int i = eigenValues.rows() - 1; i >= 0; i--) {
 			if (eigenValues.get(i, 0)[0] > Precision.EPSILON) {
@@ -105,6 +108,8 @@ public class Svd {
 		}
 
 		Mat result = eigenVectors.row(minIndex);
+
+		System.out.println("Eigen normal : " + (System.currentTimeMillis() - ref));
 
 		double sum = 0;
 		for (int i = 0; i < pts.size(); i++)
