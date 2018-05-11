@@ -1,5 +1,12 @@
 package org.genericsystem.cv.application;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
@@ -11,11 +18,6 @@ import org.opencv.core.Range;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
-
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -38,7 +40,7 @@ public class RadonTransformDemo2 extends AbstractApp {
 	private SuperFrameImg superFrame = gsCapture.read();
 	private ScheduledExecutorService timer = new BoundedScheduledThreadPoolExecutor();
 	private Config config = new Config();
-	private final ImageView[][] imageViews = new ImageView[][] { new ImageView[3], new ImageView[3], new ImageView[3], new ImageView[3] };
+	private final ImageView[][] imageViews = new ImageView[][] { new ImageView[3], new ImageView[3], new ImageView[3], new ImageView[3], new ImageView[3] };
 
 	private void startTimer() {
 		timer.scheduleAtFixedRate(() -> {
@@ -77,7 +79,7 @@ public class RadonTransformDemo2 extends AbstractApp {
 		if (!config.stabilizedMode) {
 			superFrame = gsCapture.read();
 		}
-		Image[] images = new Image[9];
+		Image[] images = new Image[20];
 
 		long ref = System.currentTimeMillis();
 
@@ -106,51 +108,41 @@ public class RadonTransformDemo2 extends AbstractApp {
 		ref = trace("Extract strip", ref);
 
 		Mat houghTransform = RadonTransform.fastHoughTransform(vStrip);
-		Imgproc.resize(houghTransform, houghTransform, new Size(91, houghTransform.height()), 0, 0, Imgproc.INTER_LINEAR);
+		// Imgproc.resize(houghTransform, houghTransform, new Size(91, houghTransform.height()), 0, 0, Imgproc.INTER_LINEAR);
 		// Core.pow(houghTransform, 2, houghTransform);
+		houghTransform.row(0).setTo(new Scalar(0));
+		houghTransform.row(houghTransform.rows() - 1).setTo(new Scalar(0));
 		Core.normalize(houghTransform, houghTransform, 0, 255, Core.NORM_MINMAX);
-		// Mat gray = new Mat();
-		// houghTransform.convertTo(gray, CvType.CV_8UC1);
-		// Imgproc.threshold(gray, houghTransform, 0, 255, Imgproc.THRESH_BINARY_INV + Imgproc.THRESH_OTSU);
 
-		// Core.absdiff(houghTransform, new Scalar(255), houghTransform);
-		// Mat hough = RadonTransform.fhtRemap(houghTransform, stripWidth);
 		images[3] = new Img(houghTransform, false).toJfxImage();
 		ref = trace("FHT", ref);
 
-		// Scalar mean = Core.mean(houghTransform);
-		// Core.absdiff(houghTransform, mean, houghTransform);
-		// Mat gradient = new Mat();
-		// Imgproc.Sobel(houghTransform, gradient, CvType.CV_64FC1, 0, 1);
-		// Imgproc.Sobel(houghTransform, gradient, CvType.CV_64FC1, 1, 0);
-		// Core.absdiff(gradient, new Scalar(0), gradient);
+		Mat gradient = new Mat();
+		Mat blur = new Mat();
+		Imgproc.blur(houghTransform, blur, new Size(1, 11), new Point(-1, -1), Core.BORDER_ISOLATED);
+		Core.absdiff(houghTransform, blur, gradient);
+		images[2] = new Img(blur, false).toJfxImage();
 
-		// Imgproc.morphologyEx(houghTransform, gradient, Imgproc.MORPH_GRADIENT, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(1, 2)));
-		// Core.normalize(gradient, gradient, 0, 255, Core.NORM_MINMAX);
-		// wImgproc.adaptiveThreshold(gray, houghTransform, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY_INV, 7, 10);
+		gradient.row(0).setTo(new Scalar(0));
+		gradient.row(houghTransform.rows() - 1).setTo(new Scalar(0));
+		Core.normalize(gradient, gradient, 0, 255, Core.NORM_MINMAX);
+		images[4] = new Img(gradient, false).toJfxImage();
+		ref = trace("FHT Gradient", ref);
 
-		// Core.pow(houghTransform, 4, houghTransform);
-		// gradient.row(0).setTo(new Scalar(0));
-		// gradient.row(houghTransform.rows() - 1).setTo(new Scalar(0));
-
-		// Core.normalize(houghTransform, houghTransform, 0, 255, Core.NORM_MINMAX);
-		// houghTransform = new Img(houghTransform, false).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(1, 7)).getSrc();
-		// Imgproc.threshold(houghTransform, houghTransform, 0, 1, Imgproc.THRESH_TOZERO);
-		// Core.addWeighted(houghTransform, 0, gradient, 1, 0, houghTransform);
-		// Core.normalize(houghTransform, houghTransform, 0, 1, Core.NORM_MINMAX);
-		// Imgproc.threshold(houghTransform, houghTransform, 150, 255, Imgproc.THRESH_BINARY);
-
-		images[4] = new Img(houghTransform, false).toJfxImage();
-		ref = trace("FHT compute", ref);
-		TrajectStep[] houghVtraj = RadonTransform.bestTrajectFHT(houghTransform, -20);
+		TrajectStep[] houghVtraj = RadonTransform.bestTrajectFHT(gradient, -10);
+		List<Double> magnitudes = new ArrayList<>();
+		for (int row = 0; row < houghVtraj.length; row++) {
+			double magnitude = houghTransform.get(row, houghVtraj[row].theta)[0];
+			magnitudes.add(magnitude);
+		}
 
 		for (int y = 0; y < houghVtraj.length; y++)
-			houghVtraj[y].theta = (int) Math.round(Math.atan((double) (houghVtraj[y].theta - 45) / (45)) / Math.PI * 180 + 45);
+			houghVtraj[y].theta = (int) Math.round(Math.atan((double) (houghVtraj[y].theta - (stripWidth - 1)) / (stripWidth - 1)) / Math.PI * 180 + 45);
 
 		for (int y = 0; y < houghVtraj.length; y++) {
-			if (houghVtraj[y].magnitude == 0)
+			if (houghVtraj[y].magnitude <= 1)
 				for (int end = y + 1; end < houghVtraj.length; end++) {
-					if (houghVtraj[end].magnitude != 0) {
+					if (houghVtraj[end].magnitude > 1) {
 						for (int current = y; current < end; current++)
 							houghVtraj[current].theta = houghVtraj[y == 0 ? 0 : y - 1].theta + (houghVtraj[end].theta - houghVtraj[y == 0 ? 0 : y - 1].theta) * (current - y) / (end - y + 1);
 						y = end;
@@ -159,24 +151,35 @@ public class RadonTransformDemo2 extends AbstractApp {
 				}
 		}
 
-		Mat lines = Mat.zeros(houghVtraj.length, 255, CvType.CV_8UC1);
-		for (int row = 0; row < lines.rows(); row++) {
-			Imgproc.line(lines, new Point(0, row), new Point(houghVtraj[row].magnitude, row), new Scalar(255));
-		}
-		Core.normalize(lines, lines, 0, 255, Core.NORM_MINMAX);
-		// Imgproc.adaptiveThreshold(lines, lines, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY_INV, 5, 15);
-		Imgproc.threshold(lines, lines, 100, 255, Imgproc.THRESH_BINARY);
 		Mat vHoughColor = Mat.zeros(houghTransform.height(), 91, CvType.CV_8UC3);
-		// double average = Arrays.stream(houghVtraj).mapToDouble(traj -> traj.magnitude).average().getAsDouble();
 		for (int y = 0; y < vHoughColor.height(); y++) {
 			vHoughColor.put(y, houghVtraj[y].theta, 0, 0, 255);
-			if (houghVtraj[y].magnitude != 0) {
+			if (houghVtraj[y].magnitude != 0)
 				vHoughColor.put(y, houghVtraj[y].theta, 255, 0, 0);
-				Imgproc.line(vHoughColor, new Point(0, y), new Point(91, y), new Scalar(255, 0, 0));
-			}
 		}
-		ref = trace("Best traject hough", ref);
 
+		images[5] = new Img(vHoughColor, false).toJfxImage();
+		ref = trace("FHT traject", ref);
+
+		// Mat gray = new Mat();
+		// houghTransform.convertTo(gray, CvType.CV_8UC1);
+		// Imgproc.threshold(gray, houghTransform, 0, 255, Imgproc.THRESH_BINARY_INV + Imgproc.THRESH_OTSU);
+		// Scalar mean = Core.mean(houghTransform);
+		// Core.absdiff(houghTransform, mean, houghTransform);
+		// Imgproc.Sobel(houghTransform, gradient, CvType.CV_64FC1, 0, 1);
+		// Imgproc.Sobel(houghTransform, gradient, CvType.CV_64FC1, 1, 0);
+		// Core.absdiff(gradient, new Scalar(0), gradient);
+		// wImgproc.adaptiveThreshold(gray, houghTransform, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY_INV, 7, 10);
+		// Core.pow(houghTransform, 4, houghTransform);
+		// gradient.row(0).setTo(new Scalar(0));
+		// gradient.row(houghTransform.rows() - 1).setTo(new Scalar(0));
+		// Core.normalize(houghTransform, houghTransform, 0, 255, Core.NORM_MINMAX);
+		// houghTransform = new Img(houghTransform, false).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(1, 7)).getSrc();
+		// Imgproc.threshold(houghTransform, houghTransform, 0, 1, Imgproc.THRESH_TOZERO);
+		// Core.addWeighted(houghTransform, 0, gradient, 1, 0, houghTransform);
+		// Core.normalize(houghTransform, houghTransform, 0, 1, Core.NORM_MINMAX);
+		// Imgproc.threshold(houghTransform, houghTransform, 150, 255, Imgproc.THRESH_BINARY);
+		// Imgproc.morphologyEx(houghTransform, gradient, Imgproc.MORPH_GRADIENT, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(1, 2)));
 		// Function<Double, Double> approxHoughVFunction = RadonTransform.approxTraject(houghVtraj);
 		// for (int y = 0; y < vHoughColor.height(); y++) {
 		// int x = (int) Math.round(approxHoughVFunction.apply((double) y));
@@ -194,21 +197,12 @@ public class RadonTransformDemo2 extends AbstractApp {
 		// System.out.println((Math.atan((pair.point.x - stripWidth + 1) / (stripWidth - 1)) / Math.PI * 180) + " " + pair.point.y + " " + pair.value);
 		// }
 
-		houghTransform.release();
-
-		ref = trace("Display approx hough", ref);
-		images[5] = new Img(lines, false).toJfxImage();
-
 		Mat vTransform = RadonTransform.radonTransform(vStrip, -45, 45);
 		Mat vProjection = RadonTransform.radonRemap(vTransform, -45);
 
-		// for (Pair pair : RadonTransform.getLocalExtr(vProjection, 100)) {
-		// Imgproc.circle(vHoughColor, pair.point, 2, new Scalar(255, 0, 0), -1);
-		// System.out.println((Math.atan((pair.point.x - 45) / (45)) / Math.PI * 180) + " " + pair.point.y + " " + pair.value);
-		// }
-
 		images[6] = new Img(vProjection, false).toJfxImage();
 		System.out.println(vProjection);
+
 		Imgproc.morphologyEx(vProjection, vProjection, Imgproc.MORPH_GRADIENT, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(1, 2)));
 		Core.normalize(vProjection, vProjection, 0, 255, Core.NORM_MINMAX);
 		ref = trace("Radon + Projection", ref);
@@ -279,6 +273,16 @@ public class RadonTransformDemo2 extends AbstractApp {
 
 		ref = trace("Display approx radon", ref);
 		images[8] = new Img(vProjectionColor, false).toJfxImage();
+
+		Mat lines = Mat.zeros(magnitudes.size(), 255, CvType.CV_8UC1);
+		for (int row = 0; row < lines.rows(); row++) {
+			Imgproc.line(lines, new Point(0, row), new Point(magnitudes.get(row), row), new Scalar(255));
+		}
+		double average = magnitudes.stream().mapToDouble(mag -> mag).average().getAsDouble();
+		System.out.println("average : " + average);
+		// Core.normalize(lines, lines, 0, 255, Core.NORM_MINMAX);
+		ref = trace("Display approx hough", ref);
+		images[9] = new Img(lines, false).toJfxImage();
 
 		return images;
 
