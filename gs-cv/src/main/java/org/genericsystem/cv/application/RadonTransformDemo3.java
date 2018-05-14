@@ -128,11 +128,23 @@ public class RadonTransformDemo3 extends AbstractApp {
 		vHoughs.stream().forEach(projectionMap -> projectionMap.row(0).setTo(new Scalar(0)));
 		hHoughs.stream().forEach(projectionMap -> projectionMap.row(projectionMap.rows() - 1).setTo(new Scalar(0)));
 
-		double maxV = vHoughs.stream().mapToDouble(projectionMap -> Core.minMaxLoc(projectionMap).maxVal).max().getAsDouble();
-		double maxH = hHoughs.stream().mapToDouble(projectionMap -> Core.minMaxLoc(projectionMap).maxVal).max().getAsDouble();
+		// double maxV = vHoughs.stream().mapToDouble(projectionMap -> Core.minMaxLoc(projectionMap).maxVal).max().getAsDouble();
+		// double maxH = hHoughs.stream().mapToDouble(projectionMap -> Core.minMaxLoc(projectionMap).maxVal).max().getAsDouble();
+		vHoughs.stream().forEach(projectionMap -> {
+			Mat blur = new Mat();
+			Imgproc.blur(projectionMap, blur, new Size(1, 11), new Point(-1, -1), Core.BORDER_ISOLATED);
+			Core.absdiff(projectionMap, blur, projectionMap);
+			Core.normalize(projectionMap, projectionMap, 0, 1, Core.NORM_MINMAX);
+		});
+		hHoughs.stream().forEach(projectionMap -> {
+			Mat blur = new Mat();
+			Imgproc.blur(projectionMap, blur, new Size(1, 11), new Point(-1, -1), Core.BORDER_ISOLATED);
+			Core.absdiff(projectionMap, blur, projectionMap);
+			Core.normalize(projectionMap, projectionMap, 0, 1, Core.NORM_MINMAX);
+		});
 
-		vHoughs.stream().forEach(projectionMap -> Core.divide(projectionMap, new Scalar(maxV), projectionMap));
-		hHoughs.stream().forEach(projectionMap -> Core.divide(projectionMap, new Scalar(maxH), projectionMap));
+		// vHoughs.stream().forEach(projectionMap -> Core.divide(projectionMap, new Scalar(maxV), projectionMap));
+		// hHoughs.stream().forEach(projectionMap -> Core.divide(projectionMap, new Scalar(maxH), projectionMap));
 		// vHoughs.stream().forEach(projectionMap -> Core.normalize(projectionMap, projectionMap, 0, 1, Core.NORM_MINMAX));
 		// hHoughs.stream().forEach(projectionMap -> Core.normalize(projectionMap, projectionMap, 0, 1, Core.NORM_MINMAX));
 		ref = trace("Compute FHT", ref);
@@ -196,7 +208,7 @@ public class RadonTransformDemo3 extends AbstractApp {
 		for (int hStrip = 0; hStrip < hHoughTrajs.size(); hStrip++)
 			fhtVerticals.addAll(RadonTransform.toVerticalOrientedPoints(hHoughTrajs.get(hStrip), (hStrip + 1) * hStep));
 
-		GeneralInterpolator interpolatorFHT = new GeneralInterpolator(fhtHorizontals, fhtVerticals, 3, 0.000001);
+		GeneralInterpolator interpolatorFHT = new GeneralInterpolator(fhtHorizontals, fhtVerticals, 4, 15);
 
 		ref = trace("Prepare interpolator", ref);
 
