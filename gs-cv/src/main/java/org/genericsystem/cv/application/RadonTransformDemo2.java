@@ -1,5 +1,13 @@
 package org.genericsystem.cv.application;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
@@ -11,14 +19,6 @@ import org.opencv.core.Range;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -99,17 +99,38 @@ public class RadonTransformDemo2 extends AbstractApp {
 		ref = trace("Binarization", ref);
 
 		int stripWidth = 100;
+		int w = 50;
 		Mat vStrip = RadonTransform.extractStrip(binarized.getSrc(), binarized.width() / 2 - stripWidth / 2, stripWidth);
+		Mat vStrip2 = RadonTransform.extractStrip(binarized.getSrc(), binarized.width() / 2 - stripWidth / 2 + w, stripWidth);
 		Mat vStripDisplay = Mat.zeros(binarized.size(), binarized.type());
 		Mat roi = new Mat(vStripDisplay, new Range(0, binarized.height()), new Range(binarized.width() / 2 - stripWidth / 2, binarized.width() / 2 + stripWidth / 2));
 		vStrip.copyTo(roi);
+		Mat roi2 = new Mat(vStripDisplay, new Range(0, binarized.height()), new Range(binarized.width() / 2 - stripWidth / 2 + w, binarized.width() / 2 + stripWidth / 2 + w));
+		vStrip2.copyTo(roi2);
 		images[1] = new Img(vStripDisplay, false).toJfxImage();
 		ref = trace("Extract strip", ref);
 
 		Mat houghTransform = RadonTransform.fastHoughTransform(vStrip);
+		Mat houghTransform2 = RadonTransform.fastHoughTransform(vStrip2);
+
 		// houghTransform.row(0).setTo(new Scalar(0));
 		// houghTransform.row(houghTransform.rows() - 1).setTo(new Scalar(0));
 		Core.normalize(houghTransform, houghTransform, 0, 255, Core.NORM_MINMAX);
+		// Core.normalize(houghTransform2, houghTransform2, 0, 255, Core.NORM_MINMAX);
+		// Mat shift = Mat.zeros(houghTransform2.size(), houghTransform2.type());
+		// for (int col = 0; col < shift.width(); col++) {
+		// int rowShift = (int) Math.round((double) w * ((col - (stripWidth - 1)) / (stripWidth - 1)));
+		// for (int row = 0; row < shift.height(); row++) {
+		// if (row + rowShift >= 0 && row + rowShift < shift.height())
+		// shift.put(row + rowShift, col, houghTransform2.get(row, col)[0]);
+		// }
+		// }
+		//
+		// Core.absdiff(shift, houghTransform, shift);
+		//
+		// Mat concat = new Mat(houghTransform.size(), CvType.CV_64FC1);
+		// Core.hconcat(Arrays.asList(houghTransform, shift), concat);
+
 		images[3] = new Img(houghTransform, false).toJfxImage();
 		ref = trace("FHT", ref);
 
@@ -162,33 +183,84 @@ public class RadonTransformDemo2 extends AbstractApp {
 		// for (int row = 0; row < comb.rows(); row++)
 		// Imgproc.line(comb, new Point(0, row), new Point(magnitudes.get(row), row), new Scalar(255));
 
-		// comb = new Img(comb, false).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(1, 3)).getSrc();
-
 		ref = trace("Display comb", ref);
 		images[6] = new Img(comb, false).toJfxImage();
 
 		List<Double> magnitudesGradient = new ArrayList<>();
 		Mat gradientComb = Mat.zeros(houghVtraj.length, 255, CvType.CV_8UC3);
-		for (int row = 0; row < magnitudes.size() - 1; row++) {
-			double dMag = magnitudes.get(row + 1) - magnitudes.get(row);
-			magnitudesGradient.add(dMag);
-			if (Math.abs(dMag) > stripWidth / 5) {
-				Scalar color = dMag > 0 ? new Scalar(0, 255, 0) : new Scalar(0, 0, 255);
-				Imgproc.line(gradientComb, new Point(0, row), new Point(Math.abs(dMag), row), color);
+		for (int row = 0; row < magnitudes.size(); row++) {
+			double dmag1 = magnitudes.get(row) - (row > 0 ? magnitudes.get(row - 1) : magnitudes.get(row));
+			double dmag2 = ((row < magnitudes.size() - 1) ? magnitudes.get(row + 1) : magnitudes.get(row)) - magnitudes.get(row);
+
+			if (dmag1 >= 0 && dmag2 < 0) {
+				magnitudesGradient.add(dmag1);
+			} else if (dmag1 < 0 && dmag2 >= 0) {
+				magnitudesGradient.add(0d);
+			} else if (dmag1 >= 0 && dmag2 >= 0) {
+				if (dmag1 >= dmag2)
+					magnitudesGradient.add(dmag1);
+				else
+					magnitudesGradient.add(0d);
+			} else if (dmag1 < 0 && dmag2 < 0) {
+				if (dmag1 < dmag2)
+					magnitudesGradient.add(dmag1);
+				else
+					magnitudesGradient.add(0d);
+			} else {
+				magnitudesGradient.add(0d);
+			}
+
+			// Scalar color = dmag > 0 ? new Scalar(0, 255, 0) : new Scalar(0, 0, 255);
+			// Imgproc.line(gradientComb, new Point(0, row), new Point(Math.abs(dmag), row), color);
+		}
+
+		List<Double> selectedMagnitudesGradient = new ArrayList<>();
+		for (int row = 0; row < magnitudesGradient.size();) {
+			if (magnitudesGradient.get(row) >= 0) {
+				double maxGradient = magnitudesGradient.get(row);
+				int maxPositiveGradientIndex = row;
+				for (int positiveGradientIndex = row; positiveGradientIndex < magnitudesGradient.size() && magnitudesGradient.get(positiveGradientIndex) >= 0; positiveGradientIndex++) {
+					double dmag = magnitudesGradient.get(positiveGradientIndex);
+					if (dmag >= maxGradient) {
+						maxGradient = dmag;
+						maxPositiveGradientIndex = positiveGradientIndex;
+					}
+				}
+				for (int positiveGradientIndex = row; positiveGradientIndex < magnitudesGradient.size() && magnitudesGradient.get(positiveGradientIndex) >= 0; positiveGradientIndex++, row++) {
+					selectedMagnitudesGradient.add(maxPositiveGradientIndex == positiveGradientIndex ? maxGradient : 0);
+				}
+			} else {
+				double minGradient = magnitudesGradient.get(row);
+				int minPositiveGradientIndex = row;
+				for (int negativeGradientIndex = row; negativeGradientIndex < magnitudesGradient.size() && magnitudesGradient.get(negativeGradientIndex) <= 0; negativeGradientIndex++) {
+					double dmag = magnitudesGradient.get(negativeGradientIndex);
+					if (dmag < minGradient) {
+						minGradient = dmag;
+						minPositiveGradientIndex = negativeGradientIndex;
+					}
+				}
+				for (int negativeGradientIndex = row; negativeGradientIndex < magnitudesGradient.size() && magnitudesGradient.get(negativeGradientIndex) <= 0; negativeGradientIndex++, row++) {
+					selectedMagnitudesGradient.add(minPositiveGradientIndex == negativeGradientIndex ? minGradient : 0);
+				}
 			}
 		}
+		for (int row = 0; row < selectedMagnitudesGradient.size(); row++) {
+			double dmag = selectedMagnitudesGradient.get(row);
+			Scalar color = dmag > 0 ? new Scalar(0, 255, 0) : new Scalar(0, 0, 255);
+			Imgproc.line(gradientComb, new Point(0, row), new Point(Math.abs(dmag), row), color);
+		}
+
 		images[7] = new Img(gradientComb, false).toJfxImage();
 		ref = trace("Display gradient comb", ref);
 
 		Mat vStripColor = new Mat();
 		Imgproc.cvtColor(vStrip, vStripColor, Imgproc.COLOR_GRAY2BGR);
 		// vStrip.convertTo(vStripColor, CvType.CV_8UC3);
-		for (TrajectStep trajectStep : Arrays.stream(houghVtraj).filter(ts -> Math.abs(ts.magnitude) > stripWidth / 5).collect(Collectors.toList())) {
+		for (TrajectStep trajectStep : Arrays.stream(houghVtraj).filter(ts -> Math.abs(selectedMagnitudesGradient.get(ts.k)) > 30).collect(Collectors.toList())) {
 			double mag = stripWidth;
 			double theta = ((double) trajectStep.theta - 45) / 180 * Math.PI;
-			System.out.println("coucou " + theta + " " + trajectStep.k);
 			int row = trajectStep.k;
-			Scalar color = (magnitudes.get(row) - magnitudes.get(row < houghVtraj.length - 1 ? row + 1 : row) >= 0) ? new Scalar(0, 255, 0) : new Scalar(0, 0, 255);
+			Scalar color = (selectedMagnitudesGradient.get(row) >= 0) ? new Scalar(0, 255, 0) : new Scalar(0, 0, 255);
 			Imgproc.line(vStripColor, new Point(vStripColor.width() / 2 - mag * Math.cos(theta), row - mag * Math.sin(theta)), new Point(vStripColor.width() / 2 + mag * Math.cos(theta), row + mag * Math.sin(theta)), color, 1);
 		}
 
