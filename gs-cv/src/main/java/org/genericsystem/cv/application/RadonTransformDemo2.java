@@ -2,8 +2,11 @@ package org.genericsystem.cv.application;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -105,163 +108,133 @@ public class RadonTransformDemo2 extends AbstractApp {
 		Mat vStripDisplay = Mat.zeros(binarized.size(), binarized.type());
 		Mat roi = new Mat(vStripDisplay, new Range(0, binarized.height()), new Range(binarized.width() / 2 - stripWidth / 2, binarized.width() / 2 + stripWidth / 2));
 		vStrip.copyTo(roi);
-		Mat roi2 = new Mat(vStripDisplay, new Range(0, binarized.height()), new Range(binarized.width() / 2 - stripWidth / 2 + w, binarized.width() / 2 + stripWidth / 2 + w));
-		vStrip2.copyTo(roi2);
+		// Mat roi2 = new Mat(vStripDisplay, new Range(0, binarized.height()), new Range(binarized.width() / 2 - stripWidth / 2 + w, binarized.width() / 2 + stripWidth / 2 + w));
+		// vStrip2.copyTo(roi2);
 		images[1] = new Img(vStripDisplay, false).toJfxImage();
 		ref = trace("Extract strip", ref);
 
 		Mat houghTransform = RadonTransform.fastHoughTransform(vStrip);
-		Mat houghTransform2 = RadonTransform.fastHoughTransform(vStrip2);
+		// Mat houghTransform2 = RadonTransform.fastHoughTransform(vStrip2);
 
+		System.out.println(houghTransform);
 		// houghTransform.row(0).setTo(new Scalar(0));
 		// houghTransform.row(houghTransform.rows() - 1).setTo(new Scalar(0));
 		Core.normalize(houghTransform, houghTransform, 0, 255, Core.NORM_MINMAX);
 		// Core.normalize(houghTransform2, houghTransform2, 0, 255, Core.NORM_MINMAX);
-		// Mat shift = Mat.zeros(houghTransform2.size(), houghTransform2.type());
-		// for (int col = 0; col < shift.width(); col++) {
-		// int rowShift = (int) Math.round((double) w * ((col - (stripWidth - 1)) / (stripWidth - 1)));
-		// for (int row = 0; row < shift.height(); row++) {
-		// if (row + rowShift >= 0 && row + rowShift < shift.height())
-		// shift.put(row + rowShift, col, houghTransform2.get(row, col)[0]);
-		// }
-		// }
-		//
-		// Core.absdiff(shift, houghTransform, shift);
-		//
-		// Mat concat = new Mat(houghTransform.size(), CvType.CV_64FC1);
-		// Core.hconcat(Arrays.asList(houghTransform, shift), concat);
+
+		Mat blur = new Mat();
+		Imgproc.blur(houghTransform, blur, new Size(1, 11), new Point(-1, -1), Core.BORDER_ISOLATED);
+		images[2] = new Img(blur, false).toJfxImage();
+		blur.release();
 
 		images[3] = new Img(houghTransform, false).toJfxImage();
 		ref = trace("FHT", ref);
 
-		Mat gradient = new Mat();
-		Mat blur = new Mat();
-		Imgproc.blur(houghTransform, blur, new Size(1, 11), new Point(-1, -1), Core.BORDER_ISOLATED);
-		Core.absdiff(houghTransform, blur, gradient);
-		images[2] = new Img(blur, false).toJfxImage();
-		// gradient.row(0).setTo(new Scalar(0));
-		// gradient.row(houghTransform.rows() - 1).setTo(new Scalar(0));
-		Core.pow(gradient, 2, gradient);
-		Core.normalize(gradient, gradient, 0, 255, Core.NORM_MINMAX);
-		images[4] = new Img(gradient, false).toJfxImage();
-		ref = trace("FHT Gradient", ref);
+		Mat adaptive = RadonTransform.adaptivHough(houghTransform, 11);
+		images[4] = new Img(adaptive, false).toJfxImage();
+		adaptive.release();
+		ref = trace("Adaptive FHT", ref);
 
-		TrajectStep[] houghVtraj = RadonTransform.bestTrajectFHT(gradient, -50);
-		List<Double> magnitudes = new ArrayList<>();
-		for (int row = 0; row < houghVtraj.length; row++) {
-			double magnitude = houghTransform.get(row, houghVtraj[row].theta)[0];
-			magnitudes.add(magnitude);
-		}
+		List<HoughTrajectStep> magnitudes = RadonTransform.bestTrajectFHT(houghTransform, 11, -50);
+		// for (int y = 0; y < magnitudes.size(); y++) {
+		// if (magnitudes.get(y).magnitude <= 1)
+		// for (int end = y + 1; end < magnitudes.size(); end++) {
+		// if (magnitudes.get(end).magnitude > 1) {
+		// for (int current = y; current < end; current++)
+		// magnitudes.get(current).theta = magnitudes.get(y == 0 ? 0 : y - 1).theta + (magnitudes.get(end).theta - magnitudes.get(y == 0 ? 0 : y - 1).theta) * (current - y) / (end - y + 1);
+		// y = end;
+		// break;
+		// }
+		// }
+		// }
 
-		for (int y = 0; y < houghVtraj.length; y++)
-			houghVtraj[y].theta = (int) Math.round(Math.atan((double) (houghVtraj[y].theta - (stripWidth - 1)) / (stripWidth - 1)) / Math.PI * 180 + 45);
+		Mat trajectDisplay = Mat.zeros(houghTransform.height(), 90, CvType.CV_8UC3);
+		for (HoughTrajectStep step : magnitudes)
+			if (step.magnitude >= 1)
+				trajectDisplay.put(step.y, (int) Math.round(step.getTheta()), 255, 0, 0);
+			else
+				trajectDisplay.put(step.y, (int) Math.round(step.getTheta()), 0, 0, 255);
+		images[5] = new Img(trajectDisplay, false).toJfxImage();
+		ref = trace("FHT traject", ref);
 
-		for (int y = 0; y < houghVtraj.length; y++) {
-			if (houghVtraj[y].magnitude <= 1)
-				for (int end = y + 1; end < houghVtraj.length; end++) {
-					if (houghVtraj[end].magnitude > 1) {
-						for (int current = y; current < end; current++)
-							houghVtraj[current].theta = houghVtraj[y == 0 ? 0 : y - 1].theta + (houghVtraj[end].theta - houghVtraj[y == 0 ? 0 : y - 1].theta) * (current - y) / (end - y + 1);
-						y = end;
+		Mat magnitudesDisplay = Mat.zeros(magnitudes.size(), 255, CvType.CV_8UC1);
+		for (HoughTrajectStep step : magnitudes)
+			Imgproc.line(magnitudesDisplay, new Point(0, step.y), new Point(step.magnitude, step.y), new Scalar(255));
+		images[6] = new Img(magnitudesDisplay, false).toJfxImage();
+		ref = trace("Display magnitudes", ref);
+
+		List<HoughTrajectStep> sortedMagnitudes = new ArrayList<>(magnitudes);
+		Collections.sort(sortedMagnitudes);
+
+		double alpha = 0.1;
+		double t = 0.5;
+		Set<HoughTrajectStep> alreadyComputed = new HashSet<>();
+		double max = magnitudes.stream().mapToDouble(ts -> ts.magnitude).max().getAsDouble();
+		System.out.println("Max : " + max);
+
+		List<int[]> result = new ArrayList<>();
+		for (HoughTrajectStep trajectStep : magnitudes.stream().sorted().collect(Collectors.toList())) {
+			if (trajectStep.magnitude < alpha * max)
+				break;
+			if (!alreadyComputed.contains(trajectStep)) {
+				double tAlpha = t * trajectStep.magnitude;
+				assert trajectStep.y < magnitudes.size();
+				int y1 = trajectStep.y;
+				for (; y1 >= 0; y1--)
+					if (magnitudes.get(y1).magnitude < tAlpha)
+						break;
+				y1++;
+				assert y1 >= 0;
+				int y2 = trajectStep.y;
+				for (; y2 < magnitudes.size(); y2++)
+					if (magnitudes.get(y2).magnitude < tAlpha)
+						break;
+				y2--;
+				assert y2 < magnitudes.size();
+				int[] r = new int[] { y1, y2 };
+
+				boolean alreadyVisited = false;
+				for (int k = y1; k <= y2; k++) {
+					if (alreadyComputed.contains(magnitudes.get(k))) {
+						alreadyVisited = true;
 						break;
 					}
 				}
-		}
-
-		Mat vHoughColor = Mat.zeros(houghTransform.height(), 91, CvType.CV_8UC3);
-		for (int y = 0; y < vHoughColor.height(); y++) {
-			vHoughColor.put(y, houghVtraj[y].theta, 0, 0, 255);
-			if (houghVtraj[y].magnitude >= 1)
-				vHoughColor.put(y, houghVtraj[y].theta, 255, 0, 0);
-		}
-		images[5] = new Img(vHoughColor, false).toJfxImage();
-		ref = trace("FHT traject", ref);
-
-		Mat comb = Mat.zeros(magnitudes.size(), 255, CvType.CV_8UC1);
-		for (TrajectStep trajectStep : houghVtraj)
-			Imgproc.line(comb, new Point(0, trajectStep.k), new Point(trajectStep.magnitude, trajectStep.k), new Scalar(255));
-		// for (int row = 0; row < comb.rows(); row++)
-		// Imgproc.line(comb, new Point(0, row), new Point(magnitudes.get(row), row), new Scalar(255));
-
-		ref = trace("Display comb", ref);
-		images[6] = new Img(comb, false).toJfxImage();
-
-		List<Double> magnitudesGradient = new ArrayList<>();
-		Mat gradientComb = Mat.zeros(houghVtraj.length, 255, CvType.CV_8UC3);
-		for (int row = 0; row < magnitudes.size(); row++) {
-			double dmag1 = magnitudes.get(row) - (row > 0 ? magnitudes.get(row - 1) : magnitudes.get(row));
-			double dmag2 = ((row < magnitudes.size() - 1) ? magnitudes.get(row + 1) : magnitudes.get(row)) - magnitudes.get(row);
-
-			if (dmag1 >= 0 && dmag2 < 0) {
-				magnitudesGradient.add(dmag1);
-			} else if (dmag1 < 0 && dmag2 >= 0) {
-				magnitudesGradient.add(0d);
-			} else if (dmag1 >= 0 && dmag2 >= 0) {
-				if (dmag1 >= dmag2)
-					magnitudesGradient.add(dmag1);
-				else
-					magnitudesGradient.add(0d);
-			} else if (dmag1 < 0 && dmag2 < 0) {
-				if (dmag1 < dmag2)
-					magnitudesGradient.add(dmag1);
-				else
-					magnitudesGradient.add(0d);
-			} else {
-				magnitudesGradient.add(0d);
-			}
-
-			// Scalar color = dmag > 0 ? new Scalar(0, 255, 0) : new Scalar(0, 0, 255);
-			// Imgproc.line(gradientComb, new Point(0, row), new Point(Math.abs(dmag), row), color);
-		}
-
-		List<Double> selectedMagnitudesGradient = new ArrayList<>();
-		for (int row = 0; row < magnitudesGradient.size();) {
-			if (magnitudesGradient.get(row) >= 0) {
-				double maxGradient = magnitudesGradient.get(row);
-				int maxPositiveGradientIndex = row;
-				for (int positiveGradientIndex = row; positiveGradientIndex < magnitudesGradient.size() && magnitudesGradient.get(positiveGradientIndex) >= 0; positiveGradientIndex++) {
-					double dmag = magnitudesGradient.get(positiveGradientIndex);
-					if (dmag >= maxGradient) {
-						maxGradient = dmag;
-						maxPositiveGradientIndex = positiveGradientIndex;
-					}
-				}
-				for (int positiveGradientIndex = row; positiveGradientIndex < magnitudesGradient.size() && magnitudesGradient.get(positiveGradientIndex) >= 0; positiveGradientIndex++, row++) {
-					selectedMagnitudesGradient.add(maxPositiveGradientIndex == positiveGradientIndex ? maxGradient : 0);
-				}
-			} else {
-				double minGradient = magnitudesGradient.get(row);
-				int minPositiveGradientIndex = row;
-				for (int negativeGradientIndex = row; negativeGradientIndex < magnitudesGradient.size() && magnitudesGradient.get(negativeGradientIndex) <= 0; negativeGradientIndex++) {
-					double dmag = magnitudesGradient.get(negativeGradientIndex);
-					if (dmag < minGradient) {
-						minGradient = dmag;
-						minPositiveGradientIndex = negativeGradientIndex;
-					}
-				}
-				for (int negativeGradientIndex = row; negativeGradientIndex < magnitudesGradient.size() && magnitudesGradient.get(negativeGradientIndex) <= 0; negativeGradientIndex++, row++) {
-					selectedMagnitudesGradient.add(minPositiveGradientIndex == negativeGradientIndex ? minGradient : 0);
-				}
+				if (!alreadyVisited)
+					result.add(r);
+				alreadyComputed.add(magnitudes.get(y1));
+				alreadyComputed.add(magnitudes.get(y2));
 			}
 		}
-		for (int row = 0; row < selectedMagnitudesGradient.size(); row++) {
-			double dmag = selectedMagnitudesGradient.get(row);
-			Scalar color = dmag > 0 ? new Scalar(0, 255, 0) : new Scalar(0, 0, 255);
-			Imgproc.line(gradientComb, new Point(0, row), new Point(Math.abs(dmag), row), color);
+		Mat rangeDisplay = magnitudesDisplay.clone();
+		for (int[] y1y2 : result) {
+			double minMagnitude = Double.MAX_VALUE;
+			for (int k = y1y2[0]; k <= y1y2[1]; k++)
+				if (minMagnitude > magnitudes.get(k).magnitude)
+					minMagnitude = magnitudes.get(k).magnitude;
+			// System.out.println("minMagnitude : " + minMagnitude + " Range : " + y1y2[0] + " " + y1y2[1]);
+			Imgproc.line(rangeDisplay, new Point(minMagnitude, y1y2[0]), new Point(minMagnitude, y1y2[1]), new Scalar(0), 3);
 		}
 
-		images[7] = new Img(gradientComb, false).toJfxImage();
-		ref = trace("Display gradient comb", ref);
+		// for (int row = 0; row < rangeDisplay.rows(); row++)
+		// Imgproc.line(rangeDisplay, new Point(0, row), new Point(magnitudes.get(row).magnitude, row), new Scalar(255));
+		images[7] = new Img(rangeDisplay, false).toJfxImage();
+		ref = trace("Display ranged magnitudes", ref);
 
 		Mat vStripColor = new Mat();
 		Imgproc.cvtColor(vStrip, vStripColor, Imgproc.COLOR_GRAY2BGR);
-		// vStrip.convertTo(vStripColor, CvType.CV_8UC3);
-		for (TrajectStep trajectStep : Arrays.stream(houghVtraj).filter(ts -> Math.abs(selectedMagnitudesGradient.get(ts.k)) > 30).collect(Collectors.toList())) {
+		for (int[] y1y2 : result) {
+			// for (TrajectStep trajectStep : Arrays.stream(houghVtraj).filter(ts -> Math.abs(magnitudes.get(ts.k).magnitude) > 30).collect(Collectors.toList())) {
 			double mag = stripWidth;
-			double theta = ((double) trajectStep.theta - 45) / 180 * Math.PI;
-			int row = trajectStep.k;
-			Scalar color = (selectedMagnitudesGradient.get(row) >= 0) ? new Scalar(0, 255, 0) : new Scalar(0, 0, 255);
+			int row = y1y2[0];
+			double theta = (magnitudes.get(row).getTheta() - 45) / 180 * Math.PI;
+			Scalar color = new Scalar(0, 255, 0);
 			Imgproc.line(vStripColor, new Point(vStripColor.width() / 2 - mag * Math.cos(theta), row - mag * Math.sin(theta)), new Point(vStripColor.width() / 2 + mag * Math.cos(theta), row + mag * Math.sin(theta)), color, 1);
+			color = new Scalar(0, 0, 255);
+			row = y1y2[1];
+			theta = (magnitudes.get(row).getTheta() - 45) / 180 * Math.PI;
+			Imgproc.line(vStripColor, new Point(vStripColor.width() / 2 - mag * Math.cos(theta), row - mag * Math.sin(theta)), new Point(vStripColor.width() / 2 + mag * Math.cos(theta), row + mag * Math.sin(theta)), color, 1);
+
 		}
 
 		Mat vStripColorDisplay = Mat.zeros(binarized.size(), vStripColor.type());
@@ -269,42 +242,6 @@ public class RadonTransformDemo2 extends AbstractApp {
 		vStripColor.copyTo(stripRoi);
 		images[8] = new Img(vStripColorDisplay, false).toJfxImage();
 		ref = trace("Display underlined strip", ref);
-
-		// Mat gray = new Mat();
-		// houghTransform.convertTo(gray, CvType.CV_8UC1);
-		// Imgproc.threshold(gray, houghTransform, 0, 255, Imgproc.THRESH_BINARY_INV + Imgproc.THRESH_OTSU);
-		// Scalar mean = Core.mean(houghTransform);
-		// Core.absdiff(houghTransform, mean, houghTransform);
-		// Imgproc.Sobel(houghTransform, gradient, CvType.CV_64FC1, 0, 1);
-		// Imgproc.Sobel(houghTransform, gradient, CvType.CV_64FC1, 1, 0);
-		// Core.absdiff(gradient, new Scalar(0), gradient);
-		// wImgproc.adaptiveThreshold(gray, houghTransform, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY_INV, 7, 10);
-		// Core.pow(houghTransform, 4, houghTransform);
-		// gradient.row(0).setTo(new Scalar(0));
-		// gradient.row(houghTransform.rows() - 1).setTo(new Scalar(0));
-		// Core.normalize(houghTransform, houghTransform, 0, 255, Core.NORM_MINMAX);
-		// houghTransform = new Img(houghTransform, false).morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_ELLIPSE, new Size(1, 7)).getSrc();
-		// Imgproc.threshold(houghTransform, houghTransform, 0, 1, Imgproc.THRESH_TOZERO);
-		// Core.addWeighted(houghTransform, 0, gradient, 1, 0, houghTransform);
-		// Core.normalize(houghTransform, houghTransform, 0, 1, Core.NORM_MINMAX);
-		// Imgproc.threshold(houghTransform, houghTransform, 150, 255, Imgproc.THRESH_BINARY);
-		// Imgproc.morphologyEx(houghTransform, gradient, Imgproc.MORPH_GRADIENT, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(1, 2)));
-		// Function<Double, Double> approxHoughVFunction = RadonTransform.approxTraject(houghVtraj);
-		// for (int y = 0; y < vHoughColor.height(); y++) {
-		// int x = (int) Math.round(approxHoughVFunction.apply((double) y));
-		// if (x < 0)
-		// x = 0;
-		// if (x >= vHoughColor.width())
-		// x = vHoughColor.width() - 1;
-		// vHoughColor.put(y, x, 0, 255, 0);
-		// }
-		// ref = trace("Fht approx", ref);
-		// System.out.println(houghTransform);
-
-		// for (Pair pair : RadonTransform.getLocalExtr(houghTransform, 200)) {
-		// Imgproc.circle(vHoughColor, new Point((Math.atan((pair.point.x - stripWidth + 1) / (stripWidth - 1)) / Math.PI * 180) + 45, pair.point.y), 2, new Scalar(255, 0, 0), -1);
-		// System.out.println((Math.atan((pair.point.x - stripWidth + 1) / (stripWidth - 1)) / Math.PI * 180) + " " + pair.point.y + " " + pair.value);
-		// }
 
 		Mat vTransform = RadonTransform.radonTransform(vStrip, -45, 45);
 		Mat vProjection = RadonTransform.radonRemap(vTransform, -45);
@@ -332,12 +269,11 @@ public class RadonTransformDemo2 extends AbstractApp {
 		}
 
 		Mat vProjectionColor = Mat.zeros(vProjection.size(), CvType.CV_8UC3);
-		for (int y = 0; y < vProjectionColor.height(); y++) {
-			vProjectionColor.put(y, vtraj[y].theta, 0, 0, 255);
-			if (vtraj[y].magnitude != 0) {
+		for (int y = 0; y < vProjectionColor.height(); y++)
+			if (vtraj[y].magnitude != 0)
 				vProjectionColor.put(y, vtraj[y].theta, 255, 0, 0);
-			}
-		}
+			else
+				vProjectionColor.put(y, vtraj[y].theta, 0, 0, 255);
 
 		ref = trace("Best traject radon", ref);
 		images[11] = new Img(vProjectionColor, false).toJfxImage();
@@ -357,29 +293,6 @@ public class RadonTransformDemo2 extends AbstractApp {
 		// vProjectionColor.put(y, x, 0, 255, 0);
 		// }
 		// ref = trace("Approx traject radon", ref);
-
-		double houghError = 0;
-		double houghApproxError = 0;
-		double radonError = 0;
-		double radonApproxError = 0;
-		count = 0;
-		for (int y = 100; y <= 260; y += 80) {
-			houghError += Math.pow((houghVtraj[y].theta - 45) - angles[count], 2);
-			// houghApproxError += Math.pow(approxHoughVFunction.apply((double) y) - 45 - angles[count], 2);
-			radonError += Math.pow((vtraj[y].theta - 45) - angles[count], 2);
-			// radonApproxError += Math.pow(approxRadonVFunction.apply((double) y) - 45 - angles[count], 2);
-			count++;
-		}
-		houghError = Math.sqrt(houghError);
-		houghApproxError = Math.sqrt(houghApproxError);
-		radonError = Math.sqrt(radonError);
-		radonApproxError = Math.sqrt(radonApproxError);
-
-		System.out.println("Hough        : " + houghError);
-		System.out.println("Hough approx : " + houghApproxError);
-
-		System.out.println("Radon        : " + radonError);
-		System.out.println("Radon approx : " + radonApproxError);
 
 		return images;
 	}

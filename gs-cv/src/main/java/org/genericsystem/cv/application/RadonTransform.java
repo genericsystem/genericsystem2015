@@ -1,5 +1,16 @@
 package org.genericsystem.cv.application;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.genericsystem.cv.Img;
@@ -18,17 +29,6 @@ import org.opencv.utils.Converters;
 import org.opencv.ximgproc.Ximgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class RadonTransform {
 
@@ -259,23 +259,38 @@ public class RadonTransform {
 		return thetas;
 	}
 
-	public static TrajectStep[] bestTrajectFHT(Mat projectionMap, double anglePenality) {
-		List<Double> penality = IntStream.range(0, projectionMap.cols()).mapToObj(theta -> anglePenality * Math.abs(Math.atan((double) (theta - 45) / 45) - Math.atan((double) (theta + 1 - 45) / (45))) * 180 / Math.PI).collect(Collectors.toList());
-		double[][] score = new double[projectionMap.rows()][projectionMap.cols()];
-		int[][] thetaPrev = new int[projectionMap.rows()][projectionMap.cols()];
-		for (int theta = 0; theta < projectionMap.cols(); theta++)
-			score[0][theta] = projectionMap.get(0, theta)[0];
-		for (int k = 1; k < projectionMap.rows(); k++) {
-			for (int theta = 0; theta < projectionMap.cols(); theta++) {
-				double magnitude = projectionMap.get(k, theta)[0];
+	static Mat adaptivHough(Mat houghTransform, int blurSize) {
+		Mat adaptivHough = new Mat();
+		Mat blur = new Mat();
+		Imgproc.blur(houghTransform, blur, new Size(1, blurSize), new Point(-1, -1), Core.BORDER_ISOLATED);
+		Core.absdiff(houghTransform, blur, adaptivHough);
+		blur.release();
+		// adaptivHough.row(0).setTo(new Scalar(0));
+		// adaptivHough.row(houghTransform.rows() - 1).setTo(new Scalar(0));
+		// Core.pow(adaptivHough, 2, adaptivHough);
+		return adaptivHough;
+	}
+
+	public static List<HoughTrajectStep> bestTrajectFHT(Mat houghTransform, int blurSize, double anglePenality) {
+		int stripWidth = (houghTransform.cols() + 1) / 2;
+		Mat adaptivHough = adaptivHough(houghTransform, blurSize);
+		List<Double> penality = IntStream.range(0, adaptivHough.cols())
+				.mapToObj(theta -> anglePenality * Math.abs(Math.atan((double) (theta - stripWidth + 1) / (stripWidth - 1)) - Math.atan((double) (theta - stripWidth + 2) / (stripWidth - 1))) * 180 / Math.PI).collect(Collectors.toList());
+		double[][] score = new double[adaptivHough.rows()][adaptivHough.cols()];
+		int[][] thetaPrev = new int[adaptivHough.rows()][adaptivHough.cols()];
+		for (int theta = 0; theta < adaptivHough.cols(); theta++)
+			score[0][theta] = adaptivHough.get(0, theta)[0];
+		for (int k = 1; k < adaptivHough.rows(); k++) {
+			for (int theta = 0; theta < adaptivHough.cols(); theta++) {
+				double magnitude = adaptivHough.get(k, theta)[0];
 
 				double scoreFromPrevTheta = theta != 0 ? score[k - 1][theta - 1] : Double.NEGATIVE_INFINITY;
 				double scoreFromSameTheta = score[k - 1][theta];
-				double scoreFromNextTheta = theta < projectionMap.cols() - 1 ? score[k - 1][theta + 1] : Double.NEGATIVE_INFINITY;
+				double scoreFromNextTheta = theta < adaptivHough.cols() - 1 ? score[k - 1][theta + 1] : Double.NEGATIVE_INFINITY;
 
 				double bestScore4Pos = -1;
 				double prevPenality = theta == 0 ? Double.NEGATIVE_INFINITY : penality.get(theta - 1);
-				double nextPenality = theta <= projectionMap.cols() ? penality.get(theta) : Double.NEGATIVE_INFINITY;
+				double nextPenality = theta <= adaptivHough.cols() ? penality.get(theta) : Double.NEGATIVE_INFINITY;
 
 				if (scoreFromSameTheta >= (scoreFromPrevTheta + prevPenality) && scoreFromSameTheta >= (scoreFromNextTheta + nextPenality)) {
 					bestScore4Pos = scoreFromSameTheta;
@@ -291,23 +306,26 @@ public class RadonTransform {
 			}
 		}
 
+		adaptivHough.release();
+
 		double maxScore = Double.NEGATIVE_INFINITY;
 		int prevTheta = -1;
-		for (int theta = 0; theta < projectionMap.cols(); theta++) {
-			double lastScore = score[projectionMap.rows() - 1][theta];
+		for (int theta = 0; theta < houghTransform.cols(); theta++) {
+			double lastScore = score[houghTransform.rows() - 1][theta];
 			if (lastScore > maxScore) {
 				maxScore = lastScore;
 				prevTheta = theta;
 			}
 		}
-		assert prevTheta != -1;
-		TrajectStep[] thetas = new TrajectStep[projectionMap.rows()];
-		for (int k = projectionMap.rows() - 1; k >= 0; k--) {
-			thetas[k] = new TrajectStep(k, prevTheta, projectionMap.get(k, prevTheta)[0]);
-			prevTheta = thetaPrev[k][prevTheta];
-		}
 
-		return thetas;
+		assert prevTheta != -1;
+		HoughTrajectStep[] result = new HoughTrajectStep[houghTransform.rows()];
+		for (int y = houghTransform.rows() - 1; y >= 0; y--) {
+			double derivative = ((double) prevTheta - (stripWidth - 1)) / (stripWidth - 1);
+			result[y] = new HoughTrajectStep(y, derivative, houghTransform.get(y, prevTheta)[0]);
+			prevTheta = thetaPrev[y][prevTheta];
+		}
+		return Arrays.asList(result);
 	}
 
 	public static List<Mat> extractStrips(Mat src, int stripNumber, double stripWidth, double step) {
@@ -406,20 +424,20 @@ public class RadonTransform {
 		return orientedPoints;
 	}
 
-	public static List<OrientedPoint> toHorizontalOrientedPoints(TrajectStep[] trajectSteps, double x) {
+	public static List<OrientedPoint> toHorizontalOrientedPoints(List<HoughTrajectStep> trajectSteps, double x) {
 		List<OrientedPoint> orientedPoints = new ArrayList<>();
-		Arrays.stream(trajectSteps).filter(ts -> ts.magnitude >= 0.1).sorted().limit(100).forEach(trajectStep -> {
-			double angle = ((double) trajectStep.theta - 45) / 180 * Math.PI;
-			orientedPoints.add(new OrientedPoint(new Point(x, trajectStep.k), angle, trajectStep.magnitude));
+		trajectSteps.stream().filter(ts -> ts.magnitude >= 0.1).sorted().limit(30).forEach(trajectStep -> {
+			double angle = (trajectStep.getTheta() - 45) / 180 * Math.PI;
+			orientedPoints.add(new OrientedPoint(new Point(x, trajectStep.y), angle, trajectStep.magnitude));
 		});
 		return orientedPoints;
 	}
 
-	public static List<OrientedPoint> toVerticalOrientedPoints(TrajectStep[] trajectSteps, double y) {
+	public static List<OrientedPoint> toVerticalOrientedPoints(List<HoughTrajectStep> trajectSteps, double y) {
 		List<OrientedPoint> orientedPoints = new ArrayList<>();
-		Arrays.stream(trajectSteps).filter(ts -> ts.magnitude >= 0.1).sorted().limit(100).forEach(trajectStep -> {
-			double angle = -((double) trajectStep.theta - 45) / 180 * Math.PI;
-			orientedPoints.add(new OrientedPoint(new Point(trajectStep.k, y), angle, trajectStep.magnitude));
+		trajectSteps.stream().filter(ts -> ts.magnitude >= 0.1).sorted().limit(30).forEach(trajectStep -> {
+			double angle = -(trajectStep.getTheta() - 45) / 180 * Math.PI;
+			orientedPoints.add(new OrientedPoint(new Point(trajectStep.y, y), angle, trajectStep.magnitude));
 		});
 		return orientedPoints;
 	}

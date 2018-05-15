@@ -1,6 +1,6 @@
 package org.genericsystem.cv.application;
 
-class TrajectStep implements Comparable<TrajectStep> {
+public class TrajectStep implements Comparable<TrajectStep> {
 	public final int k;
 	public int theta;
 	public final double magnitude;

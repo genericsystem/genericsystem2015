@@ -1,5 +1,13 @@
 package org.genericsystem.cv.application;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.application.GeneralInterpolator.OrientedPoint;
@@ -11,14 +19,6 @@ import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -119,87 +119,13 @@ public class RadonTransformDemo3 extends AbstractApp {
 		List<Mat> vHoughs = vStrips.stream().map(strip -> RadonTransform.fastHoughTransform(strip)).collect(Collectors.toList());
 		List<Mat> hHoughs = hStrips.stream().map(strip -> RadonTransform.fastHoughTransform(strip)).collect(Collectors.toList());
 
-		vHoughs.stream().forEach(projectionMap -> Imgproc.morphologyEx(projectionMap, projectionMap, Imgproc.MORPH_GRADIENT, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(1, 2))));
-		hHoughs.stream().forEach(projectionMap -> Imgproc.morphologyEx(projectionMap, projectionMap, Imgproc.MORPH_GRADIENT, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(1, 2))));
-
-		vHoughs.stream().forEach(projectionMap -> Core.pow(projectionMap, 2, projectionMap));
-		hHoughs.stream().forEach(projectionMap -> Core.pow(projectionMap, 2, projectionMap));
-
-		vHoughs.stream().forEach(projectionMap -> projectionMap.row(0).setTo(new Scalar(0)));
-		hHoughs.stream().forEach(projectionMap -> projectionMap.row(projectionMap.rows() - 1).setTo(new Scalar(0)));
-
-		// double maxV = vHoughs.stream().mapToDouble(projectionMap -> Core.minMaxLoc(projectionMap).maxVal).max().getAsDouble();
-		// double maxH = hHoughs.stream().mapToDouble(projectionMap -> Core.minMaxLoc(projectionMap).maxVal).max().getAsDouble();
-		vHoughs.stream().forEach(projectionMap -> {
-			Mat blur = new Mat();
-			Imgproc.blur(projectionMap, blur, new Size(1, 11), new Point(-1, -1), Core.BORDER_ISOLATED);
-			Core.absdiff(projectionMap, blur, projectionMap);
-			Core.normalize(projectionMap, projectionMap, 0, 1, Core.NORM_MINMAX);
-		});
-		hHoughs.stream().forEach(projectionMap -> {
-			Mat blur = new Mat();
-			Imgproc.blur(projectionMap, blur, new Size(1, 11), new Point(-1, -1), Core.BORDER_ISOLATED);
-			Core.absdiff(projectionMap, blur, projectionMap);
-			Core.normalize(projectionMap, projectionMap, 0, 1, Core.NORM_MINMAX);
-		});
-
-		// vHoughs.stream().forEach(projectionMap -> Core.divide(projectionMap, new Scalar(maxV), projectionMap));
-		// hHoughs.stream().forEach(projectionMap -> Core.divide(projectionMap, new Scalar(maxH), projectionMap));
-		// vHoughs.stream().forEach(projectionMap -> Core.normalize(projectionMap, projectionMap, 0, 1, Core.NORM_MINMAX));
-		// hHoughs.stream().forEach(projectionMap -> Core.normalize(projectionMap, projectionMap, 0, 1, Core.NORM_MINMAX));
+		vHoughs.stream().forEach(projectionMap -> Core.normalize(projectionMap, projectionMap, 0, 1, Core.NORM_MINMAX));
+		hHoughs.stream().forEach(projectionMap -> Core.normalize(projectionMap, projectionMap, 0, 1, Core.NORM_MINMAX));
 		ref = trace("Compute FHT", ref);
 
-		List<TrajectStep[]> vHoughTrajs = vHoughs.stream().map(projectionMap -> RadonTransform.bestTrajectFHT(projectionMap, -0.000001)).collect(Collectors.toList());
-		List<TrajectStep[]> hHoughTrajs = hHoughs.stream().map(projectionMap -> RadonTransform.bestTrajectFHT(projectionMap, -0.000001)).collect(Collectors.toList());
+		List<List<HoughTrajectStep>> vHoughTrajs = vHoughs.stream().map(projectionMap -> RadonTransform.bestTrajectFHT(projectionMap, 11, -10)).collect(Collectors.toList());
+		List<List<HoughTrajectStep>> hHoughTrajs = hHoughs.stream().map(projectionMap -> RadonTransform.bestTrajectFHT(projectionMap, 11, -10)).collect(Collectors.toList());
 		ref = trace("Compute trajects", ref);
-
-		for (TrajectStep[] houghVtraj : vHoughTrajs) {
-			for (int y = 0; y < houghVtraj.length; y++)
-				houghVtraj[y].theta = (int) Math.round(Math.atan((houghVtraj[y].theta - stripWidth + 1) / (stripWidth - 1)) / Math.PI * 180 + 45);
-
-			for (int y = 0; y < houghVtraj.length; y++) {
-				if (houghVtraj[y].magnitude == 0)
-					for (int end = y + 1; end < houghVtraj.length; end++) {
-						if (houghVtraj[end].magnitude != 0) {
-							for (int current = y; current < end; current++)
-								houghVtraj[current].theta = houghVtraj[y == 0 ? 0 : y - 1].theta + (houghVtraj[end].theta - houghVtraj[y == 0 ? 0 : y - 1].theta) * (current - y) / (end - y + 1);
-							y = end;
-							break;
-						}
-					}
-			}
-		}
-
-		for (TrajectStep[] houghHtraj : hHoughTrajs) {
-			for (int y = 0; y < houghHtraj.length; y++)
-				houghHtraj[y].theta = (int) Math.round(Math.atan((houghHtraj[y].theta - stripHeight + 1) / (stripHeight - 1)) / Math.PI * 180 + 45);
-
-			for (int y = 0; y < houghHtraj.length; y++) {
-				if (houghHtraj[y].magnitude == 0)
-					for (int end = y + 1; end < houghHtraj.length; end++) {
-						if (houghHtraj[end].magnitude != 0) {
-							for (int current = y; current < end; current++)
-								houghHtraj[current].theta = houghHtraj[y == 0 ? 0 : y - 1].theta + (houghHtraj[end].theta - houghHtraj[y == 0 ? 0 : y - 1].theta) * (current - y) / (end - y + 1);
-							y = end;
-							break;
-						}
-					}
-			}
-		}
-
-		ref = trace("Transform trajects", ref);
-		//
-		// List<Function<Double, Double>> approxVFHTFunctions = vHoughTrajs.stream().map(traj -> RadonTransform.approxTraject(traj)).collect(Collectors.toList());
-		// List<Function<Double, Double>> approxHFHTFunctions = hHoughTrajs.stream().map(traj -> RadonTransform.approxTraject(traj)).collect(Collectors.toList());
-		//
-		// ref = trace("Compute approxs", ref);
-
-		// List<OrientedPoint> fhtHorizontals = new ArrayList<>();
-		// for (int vStrip = 0; vStrip < approxVFHTFunctions.size(); vStrip++)
-		// fhtHorizontals.addAll(RadonTransform.toHorizontalOrientedPoints(approxVFHTFunctions.get(vStrip), (vStrip + 1) * vStep, binarized.height(), hStep));
-		// List<OrientedPoint> fhtVerticals = new ArrayList<>();
-		// for (int hStrip = 0; hStrip < approxHFHTFunctions.size(); hStrip++)
-		// fhtVerticals.addAll(RadonTransform.toVerticalOrientedPoints(approxHFHTFunctions.get(hStrip), (hStrip + 1) * hStep, binarized.width(), vStep));
 
 		List<OrientedPoint> fhtHorizontals = new ArrayList<>();
 		for (int vStripIndex = 0; vStripIndex < vHoughTrajs.size(); vStripIndex++)

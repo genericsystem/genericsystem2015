@@ -1,5 +1,14 @@
 package org.genericsystem.cv.application;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
@@ -10,15 +19,6 @@ import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -149,29 +149,22 @@ public class RadonTransformDemo extends AbstractApp {
 
 		List<TrajectStep[]> vTrajs = vProjectionMaps.stream().map(projectionMap -> RadonTransform.bestTrajectRadon(projectionMap, -1000)).collect(Collectors.toList());
 		List<TrajectStep[]> hTrajs = hProjectionMaps.stream().map(projectionMap -> RadonTransform.bestTrajectRadon(projectionMap, -1000)).collect(Collectors.toList());
-		List<TrajectStep[]> vHoughTrajs = vHoughs.stream().map(projectionMap -> RadonTransform.bestTrajectFHT(projectionMap, -1000)).collect(Collectors.toList());
-		List<TrajectStep[]> hHoughTrajs = hHoughs.stream().map(projectionMap -> RadonTransform.bestTrajectFHT(projectionMap, -1000)).collect(Collectors.toList());
+		List<List<HoughTrajectStep>> vHoughTrajs = vHoughs.stream().map(projectionMap -> RadonTransform.bestTrajectFHT(projectionMap, 11, -50)).collect(Collectors.toList());
+		List<List<HoughTrajectStep>> hHoughTrajs = hHoughs.stream().map(projectionMap -> RadonTransform.bestTrajectFHT(projectionMap, 11, -50)).collect(Collectors.toList());
 		ref = trace("Compute trajects", ref);
-		for (TrajectStep[] houghVtraj : vHoughTrajs)
-			for (int y = 0; y < houghVtraj.length; y++)
-				houghVtraj[y].theta = (int) Math.round(Math.atan((double) (houghVtraj[y].theta - 45) / 45) / Math.PI * 180 + 45);
-
-		for (TrajectStep[] houghHtraj : hHoughTrajs)
-			for (int y = 0; y < houghHtraj.length; y++)
-				houghHtraj[y].theta = (int) Math.round(Math.atan((double) (houghHtraj[y].theta - 45) / 45) / Math.PI * 180 + 45);
 
 		ref = trace("Transform trajects", ref);
 		List<Function<Double, Double>> approxVFunctions = vTrajs.stream().map(traj -> RadonTransform.approxTraject(traj)).collect(Collectors.toList());
 		List<Function<Double, Double>> approxHFunctions = hTrajs.stream().map(traj -> RadonTransform.approxTraject(traj)).collect(Collectors.toList());
-		List<Function<Double, Double>> approxVFHTFunctions = vHoughTrajs.stream().map(traj -> RadonTransform.approxTraject(traj)).collect(Collectors.toList());
-		List<Function<Double, Double>> approxHFHTFunctions = hHoughTrajs.stream().map(traj -> RadonTransform.approxTraject(traj)).collect(Collectors.toList());
+		// List<Function<Double, Double>> approxVFHTFunctions = vHoughTrajs.stream().map(traj -> RadonTransform.approxTraject(traj)).collect(Collectors.toList());
+		// List<Function<Double, Double>> approxHFHTFunctions = hHoughTrajs.stream().map(traj -> RadonTransform.approxTraject(traj)).collect(Collectors.toList());
 
 		ref = trace("Compute approxs", ref);
 
 		List<PolynomialSplineFunction> vRadonSplinesFunctions = RadonTransform.toPolynomialSplineFunction(approxVFunctions, binarized.getSrc().size(), 20, minAngle, vStrips.size(), 0.5f);
 		List<PolynomialSplineFunction> hRadonSplinesFunctions = RadonTransform.toPolynomialSplineFunction(approxHFunctions, transposedBinarized.getSrc().size(), 20, minAngle, hStrips.size(), 0.5f);
-		List<PolynomialSplineFunction> vFHTSplinesFunctions = RadonTransform.toPolynomialSplineFunction(approxVFHTFunctions, binarized.getSrc().size(), 20, minAngle, vStrips.size(), 0.5f);
-		List<PolynomialSplineFunction> hFHTSplinesFunctions = RadonTransform.toPolynomialSplineFunction(approxHFHTFunctions, transposedBinarized.getSrc().size(), 20, minAngle, hStrips.size(), 0.5f);
+		// List<PolynomialSplineFunction> vFHTSplinesFunctions = RadonTransform.toPolynomialSplineFunction(approxVFHTFunctions, binarized.getSrc().size(), 20, minAngle, vStrips.size(), 0.5f);
+		// List<PolynomialSplineFunction> hFHTSplinesFunctions = RadonTransform.toPolynomialSplineFunction(approxHFHTFunctions, transposedBinarized.getSrc().size(), 20, minAngle, hStrips.size(), 0.5f);
 
 		Mat image = superFrame.getFrame().getSrc().clone();
 		RadonTransform.displayHSplines(vRadonSplinesFunctions, image);
@@ -192,8 +185,8 @@ public class RadonTransformDemo extends AbstractApp {
 		images[10] = new Img(image, false).toJfxImage();
 
 		Mat image2 = superFrame.getFrame().getSrc().clone();
-		RadonTransform.displayHSplines(vFHTSplinesFunctions, image2);
-		RadonTransform.displayVSplines(hFHTSplinesFunctions, image2);
+		// RadonTransform.displayHSplines(vFHTSplinesFunctions, image2);
+		// RadonTransform.displayVSplines(hFHTSplinesFunctions, image2);
 		images[11] = new Img(image2, false).toJfxImage();
 
 		ref = trace("Compute cubic spline lines", ref);
@@ -212,12 +205,12 @@ public class RadonTransformDemo extends AbstractApp {
 
 		vStrip = 0;
 		List<OrientedPoint> fhtHorizontals = new ArrayList<>();
-		for (Function<Double, Double> f : approxVFHTFunctions)
-			fhtHorizontals.addAll(RadonTransform.toHorizontalOrientedPoints(f, (vStrip++ + 1) * hStep, binarized.height(), (int) hStep));
+		// for (Function<Double, Double> f : approxVFHTFunctions)
+		// fhtHorizontals.addAll(RadonTransform.toHorizontalOrientedPoints(f, (vStrip++ + 1) * hStep, binarized.height(), (int) hStep));
 		hStrip = 0;
 		List<OrientedPoint> fhtVerticals = new ArrayList<>();
-		for (Function<Double, Double> f : approxHFHTFunctions)
-			fhtVerticals.addAll(RadonTransform.toVerticalOrientedPoints(f, (hStrip++ + 1) * vStep, binarized.width(), (int) vStep));
+		// for (Function<Double, Double> f : approxHFHTFunctions)
+		// fhtVerticals.addAll(RadonTransform.toVerticalOrientedPoints(f, (hStrip++ + 1) * vStep, binarized.width(), (int) vStep));
 
 		GeneralInterpolator interpolatorFHT = new GeneralInterpolator(fhtHorizontals, fhtVerticals, 3, 10);
 
@@ -253,33 +246,33 @@ public class RadonTransformDemo extends AbstractApp {
 
 		images[1] = frameDisplay.toJfxImage();
 
-		Img frameDisplayFHT = new Img(superFrame.getFrame().getSrc().clone(), false);
-		vStrip = 0;
-		for (Function<Double, Double> f : approxVFHTFunctions) {
-			for (int k = (int) hStep; k + hStep <= binarized.height(); k += hStep) {
-				double angle = (f.apply((double) k) - minAngle) / 180 * Math.PI;
-				Imgproc.line(frameDisplayFHT.getSrc(), new Point((vStrip + 1) * stripWidth / 2 - Math.cos(angle) * stripWidth / 6, k - Math.sin(angle) * stripWidth / 6),
-						new Point((vStrip + 1) * stripWidth / 2 + Math.cos(angle) * stripWidth / 6, k + Math.sin(angle) * stripWidth / 6), new Scalar(0, 255, 0), 2);
-				angle = interpolatorFHT.interpolateVerticals((vStrip + 1) * stripWidth / 2, k);
-				Imgproc.line(frameDisplayFHT.getSrc(), new Point((vStrip + 1) * stripWidth / 2 - Math.cos(angle) * stripWidth / 6, k - Math.sin(angle) * stripWidth / 6),
-						new Point((vStrip + 1) * stripWidth / 2 + Math.cos(angle) * stripWidth / 6, k + Math.sin(angle) * stripWidth / 6), new Scalar(255, 0, 0), 2);
-			}
-			vStrip++;
-		}
-		hStrip = 0;
-		for (Function<Double, Double> f : approxHFHTFunctions) {
-			for (int k = (int) vStep; k + vStep <= binarized.width(); k += vStep) {
-				double angle = (90 + minAngle - (f.apply((double) k))) / 180 * Math.PI;
-				Imgproc.line(frameDisplayFHT.getSrc(), new Point(k - Math.cos(angle) * stripHeight / 6, (hStrip + 1) * stripHeight / 2 - Math.sin(angle) * stripHeight / 6),
-						new Point(k + Math.cos(angle) * stripHeight / 6, (hStrip + 1) * stripHeight / 2 + Math.sin(angle) * stripHeight / 6), new Scalar(0, 0, 255), 2);
-				angle = interpolatorFHT.interpolateHorizontals(k, (hStrip + 1) * stripHeight / 2);
-				Imgproc.line(frameDisplayFHT.getSrc(), new Point(k - Math.cos(angle) * stripHeight / 6, (hStrip + 1) * stripHeight / 2 - Math.sin(angle) * stripHeight / 6),
-						new Point(k + Math.cos(angle) * stripHeight / 6, (hStrip + 1) * stripHeight / 2 + Math.sin(angle) * stripHeight / 6), new Scalar(255, 0, 0), 2);
-
-			}
-			hStrip++;
-		}
-		images[2] = frameDisplayFHT.toJfxImage();
+		// Img frameDisplayFHT = new Img(superFrame.getFrame().getSrc().clone(), false);
+		// vStrip = 0;
+		// for (Function<Double, Double> f : approxVFHTFunctions) {
+		// for (int k = (int) hStep; k + hStep <= binarized.height(); k += hStep) {
+		// double angle = (f.apply((double) k) - minAngle) / 180 * Math.PI;
+		// Imgproc.line(frameDisplayFHT.getSrc(), new Point((vStrip + 1) * stripWidth / 2 - Math.cos(angle) * stripWidth / 6, k - Math.sin(angle) * stripWidth / 6),
+		// new Point((vStrip + 1) * stripWidth / 2 + Math.cos(angle) * stripWidth / 6, k + Math.sin(angle) * stripWidth / 6), new Scalar(0, 255, 0), 2);
+		// angle = interpolatorFHT.interpolateVerticals((vStrip + 1) * stripWidth / 2, k);
+		// Imgproc.line(frameDisplayFHT.getSrc(), new Point((vStrip + 1) * stripWidth / 2 - Math.cos(angle) * stripWidth / 6, k - Math.sin(angle) * stripWidth / 6),
+		// new Point((vStrip + 1) * stripWidth / 2 + Math.cos(angle) * stripWidth / 6, k + Math.sin(angle) * stripWidth / 6), new Scalar(255, 0, 0), 2);
+		// }
+		// vStrip++;
+		// }
+		// hStrip = 0;
+		// for (Function<Double, Double> f : approxHFHTFunctions) {
+		// for (int k = (int) vStep; k + vStep <= binarized.width(); k += vStep) {
+		// double angle = (90 + minAngle - (f.apply((double) k))) / 180 * Math.PI;
+		// Imgproc.line(frameDisplayFHT.getSrc(), new Point(k - Math.cos(angle) * stripHeight / 6, (hStrip + 1) * stripHeight / 2 - Math.sin(angle) * stripHeight / 6),
+		// new Point(k + Math.cos(angle) * stripHeight / 6, (hStrip + 1) * stripHeight / 2 + Math.sin(angle) * stripHeight / 6), new Scalar(0, 0, 255), 2);
+		// angle = interpolatorFHT.interpolateHorizontals(k, (hStrip + 1) * stripHeight / 2);
+		// Imgproc.line(frameDisplayFHT.getSrc(), new Point(k - Math.cos(angle) * stripHeight / 6, (hStrip + 1) * stripHeight / 2 - Math.sin(angle) * stripHeight / 6),
+		// new Point(k + Math.cos(angle) * stripHeight / 6, (hStrip + 1) * stripHeight / 2 + Math.sin(angle) * stripHeight / 6), new Scalar(255, 0, 0), 2);
+		//
+		// }
+		// hStrip++;
+		// }
+		// images[2] = frameDisplayFHT.toJfxImage();
 
 		ref = trace("Display lines", ref);
 
