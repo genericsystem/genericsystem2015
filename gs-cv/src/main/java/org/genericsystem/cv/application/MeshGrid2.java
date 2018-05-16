@@ -1,5 +1,16 @@
 package org.genericsystem.cv.application;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
+
 import org.genericsystem.cv.Svd;
 import org.genericsystem.cv.application.MeshGrid.Key;
 import org.opencv.core.Core;
@@ -14,16 +25,6 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public class MeshGrid2 {
 
@@ -224,32 +225,6 @@ public class MeshGrid2 {
 		return new Size(image.width() - 2 * xBorder, image.height() - 2 * yBorder);
 	}
 
-	public Mat dewarp() {
-		int rectHeight = (int) Math.floor(getOldSize().height / (2 * halfHeight));
-		int rectWidth = (int) Math.floor(getOldSize().width / (2 * halfWidth));
-
-		Mat dewarpedImage = new Mat(getOldSize(), CvType.CV_8UC3, new Scalar(255, 255, 255));
-		for (int i = -halfHeight; i < halfHeight; i++) {
-			for (int j = -halfWidth; j < halfWidth; j++) {
-				if (inImageBorders(mesh.get(i, j))) {
-					Rect subImageRect = subImageRect(i, j);
-					Mat homography = dewarpPolygon(mesh.get(i, j), subImageRect, rectHeight, rectWidth);
-					int x = (j + halfWidth) * rectWidth;
-					int y = (i + halfHeight) * rectHeight;
-					assert x >= 0 && y >= 0 && ((x + rectWidth) <= dewarpedImage.width()) && ((y + rectHeight) <= dewarpedImage.height()) : "x: " + x + ", y: " + y + ", width: " + dewarpedImage.width() + ", height: " + dewarpedImage.height()
-							+ " , rectWidth : " + rectWidth + " , rectHeight : " + rectHeight;
-					Mat subDewarpedImage = new Mat(dewarpedImage, new Rect(new Point(x, y), new Point(x + rectWidth, y + rectHeight)));
-					Mat subImage = new Mat(image, subImageRect);
-					Imgproc.warpPerspective(subImage, subDewarpedImage, homography, new Size(rectWidth, rectHeight), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(0));
-					subImage.release();
-					subDewarpedImage.release();
-					homography.release();
-				}
-			}
-		}
-		return dewarpedImage;
-	}
-
 	protected Rect subImageRect(int i, int j) {
 		Point[] polygon = mesh.get(i, j);
 		assert polygon != null : i + " " + j;
@@ -307,70 +282,45 @@ public class MeshGrid2 {
 	// --------------------------------------------------
 
 	private List<Point3> points3D;
-	private Map<Key, Point3[]> mesh3D;
 
-	private Map<Key, Point3[]> toPoint3d() {
+	public Map<Key, Point3[]> toPoint3d() {
+		int[][] rects = new int[mesh.size()][4];
+		List<Point> pointIndex = Arrays.stream(points).flatMap(Arrays::stream).collect(Collectors.toList());
+		List<Point[]> meshPoints = new ArrayList<>(mesh.values());
+		for (int i = 0; i < rects.length; i++)
+			for (int j = 0; j < 4; j++)
+				rects[i][j] = pointIndex.indexOf(meshPoints.get(i)[j]);
 
-		if (mesh3D == null) {
-			int[][] rects = new int[mesh.size()][4];
-			List<Point> points2 = Arrays.stream(points).flatMap(Arrays::stream).collect(Collectors.toList());
-			List<Point[]> meshPoints = new ArrayList<>(mesh.values());
-			for (int i = 0; i < rects.length; i++)
-				for (int j = 0; j < 4; j++)
-					rects[i][j] = points2.indexOf(meshPoints.get(i)[j]);
-
-			points3D = Svd.solve(points2, rects);
-			mesh3D = new HashMap<>();
-			for (Entry<Key, Point[]> entry : mesh.entrySet()) {
-				Point3[] para3D = new Point3[4];
-				for (int j = 0; j < 4; j++)
-					para3D[j] = points3D.get(points2.indexOf(entry.getValue()[j]));
-				mesh3D.put(entry.getKey(), para3D);
-			}
+		points3D = Svd.solve(pointIndex, rects);
+		Map<Key, Point3[]> mesh3D = new HashMap<>();
+		for (Entry<Key, Point[]> entry : mesh.entrySet()) {
+			Point3[] para3D = new Point3[4];
+			for (int j = 0; j < 4; j++)
+				para3D[j] = points3D.get(pointIndex.indexOf(entry.getValue()[j]));
+			mesh3D.put(entry.getKey(), para3D);
 		}
 		return mesh3D;
 	}
 
-	public Mat draw3Dsurface(Scalar colorStart, Scalar colorEnd) {
-		Map<Key, Point3[]> mesh3D = toPoint3d();
-		double xMin = Double.POSITIVE_INFINITY;
-		double yMin = Double.POSITIVE_INFINITY;
-		double zMin = Double.POSITIVE_INFINITY;
-		double xMax = Double.NEGATIVE_INFINITY;
-		double yMax = Double.NEGATIVE_INFINITY;
-		double zMax = Double.NEGATIVE_INFINITY;
-		for (Point3 p3 : points3D) {
-			if (p3.x > xMax)
-				xMax = p3.x;
-			if (p3.x < xMin)
-				xMin = p3.x;
-			if (p3.y > yMax)
-				yMax = p3.y;
-			if (p3.y < yMin)
-				yMin = p3.y;
-			if (p3.z > zMax)
-				zMax = p3.z;
-			if (p3.z < zMin)
-				zMin = p3.z;
-		}
+	public Mat draw3Dsurface(Map<Key, Point3[]> mesh3D, Scalar colorStart, Scalar colorEnd) {
+		double xMin = points3D.stream().mapToDouble(p -> p.x).min().getAsDouble();
+		double yMin = points3D.stream().mapToDouble(p -> p.y).min().getAsDouble();
+		double zMin = points3D.stream().mapToDouble(p -> p.z).min().getAsDouble();
+		double xMax = points3D.stream().mapToDouble(p -> p.x).max().getAsDouble();
+		double yMax = points3D.stream().mapToDouble(p -> p.y).max().getAsDouble();
+		double zMax = points3D.stream().mapToDouble(p -> p.z).max().getAsDouble();
+
 		int newWidth = image.width();
 		int newHeight = (int) Math.ceil((yMax - yMin) * image.width() / (xMax - xMin));
-		Mat result = new Mat(newHeight, newWidth, CvType.CV_16SC3, new Scalar(0, 0, 0));
-		// Useless variables because of Java’s lack of closures...
-		double xMin_ = xMin;
-		double xMax_ = xMax;
-		double yMin_ = yMin;
-		double yMax_ = yMax;
-		double zMin_ = zMin;
-		double zMax_ = zMax;
-		List<Point3> normalizedPoints = points3D.stream().map(p -> normalize(p, 0, result.width() - 1, 0, result.height() - 1, xMin_, xMax_, yMin_, yMax_)).collect(Collectors.toList());
+		Mat result = new Mat(newHeight, newWidth, CvType.CV_8UC3, new Scalar(0, 0, 0));
+		List<Point3> normalizedPoints = points3D.stream().map(p -> normalize(p, 0, result.width() - 1, 0, result.height() - 1, xMin, xMax, yMin, yMax)).collect(Collectors.toList());
 		Map<Key, Point3[]> normalizedMesh = normalize(mesh3D, normalizedPoints);
-		normalizedMesh.values().forEach(p -> {
+		for (Point3[] p : normalizedMesh.values()) {
 			Point[] p2 = new Point[] { new Point(p[0].x, p[0].y), new Point(p[1].x, p[1].y), new Point(p[2].x, p[2].y), new Point(p[3].x, p[3].y) };
-			double lambda = (p[0].z - zMin_) / (zMax_ - zMin_);
+			double lambda = (p[0].z - zMin) / (zMax - zMin);
 			Scalar color = combine(colorStart, colorEnd, lambda);
 			drawPolygon(result, p2, color, color);
-		});
+		}
 		return result;
 	}
 
@@ -405,13 +355,11 @@ public class MeshGrid2 {
 		return new Scalar(c);
 	}
 
-	public Mat dewarp3D() {
-		Map<Key, Point3[]> mesh3D = toPoint3d();
-
+	public Mat dewarp3D(Map<Key, Point3[]> mesh3D) {
 		int nVerts = halfWidth * 2;
 		int nLines = halfHeight * 2;
 		// Average width of the 3D edges for each column.
-		double[] widths = new double[nVerts - 1];
+		double[] widths = new double[nVerts];
 		for (int j = 0; j < widths.length; j++) {
 			double sum = 0;
 			for (int i = 0; i < nLines - 1; i++) {
@@ -420,13 +368,13 @@ public class MeshGrid2 {
 				sum += euclideanDistance(para[0], para[1]);
 			}
 			// Last line, bottom edge.
-			Point3[] para = mesh3D.get(new Key(nLines - 2 - halfHeight, j - halfWidth));
+			Point3[] para = mesh3D.get(new Key(nLines - 1 - halfHeight, j - halfWidth));
 			sum += euclideanDistance(para[2], para[3]);
 			widths[j] = sum / nLines;
 		}
 
 		// Average height of the 3D edges for each line.
-		double[] heights = new double[nLines - 1];
+		double[] heights = new double[nLines];
 		for (int i = 0; i < heights.length; i++) {
 			double sum = 0;
 			for (int j = 0; j < nVerts - 1; j++) {
@@ -434,79 +382,95 @@ public class MeshGrid2 {
 				sum += euclideanDistance(para[0], para[3]);
 			}
 			// Last column, right edge.
-			Point3[] para = mesh3D.get(new Key(i - halfHeight, nVerts - 2 - halfWidth));
+			Point3[] para = mesh3D.get(new Key(i - halfHeight, nVerts - 1 - halfWidth));
 			sum += euclideanDistance(para[1], para[2]);
+
 			heights[i] = sum / nVerts;
 		}
 
-		// Normalize the heights and widths so the dewarped image has the same height as the original image.
-		double totalHeight = sum(heights, heights.length);
+		Mat enlargedImage = new Mat(image.size(), CvType.CV_8UC3, new Scalar(255, 255, 255));
+
+		double height = 2 * Math.min(DoubleStream.of(heights).limit(halfHeight).sum(), DoubleStream.of(heights).skip(halfHeight).sum());
+		double width = 2 * Math.min(DoubleStream.of(widths).limit(halfWidth).sum(), DoubleStream.of(widths).skip(halfWidth).sum());
+
+		double coefHeight = (getOldSize().height - 1) / height;
 		for (int i = 0; i < heights.length; i++)
-			heights[i] *= image.height() / totalHeight;
-		double totalWidth = sum(widths, widths.length);
+			heights[i] *= coefHeight;
+
+		double coefWidth = (getOldSize().width - 1) / width;
 		for (int i = 0; i < widths.length; i++)
-			widths[i] *= image.width() / totalWidth;
+			widths[i] *= coefWidth;
 
-		Mat dewarpedImage = new Mat(image.height(), (int) Math.round(sum(widths, widths.length)) + 1, CvType.CV_8UC3, new Scalar(255, 255, 255));
+		System.out.println(Arrays.toString(heights));
+		System.out.println(Arrays.toString(widths));
+		System.out.println(DoubleStream.of(heights).sum());
+		System.out.println(DoubleStream.of(widths).sum());
 
-		for (int i = 0, y = 0; i < nLines - 1; y += heights[i], i++) {
-			for (int j = 0, x = 0; j < nVerts - 1; x += widths[j], j++) {
-				if (inImageBorders(mesh.get(i - halfHeight, j - halfWidth))) {
-					Rect subImageRect = subImageRect(i - halfHeight, j - halfWidth);
-					if (!subImageRect.empty()) {
-						Mat homography = dewarpPolygon(mesh.get(i - halfHeight, j - halfWidth), subImageRect, heights[i], widths[j]);
-						Rect dewarpedRect = new Rect(new Point(x, y), new Point(x + widths[j], y + heights[i]));
-						Mat subDewarpedImage = new Mat(dewarpedImage, dewarpedRect);
-						Mat subImage = new Mat(image, subImageRect);
-						Imgproc.warpPerspective(subImage, subDewarpedImage, homography, subDewarpedImage.size(), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(0));
-						subImage.release();
-						subDewarpedImage.release();
-						homography.release();
-					}
-				}
+		double y = enlargedImage.height() / 2;
+		for (int i = 0; i < halfHeight; i++) {
+			double x = enlargedImage.width() / 2;
+			for (int j = 0; j < halfWidth; j++) {
+				if (x >= 0 && (x + widths[j + halfWidth] < enlargedImage.width()) && y >= 0 && (y + heights[i + halfHeight] < enlargedImage.height()))
+					deWarp(enlargedImage, i, j, x, y, widths[j + halfWidth], heights[i + halfHeight]);
+				x += widths[j + halfWidth];
+			}
+			x = enlargedImage.width() / 2;
+			for (int j = -1; j >= -halfWidth; j--) {
+				x -= widths[j + halfWidth];
+				if (x >= 0 && (x + widths[j + halfWidth] < enlargedImage.width()) && y >= 0 && (y + heights[i + halfHeight] < enlargedImage.height()))
+					deWarp(enlargedImage, i, j, x, y, widths[j + halfWidth], heights[i + halfHeight]);
+			}
+			y += heights[i + halfHeight];
+		}
+		y = enlargedImage.height() / 2;
+		for (int i = -1; i >= -halfHeight; i--) {
+			y -= heights[i + halfHeight];
+			double x = enlargedImage.width() / 2;
+			for (int j = 0; j < halfWidth; j++) {
+				if (x >= 0 && (x + widths[j + halfWidth] < enlargedImage.width()) && y >= 0 && (y + heights[i + halfHeight] < enlargedImage.height()))
+					deWarp(enlargedImage, i, j, x, y, widths[j + halfWidth], heights[i + halfHeight]);
+				x += widths[j + halfWidth];
+			}
+			x = enlargedImage.width() / 2;
+			for (int j = -1; j >= -halfWidth; j--) {
+				x -= widths[j + halfWidth];
+				if (x >= 0 && (x + widths[j + halfWidth] < enlargedImage.width()) && y >= 0 && (y + heights[i + halfHeight] < enlargedImage.height()))
+					deWarp(enlargedImage, i, j, x, y, widths[j + halfWidth], heights[i + halfHeight]);
 			}
 		}
-		// // Draw lines and columns on dewarped image
-		// int y = 0;
-		// for (int i = 0; i < nLines - 1; y += heights[i], i++)
-		// Imgproc.line(dewarpedImage, new Point(0, y), new Point(dewarpedImage.width() - 1, y), new Scalar(255, 0, 255), 2);
-		// // Last horizontal line.
-		// Imgproc.line(dewarpedImage, new Point(0, y), new Point(dewarpedImage.width() - 1, y), new Scalar(255, 0, 255), 2);
-		// int x = 0;
-		// for (int j = 0; j < nVerts - 1; x += widths[j], j++)
-		// Imgproc.line(dewarpedImage, new Point(x, 0), new Point(x, dewarpedImage.height() - 1), new Scalar(255, 0, 255), 2);
-		// // Last vertical line.
-		// Imgproc.line(dewarpedImage, new Point(x, 0), new Point(x, dewarpedImage.height() - 1), new Scalar(255, 0, 255), 2);
+		return new Mat(enlargedImage, new Rect(new Point(xBorder, yBorder), new Point(enlargedImage.width() - xBorder, enlargedImage.height() - yBorder)));
+	}
+
+	public Mat dewarp() {
+		double rectHeight = getOldSize().height / (2 * halfHeight);
+		double rectWidth = getOldSize().width / (2 * halfWidth);
+		Mat dewarpedImage = new Mat(getOldSize(), CvType.CV_8UC3, new Scalar(255, 255, 255));
+		for (int i = -halfHeight; i < halfHeight; i++)
+			for (int j = -halfWidth; j < halfWidth; j++)
+				deWarp(dewarpedImage, i, j, (j + halfWidth) * rectWidth, (i + halfHeight) * rectHeight, rectWidth, rectHeight);
 		return dewarpedImage;
 	}
 
-	private double sum(double[] array, int end) {
-		double sum = 0;
-		for (int i = 0; i < end; i++)
-			sum += array[i];
-		return sum;
+	private void deWarp(Mat dewarpedImage, int i, int j, double x, double y, double rectWidth, double rectHeight) {
+		if (inBordedImage(mesh.get(i, j))) {
+			Rect subImageRect = subImageRect(i, j);
+			if (!subImageRect.empty()) {
+				Mat homography = dewarpPolygon(mesh.get(i, j), subImageRect, rectHeight, rectWidth);
+				Mat subDewarpedImage = new Mat(dewarpedImage, new Rect(new Point(x, y), new Point(x + rectWidth, y + rectHeight)));
+				Mat subImage = new Mat(image, subImageRect);
+				Imgproc.warpPerspective(subImage, subDewarpedImage, homography, subDewarpedImage.size(), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(0));
+				subImage.release();
+				subDewarpedImage.release();
+				homography.release();
+			}
+		}
 	}
 
-	// Returns true if:
-	// – no corner of the polygon lies outside the image.
-	// – at least a corner of the polygon is in the image proper,
-	// that is, not outside and not in one of the borders whose size is defined by xBorder and yBorder.
-	protected boolean inImageBorders(Point[] p) {
-		for (Point pt : p)
-			if (!inImage(pt))
+	private boolean inBordedImage(Point[] pts) {
+		for (Point p : pts)
+			if (p.x < 0 || p.x >= image.width() || p.y < 0 || p.y >= image.height())
 				return false;
-		for (Point pt : p)
-			if (inImageBorders(pt))
-				return true;
-		return false;
-	}
-
-	private boolean inImage(Point p) {
-		return p.x >= 0 && p.x < image.width() && p.y >= 0 && p.y < image.height();
-	}
-
-	private boolean inImageBorders(Point p) {
-		return p.x >= xBorder && p.x < image.width() - xBorder && p.y >= yBorder && p.y < image.height() - yBorder;
+		return true;
 	}
 
 	private double euclideanDistance(Point3 p1, Point3 p2) {

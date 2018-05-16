@@ -3,9 +3,11 @@ package org.genericsystem.cv.application;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -87,7 +89,7 @@ public class RadonTransform {
 		Ximgproc.FastHoughTransform(vStrip, houghTransform, CvType.CV_64FC1, Ximgproc.ARO_45_135, Ximgproc.FHT_ADD, Ximgproc.HDO_DESKEW);
 		Core.transpose(houghTransform, houghTransform);
 		// Core.normalize(houghTransform, houghTransform, 0, 255, Core.NORM_MINMAX);
-		return new Mat(houghTransform, new Range(vStrip.width() / 2, houghTransform.height() - vStrip.width() / 2), new Range(0, houghTransform.width()));
+		return new Mat(houghTransform, new Range(vStrip.width() / 2 - 1, houghTransform.height() - vStrip.width() / 2 - 1), new Range(0, houghTransform.width()));
 	}
 
 	public static Mat fhtRemap(Mat houghTransform) {
@@ -296,36 +298,41 @@ public class RadonTransform {
 					bestScore4Pos = scoreFromSameTheta;
 					thetaPrev[k][theta] = theta;
 				} else if ((scoreFromPrevTheta + prevPenality) >= scoreFromSameTheta && ((scoreFromPrevTheta + prevPenality) >= (scoreFromNextTheta + nextPenality))) {
-					bestScore4Pos = scoreFromPrevTheta + prevPenality * (1 + magnitude / 255);
+					bestScore4Pos = scoreFromPrevTheta + prevPenality;
 					thetaPrev[k][theta] = theta - 1;
 				} else {
-					bestScore4Pos = scoreFromNextTheta + nextPenality * (1 + magnitude / 255);
+					bestScore4Pos = scoreFromNextTheta + nextPenality;
 					thetaPrev[k][theta] = theta + 1;
 				}
 				score[k][theta] = magnitude + bestScore4Pos;
 			}
 		}
-
 		adaptivHough.release();
+		return Arrays.asList(buildResult(score, thetaPrev, stripWidth, houghTransform));
+	}
 
+	private static int getBestScoreTheta(double[][] score) {
 		double maxScore = Double.NEGATIVE_INFINITY;
-		int prevTheta = -1;
-		for (int theta = 0; theta < houghTransform.cols(); theta++) {
-			double lastScore = score[houghTransform.rows() - 1][theta];
+		int maxTheta = -1;
+		for (int theta = 0; theta < score[0].length; theta++) {
+			double lastScore = score[score.length - 1][theta];
 			if (lastScore > maxScore) {
 				maxScore = lastScore;
-				prevTheta = theta;
+				maxTheta = theta;
 			}
 		}
+		return maxTheta;
+	}
 
-		assert prevTheta != -1;
-		HoughTrajectStep[] result = new HoughTrajectStep[houghTransform.rows()];
-		for (int y = houghTransform.rows() - 1; y >= 0; y--) {
+	private static HoughTrajectStep[] buildResult(double[][] score, int[][] thetaPrev, int stripWidth, Mat houghTransform) {
+		int prevTheta = getBestScoreTheta(score);
+		HoughTrajectStep[] result = new HoughTrajectStep[score.length];
+		for (int y = score.length - 1; y >= 0; y--) {
 			double derivative = ((double) prevTheta - (stripWidth - 1)) / (stripWidth - 1);
 			result[y] = new HoughTrajectStep(y, derivative, houghTransform.get(y, prevTheta)[0]);
 			prevTheta = thetaPrev[y][prevTheta];
 		}
-		return Arrays.asList(result);
+		return result;
 	}
 
 	public static List<Mat> extractStrips(Mat src, int stripNumber, double stripWidth, double step) {
@@ -424,20 +431,30 @@ public class RadonTransform {
 		return orientedPoints;
 	}
 
-	public static List<OrientedPoint> toHorizontalOrientedPoints(List<HoughTrajectStep> trajectSteps, double x) {
+	public static List<OrientedPoint> toHorizontalOrientedPoints(List<HoughTrajectStep> trajectSteps, double x, double localTheshold, double globalTheshold) {
 		List<OrientedPoint> orientedPoints = new ArrayList<>();
-		trajectSteps.stream().filter(ts -> ts.magnitude >= 0.1).sorted().limit(30).forEach(trajectStep -> {
-			double angle = (trajectStep.getTheta() - 45) / 180 * Math.PI;
-			orientedPoints.add(new OrientedPoint(new Point(x, trajectStep.y), angle, trajectStep.magnitude));
+
+		List<HoughTrajectStep[]> lines = getStripLinesFHT(trajectSteps, localTheshold, globalTheshold);
+
+		lines.stream().forEach(trajectStep -> {
+			double angle = (trajectStep[0].getTheta() - 45) / 180 * Math.PI;
+			orientedPoints.add(new OrientedPoint(new Point(x, trajectStep[0].y), angle, trajectStep[0].magnitude));
+			angle = (trajectStep[1].getTheta() - 45) / 180 * Math.PI;
+			orientedPoints.add(new OrientedPoint(new Point(x, trajectStep[1].y), angle, trajectStep[1].magnitude));
 		});
 		return orientedPoints;
 	}
 
-	public static List<OrientedPoint> toVerticalOrientedPoints(List<HoughTrajectStep> trajectSteps, double y) {
+	public static List<OrientedPoint> toVerticalOrientedPoints(List<HoughTrajectStep> trajectSteps, double y, double localTheshold, double globalTheshold) {
 		List<OrientedPoint> orientedPoints = new ArrayList<>();
-		trajectSteps.stream().filter(ts -> ts.magnitude >= 0.1).sorted().limit(30).forEach(trajectStep -> {
-			double angle = -(trajectStep.getTheta() - 45) / 180 * Math.PI;
-			orientedPoints.add(new OrientedPoint(new Point(trajectStep.y, y), angle, trajectStep.magnitude));
+
+		List<HoughTrajectStep[]> lines = getStripLinesFHT(trajectSteps, localTheshold, globalTheshold);
+
+		lines.stream().forEach(trajectStep -> {
+			double angle = -(trajectStep[0].getTheta() - 45) / 180 * Math.PI;
+			orientedPoints.add(new OrientedPoint(new Point(trajectStep[0].y, y), angle, trajectStep[0].magnitude));
+			angle = -(trajectStep[1].getTheta() - 45) / 180 * Math.PI;
+			orientedPoints.add(new OrientedPoint(new Point(trajectStep[1].y, y), angle, trajectStep[1].magnitude));
 		});
 		return orientedPoints;
 	}
@@ -508,6 +525,45 @@ public class RadonTransform {
 			this.value = value;
 			this.point = point;
 		}
+	}
+
+	public static List<HoughTrajectStep[]> getStripLinesFHT(List<HoughTrajectStep> magnitudes, double localTheshold, double globalTheshold) {
+		Set<HoughTrajectStep> alreadyComputed = new HashSet<>();
+		double max = magnitudes.stream().mapToDouble(ts -> ts.magnitude).max().getAsDouble();
+		System.out.println("Max : " + max);
+
+		List<HoughTrajectStep[]> result = new ArrayList<>();
+		for (HoughTrajectStep trajectStep : magnitudes.stream().sorted().collect(Collectors.toList())) {
+			if (trajectStep.magnitude < globalTheshold * max)
+				break;
+			if (!alreadyComputed.contains(trajectStep)) {
+				double tAlpha = localTheshold * trajectStep.magnitude;
+
+				int y1 = trajectStep.y;
+				while (y1 >= 0 && magnitudes.get(y1).magnitude >= tAlpha)
+					y1--;
+				if (y1 != 0)
+					y1++;
+
+				int y2 = trajectStep.y;
+				while (y2 < magnitudes.size() && magnitudes.get(y2).magnitude >= tAlpha)
+					y2++;
+				if (y2 != magnitudes.size() - 1)
+					y2--;
+
+				boolean alreadyVisited = false;
+				for (int y = y1; y <= y2; y++)
+					if (alreadyComputed.contains(magnitudes.get(y))) {
+						alreadyVisited = true;
+						break;
+					}
+				for (int y = y1; y <= y2; y++)
+					alreadyComputed.add(magnitudes.get(y));
+				if (!alreadyVisited)
+					result.add(new HoughTrajectStep[] { magnitudes.get(y1), magnitudes.get(y2) });
+			}
+		}
+		return result;
 	}
 
 }

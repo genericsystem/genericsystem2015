@@ -1,24 +1,27 @@
 package org.genericsystem.cv.application;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.application.GeneralInterpolator.OrientedPoint;
+import org.genericsystem.cv.application.MeshGrid.Key;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.genericsystem.layout.Layout;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
+import org.opencv.core.Point3;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -129,10 +132,10 @@ public class RadonTransformDemo3 extends AbstractApp {
 
 		List<OrientedPoint> fhtHorizontals = new ArrayList<>();
 		for (int vStripIndex = 0; vStripIndex < vHoughTrajs.size(); vStripIndex++)
-			fhtHorizontals.addAll(RadonTransform.toHorizontalOrientedPoints(vHoughTrajs.get(vStripIndex), (vStripIndex + 1) * vStep));
+			fhtHorizontals.addAll(RadonTransform.toHorizontalOrientedPoints(vHoughTrajs.get(vStripIndex), (vStripIndex + 1) * vStep, 0.6, 0.3));
 		List<OrientedPoint> fhtVerticals = new ArrayList<>();
 		for (int hStrip = 0; hStrip < hHoughTrajs.size(); hStrip++)
-			fhtVerticals.addAll(RadonTransform.toVerticalOrientedPoints(hHoughTrajs.get(hStrip), (hStrip + 1) * hStep));
+			fhtVerticals.addAll(RadonTransform.toVerticalOrientedPoints(hHoughTrajs.get(hStrip), (hStrip + 1) * hStep, 0.6, 0.8));
 
 		GeneralInterpolator interpolatorFHT = new GeneralInterpolator(fhtHorizontals, fhtVerticals, 4, 15);
 
@@ -178,10 +181,11 @@ public class RadonTransformDemo3 extends AbstractApp {
 		images[6] = dewarpFHT.toJfxImage();
 		ref = trace("Layout", ref);
 
-		images[7] = new Img(meshGridFHT.draw3Dsurface(new Scalar(0, 255, 0), new Scalar(0, 0, 255))).toJfxImage();
+		Map<Key, Point3[]> mesh3D = meshGridFHT.toPoint3d();
+		images[7] = new Img(meshGridFHT.draw3Dsurface(mesh3D, new Scalar(0, 255, 0), new Scalar(0, 0, 255))).toJfxImage();
 		ref = trace("3D surface / svd", ref);
 
-		Img dewarpFHT3D = new Img(meshGridFHT.dewarp3D());
+		Img dewarpFHT3D = new Img(meshGridFHT.dewarp3D(mesh3D));
 		images[8] = dewarpFHT3D.toJfxImage();
 		ref = trace("Dewarp 3D", ref);
 

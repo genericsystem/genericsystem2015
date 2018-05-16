@@ -1,5 +1,11 @@
 package org.genericsystem.cv.application;
 
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
@@ -11,17 +17,6 @@ import org.opencv.core.Range;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -163,57 +158,15 @@ public class RadonTransformDemo2 extends AbstractApp {
 		images[6] = new Img(magnitudesDisplay, false).toJfxImage();
 		ref = trace("Display magnitudes", ref);
 
-		List<HoughTrajectStep> sortedMagnitudes = new ArrayList<>(magnitudes);
-		Collections.sort(sortedMagnitudes);
-
-		double alpha = 0.1;
-		double t = 0.5;
-		Set<HoughTrajectStep> alreadyComputed = new HashSet<>();
-		double max = magnitudes.stream().mapToDouble(ts -> ts.magnitude).max().getAsDouble();
-		System.out.println("Max : " + max);
-
-		List<int[]> result = new ArrayList<>();
-		for (HoughTrajectStep trajectStep : magnitudes.stream().sorted().collect(Collectors.toList())) {
-			if (trajectStep.magnitude < alpha * max)
-				break;
-			if (!alreadyComputed.contains(trajectStep)) {
-				double tAlpha = t * trajectStep.magnitude;
-				assert trajectStep.y < magnitudes.size();
-				int y1 = trajectStep.y;
-				for (; y1 >= 0; y1--)
-					if (magnitudes.get(y1).magnitude < tAlpha)
-						break;
-				y1++;
-				assert y1 >= 0;
-				int y2 = trajectStep.y;
-				for (; y2 < magnitudes.size(); y2++)
-					if (magnitudes.get(y2).magnitude < tAlpha)
-						break;
-				y2--;
-				assert y2 < magnitudes.size();
-				int[] r = new int[] { y1, y2 };
-
-				boolean alreadyVisited = false;
-				for (int k = y1; k <= y2; k++) {
-					if (alreadyComputed.contains(magnitudes.get(k))) {
-						alreadyVisited = true;
-						break;
-					}
-				}
-				if (!alreadyVisited)
-					result.add(r);
-				alreadyComputed.add(magnitudes.get(y1));
-				alreadyComputed.add(magnitudes.get(y2));
-			}
-		}
+		List<HoughTrajectStep[]> lines = RadonTransform.getStripLinesFHT(magnitudes, 0.6, 0.1);
 		Mat rangeDisplay = magnitudesDisplay.clone();
-		for (int[] y1y2 : result) {
+		for (HoughTrajectStep[] topBottom : lines) {
 			double minMagnitude = Double.MAX_VALUE;
-			for (int k = y1y2[0]; k <= y1y2[1]; k++)
-				if (minMagnitude > magnitudes.get(k).magnitude)
-					minMagnitude = magnitudes.get(k).magnitude;
+			for (int y = topBottom[0].y; y <= topBottom[1].y; y++)
+				if (minMagnitude > magnitudes.get(y).magnitude)
+					minMagnitude = magnitudes.get(y).magnitude;
 			// System.out.println("minMagnitude : " + minMagnitude + " Range : " + y1y2[0] + " " + y1y2[1]);
-			Imgproc.line(rangeDisplay, new Point(minMagnitude, y1y2[0]), new Point(minMagnitude, y1y2[1]), new Scalar(0), 3);
+			Imgproc.line(rangeDisplay, new Point(minMagnitude, topBottom[0].y), new Point(minMagnitude, topBottom[1].y), new Scalar(0), 1);
 		}
 
 		// for (int row = 0; row < rangeDisplay.rows(); row++)
@@ -223,15 +176,15 @@ public class RadonTransformDemo2 extends AbstractApp {
 
 		Mat vStripColor = new Mat();
 		Imgproc.cvtColor(vStrip, vStripColor, Imgproc.COLOR_GRAY2BGR);
-		for (int[] y1y2 : result) {
+		for (HoughTrajectStep[] topBottom : lines) {
 			// for (TrajectStep trajectStep : Arrays.stream(houghVtraj).filter(ts -> Math.abs(magnitudes.get(ts.k).magnitude) > 30).collect(Collectors.toList())) {
 			double mag = stripWidth;
-			int row = y1y2[0];
+			int row = topBottom[0].y;
 			double theta = (magnitudes.get(row).getTheta() - 45) / 180 * Math.PI;
 			Scalar color = new Scalar(0, 255, 0);
 			Imgproc.line(vStripColor, new Point(vStripColor.width() / 2 - mag * Math.cos(theta), row - mag * Math.sin(theta)), new Point(vStripColor.width() / 2 + mag * Math.cos(theta), row + mag * Math.sin(theta)), color, 1);
 			color = new Scalar(0, 0, 255);
-			row = y1y2[1];
+			row = topBottom[1].y;
 			theta = (magnitudes.get(row).getTheta() - 45) / 180 * Math.PI;
 			Imgproc.line(vStripColor, new Point(vStripColor.width() / 2 - mag * Math.cos(theta), row - mag * Math.sin(theta)), new Point(vStripColor.width() / 2 + mag * Math.cos(theta), row + mag * Math.sin(theta)), color, 1);
 
