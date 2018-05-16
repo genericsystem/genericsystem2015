@@ -98,7 +98,7 @@ public class Svd {
 
 		Mat eigenValues = new Mat();
 		Mat eigenVectors = new Mat();
-		Core.eigenNonSymmetric(M, eigenValues, eigenVectors);
+		Core.eigen(M, eigenValues, eigenVectors);
 		int minIndex = -1;
 		for (int i = eigenValues.rows() - 1; i >= 0; i--) {
 			if (eigenValues.get(i, 0)[0] > Precision.EPSILON) {
