@@ -1,16 +1,5 @@
 package org.genericsystem.cv.application;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.DoubleStream;
-
 import org.genericsystem.cv.Svd;
 import org.genericsystem.cv.application.MeshGrid.Key;
 import org.opencv.core.Core;
@@ -25,6 +14,17 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
 
 public class MeshGrid2 {
 
@@ -393,11 +393,11 @@ public class MeshGrid2 {
 		double height = 2 * Math.min(DoubleStream.of(heights).limit(halfHeight).sum(), DoubleStream.of(heights).skip(halfHeight).sum());
 		double width = 2 * Math.min(DoubleStream.of(widths).limit(halfWidth).sum(), DoubleStream.of(widths).skip(halfWidth).sum());
 
-		double coefHeight = (getOldSize().height - 1) / height;
+		double coefHeight = getOldSize().height / height;
 		for (int i = 0; i < heights.length; i++)
 			heights[i] *= coefHeight;
 
-		double coefWidth = (getOldSize().width - 1) / width;
+		double coefWidth = getOldSize().width / width;
 		for (int i = 0; i < widths.length; i++)
 			widths[i] *= coefWidth;
 

@@ -1,14 +1,5 @@
 package org.genericsystem.cv.application;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.application.GeneralInterpolator.OrientedPoint;
@@ -22,6 +13,15 @@ import org.opencv.core.Point3;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -162,7 +162,7 @@ public class RadonTransformDemo3 extends AbstractApp {
 		images[2] = frameDisplayFHT.toJfxImage();
 		ref = trace("Display lines", ref);
 
-		MeshGrid2 meshGridFHT = new MeshGrid2(8, 4, interpolatorFHT, 40, 40, superFrame.getFrame().getSrc());
+		MeshGrid2 meshGridFHT = new MeshGrid2(7, 4, interpolatorFHT, 40, 40, superFrame.getFrame().getSrc());
 		ref = trace("Build mesh", ref);
 
 		images[3] = new Img(meshGridFHT.drawOnCopy(new Scalar(0, 255, 0), new Scalar(0, 0, 255)), false).toJfxImage();
@@ -176,8 +176,8 @@ public class RadonTransformDemo3 extends AbstractApp {
 		images[5] = dewarpedBinarized2.toJfxImage();
 		ref = trace("Binarize dewarp", ref);
 
-		Layout layout = dewarpedBinarized2.buildLayout(new Size(0.01, 0.01), 3);
-		layout.draw(dewarpFHT, new Scalar(255, 0, 0), new Scalar(0, 0, 255), 2, 1);
+		Layout layout = dewarpedBinarized2.buildLayout(new Size(0.01, 0.01), 15);
+		layout.draw(dewarpFHT, new Scalar(255, 0, 0), new Scalar(0, 0, 255), 1, 2);
 		images[6] = dewarpFHT.toJfxImage();
 		ref = trace("Layout", ref);
 
@@ -193,8 +193,8 @@ public class RadonTransformDemo3 extends AbstractApp {
 		images[9] = binarized3D.toJfxImage();
 		ref = trace("Binarize dewarp 3D", ref);
 
-		Layout layout3D = binarized3D.buildLayout(new Size(0.01, 0.01), 3);
-		layout3D.draw(dewarpFHT3D, new Scalar(255, 0, 0), new Scalar(0, 0, 255), 2, 1);
+		Layout layout3D = binarized3D.buildLayout(new Size(0.01, 0.01), 15);
+		layout3D.draw(dewarpFHT3D, new Scalar(255, 0, 0), new Scalar(0, 0, 255), 1, 2);
 		images[10] = dewarpFHT3D.toJfxImage();
 		ref = trace("Layout 3D", ref);
 
