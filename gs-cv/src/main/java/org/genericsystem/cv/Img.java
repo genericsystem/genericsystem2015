@@ -909,18 +909,10 @@ public class Img implements AutoCloseable, Serializable {
 		src.release();
 	}
 
-	// public Layout buildLayout() {
-	// return this.buildLayout(new Size(0.04, 0.008), 5);
-	// }
-
-	public Layout buildLayout(Size morph, int level) {
-		Layout root = new Layout(null, 0, 1, 0, 1);// .tighten(this);
-		return root.recursiveSplit(morph, level, this);
+	public Layout buildLayout(Size constantClose, Size linearClose, int level) {
+		Layout root = new Layout(null, 0, 1, 0, 1);
+		return root.recursiveSplit(constantClose, linearClose, level, this);
 	}
-
-	// public static void main(String[] args) {
-	// System.out.println(Arrays.toString(open(Arrays.asList(true, true, false, true, true, false, true, false, true), 2)));
-	// }
 
 	public static boolean[] close(List<Boolean> histo, int k) {
 		boolean[] closed = new boolean[histo.size()];

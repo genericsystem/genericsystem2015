@@ -1,5 +1,13 @@
 package org.genericsystem.cv.application;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
+
 import org.apache.commons.math3.analysis.FunctionUtils;
 import org.apache.commons.math3.analysis.differentiation.UnivariateDifferentiableFunction;
 import org.apache.commons.math3.analysis.function.Constant;
@@ -12,6 +20,7 @@ import org.genericsystem.cv.Svd;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Point3;
 import org.opencv.core.Rect;
@@ -20,15 +29,7 @@ import org.opencv.imgproc.Imgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
-
-public class MeshGridRadon extends MeshGrid {
+public class MeshGridRadon {
 
 	private static final Logger logger = LoggerFactory.getLogger(MeshGridRadon.class);
 
@@ -47,9 +48,16 @@ public class MeshGridRadon extends MeshGrid {
 	private List<Integer> patchXs;
 	private List<Integer> patchYs;
 	private int[][] dirs;
+	protected int xBorder;
+	protected int yBorder;
+	protected Mat image;
+	protected Map<Key, Point[]> mesh = new HashMap<>();
 
 	public MeshGridRadon(int border, int xStep, int yStep, Mat image) {
-		super(image, border, border);
+		this.xBorder = border;
+		this.yBorder = border;
+		this.image = new Mat();
+		Core.copyMakeBorder(image, this.image, yBorder, yBorder, xBorder, xBorder, Core.BORDER_REPLICATE);
 		this.xStep = xStep;
 		this.yStep = yStep;
 		// Use this.image to take the borders into account.
@@ -223,6 +231,17 @@ public class MeshGridRadon extends MeshGrid {
 		return result;
 	}
 
+	protected void drawPolygon(Mat image, Point[] polygon, Scalar color) {
+		Point topLeft = polygon[0];
+		Point topRight = polygon[1];
+		Point bottomRight = polygon[2];
+		Point bottomLeft = polygon[3];
+		Imgproc.line(image, topLeft, topRight, color);
+		Imgproc.line(image, topRight, bottomRight, color);
+		Imgproc.line(image, bottomRight, bottomLeft, color);
+		Imgproc.line(image, bottomLeft, topLeft, color);
+	}
+
 	private Map<Key, Point3[]> normalize(Map<Key, Point3[]> mesh, List<Point3> newPoints) {
 		Map<Key, Point3[]> newMesh = new HashMap<>();
 		for (Entry<Key, Point3[]> entry : mesh.entrySet())
@@ -254,7 +273,6 @@ public class MeshGridRadon extends MeshGrid {
 		return new Scalar(c);
 	}
 
-	@Override
 	public Mat dewarp() {
 		Map<Key, Point3[]> mesh3D = toPoint3d();
 
@@ -324,6 +342,44 @@ public class MeshGridRadon extends MeshGrid {
 		// Last vertical line.
 		Imgproc.line(dewarpedImage, new Point(x, 0), new Point(x, dewarpedImage.height() - 1), new Scalar(255, 0, 255), 1);
 		return dewarpedImage;
+	}
+
+	protected Mat dewarpPolygon(Point[] polygon, Rect subImageRect, double rectHeight, double rectWidth) {
+		Point warpedTopLeft = changeOrigin(subImageRect, polygon[0]);
+		Point warpedTopRight = changeOrigin(subImageRect, polygon[1]);
+		Point warpedBottomRight = changeOrigin(subImageRect, polygon[2]);
+		Point warpedBottomLeft = changeOrigin(subImageRect, polygon[3]);
+		Point dewarpedTopLeft = new Point(0, 0);
+		Point dewarpedTopRight = new Point(rectWidth, 0);
+		Point dewarpedBottomRight = new Point(rectWidth, rectHeight);
+		Point dewarpedBottomLeft = new Point(0, rectHeight);
+		return Imgproc.getPerspectiveTransform(new MatOfPoint2f(warpedTopLeft, warpedTopRight, warpedBottomRight, warpedBottomLeft), new MatOfPoint2f(dewarpedTopLeft, dewarpedTopRight, dewarpedBottomRight, dewarpedBottomLeft));
+	}
+
+	public Mat drawOnCopy(Scalar color) {
+		Mat clone = image.clone();
+		mesh.values().forEach(p -> drawPolygon(clone, p, color));
+		return clone;
+	}
+
+	protected Point changeOrigin(Rect subImageRect, Point point) {
+		return new Point(point.x - subImageRect.x, point.y - subImageRect.y);
+	}
+
+	protected Rect subImageRect(int iP, int jP) {
+		Point[] polygon = mesh.get(new Key(iP, jP));
+		assert polygon != null : iP + " " + jP;
+
+		Point warpedTopLeft = polygon[0];
+		Point warpedTopRight = polygon[1];
+		Point warpedBottomRight = polygon[2];
+		Point warpedBottomLeft = polygon[3];
+		double xMin, xMax, yMin, yMax;
+		xMin = Math.min(warpedTopLeft.x, warpedBottomLeft.x);
+		xMax = Math.max(warpedBottomRight.x, warpedTopRight.x);
+		yMin = Math.min(warpedTopRight.y, warpedTopLeft.y);
+		yMax = Math.max(warpedBottomLeft.y, warpedBottomRight.y);
+		return new Rect(new Point(xMin, yMin), new Point(xMax, yMax));
 	}
 
 	private double sum(double[] array, int end) {

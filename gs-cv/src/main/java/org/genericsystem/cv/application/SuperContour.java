@@ -103,7 +103,7 @@ public class SuperContour implements Comparable<SuperContour> {
 				}
 			}
 		}
-		vertical = (Integer.valueOf(k).doubleValue() / 64) * Math.PI;
+		vertical = (Integer.valueOf(k).doubleValue() / 64) * Math.PI + Math.PI / 2;
 		// if (vertical > Math.PI)
 		// vertical = vertical - Math.PI;
 		vTop = new Point(center.x - dy * Math.cos(vertical), center.y - dy * Math.sin(vertical));

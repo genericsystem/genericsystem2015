@@ -34,7 +34,7 @@ public class MeshgridRadonTest extends AbstractApp {
 				Img baseLines = new Img(meshGrid.drawBaselines(new Scalar(255, 0, 0)), false);
 				Img grid = new Img(meshGrid.drawOnCopy(new Scalar(0, 0, 255)), false);
 				Img surface = new Img(meshGrid.draw3Dsurface(new Scalar(0, 255, 0), new Scalar(0, 0, 255)), false);
-				Img dewarped = new Img(meshGrid.dewarp(), false))  {
+				Img dewarped = new Img(meshGrid.dewarp(), false)) {
 			images[1] = baseLines.toJfxImage();
 			images[2] = vertDirs.toJfxImage();
 			images[3] = grid.toJfxImage();

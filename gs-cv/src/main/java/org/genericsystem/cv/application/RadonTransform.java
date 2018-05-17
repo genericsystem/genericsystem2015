@@ -276,8 +276,8 @@ public class RadonTransform {
 	public static List<HoughTrajectStep> bestTrajectFHT(Mat houghTransform, int blurSize, double anglePenality) {
 		int stripWidth = (houghTransform.cols() + 1) / 2;
 		Mat adaptivHough = adaptivHough(houghTransform, blurSize);
-		List<Double> penality = IntStream.range(0, adaptivHough.cols())
-				.mapToObj(theta -> anglePenality * Math.abs(Math.atan((double) (theta - stripWidth + 1) / (stripWidth - 1)) - Math.atan((double) (theta - stripWidth + 2) / (stripWidth - 1))) * 180 / Math.PI).collect(Collectors.toList());
+		List<Double> derivativeToangleCoeff = IntStream.range(0, adaptivHough.cols())
+				.mapToObj(theta -> Math.abs(Math.atan((double) (theta - stripWidth + 1) / (stripWidth - 1)) - Math.atan((double) (theta - stripWidth + 2) / (stripWidth - 1))) * 180 / Math.PI).collect(Collectors.toList());
 		double[][] score = new double[adaptivHough.rows()][adaptivHough.cols()];
 		int[][] thetaPrev = new int[adaptivHough.rows()][adaptivHough.cols()];
 		for (int theta = 0; theta < adaptivHough.cols(); theta++)
@@ -291,8 +291,8 @@ public class RadonTransform {
 				double scoreFromNextTheta = theta < adaptivHough.cols() - 1 ? score[k - 1][theta + 1] : Double.NEGATIVE_INFINITY;
 
 				double bestScore4Pos = -1;
-				double prevPenality = theta == 0 ? Double.NEGATIVE_INFINITY : penality.get(theta - 1);
-				double nextPenality = theta <= adaptivHough.cols() ? penality.get(theta) : Double.NEGATIVE_INFINITY;
+				double prevPenality = theta == 0 ? Double.NEGATIVE_INFINITY : anglePenality * derivativeToangleCoeff.get(theta - 1);
+				double nextPenality = theta <= adaptivHough.cols() ? anglePenality * derivativeToangleCoeff.get(theta) : Double.NEGATIVE_INFINITY;
 
 				if (scoreFromSameTheta >= (scoreFromPrevTheta + prevPenality) && scoreFromSameTheta >= (scoreFromNextTheta + nextPenality)) {
 					bestScore4Pos = scoreFromSameTheta;
@@ -530,8 +530,7 @@ public class RadonTransform {
 	public static List<HoughTrajectStep[]> getStripLinesFHT(List<HoughTrajectStep> magnitudes, double localTheshold, double globalTheshold) {
 		Set<HoughTrajectStep> alreadyComputed = new HashSet<>();
 		double max = magnitudes.stream().mapToDouble(ts -> ts.magnitude).max().getAsDouble();
-		System.out.println("Max : " + max);
-
+		// System.out.println("Max : " + max);
 		List<HoughTrajectStep[]> result = new ArrayList<>();
 		for (HoughTrajectStep trajectStep : magnitudes.stream().sorted().collect(Collectors.toList())) {
 			if (trajectStep.magnitude < globalTheshold * max)

@@ -27,7 +27,7 @@ public class SuperTemplate extends SuperFrameImg {
 	}
 
 	public Layout layout() {
-		return getFrame().buildLayout(new Size(0.05, 0.05), 15);
+		return getFrame().buildLayout(new Size(2, 0.4), new Size(0.04, 0.008), 8);
 	}
 
 	public void drawLayout(Layout layout) {

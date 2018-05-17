@@ -61,7 +61,7 @@ public class RadonTransformDemo2 extends AbstractApp {
 
 	@Override
 	protected void fillGrid(GridPane mainGrid) {
-		double displaySizeReduction = 1;
+		double displaySizeReduction = 1.5;
 		for (int col = 0; col < imageViews.length; col++)
 			for (int row = 0; row < imageViews[col].length; row++) {
 				ImageView imageView = new ImageView();
@@ -114,23 +114,24 @@ public class RadonTransformDemo2 extends AbstractApp {
 		System.out.println(houghTransform);
 		// houghTransform.row(0).setTo(new Scalar(0));
 		// houghTransform.row(houghTransform.rows() - 1).setTo(new Scalar(0));
-		Core.normalize(houghTransform, houghTransform, 0, 255, Core.NORM_MINMAX);
-		// Core.normalize(houghTransform2, houghTransform2, 0, 255, Core.NORM_MINMAX);
+		Core.normalize(houghTransform, houghTransform, 0, 1, Core.NORM_MINMAX);
+		Mat houghTransform255 = new Mat();
+		Core.normalize(houghTransform, houghTransform255, 0, 255, Core.NORM_MINMAX);
 
 		Mat blur = new Mat();
-		Imgproc.blur(houghTransform, blur, new Size(1, 11), new Point(-1, -1), Core.BORDER_ISOLATED);
+		Imgproc.blur(houghTransform255, blur, new Size(1, 11), new Point(-1, -1), Core.BORDER_ISOLATED);
 		images[2] = new Img(blur, false).toJfxImage();
 		blur.release();
 
-		images[3] = new Img(houghTransform, false).toJfxImage();
+		images[3] = new Img(houghTransform255, false).toJfxImage();
 		ref = trace("FHT", ref);
 
-		Mat adaptive = RadonTransform.adaptivHough(houghTransform, 11);
+		Mat adaptive = RadonTransform.adaptivHough(houghTransform255, 11);
 		images[4] = new Img(adaptive, false).toJfxImage();
 		adaptive.release();
 		ref = trace("Adaptive FHT", ref);
 
-		List<HoughTrajectStep> magnitudes = RadonTransform.bestTrajectFHT(houghTransform, 11, -1);
+		List<HoughTrajectStep> magnitudes = RadonTransform.bestTrajectFHT(houghTransform, 11, -0.2);
 		// for (int y = 0; y < magnitudes.size(); y++) {
 		// if (magnitudes.get(y).magnitude <= 1)
 		// for (int end = y + 1; end < magnitudes.size(); end++) {
@@ -145,7 +146,7 @@ public class RadonTransformDemo2 extends AbstractApp {
 
 		Mat trajectDisplay = Mat.zeros(houghTransform.height(), 90, CvType.CV_8UC3);
 		for (HoughTrajectStep step : magnitudes)
-			if (step.magnitude >= 1)
+			if (step.magnitude >= 0.1)
 				trajectDisplay.put(step.y, (int) Math.round(step.getTheta()), 255, 0, 0);
 			else
 				trajectDisplay.put(step.y, (int) Math.round(step.getTheta()), 0, 0, 255);
@@ -154,11 +155,11 @@ public class RadonTransformDemo2 extends AbstractApp {
 
 		Mat magnitudesDisplay = Mat.zeros(magnitudes.size(), 255, CvType.CV_8UC1);
 		for (HoughTrajectStep step : magnitudes)
-			Imgproc.line(magnitudesDisplay, new Point(0, step.y), new Point(step.magnitude, step.y), new Scalar(255));
+			Imgproc.line(magnitudesDisplay, new Point(0, step.y), new Point(step.magnitude * 255, step.y), new Scalar(255));
 		images[6] = new Img(magnitudesDisplay, false).toJfxImage();
 		ref = trace("Display magnitudes", ref);
 
-		List<HoughTrajectStep[]> lines = RadonTransform.getStripLinesFHT(magnitudes, 0.6, 0.1);
+		List<HoughTrajectStep[]> lines = RadonTransform.getStripLinesFHT(magnitudes, 0.5, 0.2);
 		Mat rangeDisplay = magnitudesDisplay.clone();
 		for (HoughTrajectStep[] topBottom : lines) {
 			double minMagnitude = Double.MAX_VALUE;
@@ -166,7 +167,7 @@ public class RadonTransformDemo2 extends AbstractApp {
 				if (minMagnitude > magnitudes.get(y).magnitude)
 					minMagnitude = magnitudes.get(y).magnitude;
 			// System.out.println("minMagnitude : " + minMagnitude + " Range : " + y1y2[0] + " " + y1y2[1]);
-			Imgproc.line(rangeDisplay, new Point(minMagnitude, topBottom[0].y), new Point(minMagnitude, topBottom[1].y), new Scalar(0), 1);
+			Imgproc.line(rangeDisplay, new Point(minMagnitude * 255, topBottom[0].y), new Point(minMagnitude * 255, topBottom[1].y), new Scalar(0), 1);
 		}
 
 		// for (int row = 0; row < rangeDisplay.rows(); row++)
