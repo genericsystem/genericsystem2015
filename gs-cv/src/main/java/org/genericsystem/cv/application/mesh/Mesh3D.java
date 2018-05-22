@@ -1,5 +1,9 @@
 package org.genericsystem.cv.application.mesh;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.DoubleStream;
+
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
@@ -7,10 +11,6 @@ import org.opencv.core.Point3;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.DoubleStream;
 
 public class Mesh3D extends AbstractMesh<Point3> {
 
@@ -99,11 +99,11 @@ public class Mesh3D extends AbstractMesh<Point3> {
 		double height = DoubleStream.of(heights).sum();
 		double width = DoubleStream.of(widths).sum();
 
-		double coefHeight = originalSize.height / height;
+		double coefHeight = (originalSize.height * MeshManager.sizeCoeff) / height;
 		for (int i = 0; i < heights.length; i++)
 			heights[i] *= coefHeight;
 
-		double coefWidth = originalSize.width / width;
+		double coefWidth = originalSize.width * MeshManager.sizeCoeff / width;
 		for (int i = 0; i < widths.length; i++)
 			widths[i] *= coefWidth;
 		System.out.println(Arrays.toString(heights));
@@ -120,10 +120,6 @@ public class Mesh3D extends AbstractMesh<Point3> {
 					deWarp(src, enlargedImage, mesh.getPoints(i, j), x, y, widths[j + halfWidth], heights[i + halfHeight]);
 				x += widths[j + halfWidth];
 			}
-			// if (x < enlargedImage.width() - 1) {
-			// if (x + widths[halfWidth - 1 + halfWidth] <= enlargedImage.width() - 1)
-			// deWarp(src, enlargedImage, mesh.extrapoleRight(i, halfWidth), x, y, widths[halfWidth - 1 + halfWidth], heights[i + halfHeight]);
-			// }
 
 			x = enlargedImage.width() / 2;
 			for (int j = -1; j >= -halfWidth; j--) {
@@ -131,11 +127,6 @@ public class Mesh3D extends AbstractMesh<Point3> {
 				if (x >= 0 && (x + widths[j + halfWidth] < enlargedImage.width()) && y >= 0 && (y + heights[i + halfHeight] < enlargedImage.height()))
 					deWarp(src, enlargedImage, mesh.getPoints(i, j), x, y, widths[j + halfWidth], heights[i + halfHeight]);
 			}
-			// if (x > 0) {
-			// x -= widths[0];
-			// if (x >= 0)
-			// deWarp(src, enlargedImage, mesh.extrapoleLeft(i, -halfWidth - 1), x, y, widths[0], heights[i + halfHeight]);
-			// }
 			y += heights[i + halfHeight];
 		}
 		y = enlargedImage.height() / 2;

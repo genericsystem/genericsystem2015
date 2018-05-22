@@ -27,8 +27,10 @@ public class MeshManager {
 	private Mesh mesh;
 	private Mesh3D mesh3D;
 
+	public static double sizeCoeff = 1.2;
+
 	public MeshManager(int halfWidth, int halfHeight, GeneralInterpolator interpolatorFHT, Mat src) {
-		this(halfWidth, halfHeight, interpolatorFHT, src.width() / 12, src.height() / 8, src);
+		this(halfWidth, halfHeight, interpolatorFHT, src.width() / (2 * halfWidth), src.height() / (2 * halfHeight), src);
 	}
 
 	public MeshManager(int halfWidth, int halfHeight, Interpolator interpolator, double deltaX, double deltaY, Mat image) {

@@ -1,5 +1,13 @@
 package org.genericsystem.cv.application;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.application.GeneralInterpolator.OrientedPoint;
@@ -12,14 +20,6 @@ import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -65,7 +65,7 @@ public class RadonTransformDemo extends AbstractApp {
 
 	@Override
 	protected void fillGrid(GridPane mainGrid) {
-		double displaySizeReduction = 1;
+		double displaySizeReduction = 1.5;
 		for (int col = 0; col < imageViews.length; col++)
 			for (int row = 0; row < imageViews[col].length; row++) {
 				ImageView imageView = new ImageView();
@@ -135,7 +135,7 @@ public class RadonTransformDemo extends AbstractApp {
 		for (int hStrip = 0; hStrip < hHoughTrajs.size(); hStrip++)
 			fhtVerticals.addAll(RadonTransform.toVerticalOrientedPoints(hHoughTrajs.get(hStrip), (hStrip + 1) * hStep, 0.5, 0.3));
 
-		GeneralInterpolator interpolatorFHT = new GeneralInterpolator(fhtHorizontals, fhtVerticals, 4, 12);
+		GeneralInterpolator interpolatorFHT = new GeneralInterpolator(fhtHorizontals, fhtVerticals, 4, 1);
 
 		ref = trace("Prepare interpolator", ref);
 
