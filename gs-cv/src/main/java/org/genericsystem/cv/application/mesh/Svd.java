@@ -1,6 +1,5 @@
-package org.genericsystem.cv;
+package org.genericsystem.cv.application.mesh;
 
-import org.apache.commons.math3.util.Precision;
 import org.genericsystem.cv.utils.GPUTools;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.opencv.core.Core;
@@ -53,6 +52,7 @@ public class Svd {
 		double meanspan = Math.max(Math.max(Math.abs(xmin), Math.abs(xmax)), Math.max(Math.abs(ymin), Math.abs(ymax)));
 
 		double lambda = 1 / (meanspan * meanspan);
+		System.out.println("lambda : " + lambda);
 
 		int n = pts.size();
 		int m = rects.length;
@@ -100,13 +100,15 @@ public class Svd {
 		Mat eigenVectors = new Mat();
 		Core.eigen(M, eigenValues, eigenVectors);
 		int minIndex = -1;
-		for (int i = eigenValues.rows() - 1; i >= 0; i--) {
-			if (eigenValues.get(i, 0)[0] > Precision.EPSILON) {
-				minIndex = i;
-				break;
-			}
-		}
-
+		// for (int i = eigenValues.rows() - 1; i >= 0; i--)
+		// System.out.println(i + " eigen value : " + eigenValues.get(i, 0)[0]);
+		// for (int i = eigenValues.rows() - 1; i >= 0; i--) {
+		// if (eigenValues.get(i, 0)[0] > Precision.EPSILON) {
+		// minIndex = i;
+		// break;
+		// }
+		// }
+		minIndex = eigenValues.rows() - 1;
 		Mat result = eigenVectors.row(minIndex);
 
 		System.out.println("Eigen normal : " + (System.currentTimeMillis() - ref));

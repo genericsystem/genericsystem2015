@@ -1,26 +1,25 @@
 package org.genericsystem.cv.application;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.application.GeneralInterpolator.OrientedPoint;
+import org.genericsystem.cv.application.mesh.MeshManager;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.genericsystem.layout.Layout;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
-import org.opencv.core.Point3;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -66,7 +65,7 @@ public class RadonTransformDemo extends AbstractApp {
 
 	@Override
 	protected void fillGrid(GridPane mainGrid) {
-		double displaySizeReduction = 1.5;
+		double displaySizeReduction = 1;
 		for (int col = 0; col < imageViews.length; col++)
 			for (int row = 0; row < imageViews[col].length; row++) {
 				ImageView imageView = new ImageView();
@@ -102,13 +101,13 @@ public class RadonTransformDemo extends AbstractApp {
 		Img transposedBinarized = binarized.transpose();
 		ref = trace("Binarization", ref);
 
-		double vRecover = 0.75;
+		double vRecover = 0.5;
 		int vStripsNumber = 16;
 		double stripWidth = (binarized.width() / (vStripsNumber * (1 - vRecover) + vRecover));
 		double vStep = ((1 - vRecover) * stripWidth);
 		System.out.println(vStripsNumber + " verticals strips with width : " + stripWidth + " each step : " + vStep);
 
-		double hRecover = 0.75;
+		double hRecover = 0.5;
 		int hStripsNumber = 9;
 		double stripHeight = (binarized.height() / (hStripsNumber * (1 - hRecover) + hRecover));
 		double hStep = ((1 - hRecover) * stripHeight);
@@ -161,13 +160,13 @@ public class RadonTransformDemo extends AbstractApp {
 		images[2] = frameDisplayFHT.toJfxImage();
 		ref = trace("Display lines", ref);
 
-		MeshGrid meshGridFHT = new MeshGrid(6, 4, interpolatorFHT, 38, 38, superFrame.getFrame().getSrc());
+		MeshManager meshManager = new MeshManager(6, 4, interpolatorFHT, superFrame.getFrame().getSrc());
 		ref = trace("Build mesh", ref);
 
-		images[3] = new Img(meshGridFHT.drawOnCopy(new Scalar(0, 255, 0), new Scalar(0, 0, 255)), false).toJfxImage();
+		images[3] = new Img(meshManager.drawOnCopy(new Scalar(0, 255, 0), new Scalar(0, 0, 255)), false).toJfxImage();
 		ref = trace("Draw mesh", ref);
 
-		Img dewarpFHT = new Img(meshGridFHT.dewarp());
+		Img dewarpFHT = new Img(meshManager.dewarp());
 		images[4] = dewarpFHT.toJfxImage();
 		ref = trace("Dewarp", ref);
 
@@ -180,11 +179,10 @@ public class RadonTransformDemo extends AbstractApp {
 		images[6] = dewarpFHT.toJfxImage();
 		ref = trace("Layout", ref);
 
-		Map<Key, Point3[]> mesh3D = meshGridFHT.toPoint3d();
-		images[7] = new Img(meshGridFHT.draw3Dsurface(mesh3D, new Scalar(0, 255, 0), new Scalar(0, 0, 255)), false).toJfxImage();
+		images[7] = new Img(meshManager.draw3Dsurface(new Scalar(0, 255, 0), new Scalar(0, 0, 255)), false).toJfxImage();
 		ref = trace("3D surface / svd", ref);
 
-		Img dewarpFHT3D = new Img(meshGridFHT.dewarp3D(mesh3D));
+		Img dewarpFHT3D = new Img(meshManager.dewarp3D());
 		images[8] = dewarpFHT3D.toJfxImage();
 		ref = trace("Dewarp 3D", ref);
 

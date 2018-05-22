@@ -1,18 +1,11 @@
 package org.genericsystem.cv.application;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Calibrated.AngleCalibrated;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.Lines;
 import org.genericsystem.cv.application.SuperFrameImg.Span;
+import org.genericsystem.cv.application.mesh.MeshManager;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.genericsystem.layout.Layout;
 import org.opencv.core.Core;
@@ -22,6 +15,14 @@ import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -168,8 +169,7 @@ public class GraphicApp extends AbstractApp {
 		// Mat image = superReferenceTemplate5.getDisplay().getSrc();
 
 		SuperContourInterpolator interpolator = new SuperContourInterpolator(filteredSuperContour, 2);
-		MeshGrid meshGrid = new MeshGrid(16, 9, interpolator, 20, 20, superReferenceTemplate5.getFrame().getSrc());
-		meshGrid.buildGrid();
+		MeshManager meshGrid = new MeshManager(16, 9, interpolator, 20, 20, superReferenceTemplate5.getFrame().getSrc());
 
 		Mat image = meshGrid.drawOnCopy(new Scalar(0, 255, 0), new Scalar(0, 0, 255));
 		Mat internal = new Mat(image, new Rect(new Point(20, 20), new Point(image.width() - 20, image.height() - 20)));

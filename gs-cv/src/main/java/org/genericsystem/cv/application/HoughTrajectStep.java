@@ -2,7 +2,7 @@ package org.genericsystem.cv.application;
 
 public class HoughTrajectStep implements Comparable<HoughTrajectStep> {
 	final int y;
-	final double derivative;
+	double derivative;
 	final double magnitude;
 
 	public HoughTrajectStep(int y, double derivative, double magnitude) {
