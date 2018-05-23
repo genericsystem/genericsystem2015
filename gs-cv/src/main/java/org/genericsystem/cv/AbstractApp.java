@@ -50,6 +50,8 @@ public abstract class AbstractApp extends Application {
 				onT();
 			if (event.getCode() == KeyCode.S)
 				onS();
+			if (event.getCode() == KeyCode.P)
+				onSpace();
 		});
 		stage.setScene(scene);
 		stage.show();

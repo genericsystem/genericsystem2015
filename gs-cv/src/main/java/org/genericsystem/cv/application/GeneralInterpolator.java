@@ -1,8 +1,8 @@
 package org.genericsystem.cv.application;
 
-import org.opencv.core.Point;
-
 import java.util.List;
+
+import org.opencv.core.Point;
 
 public class GeneralInterpolator implements Interpolator {
 
@@ -28,11 +28,13 @@ public class GeneralInterpolator implements Interpolator {
 		Point center;
 		double strenght;
 		double angle;
+		double derivative;
 
-		public OrientedPoint(Point center, double angle, double strenght) {
+		public OrientedPoint(Point center, double angle, double strenght, double derivate) {
 			this.center = center;
 			this.strenght = strenght;
 			this.angle = angle;
+			this.derivative = derivate;
 		}
 	}
 

@@ -71,18 +71,18 @@ public class Points {
 		// }
 
 		for (int j = 1; j <= halfWidth; j++)
-			put(0, j, createIndexedPoint(horizontalMove(getPoint(0, j - 1), deltaX)));
+			put(0, j, createIndexedPoint(horizontalMove(getPoint(0, j - 1), getWidthCoeff(deltaX, j + halfWidth - 1))));
 		for (int j = -1; j >= -halfWidth; j--)
-			put(0, j, createIndexedPoint(horizontalMove(getPoint(0, j + 1), -deltaX)));
+			put(0, j, createIndexedPoint(horizontalMove(getPoint(0, j + 1), -getWidthCoeff(deltaX, j + halfWidth))));
 		for (int i = 1; i <= halfHeight; i++) {
-			put(i, 0, createIndexedPoint(verticalMove(getPoint(i - 1, 0), deltaY)));
+			put(i, 0, createIndexedPoint(verticalMove(getPoint(i - 1, 0), getHeightCoeff(deltaY, i + halfHeight - 1))));
 			for (int j = 1; j <= halfWidth; j++)
 				put(i, j, createIndexedPoint(intersect(getPoint(i, j - 1), getPoint(i - 1, j))));
 			for (int j = -1; j >= -halfWidth; j--)
 				put(i, j, createIndexedPoint(intersect(getPoint(i, j + 1), getPoint(i - 1, j))));
 		}
 		for (int i = -1; i >= -halfHeight; i--) {
-			put(i, 0, createIndexedPoint(verticalMove(getPoint(i + 1, 0), -deltaY)));
+			put(i, 0, createIndexedPoint(verticalMove(getPoint(i + 1, 0), -getHeightCoeff(deltaY, i + halfHeight))));
 			for (int j = 1; j <= halfWidth; j++)
 				put(i, j, createIndexedPoint(intersect(getPoint(i, j - 1), getPoint(i + 1, j))));
 			for (int j = -1; j >= -halfWidth; j--)
@@ -122,6 +122,14 @@ public class Points {
 		// put(i, j, createIndexedPoint(intersectExtra(getPoint(i, j + 1), mock(getPoint(i + 1, j + 1), getPoint(i + 1, j), getPoint(i, j + 1)), getPoint(i + 1, j), mock(getPoint(i + 1, j + 1), getPoint(i, j + 1), getPoint(i + 1, j)))));
 		// }
 
+	}
+
+	double getWidthCoeff(double deltaX, int j) {
+		return deltaX;
+	}
+
+	double getHeightCoeff(double deltaY, int j) {
+		return deltaY;
 	}
 
 	private Point mock(Point p1, Point p2, Point p3) {
@@ -220,7 +228,7 @@ public class Points {
 
 	// points = new Point[2 * halfHeight + 1][2 * halfWidth + 1];
 	public void put(int i, int j, IndexedPoint point) {
-		System.out.println(i + " " + j);
+		// System.out.println(i + " " + j);
 		internal.put(new Key(i, j), point);
 	}
 

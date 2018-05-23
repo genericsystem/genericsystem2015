@@ -27,8 +27,6 @@ public class MeshManager {
 	private Mesh mesh;
 	private Mesh3D mesh3D;
 
-	public static double sizeCoeff = 1.2;
-
 	public MeshManager(int halfWidth, int halfHeight, GeneralInterpolator interpolatorFHT, Mat src) {
 		this(halfWidth, halfHeight, interpolatorFHT, src.width() / (2 * halfWidth), src.height() / (2 * halfHeight), src);
 	}
@@ -55,6 +53,35 @@ public class MeshManager {
 
 	private Mesh3D getMesh3D() {
 		return mesh3D != null ? mesh3D : (mesh3D = new Mesh3D(getMesh()));
+	}
+
+	private void reverseCoeffs(double[] coeffs) {
+		for (int i = 0; i < coeffs.length; i++)
+			coeffs[i] = 1 / coeffs[i];
+	}
+
+	public void recomputeGrid() {
+		double[] widths = mesh3D.getWidths();
+		reverseCoeffs(widths);
+		mesh3D.normalize(widths, getOriginalSize().width);
+
+		double[] heights = mesh3D.getHeights();
+		reverseCoeffs(heights);
+		mesh3D.normalize(heights, getOriginalSize().height);
+		points = new Points(new Point(image.width() / 2, image.height() / 2), halfWidth, halfHeight, deltaX, deltaY, xBorder, yBorder, interpolator) {
+			@Override
+			double getHeightCoeff(double deltaY, int j) {
+				return heights[j];
+			}
+
+			@Override
+			double getWidthCoeff(double deltaY, int j) {
+				// TODO Auto-generated method stub
+				return widths[j];
+			}
+		};
+		mesh = null;
+		mesh3D = null;
 	}
 
 	// --------------------------------------------------

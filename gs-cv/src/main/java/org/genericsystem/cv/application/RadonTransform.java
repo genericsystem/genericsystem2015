@@ -1,5 +1,18 @@
 package org.genericsystem.cv.application;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.genericsystem.cv.Img;
@@ -18,19 +31,6 @@ import org.opencv.utils.Converters;
 import org.opencv.ximgproc.Ximgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class RadonTransform {
 
@@ -413,36 +413,33 @@ public class RadonTransform {
 		return x -> f.apply(x, params);
 	}
 
-	public static List<OrientedPoint> toHorizontalOrientedPoints(Function<Double, Double> f, double x, int height, int hStep) {
-		List<OrientedPoint> orientedPoints = new ArrayList<>();
-		for (int y = hStep; y + hStep <= height; y += hStep) {
-			double angle = (f.apply((double) y) - 45) / 180 * Math.PI;
-			orientedPoints.add(new OrientedPoint(new Point(x, y), angle, 1));
-		}
-		return orientedPoints;
-	}
+	// public static List<OrientedPoint> toHorizontalOrientedPoints(Function<Double, Double> f, double x, int height, int hStep) {
+	// List<OrientedPoint> orientedPoints = new ArrayList<>();
+	// for (int y = hStep; y + hStep <= height; y += hStep) {
+	// double angle = (f.apply((double) y) - 45) / 180 * Math.PI;
+	// orientedPoints.add(new OrientedPoint(new Point(x, y), angle, 1));
+	// }
+	// return orientedPoints;
+	// }
+	//
+	// public static List<OrientedPoint> toVerticalOrientedPoints(Function<Double, Double> f, double y, int width, int vStep) {
+	// List<OrientedPoint> orientedPoints = new ArrayList<>();
+	// for (int x = vStep; x + vStep <= width; x += vStep) {
+	// double angle = -(f.apply((double) x) - 45) / 180 * Math.PI;
+	// orientedPoints.add(new OrientedPoint(new Point(x, y), angle, 1));
+	// }
+	// return orientedPoints;
+	// }
 
-	public static List<OrientedPoint> toVerticalOrientedPoints(Function<Double, Double> f, double y, int width, int vStep) {
-		List<OrientedPoint> orientedPoints = new ArrayList<>();
-		for (int x = vStep; x + vStep <= width; x += vStep) {
-			double angle = -(f.apply((double) x) - 45) / 180 * Math.PI;
-			orientedPoints.add(new OrientedPoint(new Point(x, y), angle, 1));
-		}
-		return orientedPoints;
-	}
-
-	public static List<OrientedPoint> toHorizontalOrientedPoints(List<HoughTrajectStep> trajectSteps, double x, double localTheshold, double globalTheshold) {
-		List<OrientedPoint> orientedPoints = new ArrayList<>();
-
+	public static List<OrientedPoint>[] toHorizontalOrientedPoints(List<HoughTrajectStep> trajectSteps, double x, double localTheshold, double globalTheshold) {
+		List<OrientedPoint> topPoints = new ArrayList<>();
+		List<OrientedPoint> bottomPoints = new ArrayList<>();
 		List<HoughTrajectStep[]> lines = getStripLinesFHT(trajectSteps, localTheshold, globalTheshold);
-
 		lines.stream().forEach(trajectStep -> {
-			double angle = (trajectStep[0].getTheta() - 45) / 180 * Math.PI;
-			orientedPoints.add(new OrientedPoint(new Point(x, trajectStep[0].y), angle, trajectStep[0].magnitude));
-			angle = (trajectStep[1].getTheta() - 45) / 180 * Math.PI;
-			orientedPoints.add(new OrientedPoint(new Point(x, trajectStep[1].y), angle, trajectStep[1].magnitude));
+			topPoints.add(new OrientedPoint(new Point(x, trajectStep[0].y), (trajectStep[0].getTheta() - 45) / 180 * Math.PI, trajectStep[0].magnitude, trajectStep[0].derivative));
+			bottomPoints.add(new OrientedPoint(new Point(x, trajectStep[1].y), (trajectStep[1].getTheta() - 45) / 180 * Math.PI, trajectStep[1].magnitude, trajectStep[1].derivative));
 		});
-		return orientedPoints;
+		return new List[] { topPoints, bottomPoints };
 	}
 
 	public static List<OrientedPoint> toVerticalOrientedPoints(List<HoughTrajectStep> trajectSteps, double y, double localTheshold, double globalTheshold) {
@@ -452,15 +449,11 @@ public class RadonTransform {
 
 		lines.stream().forEach(trajectStep -> {
 			double angle = -(trajectStep[0].getTheta() - 45) / 180 * Math.PI;
-			orientedPoints.add(new OrientedPoint(new Point(trajectStep[0].y, y), angle, trajectStep[0].magnitude));
+			orientedPoints.add(new OrientedPoint(new Point(trajectStep[0].y, y), angle, trajectStep[0].magnitude, trajectStep[0].derivative));
 			angle = -(trajectStep[1].getTheta() - 45) / 180 * Math.PI;
-			orientedPoints.add(new OrientedPoint(new Point(trajectStep[1].y, y), angle, trajectStep[1].magnitude));
+			orientedPoints.add(new OrientedPoint(new Point(trajectStep[1].y, y), angle, trajectStep[1].magnitude, trajectStep[1].derivative));
 		});
 		return orientedPoints;
-	}
-
-	private static boolean inImage(Point p, Mat img) {
-		return p.x >= 0 && p.y >= 0 && p.x < img.width() && p.y < img.height();
 	}
 
 	public static void displayHSplines(List<PolynomialSplineFunction> vRadonSplinesFunctions, Mat image) {

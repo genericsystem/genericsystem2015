@@ -68,7 +68,14 @@ public class Mesh3D extends AbstractMesh<Point3> {
 		return new Scalar(c);
 	}
 
-	public Mat dewarp(Mat src, Size originalSize) {
+	public void normalize(double[] sizes, double originalWidth) {
+		double width = DoubleStream.of(sizes).sum();
+		double coefWidth = originalWidth / width;
+		for (int i = 0; i < sizes.length; i++)
+			sizes[i] *= coefWidth;
+	}
+
+	public double[] getWidths() {
 		double[] widths = new double[halfWidth * 2];
 		for (int j = 0; j < widths.length; j++) {
 			double sum = 0;
@@ -82,7 +89,10 @@ public class Mesh3D extends AbstractMesh<Point3> {
 			sum += euclideanDistance(para[2], para[3]);
 			widths[j] = sum / (halfHeight * 2);
 		}
+		return widths;
+	}
 
+	public double[] getHeights() {
 		double[] heights = new double[halfHeight * 2];
 		for (int i = 0; i < heights.length; i++) {
 			double sum = 0;
@@ -95,21 +105,26 @@ public class Mesh3D extends AbstractMesh<Point3> {
 			sum += euclideanDistance(para[1], para[2]);
 			heights[i] = sum / (halfWidth * 2);
 		}
+		return heights;
+	}
 
-		double height = DoubleStream.of(heights).sum();
-		double width = DoubleStream.of(widths).sum();
+	public Mat dewarp(Mat src, Size originalSize) {
+		double[] heights = getHeights();
+		normalize(heights, originalSize.height);
+		double[] widths = getWidths();
+		normalize(widths, originalSize.width);
 
-		double coefHeight = (originalSize.height * MeshManager.sizeCoeff) / height;
-		for (int i = 0; i < heights.length; i++)
-			heights[i] *= coefHeight;
-
-		double coefWidth = originalSize.width * MeshManager.sizeCoeff / width;
-		for (int i = 0; i < widths.length; i++)
-			widths[i] *= coefWidth;
 		System.out.println(Arrays.toString(heights));
 		System.out.println(Arrays.toString(widths));
 		System.out.println(DoubleStream.of(heights).sum());
 		System.out.println(DoubleStream.of(widths).sum());
+		// double[] widths = getWidths(originalSize.width);
+		// double[] heights = getHeights(originalSize.height);
+		//
+		// System.out.println(Arrays.toString(heights));
+		// System.out.println(Arrays.toString(widths));
+		// System.out.println(DoubleStream.of(heights).sum());
+		// System.out.println(DoubleStream.of(widths).sum());
 
 		Mat enlargedImage = new Mat(src.size(), CvType.CV_8UC3, new Scalar(255, 255, 255));
 		double y = enlargedImage.height() / 2;
@@ -138,21 +153,12 @@ public class Mesh3D extends AbstractMesh<Point3> {
 					deWarp(src, enlargedImage, mesh.getPoints(i, j), x, y, widths[j + halfWidth], heights[i + halfHeight]);
 				x += widths[j + halfWidth];
 			}
-			// if (x < enlargedImage.width() - 1) {
-			// if (x + widths[halfWidth - 1 + halfWidth] <= enlargedImage.width() - 1)
-			// deWarp(src, enlargedImage, mesh.extrapoleRight(i, halfWidth), x, y, widths[halfWidth - 1 + halfWidth], heights[i + halfHeight]);
-			// }
 			x = enlargedImage.width() / 2;
 			for (int j = -1; j >= -halfWidth; j--) {
 				x -= widths[j + halfWidth];
 				if (x >= 0 && (x + widths[j + halfWidth] < enlargedImage.width()) && y >= 0 && (y + heights[i + halfHeight] < enlargedImage.height()))
 					deWarp(src, enlargedImage, mesh.getPoints(i, j), x, y, widths[j + halfWidth], heights[i + halfHeight]);
 			}
-			// if (x > 0) {
-			// x -= widths[0];
-			// if (x >= 0)
-			// deWarp(src, enlargedImage, mesh.extrapoleLeft(i, -halfWidth - 1), x, y, widths[0], heights[i + halfHeight]);
-			// }
 		}
 		double xBorder = (enlargedImage.width() - originalSize.width) / 2;
 		double yBorder = (enlargedImage.height() - originalSize.height) / 2;
