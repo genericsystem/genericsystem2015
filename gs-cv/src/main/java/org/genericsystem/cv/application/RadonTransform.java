@@ -442,18 +442,17 @@ public class RadonTransform {
 		return new List[] { topPoints, bottomPoints };
 	}
 
-	public static List<OrientedPoint> toVerticalOrientedPoints(List<HoughTrajectStep> trajectSteps, double y, double localTheshold, double globalTheshold) {
-		List<OrientedPoint> orientedPoints = new ArrayList<>();
+	public static List<OrientedPoint>[] toVerticalOrientedPoints(List<HoughTrajectStep> trajectSteps, double y, double localTheshold, double globalTheshold) {
+		List<OrientedPoint> leftPoints = new ArrayList<>();
+		List<OrientedPoint> rightPoints = new ArrayList<>();
 
 		List<HoughTrajectStep[]> lines = getStripLinesFHT(trajectSteps, localTheshold, globalTheshold);
 
 		lines.stream().forEach(trajectStep -> {
-			double angle = -(trajectStep[0].getTheta() - 45) / 180 * Math.PI;
-			orientedPoints.add(new OrientedPoint(new Point(trajectStep[0].y, y), angle, trajectStep[0].magnitude, trajectStep[0].derivative));
-			angle = -(trajectStep[1].getTheta() - 45) / 180 * Math.PI;
-			orientedPoints.add(new OrientedPoint(new Point(trajectStep[1].y, y), angle, trajectStep[1].magnitude, trajectStep[1].derivative));
+			leftPoints.add(new OrientedPoint(new Point(trajectStep[0].y, y), -(trajectStep[0].getTheta() - 45) / 180 * Math.PI, trajectStep[0].magnitude, trajectStep[0].derivative));
+			rightPoints.add(new OrientedPoint(new Point(trajectStep[1].y, y), -(trajectStep[1].getTheta() - 45) / 180 * Math.PI, trajectStep[1].magnitude, trajectStep[1].derivative));
 		});
-		return orientedPoints;
+		return new List[] { leftPoints, rightPoints };
 	}
 
 	public static void displayHSplines(List<PolynomialSplineFunction> vRadonSplinesFunctions, Mat image) {

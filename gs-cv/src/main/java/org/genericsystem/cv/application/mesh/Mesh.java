@@ -1,13 +1,13 @@
 package org.genericsystem.cv.application.mesh;
 
+import java.util.List;
+
 import org.genericsystem.cv.application.mesh.Points.IndexedPoint;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
-
-import java.util.List;
 
 class Mesh extends AbstractMesh<IndexedPoint> {
 
@@ -53,34 +53,6 @@ class Mesh extends AbstractMesh<IndexedPoint> {
 			for (int j = -halfWidth; j < halfWidth; j++)
 				deWarp(img, dewarpedImage, getPoints(i, j), (j + halfWidth) * rectWidth, (i + halfHeight) * rectHeight, rectWidth, rectHeight);
 		return dewarpedImage;
-	}
-
-	public Point[] extrapoleRight(int i, int j) {
-		IndexedPoint[] leftCell = get(i, j - 1);
-
-		Point leftCellTopLeft = leftCell[0].getPoint();
-		Point leftCellBottomLeft = leftCell[3].getPoint();
-
-		Point topLeft = leftCell[1].getPoint();
-		Point bottomLeft = leftCell[2].getPoint();
-		Point topRight = new Point(topLeft.x + (topLeft.x - leftCellTopLeft.x), topLeft.y + (topLeft.y - leftCellTopLeft.y));
-		Point bottomRight = new Point(bottomLeft.x + (bottomLeft.x - leftCellBottomLeft.x), bottomLeft.y + (bottomLeft.y - leftCellBottomLeft.y));
-
-		return new Point[] { topLeft, topRight, bottomRight, bottomLeft };
-	}
-
-	public Point[] extrapoleLeft(int i, int j) {
-		IndexedPoint[] rightCell = get(i, j + 1);
-
-		Point rightCellTopRight = rightCell[1].getPoint();
-		Point rightCellBottomRight = rightCell[2].getPoint();
-
-		Point topRight = rightCell[0].getPoint();
-		Point bottomRight = rightCell[3].getPoint();
-		Point topLeft = new Point(topRight.x + (topRight.x - rightCellTopRight.x), topRight.y + (topRight.y - rightCellTopRight.y));
-		Point bottomLeft = new Point(bottomRight.x + (bottomRight.x - rightCellBottomRight.x), bottomRight.y + (bottomRight.y - rightCellBottomRight.y));
-
-		return new Point[] { topLeft, topRight, bottomRight, bottomLeft };
 	}
 
 }

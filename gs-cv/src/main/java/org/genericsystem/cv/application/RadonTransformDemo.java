@@ -3,10 +3,8 @@ package org.genericsystem.cv.application;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -135,42 +133,55 @@ public class RadonTransformDemo extends AbstractApp {
 
 		List<List<OrientedPoint>[]> fhtHorizontals = new ArrayList<>();
 		for (int vStripIndex = 0; vStripIndex < vHoughTrajs.size(); vStripIndex++)
-			fhtHorizontals.add(RadonTransform.toHorizontalOrientedPoints(vHoughTrajs.get(vStripIndex), (vStripIndex + 1) * vStep, 0.5, 0.3));
-		List<List<OrientedPoint>> fhtVerticals = new ArrayList<>();
+			fhtHorizontals.add(RadonTransform.toHorizontalOrientedPoints(vHoughTrajs.get(vStripIndex), (vStripIndex + 1) * vStep, 0.3, 0.1));
+		List<List<OrientedPoint>[]> fhtVerticals = new ArrayList<>();
 		for (int hStrip = 0; hStrip < hHoughTrajs.size(); hStrip++)
-			fhtVerticals.add(RadonTransform.toVerticalOrientedPoints(hHoughTrajs.get(hStrip), (hStrip + 1) * hStep, 0.5, 0.3));
+			fhtVerticals.add(RadonTransform.toVerticalOrientedPoints(hHoughTrajs.get(hStrip), (hStrip + 1) * hStep, 0.3, 0.1));
 
-		List<List<Edge>>[] connectedEdges = connect(fhtHorizontals, hStep, 2);
-		List<PolynomialSplineFunction>[] splines = toSplines(connectedEdges);
+		List<List<Segment>>[] horizontalSegments = connect(fhtHorizontals, hStep, 2, false);
+		List<PolynomialSplineFunction>[] horizontalSplines = toSplines(horizontalSegments, false);
+		List<List<Segment>>[] verticalSegments = connect(fhtVerticals, vStep, 2, true);
+		List<PolynomialSplineFunction>[] verticalSplines = toSplines(verticalSegments, true);
+
 		Img splineDisplay = new Img(superFrame.getFrame().getSrc().clone(), false);
-		for (PolynomialSplineFunction spline : splines[0])
+		for (PolynomialSplineFunction spline : horizontalSplines[0])
 			for (double x = spline.getKnots()[0]; x < spline.getKnots()[spline.getKnots().length - 1]; x++)
 				splineDisplay.getSrc().put((int) Math.round(spline.value(x)), (int) x, 0, 255, 0);
-		for (PolynomialSplineFunction spline : splines[1])
+		for (PolynomialSplineFunction spline : horizontalSplines[1])
 			for (double x = spline.getKnots()[0]; x < spline.getKnots()[spline.getKnots().length - 1]; x++)
 				splineDisplay.getSrc().put((int) Math.round(spline.value(x)), (int) x, 0, 0, 255);
+
+		for (PolynomialSplineFunction spline : verticalSplines[0])
+			for (double y = spline.getKnots()[0]; y < spline.getKnots()[spline.getKnots().length - 1]; y++)
+				splineDisplay.getSrc().put((int) y, (int) Math.round(spline.value(y)), 255, 255, 0);
+		for (PolynomialSplineFunction spline : verticalSplines[1])
+			for (double y = spline.getKnots()[0]; y < spline.getKnots()[spline.getKnots().length - 1]; y++)
+				splineDisplay.getSrc().put((int) y, (int) Math.round(spline.value(y)), 255, 0, 255);
+
 		images[2] = splineDisplay.toJfxImage();
 		ref = trace("Display splines", ref);
 
-		List<OrientedPoint> flatConnectedEdges = Stream.of(connectedEdges).flatMap(h -> h.stream()).flatMap(h -> h.stream()).flatMap(edge -> Stream.of(edge.step1, edge.step2)).collect(Collectors.toList());
-		List<OrientedPoint> flatFhtVerticals = fhtVerticals.stream().flatMap(h -> h.stream()).collect(Collectors.toList());
-		// List<OrientedPoint> flatFhtHorizontals = fhtHorizontals.stream().flatMap(h -> h.stream()).collect(Collectors.toList());
-		GeneralInterpolator interpolatorFHT = new GeneralInterpolator(flatConnectedEdges, flatFhtVerticals, 4, 1);
+		List<OrientedPoint> flatHorizontalSegments = Stream.of(horizontalSegments).flatMap(h -> h.stream()).flatMap(h -> h.stream()).flatMap(edge -> Stream.of(edge.op1, edge.op2)).collect(Collectors.toList());
+		List<OrientedPoint> flatVerticalSegments = Stream.of(verticalSegments).flatMap(h -> h.stream()).flatMap(h -> h.stream()).flatMap(edge -> Stream.of(edge.op1, edge.op2)).collect(Collectors.toList());
+
+		List<OrientedPoint> flatFhtVerticals = fhtVerticals.stream().flatMap(h -> Stream.of(h)).flatMap(h -> h.stream()).collect(Collectors.toList());
+		List<OrientedPoint> flatFhtHorizontals = fhtHorizontals.stream().flatMap(h -> Stream.of(h)).flatMap(h -> h.stream()).collect(Collectors.toList());
+		GeneralInterpolator interpolatorFHT = new GeneralInterpolator(flatHorizontalSegments, flatVerticalSegments, 4, 0.0001);
 
 		ref = trace("Prepare interpolator", ref);
 
 		Img frameDisplayFHT = new Img(superFrame.getFrame().getSrc().clone(), false);
 
-		for (OrientedPoint op : flatFhtVerticals) {
-			double angle = op.angle + Math.PI / 2;
-			Imgproc.line(frameDisplayFHT.getSrc(), new Point(op.center.x - Math.cos(angle) * stripWidth / 2 * op.strenght, op.center.y - Math.sin(angle) * stripHeight / 2 * op.strenght),
-					new Point(op.center.x + Math.cos(angle) * stripWidth / 2 * op.strenght, op.center.y + Math.sin(angle) * stripHeight / 2 * op.strenght), new Scalar(0, 0, 255), 1);
-			angle = interpolatorFHT.interpolateVerticals(op.center.x, op.center.y) + Math.PI / 2;
-			Imgproc.line(frameDisplayFHT.getSrc(), new Point(op.center.x - Math.cos(angle) * stripWidth / 2 * op.strenght, op.center.y - Math.sin(angle) * stripHeight / 2 * op.strenght),
-					new Point(op.center.x + Math.cos(angle) * stripWidth / 2 * op.strenght, op.center.y + Math.sin(angle) * stripHeight / 2 * op.strenght), new Scalar(255, 0, 0), 1);
-		}
+		// for (OrientedPoint op : flatFhtVerticals) {
+		// double angle = op.angle + Math.PI / 2;
+		// Imgproc.line(frameDisplayFHT.getSrc(), new Point(op.center.x - Math.cos(angle) * stripWidth / 2 * op.strenght, op.center.y - Math.sin(angle) * stripHeight / 2 * op.strenght),
+		// new Point(op.center.x + Math.cos(angle) * stripWidth / 2 * op.strenght, op.center.y + Math.sin(angle) * stripHeight / 2 * op.strenght), new Scalar(0, 0, 255), 1);
+		// angle = interpolatorFHT.interpolateVerticals(op.center.x, op.center.y) + Math.PI / 2;
+		// Imgproc.line(frameDisplayFHT.getSrc(), new Point(op.center.x - Math.cos(angle) * stripWidth / 2 * op.strenght, op.center.y - Math.sin(angle) * stripHeight / 2 * op.strenght),
+		// new Point(op.center.x + Math.cos(angle) * stripWidth / 2 * op.strenght, op.center.y + Math.sin(angle) * stripHeight / 2 * op.strenght), new Scalar(255, 0, 0), 1);
+		// }
 
-		// for (OrientedPoint op : flatConnectedEdges) {
+		// for (OrientedPoint op : flatFhtHorizontals) {
 		// Imgproc.line(frameDisplayFHT.getSrc(), new Point(op.center.x - Math.cos(op.angle) * stripWidth / 2 * op.strenght, op.center.y - Math.sin(op.angle) * stripHeight / 2 * op.strenght),
 		// new Point(op.center.x + Math.cos(op.angle) * stripWidth / 2 * op.strenght, op.center.y + Math.sin(op.angle) * stripHeight / 2 * op.strenght), new Scalar(0, 0, 255), 1);
 		// double angle = interpolatorFHT.interpolateHorizontals(op.center.x, op.center.y);
@@ -179,14 +190,25 @@ public class RadonTransformDemo extends AbstractApp {
 		//
 		// }
 
-		for (OrientedPoint op : connectedEdges[0].stream().flatMap(h -> h.stream()).flatMap(edge -> Stream.of(edge.step1, edge.step2)).collect(Collectors.toList())) {
+		for (OrientedPoint op : horizontalSegments[0].stream().flatMap(h -> h.stream()).flatMap(edge -> Stream.of(edge.op1, edge.op2)).collect(Collectors.toList())) {
 			Imgproc.line(frameDisplayFHT.getSrc(), new Point(op.center.x - Math.cos(op.angle) * stripWidth / 2 * op.strenght, op.center.y - Math.sin(op.angle) * stripHeight / 2 * op.strenght),
 					new Point(op.center.x + Math.cos(op.angle) * stripWidth / 2 * op.strenght, op.center.y + Math.sin(op.angle) * stripHeight / 2 * op.strenght), new Scalar(0, 255, 0), 1);
 
 		}
-		for (OrientedPoint op : connectedEdges[1].stream().flatMap(h -> h.stream()).flatMap(edge -> Stream.of(edge.step1, edge.step2)).collect(Collectors.toList())) {
+		for (OrientedPoint op : horizontalSegments[1].stream().flatMap(h -> h.stream()).flatMap(edge -> Stream.of(edge.op1, edge.op2)).collect(Collectors.toList())) {
 			Imgproc.line(frameDisplayFHT.getSrc(), new Point(op.center.x - Math.cos(op.angle) * stripWidth / 2 * op.strenght, op.center.y - Math.sin(op.angle) * stripHeight / 2 * op.strenght),
 					new Point(op.center.x + Math.cos(op.angle) * stripWidth / 2 * op.strenght, op.center.y + Math.sin(op.angle) * stripHeight / 2 * op.strenght), new Scalar(0, 0, 255), 1);
+
+		}
+
+		for (OrientedPoint op : verticalSegments[0].stream().flatMap(h -> h.stream()).flatMap(edge -> Stream.of(edge.op1, edge.op2)).collect(Collectors.toList())) {
+			Imgproc.line(frameDisplayFHT.getSrc(), new Point(op.center.x + Math.sin(op.angle) * stripWidth / 2 * op.strenght, op.center.y - Math.cos(op.angle) * stripHeight / 2 * op.strenght),
+					new Point(op.center.x - Math.sin(op.angle) * stripWidth / 2 * op.strenght, op.center.y + Math.cos(op.angle) * stripHeight / 2 * op.strenght), new Scalar(255, 255, 0), 1);
+
+		}
+		for (OrientedPoint op : verticalSegments[1].stream().flatMap(h -> h.stream()).flatMap(edge -> Stream.of(edge.op1, edge.op2)).collect(Collectors.toList())) {
+			Imgproc.line(frameDisplayFHT.getSrc(), new Point(op.center.x + Math.sin(op.angle) * stripWidth / 2 * op.strenght, op.center.y - Math.cos(op.angle) * stripHeight / 2 * op.strenght),
+					new Point(op.center.x - Math.sin(op.angle) * stripWidth / 2 * op.strenght, op.center.y + Math.cos(op.angle) * stripHeight / 2 * op.strenght), new Scalar(255, 0, 255), 1);
 
 		}
 		images[3] = frameDisplayFHT.toJfxImage();
@@ -241,99 +263,82 @@ public class RadonTransformDemo extends AbstractApp {
 
 	}
 
-	private List<PolynomialSplineFunction>[] toSplines(List<List<Edge>>[] connectedEdges) {
-		List<List<Edge>> topConnectedEdges = connectedEdges[0];
-		List<List<Edge>> bottomConnectedEdges = connectedEdges[1];
-		return new List[] { toSplines(topConnectedEdges), toSplines(bottomConnectedEdges) };
+	private List<PolynomialSplineFunction>[] toSplines(List<List<Segment>>[] connectedEdges, boolean vertical) {
+		List<List<Segment>> topConnectedEdges = connectedEdges[0];
+		List<List<Segment>> bottomConnectedEdges = connectedEdges[1];
+		return new List[] { toSplines(topConnectedEdges, vertical), toSplines(bottomConnectedEdges, vertical) };
 	}
 
-	private List<PolynomialSplineFunction> toSplines(List<List<Edge>> connectedEdges) {
-		List<PolynomialSplineFunction> result = new ArrayList<>();
-
-		List<List<OrientedPoint>> orientedPointsList = new ArrayList<>();
-		for (List<Edge> stripEdges : connectedEdges) {
-			Set<List<OrientedPoint>> notFinished = new HashSet<>();
-			for (Edge edge : stripEdges) {
-				boolean match = false;
-				for (List<OrientedPoint> opList : orientedPointsList)
-					if (edge.step1.equals(opList.get(opList.size() - 1))) {
-						opList.add(edge.step2);
-						notFinished.add(opList);
-						match = true;
-						break;
+	private List<PolynomialSplineFunction> toSplines(List<List<Segment>> connectedEdges, boolean vertical) {
+		List<List<OrientedPoint>> orientedPointsSuperList = new ArrayList<>();
+		for (List<Segment> segments : connectedEdges) {
+			LOOP1: for (Segment segment : segments) {
+				for (List<OrientedPoint> opList : orientedPointsSuperList)
+					if (segment.op1.equals(opList.get(opList.size() - 1))) {
+						opList.add(segment.op2);
+						continue LOOP1;
 					}
-				if (!match) {
-					List<OrientedPoint> newList = new ArrayList<>(Arrays.asList(edge.step1, edge.step2));
-					orientedPointsList.add(newList);
-					notFinished.add(newList);
-				}
-			}
-			Iterator<List<OrientedPoint>> it = orientedPointsList.iterator();
-			while (it.hasNext()) {
-				List<OrientedPoint> orientedPoints = it.next();
-				if (!notFinished.contains(orientedPoints)) {
-					result.add(toSpline(orientedPoints));
-					it.remove();
-				}
+				orientedPointsSuperList.add(new ArrayList<>(Arrays.asList(segment.op1, segment.op2)));
 			}
 		}
-		return result;
+		return orientedPointsSuperList.stream().map(ops -> toSpline(ops, vertical)).collect(Collectors.toList());
+
 	}
 
-	private PolynomialSplineFunction toSpline(List<OrientedPoint> orientedPoints) {
-		return new LinearInterpolator().interpolate(orientedPoints.stream().mapToDouble(op -> op.center.x).toArray(), orientedPoints.stream().mapToDouble(op -> op.center.y).toArray());
+	private PolynomialSplineFunction toSpline(List<OrientedPoint> orientedPoints, boolean vertical) {
+		return new LinearInterpolator().interpolate(orientedPoints.stream().mapToDouble(op -> vertical ? op.center.y : op.center.x).toArray(), orientedPoints.stream().mapToDouble(op -> vertical ? op.center.x : op.center.y).toArray());
 	}
 
-	private List<List<Edge>>[] connect(List<List<OrientedPoint>[]> trajects, double w, double maxDistance) {
-		List<List<Edge>> topResult = new ArrayList<>();
-		List<List<Edge>> bottomResult = new ArrayList<>();
+	private List<List<Segment>>[] connect(List<List<OrientedPoint>[]> trajects, double w, double maxDistance, boolean vertical) {
+		List<List<Segment>> topResult = new ArrayList<>();
+		List<List<Segment>> bottomResult = new ArrayList<>();
 		for (int i = 0; i < trajects.size() - 1; i++) {
-			List<Edge>[] connectStrips = connectStrips(trajects.get(i), trajects.get(i + 1), w, maxDistance);
+			List<Segment>[] connectStrips = connectStrips(trajects.get(i), trajects.get(i + 1), w, maxDistance, vertical);
 			topResult.add(connectStrips[0]);
 			bottomResult.add(connectStrips[1]);
 		}
 		return new List[] { topResult, bottomResult };
 	}
 
-	private List<Edge>[] connectStrips(List<OrientedPoint>[] traject1, List<OrientedPoint>[] traject2, double w, double maxDistance) {
-		List<Edge> topResult = new ArrayList<>();
-		final List<Edge> topSortedFilteredEdges = new ArrayList<>();
-		traject1[0].forEach(step1 -> traject2[0].forEach(step2 -> topSortedFilteredEdges.add(new Edge(step1, step2, w))));
+	private List<Segment>[] connectStrips(List<OrientedPoint>[] traject1, List<OrientedPoint>[] traject2, double w, double maxDistance, boolean vertical) {
+		List<Segment> topResult = new ArrayList<>();
+		final List<Segment> topSortedFilteredEdges = new ArrayList<>();
+		traject1[0].forEach(step1 -> traject2[0].forEach(step2 -> topSortedFilteredEdges.add(new Segment(step1, step2, w, vertical))));
 
 		topSortedFilteredEdges.removeIf(edge -> edge.getDistance() > maxDistance);
 		Collections.sort(topSortedFilteredEdges);
 		while (!topSortedFilteredEdges.isEmpty()) {
-			Edge selected = topSortedFilteredEdges.get(0);
+			Segment selected = topSortedFilteredEdges.get(0);
 			topResult.add(selected);
 			topSortedFilteredEdges.removeIf(selected::invalidate);
 		}
 
-		List<Edge> bottomResult = new ArrayList<>();
-		final List<Edge> bottomSortedFilteredEdges = new ArrayList<>();
-		traject1[1].forEach(step1 -> traject2[1].forEach(step2 -> bottomSortedFilteredEdges.add(new Edge(step1, step2, w))));
+		List<Segment> bottomResult = new ArrayList<>();
+		final List<Segment> bottomSortedFilteredEdges = new ArrayList<>();
+		traject1[1].forEach(step1 -> traject2[1].forEach(step2 -> bottomSortedFilteredEdges.add(new Segment(step1, step2, w, vertical))));
 		bottomSortedFilteredEdges.removeIf(edge -> edge.getDistance() > maxDistance);
 		Collections.sort(bottomSortedFilteredEdges);
 		while (!bottomSortedFilteredEdges.isEmpty()) {
-			Edge selected = bottomSortedFilteredEdges.get(0);
+			Segment selected = bottomSortedFilteredEdges.get(0);
 			bottomResult.add(selected);
 			bottomSortedFilteredEdges.removeIf(selected::invalidate);
 		}
 		return new List[] { topResult, bottomResult };
 	}
 
-	public static class Edge implements Comparable<Edge> {
-		private final OrientedPoint step1;
-		private final OrientedPoint step2;
+	public static class Segment implements Comparable<Segment> {
+		private final OrientedPoint op1;
+		private final OrientedPoint op2;
 		private final double distance;
 
-		public Edge(OrientedPoint step1, OrientedPoint step2, double w) {
-			this.step1 = step1;
-			this.step2 = step2;
-			this.distance = Math.abs((w * step1.derivative / 2 + step1.center.y) - (step2.center.y - w * step2.derivative / 2));
+		public Segment(OrientedPoint op1, OrientedPoint op2, double w, boolean vertical) {
+			this.op1 = op1;
+			this.op2 = op2;
+			this.distance = Math.abs((w * op1.derivative / 2 + (vertical ? op1.center.x : op1.center.y)) - ((vertical ? op2.center.x : op2.center.y) - w * op2.derivative / 2));
 		}
 
-		public boolean invalidate(Edge selected) {
-			return step1.equals(selected.step1) || step2.equals(selected.step2);
+		public boolean invalidate(Segment selected) {
+			return op1.equals(selected.op1) || op2.equals(selected.op2);
 		}
 
 		public double getDistance() {
@@ -341,13 +346,8 @@ public class RadonTransformDemo extends AbstractApp {
 		}
 
 		@Override
-		public int compareTo(Edge e) {
+		public int compareTo(Segment e) {
 			return Double.compare(distance, e.distance);
-		}
-
-		@Override
-		public String toString() {
-			return step1.center.y + " " + step2.center.y + " " + distance;
 		}
 	}
 
