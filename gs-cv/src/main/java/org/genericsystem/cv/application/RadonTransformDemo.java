@@ -133,10 +133,10 @@ public class RadonTransformDemo extends AbstractApp {
 
 		List<List<OrientedPoint>[]> fhtHorizontals = new ArrayList<>();
 		for (int vStripIndex = 0; vStripIndex < vHoughTrajs.size(); vStripIndex++)
-			fhtHorizontals.add(RadonTransform.toHorizontalOrientedPoints(vHoughTrajs.get(vStripIndex), (vStripIndex + 1) * vStep, 0.3, 0.1));
+			fhtHorizontals.add(RadonTransform.toHorizontalOrientedPoints(vHoughTrajs.get(vStripIndex), (vStripIndex + 1) * vStep, 0.2, 0.08));
 		List<List<OrientedPoint>[]> fhtVerticals = new ArrayList<>();
 		for (int hStrip = 0; hStrip < hHoughTrajs.size(); hStrip++)
-			fhtVerticals.add(RadonTransform.toVerticalOrientedPoints(hHoughTrajs.get(hStrip), (hStrip + 1) * hStep, 0.3, 0.1));
+			fhtVerticals.add(RadonTransform.toVerticalOrientedPoints(hHoughTrajs.get(hStrip), (hStrip + 1) * hStep, 0.2, 0.08));
 
 		List<List<Segment>>[] horizontalSegments = connect(fhtHorizontals, hStep, 2, false);
 		List<PolynomialSplineFunction>[] horizontalSplines = toSplines(horizontalSegments, false);
