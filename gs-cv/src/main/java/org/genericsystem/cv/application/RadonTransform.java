@@ -1,18 +1,5 @@
 package org.genericsystem.cv.application;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.genericsystem.cv.Img;
@@ -31,6 +18,19 @@ import org.opencv.utils.Converters;
 import org.opencv.ximgproc.Ximgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class RadonTransform {
 
@@ -92,6 +92,7 @@ public class RadonTransform {
 		return new Mat(houghTransform, new Range(vStrip.width() / 2 - 1, houghTransform.height() - vStrip.width() / 2 - 1), new Range(0, houghTransform.width()));
 	}
 
+	@Deprecated
 	public static Mat fhtRemap(Mat houghTransform) {
 		Mat result = Mat.zeros(houghTransform.rows(), 91, CvType.CV_64FC1);
 		// System.out.println(houghTransform);
@@ -283,68 +284,68 @@ public class RadonTransform {
 		for (int theta = 0; theta < adaptivHough.cols(); theta++)
 			score[0][theta] = adaptivHough.get(0, theta)[0];
 		for (int k = 1; k < adaptivHough.rows(); k++) {
-			for (int theta = 0; theta < adaptivHough.cols(); theta++) {
-				double magnitude = adaptivHough.get(k, theta)[0];
+			for (int derivativeIndex = 0; derivativeIndex < adaptivHough.cols(); derivativeIndex++) {
+				double magnitude = adaptivHough.get(k, derivativeIndex)[0];
 
-				double scoreFromPrevTheta = theta != 0 ? score[k - 1][theta - 1] : Double.NEGATIVE_INFINITY;
-				double scoreFromSameTheta = score[k - 1][theta];
-				double scoreFromNextTheta = theta < adaptivHough.cols() - 1 ? score[k - 1][theta + 1] : Double.NEGATIVE_INFINITY;
+				double scoreFromPrevTheta = derivativeIndex != 0 ? score[k - 1][derivativeIndex - 1] : Double.NEGATIVE_INFINITY;
+				double scoreFromSameTheta = score[k - 1][derivativeIndex];
+				double scoreFromNextTheta = derivativeIndex < adaptivHough.cols() - 1 ? score[k - 1][derivativeIndex + 1] : Double.NEGATIVE_INFINITY;
 
 				double bestScore4Pos = -1;
-				double prevPenality = theta == 0 ? Double.NEGATIVE_INFINITY : anglePenality * derivativeToangleCoeff.get(theta - 1);
-				double nextPenality = theta <= adaptivHough.cols() ? anglePenality * derivativeToangleCoeff.get(theta) : Double.NEGATIVE_INFINITY;
+				double prevPenality = derivativeIndex == 0 ? Double.NEGATIVE_INFINITY : anglePenality * derivativeToangleCoeff.get(derivativeIndex - 1);
+				double nextPenality = derivativeIndex <= adaptivHough.cols() ? anglePenality * derivativeToangleCoeff.get(derivativeIndex) : Double.NEGATIVE_INFINITY;
 
 				if (scoreFromSameTheta >= (scoreFromPrevTheta + prevPenality) && scoreFromSameTheta >= (scoreFromNextTheta + nextPenality)) {
 					bestScore4Pos = scoreFromSameTheta;
-					thetaPrev[k][theta] = theta;
+					thetaPrev[k][derivativeIndex] = derivativeIndex;
 				} else if ((scoreFromPrevTheta + prevPenality) >= scoreFromSameTheta && ((scoreFromPrevTheta + prevPenality) >= (scoreFromNextTheta + nextPenality))) {
 					bestScore4Pos = scoreFromPrevTheta + prevPenality;
-					thetaPrev[k][theta] = theta - 1;
+					thetaPrev[k][derivativeIndex] = derivativeIndex - 1;
 				} else {
 					bestScore4Pos = scoreFromNextTheta + nextPenality;
-					thetaPrev[k][theta] = theta + 1;
+					thetaPrev[k][derivativeIndex] = derivativeIndex + 1;
 				}
-				score[k][theta] = magnitude + bestScore4Pos;
+				score[k][derivativeIndex] = magnitude + bestScore4Pos;
 			}
 		}
 		adaptivHough.release();
 		return Arrays.asList(buildResult(score, thetaPrev, stripWidth, houghTransform));
 	}
 
-	public static List<HoughTrajectStep> bestTrajectFHT2(Mat houghTransform, int blurSize, double anglePenality, int stepCount) {
+	public static List<HoughTrajectStep> bestTrajectFHT2(Mat houghTransform, int blurSize, double penality, int stepCount) {
 		int stripWidth = (houghTransform.cols() + 1) / 2;
 		Mat adaptivHough = adaptivHough(houghTransform, blurSize);
-		List<Double> derivativeFromIndex = IntStream.range(0, adaptivHough.cols()).mapToObj(theta -> (double) (theta - stripWidth + 1) / (stripWidth - 1)).collect(Collectors.toList());
-
-		List<Double> anglePenalities = IntStream.range(0, adaptivHough.cols() - 1)
-				.mapToObj(derivativeIndex -> anglePenality * (Math.abs(Math.atan(derivativeFromIndex.get(derivativeIndex)) - Math.atan(derivativeFromIndex.get(derivativeIndex + 1))) * 180 / Math.PI)).collect(Collectors.toList());
-		double[][] score = new double[stepCount][adaptivHough.cols()];
-		int[][] prevDerivatives = new int[stepCount][adaptivHough.cols()];
+		double[][] fastAdaptivHough = new double[adaptivHough.rows()][adaptivHough.cols()];
+		for (int row = 0; row < adaptivHough.rows(); row++)
+			for (int col = 0; col < adaptivHough.cols(); col++)
+				fastAdaptivHough[row][col] = adaptivHough.get(row, col)[0];
+		List<Double> derivatives = IntStream.range(0, adaptivHough.cols()).mapToObj(theta -> (double) (theta - stripWidth + 1) / (stripWidth - 1)).collect(Collectors.toList());
+		double[] angleFromIndex = derivatives.stream().mapToDouble(derivative -> Math.atan(derivative)).toArray();
+		double[][] score = new double[stepCount + 1][adaptivHough.cols()];
+		int[][] prevDerivatives = new int[stepCount + 1][adaptivHough.cols()];
 		for (int theta = 0; theta < adaptivHough.cols(); theta++)
 			score[0][theta] = adaptivHough.get(0, theta)[0];
+		double step = ((double) adaptivHough.rows() - 1) / stepCount;
 
-		double step = ((double) adaptivHough.rows() / stepCount);
-
-		for (int i = 1; i < stepCount; i++) {
+		for (int i = 1; i <= stepCount; i++) {
 			int row = (int) Math.round(i * step);
-			for (int derivativeIndex = 0; derivativeIndex < adaptivHough.cols(); derivativeIndex++) {
-				int[] derivativeRange = getPrevRange(derivativeFromIndex, step, derivativeFromIndex.get(derivativeIndex), stripWidth);
+			for (int derivativeIndex = 0; derivativeIndex < adaptivHough.cols() - 1; derivativeIndex++) {
+				int[] derivativeRange = getPrevRange(derivatives, step, derivatives.get(derivativeIndex), stripWidth);
 				int maxPrevDerivative = -1;
 				double maxScoreFromPrev = Double.NEGATIVE_INFINITY;
 				for (int prevDerivativeIndex = derivativeRange[0]; prevDerivativeIndex < derivativeRange[1]; prevDerivativeIndex++) {
-					double scoreFromPrevDerivative = scoreFromSegmentFromPrevDerivative(score[i - 1][prevDerivativeIndex], houghTransform, anglePenalities, row, (int) Math.round((i - 1) * step), derivativeIndex, prevDerivativeIndex);
+					double scoreFromPrevDerivative = scoreFromSegmentFromPrevDerivative(score[i - 1][prevDerivativeIndex], fastAdaptivHough, angleFromIndex, penality, row, (int) ((i - 1) * step), derivativeIndex, prevDerivativeIndex);
 					if (maxScoreFromPrev < scoreFromPrevDerivative) {
 						maxScoreFromPrev = scoreFromPrevDerivative;
 						maxPrevDerivative = prevDerivativeIndex;
 					}
 				}
-				System.out.println(i + " " + maxPrevDerivative + " " + maxScoreFromPrev);
 				prevDerivatives[i][derivativeIndex] = maxPrevDerivative;
 				score[i][derivativeIndex] = maxScoreFromPrev;
 			}
 		}
 		adaptivHough.release();
-		return Arrays.asList(buildResult2(derivativeFromIndex, score, prevDerivatives, stripWidth, houghTransform, step));
+		return Arrays.asList(buildResult2(derivatives, score, prevDerivatives, stripWidth, houghTransform, step));
 	}
 
 	private static HoughTrajectStep[] buildResult2(List<Double> derivativeFromIndex, double[][] score, int[][] thetaPrev, int stripWidth, Mat houghTransform, double step) {
@@ -359,25 +360,29 @@ public class RadonTransform {
 		return result;
 	}
 
-	private static double scoreFromSegmentFromPrevDerivative(double prevScore, Mat houghTransform, List<Double> anglePenalities, int row, int prevRow, int derivativeIndex, int prevDerivativeIndex) {
-		// System.out.println(prevDerivativeIndex + " " + derivativeIndex);
-		if (prevDerivativeIndex <= derivativeIndex)
-			for (int currentDerivative = prevDerivativeIndex; currentDerivative < derivativeIndex; currentDerivative++)
-				prevScore += anglePenalities.get(currentDerivative);
-		else
-			for (int currentDerivative = derivativeIndex; currentDerivative < prevDerivativeIndex; currentDerivative++)
-				prevScore += anglePenalities.get(currentDerivative);
-		double deltaDerivativeIndexByRow = (derivativeIndex - prevDerivativeIndex) / (row - prevRow);
+	private static HoughTrajectStep[] buildResult(double[][] score, int[][] thetaPrev, int stripWidth, Mat houghTransform) {
+		int prevTheta = getBestScoreTheta(score);
+		HoughTrajectStep[] result = new HoughTrajectStep[score.length];
+		for (int y = score.length - 1; y >= 0; y--) {
+			double derivative = ((double) prevTheta - (stripWidth - 1)) / (stripWidth - 1);
+			result[y] = new HoughTrajectStep(y, derivative, houghTransform.get(y, prevTheta)[0]);
+			prevTheta = thetaPrev[y][prevTheta];
+		}
+		return result;
+	}
+
+	private static double scoreFromSegmentFromPrevDerivative(double prevScore, double[][] fastAdaptivHough, double[] anglesFromIndex, double penality, int row, int prevRow, int derivativeIndex, int prevDerivativeIndex) {
+		double deltaDerivativeIndexByRow = ((double) derivativeIndex - (double) prevDerivativeIndex) / (row - prevRow);
 		double x = prevDerivativeIndex + deltaDerivativeIndexByRow;
 		for (int currentRow = prevRow + 1; currentRow <= row; currentRow++) {
-			prevScore += houghTransform.get(currentRow, (int) Math.round(x))[0];
+			prevScore += fastAdaptivHough[currentRow][(int) Math.round(x)];
 			x += deltaDerivativeIndexByRow;
 		}
-		// System.out.println(prevScore);
-		return prevScore;
+		return prevScore += penality * Math.exp(-0.5 * Math.pow(anglesFromIndex[derivativeIndex] - anglesFromIndex[prevDerivativeIndex], 2));
 	}
 
 	private static int[] getPrevRange(List<Double> derivativeFromIndex, double step, double derivative, int stripWidth) {
+
 		double y1 = step + -derivative * stripWidth / 2;
 		double y2 = step + derivative * stripWidth / 2;
 		List<Integer> range = new ArrayList<>();
@@ -403,17 +408,6 @@ public class RadonTransform {
 			}
 		}
 		return maxTheta;
-	}
-
-	private static HoughTrajectStep[] buildResult(double[][] score, int[][] thetaPrev, int stripWidth, Mat houghTransform) {
-		int prevTheta = getBestScoreTheta(score);
-		HoughTrajectStep[] result = new HoughTrajectStep[score.length];
-		for (int y = score.length - 1; y >= 0; y--) {
-			double derivative = ((double) prevTheta - (stripWidth - 1)) / (stripWidth - 1);
-			result[y] = new HoughTrajectStep(y, derivative, houghTransform.get(y, prevTheta)[0]);
-			prevTheta = thetaPrev[y][prevTheta];
-		}
-		return result;
 	}
 
 	public static List<Mat> extractStrips(Mat src, int stripNumber, double stripWidth, double step) {

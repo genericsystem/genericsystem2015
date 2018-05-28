@@ -1,11 +1,7 @@
 package org.genericsystem.cv.application;
 
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
+import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
+import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
@@ -17,6 +13,13 @@ import org.opencv.core.Range;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -131,7 +134,18 @@ public class RadonTransformDemo2 extends AbstractApp {
 		adaptive.release();
 		ref = trace("Adaptive FHT", ref);
 
-		// List<HoughTrajectStep> magnitudes = RadonTransform.bestTrajectFHT(houghTransform, 11, -0.2, 30);
+		List<HoughTrajectStep> magnitudes = RadonTransform.bestTrajectFHT(houghTransform, 11, -0.2);
+		List<HoughTrajectStep> filteredMagnitudes = new ArrayList<>();
+		filteredMagnitudes.add(magnitudes.get(0));
+		for (int row = 1; row < magnitudes.size() - 1; row++) {
+			HoughTrajectStep step = magnitudes.get(row);
+			if (step.magnitude >= 0.2)
+				filteredMagnitudes.add(step);
+		}
+		filteredMagnitudes.add(magnitudes.get(magnitudes.size() - 1));
+		/// magnitudes = magnitudes.stream().filter(step -> step.magnitude >= 0.2).collect(Collectors.toList());
+		PolynomialSplineFunction polynomialSplineFunction = new LinearInterpolator().interpolate(filteredMagnitudes.stream().mapToDouble(step -> step.y).toArray(), filteredMagnitudes.stream().mapToDouble(step -> step.derivative).toArray());
+
 		// for (int y = 0; y < magnitudes.size(); y++) {
 		// if (magnitudes.get(y).magnitude <= 0.2)
 		// for (int end = y + 1; end < magnitudes.size(); end++) {
@@ -143,15 +157,22 @@ public class RadonTransformDemo2 extends AbstractApp {
 		// }
 		// }
 		// }
-		List<HoughTrajectStep> magnitudes = RadonTransform.bestTrajectFHT2(houghTransform, 11, -0.2, 10);
+		ref = trace("FHT traject 1", ref);
+		List<HoughTrajectStep> magnitudes2 = RadonTransform.bestTrajectFHT2(houghTransform, 11, 1000, 30);
+		ref = trace("FHT traject2", ref);
+		PolynomialSplineFunction polynomialSplineFunction2 = new LinearInterpolator().interpolate(magnitudes2.stream().mapToDouble(step -> step.y).toArray(), magnitudes2.stream().mapToDouble(step -> step.derivative).toArray());
 
 		// double ystep = ((double) houghTransform.rows() / 30);
-		Mat trajectDisplay = Mat.zeros(houghTransform.height(), 90, CvType.CV_8UC3);
-		for (HoughTrajectStep step : magnitudes)
-			if (step.magnitude >= 0.2)
-				trajectDisplay.put(step.y, (int) Math.round(step.getTheta()), 255, 0, 0);
-			else
-				trajectDisplay.put(step.y, (int) Math.round(step.getTheta()), 0, 0, 255);
+		Mat trajectDisplay = Mat.zeros(houghTransform.height(), 200, CvType.CV_8UC3);
+		for (double y = 0; y < trajectDisplay.height(); y++)
+			trajectDisplay.put((int) y, (int) (100 * polynomialSplineFunction.value(y) + 100), 255, 0, 0);
+		for (double y = 0; y < trajectDisplay.height(); y++)
+			trajectDisplay.put((int) y, (int) (100 * polynomialSplineFunction2.value(y) + 100), 0, 0, 255);
+		// for (HoughTrajectStep step : magnitudes)
+		// // if (step.magnitude >= 0.2)
+		// trajectDisplay.put(step.y, (int) Math.round(100d * step.derivative + 100), 255, 0, 0);
+		// else
+		// trajectDisplay.put(step.y, (int) Math.round(step.getTheta()), 0, 255, 0);
 		images[5] = new Img(trajectDisplay, false).toJfxImage();
 		ref = trace("FHT traject", ref);
 
