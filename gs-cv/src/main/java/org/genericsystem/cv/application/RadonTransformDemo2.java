@@ -158,7 +158,7 @@ public class RadonTransformDemo2 extends AbstractApp {
 		// }
 		// }
 		ref = trace("FHT traject 1", ref);
-		List<HoughTrajectStep> magnitudes2 = RadonTransform.bestTrajectFHT2(houghTransform, 11, 1000, 30);
+		List<HoughTrajectStep> magnitudes2 = RadonTransform.bestTrajectFHT2(houghTransform, 11, 500, 30);
 		ref = trace("FHT traject2", ref);
 		PolynomialSplineFunction polynomialSplineFunction2 = new LinearInterpolator().interpolate(magnitudes2.stream().mapToDouble(step -> step.y).toArray(), magnitudes2.stream().mapToDouble(step -> step.derivative).toArray());
 
@@ -182,41 +182,41 @@ public class RadonTransformDemo2 extends AbstractApp {
 		images[6] = new Img(magnitudesDisplay, false).toJfxImage();
 		ref = trace("Display magnitudes", ref);
 
-		// List<HoughTrajectStep[]> lines = RadonTransform.getStripLinesFHT(magnitudes, 0.5, 0.2);
-		// Mat rangeDisplay = magnitudesDisplay.clone();
-		// for (HoughTrajectStep[] topBottom : lines) {
-		// double minMagnitude = Double.MAX_VALUE;
-		// for (int y = topBottom[0].y; y <= topBottom[1].y; y++)
-		// if (minMagnitude > magnitudes.get(y).magnitude)
-		// minMagnitude = magnitudes.get(y).magnitude;
-		// // System.out.println("minMagnitude : " + minMagnitude + " Range : " + y1y2[0] + " " + y1y2[1]);
-		// Imgproc.line(rangeDisplay, new Point(minMagnitude * 255, topBottom[0].y), new Point(minMagnitude * 255, topBottom[1].y), new Scalar(0), 1);
-		// }
+		List<HoughTrajectStep[]> lines = RadonTransform.getStripLinesFHT(magnitudes, 0.3, 0.2);
+		Mat rangeDisplay = magnitudesDisplay.clone();
+		for (HoughTrajectStep[] topBottom : lines) {
+			double minMagnitude = Double.MAX_VALUE;
+			for (int y = topBottom[0].y; y <= topBottom[1].y; y++)
+				if (minMagnitude > magnitudes.get(y).magnitude)
+					minMagnitude = magnitudes.get(y).magnitude;
+			// System.out.println("minMagnitude : " + minMagnitude + " Range : " + y1y2[0] + " " + y1y2[1]);
+			Imgproc.line(rangeDisplay, new Point(minMagnitude * 255, topBottom[0].y), new Point(minMagnitude * 255, topBottom[1].y), new Scalar(0), 1);
+		}
 
-		// images[7] = new Img(rangeDisplay, false).toJfxImage();
-		// ref = trace("Display ranged magnitudes", ref);
-		//
-		// Mat vStripColor = new Mat();
-		// Imgproc.cvtColor(vStrip, vStripColor, Imgproc.COLOR_GRAY2BGR);
-		// for (HoughTrajectStep[] topBottom : lines) {
-		// // for (TrajectStep trajectStep : Arrays.stream(houghVtraj).filter(ts -> Math.abs(magnitudes.get(ts.k).magnitude) > 30).collect(Collectors.toList())) {
-		// double mag = stripWidth;
-		// int row = topBottom[0].y;
-		// double theta = (magnitudes.get(row).getTheta() - 45) / 180 * Math.PI;
-		// Scalar color = new Scalar(0, 255, 0);
-		// Imgproc.line(vStripColor, new Point(vStripColor.width() / 2 - mag * Math.cos(theta), row - mag * Math.sin(theta)), new Point(vStripColor.width() / 2 + mag * Math.cos(theta), row + mag * Math.sin(theta)), color, 1);
-		// color = new Scalar(0, 0, 255);
-		// row = topBottom[1].y;
-		// theta = (magnitudes.get(row).getTheta() - 45) / 180 * Math.PI;
-		// Imgproc.line(vStripColor, new Point(vStripColor.width() / 2 - mag * Math.cos(theta), row - mag * Math.sin(theta)), new Point(vStripColor.width() / 2 + mag * Math.cos(theta), row + mag * Math.sin(theta)), color, 1);
-		//
-		// }
-		//
-		// Mat vStripColorDisplay = Mat.zeros(binarized.size(), vStripColor.type());
-		// Mat stripRoi = new Mat(vStripColorDisplay, new Range(0, vStripColorDisplay.height()), new Range(vStripColorDisplay.width() / 2 - stripWidth / 2, vStripColorDisplay.width() / 2 + stripWidth / 2));
-		// vStripColor.copyTo(stripRoi);
-		// images[8] = new Img(vStripColorDisplay, false).toJfxImage();
-		// ref = trace("Display underlined strip", ref);
+		images[7] = new Img(rangeDisplay, false).toJfxImage();
+		ref = trace("Display ranged magnitudes", ref);
+
+		Mat vStripColor = new Mat();
+		Imgproc.cvtColor(vStrip, vStripColor, Imgproc.COLOR_GRAY2BGR);
+		for (HoughTrajectStep[] topBottom : lines) {
+			// for (TrajectStep trajectStep : Arrays.stream(houghVtraj).filter(ts -> Math.abs(magnitudes.get(ts.k).magnitude) > 30).collect(Collectors.toList())) {
+			double mag = stripWidth;
+			int row = topBottom[0].y;
+			double theta = (magnitudes.get(row).getTheta() - 45) / 180 * Math.PI;
+			Scalar color = new Scalar(0, 255, 0);
+			Imgproc.line(vStripColor, new Point(vStripColor.width() / 2 - mag * Math.cos(theta), row - mag * Math.sin(theta)), new Point(vStripColor.width() / 2 + mag * Math.cos(theta), row + mag * Math.sin(theta)), color, 1);
+			color = new Scalar(0, 0, 255);
+			row = topBottom[1].y;
+			theta = (magnitudes.get(row).getTheta() - 45) / 180 * Math.PI;
+			Imgproc.line(vStripColor, new Point(vStripColor.width() / 2 - mag * Math.cos(theta), row - mag * Math.sin(theta)), new Point(vStripColor.width() / 2 + mag * Math.cos(theta), row + mag * Math.sin(theta)), color, 1);
+
+		}
+
+		Mat vStripColorDisplay = Mat.zeros(binarized.size(), vStripColor.type());
+		Mat stripRoi = new Mat(vStripColorDisplay, new Range(0, vStripColorDisplay.height()), new Range(vStripColorDisplay.width() / 2 - stripWidth / 2, vStripColorDisplay.width() / 2 + stripWidth / 2));
+		vStripColor.copyTo(stripRoi);
+		images[8] = new Img(vStripColorDisplay, false).toJfxImage();
+		ref = trace("Display underlined strip", ref);
 
 		Mat vTransform = RadonTransform.radonTransform(vStrip, -45, 45);
 		Mat vProjection = RadonTransform.radonRemap(vTransform, -45);
