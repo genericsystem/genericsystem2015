@@ -1,6 +1,5 @@
 package org.genericsystem.cv.application.mesh;
 
-import org.genericsystem.cv.application.GeneralInterpolator;
 import org.genericsystem.cv.application.Interpolator;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
@@ -27,7 +26,7 @@ public class MeshManager {
 	private Mesh mesh;
 	private Mesh3D mesh3D;
 
-	public MeshManager(int halfWidth, int halfHeight, GeneralInterpolator interpolatorFHT, Mat src) {
+	public MeshManager(int halfWidth, int halfHeight, Interpolator interpolatorFHT, Mat src) {
 		this(halfWidth, halfHeight, interpolatorFHT, src.width() / (2 * halfWidth), src.height() / (2 * halfHeight), src);
 	}
 

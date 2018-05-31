@@ -43,7 +43,7 @@ public class GeneralInterpolator implements Interpolator {
 		double sumHCoefs = 0; // somme des coefficients pour l'angle horizontal
 		double hAngle = 0; // angle horizontal
 		for (OrientedPoint op : horizontals) {
-			double geoCoef = Math.pow(1 / squaredEuclidianDistance(x, y, op), pow / 2);
+			double geoCoef = 1 / Math.pow(squaredEuclidianDistance(x, y, op), pow / 2);
 			double hCoef = geoCoef * op.strenght;
 			hAngle += hCoef * op.angle;
 			sumHCoefs += hCoef;

@@ -1,5 +1,15 @@
 package org.genericsystem.cv.application;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.genericsystem.cv.AbstractApp;
@@ -14,16 +24,6 @@ import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -138,9 +138,9 @@ public class RadonTransformDemo extends AbstractApp {
 		for (int hStrip = 0; hStrip < hHoughTrajs.size(); hStrip++)
 			fhtVerticals.add(RadonTransform.toVerticalOrientedPoints(hHoughTrajs.get(hStrip), (hStrip + 1) * hStep, 0.2, 0.08));
 
-		List<List<Segment>>[] horizontalSegments = connect(fhtHorizontals, hStep, 2, false);
+		List<List<Segment>>[] horizontalSegments = connect(fhtHorizontals, hStep, 1, false);
 		List<PolynomialSplineFunction>[] horizontalSplines = toSplines(horizontalSegments, false);
-		List<List<Segment>>[] verticalSegments = connect(fhtVerticals, vStep, 2, true);
+		List<List<Segment>>[] verticalSegments = connect(fhtVerticals, vStep, 1, true);
 		List<PolynomialSplineFunction>[] verticalSplines = toSplines(verticalSegments, true);
 
 		Img splineDisplay = new Img(superFrame.getFrame().getSrc().clone(), false);
@@ -167,6 +167,7 @@ public class RadonTransformDemo extends AbstractApp {
 		List<OrientedPoint> flatFhtVerticals = fhtVerticals.stream().flatMap(h -> Stream.of(h)).flatMap(h -> h.stream()).collect(Collectors.toList());
 		List<OrientedPoint> flatFhtHorizontals = fhtHorizontals.stream().flatMap(h -> Stream.of(h)).flatMap(h -> h.stream()).collect(Collectors.toList());
 		GeneralInterpolator interpolatorFHT = new GeneralInterpolator(flatHorizontalSegments, flatVerticalSegments, 4, 0.0001);
+		SplineInterpolator superInterpolator = new SplineInterpolator(interpolatorFHT, horizontalSplines, verticalSplines);
 
 		ref = trace("Prepare interpolator", ref);
 
@@ -214,7 +215,7 @@ public class RadonTransformDemo extends AbstractApp {
 		images[3] = frameDisplayFHT.toJfxImage();
 		ref = trace("Display lines", ref);
 
-		MeshManager meshManager = new MeshManager(6, 4, interpolatorFHT, superFrame.getFrame().getSrc());
+		MeshManager meshManager = new MeshManager(6, 4, superInterpolator, superFrame.getFrame().getSrc());
 		ref = trace("Build mesh", ref);
 
 		images[4] = new Img(meshManager.drawOnCopy(new Scalar(0, 255, 0), new Scalar(0, 0, 255)), false).toJfxImage();
