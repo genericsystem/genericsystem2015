@@ -51,7 +51,7 @@ public class MeshManager {
 	}
 
 	private Mesh3D getMesh3D() {
-		return mesh3D != null ? mesh3D : (mesh3D = new Mesh3D(getMesh()));
+		return mesh3D != null ? mesh3D : (mesh3D = new Mesh3D(getMesh(), image.size()));
 	}
 
 	private void reverseCoeffs(double[] coeffs) {
@@ -74,7 +74,7 @@ public class MeshManager {
 			}
 
 			@Override
-			double getWidthCoeff(double deltaY, int j) {
+			double getWidthCoeff(double deltaX, int j) {
 				// TODO Auto-generated method stub
 				return widths[j];
 			}

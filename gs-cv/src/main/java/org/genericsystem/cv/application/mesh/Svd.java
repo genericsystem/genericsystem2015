@@ -1,5 +1,8 @@
 package org.genericsystem.cv.application.mesh;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.genericsystem.cv.utils.GPUTools;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.opencv.core.Core;
@@ -10,9 +13,6 @@ import org.opencv.core.Point3;
 import org.opencv.core.Scalar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class Svd {
 
@@ -127,6 +127,7 @@ public class Svd {
 		for (int i = 0; i < pts.size(); i++) {
 			pts.get(i).x *= stdxy[0];
 			pts.get(i).y *= stdxy[1];
+			pts.get(i).z *= Math.sqrt(stdxy[0] * stdxy[1]);
 		}
 
 		return pts;

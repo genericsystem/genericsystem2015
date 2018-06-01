@@ -2,6 +2,7 @@ package org.genericsystem.cv.application.mesh;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 
 import org.opencv.core.CvType;
@@ -17,11 +18,16 @@ public class Mesh3D extends AbstractMesh<Point3> {
 	private final Mesh mesh;
 	private List<Point3> points3D;
 
-	public Mesh3D(Mesh mesh) {
+	public Mesh3D(Mesh mesh, Size size) {
 		super(mesh.halfWidth, mesh.halfHeight);
 		this.mesh = mesh;
 		int[][] indexRects = mesh.values().stream().map(indexedPts -> new int[] { indexedPts[0].getIndex(), indexedPts[1].getIndex(), indexedPts[2].getIndex(), indexedPts[3].getIndex() }).toArray(int[][]::new);
-		points3D = Svd.solve(mesh.getPointIndex(), indexRects);
+
+		double focal_length = Math.max(size.width, size.height) / Math.tan((60d / 180) * Math.PI / 2) / 2;
+		System.out.println("Focale : " + focal_length);
+		List<Point> focalizedPts = mesh.getPointIndex().stream().map(pts -> new Point((pts.x - size.width / 2) / focal_length, -(pts.y - size.height / 2) / focal_length)).collect(Collectors.toList());
+
+		points3D = Svd.solve(focalizedPts, indexRects);
 		for (int i = -halfHeight; i < halfHeight; i++)
 			for (int j = -halfWidth; j < halfWidth; j++) {
 				Point3[] para3D = new Point3[4];
