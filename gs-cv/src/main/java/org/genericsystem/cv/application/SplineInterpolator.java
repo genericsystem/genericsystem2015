@@ -1,10 +1,10 @@
 package org.genericsystem.cv.application;
 
+import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 
 public class SplineInterpolator implements Interpolator {
 
@@ -27,7 +27,7 @@ public class SplineInterpolator implements Interpolator {
 		if (left != null && right != null) {
 			double x1 = left[0].value(y);
 			double x2 = right[0].value(y);
-			return -((x - x1) / (x2 - x1) * Math.atan(right[1].value(y)) + (x2 - x) / (x2 - x1) * Math.atan(left[1].value(y)));
+			return -Math.atan((x - x1) / (x2 - x1) * right[1].value(y) + (x2 - x) / (x2 - x1) * left[1].value(y));
 		} else
 			return subInterpolator.interpolateVerticals(x, y);
 		// if (left != null) {
@@ -83,8 +83,7 @@ public class SplineInterpolator implements Interpolator {
 		if (top != null && bottom != null) {
 			double y1 = top[0].value(x);
 			double y2 = bottom[0].value(x);
-
-			return (y - y1) / (y2 - y1) * Math.atan(bottom[1].value(x)) + (y2 - y) / (y2 - y1) * Math.atan(top[1].value(x));
+			return Math.atan((y - y1) / (y2 - y1) * bottom[1].value(x) + (y2 - y) / (y2 - y1) * top[1].value(x));
 		} else
 			return subInterpolator.interpolateHorizontals(x, y);
 	}

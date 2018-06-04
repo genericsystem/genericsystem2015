@@ -315,6 +315,7 @@ public class RadonTransform {
 	public static List<HoughTrajectStep> bestTrajectFHT2(Mat houghTransform, int blurSize, double penality, int stepCount) {
 		int stripWidth = (houghTransform.cols() + 1) / 2;
 		Mat adaptivHough = adaptivHough(houghTransform, blurSize);
+		Core.pow(houghTransform, 3, adaptivHough);
 		double[][] fastAdaptivHough = new double[adaptivHough.rows()][adaptivHough.cols()];
 		for (int row = 0; row < adaptivHough.rows(); row++)
 			for (int col = 0; col < adaptivHough.cols(); col++)

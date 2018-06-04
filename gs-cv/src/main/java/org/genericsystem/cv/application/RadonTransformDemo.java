@@ -1,15 +1,5 @@
 package org.genericsystem.cv.application;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.genericsystem.cv.AbstractApp;
@@ -24,6 +14,16 @@ import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -133,14 +133,14 @@ public class RadonTransformDemo extends AbstractApp {
 
 		List<List<OrientedPoint>[]> fhtHorizontals = new ArrayList<>();
 		for (int vStripIndex = 0; vStripIndex < vHoughTrajs.size(); vStripIndex++)
-			fhtHorizontals.add(RadonTransform.toHorizontalOrientedPoints(vHoughTrajs.get(vStripIndex), (vStripIndex + 1) * vStep, 0.2, 0.08));
+			fhtHorizontals.add(RadonTransform.toHorizontalOrientedPoints(vHoughTrajs.get(vStripIndex), (vStripIndex + 1) * vStep, 0.3, 0.05));
 		List<List<OrientedPoint>[]> fhtVerticals = new ArrayList<>();
 		for (int hStrip = 0; hStrip < hHoughTrajs.size(); hStrip++)
-			fhtVerticals.add(RadonTransform.toVerticalOrientedPoints(hHoughTrajs.get(hStrip), (hStrip + 1) * hStep, 0.2, 0.08));
+			fhtVerticals.add(RadonTransform.toVerticalOrientedPoints(hHoughTrajs.get(hStrip), (hStrip + 1) * hStep, 0.3, 0.05));
 
-		List<List<Segment>>[] horizontalSegments = connect(fhtHorizontals, hStep, 1, false);
+		List<List<Segment>>[] horizontalSegments = connect(fhtHorizontals, hStep, 2, false);
 		List<PolynomialSplineFunction>[] horizontalSplines = toSplines(horizontalSegments, false);
-		List<List<Segment>>[] verticalSegments = connect(fhtVerticals, vStep, 1, true);
+		List<List<Segment>>[] verticalSegments = connect(fhtVerticals, vStep, 2, true);
 		List<PolynomialSplineFunction>[] verticalSplines = toSplines(verticalSegments, true);
 
 		Img splineDisplay = new Img(superFrame.getFrame().getSrc().clone(), false);
@@ -229,7 +229,7 @@ public class RadonTransformDemo extends AbstractApp {
 		images[6] = dewarpedBinarized2.toJfxImage();
 		ref = trace("Binarize dewarp", ref);
 
-		Layout layout = dewarpedBinarized2.buildLayout(new Size(2, 0.0), new Size(0.01, 0.01), 8);
+		Layout layout = dewarpedBinarized2.buildLayout(new Size(2, 0.0), new Size(0.001, 0.001), 8);
 		layout.draw(dewarpFHT, new Scalar(255, 0, 0), new Scalar(0, 0, 255), 1, 2);
 		images[7] = dewarpFHT.toJfxImage();
 		ref = trace("Layout", ref);
