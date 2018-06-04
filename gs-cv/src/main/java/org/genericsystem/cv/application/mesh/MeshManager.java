@@ -75,7 +75,6 @@ public class MeshManager {
 
 			@Override
 			double getWidthCoeff(double deltaX, int j) {
-				// TODO Auto-generated method stub
 				return widths[j];
 			}
 		};

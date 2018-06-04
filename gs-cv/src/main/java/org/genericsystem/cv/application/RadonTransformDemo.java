@@ -1,5 +1,15 @@
 package org.genericsystem.cv.application;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.genericsystem.cv.AbstractApp;
@@ -14,16 +24,6 @@ import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -104,14 +104,14 @@ public class RadonTransformDemo extends AbstractApp {
 		Img transposedBinarized = binarized.transpose();
 		ref = trace("Binarization", ref);
 
-		double vRecover = 0.5;
-		int vStripsNumber = 16;
+		double vRecover = 0.8;
+		int vStripsNumber = 24;
 		double stripWidth = (binarized.width() / (vStripsNumber * (1 - vRecover) + vRecover));
 		double vStep = ((1 - vRecover) * stripWidth);
 		System.out.println(vStripsNumber + " verticals strips with width : " + stripWidth + " each step : " + vStep);
 
-		double hRecover = 0.5;
-		int hStripsNumber = 9;
+		double hRecover = 0.8;
+		int hStripsNumber = 12;
 		double stripHeight = (binarized.height() / (hStripsNumber * (1 - hRecover) + hRecover));
 		double hStep = ((1 - hRecover) * stripHeight);
 		System.out.println(hStripsNumber + " horizontal strips with width : " + stripHeight + " each step : " + hStep);
@@ -131,16 +131,20 @@ public class RadonTransformDemo extends AbstractApp {
 		List<List<HoughTrajectStep>> hHoughTrajs = hHoughs.stream().map(projectionMap -> RadonTransform.bestTrajectFHT(projectionMap, 11, -0.2)).collect(Collectors.toList());
 		ref = trace("Compute trajects", ref);
 
+		for (int vStripIndex = 0; vStripIndex < vHoughTrajs.size(); vStripIndex++) {
+			System.out.println(vStripIndex * vStep + stripWidth / 2);
+		}
+
 		List<List<OrientedPoint>[]> fhtHorizontals = new ArrayList<>();
 		for (int vStripIndex = 0; vStripIndex < vHoughTrajs.size(); vStripIndex++)
-			fhtHorizontals.add(RadonTransform.toHorizontalOrientedPoints(vHoughTrajs.get(vStripIndex), (vStripIndex + 1) * vStep, 0.3, 0.05));
+			fhtHorizontals.add(RadonTransform.toHorizontalOrientedPoints(vHoughTrajs.get(vStripIndex), vStripIndex * vStep + stripWidth / 2, 0.4, 0.03));
 		List<List<OrientedPoint>[]> fhtVerticals = new ArrayList<>();
 		for (int hStrip = 0; hStrip < hHoughTrajs.size(); hStrip++)
-			fhtVerticals.add(RadonTransform.toVerticalOrientedPoints(hHoughTrajs.get(hStrip), (hStrip + 1) * hStep, 0.3, 0.05));
+			fhtVerticals.add(RadonTransform.toVerticalOrientedPoints(hHoughTrajs.get(hStrip), hStrip * hStep + stripHeight / 2, 0.4, 0.03));
 
-		List<List<Segment>>[] horizontalSegments = connect(fhtHorizontals, hStep, 2, false);
+		List<List<Segment>>[] horizontalSegments = connect(fhtHorizontals, hStep, 0.05, false);
 		List<PolynomialSplineFunction>[] horizontalSplines = toSplines(horizontalSegments, false);
-		List<List<Segment>>[] verticalSegments = connect(fhtVerticals, vStep, 2, true);
+		List<List<Segment>>[] verticalSegments = connect(fhtVerticals, vStep, 0.05, true);
 		List<PolynomialSplineFunction>[] verticalSplines = toSplines(verticalSegments, true);
 
 		Img splineDisplay = new Img(superFrame.getFrame().getSrc().clone(), false);
@@ -252,13 +256,13 @@ public class RadonTransformDemo extends AbstractApp {
 
 		meshManager.recomputeGrid();
 		images[12] = new Img(meshManager.drawOnCopy(new Scalar(0, 255, 0), new Scalar(0, 0, 255)), false).toJfxImage();
-		ref = trace("Redraw mesh", ref);
+		ref = trace("Draw mesh", ref);
 
 		images[13] = new Img(meshManager.draw3Dsurface(new Scalar(0, 255, 0), new Scalar(0, 0, 255)), false).toJfxImage();
-		ref = trace("Redraw mesh", ref);
+		ref = trace("3D surface SVD", ref);
 
 		images[14] = new Img(meshManager.dewarp3D(), false).toJfxImage();
-		ref = trace("Redraw mesh", ref);
+		ref = trace("Dewarp 3D", ref);
 
 		return images;
 
@@ -290,23 +294,23 @@ public class RadonTransformDemo extends AbstractApp {
 		return new LinearInterpolator().interpolate(orientedPoints.stream().mapToDouble(op -> vertical ? op.center.y : op.center.x).toArray(), orientedPoints.stream().mapToDouble(op -> vertical ? op.center.x : op.center.y).toArray());
 	}
 
-	private List<List<Segment>>[] connect(List<List<OrientedPoint>[]> trajects, double w, double maxDistance, boolean vertical) {
+	private List<List<Segment>>[] connect(List<List<OrientedPoint>[]> trajects, double w, double maxDistanceCoeff, boolean vertical) {
 		List<List<Segment>> topResult = new ArrayList<>();
 		List<List<Segment>> bottomResult = new ArrayList<>();
 		for (int i = 0; i < trajects.size() - 1; i++) {
-			List<Segment>[] connectStrips = connectStrips(trajects.get(i), trajects.get(i + 1), w, maxDistance, vertical);
+			List<Segment>[] connectStrips = connectStrips(trajects.get(i), trajects.get(i + 1), w, maxDistanceCoeff, vertical);
 			topResult.add(connectStrips[0]);
 			bottomResult.add(connectStrips[1]);
 		}
 		return new List[] { topResult, bottomResult };
 	}
 
-	private List<Segment>[] connectStrips(List<OrientedPoint>[] traject1, List<OrientedPoint>[] traject2, double w, double maxDistance, boolean vertical) {
+	private List<Segment>[] connectStrips(List<OrientedPoint>[] traject1, List<OrientedPoint>[] traject2, double w, double maxDistanceCoeff, boolean vertical) {
 		List<Segment> topResult = new ArrayList<>();
 		final List<Segment> topSortedFilteredEdges = new ArrayList<>();
 		traject1[0].forEach(step1 -> traject2[0].forEach(step2 -> topSortedFilteredEdges.add(new Segment(step1, step2, w, vertical))));
 
-		topSortedFilteredEdges.removeIf(edge -> edge.getDistance() > maxDistance);
+		topSortedFilteredEdges.removeIf(edge -> edge.getDistance() > maxDistanceCoeff * w);
 		Collections.sort(topSortedFilteredEdges);
 		while (!topSortedFilteredEdges.isEmpty()) {
 			Segment selected = topSortedFilteredEdges.get(0);
@@ -317,7 +321,7 @@ public class RadonTransformDemo extends AbstractApp {
 		List<Segment> bottomResult = new ArrayList<>();
 		final List<Segment> bottomSortedFilteredEdges = new ArrayList<>();
 		traject1[1].forEach(step1 -> traject2[1].forEach(step2 -> bottomSortedFilteredEdges.add(new Segment(step1, step2, w, vertical))));
-		bottomSortedFilteredEdges.removeIf(edge -> edge.getDistance() > maxDistance);
+		bottomSortedFilteredEdges.removeIf(edge -> edge.getDistance() > maxDistanceCoeff * w);
 		Collections.sort(bottomSortedFilteredEdges);
 		while (!bottomSortedFilteredEdges.isEmpty()) {
 			Segment selected = bottomSortedFilteredEdges.get(0);
