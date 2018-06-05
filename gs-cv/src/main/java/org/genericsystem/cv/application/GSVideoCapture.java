@@ -43,7 +43,7 @@ public class GSVideoCapture implements GSCapture {
 		boolean result = videoCapture.read(frameMat);
 		if (!result)
 			throw new IllegalStateException("Unable to read camera");
-		Imgproc.resize(frameMat, frameMat, resize, 0, 0, Imgproc.INTER_CUBIC);
+		Imgproc.resize(frameMat, frameMat, resize, 1, 1, Imgproc.INTER_LINEAR);
 		return new SuperFrameImg(frameMat, new double[] { frameMat.width() / 2, frameMat.height() / 2 }, f);
 	}
 

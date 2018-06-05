@@ -199,12 +199,11 @@ public class Points {
 	private Point verticalMove(Point startingPoint, double deltaY) {
 		if (deltaY == 0)
 			return startingPoint;
-		double dY = Math.max(1, deltaY / 2) * Math.signum(deltaY);
+		double dY = Math.signum(deltaY);
 		double x = startingPoint.x, y = startingPoint.y;
 		while (Math.abs(y - startingPoint.y - deltaY) >= 1) {
-			double dX = dY / Math.tan(interpolator.interpolateVerticals(x - xBorder, y - yBorder) + Math.PI / 2);
-			if (!Double.isFinite(dX))
-				dX = 0;
+			double dX = interpolator.interpolateVerticals(x - xBorder, y - yBorder) * dY;
+			assert Double.isFinite(dX) : interpolator.interpolateVerticals(x - xBorder, y - yBorder);
 			x += dX;
 			y += dY;
 		}
@@ -214,12 +213,11 @@ public class Points {
 	private Point horizontalMove(Point startingPoint, double deltaX) {
 		if (deltaX == 0)
 			return startingPoint;
-		double dX = Math.max(1, deltaX / 2) * Math.signum(deltaX);
+		double dX = Math.signum(deltaX);
 		double x = startingPoint.x, y = startingPoint.y;
 		while (Math.abs(x - startingPoint.x - deltaX) >= 1) {
-			double dY = Math.tan(interpolator.interpolateHorizontals(x - xBorder, y - yBorder)) * dX;
-			if (!Double.isFinite(dY))
-				dY = 0;
+			double dY = interpolator.interpolateHorizontals(x - xBorder, y - yBorder) * dX;
+			assert Double.isFinite(dY) : interpolator.interpolateHorizontals(x - xBorder, y - yBorder);
 			x += dX;
 			y += dY;
 		}

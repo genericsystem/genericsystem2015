@@ -51,10 +51,10 @@ public abstract class AbstractMesh<T> {
 		Point topRight = polygon[1];
 		Point bottomRight = polygon[2];
 		Point bottomLeft = polygon[3];
-		Imgproc.circle(image, topLeft, 5, ptsColor, -1);
-		Imgproc.circle(image, topRight, 5, ptsColor, -1);
-		Imgproc.circle(image, bottomRight, 5, ptsColor, -1);
-		Imgproc.circle(image, bottomLeft, 5, ptsColor, -1);
+		Imgproc.circle(image, topLeft, 3, ptsColor, -1);
+		Imgproc.circle(image, topRight, 3, ptsColor, -1);
+		Imgproc.circle(image, bottomRight, 3, ptsColor, -1);
+		Imgproc.circle(image, bottomLeft, 3, ptsColor, -1);
 		Imgproc.line(image, topLeft, topRight, meshColor);
 		Imgproc.line(image, topRight, bottomRight, meshColor);
 		Imgproc.line(image, bottomRight, bottomLeft, meshColor);

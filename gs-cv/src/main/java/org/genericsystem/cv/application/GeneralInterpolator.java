@@ -48,7 +48,7 @@ public class GeneralInterpolator implements Interpolator {
 			hAngle += hCoef * op.angle;
 			sumHCoefs += hCoef;
 		}
-		return hAngle / sumHCoefs;
+		return Math.tan(hAngle / sumHCoefs);
 	}
 
 	@Override
@@ -61,6 +61,6 @@ public class GeneralInterpolator implements Interpolator {
 			vAngle += vCoef * op.angle;
 			sumVCoefs += vCoef;
 		}
-		return vAngle / sumVCoefs;
+		return -Math.tan(vAngle / sumVCoefs);
 	}
 }

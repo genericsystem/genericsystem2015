@@ -54,33 +54,33 @@ public class MeshManager {
 		return mesh3D != null ? mesh3D : (mesh3D = new Mesh3D(getMesh(), image.size()));
 	}
 
-	private void reverseCoeffs(double[] coeffs) {
-		for (int i = 0; i < coeffs.length; i++)
-			coeffs[i] = 1 / coeffs[i];
-	}
+	// private void reverseCoeffs(double[] coeffs) {
+	// for (int i = 0; i < coeffs.length; i++)
+	// coeffs[i] = 1 / coeffs[i];
+	// }
 
-	public void recomputeGrid() {
-		double[] widths = mesh3D.getWidths();
-		reverseCoeffs(widths);
-		mesh3D.normalize(widths, getOriginalSize().width);
-
-		double[] heights = mesh3D.getHeights();
-		reverseCoeffs(heights);
-		mesh3D.normalize(heights, getOriginalSize().height);
-		points = new Points(new Point(image.width() / 2, image.height() / 2), halfWidth, halfHeight, deltaX, deltaY, xBorder, yBorder, interpolator) {
-			@Override
-			double getHeightCoeff(double deltaY, int j) {
-				return heights[j];
-			}
-
-			@Override
-			double getWidthCoeff(double deltaX, int j) {
-				return widths[j];
-			}
-		};
-		mesh = null;
-		mesh3D = null;
-	}
+	// public void recomputeGrid() {
+	// double[] widths = mesh3D.getWidths();
+	// reverseCoeffs(widths);
+	// mesh3D.normalize(widths, getOriginalSize().width);
+	//
+	// double[] heights = mesh3D.getHeights();
+	// reverseCoeffs(heights);
+	// mesh3D.normalize(heights, getOriginalSize().height);
+	// points = new Points(new Point(image.width() / 2, image.height() / 2), halfWidth, halfHeight, deltaX, deltaY, xBorder, yBorder, interpolator) {
+	// @Override
+	// double getHeightCoeff(double deltaY, int j) {
+	// return heights[j];
+	// }
+	//
+	// @Override
+	// double getWidthCoeff(double deltaX, int j) {
+	// return widths[j];
+	// }
+	// };
+	// mesh = null;
+	// mesh3D = null;
+	// }
 
 	// --------------------------------------------------
 

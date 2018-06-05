@@ -23,25 +23,21 @@ public class SplineInterpolator implements Interpolator {
 	@Override
 	public double interpolateVerticals(double x, double y) {
 		PolynomialSplineFunction[] left = findLeftVerticalSplines(x, y);
-		PolynomialSplineFunction[] right = findRightVerticalSplines(x, y);
-		// if (left != null && right != null) {
-		// double x1 = left[0].value(y);
-		// double x2 = right[0].value(y);
-		// // return -Math.atan((x - x1) / (x2 - x1) * left[1].value(y) + (x2 - x) / (x2 - x1) * right[1].value(x));
-		// return -((x - x1) / (x2 - x1) * Math.atan(right[1].value(y)) + (x2 - x) / (x2 - x1) * Math.atan(left[1].value(y)));
-		// } else
-		// return subInterpolator.interpolateVerticals(x, y);
 		if (left != null) {
+			double x1 = left[0].value(y);
+			if (x == x1)
+				return left[1].value(y);
+			PolynomialSplineFunction[] right = findRightVerticalSplines(x, y);
 			if (right != null) {
-				double x1 = left[0].value(y);
 				double x2 = right[0].value(y);
-				// return -Math.atan((x - x1) / (x2 - x1) * left[1].value(y) + (x2 - x) / (x2 - x1) * right[1].value(x));
-				return -((x - x1) / (x2 - x1) * Math.atan(right[1].value(y)) + (x2 - x) / (x2 - x1) * Math.atan(left[1].value(y)));
+				return (x - x1) / (x2 - x1) * right[1].value(y) + (x2 - x) / (x2 - x1) * left[1].value(y);
+				// return Math.tan(((x - x1) / (x2 - x1) * Math.atan(right[1].value(y)) + (x2 - x) / (x2 - x1) * Math.atan(left[1].value(y))));
 			} else
-				return -Math.atan(left[1].value(y));
+				return left[1].value(y);
 		} else {
+			PolynomialSplineFunction[] right = findRightVerticalSplines(x, y);
 			if (right != null)
-				return -Math.atan(right[1].value(y));
+				return right[1].value(y);
 			else
 				return subInterpolator.interpolateVerticals(x, y);
 		}
@@ -81,35 +77,29 @@ public class SplineInterpolator implements Interpolator {
 	@Override
 	public double interpolateHorizontals(double x, double y) {
 		PolynomialSplineFunction[] top = findTopHorizontalSplines(x, y);
-		PolynomialSplineFunction[] bottom = findBottomVerticalSplines(x, y);
-
 		if (top != null) {
+			double y1 = top[0].value(x);
+			if (y == y1)
+				return top[1].value(x);
+			PolynomialSplineFunction[] bottom = findBottomHorizontalSplines(x, y);
 			if (bottom != null) {
-				double y1 = top[0].value(x);
 				double y2 = bottom[0].value(x);
-				// return Math.atan((y - y1) / (y2 - y1) * bottom[1].value(x) + (y2 - y) / (y2 - y1) * top[1].value(x));
-
-				return (y - y1) / (y2 - y1) * Math.atan(bottom[1].value(x)) + (y2 - y) / (y2 - y1) * Math.atan(top[1].value(x));
-			} else
-				return Math.atan(top[1].value(x));
+				return (y - y1) / (y2 - y1) * bottom[1].value(x) + (y2 - y) / (y2 - y1) * top[1].value(x);
+				// return Math.tan((y - y1) / (y2 - y1) * Math.atan(bottom[1].value(x)) + (y2 - y) / (y2 - y1) * Math.atan(top[1].value(x)));
+			} else {
+				return top[1].value(x);
+			}
 		} else {
-			if (bottom != null)
-				return Math.atan(bottom[1].value(x));
-			else
+			PolynomialSplineFunction[] bottom = findBottomHorizontalSplines(x, y);
+			if (bottom != null) {
+				return bottom[1].value(x);
+			} else {
 				return subInterpolator.interpolateHorizontals(x, y);
+			}
 		}
-
-		// if (top != null && bottom != null) {
-		// double y1 = top[0].value(x);
-		// double y2 = bottom[0].value(x);
-		// // return Math.atan((y - y1) / (y2 - y1) * bottom[1].value(x) + (y2 - y) / (y2 - y1) * top[1].value(x));
-		//
-		// return (y - y1) / (y2 - y1) * Math.atan(bottom[1].value(x)) + (y2 - y) / (y2 - y1) * Math.atan(top[1].value(x));
-		// } else
-		// return subInterpolator.interpolateHorizontals(x, y);
 	}
 
-	private PolynomialSplineFunction[] findBottomVerticalSplines(double x, double y) {
+	private PolynomialSplineFunction[] findBottomHorizontalSplines(double x, double y) {
 		double value = Double.POSITIVE_INFINITY;
 		PolynomialSplineFunction[] result = null;
 		for (PolynomialSplineFunction[] function : horizontals) {

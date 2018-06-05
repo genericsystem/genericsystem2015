@@ -46,7 +46,7 @@ public class RadonTransformDemo extends AbstractApp {
 	private SuperFrameImg superFrame = gsCapture.read();
 	private ScheduledExecutorService timer = new BoundedScheduledThreadPoolExecutor();
 	private Config config = new Config();
-	private final ImageView[][] imageViews = new ImageView[][] { new ImageView[3], new ImageView[3], new ImageView[3], new ImageView[3], new ImageView[3] };
+	private final ImageView[][] imageViews = new ImageView[][] { new ImageView[3], new ImageView[3], new ImageView[3], new ImageView[3] };
 	private int frameCount = 0;
 
 	private void startTimer() {
@@ -69,7 +69,7 @@ public class RadonTransformDemo extends AbstractApp {
 
 	@Override
 	protected void fillGrid(GridPane mainGrid) {
-		double displaySizeReduction = 1.5;
+		double displaySizeReduction = 1;
 		for (int col = 0; col < imageViews.length; col++)
 			for (int row = 0; row < imageViews[col].length; row++) {
 				ImageView imageView = new ImageView();
@@ -104,14 +104,14 @@ public class RadonTransformDemo extends AbstractApp {
 		Img transposedBinarized = binarized.transpose();
 		ref = trace("Binarization", ref);
 
-		double vRecover = 0.8;
-		int vStripsNumber = 24;
+		double vRecover = 0.7;
+		int vStripsNumber = 8;
 		double stripWidth = (binarized.width() / (vStripsNumber * (1 - vRecover) + vRecover));
 		double vStep = ((1 - vRecover) * stripWidth);
 		System.out.println(vStripsNumber + " verticals strips with width : " + stripWidth + " each step : " + vStep);
 
-		double hRecover = 0.8;
-		int hStripsNumber = 12;
+		double hRecover = 0.7;
+		int hStripsNumber = 4;
 		double stripHeight = (binarized.height() / (hStripsNumber * (1 - hRecover) + hRecover));
 		double hStep = ((1 - hRecover) * stripHeight);
 		System.out.println(hStripsNumber + " horizontal strips with width : " + stripHeight + " each step : " + hStep);
@@ -131,10 +131,6 @@ public class RadonTransformDemo extends AbstractApp {
 		List<List<HoughTrajectStep>> hHoughTrajs = hHoughs.stream().map(projectionMap -> RadonTransform.bestTrajectFHT(projectionMap, 11, -0.2)).collect(Collectors.toList());
 		ref = trace("Compute trajects", ref);
 
-		for (int vStripIndex = 0; vStripIndex < vHoughTrajs.size(); vStripIndex++) {
-			System.out.println(vStripIndex * vStep + stripWidth / 2);
-		}
-
 		List<List<OrientedPoint>[]> fhtHorizontals = new ArrayList<>();
 		for (int vStripIndex = 0; vStripIndex < vHoughTrajs.size(); vStripIndex++)
 			fhtHorizontals.add(RadonTransform.toHorizontalOrientedPoints(vHoughTrajs.get(vStripIndex), vStripIndex * vStep + stripWidth / 2, 0.4, 0.03));
@@ -142,10 +138,44 @@ public class RadonTransformDemo extends AbstractApp {
 		for (int hStrip = 0; hStrip < hHoughTrajs.size(); hStrip++)
 			fhtVerticals.add(RadonTransform.toVerticalOrientedPoints(hHoughTrajs.get(hStrip), hStrip * hStep + stripHeight / 2, 0.4, 0.03));
 
-		List<List<Segment>>[] horizontalSegments = connect(fhtHorizontals, hStep, 0.05, false);
+		List<List<Segment>>[] horizontalSegments = connect(fhtHorizontals, vStep, 0.05, false);
+		List<List<Segment>>[] verticalSegments = connect(fhtVerticals, hStep, 0.05, true);
+
+		Img frameDisplayFHT = new Img(superFrame.getFrame().getSrc().clone(), false);
+		for (OrientedPoint op : horizontalSegments[0].stream().flatMap(h -> h.stream()).flatMap(edge -> Stream.of(edge.op1, edge.op2)).collect(Collectors.toList())) {
+			Imgproc.line(frameDisplayFHT.getSrc(), new Point(op.center.x - Math.cos(op.angle) * vStep * op.strenght, op.center.y - Math.sin(op.angle) * hStep * op.strenght),
+					new Point(op.center.x + Math.cos(op.angle) * vStep * op.strenght, op.center.y + Math.sin(op.angle) * hStep * op.strenght), new Scalar(0, 255, 0), 1);
+
+		}
+		for (OrientedPoint op : horizontalSegments[1].stream().flatMap(h -> h.stream()).flatMap(edge -> Stream.of(edge.op1, edge.op2)).collect(Collectors.toList())) {
+			Imgproc.line(frameDisplayFHT.getSrc(), new Point(op.center.x - Math.cos(op.angle) * vStep * op.strenght, op.center.y - Math.sin(op.angle) * hStep * op.strenght),
+					new Point(op.center.x + Math.cos(op.angle) * vStep * op.strenght, op.center.y + Math.sin(op.angle) * hStep * op.strenght), new Scalar(0, 0, 255), 1);
+
+		}
+
+		for (OrientedPoint op : verticalSegments[0].stream().flatMap(h -> h.stream()).flatMap(edge -> Stream.of(edge.op1, edge.op2)).collect(Collectors.toList())) {
+			Imgproc.line(frameDisplayFHT.getSrc(), new Point(op.center.x + Math.sin(op.angle) * vStep * op.strenght, op.center.y - Math.cos(op.angle) * hStep * op.strenght),
+					new Point(op.center.x - Math.sin(op.angle) * vStep * op.strenght, op.center.y + Math.cos(op.angle) * hStep * op.strenght), new Scalar(255, 255, 0), 1);
+
+		}
+		for (OrientedPoint op : verticalSegments[1].stream().flatMap(h -> h.stream()).flatMap(edge -> Stream.of(edge.op1, edge.op2)).collect(Collectors.toList())) {
+			Imgproc.line(frameDisplayFHT.getSrc(), new Point(op.center.x + Math.sin(op.angle) * vStep * op.strenght, op.center.y - Math.cos(op.angle) * hStep * op.strenght),
+					new Point(op.center.x - Math.sin(op.angle) * vStep * op.strenght, op.center.y + Math.cos(op.angle) * hStep * op.strenght), new Scalar(255, 0, 255), 1);
+
+		}
+		images[2] = frameDisplayFHT.toJfxImage();
+		ref = trace("Display lines", ref);
+
 		List<PolynomialSplineFunction>[] horizontalSplines = toSplines(horizontalSegments, false);
-		List<List<Segment>>[] verticalSegments = connect(fhtVerticals, vStep, 0.05, true);
 		List<PolynomialSplineFunction>[] verticalSplines = toSplines(verticalSegments, true);
+
+		List<OrientedPoint> flatHorizontalSegments = Stream.of(horizontalSegments).flatMap(h -> h.stream()).flatMap(h -> h.stream()).flatMap(edge -> Stream.of(edge.op1, edge.op2)).collect(Collectors.toList());
+		List<OrientedPoint> flatVerticalSegments = Stream.of(verticalSegments).flatMap(h -> h.stream()).flatMap(h -> h.stream()).flatMap(edge -> Stream.of(edge.op1, edge.op2)).collect(Collectors.toList());
+
+		GeneralInterpolator interpolatorFHT = new GeneralInterpolator(flatHorizontalSegments, flatVerticalSegments, 4, 0.0001);
+		SplineInterpolator superInterpolator = new SplineInterpolator(interpolatorFHT, horizontalSplines, verticalSplines);
+
+		ref = trace("Prepare interpolator", ref);
 
 		Img splineDisplay = new Img(superFrame.getFrame().getSrc().clone(), false);
 		for (PolynomialSplineFunction spline : horizontalSplines[0])
@@ -162,107 +192,51 @@ public class RadonTransformDemo extends AbstractApp {
 			for (double y = spline.getKnots()[0]; y < spline.getKnots()[spline.getKnots().length - 1]; y++)
 				splineDisplay.getSrc().put((int) y, (int) Math.round(spline.value(y)), 255, 0, 255);
 
-		images[2] = splineDisplay.toJfxImage();
+		images[3] = splineDisplay.toJfxImage();
 		ref = trace("Display splines", ref);
 
-		List<OrientedPoint> flatHorizontalSegments = Stream.of(horizontalSegments).flatMap(h -> h.stream()).flatMap(h -> h.stream()).flatMap(edge -> Stream.of(edge.op1, edge.op2)).collect(Collectors.toList());
-		List<OrientedPoint> flatVerticalSegments = Stream.of(verticalSegments).flatMap(h -> h.stream()).flatMap(h -> h.stream()).flatMap(edge -> Stream.of(edge.op1, edge.op2)).collect(Collectors.toList());
-
-		List<OrientedPoint> flatFhtVerticals = fhtVerticals.stream().flatMap(h -> Stream.of(h)).flatMap(h -> h.stream()).collect(Collectors.toList());
-		List<OrientedPoint> flatFhtHorizontals = fhtHorizontals.stream().flatMap(h -> Stream.of(h)).flatMap(h -> h.stream()).collect(Collectors.toList());
-		GeneralInterpolator interpolatorFHT = new GeneralInterpolator(flatHorizontalSegments, flatVerticalSegments, 4, 0.0001);
-		SplineInterpolator superInterpolator = new SplineInterpolator(interpolatorFHT, horizontalSplines, verticalSplines);
-
-		ref = trace("Prepare interpolator", ref);
-
-		Img frameDisplayFHT = new Img(superFrame.getFrame().getSrc().clone(), false);
-
-		// for (OrientedPoint op : flatFhtVerticals) {
-		// double angle = op.angle + Math.PI / 2;
-		// Imgproc.line(frameDisplayFHT.getSrc(), new Point(op.center.x - Math.cos(angle) * stripWidth / 2 * op.strenght, op.center.y - Math.sin(angle) * stripHeight / 2 * op.strenght),
-		// new Point(op.center.x + Math.cos(angle) * stripWidth / 2 * op.strenght, op.center.y + Math.sin(angle) * stripHeight / 2 * op.strenght), new Scalar(0, 0, 255), 1);
-		// angle = interpolatorFHT.interpolateVerticals(op.center.x, op.center.y) + Math.PI / 2;
-		// Imgproc.line(frameDisplayFHT.getSrc(), new Point(op.center.x - Math.cos(angle) * stripWidth / 2 * op.strenght, op.center.y - Math.sin(angle) * stripHeight / 2 * op.strenght),
-		// new Point(op.center.x + Math.cos(angle) * stripWidth / 2 * op.strenght, op.center.y + Math.sin(angle) * stripHeight / 2 * op.strenght), new Scalar(255, 0, 0), 1);
-		// }
-
-		// for (OrientedPoint op : flatFhtHorizontals) {
-		// Imgproc.line(frameDisplayFHT.getSrc(), new Point(op.center.x - Math.cos(op.angle) * stripWidth / 2 * op.strenght, op.center.y - Math.sin(op.angle) * stripHeight / 2 * op.strenght),
-		// new Point(op.center.x + Math.cos(op.angle) * stripWidth / 2 * op.strenght, op.center.y + Math.sin(op.angle) * stripHeight / 2 * op.strenght), new Scalar(0, 0, 255), 1);
-		// double angle = interpolatorFHT.interpolateHorizontals(op.center.x, op.center.y);
-		// Imgproc.line(frameDisplayFHT.getSrc(), new Point(op.center.x - Math.cos(angle) * stripWidth / 2 * op.strenght, op.center.y - Math.sin(angle) * stripHeight / 2 * op.strenght),
-		// new Point(op.center.x + Math.cos(angle) * stripWidth / 2 * op.strenght, op.center.y + Math.sin(angle) * stripHeight / 2 * op.strenght), new Scalar(255, 0, 0), 1);
-		//
-		// }
-
-		for (OrientedPoint op : horizontalSegments[0].stream().flatMap(h -> h.stream()).flatMap(edge -> Stream.of(edge.op1, edge.op2)).collect(Collectors.toList())) {
-			Imgproc.line(frameDisplayFHT.getSrc(), new Point(op.center.x - Math.cos(op.angle) * stripWidth / 2 * op.strenght, op.center.y - Math.sin(op.angle) * stripHeight / 2 * op.strenght),
-					new Point(op.center.x + Math.cos(op.angle) * stripWidth / 2 * op.strenght, op.center.y + Math.sin(op.angle) * stripHeight / 2 * op.strenght), new Scalar(0, 255, 0), 1);
-
-		}
-		for (OrientedPoint op : horizontalSegments[1].stream().flatMap(h -> h.stream()).flatMap(edge -> Stream.of(edge.op1, edge.op2)).collect(Collectors.toList())) {
-			Imgproc.line(frameDisplayFHT.getSrc(), new Point(op.center.x - Math.cos(op.angle) * stripWidth / 2 * op.strenght, op.center.y - Math.sin(op.angle) * stripHeight / 2 * op.strenght),
-					new Point(op.center.x + Math.cos(op.angle) * stripWidth / 2 * op.strenght, op.center.y + Math.sin(op.angle) * stripHeight / 2 * op.strenght), new Scalar(0, 0, 255), 1);
-
-		}
-
-		for (OrientedPoint op : verticalSegments[0].stream().flatMap(h -> h.stream()).flatMap(edge -> Stream.of(edge.op1, edge.op2)).collect(Collectors.toList())) {
-			Imgproc.line(frameDisplayFHT.getSrc(), new Point(op.center.x + Math.sin(op.angle) * stripWidth / 2 * op.strenght, op.center.y - Math.cos(op.angle) * stripHeight / 2 * op.strenght),
-					new Point(op.center.x - Math.sin(op.angle) * stripWidth / 2 * op.strenght, op.center.y + Math.cos(op.angle) * stripHeight / 2 * op.strenght), new Scalar(255, 255, 0), 1);
-
-		}
-		for (OrientedPoint op : verticalSegments[1].stream().flatMap(h -> h.stream()).flatMap(edge -> Stream.of(edge.op1, edge.op2)).collect(Collectors.toList())) {
-			Imgproc.line(frameDisplayFHT.getSrc(), new Point(op.center.x + Math.sin(op.angle) * stripWidth / 2 * op.strenght, op.center.y - Math.cos(op.angle) * stripHeight / 2 * op.strenght),
-					new Point(op.center.x - Math.sin(op.angle) * stripWidth / 2 * op.strenght, op.center.y + Math.cos(op.angle) * stripHeight / 2 * op.strenght), new Scalar(255, 0, 255), 1);
-
-		}
-		images[3] = frameDisplayFHT.toJfxImage();
-		ref = trace("Display lines", ref);
-
 		MeshManager meshManager = new MeshManager(6, 4, superInterpolator, superFrame.getFrame().getSrc());
-		ref = trace("Build mesh", ref);
-
 		images[4] = new Img(meshManager.drawOnCopy(new Scalar(0, 255, 0), new Scalar(0, 0, 255)), false).toJfxImage();
-		ref = trace("Draw mesh", ref);
+		ref = trace("Build and draw mesh", ref);
 
-		Img dewarpFHT = new Img(meshManager.dewarp());
-		images[5] = dewarpFHT.toJfxImage();
-		ref = trace("Dewarp", ref);
+		// Img dewarpFHT = new Img(meshManager.dewarp());
+		// images[5] = dewarpFHT.toJfxImage();
+		// ref = trace("Dewarp", ref);
 
-		Img dewarpedBinarized2 = dewarpFHT.adaptativeGaussianInvThreshold(7, 5);// .canny(20, 80);
-		images[6] = dewarpedBinarized2.toJfxImage();
-		ref = trace("Binarize dewarp", ref);
+		// Img dewarpedBinarized2 = dewarpFHT.adaptativeGaussianInvThreshold(7, 5);// .canny(20, 80);
+		// images[6] = dewarpedBinarized2.toJfxImage();
+		// ref = trace("Binarize dewarp", ref);
 
-		Layout layout = dewarpedBinarized2.buildLayout(new Size(2, 0.0), new Size(0.001, 0.001), 8);
-		layout.draw(dewarpFHT, new Scalar(255, 0, 0), new Scalar(0, 0, 255), 1, 2);
-		images[7] = dewarpFHT.toJfxImage();
-		ref = trace("Layout", ref);
+		// Layout layout = dewarpedBinarized2.buildLayout(new Size(2, 0.0), new Size(0.001, 0.001), 8);
+		// layout.draw(dewarpFHT, new Scalar(255, 0, 0), new Scalar(0, 0, 255), 1, 2);
+		// images[7] = dewarpFHT.toJfxImage();
+		// ref = trace("Layout", ref);
 
-		images[8] = new Img(meshManager.draw3Dsurface(new Scalar(0, 255, 0), new Scalar(0, 0, 255)), false).toJfxImage();
+		images[5] = new Img(meshManager.draw3Dsurface(new Scalar(0, 255, 0), new Scalar(0, 0, 255)), false).toJfxImage();
 		ref = trace("3D surface / svd", ref);
 
 		Img dewarpFHT3D = new Img(meshManager.dewarp3D());
-		images[9] = dewarpFHT3D.toJfxImage();
+		images[6] = dewarpFHT3D.toJfxImage();
 		ref = trace("Dewarp 3D", ref);
 
 		Img binarized3D = dewarpFHT3D.adaptativeGaussianInvThreshold(7, 5);// .canny(20, 80);
-		images[10] = binarized3D.toJfxImage();
+		images[7] = binarized3D.toJfxImage();
 		ref = trace("Binarize dewarp 3D", ref);
 
-		Layout layout3D = binarized3D.buildLayout(new Size(2, 0.0), new Size(0.01, 0.01), 8);
+		Layout layout3D = binarized3D.buildLayout(new Size(2, 0.0), new Size(0.001, 0.001), 8);
 		layout3D.draw(dewarpFHT3D, new Scalar(255, 0, 0), new Scalar(0, 0, 255), 1, 2);
-		images[11] = dewarpFHT3D.toJfxImage();
+		images[8] = dewarpFHT3D.toJfxImage();
 		ref = trace("Layout 3D", ref);
 
-		meshManager.recomputeGrid();
-		images[12] = new Img(meshManager.drawOnCopy(new Scalar(0, 255, 0), new Scalar(0, 0, 255)), false).toJfxImage();
-		ref = trace("Draw mesh", ref);
-
-		images[13] = new Img(meshManager.draw3Dsurface(new Scalar(0, 255, 0), new Scalar(0, 0, 255)), false).toJfxImage();
-		ref = trace("3D surface SVD", ref);
-
-		images[14] = new Img(meshManager.dewarp3D(), false).toJfxImage();
-		ref = trace("Dewarp 3D", ref);
+		// meshManager.recomputeGrid();
+		// images[12] = new Img(meshManager.drawOnCopy(new Scalar(0, 255, 0), new Scalar(0, 0, 255)), false).toJfxImage();
+		// ref = trace("Draw mesh", ref);
+		//
+		// images[13] = new Img(meshManager.draw3Dsurface(new Scalar(0, 255, 0), new Scalar(0, 0, 255)), false).toJfxImage();
+		// ref = trace("3D surface SVD", ref);
+		//
+		// images[14] = new Img(meshManager.dewarp3D(), false).toJfxImage();
+		// ref = trace("Dewarp 3D", ref);
 
 		return images;
 

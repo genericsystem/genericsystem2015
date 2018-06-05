@@ -9,7 +9,6 @@ import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Point3;
-import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 
@@ -132,43 +131,56 @@ public class Mesh3D extends AbstractMesh<Point3> {
 		// System.out.println(DoubleStream.of(heights).sum());
 		// System.out.println(DoubleStream.of(widths).sum());
 
-		Mat enlargedImage = new Mat(src.size(), CvType.CV_8UC3, new Scalar(255, 255, 255));
-		double y = enlargedImage.height() / 2;
-		for (int i = 0; i < halfHeight; i++) {
-			double x = enlargedImage.width() / 2;
-			for (int j = 0; j < halfWidth; j++) {
-				if (x >= 0 && (x + widths[j + halfWidth] < enlargedImage.width()) && y >= 0 && (y + heights[i + halfHeight] < enlargedImage.height()))
-					deWarp(src, enlargedImage, mesh.getPoints(i, j), x, y, widths[j + halfWidth], heights[i + halfHeight]);
-				x += widths[j + halfWidth];
+		Mat result = new Mat(originalSize, CvType.CV_8UC3, new Scalar(255, 255, 255));
+		double y = 0;
+		for (int i = 0; i < 2 * halfHeight; i++) {
+			double x = 0;
+			for (int j = 0; j < 2 * halfWidth; j++) {
+				if (x >= 0 && ((int) (x + widths[j]) <= result.width()) && y >= 0 && ((int) (y + heights[i]) <= result.height()))
+					deWarp(src, result, mesh.getPoints(i - halfHeight, j - halfWidth), x, y, widths[j], heights[i]);
+				x += widths[j];
 			}
+			y += heights[i];
+		}
+		return result;
 
-			x = enlargedImage.width() / 2;
-			for (int j = -1; j >= -halfWidth; j--) {
-				x -= widths[j + halfWidth];
-				if (x >= 0 && (x + widths[j + halfWidth] < enlargedImage.width()) && y >= 0 && (y + heights[i + halfHeight] < enlargedImage.height()))
-					deWarp(src, enlargedImage, mesh.getPoints(i, j), x, y, widths[j + halfWidth], heights[i + halfHeight]);
-			}
-			y += heights[i + halfHeight];
-		}
-		y = enlargedImage.height() / 2;
-		for (int i = -1; i >= -halfHeight; i--) {
-			y -= heights[i + halfHeight];
-			double x = enlargedImage.width() / 2;
-			for (int j = 0; j < halfWidth; j++) {
-				if (x >= 0 && (x + widths[j + halfWidth] < enlargedImage.width()) && y >= 0 && (y + heights[i + halfHeight] < enlargedImage.height()))
-					deWarp(src, enlargedImage, mesh.getPoints(i, j), x, y, widths[j + halfWidth], heights[i + halfHeight]);
-				x += widths[j + halfWidth];
-			}
-			x = enlargedImage.width() / 2;
-			for (int j = -1; j >= -halfWidth; j--) {
-				x -= widths[j + halfWidth];
-				if (x >= 0 && (x + widths[j + halfWidth] < enlargedImage.width()) && y >= 0 && (y + heights[i + halfHeight] < enlargedImage.height()))
-					deWarp(src, enlargedImage, mesh.getPoints(i, j), x, y, widths[j + halfWidth], heights[i + halfHeight]);
-			}
-		}
-		double xBorder = (enlargedImage.width() - originalSize.width) / 2;
-		double yBorder = (enlargedImage.height() - originalSize.height) / 2;
-		return new Mat(enlargedImage, new Rect(new Point(xBorder, yBorder), new Point(enlargedImage.width() - xBorder, enlargedImage.height() - yBorder)));
+		// Mat enlargedImage = new Mat(src.size(), CvType.CV_8UC3, new Scalar(255, 255, 255));
+		// double y = enlargedImage.height() / 2;
+		// for (int i = 0; i < halfHeight; i++) {
+		// double x = enlargedImage.width() / 2;
+		// for (int j = 0; j < halfWidth; j++) {
+		// if (x >= 0 && (x + widths[j + halfWidth] < enlargedImage.width()) && y >= 0 && (y + heights[i + halfHeight] < enlargedImage.height()))
+		// deWarp(src, enlargedImage, mesh.getPoints(i, j), x, y, widths[j + halfWidth], heights[i + halfHeight]);
+		// x += widths[j + halfWidth];
+		// }
+		//
+		// x = enlargedImage.width() / 2;
+		// for (int j = -1; j >= -halfWidth; j--) {
+		// x -= widths[j + halfWidth];
+		// if (x >= 0 && (x + widths[j + halfWidth] < enlargedImage.width()) && y >= 0 && (y + heights[i + halfHeight] < enlargedImage.height()))
+		// deWarp(src, enlargedImage, mesh.getPoints(i, j), x, y, widths[j + halfWidth], heights[i + halfHeight]);
+		// }
+		// y += heights[i + halfHeight];
+		// }
+		// y = enlargedImage.height() / 2;
+		// for (int i = -1; i >= -halfHeight; i--) {
+		// y -= heights[i + halfHeight];
+		// double x = enlargedImage.width() / 2;
+		// for (int j = 0; j < halfWidth; j++) {
+		// if (x >= 0 && (x + widths[j + halfWidth] < enlargedImage.width()) && y >= 0 && (y + heights[i + halfHeight] < enlargedImage.height()))
+		// deWarp(src, enlargedImage, mesh.getPoints(i, j), x, y, widths[j + halfWidth], heights[i + halfHeight]);
+		// x += widths[j + halfWidth];
+		// }
+		// x = enlargedImage.width() / 2;
+		// for (int j = -1; j >= -halfWidth; j--) {
+		// x -= widths[j + halfWidth];
+		// if (x >= 0 && (x + widths[j + halfWidth] < enlargedImage.width()) && y >= 0 && (y + heights[i + halfHeight] < enlargedImage.height()))
+		// deWarp(src, enlargedImage, mesh.getPoints(i, j), x, y, widths[j + halfWidth], heights[i + halfHeight]);
+		// }
+		// }
+		// double xBorder = (enlargedImage.width() - originalSize.width) / 2;
+		// double yBorder = (enlargedImage.height() - originalSize.height) / 2;
+		// return new Mat(enlargedImage, new Rect(new Point(xBorder, yBorder), new Point(enlargedImage.width() - xBorder, enlargedImage.height() - yBorder)));
 	}
 
 	private double euclideanDistance(Point3 p1, Point3 p2) {

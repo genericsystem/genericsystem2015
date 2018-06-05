@@ -1,5 +1,12 @@
 package org.genericsystem.cv.application;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.genericsystem.cv.AbstractApp;
@@ -13,13 +20,6 @@ import org.opencv.core.Range;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -102,7 +102,7 @@ public class RadonTransformDemo2 extends AbstractApp {
 		int stripWidth = 100;
 		int w = 50;
 		Mat vStrip = RadonTransform.extractStrip(binarized.getSrc(), binarized.width() / 2 - stripWidth / 2, stripWidth);
-		Mat vStrip2 = RadonTransform.extractStrip(binarized.getSrc(), binarized.width() / 2 - stripWidth / 2 + w, stripWidth);
+		// Mat vStrip2 = RadonTransform.extractStrip(binarized.getSrc(), binarized.width() / 2 - stripWidth / 2 + w, stripWidth);
 		Mat vStripDisplay = Mat.zeros(binarized.size(), binarized.type());
 		Mat roi = new Mat(vStripDisplay, new Range(0, binarized.height()), new Range(binarized.width() / 2 - stripWidth / 2, binarized.width() / 2 + stripWidth / 2));
 		vStrip.copyTo(roi);
