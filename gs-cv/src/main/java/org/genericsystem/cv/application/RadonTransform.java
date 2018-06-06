@@ -512,8 +512,8 @@ public class RadonTransform {
 		List<OrientedPoint> bottomPoints = new ArrayList<>();
 		List<HoughTrajectStep[]> lines = getStripLinesFHT(trajectSteps, localTheshold, globalTheshold);
 		lines.stream().forEach(trajectStep -> {
-			topPoints.add(new OrientedPoint(new Point(x, trajectStep[0].y), (trajectStep[0].getTheta() - 45) / 180 * Math.PI, trajectStep[0].magnitude, trajectStep[0].derivative));
-			bottomPoints.add(new OrientedPoint(new Point(x, trajectStep[1].y), (trajectStep[1].getTheta() - 45) / 180 * Math.PI, trajectStep[1].magnitude, trajectStep[1].derivative));
+			topPoints.add(new OrientedPoint(new Point(x, trajectStep[0].y), Math.atan(trajectStep[0].derivative), trajectStep[0].magnitude, trajectStep[0].derivative));
+			bottomPoints.add(new OrientedPoint(new Point(x, trajectStep[1].y), Math.atan(trajectStep[1].derivative), trajectStep[1].magnitude, trajectStep[1].derivative));
 		});
 		return new List[] { topPoints, bottomPoints };
 	}
@@ -525,8 +525,8 @@ public class RadonTransform {
 		List<HoughTrajectStep[]> lines = getStripLinesFHT(trajectSteps, localTheshold, globalTheshold);
 
 		lines.stream().forEach(trajectStep -> {
-			leftPoints.add(new OrientedPoint(new Point(trajectStep[0].y, y), -(trajectStep[0].getTheta() - 45) / 180 * Math.PI, trajectStep[0].magnitude, trajectStep[0].derivative));
-			rightPoints.add(new OrientedPoint(new Point(trajectStep[1].y, y), -(trajectStep[1].getTheta() - 45) / 180 * Math.PI, trajectStep[1].magnitude, trajectStep[1].derivative));
+			leftPoints.add(new OrientedPoint(new Point(trajectStep[0].y, y), -Math.atan(trajectStep[0].derivative), trajectStep[0].magnitude, trajectStep[0].derivative));
+			rightPoints.add(new OrientedPoint(new Point(trajectStep[1].y, y), -Math.atan(trajectStep[1].derivative), trajectStep[1].magnitude, trajectStep[1].derivative));
 		});
 		return new List[] { leftPoints, rightPoints };
 	}

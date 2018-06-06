@@ -100,9 +100,9 @@ public class RadonTransformDemo2 extends AbstractApp {
 		ref = trace("Binarization", ref);
 
 		int stripWidth = 100;
-		int w = 50;
+		int vStep = 50;
 		Mat vStrip = RadonTransform.extractStrip(binarized.getSrc(), binarized.width() / 2 - stripWidth / 2, stripWidth);
-		// Mat vStrip2 = RadonTransform.extractStrip(binarized.getSrc(), binarized.width() / 2 - stripWidth / 2 + w, stripWidth);
+		Mat vStrip2 = RadonTransform.extractStrip(binarized.getSrc(), binarized.width() / 2 - stripWidth / 2 + vStep, stripWidth);
 		Mat vStripDisplay = Mat.zeros(binarized.size(), binarized.type());
 		Mat roi = new Mat(vStripDisplay, new Range(0, binarized.height()), new Range(binarized.width() / 2 - stripWidth / 2, binarized.width() / 2 + stripWidth / 2));
 		vStrip.copyTo(roi);
@@ -112,14 +112,14 @@ public class RadonTransformDemo2 extends AbstractApp {
 		ref = trace("Extract strip", ref);
 
 		Mat houghTransform = RadonTransform.fastHoughTransform(vStrip);
-		// Mat houghTransform2 = RadonTransform.fastHoughTransform(vStrip2);
+		Mat houghTransform2 = RadonTransform.fastHoughTransform(vStrip2);
 
-		System.out.println(houghTransform);
-		// houghTransform.row(0).setTo(new Scalar(0));
-		// houghTransform.row(houghTransform.rows() - 1).setTo(new Scalar(0));
 		Core.normalize(houghTransform, houghTransform, 0, 1, Core.NORM_MINMAX);
+		Core.normalize(houghTransform2, houghTransform2, 0, 1, Core.NORM_MINMAX);
 		Mat houghTransform255 = new Mat();
+		Mat houghTransform2552 = new Mat();
 		Core.normalize(houghTransform, houghTransform255, 0, 255, Core.NORM_MINMAX);
+		Core.normalize(houghTransform2, houghTransform2552, 0, 255, Core.NORM_MINMAX);
 
 		Mat blur = new Mat();
 		Imgproc.blur(houghTransform255, blur, new Size(1, 11), new Point(-1, -1), Core.BORDER_ISOLATED);
@@ -202,12 +202,12 @@ public class RadonTransformDemo2 extends AbstractApp {
 			// for (TrajectStep trajectStep : Arrays.stream(houghVtraj).filter(ts -> Math.abs(magnitudes.get(ts.k).magnitude) > 30).collect(Collectors.toList())) {
 			double mag = stripWidth;
 			int row = topBottom[0].y;
-			double theta = (magnitudes.get(row).getTheta() - 45) / 180 * Math.PI;
+			double theta = Math.atan(magnitudes.get(row).derivative);
 			Scalar color = new Scalar(0, 255, 0);
 			Imgproc.line(vStripColor, new Point(vStripColor.width() / 2 - mag * Math.cos(theta), row - mag * Math.sin(theta)), new Point(vStripColor.width() / 2 + mag * Math.cos(theta), row + mag * Math.sin(theta)), color, 1);
 			color = new Scalar(0, 0, 255);
 			row = topBottom[1].y;
-			theta = (magnitudes.get(row).getTheta() - 45) / 180 * Math.PI;
+			theta = Math.atan(magnitudes.get(row).derivative);
 			Imgproc.line(vStripColor, new Point(vStripColor.width() / 2 - mag * Math.cos(theta), row - mag * Math.sin(theta)), new Point(vStripColor.width() / 2 + mag * Math.cos(theta), row + mag * Math.sin(theta)), color, 1);
 
 		}
@@ -218,16 +218,59 @@ public class RadonTransformDemo2 extends AbstractApp {
 		images[8] = new Img(vStripColorDisplay, false).toJfxImage();
 		ref = trace("Display underlined strip", ref);
 
+		List<HoughTrajectStep> mags2 = RadonTransform.bestTrajectFHT(houghTransform2, 11, -0.2);
+		Double[] magnitudes_ = new Double[binarized.height()];
+		Double[] derivatives = new Double[binarized.height()];
+
+		for (int row = 0; row < binarized.height(); row++) {
+			double derivative = mags2.get(row).derivative;
+			int newy = (int) Math.round(-derivative * vStep + row);
+			if (newy >= 0 && newy < binarized.height()) {
+				if (derivatives[newy] != null)
+					throw new IllegalStateException("" + row);
+				derivatives[newy] = derivative;
+				// if (magnitudes_[newy] != null)
+				// throw new IllegalStateException("" + row);
+				magnitudes_[newy] = mags2.get(row).magnitude;
+			}
+		}
+
+		Mat penality = Mat.zeros(binarized.height(), 2 * stripWidth - 1, CvType.CV_64FC1);
+		for (int row = 0; row < penality.height(); row++) {
+			Double derivative = derivatives[row];
+			if (derivative != null) {
+				double mag = magnitudes_[row];
+				for (int col = 0; col < penality.width(); col++) {
+					double angle1 = Math.atan(derivative) * 180 / Math.PI;
+					double angle2 = Math.atan(((double) col - stripWidth + 1) / (stripWidth - 1)) * 180 / Math.PI;
+					double angleCoeff = Math.abs(angle1 - angle2) / 90;
+					// System.out.println(row + " " + col + " " + angle1 + " " + angle2);
+					penality.put(row, col, 255 * mag * angleCoeff);
+				}
+			}
+		}
+		images[9] = new Img(penality, false).toJfxImage();
+		ref = trace("Display influence from second strip", ref);
+
+		Mat newHough = houghTransform255.clone();
+		Core.addWeighted(newHough, 1, penality, -1, 0, newHough);
+
+		images[10] = new Img(houghTransform2552, false).toJfxImage();
+		ref = trace("Display new hough", ref);
+
+		images[11] = new Img(newHough, false).toJfxImage();
+		ref = trace("Display new hough", ref);
+
 		Mat vTransform = RadonTransform.radonTransform(vStrip, -45, 45);
 		Mat vProjection = RadonTransform.radonRemap(vTransform, -45);
 
-		images[9] = new Img(vProjection, false).toJfxImage();
+		images[12] = new Img(vProjection, false).toJfxImage();
 		System.out.println(vProjection);
 
 		Imgproc.morphologyEx(vProjection, vProjection, Imgproc.MORPH_GRADIENT, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(1, 2)));
 		Core.normalize(vProjection, vProjection, 0, 255, Core.NORM_MINMAX);
 		ref = trace("Radon + Projection", ref);
-		images[10] = new Img(vProjection, false).toJfxImage();
+		images[13] = new Img(vProjection, false).toJfxImage();
 
 		TrajectStep[] vtraj = RadonTransform.bestTrajectRadon(vProjection, -20);
 
@@ -251,7 +294,7 @@ public class RadonTransformDemo2 extends AbstractApp {
 				vProjectionColor.put(y, vtraj[y].theta, 0, 0, 255);
 
 		ref = trace("Best traject radon", ref);
-		images[11] = new Img(vProjectionColor, false).toJfxImage();
+		images[14] = new Img(vProjectionColor, false).toJfxImage();
 		// Function<Double, Double> approxRadonVFunction = RadonTransform.approxTraject(vtraj);
 		// for (int y = 0; y < vProjectionColor.height(); y++) {
 		// int x = (int) Math.round(approxRadonVFunction.apply((double) y));

@@ -127,8 +127,8 @@ public class RadonTransformDemo extends AbstractApp {
 		hHoughs.stream().forEach(projectionMap -> Core.normalize(projectionMap, projectionMap, 0, 1, Core.NORM_MINMAX));
 		ref = trace("Compute FHT", ref);
 
-		List<List<HoughTrajectStep>> vHoughTrajs = vHoughs.stream().map(projectionMap -> RadonTransform.bestTrajectFHT(projectionMap, 11, -0.2)).collect(Collectors.toList());
-		List<List<HoughTrajectStep>> hHoughTrajs = hHoughs.stream().map(projectionMap -> RadonTransform.bestTrajectFHT(projectionMap, 11, -0.2)).collect(Collectors.toList());
+		List<List<HoughTrajectStep>> vHoughTrajs = vHoughs.stream().map(projectionMap -> RadonTransform.bestTrajectFHT(projectionMap, 21, -0.2)).collect(Collectors.toList());
+		List<List<HoughTrajectStep>> hHoughTrajs = hHoughs.stream().map(projectionMap -> RadonTransform.bestTrajectFHT(projectionMap, 21, -0.2)).collect(Collectors.toList());
 		ref = trace("Compute trajects", ref);
 
 		List<List<OrientedPoint>[]> fhtHorizontals = new ArrayList<>();

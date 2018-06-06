@@ -16,8 +16,4 @@ public class HoughTrajectStep implements Comparable<HoughTrajectStep> {
 		return Double.compare(step.magnitude, magnitude);
 	}
 
-	public double getTheta() {
-		return Math.atan(derivative) / Math.PI * 180 + 45;
-	}
-
 }
