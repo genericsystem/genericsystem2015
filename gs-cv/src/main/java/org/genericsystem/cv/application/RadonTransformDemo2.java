@@ -226,8 +226,8 @@ public class RadonTransformDemo2 extends AbstractApp {
 			double derivative = mags2.get(row).derivative;
 			int newy = (int) Math.round(-derivative * vStep + row);
 			if (newy >= 0 && newy < binarized.height()) {
-				if (derivatives[newy] != null)
-					throw new IllegalStateException("" + row);
+				// if (derivatives[newy] != null)
+				// throw new IllegalStateException("" + row);
 				derivatives[newy] = derivative;
 				// if (magnitudes_[newy] != null)
 				// throw new IllegalStateException("" + row);
@@ -245,7 +245,7 @@ public class RadonTransformDemo2 extends AbstractApp {
 					double angle2 = Math.atan(((double) col - stripWidth + 1) / (stripWidth - 1)) * 180 / Math.PI;
 					double angleCoeff = Math.abs(angle1 - angle2) / 90;
 					// System.out.println(row + " " + col + " " + angle1 + " " + angle2);
-					penality.put(row, col, 255 * mag * angleCoeff);
+					penality.put(row, col, 100 * mag * angleCoeff);
 				}
 			}
 		}

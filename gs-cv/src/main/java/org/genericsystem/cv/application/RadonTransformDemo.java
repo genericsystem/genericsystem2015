@@ -105,19 +105,25 @@ public class RadonTransformDemo extends AbstractApp {
 		ref = trace("Binarization", ref);
 
 		double vRecover = 0.7;
-		int vStripsNumber = 8;
-		double stripWidth = (binarized.width() / (vStripsNumber * (1 - vRecover) + vRecover));
+		int vStripsNumber = 16;
+		double stripWidth = (binarized.width() / (vStripsNumber * (1 - vRecover) + vRecover - 1));
 		double vStep = ((1 - vRecover) * stripWidth);
 		System.out.println(vStripsNumber + " verticals strips with width : " + stripWidth + " each step : " + vStep);
 
 		double hRecover = 0.7;
-		int hStripsNumber = 4;
-		double stripHeight = (binarized.height() / (hStripsNumber * (1 - hRecover) + hRecover));
+		int hStripsNumber = 10;
+		double stripHeight = (binarized.height() / (hStripsNumber * (1 - hRecover) + hRecover - 1));
 		double hStep = ((1 - hRecover) * stripHeight);
 		System.out.println(hStripsNumber + " horizontal strips with width : " + stripHeight + " each step : " + hStep);
 
-		List<Mat> vStrips = RadonTransform.extractStrips(binarized.getSrc(), vStripsNumber, stripWidth, vStep);
-		List<Mat> hStrips = RadonTransform.extractStrips(transposedBinarized.getSrc(), hStripsNumber, stripHeight, hStep);
+		Mat enlargedBinarized = new Mat();
+		Core.copyMakeBorder(binarized.getSrc(), enlargedBinarized, 0, 0, (int) Math.round(stripWidth / 2), (int) Math.round(stripWidth / 2), Core.BORDER_CONSTANT, new Scalar(0));
+
+		Mat enlargedTransposedBinarized = new Mat();
+		Core.copyMakeBorder(transposedBinarized.getSrc(), enlargedTransposedBinarized, 0, 0, (int) Math.round(stripHeight / 2), (int) Math.round(stripHeight / 2), Core.BORDER_CONSTANT, new Scalar(0));
+
+		List<Mat> vStrips = RadonTransform.extractStrips(enlargedBinarized, vStripsNumber, stripWidth, vStep);
+		List<Mat> hStrips = RadonTransform.extractStrips(enlargedTransposedBinarized, hStripsNumber, stripHeight, hStep);
 		ref = trace("Extract strips", ref);
 
 		List<Mat> vHoughs = vStrips.stream().map(strip -> RadonTransform.fastHoughTransform(strip)).collect(Collectors.toList());
@@ -133,10 +139,10 @@ public class RadonTransformDemo extends AbstractApp {
 
 		List<List<OrientedPoint>[]> fhtHorizontals = new ArrayList<>();
 		for (int vStripIndex = 0; vStripIndex < vHoughTrajs.size(); vStripIndex++)
-			fhtHorizontals.add(RadonTransform.toHorizontalOrientedPoints(vHoughTrajs.get(vStripIndex), vStripIndex * vStep + stripWidth / 2, 0.4, 0.03));
+			fhtHorizontals.add(RadonTransform.toHorizontalOrientedPoints(vHoughTrajs.get(vStripIndex), vStripIndex * vStep, 0.4, 0.03));
 		List<List<OrientedPoint>[]> fhtVerticals = new ArrayList<>();
 		for (int hStrip = 0; hStrip < hHoughTrajs.size(); hStrip++)
-			fhtVerticals.add(RadonTransform.toVerticalOrientedPoints(hHoughTrajs.get(hStrip), hStrip * hStep + stripHeight / 2, 0.4, 0.03));
+			fhtVerticals.add(RadonTransform.toVerticalOrientedPoints(hHoughTrajs.get(hStrip), hStrip * hStep, 0.4, 0.03));
 
 		List<List<Segment>>[] horizontalSegments = connect(fhtHorizontals, vStep, 0.05, false);
 		List<List<Segment>>[] verticalSegments = connect(fhtVerticals, hStep, 0.05, true);
