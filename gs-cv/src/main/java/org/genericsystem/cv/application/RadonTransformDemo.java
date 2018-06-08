@@ -1,5 +1,15 @@
 package org.genericsystem.cv.application;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.genericsystem.cv.AbstractApp;
@@ -14,16 +24,6 @@ import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -104,17 +104,17 @@ public class RadonTransformDemo extends AbstractApp {
 		Img transposedBinarized = binarized.transpose();
 		ref = trace("Binarization", ref);
 
-		double vRecover = 0.7;
-		int vStripsNumber = 16;
+		double vRecover = 0.80;
+		int vStripsNumber = (int) ((16d / 5 - vRecover + 1) / (1 - vRecover));
 		double stripWidth = (binarized.width() / (vStripsNumber * (1 - vRecover) + vRecover - 1));
 		double vStep = ((1 - vRecover) * stripWidth);
 		double minVerticalAccuracy = 180 * (Math.atan(1 / (stripWidth - 1))) / Math.PI;
 		System.out.println(vStripsNumber + " verticals strips with width : " + stripWidth + " each step : " + vStep + " min accuracy : " + minVerticalAccuracy);
 
-		double hRecover = 0.7;
-		int hStripsNumber = 9;
-
+		double hRecover = 0.80;
+		int hStripsNumber = (int) ((9d / 5 - hRecover + 1) / (1 - hRecover));
 		double stripHeight = (binarized.height() / (hStripsNumber * (1 - hRecover) + hRecover - 1));
+
 		double hStep = ((1 - hRecover) * stripHeight);
 		double minHorizontalAccuracy = 180 * (Math.atan(1 / (stripHeight - 1))) / Math.PI;
 

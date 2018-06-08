@@ -6,7 +6,7 @@ import org.opencv.core.Size;
 
 interface GSCapture {
 	public static final Size HD = new Size(1280, 720);
-	public static final Size VGA = new Size(320, 180);
+	public static final Size VGA = new Size(320, 160);
 
 	SuperFrameImg read();
 
