@@ -1,15 +1,5 @@
 package org.genericsystem.cv.application;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.genericsystem.cv.AbstractApp;
@@ -24,6 +14,16 @@ import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -108,13 +108,17 @@ public class RadonTransformDemo extends AbstractApp {
 		int vStripsNumber = 16;
 		double stripWidth = (binarized.width() / (vStripsNumber * (1 - vRecover) + vRecover - 1));
 		double vStep = ((1 - vRecover) * stripWidth);
-		System.out.println(vStripsNumber + " verticals strips with width : " + stripWidth + " each step : " + vStep);
+		double minVerticalAccuracy = 180 * (Math.atan(1 / (stripWidth - 1))) / Math.PI;
+		System.out.println(vStripsNumber + " verticals strips with width : " + stripWidth + " each step : " + vStep + " min accuracy : " + minVerticalAccuracy);
 
 		double hRecover = 0.7;
-		int hStripsNumber = 10;
+		int hStripsNumber = 9;
+
 		double stripHeight = (binarized.height() / (hStripsNumber * (1 - hRecover) + hRecover - 1));
 		double hStep = ((1 - hRecover) * stripHeight);
-		System.out.println(hStripsNumber + " horizontal strips with width : " + stripHeight + " each step : " + hStep);
+		double minHorizontalAccuracy = 180 * (Math.atan(1 / (stripHeight - 1))) / Math.PI;
+
+		System.out.println(hStripsNumber + " horizontal strips with width : " + stripHeight + " each step : " + hStep + " min accuracy : " + minHorizontalAccuracy);
 
 		Mat enlargedBinarized = new Mat();
 		Core.copyMakeBorder(binarized.getSrc(), enlargedBinarized, 0, 0, (int) Math.round(stripWidth / 2), (int) Math.round(stripWidth / 2), Core.BORDER_CONSTANT, new Scalar(0));
@@ -230,7 +234,7 @@ public class RadonTransformDemo extends AbstractApp {
 		ref = trace("Binarize dewarp 3D", ref);
 
 		Layout layout3D = binarized3D.buildLayout(new Size(2, 0.0), new Size(0.001, 0.001), 8);
-		layout3D.draw(dewarpFHT3D, new Scalar(255, 0, 0), new Scalar(0, 0, 255), 1, 2);
+		layout3D.draw(dewarpFHT3D, new Scalar(255, 0, 0), new Scalar(0, 0, 255), 0, -1);
 		images[8] = dewarpFHT3D.toJfxImage();
 		ref = trace("Layout 3D", ref);
 

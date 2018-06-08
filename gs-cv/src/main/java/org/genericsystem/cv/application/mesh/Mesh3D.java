@@ -1,16 +1,16 @@
 package org.genericsystem.cv.application.mesh;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.DoubleStream;
-
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Point3;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
 
 public class Mesh3D extends AbstractMesh<Point3> {
 
@@ -22,7 +22,7 @@ public class Mesh3D extends AbstractMesh<Point3> {
 		this.mesh = mesh;
 		int[][] indexRects = mesh.values().stream().map(indexedPts -> new int[] { indexedPts[0].getIndex(), indexedPts[1].getIndex(), indexedPts[2].getIndex(), indexedPts[3].getIndex() }).toArray(int[][]::new);
 
-		double focal_length = Math.max(size.width, size.height) / Math.tan((70d / 180) * Math.PI / 2) / 2;
+		double focal_length = Math.max(size.width, size.height) / Math.tan((100d / 180) * Math.PI / 2) / 2;
 		System.out.println("Focale : " + focal_length);
 		List<Point> focalizedPts = mesh.getPointIndex().stream().map(pts -> new Point((pts.x - size.width / 2) / focal_length, (pts.y - size.height / 2) / focal_length)).collect(Collectors.toList());
 
