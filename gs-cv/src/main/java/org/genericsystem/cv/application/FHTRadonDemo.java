@@ -1,9 +1,17 @@
 package org.genericsystem.cv.application;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
+import org.genericsystem.cv.application.RadonTransform.RadonTrajectStep;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
@@ -14,19 +22,12 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
 import javafx.application.Platform;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 
-public class RadonTransformDemo2 extends AbstractApp {
+public class FHTRadonDemo extends AbstractApp {
 
 	public static void main(String[] args) {
 		launch(args);
@@ -111,8 +112,8 @@ public class RadonTransformDemo2 extends AbstractApp {
 		images[1] = new Img(vStripDisplay, false).toJfxImage();
 		ref = trace("Extract strip", ref);
 
-		Mat houghTransform = RadonTransform.fastHoughTransform(vStrip);
-		Mat houghTransform2 = RadonTransform.fastHoughTransform(vStrip2);
+		Mat houghTransform = FHT.fastHoughTransform(vStrip);
+		Mat houghTransform2 = FHT.fastHoughTransform(vStrip2);
 
 		Core.normalize(houghTransform, houghTransform, 0, 1, Core.NORM_MINMAX);
 		Core.normalize(houghTransform2, houghTransform2, 0, 1, Core.NORM_MINMAX);
@@ -129,17 +130,17 @@ public class RadonTransformDemo2 extends AbstractApp {
 		images[3] = new Img(houghTransform255, false).toJfxImage();
 		ref = trace("FHT", ref);
 
-		Mat adaptive = RadonTransform.adaptivHough(houghTransform255, 11);
+		Mat adaptive = FHT.adaptivHough(houghTransform255, 11);
 		Core.normalize(adaptive, adaptive, 0, 255, Core.NORM_MINMAX);
 		images[4] = new Img(adaptive, false).toJfxImage();
 		adaptive.release();
 		ref = trace("Adaptive FHT", ref);
 
-		List<HoughTrajectStep> magnitudes = RadonTransform.bestTrajectFHT(houghTransform, 11, -0.2);
-		List<HoughTrajectStep> filteredMagnitudes = new ArrayList<>();
+		List<TrajectStep> magnitudes = FHT.bestTrajectFHT(houghTransform, 11, -0.2);
+		List<TrajectStep> filteredMagnitudes = new ArrayList<>();
 		filteredMagnitudes.add(magnitudes.get(0));
 		for (int row = 1; row < magnitudes.size() - 1; row++) {
-			HoughTrajectStep step = magnitudes.get(row);
+			TrajectStep step = magnitudes.get(row);
 			if (step.magnitude >= 0.2)
 				filteredMagnitudes.add(step);
 		}
@@ -159,7 +160,7 @@ public class RadonTransformDemo2 extends AbstractApp {
 		// }
 		// }
 		ref = trace("FHT traject 1", ref);
-		List<HoughTrajectStep> magnitudes2 = RadonTransform.bestTrajectFHT2(houghTransform, 11, 500, 30);
+		List<TrajectStep> magnitudes2 = FHT.bestTrajectFHT2(houghTransform, 11, 500, 30);
 		ref = trace("FHT traject2", ref);
 		PolynomialSplineFunction polynomialSplineFunction2 = new LinearInterpolator().interpolate(magnitudes2.stream().mapToDouble(step -> step.y).toArray(), magnitudes2.stream().mapToDouble(step -> step.derivative).toArray());
 
@@ -178,14 +179,14 @@ public class RadonTransformDemo2 extends AbstractApp {
 		ref = trace("FHT traject", ref);
 
 		Mat magnitudesDisplay = Mat.zeros(magnitudes.size(), 255, CvType.CV_8UC1);
-		for (HoughTrajectStep step : magnitudes)
+		for (TrajectStep step : magnitudes)
 			Imgproc.line(magnitudesDisplay, new Point(0, step.y), new Point(step.magnitude * 255, step.y), new Scalar(255));
 		images[6] = new Img(magnitudesDisplay, false).toJfxImage();
 		ref = trace("Display magnitudes", ref);
 
-		List<HoughTrajectStep[]> lines = RadonTransform.getStripLinesFHT(magnitudes, 0.3, 0.2);
+		List<TrajectStep[]> lines = ProjectionLines.getStripLinesFHT(magnitudes, 0.3, 0.2);
 		Mat rangeDisplay = magnitudesDisplay.clone();
-		for (HoughTrajectStep[] topBottom : lines) {
+		for (TrajectStep[] topBottom : lines) {
 			double minMagnitude = Double.MAX_VALUE;
 			for (int y = topBottom[0].y; y <= topBottom[1].y; y++)
 				if (minMagnitude > magnitudes.get(y).magnitude)
@@ -199,7 +200,7 @@ public class RadonTransformDemo2 extends AbstractApp {
 
 		Mat vStripColor = new Mat();
 		Imgproc.cvtColor(vStrip, vStripColor, Imgproc.COLOR_GRAY2BGR);
-		for (HoughTrajectStep[] topBottom : lines) {
+		for (TrajectStep[] topBottom : lines) {
 			// for (TrajectStep trajectStep : Arrays.stream(houghVtraj).filter(ts -> Math.abs(magnitudes.get(ts.k).magnitude) > 30).collect(Collectors.toList())) {
 			double mag = stripWidth;
 			int row = topBottom[0].y;
@@ -219,7 +220,7 @@ public class RadonTransformDemo2 extends AbstractApp {
 		images[8] = new Img(vStripColorDisplay, false).toJfxImage();
 		ref = trace("Display underlined strip", ref);
 
-		List<HoughTrajectStep> mags2 = RadonTransform.bestTrajectFHT(houghTransform2, 11, -0.2);
+		List<TrajectStep> mags2 = FHT.bestTrajectFHT(houghTransform2, 11, -0.2);
 		Double[] magnitudes_ = new Double[binarized.height()];
 		Double[] derivatives = new Double[binarized.height()];
 
@@ -273,7 +274,7 @@ public class RadonTransformDemo2 extends AbstractApp {
 		ref = trace("Radon + Projection", ref);
 		images[13] = new Img(vProjection, false).toJfxImage();
 
-		TrajectStep[] vtraj = RadonTransform.bestTrajectRadon(vProjection, -20);
+		RadonTrajectStep[] vtraj = RadonTransform.bestTrajectRadon(vProjection, -20);
 
 		for (int y = 0; y < vtraj.length; y++) {
 			if (vtraj[y].magnitude == 0)

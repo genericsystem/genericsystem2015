@@ -1,13 +1,13 @@
 package org.genericsystem.cv.application;
 
 public class TrajectStep implements Comparable<TrajectStep> {
-	public final int k;
-	public int theta;
-	public final double magnitude;
+	final int y;
+	double derivative;
+	final double magnitude;
 
-	public TrajectStep(int k, int theta, double magnitude) {
-		this.k = k;
-		this.theta = theta;
+	public TrajectStep(int y, double derivative, double magnitude) {
+		this.y = y;
+		this.derivative = derivative;
 		this.magnitude = magnitude;
 	}
 

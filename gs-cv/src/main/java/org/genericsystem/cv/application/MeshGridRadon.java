@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.math3.analysis.FunctionUtils;
@@ -13,9 +14,12 @@ import org.apache.commons.math3.analysis.differentiation.UnivariateDifferentiabl
 import org.apache.commons.math3.analysis.function.Constant;
 import org.apache.commons.math3.analysis.function.Identity;
 import org.apache.commons.math3.analysis.function.Minus;
+import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.apache.commons.math3.analysis.solvers.BisectionSolver;
 import org.apache.commons.math3.analysis.solvers.UnivariateSolverUtils;
+import org.genericsystem.cv.Img;
+import org.genericsystem.cv.application.RadonTransform.RadonTrajectStep;
 import org.genericsystem.cv.application.mesh.Key;
 import org.genericsystem.cv.application.mesh.Svd;
 import org.opencv.core.Core;
@@ -26,6 +30,7 @@ import org.opencv.core.Point;
 import org.opencv.core.Point3;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -139,7 +144,7 @@ public class MeshGridRadon {
 		VerticalInterpolator interpolator = new VerticalInterpolator(patchXs, patchYs, dirs, nSide, nBin);
 
 		// Compute lines.
-		hLines = RadonTransform.estimateBaselines(image, anglePenalty, minAngle, maxAngle, yStep);
+		hLines = estimateBaselines(image, anglePenalty, minAngle, maxAngle, yStep);
 
 		Point[] prevLine = null;
 		double angleTolerance = Math.PI / 180;
@@ -162,6 +167,60 @@ public class MeshGridRadon {
 			points.addAll(Arrays.asList(currLine));
 			prevLine = currLine;
 		}
+	}
+
+	private static List<PolynomialSplineFunction> estimateBaselines(Mat image, double anglePenalty, int minAngle, int maxAngle, int yStep) {
+
+		int n = 20;// Number of overlapping vertical strips.
+		float r = .5f;// Overlap ratio between two consecutive strips.
+		double w = (image.width() / (n * (1 - r) + r));// w = width of a vertical strip.
+		double step = (int) ((1 - r) * w);// Image width = [n(1 - r) + r] w
+
+		int x = 0;
+		List<Function<Double, Double>> approxFunctions = new ArrayList<>();
+		Mat preprocessed = new Img(image, false).adaptativeGaussianInvThreshold(5, 3).getSrc();
+		for (int i = 0; i < n; i++) {
+			Mat radonTransform = RadonTransform.radonTransform(RadonTransform.extractStrip(preprocessed, x, (int) w), minAngle, maxAngle);
+			Mat projMap = RadonTransform.radonRemap(radonTransform, minAngle);
+			Imgproc.morphologyEx(projMap, projMap, Imgproc.MORPH_GRADIENT, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(2, 4)));
+			RadonTrajectStep[] angles = RadonTransform.bestTrajectRadon(projMap, anglePenalty);
+			// TrajectStep[] angles = bestTraject2(projMap, minAngle, maxAngle, w);
+			projMap.release();
+			radonTransform.release();
+			approxFunctions.add(RadonTransform.approxTraject(angles));
+			x += step;
+		}
+
+		return toPolynomialSplineFunction(approxFunctions, image.size(), yStep, minAngle, n, r);
+	}
+
+	private static List<PolynomialSplineFunction> toPolynomialSplineFunction(List<Function<Double, Double>> approxFunctions, Size imageSize, int yMeshStep, int minAngle, int vStripsNumber, float recover) {
+		double w = (imageSize.width / (vStripsNumber * (1 - recover) + recover));
+		double xStep = (int) ((1 - recover) * w);
+
+		// 0, center of each vertical strip, image.width() - 1
+		double[] xs = new double[vStripsNumber + 2];
+
+		for (int i = 0; i < vStripsNumber; i++)
+			xs[i + 1] = i * xStep + w / 2;
+
+		xs[vStripsNumber + 1] = imageSize.width - 1;
+		int lines = (int) ((imageSize.height - 1) / yMeshStep + 1);
+		List<PolynomialSplineFunction> hLines = new ArrayList<>();
+		for (int line = 0; line < lines; line++) {
+			double[] ys = new double[vStripsNumber + 2];
+			ys[vStripsNumber / 2] = line * yMeshStep + yMeshStep / 2;
+			for (int j = vStripsNumber / 2; j <= vStripsNumber; j++) {
+				double theta = (approxFunctions.get(j - 1).apply(ys[j]) + minAngle) / 180 * Math.PI;
+				ys[j + 1] = ys[j] + xStep * Math.tan(theta);
+			}
+			for (int j = vStripsNumber / 2; j > 0; j--) {
+				double theta = (approxFunctions.get(j - 1).apply(ys[j]) + minAngle) / 180 * Math.PI;
+				ys[j - 1] = ys[j] - xStep * Math.tan(theta);
+			}
+			hLines.add(new LinearInterpolator().interpolate(xs, ys));
+		}
+		return hLines;
 	}
 
 	private Point findIntersection(int hLineNum, Point prevPoint, Point[] prevLine, VerticalInterpolator interpolator, List<PolynomialSplineFunction> hLines) {
