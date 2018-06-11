@@ -1,12 +1,5 @@
 package org.genericsystem.cv.application;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.genericsystem.cv.AbstractApp;
@@ -20,6 +13,13 @@ import org.opencv.core.Range;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -130,6 +130,7 @@ public class RadonTransformDemo2 extends AbstractApp {
 		ref = trace("FHT", ref);
 
 		Mat adaptive = RadonTransform.adaptivHough(houghTransform255, 11);
+		Core.normalize(adaptive, adaptive, 0, 255, Core.NORM_MINMAX);
 		images[4] = new Img(adaptive, false).toJfxImage();
 		adaptive.release();
 		ref = trace("Adaptive FHT", ref);

@@ -1,20 +1,11 @@
 package org.genericsystem.cv.application;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.application.GeneralInterpolator.OrientedPoint;
+import org.genericsystem.cv.application.RadonTransform.Influence;
 import org.genericsystem.cv.application.mesh.MeshManager;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.genericsystem.layout.Layout;
@@ -24,6 +15,16 @@ import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -137,16 +138,30 @@ public class RadonTransformDemo extends AbstractApp {
 		hHoughs.stream().forEach(projectionMap -> Core.normalize(projectionMap, projectionMap, 0, 1, Core.NORM_MINMAX));
 		ref = trace("Compute FHT", ref);
 
-		List<List<HoughTrajectStep>> vHoughTrajs = vHoughs.stream().map(projectionMap -> RadonTransform.bestTrajectFHT(projectionMap, 21, -0.2)).collect(Collectors.toList());
-		List<List<HoughTrajectStep>> hHoughTrajs = hHoughs.stream().map(projectionMap -> RadonTransform.bestTrajectFHT(projectionMap, 21, -0.2)).collect(Collectors.toList());
+		List<List<HoughTrajectStep>> vHoughTrajs = vHoughs.stream().map(projectionMap -> RadonTransform.bestTrajectFHT(projectionMap, 21, -0.08)).collect(Collectors.toList());
+		List<List<HoughTrajectStep>> hHoughTrajs = hHoughs.stream().map(projectionMap -> RadonTransform.bestTrajectFHT(projectionMap, 21, -0.08)).collect(Collectors.toList());
 		ref = trace("Compute trajects", ref);
 
+		List<List<HoughTrajectStep>> vInfluencedTrajs = new ArrayList<>();
+		for (int strip = 0; strip < vHoughTrajs.size(); strip++) {
+			Influence[] prevStripInfluences = strip != 0 ? RadonTransform.stripInfluences(vHoughTrajs.get(strip - 1), vStep) : RadonTransform.noInfluences(vHoughTrajs.get(strip).size());
+			Influence[] nextStripInfluences = strip != vHoughTrajs.size() - 1 ? RadonTransform.stripInfluences(vHoughTrajs.get(strip + 1), vStep) : RadonTransform.noInfluences(vHoughTrajs.get(strip).size());
+			vInfluencedTrajs.add(RadonTransform.bestInfluencedTrajectFHT(vHoughs.get(strip), 21, -0.08, -1000, prevStripInfluences, nextStripInfluences));
+		}
+
+		List<List<HoughTrajectStep>> hInfluencedTrajs = new ArrayList<>();
+		for (int strip = 0; strip < hHoughTrajs.size(); strip++) {
+			Influence[] prevStripInfluences = strip != 0 ? RadonTransform.stripInfluences(hHoughTrajs.get(strip - 1), hStep) : RadonTransform.noInfluences(hHoughTrajs.get(strip).size());
+			Influence[] nextStripInfluences = strip != hHoughTrajs.size() - 1 ? RadonTransform.stripInfluences(hHoughTrajs.get(strip + 1), hStep) : RadonTransform.noInfluences(hHoughTrajs.get(strip).size());
+			hInfluencedTrajs.add(RadonTransform.bestInfluencedTrajectFHT(hHoughs.get(strip), 21, -0.08, -1000, prevStripInfluences, nextStripInfluences));
+		}
+
 		List<List<OrientedPoint>[]> fhtHorizontals = new ArrayList<>();
-		for (int vStripIndex = 0; vStripIndex < vHoughTrajs.size(); vStripIndex++)
-			fhtHorizontals.add(RadonTransform.toHorizontalOrientedPoints(vHoughTrajs.get(vStripIndex), vStripIndex * vStep, 0.4, 0.03));
+		for (int vStripIndex = 0; vStripIndex < vInfluencedTrajs.size(); vStripIndex++)
+			fhtHorizontals.add(RadonTransform.toHorizontalOrientedPoints(vInfluencedTrajs.get(vStripIndex), vStripIndex * vStep, 0.5, 0.05));
 		List<List<OrientedPoint>[]> fhtVerticals = new ArrayList<>();
-		for (int hStrip = 0; hStrip < hHoughTrajs.size(); hStrip++)
-			fhtVerticals.add(RadonTransform.toVerticalOrientedPoints(hHoughTrajs.get(hStrip), hStrip * hStep, 0.4, 0.03));
+		for (int hStrip = 0; hStrip < hInfluencedTrajs.size(); hStrip++)
+			fhtVerticals.add(RadonTransform.toVerticalOrientedPoints(hInfluencedTrajs.get(hStrip), hStrip * hStep, 0.5, 0.05));
 
 		List<List<Segment>>[] horizontalSegments = connect(fhtHorizontals, vStep, 0.05, false);
 		List<List<Segment>>[] verticalSegments = connect(fhtVerticals, hStep, 0.05, true);

@@ -1,18 +1,5 @@
 package org.genericsystem.cv.application;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.genericsystem.cv.Img;
@@ -31,6 +18,19 @@ import org.opencv.utils.Converters;
 import org.opencv.ximgproc.Ximgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class RadonTransform {
 
@@ -268,6 +268,7 @@ public class RadonTransform {
 		Imgproc.blur(houghTransform, blur, new Size(1, blurSize), new Point(-1, -1), Core.BORDER_ISOLATED);
 		Core.absdiff(houghTransform, blur, adaptivHough);
 		blur.release();
+		// Core.normalize(adaptivHough, adaptivHough, 0, 255, Core.NORM_MINMAX);
 		return adaptivHough;
 	}
 
@@ -319,12 +320,18 @@ public class RadonTransform {
 		}
 
 		double getInfluence(double derivative) {
-			return magnitude * Math.abs(Math.atan(derivative) - Math.atan(this.derivative));
+			return magnitude * Math.pow(Math.atan(derivative) - Math.atan(this.derivative), 2);
 		}
 	}
 
+	public static Influence[] noInfluences(int size) {
+		Influence[] result = new Influence[size];
+		Arrays.fill(result, new Influence(0, 0));
+		return result;
+	}
+
 	public static Influence[] stripInfluences(List<HoughTrajectStep> neigbourTraject, double step) {
-		Influence[] result = new Influence[neigbourTraject.size()];
+		Influence[] result = noInfluences(neigbourTraject.size());
 		for (int row = 0; row < neigbourTraject.size(); row++) {
 			HoughTrajectStep trajectStep = neigbourTraject.get(row);
 			int newy = (int) Math.round(trajectStep.derivative * step + row);
