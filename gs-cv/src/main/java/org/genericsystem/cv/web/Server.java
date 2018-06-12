@@ -5,6 +5,7 @@ import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
+import org.opencv.core.MatOfInt;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.imgcodecs.Imgcodecs;
@@ -34,15 +35,10 @@ public class Server extends AbstractVerticle {
 		// Reception des requêtes HTTP du navigateur et réponses
 
 		httpServer.requestHandler(req -> {
-
-			// System.out.println("URI" + req.uri());
-
-			if (req.uri().equals("/"))
-
-				req.response().sendFile("resources/index.html");
-
-			if (req.uri().equals("/js/main.js"))
-				req.response().sendFile("resources/main.js");
+			if (req.uri().equals("/")) {
+				req.response().sendFile("index.html");
+			} else if (req.uri().equals("/js/main.js"))
+				req.response().sendFile("main.js");
 
 			// if (req.uri().equals("/css/style.css"))
 			//
@@ -60,10 +56,10 @@ public class Server extends AbstractVerticle {
 				Mat buf = new Mat(1, imageData.length, CvType.CV_8UC1);
 				buf.put(0, 0, imageData);
 				Mat mat = Imgcodecs.imdecode(buf, Imgcodecs.IMREAD_GRAYSCALE);
-				System.out.println("image received");
 				Imgproc.putText(mat, "Coucou", new Point(mat.width() / 2, mat.height() / 2), Core.FONT_HERSHEY_COMPLEX, 1, new Scalar(255, 0, 0));
 				MatOfByte byteMat = new MatOfByte();
-				Imgcodecs.imencode(".png", mat, byteMat);
+				MatOfInt parameters = new MatOfInt(Imgcodecs.IMWRITE_PNG_BILEVEL, 1);
+				Imgcodecs.imencode(".png", mat, byteMat, parameters);
 				byte[] result = byteMat.toArray();
 
 				sws.writeBinaryMessage(Buffer.buffer(result));

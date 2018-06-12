@@ -8,15 +8,10 @@ import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 
-/*
- * @author <a href="http://tfox.org">Tim Fox</a>
- */
 public class Runner {
 
 	private static final String UNIT_EXAMPLES_DIR = "unit-examples";
 	private static final String UNIT_EXAMPLES_JAVA_DIR = UNIT_EXAMPLES_DIR + "/src/main/java/";
-	private static final String UNIT_EXAMPLES_JS_DIR = UNIT_EXAMPLES_DIR + "/src/main/js/";
-	private static final String UNIT_EXAMPLES_GROOVY_DIR = UNIT_EXAMPLES_DIR + "/src/main/groovy/";
 
 	public static void runClusteredExample(Class clazz) {
 		runExample(UNIT_EXAMPLES_JAVA_DIR, clazz, new VertxOptions().setClustered(true), null);
@@ -24,38 +19,6 @@ public class Runner {
 
 	public static void runExample(Class clazz) {
 		runExample(UNIT_EXAMPLES_JAVA_DIR, clazz, new VertxOptions().setClustered(false), null);
-	}
-
-	// JavaScript examples
-
-	public static void runJSExample(String scriptName) {
-		runScriptExample(UNIT_EXAMPLES_JS_DIR, scriptName, new VertxOptions().setClustered(false));
-	}
-
-	public static void runJSExampleClustered(String scriptName) {
-		runScriptExample(UNIT_EXAMPLES_JS_DIR, scriptName, new VertxOptions().setClustered(true));
-	}
-
-	static class JSVertxUnitTest {
-		public static void main(String[] args) {
-			Runner.runJSExample("io/vertx/example/unit/test/vertx_unit_test.js");
-		}
-	}
-
-	// Groovy examples
-
-	public static void runGroovyExample(String scriptName) {
-		runScriptExample(UNIT_EXAMPLES_GROOVY_DIR, scriptName, new VertxOptions().setClustered(false));
-	}
-
-	public static void runGroovyExampleClustered(String scriptName) {
-		runScriptExample(UNIT_EXAMPLES_GROOVY_DIR, scriptName, new VertxOptions().setClustered(true));
-	}
-
-	static class GroovyVertxUnitTest {
-		public static void main(String[] args) {
-			Runner.runGroovyExample("io/vertx/example/unit/test/vertx_unit_test.groovy");
-		}
 	}
 
 	public static void runExample(String exampleDir, Class clazz, VertxOptions options, DeploymentOptions deploymentOptions) {

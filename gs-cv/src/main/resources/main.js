@@ -4,8 +4,8 @@ var context = canvas.getContext('2d');
 var img = document.querySelector('img');
 var streaming = false;
 let vc = null;
-let width= 640;
-let height=  320;
+let width= 1280;
+let height=  720;
 
 
 var url = "ws://localhost:8080/WScams/wsServer";
@@ -22,6 +22,8 @@ function opencvIsReady() {
         requestAnimationFrame(processVideo);
     });
 
+	video.width=width;
+	video.height=height;
     canvas.width=width;
     canvas.height=height;
 
@@ -29,8 +31,8 @@ function opencvIsReady() {
 
 
     const constraints = { video:{
-        width : width,
-        height : height }
+        width : {exact: 1280},
+        height : {exact: 720} }
     }
 
 
