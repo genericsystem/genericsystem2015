@@ -2,11 +2,6 @@ package org.genericsystem.cv.application;
 
 import java.util.List;
 
-import org.opencv.core.Mat;
-import org.opencv.core.Point;
-import org.opencv.core.Scalar;
-import org.opencv.imgproc.Imgproc;
-
 public class GeneralInterpolator implements Interpolator {
 
 	private final List<OrientedPoint> horizontals;
@@ -24,29 +19,6 @@ public class GeneralInterpolator implements Interpolator {
 	private double squaredEuclidianDistance(double x, double y, OrientedPoint op) { // distance euclidienne au carré
 		double result = (x - op.center.x) * (x - op.center.x) + (y - op.center.y) * (y - op.center.y);
 		return result >= (minDist * minDist) ? result : (minDist * minDist);
-	}
-
-	public static class OrientedPoint {
-
-		Point center;
-		double strenght;
-		double angle;
-		double derivative;
-
-		public OrientedPoint(Point center, double angle, double strenght, double derivate) {
-			this.center = center;
-			this.strenght = strenght;
-			this.angle = angle;
-			this.derivative = derivate;
-		}
-
-		public void displayHorizontalOp(Mat img, double vStep, double hStep, Scalar color) {
-			Imgproc.line(img, new Point(center.x - Math.cos(angle) * vStep * strenght, center.y - Math.sin(angle) * hStep * strenght), new Point(center.x + Math.cos(angle) * vStep * strenght, center.y + Math.sin(angle) * hStep * strenght), color, 1);
-		}
-
-		public void displayVerticalOp(Mat img, double vStep, double hStep, Scalar color) {
-			Imgproc.line(img, new Point(center.x + Math.sin(angle) * vStep * strenght, center.y - Math.cos(angle) * hStep * strenght), new Point(center.x - Math.sin(angle) * vStep * strenght, center.y + Math.cos(angle) * hStep * strenght), color, 1);
-		}
 	}
 
 	@Override

@@ -9,13 +9,12 @@ import java.util.stream.Stream;
 
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
-import org.genericsystem.cv.application.GeneralInterpolator.OrientedPoint;
 import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
 
 public class Segment implements Comparable<Segment> {
-	final OrientedPoint op1;
-	final OrientedPoint op2;
+	public final OrientedPoint op1;
+	public final OrientedPoint op2;
 	private final double distance;
 
 	public Segment(OrientedPoint op1, OrientedPoint op2, double w, boolean vertical) {

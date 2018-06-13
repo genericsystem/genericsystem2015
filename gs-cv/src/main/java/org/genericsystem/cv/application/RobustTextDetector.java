@@ -80,11 +80,16 @@ public class RobustTextDetector extends AbstractApp {
 		startTimer();
 	}
 
+	public static interface ZZZ {
+		void zz();
+	}
+
 	private Image[] doWork() {
+
 		System.out.println("do work");
 		if (!config.stabilizedMode)
 			superFrame = gsCapture.read();
-		Image[] images = new Image[8];
+		Image[] images = new Image[12];
 
 		MSER detector = MSER.create(3, 10, 2000, 0.25, 0.1, 100, 1.01, 0.03, 5);
 		Img gray = superFrame.getFrame().bgr2Gray();
@@ -99,6 +104,7 @@ public class RobustTextDetector extends AbstractApp {
 			for (Point p : mop.toList())
 				mserMask.put((int) p.y, (int) p.x, 255);
 		}
+		images[0] = new Img(mserMask, false).toJfxImage();
 		// for (Rect rect : mor.toList()) {
 		// Imgproc.rectangle(mserMask, rect.tl(), rect.br(), new Scalar(255), -1);
 		// // mserMask.put((int) kpoint.pt.x, (int) kpoint.pt.y, 255);
@@ -107,12 +113,16 @@ public class RobustTextDetector extends AbstractApp {
 		Imgproc.Canny(gray.getSrc(), edges, 20, 100);
 		Mat edge_mser_intersection = new Mat();
 		Core.bitwise_and(edges, mserMask, edge_mser_intersection);
+		images[1] = new Img(edge_mser_intersection, false).toJfxImage();
 
 		Mat gradientGrown = growEdges(gray.getSrc(), edge_mser_intersection);
+		images[2] = new Img(gradientGrown, false).toJfxImage();
+
 		Mat edgeEnhancedMser = new Mat();
 		Mat notGradientGrown = new Mat();
 		Core.bitwise_not(gradientGrown, notGradientGrown);
 		Core.bitwise_and(notGradientGrown, mserMask, edgeEnhancedMser);
+		images[3] = new Img(edgeEnhancedMser, false).toJfxImage();
 
 		Mat labels = new Mat();
 		Mat stats = new Mat();
@@ -128,12 +138,18 @@ public class RobustTextDetector extends AbstractApp {
 			Core.inRange(labels, new Scalar(labelId), new Scalar(labelId), labelMask);
 			Core.bitwise_or(result2, labelMask, result2);
 		}
+		images[4] = new Img(result2, false).toJfxImage();
 
 		Imgproc.distanceTransform(result2, result2, Imgproc.DIST_L2, 3);
+		Mat tmp = new Mat();
+		Core.multiply(result2, new Scalar(100), tmp);
+		images[5] = new Img(tmp, false).toJfxImage();
 		result2.convertTo(result2, CvType.CV_32SC1);
-		// Core.multiply(result2, new Scalar(50), result2);
+
 		Mat strokeWidth = computeStrokeWidth(result2);
-		// Core.multiply(stokeWidth, new Scalar(50), stokeWidth);
+		tmp = new Mat();
+		Core.multiply(strokeWidth, new Scalar(100), tmp);
+		images[6] = new Img(tmp, false).toJfxImage();
 		Mat filtered_stroke_width = new Mat(strokeWidth.size(), CvType.CV_8UC1, new Scalar(0));
 
 		Mat strokeWithCV8U = new Mat();
@@ -158,13 +174,13 @@ public class RobustTextDetector extends AbstractApp {
 				Core.bitwise_or(filtered_stroke_width, labelMask, filtered_stroke_width);
 			}
 		}
-
+		images[7] = new Img(filtered_stroke_width, false).toJfxImage();
 		Mat bounding_region = new Mat();
 		Imgproc.morphologyEx(filtered_stroke_width, bounding_region, Imgproc.MORPH_CLOSE, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(25, 25)));
 		Imgproc.morphologyEx(bounding_region, bounding_region, Imgproc.MORPH_OPEN, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(7, 7)));
 		Mat result3 = new Mat();
 		superFrame.getFrame().getSrc().copyTo(result3, bounding_region);
-		images[0] = new Img(result3, false).toJfxImage();
+		images[8] = new Img(result3, false).toJfxImage();
 
 		return images;
 	}

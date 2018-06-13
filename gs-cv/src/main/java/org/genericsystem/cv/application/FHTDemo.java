@@ -3,7 +3,6 @@ package org.genericsystem.cv.application;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
-import org.genericsystem.cv.application.GeneralInterpolator.OrientedPoint;
 import org.genericsystem.cv.application.mesh.MeshManager;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.genericsystem.layout.Layout;

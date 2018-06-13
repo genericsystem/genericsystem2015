@@ -4,11 +4,11 @@ var context = canvas.getContext('2d');
 var img = document.querySelector('img');
 var streaming = false;
 let vc = null;
-let width= 1280;
-let height=  720;
+let width = 320;
+let height = 240;
 
 
-var url = "ws://localhost:8080/WScams/wsServer";
+var url = "ws://192.168.1.10:8080/WScams/wsServer";
 var socket = new WebSocket(url);
 
 function onOpen(event){
@@ -30,9 +30,10 @@ function opencvIsReady() {
     let mediaStream = new MediaStream();
 
 
-    const constraints = { video:{
-        width : {exact: 1280},
-        height : {exact: 720} }
+    const constraints = { 
+    		video:{
+        width : {exact: 320},
+        height : {exact: 240} }
     }
 
 
@@ -86,11 +87,11 @@ function stopVideoProcessing(){
 function processVideo(){
     console.log('draw Image');
     vc.read(src);
-    let mat = new cv.Mat(height, width, cv.CV_8U);
-    cv.cvtColor(src, mat, cv.COLOR_RGBA2GRAY);
-    cv.adaptiveThreshold(mat, dstC1, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY_INV, 9, 5);
-    mat.delete();
-    cv.imshow("canvas", dstC1);
+    //let mat = new cv.Mat(height, width, cv.CV_8U);
+    //cv.cvtColor(src, mat, cv.COLOR_RGBA2GRAY);
+    //cv.adaptiveThreshold(mat, dstC1, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY_INV, 9, 5);
+    //mat.delete();
+    cv.imshow("canvas", src);
     var canvasData = canvas.toDataURL('image/png',1);
     var decodeAstring = atob(canvasData.split(',')[1]);
     var charArray =[];

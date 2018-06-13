@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.genericsystem.cv.application.GeneralInterpolator.OrientedPoint;
 import org.opencv.core.Point;
 
 public class ProjectionLines {
