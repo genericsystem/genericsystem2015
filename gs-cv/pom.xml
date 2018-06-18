@@ -14,11 +14,11 @@
 	<properties>
 		<deeplearning4j.version>0.9.1</deeplearning4j.version>
 		<maven-install-plugin.version>2.5.2</maven-install-plugin.version>
-		<opencv.version>3.3.0</opencv.version>
-		<eclipse-opencv-libname>Opencv-3.3.0</eclipse-opencv-libname>
+		<opencv.version>4.0.0</opencv.version>
+		<eclipse-opencv-libname>Opencv-4.0.0</eclipse-opencv-libname>
 		<opencv-libraries>/usr/local/share/OpenCV/java/</opencv-libraries>
-		<opencv-jar>${opencv-libraries}/opencv-330.jar</opencv-jar>
-		<opencv-native-library>${opencv-libraries}/libopencv_java330.so</opencv-native-library>
+		<opencv-jar>${opencv-libraries}/opencv-400.jar</opencv-jar>
+		<opencv-native-library>${opencv-libraries}/libopencv_java400.so</opencv-native-library>
 		<javacpp.version>1.4.1</javacpp.version>
 		<javacpp.parser.skip>true</javacpp.parser.skip>     <!-- To skip header file parsing phase: -Djavacpp.parser.skip=true -->
 		<!-- Set the following to false to activate Java CPP. -->
