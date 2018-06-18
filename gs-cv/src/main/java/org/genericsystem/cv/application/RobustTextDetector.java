@@ -1,12 +1,5 @@
 package org.genericsystem.cv.application;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
@@ -15,15 +8,23 @@ import org.opencv.core.Core.MinMaxLocResult;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfDouble;
+import org.opencv.core.MatOfInt;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfRect;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
-import org.opencv.core.Size;
 import org.opencv.features2d.MSER;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.imgproc.Moments;
 import org.opencv.utils.Converters;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -68,7 +69,7 @@ public class RobustTextDetector extends AbstractApp {
 
 	@Override
 	protected void fillGrid(GridPane mainGrid) {
-		double displaySizeReduction = 1.5;
+		double displaySizeReduction = 1;
 		for (int col = 0; col < imageViews.length; col++)
 			for (int row = 0; row < imageViews[col].length; row++) {
 				ImageView imageView = new ImageView();
@@ -78,10 +79,6 @@ public class RobustTextDetector extends AbstractApp {
 				imageView.setFitHeight(superFrame.height() / displaySizeReduction);
 			}
 		startTimer();
-	}
-
-	public static interface ZZZ {
-		void zz();
 	}
 
 	private Image[] doWork() {
@@ -105,24 +102,20 @@ public class RobustTextDetector extends AbstractApp {
 				mserMask.put((int) p.y, (int) p.x, 255);
 		}
 		images[0] = new Img(mserMask, false).toJfxImage();
-		// for (Rect rect : mor.toList()) {
-		// Imgproc.rectangle(mserMask, rect.tl(), rect.br(), new Scalar(255), -1);
-		// // mserMask.put((int) kpoint.pt.x, (int) kpoint.pt.y, 255);
-		// }
+
 		Mat edges = new Mat();
-		Imgproc.Canny(gray.getSrc(), edges, 20, 100);
+		Imgproc.Canny(gray.getSrc(), edges, 30, 100);
 		Mat edge_mser_intersection = new Mat();
 		Core.bitwise_and(edges, mserMask, edge_mser_intersection);
-		images[1] = new Img(edge_mser_intersection, false).toJfxImage();
 
 		Mat gradientGrown = growEdges(gray.getSrc(), edge_mser_intersection);
-		images[2] = new Img(gradientGrown, false).toJfxImage();
+		images[1] = new Img(gradientGrown, false).toJfxImage();
 
 		Mat edgeEnhancedMser = new Mat();
 		Mat notGradientGrown = new Mat();
 		Core.bitwise_not(gradientGrown, notGradientGrown);
 		Core.bitwise_and(notGradientGrown, mserMask, edgeEnhancedMser);
-		images[3] = new Img(edgeEnhancedMser, false).toJfxImage();
+		images[2] = new Img(edgeEnhancedMser, false).toJfxImage();
 
 		Mat labels = new Mat();
 		Mat stats = new Mat();
@@ -136,20 +129,49 @@ public class RobustTextDetector extends AbstractApp {
 
 			Mat labelMask = new Mat();
 			Core.inRange(labels, new Scalar(labelId), new Scalar(labelId), labelMask);
+			Moments moment = Imgproc.moments(labelMask);
+
+			double left_comp = (moment.nu20 + moment.nu02) / 2.0;
+			double right_comp = Math.sqrt((4 * moment.nu11 * moment.nu11) + (moment.nu20 - moment.nu02) * (moment.nu20 - moment.nu02)) / 2.0;
+
+			double eig_val_1 = left_comp + right_comp;
+			double eig_val_2 = left_comp - right_comp;
+
+			double eccentricity = Math.sqrt(1.0 - (eig_val_2 / eig_val_1));
+			double minEccentricity = 0.1;
+			double maxEccentricity = 0.995;
+
+			if (eccentricity < minEccentricity || eccentricity > maxEccentricity) {
+				continue;
+			}
+
+			List<MatOfPoint> contours = new ArrayList<>();
+			Imgproc.findContours(labelMask, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+			MatOfInt hull = new MatOfInt();
+			Imgproc.convexHull(contours.get(0), hull);
+			MatOfPoint mopHull = new MatOfPoint();
+			mopHull.create((int) hull.size().height, 1, CvType.CV_32SC2);
+			for (int j = 0; j < hull.size().height; j++) {
+				int index = (int) hull.get(j, 0)[0];
+				double[] point = new double[] { contours.get(0).get(index, 0)[0], contours.get(0).get(index, 0)[1] };
+				mopHull.put(j, 0, point);
+			}
+			double solidity = area / Imgproc.contourArea(mopHull);
+			double minSolidity = 0.5;
+			if (solidity < minSolidity) {
+				continue;
+			}
 			Core.bitwise_or(result2, labelMask, result2);
 		}
-		images[4] = new Img(result2, false).toJfxImage();
+		images[3] = new Img(result2, false).toJfxImage();
 
 		Imgproc.distanceTransform(result2, result2, Imgproc.DIST_L2, 3);
 		Mat tmp = new Mat();
-		Core.multiply(result2, new Scalar(100), tmp);
-		images[5] = new Img(tmp, false).toJfxImage();
+		Core.multiply(result2, new Scalar(200), tmp);
+		images[4] = new Img(tmp, false).toJfxImage();
 		result2.convertTo(result2, CvType.CV_32SC1);
 
 		Mat strokeWidth = computeStrokeWidth(result2);
-		tmp = new Mat();
-		Core.multiply(strokeWidth, new Scalar(100), tmp);
-		images[6] = new Img(tmp, false).toJfxImage();
 		Mat filtered_stroke_width = new Mat(strokeWidth.size(), CvType.CV_8UC1, new Scalar(0));
 
 		Mat strokeWithCV8U = new Mat();
@@ -174,13 +196,13 @@ public class RobustTextDetector extends AbstractApp {
 				Core.bitwise_or(filtered_stroke_width, labelMask, filtered_stroke_width);
 			}
 		}
-		images[7] = new Img(filtered_stroke_width, false).toJfxImage();
+		images[5] = new Img(filtered_stroke_width, false).toJfxImage();
 		Mat bounding_region = new Mat();
-		Imgproc.morphologyEx(filtered_stroke_width, bounding_region, Imgproc.MORPH_CLOSE, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(25, 25)));
-		Imgproc.morphologyEx(bounding_region, bounding_region, Imgproc.MORPH_OPEN, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(7, 7)));
-		Mat result3 = new Mat();
-		superFrame.getFrame().getSrc().copyTo(result3, bounding_region);
-		images[8] = new Img(result3, false).toJfxImage();
+		// Imgproc.morphologyEx(filtered_stroke_width, bounding_region, Imgproc.MORPH_CLOSE, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(30, 30)));
+		// Imgproc.morphologyEx(bounding_region, bounding_region, Imgproc.MORPH_OPEN, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(25, 25)));
+		// Mat result3 = new Mat();
+		// superFrame.getFrame().getSrc().copyTo(result3, filtered_stroke_width);
+		// images[8] = new Img(result3, false).toJfxImage();
 
 		return images;
 	}
