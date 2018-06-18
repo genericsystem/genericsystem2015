@@ -16,8 +16,7 @@ public class SliderGS extends Application {
 	final Label sliderValue = new Label(Double.toString(sliderGS.getValue()));
 	
 	final static Color textColor = Color.BLACK;
-	
-	
+		
 	
 	@Override
 	public void start(Stage primaryStage) throws Exception {
