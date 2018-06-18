@@ -6,6 +6,7 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.scene.control.Slider;
 import javafx.scene.control.Label;
+import javafx.scene.layout.VBox;
 
 @SuppressWarnings("restriction")
 public class SliderGS extends Application {
@@ -20,11 +21,11 @@ public class SliderGS extends Application {
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		// TODO Auto-generated method stub
-		Group root = new Group();
-        Scene scene = new Scene(root, 600, 400);
-        primaryStage.setScene(scene);
+		VBox layout = new VBox(10);
+        primaryStage.setScene(new Scene(layout));
         primaryStage.setTitle("Slider Sample");
-        scene.setFill(Color.WHITE);
+                
+        primaryStage.show();
 	}
 
 	public static void main(String[] args) {
