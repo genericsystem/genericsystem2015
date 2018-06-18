@@ -18,6 +18,7 @@ public class SliderGS extends Application {
 	final static Color textColor = Color.BLACK;
 	
 	
+	
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		// TODO Auto-generated method stub
