@@ -79,28 +79,24 @@ public class Layout {
 				new Point(parentRect[0].x + (parentRect[1].x - parentRect[0].x) * getX2(), parentRect[0].y + (parentRect[1].y - parentRect[0].y) * getY2()) };
 	}
 
-	// public double area(Img imgRoot) {
-	// double result = 0;
-	// if (this.getChildren().isEmpty()) {
-	// // Point[] pts = getRect();
-	// // result += (pts[1].x - pts[0].x) * (pts[1].y - pts[0].y);
-	// return getRect(imgRoot).area() / (imgRoot.height() * imgRoot.width());
-	// } else {
-	// for (Layout child : getChildren()) {
-	// result += child.area(imgRoot);
-	// }
-	// }
-	// return result;
-	// }
-	//
-	// public double computeTotalSurface(Img img) {
-	// double[] surface = new double[] { 0.0 };
-	// traverse(getRoi(img), (roi, shard) -> {
-	// if (shard.getChildren().isEmpty())
-	// surface[0] += roi.height() * roi.width();
-	// });
-	// return surface[0] / (img.width() * img.height());
-	// }
+	public double area(Img imgRoot) {
+		if (this.getChildren().isEmpty())
+			return getRect(imgRoot).area() / (imgRoot.height() * imgRoot.width());
+		double result = 0;
+		for (Layout child : getChildren())
+			result += child.area(imgRoot);
+
+		return result;
+	}
+
+	public double computeTotalSurface(Img img) {
+		double[] surface = new double[] { 0.0 };
+		traverse(getRoi(img), (roi, shard) -> {
+			if (shard.getChildren().isEmpty())
+				surface[0] += roi.height() * roi.width();
+		});
+		return surface[0] / (img.width() * img.height());
+	}
 
 	// public Layout traverse(Size parentSize, BiConsumer<Size, Layout> visitor) {
 	// for (Layout shard : getChildren())

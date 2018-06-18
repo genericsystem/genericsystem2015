@@ -1,13 +1,5 @@
 package org.genericsystem.cv.application;
 
-import org.opencv.core.Core;
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
-import org.opencv.core.Point;
-import org.opencv.core.Rect;
-import org.opencv.core.Size;
-import org.opencv.utils.Converters;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -17,6 +9,14 @@ import java.util.Random;
 import java.util.TreeMap;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import org.opencv.core.Core;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.core.Point;
+import org.opencv.core.Rect;
+import org.opencv.core.Size;
+import org.opencv.utils.Converters;
 
 public class ReferenceManager {
 	private static final Mat IDENTITY_MAT = Mat.eye(new Size(3, 3), CvType.CV_64F);
@@ -139,34 +139,34 @@ public class ReferenceManager {
 	}
 
 	private ImgDescriptor findConsensualDescriptor() {
-		// double bestDistance = Double.MAX_VALUE;
-		// ImgDescriptor bestDescriptor = null;
-		// for (Entry<ImgDescriptor, Mat> entry : toReferenceGraphy.entrySet()) {
-		// double distance = 0;
-		// for (Entry<ImgDescriptor, Mat> entry2 : toReferenceGraphy.entrySet()) {
-		// if (!entry.getKey().equals(entry2.getKey())) {
-		// Mat betweenHomography = new Mat();
-		// Core.gemm(entry.getValue(), entry2.getValue().inv(), 1, new Mat(), 0, betweenHomography);
-		// distance += distance(betweenHomography);
-		// }
-		// }
-		// if (distance < bestDistance) {
-		// bestDistance = distance;
-		// bestDescriptor = entry.getKey();
-		// }
-		// }
-		// return bestDescriptor;
-
-		double minArea = Double.MAX_VALUE;
+		double bestDistance = Double.MAX_VALUE;
 		ImgDescriptor bestDescriptor = null;
 		for (Entry<ImgDescriptor, Mat> entry : toReferenceGraphy.entrySet()) {
-			double surface = entry.getKey().getSurface();
-			if (surface < minArea) {
-				minArea = surface;
+			double distance = 0;
+			for (Entry<ImgDescriptor, Mat> entry2 : toReferenceGraphy.entrySet()) {
+				if (!entry.getKey().equals(entry2.getKey())) {
+					Mat betweenHomography = new Mat();
+					Core.gemm(entry.getValue(), entry2.getValue().inv(), 1, new Mat(), 0, betweenHomography);
+					distance += distance(betweenHomography);
+				}
+			}
+			if (distance < bestDistance) {
+				bestDistance = distance;
 				bestDescriptor = entry.getKey();
 			}
 		}
 		return bestDescriptor;
+
+		// double minArea = Double.MAX_VALUE;
+		// ImgDescriptor bestDescriptor = null;
+		// for (Entry<ImgDescriptor, Mat> entry : toReferenceGraphy.entrySet()) {
+		// double surface = entry.getKey().getSurface();
+		// if (surface < minArea) {
+		// minArea = surface;
+		// bestDescriptor = entry.getKey();
+		// }
+		// }
+		// return bestDescriptor;
 	}
 
 	public List<Rect> getResizedFieldsRects() {
@@ -176,7 +176,7 @@ public class ReferenceManager {
 		double maxY = fields.getMaxY();
 		double horizontalRatio = frameSize.width / (maxX - minX) > 1 ? 1 : frameSize.width / (maxX - minX);
 		double verticalRatio = frameSize.height / (maxY - minY) > 1 ? 1 : frameSize.height / (maxY - minY);
-		return rescale(transpose(getReferenceRects(), minX, minY), Math.min(horizontalRatio, verticalRatio));
+		return rescale(shift(getReferenceRects(), minX, minY), Math.min(horizontalRatio, verticalRatio));
 	}
 
 	private List<Rect> rescale(List<Rect> rects, double ratio) {
@@ -187,11 +187,11 @@ public class ReferenceManager {
 		return new Rect((int) (rect.x * ratio), (int) (rect.y * ratio), (int) (rect.width * ratio), (int) (rect.height * ratio));
 	}
 
-	private List<Rect> transpose(List<Rect> rects, double minX, double minY) {
-		return rects.stream().map(r -> transpose(r, minX, minY)).collect(Collectors.toList());
+	private List<Rect> shift(List<Rect> rects, double minX, double minY) {
+		return rects.stream().map(r -> shift(r, minX, minY)).collect(Collectors.toList());
 	}
 
-	private Rect transpose(Rect rect, double minX, double minY) {
+	private Rect shift(Rect rect, double minX, double minY) {
 		return new Rect((int) (rect.x - minX), (int) (rect.y - minY), rect.width, rect.height);
 	}
 

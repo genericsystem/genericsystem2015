@@ -3,6 +3,7 @@ package org.genericsystem.cv.application;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.genericsystem.cv.Img;
 import org.opencv.calib3d.Calib3d;
 import org.opencv.core.Core;
 import org.opencv.core.DMatch;
@@ -22,30 +23,22 @@ public class ImgDescriptor {
 	private static final FastFeatureDetector detector = FastFeatureDetector.create(10, true, FastFeatureDetector.TYPE_9_16);
 	private static final DescriptorMatcher matcher = BFMatcher.create(DescriptorMatcher.BRUTEFORCE_HAMMING, false);
 
-	private final SuperFrameImg superFrame;
+	private final Img frame;
 	private final MatOfKeyPoint keypoints = new MatOfKeyPoint();
 	private final Mat descriptors;
 	private final long timeStamp;
-	private final double layoutSurface;
 
-	public ImgDescriptor(SuperFrameImg superFrame, double surface) {
-		this.superFrame = superFrame;
-		detector.detect(superFrame.getFrame().getSrc(), keypoints);
-		// keypoints = detect(deperspectivedImg);
+	public ImgDescriptor(Img frame) {
+		this.frame = frame;
+		detector.detect(frame.getSrc(), keypoints);
 		assert keypoints != null && !keypoints.empty();
 		descriptors = new Mat();
-		briefExtractor.compute(superFrame.getFrame().getSrc(), keypoints, descriptors);
-		// EXTRACTOR.compute(deperspectivedImg.getSrc(), keypoints, descriptors);
+		briefExtractor.compute(frame.getSrc(), keypoints, descriptors);
 		timeStamp = System.currentTimeMillis();
-		this.layoutSurface = surface;
 	}
 
-	public SuperFrameImg getSuperFrame() {
-		return superFrame;
-	}
-
-	public double getSurface(){
-		return layoutSurface;
+	public Img getFrame() {
+		return frame;
 	}
 
 	public Mat getDescriptors() {
@@ -76,13 +69,17 @@ public class ImgDescriptor {
 		if (referencePts.size() > 50) {
 
 			// List<Point[]> pairedPoints = new ArrayList<>();
-			// for (int i = 0; i < goodNewKeypoints.size(); i++)
-			// pairedPoints.add(new Point[] { goodOldKeypoints.get(i), goodNewKeypoints.get(i) });
-
+			// for (int i = 0; i < pts.size(); i++)
+			// pairedPoints.add(new Point[] { pts.get(i), referencePts.get(i) });
+			//
 			// double[] transScaleParams = new LevenbergImpl<>((points, params) -> distance(points, params), pairedPoints, new double[] { 1, 1, 0, 0 }).getParams();
 			// System.out.println("params " + Arrays.toString(transScaleParams));
-			// Mat result = getTSMat(transScaleParams);
-
+			// Mat result = Mat.zeros(3, 3, CvType.CV_64FC1);
+			// result.put(0, 0, transScaleParams[0]);
+			// result.put(1, 1, transScaleParams[1]);
+			// result.put(0, 2, transScaleParams[2]);
+			// result.put(1, 2, transScaleParams[3]);
+			// result.put(2, 2, 1);
 			Mat result = Calib3d.findHomography(new MatOfPoint2f(pts.stream().toArray(Point[]::new)), new MatOfPoint2f(referencePts.stream().toArray(Point[]::new)), Calib3d.RANSAC, 1);
 			if (result.size().empty()) {
 				System.out.println("Stabilization homography is empty");
@@ -99,9 +96,21 @@ public class ImgDescriptor {
 		}
 	}
 
+	private double distance(Point[] points, double[] params) {
+		double sx = params[0];
+		double sy = params[1];
+		double tx = params[2];
+		double ty = params[3];
+
+		double dx = (sx * points[0].x + tx) - points[1].x;
+		double dy = (sy * points[0].y + ty) - points[1].y;
+
+		return Math.sqrt(dx * dx + dy * dy);
+	}
+
 	private boolean isValidHomography(Mat homography) {
-		int w = superFrame.getFrame().width();
-		int h = superFrame.getFrame().height();
+		int w = frame.width();
+		int h = frame.height();
 		MatOfPoint2f original = new MatOfPoint2f(new Point[] { new Point(0, 0), new Point(w, 0), new Point(w, h), new Point(0, h) });
 		MatOfPoint2f dst = new MatOfPoint2f();
 		Core.perspectiveTransform(original, dst, homography);

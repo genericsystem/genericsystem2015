@@ -1,5 +1,13 @@
 package org.genericsystem.cv.application;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.Lines;
@@ -9,14 +17,6 @@ import org.opencv.core.MatOfPoint;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -33,10 +33,8 @@ public class DirectionalEnhancerDemo extends AbstractApp {
 		NativeLibraryLoader.load();
 	}
 
-	private final double f = 6.053 / 0.009;
-
-	private GSCapture gsCapture = new GSVideoCapture(0, f, GSVideoCapture.HD, GSVideoCapture.VGA);
-	private SuperFrameImg superFrame = gsCapture.read();
+	private GSCapture gsCapture = new GSVideoCapture(0, GSVideoCapture.HD, GSVideoCapture.VGA);
+	private Img frame = gsCapture.read();
 	private ScheduledExecutorService timer = new BoundedScheduledThreadPoolExecutor();
 	private Config config = new Config();
 	private final ImageView[][] imageViews = new ImageView[][] { new ImageView[3], new ImageView[3], new ImageView[3], new ImageView[3] };
@@ -67,8 +65,8 @@ public class DirectionalEnhancerDemo extends AbstractApp {
 				ImageView imageView = new ImageView();
 				imageViews[col][row] = imageView;
 				mainGrid.add(imageViews[col][row], col, row);
-				imageView.setFitWidth(superFrame.width() / displaySizeReduction);
-				imageView.setFitHeight(superFrame.height() / displaySizeReduction);
+				imageView.setFitWidth(frame.width() / displaySizeReduction);
+				imageView.setFitHeight(frame.height() / displaySizeReduction);
 			}
 		startTimer();
 	}
@@ -76,7 +74,7 @@ public class DirectionalEnhancerDemo extends AbstractApp {
 	private Image[] doWork() {
 		System.out.println("do work");
 		if (!config.stabilizedMode) {
-			superFrame = gsCapture.read();
+			frame = gsCapture.read();
 		}
 		Image[] images = new Image[12];
 
@@ -85,7 +83,7 @@ public class DirectionalEnhancerDemo extends AbstractApp {
 		// Mat mat = DirectionalEnhancer.prepare(superFrame.getFrame().getSrc());
 
 		Mat mat = new Mat();
-		Imgproc.cvtColor(superFrame.getFrame().getSrc(), mat, Imgproc.COLOR_BGR2GRAY);
+		Imgproc.cvtColor(frame.getSrc(), mat, Imgproc.COLOR_BGR2GRAY);
 		Imgproc.GaussianBlur(mat, mat, new Size(13, 13), 0);
 		images[0] = new Img(mat, false).toJfxImage();
 		Imgproc.adaptiveThreshold(mat, mat, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 7, 2);
@@ -112,7 +110,7 @@ public class DirectionalEnhancerDemo extends AbstractApp {
 		Lines slines = new Lines(smallLines);
 		Lines blines = new Lines(bigLines);
 
-		Mat result = Mat.zeros(superFrame.getFrame().getSrc().size(), superFrame.getFrame().getSrc().type());
+		Mat result = Mat.zeros(frame.getSrc().size(), frame.getSrc().type());
 		Lines horizontalLines = new Lines(blines.getLines().stream().filter(l -> Math.abs(l.y2 - l.y1) < Math.abs(l.x2 - l.x1)).collect(Collectors.toList()));
 		horizontalLines.draw(result, new Scalar(0, 255, 0), 2);
 
@@ -140,7 +138,7 @@ public class DirectionalEnhancerDemo extends AbstractApp {
 		slines = new Lines(smallLines);
 		blines = new Lines(bigLines);
 
-		result = Mat.zeros(superFrame.getFrame().getSrc().size(), superFrame.getFrame().getSrc().type());
+		result = Mat.zeros(frame.getSrc().size(), frame.getSrc().type());
 		horizontalLines = new Lines(blines.getLines().stream().filter(l -> Math.abs(l.y2 - l.y1) < Math.abs(l.x2 - l.x1)).collect(Collectors.toList()));
 		horizontalLines.draw(result, new Scalar(0, 255, 0), 2);
 
@@ -176,11 +174,6 @@ public class DirectionalEnhancerDemo extends AbstractApp {
 			startTimer();
 		}
 		config.isOn = !config.isOn;
-	}
-
-	@Override
-	protected void onT() {
-		config.textsEnabledMode = !config.textsEnabledMode;
 	}
 
 	@Override

@@ -37,10 +37,8 @@ public class FHTRadonDemo extends AbstractApp {
 		NativeLibraryLoader.load();
 	}
 
-	private final double f = 6.053 / 0.009;
-
-	private GSCapture gsCapture = new GSVideoCapture(0, f, GSVideoCapture.HD, GSVideoCapture.VGA);
-	private SuperFrameImg superFrame = gsCapture.read();
+	private GSCapture gsCapture = new GSVideoCapture(0, GSVideoCapture.HD, GSVideoCapture.VGA);
+	private Img frame = gsCapture.read();
 	private ScheduledExecutorService timer = new BoundedScheduledThreadPoolExecutor();
 	private Config config = new Config();
 	private final ImageView[][] imageViews = new ImageView[][] { new ImageView[3], new ImageView[3], new ImageView[3], new ImageView[3], new ImageView[3] };
@@ -71,8 +69,8 @@ public class FHTRadonDemo extends AbstractApp {
 				ImageView imageView = new ImageView();
 				imageViews[col][row] = imageView;
 				mainGrid.add(imageViews[col][row], col, row);
-				imageView.setFitWidth(superFrame.width() / displaySizeReduction);
-				imageView.setFitHeight(superFrame.height() / displaySizeReduction);
+				imageView.setFitWidth(frame.width() / displaySizeReduction);
+				imageView.setFitHeight(frame.height() / displaySizeReduction);
 			}
 		startTimer();
 	}
@@ -80,13 +78,13 @@ public class FHTRadonDemo extends AbstractApp {
 	private Image[] doWork() {
 		System.out.println("do work");
 		if (!config.stabilizedMode) {
-			superFrame = gsCapture.read();
+			frame = gsCapture.read();
 		}
 		Image[] images = new Image[20];
 
 		long ref = System.currentTimeMillis();
 
-		Img binarized = superFrame.getFrame().adaptativeGaussianInvThreshold(7, 5);
+		Img binarized = frame.adaptativeGaussianInvThreshold(7, 5);
 		// Img binarized = new Img(Mat.zeros(360, 640, CvType.CV_8UC1), false);
 		double[] angles = { -10, -25, -5 };
 		int count = 0;
@@ -339,11 +337,6 @@ public class FHTRadonDemo extends AbstractApp {
 			startTimer();
 		}
 		config.isOn = !config.isOn;
-	}
-
-	@Override
-	protected void onT() {
-		config.textsEnabledMode = !config.textsEnabledMode;
 	}
 
 	@Override

@@ -12,16 +12,19 @@ import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Range;
+import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.ximgproc.Ximgproc;
 
 public class FHT {
 
-	public static List<Mat> extractStrips(Mat src, int stripNumber, double stripWidth, double step) {
+	public static List<Mat> extractStrips(Mat src, int stripNumber, double stripSize, double step) {
+		Mat enlargedBinarized = new Mat();
+		Core.copyMakeBorder(src, enlargedBinarized, 0, 0, (int) Math.round(stripSize / 2), (int) Math.round(stripSize / 2), Core.BORDER_CONSTANT, new Scalar(0));
 		List<Mat> strips = new ArrayList<>();
 		for (int stripIndex = 0; stripIndex < stripNumber; stripIndex++)
-			strips.add(extractStrip(src, (int) Math.round(stripIndex * step), (int) stripWidth));
+			strips.add(extractStrip(enlargedBinarized, (int) Math.round(stripIndex * step), (int) stripSize));
 		return strips;
 	}
 

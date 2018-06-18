@@ -1,5 +1,13 @@
 package org.genericsystem.cv.application;
 
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
@@ -10,14 +18,6 @@ import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
-
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -34,10 +34,8 @@ public class FHTDemo extends AbstractApp {
 		NativeLibraryLoader.load();
 	}
 
-	private final double f = 6.053 / 0.009;
-
-	private GSCapture gsCapture = new GSVideoCapture(0, f, GSVideoCapture.HD, GSVideoCapture.VGA);
-	private SuperFrameImg superFrame = gsCapture.read();
+	private GSCapture gsCapture = new GSVideoCapture(0, GSVideoCapture.HD, GSVideoCapture.VGA);
+	private Img frame = gsCapture.read();
 	private ScheduledExecutorService timer = new BoundedScheduledThreadPoolExecutor();
 	private Config config = new Config();
 	private final ImageView[][] imageViews = new ImageView[][] { new ImageView[3], new ImageView[3], new ImageView[3], new ImageView[3] };
@@ -69,8 +67,8 @@ public class FHTDemo extends AbstractApp {
 				ImageView imageView = new ImageView();
 				imageViews[col][row] = imageView;
 				mainGrid.add(imageViews[col][row], col, row);
-				imageView.setFitWidth(superFrame.width() / displaySizeReduction);
-				imageView.setFitHeight(superFrame.height() / displaySizeReduction);
+				imageView.setFitWidth(frame.width() / displaySizeReduction);
+				imageView.setFitHeight(frame.height() / displaySizeReduction);
 			}
 		startTimer();
 	}
@@ -78,17 +76,18 @@ public class FHTDemo extends AbstractApp {
 	private Image[] doWork() {
 		System.out.println("do work");
 		if (!config.stabilizedMode) {
-			superFrame = gsCapture.read();
+			frame = gsCapture.read();
 			frameCount++;
 		}
 		Image[] images = new Image[20];
 		long ref = System.currentTimeMillis();
-		images[0] = superFrame.getFrame().toJfxImage();
+		images[0] = frame.toJfxImage();
 
-		Img binarized = superFrame.getFrame().adaptativeGaussianInvThreshold(7, 5);// .dilate(Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(2, 2)));// .canny(20, 80);
+		Img binarized = frame.adaptativeGaussianInvThreshold(7, 5);// .dilate(Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(2, 2)));// .canny(20, 80);
 		images[1] = binarized.toJfxImage();
 		if (frameCount < 30)
 			return images;
+
 		Img transposedBinarized = binarized.transpose();
 		ref = trace("Binarization", ref);
 
@@ -106,14 +105,8 @@ public class FHTDemo extends AbstractApp {
 		double minHorizontalAccuracy = 180 * (Math.atan(1 / (stripHeight - 1))) / Math.PI;
 		System.out.println(hStripsNumber + " horizontal strips with width : " + stripHeight + " each step : " + hStep + " min accuracy : " + minHorizontalAccuracy);
 
-		Mat enlargedBinarized = new Mat();
-		Core.copyMakeBorder(binarized.getSrc(), enlargedBinarized, 0, 0, (int) Math.round(stripWidth / 2), (int) Math.round(stripWidth / 2), Core.BORDER_CONSTANT, new Scalar(0));
-
-		Mat enlargedTransposedBinarized = new Mat();
-		Core.copyMakeBorder(transposedBinarized.getSrc(), enlargedTransposedBinarized, 0, 0, (int) Math.round(stripHeight / 2), (int) Math.round(stripHeight / 2), Core.BORDER_CONSTANT, new Scalar(0));
-
-		List<Mat> vStrips = FHT.extractStrips(enlargedBinarized, vStripsNumber, stripWidth, vStep);
-		List<Mat> hStrips = FHT.extractStrips(enlargedTransposedBinarized, hStripsNumber, stripHeight, hStep);
+		List<Mat> vStrips = FHT.extractStrips(binarized.getSrc(), vStripsNumber, stripWidth, vStep);
+		List<Mat> hStrips = FHT.extractStrips(transposedBinarized.getSrc(), hStripsNumber, stripHeight, hStep);
 		ref = trace("Extract strips", ref);
 
 		List<Mat> vHoughs = vStrips.stream().map(strip -> FHT.fastHoughTransform(strip)).collect(Collectors.toList());
@@ -136,7 +129,7 @@ public class FHTDemo extends AbstractApp {
 		List<List<Segment>>[] horizontalSegments = Segment.connect(fhtHorizontals, vStep, 0.05, false);
 		List<List<Segment>>[] verticalSegments = Segment.connect(fhtVerticals, hStep, 0.05, true);
 
-		Img frameDisplayFHT = new Img(superFrame.getFrame().getSrc().clone(), false);
+		Img frameDisplayFHT = new Img(frame.getSrc().clone(), false);
 		Segment.displayHorizontalOps(horizontalSegments[0], frameDisplayFHT.getSrc(), vStep, hStep, new Scalar(0, 255, 0));
 		Segment.displayHorizontalOps(horizontalSegments[1], frameDisplayFHT.getSrc(), vStep, hStep, new Scalar(0, 0, 255));
 		Segment.displayVerticalOps(verticalSegments[0], frameDisplayFHT.getSrc(), vStep, hStep, new Scalar(255, 255, 0));
@@ -147,7 +140,7 @@ public class FHTDemo extends AbstractApp {
 
 		List<PolynomialSplineFunction>[] horizontalSplines = Segment.toSplines(horizontalSegments, false);
 		List<PolynomialSplineFunction>[] verticalSplines = Segment.toSplines(verticalSegments, true);
-		Img splineDisplay = new Img(superFrame.getFrame().getSrc().clone(), false);
+		Img splineDisplay = new Img(frame.getSrc().clone(), false);
 		FHT.displayHSplines(horizontalSplines[0], splineDisplay.getSrc(), 0, 255, 0);
 		FHT.displayHSplines(horizontalSplines[1], splineDisplay.getSrc(), 0, 0, 255);
 		FHT.displayVSplines(verticalSplines[0], splineDisplay.getSrc(), 255, 255, 0);
@@ -161,7 +154,7 @@ public class FHTDemo extends AbstractApp {
 		SplineInterpolator superInterpolator = new SplineInterpolator(interpolatorFHT, horizontalSplines, verticalSplines);
 		ref = trace("Prepare interpolator", ref);
 
-		MeshManager meshManager = new MeshManager(6, 4, superInterpolator, superFrame.getFrame().getSrc());
+		MeshManager meshManager = new MeshManager(6, 4, superInterpolator, frame.getSrc());
 		images[4] = new Img(meshManager.drawOnCopy(new Scalar(0, 255, 0), new Scalar(0, 0, 255)), false).toJfxImage();
 		ref = trace("Build and draw mesh", ref);
 
@@ -207,11 +200,6 @@ public class FHTDemo extends AbstractApp {
 			startTimer();
 		}
 		config.isOn = !config.isOn;
-	}
-
-	@Override
-	protected void onT() {
-		config.textsEnabledMode = !config.textsEnabledMode;
 	}
 
 	@Override

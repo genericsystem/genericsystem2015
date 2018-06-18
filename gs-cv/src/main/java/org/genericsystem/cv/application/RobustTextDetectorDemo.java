@@ -1,5 +1,12 @@
 package org.genericsystem.cv.application;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
@@ -10,28 +17,19 @@ import org.opencv.core.Mat;
 import org.opencv.core.MatOfDouble;
 import org.opencv.core.MatOfInt;
 import org.opencv.core.MatOfPoint;
-import org.opencv.core.MatOfRect;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
-import org.opencv.features2d.MSER;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.imgproc.Moments;
 import org.opencv.utils.Converters;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 
-public class RobustTextDetector extends AbstractApp {
+public class RobustTextDetectorDemo extends AbstractApp {
 
 	public static void main(String[] args) {
 		launch(args);
@@ -41,13 +39,11 @@ public class RobustTextDetector extends AbstractApp {
 		NativeLibraryLoader.load();
 	}
 
-	private final double f = 6.053 / 0.009;
-
-	private final GSCapture gsCapture = new GSVideoCapture(0, f, GSVideoCapture.HD, GSVideoCapture.VGA);
-	private SuperFrameImg superFrame = gsCapture.read();
+	private final GSCapture gsCapture = new GSVideoCapture(0, GSVideoCapture.HD, GSVideoCapture.VGA);
+	private Img frame = gsCapture.read();
 	private ScheduledExecutorService timer = new BoundedScheduledThreadPoolExecutor();
 	private Config config = new Config();
-	private final ImageView[][] imageViews = new ImageView[][] { new ImageView[3], new ImageView[3], new ImageView[3], new ImageView[3] };
+	private final ImageView[][] imageViews = new ImageView[][] { new ImageView[3], new ImageView[3], new ImageView[3] };
 
 	private void startTimer() {
 		timer.scheduleAtFixedRate(() -> {
@@ -75,8 +71,8 @@ public class RobustTextDetector extends AbstractApp {
 				ImageView imageView = new ImageView();
 				imageViews[col][row] = imageView;
 				mainGrid.add(imageViews[col][row], col, row);
-				imageView.setFitWidth(superFrame.width() / displaySizeReduction);
-				imageView.setFitHeight(superFrame.height() / displaySizeReduction);
+				imageView.setFitWidth(frame.width() / displaySizeReduction);
+				imageView.setFitHeight(frame.height() / displaySizeReduction);
 			}
 		startTimer();
 	}
@@ -85,22 +81,13 @@ public class RobustTextDetector extends AbstractApp {
 
 		System.out.println("do work");
 		if (!config.stabilizedMode)
-			superFrame = gsCapture.read();
+			frame = gsCapture.read();
 		Image[] images = new Image[12];
 
-		MSER detector = MSER.create(3, 10, 2000, 0.25, 0.1, 100, 1.01, 0.03, 5);
-		Img gray = superFrame.getFrame().bgr2Gray();
+		Img gray = frame.bgr2Gray();
+		RobustTextDetectorManager manager = new RobustTextDetectorManager(gray.getSrc());
 
-		// detector.detect(gray.getSrc(), keypoint);
-		ArrayList<MatOfPoint> regions = new ArrayList<>();
-		MatOfRect mor = new MatOfRect();
-		detector.detectRegions(gray.getSrc(), regions, mor);
-		// System.out.println(mor);
-		Mat mserMask = new Mat(gray.size(), CvType.CV_8UC1, new Scalar(0));
-		for (MatOfPoint mop : regions) {
-			for (Point p : mop.toList())
-				mserMask.put((int) p.y, (int) p.x, 255);
-		}
+		Mat mserMask = manager.getMserMask();
 		images[0] = new Img(mserMask, false).toJfxImage();
 
 		Mat edges = new Mat();
@@ -384,11 +371,6 @@ public class RobustTextDetector extends AbstractApp {
 			startTimer();
 		}
 		config.isOn = !config.isOn;
-	}
-
-	@Override
-	protected void onT() {
-		config.textsEnabledMode = !config.textsEnabledMode;
 	}
 
 	@Override
