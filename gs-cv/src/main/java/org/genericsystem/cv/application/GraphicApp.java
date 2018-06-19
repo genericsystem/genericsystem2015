@@ -35,6 +35,7 @@ public class GraphicApp extends AbstractApp {
 	private ReferenceManager referenceManager;
 	private Config config = new Config();
 	private ScheduledExecutorService timer = new BoundedScheduledThreadPoolExecutor();
+	private FHTManager fhtManager = new FHTManager();
 	ImageView[][] imageViews = new ImageView[][] { new ImageView[3], new ImageView[3], new ImageView[3], new ImageView[3] };
 
 	public static void main(String[] args) {
@@ -52,6 +53,14 @@ public class GraphicApp extends AbstractApp {
 
 	@Override
 	protected void fillGrid(GridPane mainGrid) {
+
+		addIntegerSliderProperty("hBlurSize", fhtManager.gethBlurSize(), 10, 100);
+		addIntegerSliderProperty("vBlurSize", fhtManager.getvBlurSize(), 10, 100);
+		addDoubleSliderProperty("hNeighbourPenality", fhtManager.gethNeighbourPenality(), -5000, 0);
+		addDoubleSliderProperty("vNeighbourPenality", fhtManager.getvNeighbourPenality(), -5000, 0);
+		addDoubleSliderProperty("hAnglePenality", fhtManager.gethAnglePenality(), -0.2, 0);
+		addDoubleSliderProperty("vAnglePenality", fhtManager.getvAnglePenality(), -0.2, 0);
+
 		double displaySizeReduction = 1.5;
 		for (int col = 0; col < imageViews.length; col++)
 			for (int row = 0; row < imageViews[col].length; row++) {
@@ -91,11 +100,14 @@ public class GraphicApp extends AbstractApp {
 		images[0] = frame.toJfxImage();
 
 		Img binarized = frame.adaptativeGaussianInvThreshold(7, 5);
-		FHTManager fhtManager = new FHTManager(binarized, 0.75, 0.75);
-		Img flat = fhtManager.dewarp(frame.getSrc());
+		Img flat = fhtManager.dewarp(frame.getSrc(), binarized.getSrc(), 0.75, 0.75);
 		images[1] = flat.toJfxImage();
 
-		Img flatBinarized = flat.adaptativeGaussianInvThreshold(7, 5);
+		// Img flatBinarized = flat.adaptativeGaussianInvThreshold(7, 5);
+		Img gray = flat.bgr2Gray().gaussianBlur(new Size(3, 3));
+		Core.absdiff(gray.getSrc(), new Scalar(100), gray.getSrc());
+		Imgproc.adaptiveThreshold(gray.getSrc(), gray.getSrc(), 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY_INV, 7, 3);
+		Img flatBinarized = new Img(gray.getSrc(), false);
 		images[2] = flatBinarized.toJfxImage();
 
 		List<Rect> detectedRects = detectRects(flatBinarized, 1, 10000, 0.);

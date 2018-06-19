@@ -2,6 +2,7 @@ package org.genericsystem.cv.application;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map.Entry;
@@ -170,13 +171,17 @@ public class ReferenceManager {
 	}
 
 	public List<Rect> getResizedFieldsRects() {
-		double minX = fields.getMinX();
-		double maxX = fields.getMaxX();
-		double minY = fields.getMinY();
-		double maxY = fields.getMaxY();
+		List<Rect> referenceRects = getReferenceRects();
+		if (referenceRects.isEmpty())
+			return Collections.emptyList();
+		double minX = referenceRects.stream().mapToDouble(rect -> rect.tl().x).min().getAsDouble();
+		double maxX = referenceRects.stream().mapToDouble(rect -> rect.br().x).max().getAsDouble();
+		double minY = referenceRects.stream().mapToDouble(rect -> rect.tl().y).min().getAsDouble();
+		double maxY = referenceRects.stream().mapToDouble(rect -> rect.br().y).max().getAsDouble();
+
 		double horizontalRatio = frameSize.width / (maxX - minX) > 1 ? 1 : frameSize.width / (maxX - minX);
 		double verticalRatio = frameSize.height / (maxY - minY) > 1 ? 1 : frameSize.height / (maxY - minY);
-		return rescale(shift(getReferenceRects(), minX, minY), Math.min(horizontalRatio, verticalRatio));
+		return rescale(shift(referenceRects, minX, minY), Math.min(horizontalRatio, verticalRatio));
 	}
 
 	private List<Rect> rescale(List<Rect> rects, double ratio) {
@@ -262,41 +267,41 @@ public class ReferenceManager {
 			fieldsList.removeIf(predicate);
 		}
 
-		public double getMinX() {
-			double minX = Double.MAX_VALUE;
-			for (Field f : fieldsList) {
-				if (f.getRect().tl().x < minX)
-					minX = f.getRect().tl().x;
-			}
-			return minX;
-		}
-
-		public double getMaxX() {
-			double maxX = 0.0;
-			for (Field f : fieldsList) {
-				if (f.getRect().br().x > maxX)
-					maxX = f.getRect().br().x;
-			}
-			return maxX;
-		}
-
-		public double getMinY() {
-			double minY = Double.MAX_VALUE;
-			for (Field f : fieldsList) {
-				if (f.getRect().tl().y < minY)
-					minY = f.getRect().tl().y;
-			}
-			return minY;
-		}
-
-		public double getMaxY() {
-			double maxY = 0.0;
-			for (Field f : fieldsList) {
-				if (f.getRect().br().y > maxY)
-					maxY = f.getRect().br().y;
-			}
-			return maxY;
-		}
+		// public double getMinX() {
+		// double minX = Double.MAX_VALUE;
+		// for (Field f : fieldsList) {
+		// if (f.getRect().tl().x < minX)
+		// minX = f.getRect().tl().x;
+		// }
+		// return minX;
+		// }
+		//
+		// public double getMaxX() {
+		// double maxX = 0.0;
+		// for (Field f : fieldsList) {
+		// if (f.getRect().br().x > maxX)
+		// maxX = f.getRect().br().x;
+		// }
+		// return maxX;
+		// }
+		//
+		// public double getMinY() {
+		// double minY = Double.MAX_VALUE;
+		// for (Field f : fieldsList) {
+		// if (f.getRect().tl().y < minY)
+		// minY = f.getRect().tl().y;
+		// }
+		// return minY;
+		// }
+		//
+		// public double getMaxY() {
+		// double maxY = 0.0;
+		// for (Field f : fieldsList) {
+		// if (f.getRect().br().y > maxY)
+		// maxY = f.getRect().br().y;
+		// }
+		// return maxY;
+		// }
 
 		public void shift(Mat homoInv) {
 			fieldsList.forEach(field -> field.shift(homoInv));
@@ -378,9 +383,9 @@ public class ReferenceManager {
 		return res;
 	}
 
-	public Reconciliation computeHomography(ImgDescriptor newDescriptor) {
-		return newDescriptor.computeReconciliation(getReference());
-	}
+	// public Reconciliation computeHomography(ImgDescriptor newDescriptor) {
+	// return newDescriptor.computeReconciliation(getReference());
+	// }
 
 	private double distance(Mat betweenHomography) {
 		List<Point> originalPoints = Arrays.asList(new Point[] { new Point(0, 0), new Point(frameSize.width, 0), new Point(frameSize.width, frameSize.height), new Point(0, frameSize.height) });

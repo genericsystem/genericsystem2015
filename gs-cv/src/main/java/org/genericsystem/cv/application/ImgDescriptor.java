@@ -1,11 +1,13 @@
 package org.genericsystem.cv.application;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.genericsystem.cv.Img;
-import org.opencv.calib3d.Calib3d;
+import org.genericsystem.cv.lm.LevenbergImpl;
 import org.opencv.core.Core;
+import org.opencv.core.CvType;
 import org.opencv.core.DMatch;
 import org.opencv.core.KeyPoint;
 import org.opencv.core.Mat;
@@ -62,29 +64,39 @@ public class ImgDescriptor {
 		List<Point> referencePts = new ArrayList<>();
 		List<Point> pts = new ArrayList<>();
 		for (DMatch goodMatch : matches.toArray())
-			if (goodMatch.distance <= 120) {
+			if (goodMatch.distance <= 150) {
 				referencePts.add(referenceKeyPoints.get(goodMatch.trainIdx).pt);
 				pts.add(keyPoints.get(goodMatch.queryIdx).pt);
 			}
 		if (referencePts.size() > 50) {
 
-			// List<Point[]> pairedPoints = new ArrayList<>();
-			// for (int i = 0; i < pts.size(); i++)
-			// pairedPoints.add(new Point[] { pts.get(i), referencePts.get(i) });
-			//
-			// double[] transScaleParams = new LevenbergImpl<>((points, params) -> distance(points, params), pairedPoints, new double[] { 1, 1, 0, 0 }).getParams();
-			// System.out.println("params " + Arrays.toString(transScaleParams));
-			// Mat result = Mat.zeros(3, 3, CvType.CV_64FC1);
-			// result.put(0, 0, transScaleParams[0]);
-			// result.put(1, 1, transScaleParams[1]);
-			// result.put(0, 2, transScaleParams[2]);
-			// result.put(1, 2, transScaleParams[3]);
-			// result.put(2, 2, 1);
-			Mat result = Calib3d.findHomography(new MatOfPoint2f(pts.stream().toArray(Point[]::new)), new MatOfPoint2f(referencePts.stream().toArray(Point[]::new)), Calib3d.RANSAC, 1);
+			List<Point[]> pairedPoints = new ArrayList<>();
+			for (int i = 0; i < pts.size(); i++)
+				pairedPoints.add(new Point[] { pts.get(i), referencePts.get(i) });
+
+			double[] transScaleParams = new LevenbergImpl<>((points, params) -> distance(points, params), pairedPoints, new double[] { 1, 1, 0, 0 }).getParams();
+			System.out.println("params " + Arrays.toString(transScaleParams));
+			Mat result = Mat.zeros(3, 3, CvType.CV_64FC1);
+			result.put(0, 0, transScaleParams[0]);
+			result.put(1, 1, transScaleParams[1]);
+			result.put(0, 2, transScaleParams[2] * transScaleParams[0]);
+			result.put(1, 2, transScaleParams[3] * transScaleParams[1]);
+			result.put(2, 2, 1);
+			// Mat result = Calib3d.findHomography(new MatOfPoint2f(pts.stream().toArray(Point[]::new)), new MatOfPoint2f(referencePts.stream().toArray(Point[]::new)), Calib3d.RANSAC, 1);
 			if (result.size().empty()) {
 				System.out.println("Stabilization homography is empty");
 				return null;
 			}
+			double error = 0;
+			for (Point[] points : pairedPoints) {
+				error += Math.pow(distance(points, transScaleParams), 2);
+			}
+			error = Math.sqrt(error) / pairedPoints.size();
+			if (error > 3) {
+				System.out.println("error too big : " + error + " match size : " + pairedPoints.size());
+				return null;
+			}
+			System.out.println("error : " + error + " match size : " + pairedPoints.size());
 			if (!isValidHomography(result)) {
 				System.out.println("Not a valid homography");
 				return null;
@@ -102,8 +114,8 @@ public class ImgDescriptor {
 		double tx = params[2];
 		double ty = params[3];
 
-		double dx = (sx * points[0].x + tx) - points[1].x;
-		double dy = (sy * points[0].y + ty) - points[1].y;
+		double dx = sx * (points[0].x + tx) - points[1].x;
+		double dy = sy * (points[0].y + ty) - points[1].y;
 
 		return Math.sqrt(dx * dx + dy * dy);
 	}

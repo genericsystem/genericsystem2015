@@ -1,8 +1,11 @@
 package org.genericsystem.cv;
 
+import org.genericsystem.cv.params.ParamsPanel;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 
 import javafx.application.Application;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.IntegerProperty;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -20,6 +23,18 @@ public abstract class AbstractApp extends Application {
 
 	public final static double displayWidth = 400d;
 
+	private ParamsPanel paramsPanel = new ParamsPanel();
+
+	public void addDoubleSliderProperty(String propertyName, DoubleProperty property, double min, double max) {
+		DoubleProperty sliderProperty = paramsPanel.addSliderProperty(propertyName, property.getValue(), min, max);
+		property.bind(sliderProperty);
+	}
+
+	public void addIntegerSliderProperty(String propertyName, IntegerProperty property, double min, double max) {
+		DoubleProperty sliderProperty = paramsPanel.addSliderProperty(propertyName, property.getValue(), min, max);
+		property.bind(sliderProperty);
+	}
+
 	@Override
 	public void start(Stage stage) throws Exception {
 		GridPane gridPane = new GridPane();
@@ -28,7 +43,7 @@ public abstract class AbstractApp extends Application {
 		stage.setTitle("Generic System Information Retriever");
 		ScrollPane scrollPane = new ScrollPane(gridPane);
 		scrollPane.setFitToHeight(true);
-		VBox root = new VBox(scrollPane);
+		VBox root = new VBox(scrollPane, paramsPanel);
 		scene.setRoot(root);
 		stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
 			@Override
