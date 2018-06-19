@@ -44,7 +44,7 @@ public class StripTractor {
 		for (int strip = 0; strip < vHoughTrajs.size(); strip++) {
 			StripTractor[] prevStripInfluences = strip != 0 ? StripTractor.stripInfluences(vHoughTrajs.get(strip - 1), vStep) : noInfluences(vHoughTrajs.get(strip).size());
 			StripTractor[] nextStripInfluences = strip != vHoughTrajs.size() - 1 ? StripTractor.stripInfluences(vHoughTrajs.get(strip + 1), vStep) : noInfluences(vHoughTrajs.get(strip).size());
-			vInfluencedTrajs.add(FHT.bestInfluencedTrajectFHT(vHoughs.get(strip), 21, -0.08, -1000, prevStripInfluences, nextStripInfluences));
+			vInfluencedTrajs.add(FHT.bestInfluencedTrajectFHT(vHoughs.get(strip), blurSize, anglePenality, neigbourPenality, prevStripInfluences, nextStripInfluences));
 		}
 		return vInfluencedTrajs;
 	}

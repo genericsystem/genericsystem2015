@@ -54,12 +54,12 @@ public class GraphicApp extends AbstractApp {
 	@Override
 	protected void fillGrid(GridPane mainGrid) {
 
-		addIntegerSliderProperty("hBlurSize", fhtManager.gethBlurSize(), 10, 100);
-		addIntegerSliderProperty("vBlurSize", fhtManager.getvBlurSize(), 10, 100);
+		addIntegerSliderProperty("hBlurSize", fhtManager.gethBlurSize(), 0, 200);
+		addIntegerSliderProperty("vBlurSize", fhtManager.getvBlurSize(), 0, 200);
 		addDoubleSliderProperty("hNeighbourPenality", fhtManager.gethNeighbourPenality(), -5000, 0);
 		addDoubleSliderProperty("vNeighbourPenality", fhtManager.getvNeighbourPenality(), -5000, 0);
-		addDoubleSliderProperty("hAnglePenality", fhtManager.gethAnglePenality(), -0.2, 0);
-		addDoubleSliderProperty("vAnglePenality", fhtManager.getvAnglePenality(), -0.2, 0);
+		addDoubleSliderProperty("hAnglePenality", fhtManager.gethAnglePenality(), -1, 0);
+		addDoubleSliderProperty("vAnglePenality", fhtManager.getvAnglePenality(), -1, 0);
 
 		double displaySizeReduction = 1.5;
 		for (int col = 0; col < imageViews.length; col++)

@@ -128,7 +128,7 @@ public class FHTRadonDemo extends AbstractApp {
 		images[3] = new Img(houghTransform255, false).toJfxImage();
 		ref = trace("FHT", ref);
 
-		Mat adaptive = FHT.adaptivHough(houghTransform255, 11);
+		Mat adaptive = FHT.adaptivHough(houghTransform255, 200);
 		Core.normalize(adaptive, adaptive, 0, 255, Core.NORM_MINMAX);
 		images[4] = new Img(adaptive, false).toJfxImage();
 		adaptive.release();
