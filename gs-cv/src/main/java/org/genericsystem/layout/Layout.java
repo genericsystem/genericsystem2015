@@ -113,8 +113,11 @@ public class Layout {
 	}
 
 	public void draw(Img img, Scalar branchColor, Scalar leafColor, int branchThickness, int leafThickness) {
-		traverse(getRoi(img),
-				(roi, shard) -> Imgproc.rectangle(roi.getSrc(), new Point(0, 0), new Point(roi.width() - 1, roi.height() - 1), shard.getChildren().isEmpty() ? leafColor : branchColor, shard.getChildren().isEmpty() ? leafThickness : branchThickness));
+		traverse(getRoi(img), (roi, shard) -> {
+			int thickNess = shard.getChildren().isEmpty() ? leafThickness : branchThickness;
+			if (thickNess != 0)
+				Imgproc.rectangle(roi.getSrc(), new Point(0, 0), new Point(roi.width() - 1, roi.height() - 1), shard.getChildren().isEmpty() ? leafColor : branchColor, thickNess);
+		});
 	}
 
 	public void drawOcrPerspectiveInverse(Img rootImg, Mat homography, Scalar color, int thickness) {

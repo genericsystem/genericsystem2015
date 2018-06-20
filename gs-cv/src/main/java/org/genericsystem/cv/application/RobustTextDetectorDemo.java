@@ -20,6 +20,7 @@ import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.imgproc.Moments;
 import org.opencv.utils.Converters;
@@ -77,6 +78,16 @@ public class RobustTextDetectorDemo extends AbstractApp {
 		startTimer();
 	}
 
+	Mat convertContourToMat(MatOfPoint contour) {
+		Point[] pts = contour.toArray();
+		Mat result = new Mat(pts.length, 2, CvType.CV_64FC1);
+		for (int i = 0; i < result.rows(); ++i) {
+			result.put(i, 0, pts[i].x);
+			result.put(i, 1, pts[i].y);
+		}
+		return result;
+	}
+
 	private Image[] doWork() {
 
 		System.out.println("do work");
@@ -91,18 +102,19 @@ public class RobustTextDetectorDemo extends AbstractApp {
 		images[0] = new Img(mserMask, false).toJfxImage();
 
 		Mat edges = new Mat();
-		Imgproc.Canny(gray.getSrc(), edges, 30, 100);
+		Imgproc.Canny(gray.getSrc(), edges, 20, 60);
 		Mat edge_mser_intersection = new Mat();
 		Core.bitwise_and(edges, mserMask, edge_mser_intersection);
+		images[1] = new Img(edge_mser_intersection, false).toJfxImage();
 
 		Mat gradientGrown = growEdges(gray.getSrc(), edge_mser_intersection);
-		images[1] = new Img(gradientGrown, false).toJfxImage();
+		images[2] = new Img(gradientGrown, false).toJfxImage();
 
 		Mat edgeEnhancedMser = new Mat();
 		Mat notGradientGrown = new Mat();
 		Core.bitwise_not(gradientGrown, notGradientGrown);
 		Core.bitwise_and(notGradientGrown, mserMask, edgeEnhancedMser);
-		images[2] = new Img(edgeEnhancedMser, false).toJfxImage();
+		images[3] = new Img(edgeEnhancedMser, false).toJfxImage();
 
 		Mat labels = new Mat();
 		Mat stats = new Mat();
@@ -131,7 +143,6 @@ public class RobustTextDetectorDemo extends AbstractApp {
 			if (eccentricity < minEccentricity || eccentricity > maxEccentricity) {
 				continue;
 			}
-
 			List<MatOfPoint> contours = new ArrayList<>();
 			Imgproc.findContours(labelMask, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 			MatOfInt hull = new MatOfInt();
@@ -144,18 +155,18 @@ public class RobustTextDetectorDemo extends AbstractApp {
 				mopHull.put(j, 0, point);
 			}
 			double solidity = area / Imgproc.contourArea(mopHull);
-			double minSolidity = 0.5;
+			double minSolidity = 0.4;// 0.5
 			if (solidity < minSolidity) {
 				continue;
 			}
 			Core.bitwise_or(result2, labelMask, result2);
 		}
-		images[3] = new Img(result2, false).toJfxImage();
+		images[4] = new Img(result2, false).toJfxImage();
 
 		Imgproc.distanceTransform(result2, result2, Imgproc.DIST_L2, 3);
 		Mat tmp = new Mat();
 		Core.multiply(result2, new Scalar(200), tmp);
-		images[4] = new Img(tmp, false).toJfxImage();
+		images[5] = new Img(tmp, false).toJfxImage();
 		result2.convertTo(result2, CvType.CV_32SC1);
 
 		Mat strokeWidth = computeStrokeWidth(result2);
@@ -183,13 +194,13 @@ public class RobustTextDetectorDemo extends AbstractApp {
 				Core.bitwise_or(filtered_stroke_width, labelMask, filtered_stroke_width);
 			}
 		}
-		images[5] = new Img(filtered_stroke_width, false).toJfxImage();
+		images[6] = new Img(filtered_stroke_width, false).toJfxImage();
 		Mat bounding_region = new Mat();
-		// Imgproc.morphologyEx(filtered_stroke_width, bounding_region, Imgproc.MORPH_CLOSE, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(30, 30)));
+		Imgproc.morphologyEx(filtered_stroke_width, bounding_region, Imgproc.MORPH_CLOSE, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(25, 25)));
 		// Imgproc.morphologyEx(bounding_region, bounding_region, Imgproc.MORPH_OPEN, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(25, 25)));
 		// Mat result3 = new Mat();
 		// superFrame.getFrame().getSrc().copyTo(result3, filtered_stroke_width);
-		// images[8] = new Img(result3, false).toJfxImage();
+		images[7] = new Img(bounding_region, false).toJfxImage();
 
 		return images;
 	}
@@ -291,15 +302,14 @@ public class RobustTextDetectorDemo extends AbstractApp {
 
 	public static int toBin(double angle, int neighbors) {
 		float divisor = 180.0f / neighbors;
-		return (int) (((Math.floor(angle / divisor) - 1) / 2) + 1) % neighbors + 1;
+		return (int) ((((Math.floor(angle / divisor) - 1) / 2) + 1) % neighbors + 1);
 	}
 
 	public static Mat growEdges(Mat image, Mat edges) {
 
 		Mat grad_x = new Mat(), grad_y = new Mat();
-		Imgproc.Sobel(image, grad_x, CvType.CV_64FC1, 1, 0);
-		Imgproc.Sobel(image, grad_y, CvType.CV_64FC1, 0, 1);
-		Core.subtract(Mat.zeros(image.size(), CvType.CV_64FC1), grad_x, grad_x);
+		Imgproc.Sobel(image, grad_x, CvType.CV_32FC1, 1, 0);
+		Imgproc.Sobel(image, grad_y, CvType.CV_32FC1, 0, 1);
 		Mat grad_mag = new Mat(), grad_dir = new Mat();
 		Core.cartToPolar(grad_x, grad_y, grad_mag, grad_dir, true);
 
@@ -322,29 +332,53 @@ public class RobustTextDetectorDemo extends AbstractApp {
 					/* .. there should be a better way .... */
 					switch ((int) grad_dir.get(y, x)[0]) {
 					case 1:
-						result.put(y, x - 1, 255);
-						break;
-					case 2:
-						result.put(y - 1, x - 1, 255);
-						break;
-					case 3:
-						result.put(y - 1, x, 255);
-						break;
-					case 4:
-						result.put(y - 1, x + 1, 255);
-						break;
-					case 5:
 						result.put(y, x + 1, 255);
 						break;
-					case 6:
+					case 2:
 						result.put(y + 1, x + 1, 255);
 						break;
-					case 7:
+					case 3:
 						result.put(y + 1, x, 255);
 						break;
-					case 8:
+					case 4:
 						result.put(y + 1, x - 1, 255);
 						break;
+					case 5:
+						result.put(y, x - 1, 255);
+						break;
+					case 6:
+						result.put(y - 1, x - 1, 255);
+						break;
+					case 7:
+						result.put(y - 1, x, 255);
+						break;
+					case 8:
+						result.put(y - 1, x + 1, 255);
+						break;
+					// case 1:
+					// result.put(y, x - 1, 255);
+					// break;
+					// case 2:
+					// result.put(y - 1, x - 1, 255);
+					// break;
+					// case 3:
+					// result.put(y - 1, x, 255);
+					// break;
+					// case 4:
+					// result.put(y - 1, x + 1, 255);
+					// break;
+					// case 5:
+					// result.put(y, x + 1, 255);
+					// break;
+					// case 6:
+					// result.put(y + 1, x + 1, 255);
+					// break;
+					// case 7:
+					// result.put(y + 1, x, 255);
+					// break;
+					// case 8:
+					// result.put(y + 1, x - 1, 255);
+					// break;
 					default:
 						System.out.println("Error : " + (int) grad_dir.get(y, x)[0]);
 						break;

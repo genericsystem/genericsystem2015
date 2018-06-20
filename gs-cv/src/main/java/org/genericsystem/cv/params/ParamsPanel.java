@@ -22,6 +22,11 @@ public class ParamsPanel extends VBox {
 		DoubleProperty property = addProperty(propertyName, value);
 		property.addListener((ov, oldV, newV) -> System.out.println(propertyName + " " + newV));
 		Slider slider = new Slider(min, max, value);
+		slider.setShowTickLabels(true);
+		slider.setShowTickMarks(true);
+		// slider.setMajorTickUnit(50);
+		// slider.setMinorTickCount(5);
+		// slider.setBlockIncrement(10);
 		slider.valueProperty().addListener((ov, oldValue, newValue) -> {
 			if (!slider.isValueChanging())
 				property.setValue(newValue);

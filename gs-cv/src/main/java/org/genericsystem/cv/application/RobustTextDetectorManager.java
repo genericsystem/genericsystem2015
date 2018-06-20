@@ -34,9 +34,17 @@ public class RobustTextDetectorManager {
 		MatOfRect mor = new MatOfRect();
 		detector.detectRegions(gray, regions, mor);
 		Mat mserMask = new Mat(gray.size(), CvType.CV_8UC1, new Scalar(0));
-		for (MatOfPoint mop : regions)
+		for (MatOfPoint mop : regions) {
+			// Point[] array = mop.toArray();
+			// double minX = Arrays.stream(array).mapToDouble(pt -> pt.x).min().getAsDouble();
+			// double minY = Arrays.stream(array).mapToDouble(pt -> pt.y).min().getAsDouble();
+			// double maxX = Arrays.stream(array).mapToDouble(pt -> pt.x).max().getAsDouble();
+			// double maxY = Arrays.stream(array).mapToDouble(pt -> pt.y).max().getAsDouble();
+			// Imgproc.rectangle(mserMask, new Point(minX, minY), new Point(maxX, maxY), new Scalar(Math.random() * 200 + 55), -1);
+			// double color = Math.random() * 200 + 55;
 			for (Point p : mop.toArray())
 				mserMask.put((int) p.y, (int) p.x, 255);
+		}
 		return mserMask;
 	}
 

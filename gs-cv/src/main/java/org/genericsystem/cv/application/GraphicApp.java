@@ -11,14 +11,17 @@ import java.util.concurrent.TimeUnit;
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
+import org.genericsystem.layout.Layout;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
+import org.opencv.core.MatOfRect;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
+import org.opencv.features2d.MSER;
 import org.opencv.imgproc.Imgproc;
 
 import javafx.application.Platform;
@@ -36,7 +39,8 @@ public class GraphicApp extends AbstractApp {
 	private Config config = new Config();
 	private ScheduledExecutorService timer = new BoundedScheduledThreadPoolExecutor();
 	private FHTManager fhtManager = new FHTManager();
-	ImageView[][] imageViews = new ImageView[][] { new ImageView[3], new ImageView[3], new ImageView[3], new ImageView[3] };
+	private ImageView[][] imageViews = new ImageView[][] { new ImageView[3], new ImageView[3], new ImageView[3], new ImageView[3] };
+	private int frameCount = 0;
 
 	public static void main(String[] args) {
 		launch(args);
@@ -94,28 +98,41 @@ public class GraphicApp extends AbstractApp {
 	private Image[] doWork() {
 
 		System.out.println("do work");
-		if (!config.stabilizedMode)
+		if (!config.stabilizedMode) {
 			frame = gsCapture.read();
+			frameCount++;
+		}
 		Image[] images = new Image[10];
 		images[0] = frame.toJfxImage();
+
+		if (frameCount < 30)
+			return images;
 
 		Img binarized = frame.adaptativeGaussianInvThreshold(7, 5);
 		Img flat = fhtManager.dewarp(frame.getSrc(), binarized.getSrc(), 0.75, 0.75);
 		images[1] = flat.toJfxImage();
 
 		// Img flatBinarized = flat.adaptativeGaussianInvThreshold(7, 5);
-		Img gray = flat.bgr2Gray().gaussianBlur(new Size(3, 3));
-		Core.absdiff(gray.getSrc(), new Scalar(100), gray.getSrc());
-		Imgproc.adaptiveThreshold(gray.getSrc(), gray.getSrc(), 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY_INV, 7, 3);
-		Img flatBinarized = new Img(gray.getSrc(), false);
-		images[2] = flatBinarized.toJfxImage();
+		// Img gray = flat.bgr2Gray().gaussianBlur(new Size(3, 3));
+		// Core.absdiff(gray.getSrc(), new Scalar(100), gray.getSrc());
+		// Imgproc.adaptiveThreshold(gray.getSrc(), gray.getSrc(), 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY_INV, 7, 3);
+		// Img flatBinarized = new Img(gray.getSrc(), false);
+		// images[2] = flatBinarized.toJfxImage();
 
-		List<Rect> detectedRects = detectRects(flatBinarized, 1, 10000, 0.);
+		Img mserMask = new Img(findMask(flat.bgr2Gray(), 10, 2000), false);
+		images[2] = mserMask.toJfxImage();
+
+		List<Rect> detectedRects = detectRects(mserMask.getSrc(), 10, 2000);
 		Img flatDisplay = new Img(flat.getSrc(), true);
-		detectedRects.forEach(rect -> Imgproc.rectangle(flatDisplay.getSrc(), rect.tl(), rect.br(), new Scalar(0, 255, 0), -1));
+		detectedRects.forEach(rect -> Imgproc.rectangle(flatDisplay.getSrc(), rect.tl(), rect.br(), new Scalar(0, 255, 0), 1));
 		images[3] = flatDisplay.toJfxImage();
 
-		// Layout surfaceLayout = flatBinarized.buildLayout(new Size(2, 0.4), new Size(0.04, 0.008), 8);
+		Layout layout = mserMask.buildLayout(new Size(0, 0), new Size(0.001, 0.001), 8);
+		Img flatDisplay2 = new Img(flat.getSrc(), true);
+		layout.draw(flatDisplay2, new Scalar(255, 0, 0), new Scalar(0, 255, 0), 0, 1);
+		layout.ocrTree(flat, 0, 0);
+		layout.drawOcr(flatDisplay2);
+		images[4] = flatDisplay2.toJfxImage();
 		// double surface = surfaceLayout.normalizedArea();
 		// System.out.println("surface : " + surface + " " + surfaceLayout.area(flatBinarized) + " " + surfaceLayout.computeTotalSurface(flatBinarized));
 		// Imgproc.putText(flatDisplay.getSrc(), String.valueOf(surface), new Point(flatDisplay.width() / 2, 20), Core.FONT_HERSHEY_PLAIN, 1, new Scalar(255, 255, 255), 1);
@@ -205,11 +222,11 @@ public class GraphicApp extends AbstractApp {
 		List<Rect> referenceRects = referenceManager.getReferenceRects();
 		Mat referenceTemplate = Mat.zeros(flat.size(), CvType.CV_8UC1);// new SuperTemplate(referenceManager.getReference().getSuperFrame(), CvType.CV_8UC1, SuperFrameImg::getFrame);
 		referenceRects.forEach(rect -> Imgproc.rectangle(referenceTemplate, rect, new Scalar(255), -1));
-		images[4] = new Img(referenceTemplate, false).toJfxImage();
+		images[6] = new Img(referenceTemplate, false).toJfxImage();
 
 		Mat display = Mat.zeros(frame.size(), CvType.CV_8UC1);
 		referenceManager.getResizedFieldsRects().forEach(rect -> Imgproc.rectangle(display, rect, new Scalar(255), -1));
-		images[5] = new Img(display, false).toJfxImage();
+		images[7] = new Img(display, false).toJfxImage();
 		//
 		// SuperTemplate layoutTemplate = new SuperTemplate(referenceTemplate, CvType.CV_8UC3, SuperFrameImg::getDisplay);
 		// Layout layout = layoutTemplate.layout();
@@ -242,10 +259,22 @@ public class GraphicApp extends AbstractApp {
 		timer.schedule(() -> referenceManager.clear(), 0, TimeUnit.MILLISECONDS);
 	}
 
-	List<Rect> detectRects(Img binarized, int minArea, int maxArea, double fillRatio) {
+	Mat findMask(Img gray, int minArea, int maxArea) {
+		MSER detector = MSER.create(2, minArea, maxArea, 1, 0.25, 100, 1.01, 0.03, 5);
+		ArrayList<MatOfPoint> regions = new ArrayList<>();
+		MatOfRect mor = new MatOfRect();
+		detector.detectRegions(gray.getSrc(), regions, mor);
+		Mat mserMask = new Mat(gray.size(), CvType.CV_8UC1, new Scalar(0));
+		for (MatOfPoint mop : regions)
+			for (Point p : mop.toArray())
+				mserMask.put((int) p.y, (int) p.x, 255);
+		return mserMask;
+	}
+
+	List<Rect> detectRects(Mat mserMask, int minArea, int maxArea) {
 		List<MatOfPoint> contours = new ArrayList<>();
-		Imgproc.findContours(binarized.getSrc(), contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
-		Size size = binarized.size();
+		Imgproc.findContours(mserMask, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+		Size size = mserMask.size();
 		List<Rect> result = new ArrayList<>();
 		for (MatOfPoint contour : contours) {
 			double area = Imgproc.contourArea(contour);
