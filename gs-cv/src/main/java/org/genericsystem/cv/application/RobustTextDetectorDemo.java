@@ -97,29 +97,56 @@ public class RobustTextDetectorDemo extends AbstractApp {
 
 		Img gray = frame.bgr2Gray();
 		RobustTextDetectorManager manager = new RobustTextDetectorManager(gray.getSrc());
+		Mat mask = manager.getMserMask();
+		Mat smoothedInput = new Mat();
+		Imgproc.GaussianBlur(frame.getSrc(), smoothedInput, new Size(7, 7), Math.sqrt(2));
+		Mat edges = new Mat();
+		Imgproc.Canny(smoothedInput, edges, 120, 120);
+		Mat mserAndCanny = new Mat();
+		Core.bitwise_and(mask, edges, mserAndCanny);
+		Mat sobelx = new Mat();
+		Imgproc.Sobel(gray.getSrc(), sobelx, CvType.CV_64F, 1, 0);
+		Mat sobely = new Mat();
+		Imgproc.Sobel(gray.getSrc(), sobely, CvType.CV_64F, 0, 1);
+		Mat gradAngle = new Mat();
+		Mat gradMag = new Mat(), grad_dir = new Mat();
+		Core.cartToPolar(sobelx, sobely, gradMag, gradAngle, true);
+		Imgproc.phaseCorrelate(sobelx, sobely);
+		Mat mserAndCannyGrown = growEdge2(mserAndCanny, gradAngle, 2);
+		Core.absdiff(mserAndCannyGrown, new Scalar(0), mserAndCannyGrown);
+		mserAndCannyGrown.convertTo(mserAndCannyGrown, CvType.CV_8UC1);
+
+		Mat se = Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(3, 3));
+		Mat gradient = new Mat();
+		Imgproc.morphologyEx(mask, gradient, Imgproc.MORPH_GRADIENT, se);
+		Mat edgeEnhancedMserMask = new Mat();
+		Mat scalar255 = new Mat(gradient.size(), CvType.CV_8UC1, new Scalar(255));
+		Mat substract = new Mat();
+		Core.subtract(scalar255, gradient, substract);
+		Core.bitwise_and(substract, mask, edgeEnhancedMserMask);
 
 		Mat mserMask = manager.getMserMask();
 		images[0] = new Img(mserMask, false).toJfxImage();
 
-		Mat edges = new Mat();
-		Imgproc.Canny(gray.getSrc(), edges, 30, 110);
-		Mat edge_mser_intersection = new Mat();
-		Core.bitwise_and(edges, mserMask, edge_mser_intersection);
-		images[1] = new Img(edge_mser_intersection, false).toJfxImage();
-
-		Mat gradientGrown = growEdges(gray.getSrc(), edge_mser_intersection);
-		images[2] = new Img(gradientGrown, false).toJfxImage();
-
-		Mat edgeEnhancedMser = new Mat();
-		Mat notGradientGrown = new Mat();
-		Core.bitwise_not(gradientGrown, notGradientGrown);
-		Core.bitwise_and(notGradientGrown, mserMask, edgeEnhancedMser);
-		images[3] = new Img(edgeEnhancedMser, false).toJfxImage();
+		// Mat edges = new Mat();
+		// Imgproc.Canny(gray.getSrc(), edges, 30, 110);
+		// Mat edge_mser_intersection = new Mat();
+		// Core.bitwise_and(edges, mserMask, edge_mser_intersection);
+		// images[1] = new Img(edge_mser_intersection, false).toJfxImage();
+		//
+		// Mat gradientGrown = growEdges(gray.getSrc(), edge_mser_intersection);
+		// images[2] = new Img(gradientGrown, false).toJfxImage();
+		//
+		// Mat edgeEnhancedMser = new Mat();
+		// Mat notGradientGrown = new Mat();
+		// Core.bitwise_not(gradientGrown, notGradientGrown);
+		// Core.bitwise_and(notGradientGrown, mserMask, edgeEnhancedMser);
+		// images[3] = new Img(edgeEnhancedMser, false).toJfxImage();
 
 		Mat labels = new Mat();
 		Mat stats = new Mat();
 		Mat centroid = new Mat();
-		int labelsIds = Imgproc.connectedComponentsWithStats(edgeEnhancedMser, labels, stats, centroid, 4, CvType.CV_32S);
+		int labelsIds = Imgproc.connectedComponentsWithStats(edgeEnhancedMserMask, labels, stats, centroid, 4, CvType.CV_32S);
 		Mat result2 = new Mat(labels.size(), CvType.CV_8UC1, new Scalar(0));
 		for (int labelId = 0; labelId < labelsIds; labelId++) {
 			double area = stats.get(labelId, Imgproc.CC_STAT_AREA)[0];
@@ -302,6 +329,29 @@ public class RobustTextDetectorDemo extends AbstractApp {
 	public static int toBin(double angle, int neighbors) {
 		float divisor = 180.0f / neighbors;
 		return (int) ((((Math.floor(angle / divisor) - 1) / 2) + 1) % neighbors + 1);
+	}
+
+	public static Mat growEdge2(Mat edgeMser, Mat gradAngle, double maxLength) {
+		// if (darkonLight==1)
+		// grad_angle = -grad_angle
+		Mat edgeGrown = new Mat();
+		edgeMser.copyTo(edgeGrown);
+		for (int i = 0; i < edgeGrown.height(); i++)
+			for (int j = 0; j < edgeGrown.width(); j++)
+				if (edgeMser.get(i, j)[0] != 0) {
+					int x1 = j;
+					int y1 = i;
+					for (int l = 0; l < maxLength; l++) {
+						int length = l + 1;
+						x1 = (int) (j + length * Math.cos(gradAngle.get(y1, x1)[0]));
+						y1 = (int) (i + length * Math.sin(gradAngle.get(y1, x1)[0]));
+						if (x1 >= edgeGrown.width() || y1 >= edgeGrown.height() || x1 < 0 || y1 < 0)
+							break;
+						edgeGrown.put(y1, x1, 255);
+					}
+				}
+		return edgeGrown;
+
 	}
 
 	public static Mat growEdges(Mat gray, Mat edges) {
