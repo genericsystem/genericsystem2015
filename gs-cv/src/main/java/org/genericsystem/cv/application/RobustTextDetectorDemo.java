@@ -1,12 +1,5 @@
 package org.genericsystem.cv.application;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
@@ -24,6 +17,13 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.imgproc.Moments;
 import org.opencv.utils.Converters;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -66,7 +66,7 @@ public class RobustTextDetectorDemo extends AbstractApp {
 
 	@Override
 	protected void fillGrid(GridPane mainGrid) {
-		double displaySizeReduction = 1;
+		double displaySizeReduction = 0.5;
 		for (int col = 0; col < imageViews.length; col++)
 			for (int row = 0; row < imageViews[col].length; row++) {
 				ImageView imageView = new ImageView();
@@ -102,7 +102,7 @@ public class RobustTextDetectorDemo extends AbstractApp {
 		images[0] = new Img(mserMask, false).toJfxImage();
 
 		Mat edges = new Mat();
-		Imgproc.Canny(gray.getSrc(), edges, 20, 60);
+		Imgproc.Canny(gray.getSrc(), edges, 30, 110);
 		Mat edge_mser_intersection = new Mat();
 		Core.bitwise_and(edges, mserMask, edge_mser_intersection);
 		images[1] = new Img(edge_mser_intersection, false).toJfxImage();
@@ -156,9 +156,8 @@ public class RobustTextDetectorDemo extends AbstractApp {
 			}
 			double solidity = area / Imgproc.contourArea(mopHull);
 			double minSolidity = 0.4;// 0.5
-			if (solidity < minSolidity) {
+			if (solidity < minSolidity)
 				continue;
-			}
 			Core.bitwise_or(result2, labelMask, result2);
 		}
 		images[4] = new Img(result2, false).toJfxImage();
@@ -305,12 +304,13 @@ public class RobustTextDetectorDemo extends AbstractApp {
 		return (int) ((((Math.floor(angle / divisor) - 1) / 2) + 1) % neighbors + 1);
 	}
 
-	public static Mat growEdges(Mat image, Mat edges) {
-
+	public static Mat growEdges(Mat gray, Mat edges) {
 		Mat grad_x = new Mat(), grad_y = new Mat();
-		Imgproc.Sobel(image, grad_x, CvType.CV_32FC1, 1, 0);
-		Imgproc.Sobel(image, grad_y, CvType.CV_32FC1, 0, 1);
+
+		Imgproc.Sobel(gray, grad_x, CvType.CV_64FC1, 1, 0, -1, 1, 0);
+		Imgproc.Sobel(gray, grad_y, CvType.CV_64FC1, 0, 1, -1, 1, 0);
 		Mat grad_mag = new Mat(), grad_dir = new Mat();
+
 		Core.cartToPolar(grad_x, grad_y, grad_mag, grad_dir, true);
 
 		/*
@@ -355,30 +355,7 @@ public class RobustTextDetectorDemo extends AbstractApp {
 					case 8:
 						result.put(y - 1, x + 1, 255);
 						break;
-					// case 1:
-					// result.put(y, x - 1, 255);
-					// break;
-					// case 2:
-					// result.put(y - 1, x - 1, 255);
-					// break;
-					// case 3:
-					// result.put(y - 1, x, 255);
-					// break;
-					// case 4:
-					// result.put(y - 1, x + 1, 255);
-					// break;
-					// case 5:
-					// result.put(y, x + 1, 255);
-					// break;
-					// case 6:
-					// result.put(y + 1, x + 1, 255);
-					// break;
-					// case 7:
-					// result.put(y + 1, x, 255);
-					// break;
-					// case 8:
-					// result.put(y + 1, x - 1, 255);
-					// break;
+
 					default:
 						System.out.println("Error : " + (int) grad_dir.get(y, x)[0]);
 						break;
