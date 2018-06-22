@@ -1,5 +1,12 @@
 package org.genericsystem.cv.application;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
@@ -17,13 +24,6 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.imgproc.Moments;
 import org.opencv.utils.Converters;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -66,7 +66,7 @@ public class RobustTextDetectorDemo extends AbstractApp {
 
 	@Override
 	protected void fillGrid(GridPane mainGrid) {
-		double displaySizeReduction = 0.5;
+		double displaySizeReduction = 1;
 		for (int col = 0; col < imageViews.length; col++)
 			for (int row = 0; row < imageViews[col].length; row++) {
 				ImageView imageView = new ImageView();
@@ -98,35 +98,33 @@ public class RobustTextDetectorDemo extends AbstractApp {
 		Img gray = frame.bgr2Gray();
 		RobustTextDetectorManager manager = new RobustTextDetectorManager(gray.getSrc());
 		Mat mask = manager.getMserMask();
-		Mat smoothedInput = new Mat();
-		Imgproc.GaussianBlur(frame.getSrc(), smoothedInput, new Size(7, 7), Math.sqrt(2));
+		images[0] = new Img(mask, false).toJfxImage();
+		// Mat smoothedInput = new Mat();
+		// Imgproc.GaussianBlur(gray.getSrc(), smoothedInput, new Size(3, 3), 0);
 		Mat edges = new Mat();
-		Imgproc.Canny(smoothedInput, edges, 120, 120);
+		Imgproc.Canny(gray.getSrc(), edges, 30, 100, 7, true);
 		Mat mserAndCanny = new Mat();
 		Core.bitwise_and(mask, edges, mserAndCanny);
+		images[1] = new Img(mserAndCanny, false).toJfxImage();
 		Mat sobelx = new Mat();
 		Imgproc.Sobel(gray.getSrc(), sobelx, CvType.CV_64F, 1, 0);
 		Mat sobely = new Mat();
 		Imgproc.Sobel(gray.getSrc(), sobely, CvType.CV_64F, 0, 1);
 		Mat gradAngle = new Mat();
-		Mat gradMag = new Mat(), grad_dir = new Mat();
-		Core.cartToPolar(sobelx, sobely, gradMag, gradAngle, true);
-		Imgproc.phaseCorrelate(sobelx, sobely);
-		Mat mserAndCannyGrown = growEdge2(mserAndCanny, gradAngle, 2);
-		Core.absdiff(mserAndCannyGrown, new Scalar(0), mserAndCannyGrown);
-		mserAndCannyGrown.convertTo(mserAndCannyGrown, CvType.CV_8UC1);
+		Mat gradMag = new Mat();
+		Core.cartToPolar(sobelx, sobely, gradMag, gradAngle, false);
+		Mat mserAndCannyGrown = growEdge2(mserAndCanny, gradAngle, 1);
+		images[2] = new Img(mserAndCannyGrown, false).toJfxImage();
+		// Mat gradient = new Mat();
+		// Imgproc.morphologyEx(mask, gradient, Imgproc.MORPH_GRADIENT, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(2, 2)));
+		// images[2] = new Img(gradient, false).toJfxImage();
 
-		Mat se = Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(3, 3));
-		Mat gradient = new Mat();
-		Imgproc.morphologyEx(mask, gradient, Imgproc.MORPH_GRADIENT, se);
+		Mat notGradient = new Mat();
+		Core.bitwise_not(mserAndCannyGrown, notGradient);
 		Mat edgeEnhancedMserMask = new Mat();
-		Mat scalar255 = new Mat(gradient.size(), CvType.CV_8UC1, new Scalar(255));
-		Mat substract = new Mat();
-		Core.subtract(scalar255, gradient, substract);
-		Core.bitwise_and(substract, mask, edgeEnhancedMserMask);
+		Core.bitwise_and(notGradient, mask, edgeEnhancedMserMask);
 
-		Mat mserMask = manager.getMserMask();
-		images[0] = new Img(mserMask, false).toJfxImage();
+		images[3] = new Img(edgeEnhancedMserMask, false).toJfxImage();
 
 		// Mat edges = new Mat();
 		// Imgproc.Canny(gray.getSrc(), edges, 30, 110);
@@ -222,11 +220,14 @@ public class RobustTextDetectorDemo extends AbstractApp {
 		}
 		images[6] = new Img(filtered_stroke_width, false).toJfxImage();
 		Mat bounding_region = new Mat();
-		Imgproc.morphologyEx(filtered_stroke_width, bounding_region, Imgproc.MORPH_CLOSE, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(25, 25)));
-		// Imgproc.morphologyEx(bounding_region, bounding_region, Imgproc.MORPH_OPEN, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(25, 25)));
+		Imgproc.morphologyEx(filtered_stroke_width, bounding_region, Imgproc.MORPH_CLOSE, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(15, 15)));
+		Imgproc.morphologyEx(bounding_region, bounding_region, Imgproc.MORPH_OPEN, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(3, 3)));
 		// Mat result3 = new Mat();
 		// superFrame.getFrame().getSrc().copyTo(result3, filtered_stroke_width);
 		images[7] = new Img(bounding_region, false).toJfxImage();
+		Mat result = new Mat();
+		Core.bitwise_and(mask, frame.adaptativeGaussianInvThreshold(7, 5).getSrc(), result);
+		images[8] = new Img(result, false).toJfxImage();
 
 		return images;
 	}
@@ -343,8 +344,8 @@ public class RobustTextDetectorDemo extends AbstractApp {
 					int y1 = i;
 					for (int l = 0; l < maxLength; l++) {
 						int length = l + 1;
-						x1 = (int) (j + length * Math.cos(gradAngle.get(y1, x1)[0]));
-						y1 = (int) (i + length * Math.sin(gradAngle.get(y1, x1)[0]));
+						x1 = (int) (j + Math.round(length * Math.cos(gradAngle.get(y1, x1)[0])));
+						y1 = (int) (i + Math.round(length * Math.sin(gradAngle.get(y1, x1)[0])));
 						if (x1 >= edgeGrown.width() || y1 >= edgeGrown.height() || x1 < 0 || y1 < 0)
 							break;
 						edgeGrown.put(y1, x1, 255);

@@ -1,5 +1,7 @@
 package org.genericsystem.cv.application;
 
+import java.util.ArrayList;
+
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -8,8 +10,6 @@ import org.opencv.core.MatOfRect;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.features2d.MSER;
-
-import java.util.ArrayList;
 
 public class RobustTextDetectorManager {
 
@@ -29,7 +29,7 @@ public class RobustTextDetectorManager {
 	}
 
 	private Mat buildMserMask(Mat frame) {
-		MSER detector = MSER.create();// 3, 10, 2000, 0.25, 0.1, 100, 1.01, 0.03, 5);
+		MSER detector = MSER.create(3, 10, 2000, 0.25, 0.2, 200, 1.01, 0.03, 5);
 		ArrayList<MatOfPoint> regions = new ArrayList<>();
 		MatOfRect mor = new MatOfRect();
 		detector.detectRegions(frame, regions, mor);
