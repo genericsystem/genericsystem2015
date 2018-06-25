@@ -31,7 +31,6 @@ public class TextDetectors {
 			Img result = new Img(frame);
 
 			Zones.get(frameImg.sobel(), 400).draw(result, new Scalar(0, 255, 0), 1);
-			Zones.get(frameImg.mser(), 400).draw(result, new Scalar(255, 0, 0), 1);
 			Zones.get(frameImg.grad(3, 3), 400).draw(result, new Scalar(0, 0, 255), 1);
 
 			vidpanel.setIcon(result.getImageIcon());
