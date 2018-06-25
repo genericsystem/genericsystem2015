@@ -91,4 +91,9 @@ public abstract class AbstractApp extends Application {
 
 	protected abstract void fillGrid(GridPane mainGrid);
 
+	protected long trace(String message, long ref) {
+		long last = System.currentTimeMillis();
+		System.out.println(message + " : " + (last - ref));
+		return last;
+	}
 }

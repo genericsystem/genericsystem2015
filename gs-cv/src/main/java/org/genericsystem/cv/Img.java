@@ -1,5 +1,29 @@
 package org.genericsystem.cv;
 
+import org.genericsystem.cv.utils.Tools;
+import org.genericsystem.layout.Layout;
+import org.opencv.core.Core;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfByte;
+import org.opencv.core.MatOfFloat;
+import org.opencv.core.MatOfInt;
+import org.opencv.core.MatOfPoint;
+import org.opencv.core.MatOfPoint2f;
+import org.opencv.core.Point;
+import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
+import org.opencv.core.Size;
+import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.CLAHE;
+import org.opencv.imgproc.Imgproc;
+import org.opencv.objdetect.HOGDescriptor;
+import org.opencv.photo.Photo;
+import org.opencv.utils.Converters;
+import org.opencv.ximgproc.Ximgproc;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -16,33 +40,6 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import javax.swing.ImageIcon;
-
-import org.genericsystem.cv.utils.Tools;
-import org.genericsystem.layout.Layout;
-import org.opencv.core.Core;
-import org.opencv.core.CvType;
-import org.opencv.core.KeyPoint;
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfByte;
-import org.opencv.core.MatOfFloat;
-import org.opencv.core.MatOfInt;
-import org.opencv.core.MatOfKeyPoint;
-import org.opencv.core.MatOfPoint;
-import org.opencv.core.MatOfPoint2f;
-import org.opencv.core.Point;
-import org.opencv.core.Rect;
-import org.opencv.core.Scalar;
-import org.opencv.core.Size;
-import org.opencv.features2d.FeatureDetector;
-import org.opencv.imgcodecs.Imgcodecs;
-import org.opencv.imgproc.CLAHE;
-import org.opencv.imgproc.Imgproc;
-import org.opencv.objdetect.HOGDescriptor;
-import org.opencv.photo.Photo;
-import org.opencv.utils.Converters;
-import org.opencv.ximgproc.Ximgproc;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -395,36 +392,36 @@ public class Img implements AutoCloseable, Serializable {
 		return new Img(result, false);
 	}
 
-	public Img mser() {
-		Img gray = bgr2Gray();
-		MatOfKeyPoint keypoint = new MatOfKeyPoint();
-		FeatureDetector detector = FeatureDetector.create(FeatureDetector.MSER);
-		detector.detect(gray.getSrc(), keypoint);
-		List<KeyPoint> listpoint = keypoint.toList();
-		Mat result = Mat.zeros(gray.size(), CvType.CV_8UC1);
-		for (int ind = 0; ind < listpoint.size(); ind++) {
-			KeyPoint kpoint = listpoint.get(ind);
-			int rectanx1 = (int) (kpoint.pt.x - 0.5 * kpoint.size);
-			int rectany1 = (int) (kpoint.pt.y - 0.5 * kpoint.size);
-			int width = (int) (kpoint.size);
-			int height = (int) (kpoint.size);
-			if (rectanx1 <= 0)
-				rectanx1 = 1;
-			if (rectany1 <= 0)
-				rectany1 = 1;
-			if ((rectanx1 + width) > gray.width())
-				width = gray.width() - rectanx1;
-			if ((rectany1 + height) > gray.height())
-				height = gray.height() - rectany1;
-			Rect rectant = new Rect(rectanx1, rectany1, width, height);
-			Mat roi = new Mat(result, rectant);
-			roi.setTo(new Scalar(255));
-		}
-		Img img = new Img(result, false);
-		Img result_ = img.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(17, 3));
-		img.close();
-		return result_;
-	}
+	// public Img mser() {
+	// Img gray = bgr2Gray();
+	// MatOfKeyPoint keypoint = new MatOfKeyPoint();
+	// FeatureDetector detector = FeatureDetector.create(FeatureDetector.MSER);
+	// detector.detect(gray.getSrc(), keypoint);
+	// List<KeyPoint> listpoint = keypoint.toList();
+	// Mat result = Mat.zeros(gray.size(), CvType.CV_8UC1);
+	// for (int ind = 0; ind < listpoint.size(); ind++) {
+	// KeyPoint kpoint = listpoint.get(ind);
+	// int rectanx1 = (int) (kpoint.pt.x - 0.5 * kpoint.size);
+	// int rectany1 = (int) (kpoint.pt.y - 0.5 * kpoint.size);
+	// int width = (int) (kpoint.size);
+	// int height = (int) (kpoint.size);
+	// if (rectanx1 <= 0)
+	// rectanx1 = 1;
+	// if (rectany1 <= 0)
+	// rectany1 = 1;
+	// if ((rectanx1 + width) > gray.width())
+	// width = gray.width() - rectanx1;
+	// if ((rectany1 + height) > gray.height())
+	// height = gray.height() - rectany1;
+	// Rect rectant = new Rect(rectanx1, rectany1, width, height);
+	// Mat roi = new Mat(result, rectant);
+	// roi.setTo(new Scalar(255));
+	// }
+	// Img img = new Img(result, false);
+	// Img result_ = img.morphologyEx(Imgproc.MORPH_CLOSE, Imgproc.MORPH_RECT, new Size(17, 3));
+	// img.close();
+	// return result_;
+	// }
 
 	public Img grad(double k1, double k2) {
 		// Img gray = bgr2Gray();

@@ -1,13 +1,5 @@
 package org.genericsystem.cv.application;
 
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
@@ -18,6 +10,14 @@ import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
+
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -40,6 +40,16 @@ public class FHTDemo extends AbstractApp {
 	private Config config = new Config();
 	private final ImageView[][] imageViews = new ImageView[][] { new ImageView[3], new ImageView[3], new ImageView[3], new ImageView[3] };
 	private int frameCount = 0;
+	private FHTManager fhtManager = new FHTManager();
+
+	public FHTDemo() {
+		addIntegerSliderProperty("hBlurSize", fhtManager.gethBlurSize(), 0, 200);
+		addIntegerSliderProperty("vBlurSize", fhtManager.getvBlurSize(), 0, 200);
+		addDoubleSliderProperty("hNeighbourPenality", fhtManager.gethNeighbourPenality(), -5000, 0);
+		addDoubleSliderProperty("vNeighbourPenality", fhtManager.getvNeighbourPenality(), -5000, 0);
+		addDoubleSliderProperty("hAnglePenality", fhtManager.gethAnglePenality(), -1, 0);
+		addDoubleSliderProperty("vAnglePenality", fhtManager.getvAnglePenality(), -1, 0);
+	}
 
 	private void startTimer() {
 		timer.scheduleAtFixedRate(() -> {
@@ -120,8 +130,8 @@ public class FHTDemo extends AbstractApp {
 		List<List<TrajectStep>> hHoughTrajs = hHoughs.stream().map(projectionMap -> FHT.bestTrajectFHT(projectionMap, 21, -0.08)).collect(Collectors.toList());
 		ref = trace("Compute trajects", ref);
 
-		vHoughTrajs = StripTractor.optimize(vHoughs, 21, -0.08, -100, vHoughTrajs, vStep);
-		hHoughTrajs = StripTractor.optimize(hHoughs, 21, -0.08, -100, hHoughTrajs, hStep);
+		// vHoughTrajs = StripTractor.optimize(vHoughs, 21, -0.08, -100, vHoughTrajs, vStep);
+		// hHoughTrajs = StripTractor.optimize(hHoughs, 21, -0.08, -100, hHoughTrajs, hStep);
 
 		List<List<OrientedPoint>[]> fhtHorizontals = ProjectionLines.toHorizontalsOrientedPoints(vHoughTrajs, vStep, 0.5, 0.05);
 		List<List<OrientedPoint>[]> fhtVerticals = ProjectionLines.toVerticalsOrientedPoints(hHoughTrajs, hStep, 0.5, 0.05);
@@ -176,12 +186,6 @@ public class FHTDemo extends AbstractApp {
 
 		return images;
 
-	}
-
-	private long trace(String message, long ref) {
-		long last = System.currentTimeMillis();
-		System.out.println(message + " : " + (last - ref));
-		return last;
 	}
 
 	@Override

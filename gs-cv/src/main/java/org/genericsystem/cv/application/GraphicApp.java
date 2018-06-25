@@ -1,13 +1,5 @@
 package org.genericsystem.cv.application;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
@@ -16,13 +8,19 @@ import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
-import org.opencv.core.MatOfRect;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
-import org.opencv.features2d.MSER;
 import org.opencv.imgproc.Imgproc;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -110,6 +108,8 @@ public class GraphicApp extends AbstractApp {
 
 		Img binarized = frame.adaptativeGaussianInvThreshold(7, 5);
 		Img flat = fhtManager.dewarp(frame.getSrc(), binarized.getSrc(), 0.75, 0.75);
+		// flat = fhtManager.dewarp(flat.getSrc(), flat.adaptativeGaussianInvThreshold(7, 5).getSrc(), 0.75, 0.75);
+
 		images[1] = flat.toJfxImage();
 
 		// Img flatBinarized = flat.adaptativeGaussianInvThreshold(7, 5);
@@ -119,15 +119,16 @@ public class GraphicApp extends AbstractApp {
 		// Img flatBinarized = new Img(gray.getSrc(), false);
 		// images[2] = flatBinarized.toJfxImage();
 
-		Img mserMask = new Img(findMask(flat.bgr2Gray(), 10, 2000), false);
+		RobustTextDetectorManager rbm = new RobustTextDetectorManager(flat.bgr2Gray().getSrc(), 2);
+		Img mserMask = new Img(rbm.getEdgeEnhancedMserMask(), false);
 		images[2] = mserMask.toJfxImage();
 
-		List<Rect> detectedRects = detectRects(mserMask.getSrc(), 10, 2000);
+		List<Rect> detectedRects = detectRects(mserMask.getSrc(), 8, 100000, new Size(25, 1), Imgproc.MORPH_RECT);
 		Img flatDisplay = new Img(flat.getSrc(), true);
 		detectedRects.forEach(rect -> Imgproc.rectangle(flatDisplay.getSrc(), rect.tl(), rect.br(), new Scalar(0, 255, 0), 1));
 		images[3] = flatDisplay.toJfxImage();
 
-		Layout layout = mserMask.buildLayout(new Size(0, 0), new Size(0.001, 0.001), 8);
+		Layout layout = mserMask.buildLayout(new Size(0, 0), new Size(0.08, 0.001), 8);
 		Img flatDisplay2 = new Img(flat.getSrc(), true);
 		layout.draw(flatDisplay2, new Scalar(255, 0, 0), new Scalar(0, 255, 0), 0, 1);
 		layout.ocrTree(flat, 0, 0);
@@ -259,22 +260,24 @@ public class GraphicApp extends AbstractApp {
 		timer.schedule(() -> referenceManager.clear(), 0, TimeUnit.MILLISECONDS);
 	}
 
-	Mat findMask(Img gray, int minArea, int maxArea) {
-		MSER detector = MSER.create(2, minArea, maxArea, 1, 0.25, 100, 1.01, 0.03, 5);
-		ArrayList<MatOfPoint> regions = new ArrayList<>();
-		MatOfRect mor = new MatOfRect();
-		detector.detectRegions(gray.getSrc(), regions, mor);
-		Mat mserMask = new Mat(gray.size(), CvType.CV_8UC1, new Scalar(0));
-		for (MatOfPoint mop : regions)
-			for (Point p : mop.toArray())
-				mserMask.put((int) p.y, (int) p.x, 255);
-		return mserMask;
-	}
+	// Mat findMask(Img gray, int minArea, int maxArea) {
+	// MSER detector = MSER.create(2, minArea, maxArea, 1, 0.25, 100, 1.01, 0.03, 5);
+	// ArrayList<MatOfPoint> regions = new ArrayList<>();
+	// MatOfRect mor = new MatOfRect();
+	// detector.detectRegions(gray.getSrc(), regions, mor);
+	// Mat mserMask = new Mat(gray.size(), CvType.CV_8UC1, new Scalar(0));
+	// for (MatOfPoint mop : regions)
+	// for (Point p : mop.toArray())
+	// mserMask.put((int) p.y, (int) p.x, 255);
+	// return mserMask;
+	// }
 
-	List<Rect> detectRects(Mat mserMask, int minArea, int maxArea) {
+	List<Rect> detectRects(Mat mserMask, int minArea, int maxArea, Size closeSize, int closeShape) {
+		Mat closed = new Mat();
+		Imgproc.morphologyEx(mserMask, closed, Imgproc.MORPH_CLOSE, Imgproc.getStructuringElement(closeShape, closeSize));
 		List<MatOfPoint> contours = new ArrayList<>();
-		Imgproc.findContours(mserMask, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
-		Size size = mserMask.size();
+		Imgproc.findContours(closed, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+		Size size = closed.size();
 		List<Rect> result = new ArrayList<>();
 		for (MatOfPoint contour : contours) {
 			double area = Imgproc.contourArea(contour);
