@@ -1,5 +1,13 @@
 package org.genericsystem.cv.application;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
@@ -13,14 +21,6 @@ import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -63,7 +63,7 @@ public class GraphicApp extends AbstractApp {
 		addDoubleSliderProperty("hAnglePenality", fhtManager.gethAnglePenality(), -1, 0);
 		addDoubleSliderProperty("vAnglePenality", fhtManager.getvAnglePenality(), -1, 0);
 
-		double displaySizeReduction = 1.5;
+		double displaySizeReduction = 1;
 		for (int col = 0; col < imageViews.length; col++)
 			for (int row = 0; row < imageViews[col].length; row++) {
 				ImageView imageView = new ImageView();
@@ -108,8 +108,6 @@ public class GraphicApp extends AbstractApp {
 
 		Img binarized = frame.adaptativeGaussianInvThreshold(7, 5);
 		Img flat = fhtManager.dewarp(frame.getSrc(), binarized.getSrc(), 0.75, 0.75);
-		// flat = fhtManager.dewarp(flat.getSrc(), flat.adaptativeGaussianInvThreshold(7, 5).getSrc(), 0.75, 0.75);
-
 		images[1] = flat.toJfxImage();
 
 		// Img flatBinarized = flat.adaptativeGaussianInvThreshold(7, 5);
@@ -120,13 +118,18 @@ public class GraphicApp extends AbstractApp {
 		// images[2] = flatBinarized.toJfxImage();
 
 		RobustTextDetectorManager rbm = new RobustTextDetectorManager(flat.bgr2Gray().getSrc(), 2);
-		Img mserMask = new Img(rbm.getEdgeEnhancedMserMask(), false);
+		Img mserMask = new Img(rbm.getMserMask(), false);
 		images[2] = mserMask.toJfxImage();
 
-		List<Rect> detectedRects = detectRects(mserMask.getSrc(), 8, 100000, new Size(25, 1), Imgproc.MORPH_RECT);
+		Mat closed = new Mat();
+		Imgproc.morphologyEx(mserMask.getSrc(), closed, Imgproc.MORPH_DILATE, Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(5, 1)));
+		Imgproc.morphologyEx(closed, closed, Imgproc.MORPH_CLOSE, Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(11, 1)));
+		images[3] = new Img(closed, false).toJfxImage();
+
+		List<Rect> detectedRects = detectRects(closed, 8, 20000);
 		Img flatDisplay = new Img(flat.getSrc(), true);
 		detectedRects.forEach(rect -> Imgproc.rectangle(flatDisplay.getSrc(), rect.tl(), rect.br(), new Scalar(0, 255, 0), 1));
-		images[3] = flatDisplay.toJfxImage();
+		images[4] = flatDisplay.toJfxImage();
 
 		Layout layout = mserMask.buildLayout(new Size(0, 0), new Size(0.08, 0.001), 8);
 		Img flatDisplay2 = new Img(flat.getSrc(), true);
@@ -272,20 +275,18 @@ public class GraphicApp extends AbstractApp {
 	// return mserMask;
 	// }
 
-	List<Rect> detectRects(Mat mserMask, int minArea, int maxArea, Size closeSize, int closeShape) {
-		Mat closed = new Mat();
-		Imgproc.morphologyEx(mserMask, closed, Imgproc.MORPH_CLOSE, Imgproc.getStructuringElement(closeShape, closeSize));
+	List<Rect> detectRects(Mat mask, int minArea, int maxArea) {
 		List<MatOfPoint> contours = new ArrayList<>();
-		Imgproc.findContours(closed, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
-		Size size = closed.size();
+		Imgproc.findContours(mask, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+		Size size = mask.size();
 		List<Rect> result = new ArrayList<>();
 		for (MatOfPoint contour : contours) {
 			double area = Imgproc.contourArea(contour);
 			if (area > minArea && area < maxArea) {
 				Rect rect = Imgproc.boundingRect(contour);
-				if (rect.tl().x != 0 && rect.tl().y != 0 && rect.br().x != size.width && rect.br().y != size.height)
-					// if (getFillRatio(contour, rect) > fillRatio)
-					result.add(rect);
+				// if (rect.tl().x != 0 && rect.tl().y != 0 && rect.br().x != size.width && rect.br().y != size.height)
+				// if (getFillRatio(contour, rect) > fillRatio)
+				result.add(rect);
 
 			}
 		}

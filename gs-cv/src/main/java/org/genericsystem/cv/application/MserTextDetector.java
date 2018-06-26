@@ -1,26 +1,30 @@
 package org.genericsystem.cv.application;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
-import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
-import org.opencv.core.Point;
-import org.opencv.core.Size;
+import org.opencv.core.MatOfRect;
+import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
+import org.opencv.features2d.MSER;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.utils.Converters;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 
-public class RobustTextDetectorDemo extends AbstractApp {
+public class MserTextDetector extends AbstractApp {
 
 	public static void main(String[] args) {
 		launch(args);
@@ -35,6 +39,7 @@ public class RobustTextDetectorDemo extends AbstractApp {
 	private ScheduledExecutorService timer = new BoundedScheduledThreadPoolExecutor();
 	private Config config = new Config();
 	private final ImageView[][] imageViews = new ImageView[][] { new ImageView[3], new ImageView[3], new ImageView[3], new ImageView[3] };
+	private final MSER detector = MSER.create(2, 10, 2000, 0.25, 0.2, 200, 1.01, 0.03, 5);
 
 	private void startTimer() {
 		timer.scheduleAtFixedRate(() -> {
@@ -68,65 +73,26 @@ public class RobustTextDetectorDemo extends AbstractApp {
 		startTimer();
 	}
 
-	Mat convertContourToMat(MatOfPoint contour) {
-		Point[] pts = contour.toArray();
-		Mat result = new Mat(pts.length, 2, CvType.CV_64FC1);
-		for (int i = 0; i < result.rows(); ++i) {
-			result.put(i, 0, pts[i].x);
-			result.put(i, 1, pts[i].y);
-		}
-		return result;
-	}
-
 	private Image[] doWork() {
 
 		System.out.println("do work");
 		if (!config.stabilizedMode)
 			frame = gsCapture.read();
-		Image[] images = new Image[12];
+
+		Image[] images = new Image[3];
 		long ref = System.currentTimeMillis();
 		long ref2 = System.currentTimeMillis();
-		Img gray = frame.bgr2Gray();
-		RobustTextDetectorManager manager = new RobustTextDetectorManager(gray.getSrc(), 2);
-		images[0] = new Img(manager.getMserMask(), false).toJfxImage();
-		ref = trace("mser mask", ref);
 
-		images[1] = new Img(manager.getCannyMask(), false).toJfxImage();
-		ref = trace("canny", ref);
-
-		images[2] = new Img(manager.getMserAndCannyMask(), false).toJfxImage();
-		ref = trace("mserAndCanny", ref);
-
-		images[3] = new Img(manager.getMserAndCannyGrownMask(), false).toJfxImage();
-		ref = trace("grow", ref);
-
-		images[4] = new Img(manager.getEdgeEnhancedMserMask(), false).toJfxImage();
-		ref = trace("edgeEnhancedMser", ref);
-
-		images[5] = new Img(manager.getEdgeEnhanceMserCCMask(), false).toJfxImage();
-		ref = trace("cc", ref);
-
-		images[6] = new Img(manager.getFilteredStrokeWidthMask(), false).toJfxImage();
-		ref = trace("swt", ref);
-		Mat bounding_region = new Mat();
-		Imgproc.morphologyEx(manager.getFilteredStrokeWidthMask(), bounding_region, Imgproc.MORPH_CLOSE, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(9, 5)));
-		Imgproc.morphologyEx(bounding_region, bounding_region, Imgproc.MORPH_OPEN, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(3, 3)));
-		// Mat result3 = new Mat();
-		// superFrame.getFrame().getSrc().copyTo(result3, filtered_stroke_width);
-		images[7] = new Img(bounding_region, false).toJfxImage();
-		Imgproc.morphologyEx(manager.getFilteredStrokeWidthMask(), bounding_region, Imgproc.MORPH_CLOSE, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(27, 5)));
-		Imgproc.morphologyEx(bounding_region, bounding_region, Imgproc.MORPH_OPEN, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(3, 3)));
-		images[8] = new Img(bounding_region, false).toJfxImage();
-
-		ref = trace("morphologies", ref);
-
-		Mat thresholdMask = new Mat();
-		Imgproc.adaptiveThreshold(gray.getSrc(), thresholdMask, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY_INV, 7, 3);
-		Mat result = Mat.zeros(frame.size(), CvType.CV_8UC1);
-		thresholdMask.copyTo(result, bounding_region);
-		images[9] = new Img(result, false).toJfxImage();
-		ref = trace("masked threshold", ref);
-
+		ArrayList<MatOfPoint> regions = new ArrayList<>();
+		MatOfRect mor = new MatOfRect();
+		detector.detectRegions(frame.bgr2Gray().getSrc(), regions, mor);
+		List<Rect> rects = new ArrayList<>();
+		Converters.Mat_to_vector_Rect(mor, rects);
+		Mat display = frame.getSrc().clone();
+		for (int rectIndex = 0; rectIndex < rects.size(); rectIndex++)
+			Imgproc.rectangle(display, rects.get(rectIndex), new Scalar(0, 255, 0), -1);
+		images[0] = new Img(display, false).toJfxImage();
+		ref = trace("mser", ref);
 		ref2 = trace("total", ref2);
 
 		return images;

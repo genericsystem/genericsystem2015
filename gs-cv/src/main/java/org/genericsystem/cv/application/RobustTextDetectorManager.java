@@ -1,5 +1,8 @@
 package org.genericsystem.cv.application;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.opencv.core.Core;
 import org.opencv.core.Core.MinMaxLocResult;
@@ -12,13 +15,11 @@ import org.opencv.core.MatOfRect;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.features2d.MSER;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.imgproc.Moments;
 import org.opencv.utils.Converters;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class RobustTextDetectorManager {
 
@@ -27,7 +28,7 @@ public class RobustTextDetectorManager {
 	}
 
 	private final Mat gray;
-	private Mat mserMask, mserAndCannyMask, mserAndCannyGrownMask, edgeEnhancedMserMask, edgeEnhancedMserCCMask, filteredStrokeWidthMask;
+	private Mat mserMask, cannyMask, mserAndCannyMask, mserAndCannyGrownMask, edgeEnhancedMserMask, edgeEnhancedMserCCMask, filteredStrokeWidthMask;
 	private final int delta;
 
 	public RobustTextDetectorManager(Mat gray, int delta) {
@@ -56,15 +57,19 @@ public class RobustTextDetectorManager {
 		return mserAndCannyMask != null ? mserAndCannyMask : (mserAndCannyMask = buildMserAndCannyMask());
 	}
 
+	public Mat getCannyMask() {
+		return cannyMask != null ? cannyMask : (cannyMask = buildCannyMask());
+	}
+
+	private Mat buildCannyMask() {
+		Mat canny = new Mat();
+		Imgproc.Canny(gray, canny, 20, 80, 3, false);
+		return canny;
+	}
+
 	private Mat buildMserAndCannyMask() {
-		// Mat grayInv = new Mat();
-		// Core.subtract(new Mat(gray.size(), gray.type(), new Scalar(255)), gray.getSrc(), grayInv);
-		// Imgproc.adaptiveThreshold(gray.getSrc(), edges, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 7, 5);
-		// images[1] = new Img(edges, false).toJfxImage();
-		Mat edges = new Mat();
-		Imgproc.Canny(gray, edges, 20, 100);
 		Mat mserAndCanny = new Mat();
-		Core.bitwise_and(getMserMask(), edges, mserAndCanny);
+		Core.bitwise_and(getMserMask(), getCannyMask(), mserAndCanny);
 		return mserAndCanny;
 	}
 
@@ -103,7 +108,7 @@ public class RobustTextDetectorManager {
 	}
 
 	public Mat getEdgeEnhancedMserMask() {
-		return edgeEnhancedMserMask != null ? edgeEnhancedMserMask : buildEdgedEnhancedMserMask();
+		return edgeEnhancedMserMask != null ? edgeEnhancedMserMask : (edgeEnhancedMserMask = buildEdgedEnhancedMserMask());
 	}
 
 	public Mat buildEdgedEnhancedMserMask() {
@@ -126,7 +131,7 @@ public class RobustTextDetectorManager {
 		Mat edgeEnhancedMserCCMask = Mat.zeros(labels.size(), CvType.CV_8UC1);
 		for (int labelId = 0; labelId < labelsIds; labelId++) {
 			double area = stats.get(labelId, Imgproc.CC_STAT_AREA)[0];
-			if (area < 3 || area > 600)
+			if (area < 3 || area > 200)
 				continue;
 
 			Mat labelMask = new Mat();
@@ -143,9 +148,9 @@ public class RobustTextDetectorManager {
 			double minEccentricity = 0.1;
 			double maxEccentricity = 0.995;
 
-			if (eccentricity < minEccentricity || eccentricity > maxEccentricity) {
-				continue;
-			}
+			// if (eccentricity < minEccentricity || eccentricity > maxEccentricity) {
+			// continue;
+			// }
 			List<MatOfPoint> contours = new ArrayList<>();
 			Imgproc.findContours(labelMask, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 			MatOfInt hull = new MatOfInt();
@@ -158,7 +163,7 @@ public class RobustTextDetectorManager {
 				mopHull.put(j, 0, point);
 			}
 			double solidity = area / Imgproc.contourArea(mopHull);
-			double minSolidity = 0.4;// 0.5
+			double minSolidity = 0.35;// 0.5
 			if (solidity < minSolidity)
 				continue;
 			Core.bitwise_or(edgeEnhancedMserCCMask, labelMask, edgeEnhancedMserCCMask);
@@ -189,9 +194,25 @@ public class RobustTextDetectorManager {
 		// }
 		// // swt32f : resulting SWT image
 
+		Mat normalized = new Mat();
+		Imgproc.threshold(getEdgeEnhanceMserCCMask(), normalized, 1, 1, Imgproc.THRESH_BINARY);
+
+		Mat mask32F = new Mat();
+		normalized.convertTo(mask32F, CvType.CV_32F);
+
 		Mat result32F = new Mat();
-		Imgproc.distanceTransform(getEdgeEnhanceMserCCMask(), result32F, Imgproc.DIST_L2, 3);
-		Mat strokeWidth = computeStrokeWidth(result32F);
+		Imgproc.distanceTransform(normalized, result32F, Imgproc.DIST_L2, 5);
+
+		MinMaxLocResult minMaxLocResult = Core.minMaxLoc(result32F);
+		int strokeRadius = (int) Math.ceil(minMaxLocResult.maxVal);
+		Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(3, 3));
+
+		for (int j = 0; j < strokeRadius; j++) {
+			Imgproc.dilate(result32F, result32F, kernel); // assign the max in 3x3 neighborhood to each center pixel
+			result32F = result32F.mul(mask32F); // apply mask to restore original shape and to avoid unnecessary max propogation
+		}
+
+		Mat strokeWidth = result32F;// computeStrokeWidth(result32F);
 		Mat filteredStrokeWidth = new Mat(strokeWidth.size(), CvType.CV_8UC1, new Scalar(0));
 		Mat strokeWithCV8U = new Mat();
 		strokeWidth.convertTo(strokeWithCV8U, CvType.CV_8UC1);
@@ -211,7 +232,7 @@ public class RobustTextDetectorManager {
 
 			if (area != 0) {
 				/* Filter out those which are out of the prespecified ratio */
-				if ((stdDev.get(0, 0)[0] / meanD.get(0, 0)[0]) > 0.5)
+				if ((stdDev.get(0, 0)[0] / meanD.get(0, 0)[0]) > 0.3)
 					continue;
 
 				/* Collect the filtered stroke width */
