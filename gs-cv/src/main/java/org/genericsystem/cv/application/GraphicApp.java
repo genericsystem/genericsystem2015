@@ -1,5 +1,6 @@
 package org.genericsystem.cv.application;
 
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -7,20 +8,24 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
+import org.genericsystem.cv.Ocr;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
-import org.genericsystem.layout.Layout;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
+import org.opencv.core.MatOfRect;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
+import org.opencv.features2d.MSER;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.utils.Converters;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -39,6 +44,7 @@ public class GraphicApp extends AbstractApp {
 	private FHTManager fhtManager = new FHTManager();
 	private ImageView[][] imageViews = new ImageView[][] { new ImageView[3], new ImageView[3], new ImageView[3], new ImageView[3] };
 	private int frameCount = 0;
+	private final MSER detector = MSER.create(1, 6, 200, 0.25, 0.2, 200, 1.01, 0.03, 5);
 
 	public static void main(String[] args) {
 		launch(args);
@@ -93,6 +99,10 @@ public class GraphicApp extends AbstractApp {
 		}, 2000, 30, TimeUnit.MILLISECONDS);
 	}
 
+	public boolean contains(Rect rect, Rect shiftedRect) {
+		return (rect.tl().x <= shiftedRect.tl().x && rect.tl().y <= shiftedRect.tl().y && rect.br().x >= shiftedRect.br().x && rect.br().y >= shiftedRect.br().y);
+	}
+
 	private Image[] doWork() {
 
 		System.out.println("do work");
@@ -100,6 +110,7 @@ public class GraphicApp extends AbstractApp {
 			frame = gsCapture.read();
 			frameCount++;
 		}
+		long ref = System.currentTimeMillis();
 		Image[] images = new Image[10];
 		images[0] = frame.toJfxImage();
 
@@ -109,7 +120,7 @@ public class GraphicApp extends AbstractApp {
 		Img binarized = frame.adaptativeGaussianInvThreshold(7, 5);
 		Img flat = fhtManager.dewarp(frame.getSrc(), binarized.getSrc(), 0.75, 0.75);
 		images[1] = flat.toJfxImage();
-
+		ref = trace("Dewarp", ref);
 		// Img flatBinarized = flat.adaptativeGaussianInvThreshold(7, 5);
 		// Img gray = flat.bgr2Gray().gaussianBlur(new Size(3, 3));
 		// Core.absdiff(gray.getSrc(), new Scalar(100), gray.getSrc());
@@ -117,26 +128,52 @@ public class GraphicApp extends AbstractApp {
 		// Img flatBinarized = new Img(gray.getSrc(), false);
 		// images[2] = flatBinarized.toJfxImage();
 
-		RobustTextDetectorManager rbm = new RobustTextDetectorManager(flat.bgr2Gray().getSrc(), 2);
-		Img mserMask = new Img(rbm.getMserMask(), false);
-		images[2] = mserMask.toJfxImage();
+		ArrayList<MatOfPoint> regions = new ArrayList<>();
+		MatOfRect mor = new MatOfRect();
+		detector.detectRegions(flat.bgr2Gray().getSrc(), regions, mor);
+		List<Rect> rects = new ArrayList<>();
+		Converters.Mat_to_vector_Rect(mor, rects);
 
+		rects.removeIf(rect -> {
+			for (Rect rect_ : rects)
+				if (!rect_.equals(rect) && contains(rect_, rect))
+					return true;
+			return false;
+		});
+
+		Mat mask = Mat.zeros(flat.size(), CvType.CV_8UC1);
+		rects.forEach(rect -> Imgproc.rectangle(mask, rect, new Scalar(255, 0, 0), -1));
+		images[2] = new Img(mask, false).toJfxImage();
+		ref = trace("Mask", ref);
+		// RobustTextDetectorManager rbm = new RobustTextDetectorManager(flat.bgr2Gray().getSrc(), 1);
+		// Img mserMask = new Img(rbm.getMserMask(), false);
+		// images[2] = mserMask.toJfxImage();
+		//
 		Mat closed = new Mat();
-		Imgproc.morphologyEx(mserMask.getSrc(), closed, Imgproc.MORPH_DILATE, Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(5, 1)));
-		Imgproc.morphologyEx(closed, closed, Imgproc.MORPH_CLOSE, Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(11, 1)));
-		images[3] = new Img(closed, false).toJfxImage();
+		Imgproc.morphologyEx(mask, closed, Imgproc.MORPH_CLOSE, Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(3, 1)));
+		List<Rect> detectedClosedRects = detectRects(closed, 8, 20000);
+		Mat closedMask = Mat.zeros(flat.size(), CvType.CV_8UC1);
+		detectedClosedRects.forEach(rect -> Imgproc.rectangle(closedMask, rect, new Scalar(255), -1));
 
-		List<Rect> detectedRects = detectRects(closed, 8, 20000);
-		Img flatDisplay = new Img(flat.getSrc(), true);
-		detectedRects.forEach(rect -> Imgproc.rectangle(flatDisplay.getSrc(), rect.tl(), rect.br(), new Scalar(0, 255, 0), 1));
-		images[4] = flatDisplay.toJfxImage();
+		Mat flatDisplay = Mat.zeros(flat.size(), flat.type());
+		Mat flatDisplay2 = Mat.zeros(flat.size(), flat.type());
+		flat.getSrc().copyTo(flatDisplay, closedMask);
+		detectedClosedRects.forEach(rect -> Imgproc.rectangle(flatDisplay, rect.tl(), rect.br(), new Scalar(0, 255, 0), 1));
+		images[3] = new Img(flatDisplay, false).toJfxImage();
+		ref = trace("Close mask", ref);
 
-		Layout layout = mserMask.buildLayout(new Size(0, 0), new Size(0.08, 0.001), 8);
-		Img flatDisplay2 = new Img(flat.getSrc(), true);
-		layout.draw(flatDisplay2, new Scalar(255, 0, 0), new Scalar(0, 255, 0), 0, 1);
-		layout.ocrTree(flat, 0, 0);
-		layout.drawOcr(flatDisplay2);
-		images[4] = flatDisplay2.toJfxImage();
+		Fields fields = new Fields(detectedClosedRects);
+		fields.ocr(flat.getSrc(), 10, 1, 2, 2);
+		fields.putOcr(flatDisplay2);
+		images[4] = new Img(flatDisplay2, false).toJfxImage();
+		ref = trace("Ocr", ref);
+
+		// Layout layout = mserMask.buildLayout(new Size(0, 0), new Size(0.08, 0.001), 8);
+		// Img flatDisplay2 = new Img(flat.getSrc(), true);
+		// layout.draw(flatDisplay2, new Scalar(255, 0, 0), new Scalar(0, 255, 0), 0, 1);
+		// layout.ocrTree(flat, 0, 0);
+		// layout.drawOcr(flatDisplay2);
+		// images[5] = flatDisplay2.toJfxImage();
 		// double surface = surfaceLayout.normalizedArea();
 		// System.out.println("surface : " + surface + " " + surfaceLayout.area(flatBinarized) + " " + surfaceLayout.computeTotalSurface(flatBinarized));
 		// Imgproc.putText(flatDisplay.getSrc(), String.valueOf(surface), new Point(flatDisplay.width() / 2, 20), Core.FONT_HERSHEY_PLAIN, 1, new Scalar(255, 255, 255), 1);
@@ -222,7 +259,7 @@ public class GraphicApp extends AbstractApp {
 			System.out.println("Empty descriptors");
 			return null;
 		}
-		referenceManager.submit(newImgDescriptor, detectedRects);
+		referenceManager.submit(newImgDescriptor, rects);
 		List<Rect> referenceRects = referenceManager.getReferenceRects();
 		Mat referenceTemplate = Mat.zeros(flat.size(), CvType.CV_8UC1);// new SuperTemplate(referenceManager.getReference().getSuperFrame(), CvType.CV_8UC1, SuperFrameImg::getFrame);
 		referenceRects.forEach(rect -> Imgproc.rectangle(referenceTemplate, rect, new Scalar(255), -1));
@@ -240,6 +277,47 @@ public class GraphicApp extends AbstractApp {
 		// }
 
 		return images;
+	}
+
+	public static class Field {
+		private final Rect rect;
+		private String label;
+
+		public Field(Rect rect) {
+			this.rect = rect;
+		}
+
+		public void ocr(Mat img, int confidence, int componentLevel, int dx, int dy) {
+			double newTlx = rect.tl().x - dx >= 0 ? rect.tl().x - dx : 0;
+			double newTly = rect.tl().y - dy >= 0 ? rect.tl().y - dy : 0;
+			double newBrx = rect.br().x + dx <= img.width() ? rect.br().x + dx : img.width();
+			double newBry = rect.br().y + dy <= img.height() ? rect.br().y + dy : img.height();
+			label = Ocr.doWork(new Mat(img, new Rect(new Point(newTlx, newTly), new Point(newBrx, newBry))), confidence, componentLevel);
+		}
+
+		public void putOcr(Mat img) {
+			String normalizedText = Normalizer.normalize(label, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", "");
+			int[] baseLine = new int[1];
+			Size size = Imgproc.getTextSize(normalizedText, Core.FONT_HERSHEY_PLAIN, 1, 1, baseLine);
+			double scale = Math.min(rect.width / size.width, rect.height / size.height);
+			Imgproc.putText(img, normalizedText, new Point(rect.tl().x, rect.br().y), Core.FONT_HERSHEY_PLAIN, scale, new Scalar(0, 0, 255), 1);
+		}
+	}
+
+	public static class Fields {
+		private final List<Field> fields;
+
+		public Fields(List<Rect> rects) {
+			fields = rects.stream().map(Field::new).collect(Collectors.toList());
+		}
+
+		public void putOcr(Mat img) {
+			fields.forEach(field -> field.putOcr(img));
+		}
+
+		public void ocr(Mat img, int confidence, int componentLevel, int dx, int dy) {
+			fields.forEach(field -> field.ocr(img, confidence, componentLevel, dx, dy));
+		}
 	}
 
 	@Override
@@ -282,7 +360,7 @@ public class GraphicApp extends AbstractApp {
 		List<Rect> result = new ArrayList<>();
 		for (MatOfPoint contour : contours) {
 			double area = Imgproc.contourArea(contour);
-			if (area > minArea && area < maxArea) {
+			if (area >= minArea && area <= maxArea) {
 				Rect rect = Imgproc.boundingRect(contour);
 				// if (rect.tl().x != 0 && rect.tl().y != 0 && rect.br().x != size.width && rect.br().y != size.height)
 				// if (getFillRatio(contour, rect) > fillRatio)

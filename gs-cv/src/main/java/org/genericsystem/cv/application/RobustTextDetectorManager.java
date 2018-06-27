@@ -41,7 +41,7 @@ public class RobustTextDetectorManager {
 	}
 
 	private Mat buildMserMask(Mat frame) {
-		MSER detector = MSER.create(delta, 10, 2000, 0.25, 0.2, 200, 1.01, 0.03, 5);
+		MSER detector = MSER.create(delta, 10, 1000, 0.25, 0.2, 200, 1.01, 0.03, 5);
 		ArrayList<MatOfPoint> regions = new ArrayList<>();
 		MatOfRect mor = new MatOfRect();
 		detector.detectRegions(frame, regions, mor);

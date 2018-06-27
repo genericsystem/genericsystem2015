@@ -57,8 +57,8 @@ public class FHTManager {
 		hHoughs.forEach(projectionMap -> Core.normalize(projectionMap, projectionMap, 0, 1, Core.NORM_MINMAX));
 		List<List<TrajectStep>> vHoughTrajs = vHoughs.stream().map(projectionMap -> FHT.bestTrajectFHT(projectionMap, vBlurSize.getValue(), vAnglePenality.getValue())).collect(Collectors.toList());
 		List<List<TrajectStep>> hHoughTrajs = hHoughs.stream().map(projectionMap -> FHT.bestTrajectFHT(projectionMap, hBlurSize.getValue(), hAnglePenality.getValue())).collect(Collectors.toList());
-		vHoughTrajs = StripTractor.optimize(vHoughs, vBlurSize.getValue(), vAnglePenality.getValue(), vNeighbourPenality.get(), vHoughTrajs, vStep);
-		hHoughTrajs = StripTractor.optimize(hHoughs, hBlurSize.getValue(), hAnglePenality.getValue(), hNeighbourPenality.get(), hHoughTrajs, hStep);
+		// vHoughTrajs = StripTractor.optimize(vHoughs, vBlurSize.getValue(), vAnglePenality.getValue(), vNeighbourPenality.get(), vHoughTrajs, vStep);
+		// hHoughTrajs = StripTractor.optimize(hHoughs, hBlurSize.getValue(), hAnglePenality.getValue(), hNeighbourPenality.get(), hHoughTrajs, hStep);
 		List<List<OrientedPoint>[]> fhtHorizontals = ProjectionLines.toHorizontalsOrientedPoints(vHoughTrajs, vStep, 0.5, 0.05);
 		List<List<OrientedPoint>[]> fhtVerticals = ProjectionLines.toVerticalsOrientedPoints(hHoughTrajs, hStep, 0.5, 0.05);
 		List<List<Segment>>[] horizontalSegments = Segment.connect(fhtHorizontals, vStep, 0.05, false);

@@ -57,11 +57,15 @@ public class Ocr {
 	}
 
 	public static String doWork(Mat mat, int minConfidence) {
+		return doWork(mat, minConfidence, 1);
+	}
+
+	public static String doWork(Mat mat, int minConfidence, int componentLevel) {
 		OCRTesseract instance = null;
 		String ocrText = null;
 		try {
 			instance = tesseractInstancePool.borrowObject();
-			ocrText = instance.run(mat, minConfidence, 1).replace("\n", "").trim();
+			ocrText = instance.run(mat, minConfidence, componentLevel).replace("\n", "").trim();
 		} catch (Exception e) {
 			throw new RuntimeException("An error has occured during the OCR", e);
 		} finally {
