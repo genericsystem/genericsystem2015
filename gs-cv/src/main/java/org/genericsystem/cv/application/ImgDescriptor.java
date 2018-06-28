@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.genericsystem.cv.Img;
+import org.genericsystem.cv.application.GraphicApp.Label;
+import org.genericsystem.cv.application.GraphicApp.Labels;
 import org.genericsystem.cv.lm.LevenbergImpl;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
@@ -29,9 +31,11 @@ public class ImgDescriptor {
 	private final MatOfKeyPoint keypoints = new MatOfKeyPoint();
 	private final Mat descriptors;
 	private final long timeStamp;
+	private final Labels labels;
 
-	public ImgDescriptor(Img frame) {
+	public ImgDescriptor(Img frame, Labels labels) {
 		this.frame = frame;
+		this.labels = labels;
 		detector.detect(frame.getSrc(), keypoints);
 		assert keypoints != null && !keypoints.empty();
 		descriptors = new Mat();
@@ -55,7 +59,49 @@ public class ImgDescriptor {
 		return timeStamp;
 	}
 
+	public static class Link implements Comparable<Link> {
+		private final Label label1;
+		private final Label label2;
+
+		public Link(Label label1, Label label2) {
+			this.label1 = label1;
+			this.label2 = label2;
+		}
+
+		@Override
+		public int compareTo(Link link) {
+			return Double.compare(link.distance(), distance());
+		}
+
+		private double distance() {
+			return Math.sqrt(euclid(label1.getRect().tl(), label2.getRect().tl()) + euclid(label1.getRect().br(), label2.getRect().br()));
+		}
+
+		private double euclid(Point p1, Point p2) {
+			return (p2.x - p1.x) * (p2.x - p1.x) + (p2.y - p1.y) * (p2.y - p1.y);
+		}
+
+		@Override
+		public String toString() {
+			return label1.getLabel() + " " + label2.getLabel();
+		}
+
+	}
+
 	public Reconciliation computeReconciliation(ImgDescriptor reference) {
+
+		Labels labels = new Labels(this.labels);
+		Labels referenceLabels = new Labels(reference.getLabels());
+
+		List<Link> links = new ArrayList<>();
+		for (int i = 0; i < labels.getLabels().size(); i++)
+			for (int j = 0; j < referenceLabels.getLabels().size(); j++)
+				links.add(new Link(labels.getLabels().get(i), referenceLabels.getLabels().get(j)));
+		links.removeIf(link -> !link.label1.getLabel().equals(link.label2.getLabel()));
+		links.removeIf(link -> link.distance() > 10);
+
+		System.out.println(links);
+
 		MatOfDMatch matches = new MatOfDMatch();
 		matcher.match(getDescriptors(), reference.getDescriptors(), matches);
 
@@ -92,7 +138,7 @@ public class ImgDescriptor {
 				error += Math.pow(distance(points, transScaleParams), 2);
 			}
 			error = Math.sqrt(error) / pairedPoints.size();
-			if (error > 3) {
+			if (error > 5) {
 				System.out.println("error too big : " + error + " match size : " + pairedPoints.size());
 				return null;
 			}
@@ -106,6 +152,10 @@ public class ImgDescriptor {
 			// System.out.println("Not enough matches (" + referencePts.size() + ")");
 			return null;
 		}
+	}
+
+	private Labels getLabels() {
+		return labels;
 	}
 
 	private double distance(Point[] points, double[] params) {

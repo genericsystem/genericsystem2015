@@ -150,21 +150,21 @@ public class GraphicApp extends AbstractApp {
 		// images[2] = mserMask.toJfxImage();
 		//
 		Mat closed = new Mat();
-		Imgproc.morphologyEx(mask, closed, Imgproc.MORPH_CLOSE, Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(3, 1)));
+		Imgproc.morphologyEx(mask, closed, Imgproc.MORPH_CLOSE, Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(5, 1)));
 		List<Rect> detectedClosedRects = detectRects(closed, 8, 20000);
 		Mat closedMask = Mat.zeros(flat.size(), CvType.CV_8UC1);
 		detectedClosedRects.forEach(rect -> Imgproc.rectangle(closedMask, rect, new Scalar(255), -1));
 
 		Mat flatDisplay = Mat.zeros(flat.size(), flat.type());
-		Mat flatDisplay2 = Mat.zeros(flat.size(), flat.type());
 		flat.getSrc().copyTo(flatDisplay, closedMask);
 		detectedClosedRects.forEach(rect -> Imgproc.rectangle(flatDisplay, rect.tl(), rect.br(), new Scalar(0, 255, 0), 1));
 		images[3] = new Img(flatDisplay, false).toJfxImage();
 		ref = trace("Close mask", ref);
 
-		Fields fields = new Fields(detectedClosedRects);
-		fields.ocr(flat.getSrc(), 10, 1, 2, 2);
-		fields.putOcr(flatDisplay2);
+		Mat flatDisplay2 = Mat.zeros(flat.size(), flat.type());
+		Labels labels = new Labels(detectedClosedRects);
+		labels.ocr(flat.getSrc(), 1, 1, 2, 2);
+		labels.putOcr(flatDisplay2);
 		images[4] = new Img(flatDisplay2, false).toJfxImage();
 		ref = trace("Ocr", ref);
 
@@ -254,12 +254,12 @@ public class GraphicApp extends AbstractApp {
 		//
 		// images[6] = superReferenceTemplate2.getDisplay().toJfxImage();
 
-		ImgDescriptor newImgDescriptor = new ImgDescriptor(flat);
+		ImgDescriptor newImgDescriptor = new ImgDescriptor(flat, labels);
 		if (newImgDescriptor.getDescriptors().empty()) {
 			System.out.println("Empty descriptors");
 			return null;
 		}
-		referenceManager.submit(newImgDescriptor, rects);
+		referenceManager.submit(newImgDescriptor, detectedClosedRects);
 		List<Rect> referenceRects = referenceManager.getReferenceRects();
 		Mat referenceTemplate = Mat.zeros(flat.size(), CvType.CV_8UC1);// new SuperTemplate(referenceManager.getReference().getSuperFrame(), CvType.CV_8UC1, SuperFrameImg::getFrame);
 		referenceRects.forEach(rect -> Imgproc.rectangle(referenceTemplate, rect, new Scalar(255), -1));
@@ -279,11 +279,11 @@ public class GraphicApp extends AbstractApp {
 		return images;
 	}
 
-	public static class Field {
+	public static class Label {
 		private final Rect rect;
 		private String label;
 
-		public Field(Rect rect) {
+		public Label(Rect rect) {
 			this.rect = rect;
 		}
 
@@ -293,6 +293,7 @@ public class GraphicApp extends AbstractApp {
 			double newBrx = rect.br().x + dx <= img.width() ? rect.br().x + dx : img.width();
 			double newBry = rect.br().y + dy <= img.height() ? rect.br().y + dy : img.height();
 			label = Ocr.doWork(new Mat(img, new Rect(new Point(newTlx, newTly), new Point(newBrx, newBry))), confidence, componentLevel);
+			System.out.println(label);
 		}
 
 		public void putOcr(Mat img) {
@@ -300,23 +301,42 @@ public class GraphicApp extends AbstractApp {
 			int[] baseLine = new int[1];
 			Size size = Imgproc.getTextSize(normalizedText, Core.FONT_HERSHEY_PLAIN, 1, 1, baseLine);
 			double scale = Math.min(rect.width / size.width, rect.height / size.height);
+
+			if (scale < 0.3 && scale > 3)
+				scale = 1;
 			Imgproc.putText(img, normalizedText, new Point(rect.tl().x, rect.br().y), Core.FONT_HERSHEY_PLAIN, scale, new Scalar(0, 0, 255), 1);
+		}
+
+		public String getLabel() {
+			return label;
+		}
+
+		public Rect getRect() {
+			return rect;
 		}
 	}
 
-	public static class Fields {
-		private final List<Field> fields;
+	public static class Labels {
+		private final List<Label> labels;
 
-		public Fields(List<Rect> rects) {
-			fields = rects.stream().map(Field::new).collect(Collectors.toList());
+		public Labels(List<Rect> rects) {
+			labels = rects.stream().map(Label::new).collect(Collectors.toList());
+		}
+
+		public Labels(Labels labels) {
+			this.labels = new ArrayList<>(labels.getLabels());
 		}
 
 		public void putOcr(Mat img) {
-			fields.forEach(field -> field.putOcr(img));
+			getLabels().forEach(field -> field.putOcr(img));
 		}
 
 		public void ocr(Mat img, int confidence, int componentLevel, int dx, int dy) {
-			fields.forEach(field -> field.ocr(img, confidence, componentLevel, dx, dy));
+			getLabels().forEach(field -> field.ocr(img, confidence, componentLevel, dx, dy));
+		}
+
+		public List<Label> getLabels() {
+			return labels;
 		}
 	}
 
@@ -340,18 +360,6 @@ public class GraphicApp extends AbstractApp {
 	protected void onR() {
 		timer.schedule(() -> referenceManager.clear(), 0, TimeUnit.MILLISECONDS);
 	}
-
-	// Mat findMask(Img gray, int minArea, int maxArea) {
-	// MSER detector = MSER.create(2, minArea, maxArea, 1, 0.25, 100, 1.01, 0.03, 5);
-	// ArrayList<MatOfPoint> regions = new ArrayList<>();
-	// MatOfRect mor = new MatOfRect();
-	// detector.detectRegions(gray.getSrc(), regions, mor);
-	// Mat mserMask = new Mat(gray.size(), CvType.CV_8UC1, new Scalar(0));
-	// for (MatOfPoint mop : regions)
-	// for (Point p : mop.toArray())
-	// mserMask.put((int) p.y, (int) p.x, 255);
-	// return mserMask;
-	// }
 
 	List<Rect> detectRects(Mat mask, int minArea, int maxArea) {
 		List<MatOfPoint> contours = new ArrayList<>();
