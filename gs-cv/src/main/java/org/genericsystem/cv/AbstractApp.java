@@ -43,7 +43,9 @@ public abstract class AbstractApp extends Application {
 		stage.setTitle("Generic System Information Retriever");
 		ScrollPane scrollPane = new ScrollPane(gridPane);
 		scrollPane.setFitToHeight(true);
-		VBox root = new VBox(scrollPane, paramsPanel);
+		ScrollPane paramsScrollPane = new ScrollPane(paramsPanel);
+		paramsScrollPane.setFitToHeight(true);
+		VBox root = new VBox(scrollPane, paramsScrollPane);
 		scene.setRoot(root);
 		stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
 			@Override

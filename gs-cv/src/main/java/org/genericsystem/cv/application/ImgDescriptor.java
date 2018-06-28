@@ -98,7 +98,7 @@ public class ImgDescriptor {
 			for (int j = 0; j < referenceLabels.getLabels().size(); j++)
 				links.add(new Link(labels.getLabels().get(i), referenceLabels.getLabels().get(j)));
 		links.removeIf(link -> !link.label1.getLabel().equals(link.label2.getLabel()));
-		links.removeIf(link -> link.distance() > 10);
+		links.removeIf(link -> link.distance() > 20);
 
 		System.out.println(links);
 

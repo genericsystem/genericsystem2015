@@ -41,8 +41,8 @@ public class GraphicApp extends AbstractApp {
 	private ReferenceManager referenceManager;
 	private Config config = new Config();
 	private ScheduledExecutorService timer = new BoundedScheduledThreadPoolExecutor();
-	private FHTManager fhtManager = new FHTManager();
-	private ImageView[][] imageViews = new ImageView[][] { new ImageView[3], new ImageView[3], new ImageView[3], new ImageView[3] };
+	private FHTManager fhtManager = new FHTManager(gsCapture.getResize());
+	private ImageView[][] imageViews = new ImageView[][] { new ImageView[3], new ImageView[3], new ImageView[3] };
 	private int frameCount = 0;
 	private final MSER detector = MSER.create(1, 6, 200, 0.25, 0.2, 200, 1.01, 0.03, 5);
 
@@ -118,7 +118,7 @@ public class GraphicApp extends AbstractApp {
 			return images;
 
 		Img binarized = frame.adaptativeGaussianInvThreshold(7, 5);
-		Img flat = fhtManager.dewarp(frame.getSrc(), binarized.getSrc(), 0.75, 0.75);
+		Img flat = fhtManager.init(frame.getSrc(), binarized.getSrc()).getDewarp();
 		images[1] = flat.toJfxImage();
 		ref = trace("Dewarp", ref);
 		// Img flatBinarized = flat.adaptativeGaussianInvThreshold(7, 5);

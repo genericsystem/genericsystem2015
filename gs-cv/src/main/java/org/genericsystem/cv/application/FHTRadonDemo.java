@@ -1,5 +1,12 @@
 package org.genericsystem.cv.application;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.genericsystem.cv.AbstractApp;
@@ -14,13 +21,6 @@ import org.opencv.core.Range;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -113,8 +113,6 @@ public class FHTRadonDemo extends AbstractApp {
 		Mat houghTransform = FHT.fastHoughTransform(vStrip);
 		Mat houghTransform2 = FHT.fastHoughTransform(vStrip2);
 
-		Core.normalize(houghTransform, houghTransform, 0, 1, Core.NORM_MINMAX);
-		Core.normalize(houghTransform2, houghTransform2, 0, 1, Core.NORM_MINMAX);
 		Mat houghTransform255 = new Mat();
 		Mat houghTransform2552 = new Mat();
 		Core.normalize(houghTransform, houghTransform255, 0, 255, Core.NORM_MINMAX);

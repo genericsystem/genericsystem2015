@@ -16,7 +16,7 @@ public class ProjectionLines {
 		return fhtHorizontals;
 	}
 
-	public static List<OrientedPoint>[] toHorizontalOrientedPoints(List<TrajectStep> trajectSteps, double x, double localTheshold, double globalTheshold) {
+	private static List<OrientedPoint>[] toHorizontalOrientedPoints(List<TrajectStep> trajectSteps, double x, double localTheshold, double globalTheshold) {
 		List<OrientedPoint> topPoints = new ArrayList<>();
 		List<OrientedPoint> bottomPoints = new ArrayList<>();
 		List<TrajectStep[]> lines = getStripLinesFHT(trajectSteps, localTheshold, globalTheshold);
@@ -34,7 +34,7 @@ public class ProjectionLines {
 		return fhtHorizontals;
 	}
 
-	public static List<OrientedPoint>[] toVerticalOrientedPoints(List<TrajectStep> trajectSteps, double y, double localTheshold, double globalTheshold) {
+	private static List<OrientedPoint>[] toVerticalOrientedPoints(List<TrajectStep> trajectSteps, double y, double localTheshold, double globalTheshold) {
 		List<OrientedPoint> leftPoints = new ArrayList<>();
 		List<OrientedPoint> rightPoints = new ArrayList<>();
 

@@ -32,12 +32,12 @@ public class FHT {
 		return new Mat(src, new Range(0, src.rows()), new Range(startX, startX + width));
 	}
 
-	public static Mat fastHoughTransform(Mat vStrip) {
+	public static Mat fastHoughTransform(Mat strip) {
 		Mat houghTransform = new Mat();
-		Ximgproc.FastHoughTransform(vStrip, houghTransform, CvType.CV_64FC1, Ximgproc.ARO_45_135, Ximgproc.FHT_ADD, Ximgproc.HDO_DESKEW);
+		Ximgproc.FastHoughTransform(strip, houghTransform, CvType.CV_64FC1, Ximgproc.ARO_45_135, Ximgproc.FHT_ADD, Ximgproc.HDO_DESKEW);
 		Core.transpose(houghTransform, houghTransform);
-		// Core.normalize(houghTransform, houghTransform, 0, 255, Core.NORM_MINMAX);
-		return new Mat(houghTransform, new Range(vStrip.width() / 2 - 1, houghTransform.height() - vStrip.width() / 2 - 1), new Range(0, houghTransform.width()));
+		Core.normalize(houghTransform, houghTransform, 0, 1, Core.NORM_MINMAX);
+		return new Mat(houghTransform, new Range(strip.width() / 2 - 1, houghTransform.height() - strip.width() / 2 + 1), new Range(0, houghTransform.width()));
 	}
 
 	static Mat adaptivHough(Mat houghTransform, int blurSize) {

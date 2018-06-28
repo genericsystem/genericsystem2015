@@ -5,7 +5,9 @@ import java.util.Map;
 
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 public class ParamsPanel extends VBox {
@@ -21,6 +23,8 @@ public class ParamsPanel extends VBox {
 	public DoubleProperty addSliderProperty(String propertyName, double value, double min, double max) {
 		DoubleProperty property = addProperty(propertyName, value);
 		property.addListener((ov, oldV, newV) -> System.out.println(propertyName + " " + newV));
+		HBox hbox = new HBox();
+		Label label = new Label(propertyName);
 		Slider slider = new Slider(min, max, value);
 		slider.setShowTickLabels(true);
 		slider.setShowTickMarks(true);
@@ -35,7 +39,9 @@ public class ParamsPanel extends VBox {
 			if (!newValue)
 				property.setValue(slider.getValue());
 		});
-		getChildren().add(slider);
+		hbox.getChildren().add(label);
+		hbox.getChildren().add(slider);
+		getChildren().add(hbox);
 		return property;
 	}
 

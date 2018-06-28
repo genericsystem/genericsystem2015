@@ -1,23 +1,20 @@
 package org.genericsystem.cv.application;
 
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.application.mesh.MeshManager;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.genericsystem.layout.Layout;
-import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
-
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -38,9 +35,9 @@ public class FHTDemo extends AbstractApp {
 	private Img frame = gsCapture.read();
 	private ScheduledExecutorService timer = new BoundedScheduledThreadPoolExecutor();
 	private Config config = new Config();
-	private final ImageView[][] imageViews = new ImageView[][] { new ImageView[3], new ImageView[3], new ImageView[3], new ImageView[3] };
+	private final ImageView[][] imageViews = new ImageView[][] { new ImageView[3], new ImageView[3], new ImageView[3] };
 	private int frameCount = 0;
-	private FHTManager fhtManager = new FHTManager();
+	private FHTManager fhtManager = new FHTManager(gsCapture.getResize());
 
 	public FHTDemo() {
 		addIntegerSliderProperty("hBlurSize", fhtManager.gethBlurSize(), 0, 200);
@@ -49,6 +46,21 @@ public class FHTDemo extends AbstractApp {
 		addDoubleSliderProperty("vNeighbourPenality", fhtManager.getvNeighbourPenality(), -5000, 0);
 		addDoubleSliderProperty("hAnglePenality", fhtManager.gethAnglePenality(), -1, 0);
 		addDoubleSliderProperty("vAnglePenality", fhtManager.getvAnglePenality(), -1, 0);
+		addDoubleSliderProperty("vRecover", fhtManager.getvRecover(), 0, 1);
+		addDoubleSliderProperty("hRecover", fhtManager.gethRecover(), 0, 1);
+		addIntegerSliderProperty("vStripsNumber", fhtManager.getvStripsNumber(), 1, 32);
+		addIntegerSliderProperty("hStripsNumber", fhtManager.gethStripsNumber(), 1, 32);
+		addDoubleSliderProperty("vLocalThreshold", fhtManager.getvLocalThreshold(), 0, 1);
+		addDoubleSliderProperty("hLocalThreshold", fhtManager.gethLocalThreshold(), 0, 1);
+		addDoubleSliderProperty("vGlobalThreshold", fhtManager.getvGlobalThreshold(), 0, 0.2);
+		addDoubleSliderProperty("hGlobalThreshold", fhtManager.gethGlobalThreshold(), 0, 0.2);
+		addDoubleSliderProperty("vMaxConnectDistance", fhtManager.getvMaxConnectDistance(), 0, 0.1);
+		addDoubleSliderProperty("hMaxConnectDistance", fhtManager.gethMaxConnectDistance(), 0, 0.1);
+		addDoubleSliderProperty("interpolatorPow", fhtManager.getInterpolatorPow(), 0, 10);
+		addDoubleSliderProperty("interpolatorMinDist", fhtManager.getInterpolatorMinDist(), 0, 10);
+		addIntegerSliderProperty("halfGridWidth", fhtManager.getHalfGridWidth(), 1, 32);
+		addIntegerSliderProperty("halfGridHeight", fhtManager.getHalfGridHeight(), 1, 32);
+		addIntegerSliderProperty("optimizationsCount", fhtManager.getOptimisationsCount(), 0, 32);
 	}
 
 	private void startTimer() {
@@ -98,58 +110,48 @@ public class FHTDemo extends AbstractApp {
 		if (frameCount < 30)
 			return images;
 
-		Img transposedBinarized = binarized.transpose();
-		ref = trace("Binarization", ref);
+		fhtManager.init(frame.getSrc(), binarized.getSrc());
+		ref = trace("FHT init", ref);
 
-		double vRecover = 0.75;
-		int vStripsNumber = (int) ((16d / 3 - vRecover + 1) / (1 - vRecover));
-		double stripWidth = (binarized.width() / (vStripsNumber * (1 - vRecover) + vRecover - 1));
-		double vStep = ((1 - vRecover) * stripWidth);
-		double minVerticalAccuracy = 180 * (Math.atan(1 / (stripWidth - 1))) / Math.PI;
-		System.out.println(vStripsNumber + " verticals strips with width : " + stripWidth + " each step : " + vStep + " min accuracy : " + minVerticalAccuracy);
+		double minVerticalAccuracy = 180 * (Math.atan(1 / (fhtManager.getStripWidth().get() - 1))) / Math.PI;
+		System.out.println(fhtManager.getvStripsNumber().get() + " verticals strips with width : " + fhtManager.getStripWidth().get() + " each step : " + fhtManager.getvStep().get() + " min accuracy : " + minVerticalAccuracy);
 
-		double hRecover = 0.75;
-		int hStripsNumber = (int) ((9d / 3 - hRecover + 1) / (1 - hRecover));
-		double stripHeight = (binarized.height() / (hStripsNumber * (1 - hRecover) + hRecover - 1));
-		double hStep = ((1 - hRecover) * stripHeight);
-		double minHorizontalAccuracy = 180 * (Math.atan(1 / (stripHeight - 1))) / Math.PI;
-		System.out.println(hStripsNumber + " horizontal strips with width : " + stripHeight + " each step : " + hStep + " min accuracy : " + minHorizontalAccuracy);
+		double minHorizontalAccuracy = 180 * (Math.atan(1 / (fhtManager.getStripHeight().get() - 1))) / Math.PI;
+		System.out.println(fhtManager.gethStripsNumber().get() + " horizontal strips with height : " + fhtManager.getStripHeight().get() + " each step : " + fhtManager.gethStep().get() + " min accuracy : " + minHorizontalAccuracy);
 
-		List<Mat> vStrips = FHT.extractStrips(binarized.getSrc(), vStripsNumber, stripWidth, vStep);
-		List<Mat> hStrips = FHT.extractStrips(transposedBinarized.getSrc(), hStripsNumber, stripHeight, hStep);
+		List<Mat> vStrips = fhtManager.getVStrips();
+		List<Mat> hStrips = fhtManager.getHStrips();
 		ref = trace("Extract strips", ref);
 
-		List<Mat> vHoughs = vStrips.stream().map(strip -> FHT.fastHoughTransform(strip)).collect(Collectors.toList());
-		List<Mat> hHoughs = hStrips.stream().map(strip -> FHT.fastHoughTransform(strip)).collect(Collectors.toList());
-
-		vHoughs.forEach(projectionMap -> Core.normalize(projectionMap, projectionMap, 0, 1, Core.NORM_MINMAX));
-		hHoughs.forEach(projectionMap -> Core.normalize(projectionMap, projectionMap, 0, 1, Core.NORM_MINMAX));
+		List<Mat> vHoughs = fhtManager.getvHoughs();
+		List<Mat> hHoughs = fhtManager.gethHoughs();
 		ref = trace("Compute FHT", ref);
 
-		List<List<TrajectStep>> vHoughTrajs = vHoughs.stream().map(projectionMap -> FHT.bestTrajectFHT(projectionMap, 21, -0.08)).collect(Collectors.toList());
-		List<List<TrajectStep>> hHoughTrajs = hHoughs.stream().map(projectionMap -> FHT.bestTrajectFHT(projectionMap, 21, -0.08)).collect(Collectors.toList());
+		List<List<TrajectStep>> vHoughTrajs = fhtManager.getvHoughTrajs();
+		List<List<TrajectStep>> hHoughTrajs = fhtManager.gethHoughTrajs();
 		ref = trace("Compute trajects", ref);
 
-		// vHoughTrajs = StripTractor.optimize(vHoughs, 21, -0.08, -100, vHoughTrajs, vStep);
-		// hHoughTrajs = StripTractor.optimize(hHoughs, 21, -0.08, -100, hHoughTrajs, hStep);
+		vHoughTrajs = fhtManager.getOptimizedvHoughTrajs();// StripTractor.optimize(vHoughs, 81, -0.05, -100, vHoughTrajs, fhtManager.getvStep().get());
+		hHoughTrajs = fhtManager.getOptimizedhHoughTrajs();// StripTractor.optimize(hHoughs, 81, -0.05, -100, hHoughTrajs, fhtManager.gethStep().get());
+		ref = trace("Optimize trajects", ref);
 
-		List<List<OrientedPoint>[]> fhtHorizontals = ProjectionLines.toHorizontalsOrientedPoints(vHoughTrajs, vStep, 0.5, 0.05);
-		List<List<OrientedPoint>[]> fhtVerticals = ProjectionLines.toVerticalsOrientedPoints(hHoughTrajs, hStep, 0.5, 0.05);
+		List<List<OrientedPoint>[]> fhtHorizontals = fhtManager.getFhtHorizontals();// ProjectionLines.toHorizontalsOrientedPoints(vHoughTrajs, fhtManager.getvStep().get(), 0.5, 0.05);
+		List<List<OrientedPoint>[]> fhtVerticals = fhtManager.getFhtVerticals();// ProjectionLines.toVerticalsOrientedPoints(hHoughTrajs, fhtManager.gethStep().get(), 0.5, 0.05);
 
-		List<List<Segment>>[] horizontalSegments = Segment.connect(fhtHorizontals, vStep, 0.05, false);
-		List<List<Segment>>[] verticalSegments = Segment.connect(fhtVerticals, hStep, 0.05, true);
+		List<List<Segment>>[] horizontalSegments = fhtManager.getHorizontalSegments();// Segment.connect(fhtHorizontals, fhtManager.getvStep().get(), 0.05, false);
+		List<List<Segment>>[] verticalSegments = fhtManager.getVerticalSegments();// Segment.connect(fhtVerticals, fhtManager.gethStep().get(), 0.05, true);
 
 		Img frameDisplayFHT = new Img(frame.getSrc().clone(), false);
-		Segment.displayHorizontalOps(horizontalSegments[0], frameDisplayFHT.getSrc(), vStep, hStep, new Scalar(0, 255, 0));
-		Segment.displayHorizontalOps(horizontalSegments[1], frameDisplayFHT.getSrc(), vStep, hStep, new Scalar(0, 0, 255));
-		Segment.displayVerticalOps(verticalSegments[0], frameDisplayFHT.getSrc(), vStep, hStep, new Scalar(255, 255, 0));
-		Segment.displayVerticalOps(verticalSegments[1], frameDisplayFHT.getSrc(), vStep, hStep, new Scalar(255, 0, 255));
+		Segment.displayHorizontalOps(horizontalSegments[0], frameDisplayFHT.getSrc(), fhtManager.getvStep().get(), fhtManager.gethStep().get(), new Scalar(0, 255, 0));
+		Segment.displayHorizontalOps(horizontalSegments[1], frameDisplayFHT.getSrc(), fhtManager.getvStep().get(), fhtManager.gethStep().get(), new Scalar(0, 0, 255));
+		Segment.displayVerticalOps(verticalSegments[0], frameDisplayFHT.getSrc(), fhtManager.getvStep().get(), fhtManager.gethStep().get(), new Scalar(255, 255, 0));
+		Segment.displayVerticalOps(verticalSegments[1], frameDisplayFHT.getSrc(), fhtManager.getvStep().get(), fhtManager.gethStep().get(), new Scalar(255, 0, 255));
 
 		images[2] = frameDisplayFHT.toJfxImage();
 		ref = trace("Display lines", ref);
 
-		List<PolynomialSplineFunction>[] horizontalSplines = Segment.toSplines(horizontalSegments, false);
-		List<PolynomialSplineFunction>[] verticalSplines = Segment.toSplines(verticalSegments, true);
+		List<PolynomialSplineFunction>[] horizontalSplines = fhtManager.gethSplines();// Segment.toSplines(horizontalSegments, false);
+		List<PolynomialSplineFunction>[] verticalSplines = fhtManager.getvSplines();// Segment.toSplines(verticalSegments, true);
 		Img splineDisplay = new Img(frame.getSrc().clone(), false);
 		FHT.displayHSplines(horizontalSplines[0], splineDisplay.getSrc(), 0, 255, 0);
 		FHT.displayHSplines(horizontalSplines[1], splineDisplay.getSrc(), 0, 0, 255);
@@ -158,20 +160,17 @@ public class FHTDemo extends AbstractApp {
 		images[3] = splineDisplay.toJfxImage();
 		ref = trace("Display splines", ref);
 
-		List<OrientedPoint> flatHorizontalSegments = Stream.of(horizontalSegments).flatMap(h -> h.stream()).flatMap(h -> h.stream()).flatMap(edge -> Stream.of(edge.op1, edge.op2)).collect(Collectors.toList());
-		List<OrientedPoint> flatVerticalSegments = Stream.of(verticalSegments).flatMap(h -> h.stream()).flatMap(h -> h.stream()).flatMap(edge -> Stream.of(edge.op1, edge.op2)).collect(Collectors.toList());
-		GeneralInterpolator interpolatorFHT = new GeneralInterpolator(flatHorizontalSegments, flatVerticalSegments, 4, 0.0001);
-		SplineInterpolator superInterpolator = new SplineInterpolator(interpolatorFHT, horizontalSplines, verticalSplines);
+		SplineInterpolator superInterpolator = fhtManager.getSuperInterpolator();
 		ref = trace("Prepare interpolator", ref);
 
-		MeshManager meshManager = new MeshManager(6, 4, superInterpolator, frame.getSrc());
+		MeshManager meshManager = fhtManager.getMeshManager();
 		images[4] = new Img(meshManager.drawOnCopy(new Scalar(0, 255, 0), new Scalar(0, 0, 255)), false).toJfxImage();
 		ref = trace("Build and draw mesh", ref);
 
 		images[5] = new Img(meshManager.draw3Dsurface(new Scalar(0, 255, 0), new Scalar(0, 0, 255)), false).toJfxImage();
 		ref = trace("3D surface / svd", ref);
 
-		Img dewarpFHT3D = new Img(meshManager.dewarp3D());
+		Img dewarpFHT3D = fhtManager.getDewarp();
 		images[6] = dewarpFHT3D.toJfxImage();
 		ref = trace("Dewarp 3D", ref);
 
