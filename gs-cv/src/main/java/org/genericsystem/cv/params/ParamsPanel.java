@@ -2,6 +2,7 @@ package org.genericsystem.cv.params;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -22,10 +23,14 @@ public class ParamsPanel extends VBox {
 
 	public DoubleProperty addSliderProperty(String propertyName, double value, double min, double max) {
 		DoubleProperty property = addProperty(propertyName, value);
-		property.addListener((ov, oldV, newV) -> System.out.println(propertyName + " " + newV));
 		HBox hbox = new HBox();
 		Label label = new Label(propertyName);
 		Slider slider = new Slider(min, max, value);
+		Label valueLabel = new Label(Objects.toString(value));
+		property.addListener((ov, oldV, newV) -> {
+			valueLabel.setText(Objects.toString(newV));
+			System.out.println(propertyName + " " + newV);
+		});
 		slider.setShowTickLabels(true);
 		slider.setShowTickMarks(true);
 		// slider.setMajorTickUnit(50);
@@ -41,6 +46,7 @@ public class ParamsPanel extends VBox {
 		});
 		hbox.getChildren().add(label);
 		hbox.getChildren().add(slider);
+		hbox.getChildren().add(valueLabel);
 		getChildren().add(hbox);
 		return property;
 	}
