@@ -46,6 +46,7 @@ public class GraphicApp extends AbstractApp {
 	private ImageView[][] imageViews = new ImageView[][] { new ImageView[3], new ImageView[3], new ImageView[3] };
 	private int frameCount = 0;
 	private final MSER detector = MSER.create(1, 6, 200, 0.25, 0.2, 200, 1.01, 0.03, 5);
+	private final QualityManager qualityManager = new QualityManager(3, 1.0);
 
 	public static void main(String[] args) {
 		launch(args);
@@ -97,11 +98,40 @@ public class GraphicApp extends AbstractApp {
 			} catch (Throwable e) {
 				e.printStackTrace();
 			}
-		}, 2000, 30, TimeUnit.MILLISECONDS);
+		}, 2000, 50, TimeUnit.MILLISECONDS);
 	}
 
 	public boolean contains(Rect rect, Rect shiftedRect) {
 		return (rect.tl().x <= shiftedRect.tl().x && rect.tl().y <= shiftedRect.tl().y && rect.br().x >= shiftedRect.br().x && rect.br().y >= shiftedRect.br().y);
+	}
+
+	private static class QualityManager {
+
+		int size;
+		double coeff;
+		double average = 0;
+
+		public QualityManager(int size, double coeff) {
+			this.size = size;
+			this.coeff = coeff;
+		}
+
+		public boolean filter(Mat gray) {
+			double quality = quality(gray);
+			average = (size * average + quality) / (size + 1);
+			System.out.println("Quality : " + quality + " average : " + average + " filtered : " + (quality >= average * coeff));
+			return quality >= average * coeff;
+		}
+
+		public static double quality(Mat gray) {
+			Mat dest = new Mat();
+			Imgproc.Laplacian(gray, dest, 3);
+			MatOfDouble median = new MatOfDouble();
+			MatOfDouble std = new MatOfDouble();
+			Core.meanStdDev(dest, median, std);
+			return Math.pow(std.get(0, 0)[0], 2);
+		}
+
 	}
 
 	private Image[] doWork() {
@@ -112,6 +142,13 @@ public class GraphicApp extends AbstractApp {
 			frameCount++;
 		}
 		long ref = System.currentTimeMillis();
+
+		Img gray = frame.bgr2Gray();
+		if (!qualityManager.filter(gray.getSrc())) {
+			System.out.println("Not enough quality");
+			return null;
+		}
+
 		Image[] images = new Image[10];
 		images[0] = frame.toJfxImage();
 
@@ -119,6 +156,7 @@ public class GraphicApp extends AbstractApp {
 			return images;
 
 		Img binarized = frame.adaptativeGaussianInvThreshold(7, 5);
+
 		Img flat = fhtManager.init(frame.getSrc(), binarized.getSrc()).getDewarp();
 
 		images[1] = flat.toJfxImage();
@@ -167,16 +205,7 @@ public class GraphicApp extends AbstractApp {
 		Labels labels = new Labels(detectedClosedRects);
 		labels.ocr(flat.getSrc(), 0, 1, 2, 2);
 		labels.putOcr(flatDisplay2);
-		Mat destination = new Mat();
-		Mat matGray = new Mat();
-		Imgproc.cvtColor(flat.getSrc(), matGray, Imgproc.COLOR_BGR2GRAY);
-		Imgproc.Laplacian(matGray, destination, 3);
-		MatOfDouble median = new MatOfDouble();
-		MatOfDouble std = new MatOfDouble();
-		Core.meanStdDev(destination, median, std);
-		Imgproc.putText(flatDisplay2, "Quality : " + (int) Math.pow(std.get(0, 0)[0], 2), new Point(50, 50), Core.FONT_HERSHEY_PLAIN, 1, new Scalar(0, 0, 255), 1);
-
-		System.out.println("Quality : " + Math.pow(std.get(0, 0)[0], 2));
+		Imgproc.putText(flatDisplay2, "Quality : " + (int) QualityManager.quality(flat.bgr2Gray().getSrc()), new Point(50, 50), Core.FONT_HERSHEY_PLAIN, 1, new Scalar(0, 0, 255), 1);
 		images[4] = new Img(flatDisplay2, false).toJfxImage();
 		ref = trace("Ocr", ref);
 
@@ -305,7 +334,7 @@ public class GraphicApp extends AbstractApp {
 			double newBrx = rect.br().x + dx <= img.width() ? rect.br().x + dx : img.width();
 			double newBry = rect.br().y + dy <= img.height() ? rect.br().y + dy : img.height();
 			label = Ocr.doWork(new Mat(img, new Rect(new Point(newTlx, newTly), new Point(newBrx, newBry))), confidence, componentLevel);
-			System.out.println(label);
+			// System.out.println(label);
 		}
 
 		public void putOcr(Mat img) {

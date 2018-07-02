@@ -20,17 +20,19 @@ public class MeshManager {
 
 	private final int halfWidth;
 	private final int halfHeight;
+	private final Interpolator interpolator;
+	private final double focale;
 
-	private Interpolator interpolator;
 	private Points points;
 	private Mesh mesh;
 	private Mesh3D mesh3D;
 
-	public MeshManager(int halfWidth, int halfHeight, Interpolator interpolatorFHT, Mat src) {
-		this(halfWidth, halfHeight, interpolatorFHT, src.width() / (2 * halfWidth), src.height() / (2 * halfHeight), src);
+	public MeshManager(int halfWidth, int halfHeight, Interpolator interpolatorFHT, Mat src, double focale) {
+		this(halfWidth, halfHeight, interpolatorFHT, src.width() / (2 * halfWidth), src.height() / (2 * halfHeight), src, focale);
 	}
 
-	public MeshManager(int halfWidth, int halfHeight, Interpolator interpolator, double deltaX, double deltaY, Mat image) {
+	public MeshManager(int halfWidth, int halfHeight, Interpolator interpolator, double deltaX, double deltaY, Mat image, double focale) {
+		this.focale = focale;
 		this.interpolator = interpolator;
 		this.deltaX = deltaX;
 		this.deltaY = deltaY;
@@ -51,7 +53,7 @@ public class MeshManager {
 	}
 
 	private Mesh3D getMesh3D() {
-		return mesh3D != null ? mesh3D : (mesh3D = new Mesh3D(getMesh(), image.size()));
+		return mesh3D != null ? mesh3D : (mesh3D = new Mesh3D(getMesh(), image.size(), focale));
 	}
 
 	// private void reverseCoeffs(double[] coeffs) {

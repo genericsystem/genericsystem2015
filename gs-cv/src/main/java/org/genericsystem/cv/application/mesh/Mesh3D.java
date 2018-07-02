@@ -18,14 +18,13 @@ public class Mesh3D extends AbstractMesh<Point3> {
 	private final Mesh mesh;
 	private List<Point3> points3D;
 
-	public Mesh3D(Mesh mesh, Size size) {
+	public Mesh3D(Mesh mesh, Size size, double focal) {
 		super(mesh.halfWidth, mesh.halfHeight);
 		this.mesh = mesh;
 		int[][] indexRects = mesh.values().stream().map(indexedPts -> new int[] { indexedPts[0].getIndex(), indexedPts[1].getIndex(), indexedPts[2].getIndex(), indexedPts[3].getIndex() }).toArray(int[][]::new);
 
-		double focal_length = Math.max(size.width, size.height) / Math.tan((60d / 180) * Math.PI / 2) / 2;
-		System.out.println("Focale : " + focal_length);
-		List<Point> focalizedPts = mesh.getPointIndex().stream().map(pts -> new Point((pts.x - size.width / 2) / focal_length, (pts.y - size.height / 2) / focal_length)).collect(Collectors.toList());
+		// System.out.println("Focale : " + focal);
+		List<Point> focalizedPts = mesh.getPointIndex().stream().map(pts -> new Point((pts.x - size.width / 2) / focal, (pts.y - size.height / 2) / focal)).collect(Collectors.toList());
 
 		points3D = Svd.solve(focalizedPts, indexRects);
 		for (int i = -halfHeight; i < halfHeight; i++)

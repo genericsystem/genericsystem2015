@@ -46,6 +46,7 @@ public class FHTManager {
 	private IntegerProperty halfGridWidth = new SimpleIntegerProperty(8);
 	private IntegerProperty halfGridHeight = new SimpleIntegerProperty(8);
 	private IntegerProperty optimizationsCount = new SimpleIntegerProperty(0);
+	private DoubleProperty focale;
 
 	private final Size binarySize;
 	private Mat frame;
@@ -58,6 +59,7 @@ public class FHTManager {
 		vStep = Bindings.createDoubleBinding(() -> ((1 - vRecover.get()) * stripWidth.get()), vRecover, stripWidth);
 		stripHeight = Bindings.createDoubleBinding(() -> (binarySize.height / (hStripsNumber.get() * (1 - hRecover.get()) + hRecover.get() - 1)), hStripsNumber, hRecover);
 		hStep = Bindings.createDoubleBinding(() -> ((1 - hRecover.get()) * stripHeight.get()), hRecover, stripHeight);
+		focale = new SimpleDoubleProperty(Math.max(binarySize.width, binarySize.height) / Math.tan((60d / 180) * Math.PI / 2) / 2);
 	}
 
 	public FHTManager init(Mat frame, Mat binarized) {
@@ -200,7 +202,7 @@ public class FHTManager {
 	}
 
 	public MeshManager getMeshManager() {
-		return meshManager != null ? meshManager : (meshManager = new MeshManager(halfGridWidth.get(), halfGridHeight.get(), getSuperInterpolator(), frame));
+		return meshManager != null ? meshManager : (meshManager = new MeshManager(halfGridWidth.get(), halfGridHeight.get(), getSuperInterpolator(), frame, focale.get()));
 	}
 
 	public Img getDewarp() {
@@ -305,6 +307,10 @@ public class FHTManager {
 
 	public IntegerProperty getOptimisationsCount() {
 		return optimizationsCount;
+	}
+
+	public DoubleProperty getFocale() {
+		return focale;
 	}
 
 }

@@ -61,6 +61,7 @@ public class FHTDemo extends AbstractApp {
 		addIntegerSliderProperty("halfGridWidth", fhtManager.getHalfGridWidth(), 1, 32);
 		addIntegerSliderProperty("halfGridHeight", fhtManager.getHalfGridHeight(), 1, 32);
 		addIntegerSliderProperty("optimizationsCount", fhtManager.getOptimisationsCount(), 0, 32);
+		addDoubleSliderProperty("focale", fhtManager.getFocale(), 0, 1500);
 	}
 
 	private void startTimer() {
