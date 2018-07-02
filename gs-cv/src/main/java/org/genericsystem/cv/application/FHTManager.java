@@ -43,8 +43,8 @@ public class FHTManager {
 	private DoubleProperty vMaxConnectDistance = new SimpleDoubleProperty(0.05);
 	private DoubleProperty interpolatorPow = new SimpleDoubleProperty(4);
 	private DoubleProperty interpolatorMinDist = new SimpleDoubleProperty(0.0001);
-	private IntegerProperty halfGridWidth = new SimpleIntegerProperty(6);
-	private IntegerProperty halfGridHeight = new SimpleIntegerProperty(4);
+	private IntegerProperty halfGridWidth = new SimpleIntegerProperty(8);
+	private IntegerProperty halfGridHeight = new SimpleIntegerProperty(8);
 	private IntegerProperty optimizationsCount = new SimpleIntegerProperty(0);
 
 	private final Size binarySize;

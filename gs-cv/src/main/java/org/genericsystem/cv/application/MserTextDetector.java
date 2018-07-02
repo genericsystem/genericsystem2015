@@ -1,12 +1,5 @@
 package org.genericsystem.cv.application;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
@@ -18,6 +11,14 @@ import org.opencv.core.Scalar;
 import org.opencv.features2d.MSER;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -39,7 +40,7 @@ public class MserTextDetector extends AbstractApp {
 	private ScheduledExecutorService timer = new BoundedScheduledThreadPoolExecutor();
 	private Config config = new Config();
 	private final ImageView[][] imageViews = new ImageView[][] { new ImageView[3], new ImageView[3], new ImageView[3], new ImageView[3] };
-	private final MSER detector = MSER.create(2, 10, 2000, 0.25, 0.2, 200, 1.01, 0.03, 5);
+	private final MSER detector = MSER.create(2, 10, 1000, 0.25, 0.2, 200, 1.01, 0.03, 5);
 
 	private void startTimer() {
 		timer.scheduleAtFixedRate(() -> {

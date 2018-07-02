@@ -37,7 +37,7 @@ public class FHT {
 		Ximgproc.FastHoughTransform(strip, houghTransform, CvType.CV_64FC1, Ximgproc.ARO_45_135, Ximgproc.FHT_ADD, Ximgproc.HDO_DESKEW);
 		Core.transpose(houghTransform, houghTransform);
 		Core.normalize(houghTransform, houghTransform, 0, 1, Core.NORM_MINMAX);
-		return new Mat(houghTransform, new Range(strip.width() / 2 - 1, houghTransform.height() - strip.width() / 2 + 1), new Range(0, houghTransform.width()));
+		return new Mat(houghTransform, new Range(strip.width() / 2 - 1, houghTransform.height() - strip.width() / 2 - 1), new Range(0, houghTransform.width()));
 	}
 
 	static Mat adaptivHough(Mat houghTransform, int blurSize) {

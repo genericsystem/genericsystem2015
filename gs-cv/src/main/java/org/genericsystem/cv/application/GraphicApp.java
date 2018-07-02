@@ -17,6 +17,7 @@ import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfDouble;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfRect;
 import org.opencv.core.Point;
@@ -119,6 +120,7 @@ public class GraphicApp extends AbstractApp {
 
 		Img binarized = frame.adaptativeGaussianInvThreshold(7, 5);
 		Img flat = fhtManager.init(frame.getSrc(), binarized.getSrc()).getDewarp();
+
 		images[1] = flat.toJfxImage();
 		ref = trace("Dewarp", ref);
 		// Img flatBinarized = flat.adaptativeGaussianInvThreshold(7, 5);
@@ -163,8 +165,18 @@ public class GraphicApp extends AbstractApp {
 
 		Mat flatDisplay2 = Mat.zeros(flat.size(), flat.type());
 		Labels labels = new Labels(detectedClosedRects);
-		labels.ocr(flat.getSrc(), 1, 1, 2, 2);
+		labels.ocr(flat.getSrc(), 0, 1, 2, 2);
 		labels.putOcr(flatDisplay2);
+		Mat destination = new Mat();
+		Mat matGray = new Mat();
+		Imgproc.cvtColor(flat.getSrc(), matGray, Imgproc.COLOR_BGR2GRAY);
+		Imgproc.Laplacian(matGray, destination, 3);
+		MatOfDouble median = new MatOfDouble();
+		MatOfDouble std = new MatOfDouble();
+		Core.meanStdDev(destination, median, std);
+		Imgproc.putText(flatDisplay2, "Quality : " + (int) Math.pow(std.get(0, 0)[0], 2), new Point(50, 50), Core.FONT_HERSHEY_PLAIN, 1, new Scalar(0, 0, 255), 1);
+
+		System.out.println("Quality : " + Math.pow(std.get(0, 0)[0], 2));
 		images[4] = new Img(flatDisplay2, false).toJfxImage();
 		ref = trace("Ocr", ref);
 
@@ -304,7 +316,7 @@ public class GraphicApp extends AbstractApp {
 
 			if (scale < 0.3 && scale > 3)
 				scale = 1;
-			Imgproc.putText(img, normalizedText, new Point(rect.tl().x, rect.br().y), Core.FONT_HERSHEY_PLAIN, scale, new Scalar(0, 0, 255), 1);
+			Imgproc.putText(img, normalizedText, new Point(rect.tl().x, rect.br().y), Core.FONT_HERSHEY_PLAIN, scale, new Scalar(0, 255, 0), 1);
 		}
 
 		public String getLabel() {
