@@ -1,4 +1,4 @@
-package org.genericsystem.cv.application;
+package org.genericsystem.cv.application.supercontour;
 
 import java.util.ArrayList;
 import java.util.Arrays;

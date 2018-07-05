@@ -4,7 +4,7 @@ import org.genericsystem.cv.Img;
 import org.genericsystem.cv.PdfToPngConverter;
 import org.opencv.core.Size;
 
-interface GSCapture {
+public interface GSCapture {
 	public static final Size HD = new Size(1280, 720);
 	public static final Size VGA = new Size(640, 360);
 

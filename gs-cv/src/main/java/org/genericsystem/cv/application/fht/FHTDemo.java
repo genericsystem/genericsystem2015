@@ -1,4 +1,4 @@
-package org.genericsystem.cv.application;
+package org.genericsystem.cv.application.fht;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -9,6 +9,14 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
+import org.genericsystem.cv.application.BoundedScheduledThreadPoolExecutor;
+import org.genericsystem.cv.application.Config;
+import org.genericsystem.cv.application.GSCapture;
+import org.genericsystem.cv.application.GSVideoCapture;
+import org.genericsystem.cv.application.OrientedPoint;
+import org.genericsystem.cv.application.Segment;
+import org.genericsystem.cv.application.SplineInterpolator;
+import org.genericsystem.cv.application.TrajectStep;
 import org.genericsystem.cv.application.mesh.MeshManager;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.genericsystem.layout.Layout;

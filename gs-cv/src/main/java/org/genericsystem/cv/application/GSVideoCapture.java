@@ -22,7 +22,7 @@ public class GSVideoCapture implements GSCapture {
 		videoCapture.set(Videoio.CAP_PROP_FRAME_HEIGHT, size.height);
 	}
 
-	GSVideoCapture(int index, Size size, Size resize) {
+	public GSVideoCapture(int index, Size size, Size resize) {
 		this.size = size;
 		this.resize = resize;
 		videoCapture = new VideoCapture(index);

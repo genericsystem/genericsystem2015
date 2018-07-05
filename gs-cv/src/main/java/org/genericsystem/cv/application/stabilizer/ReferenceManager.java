@@ -1,4 +1,4 @@
-package org.genericsystem.cv.application;
+package org.genericsystem.cv.application.stabilizer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,12 +11,15 @@ import java.util.TreeMap;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import org.genericsystem.cv.application.Reconciliation;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
 import org.opencv.core.Size;
+import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
 
 public class ReferenceManager {
@@ -40,11 +43,11 @@ public class ReferenceManager {
 		this.frameSize = frameSize;
 	}
 
-	public void submit(ImgDescriptor newImgDescriptor, List<Rect> detectedrects) {
+	public boolean submit(ImgDescriptor newImgDescriptor) {
 		if (reference == null) {
 			toReferenceGraphy.put(newImgDescriptor, IDENTITY_MAT);
 			reference = newImgDescriptor;
-			return;
+			return false;
 		}
 
 		int bestMatchingPointsCount = 0;
@@ -81,20 +84,20 @@ public class ReferenceManager {
 			}
 		}
 		if (bestReconciliation == null) {
-			System.out.println("no reconciliation found");
 			if (toReferenceGraphy.size() <= 1) {
 				toReferenceGraphy.clear();
 				toReferenceGraphy.put(newImgDescriptor, IDENTITY_MAT);
 				reference = newImgDescriptor;
 			}
-			return;
+			return false;
 		}
 		Mat homographyToReference = new Mat();
 		Core.gemm(bestReconciliation.getHomography(), toReferenceGraphy.get(bestImgDescriptor), 1, new Mat(), 0, homographyToReference);
 		toReferenceGraphy.put(newImgDescriptor, homographyToReference);
-		consolidate(shift(detectedrects, homographyToReference), frameSize);
-		updateReference();
+		// consolidate(shift(detectedrects, homographyToReference), frameSize);
+		// updateReference();
 		cleanReferenceNeighbours();
+		return true;
 	}
 
 	private List<ImgDescriptor> getRandomPool(ImgDescriptor lastStored, ImgDescriptor reference) {
@@ -106,18 +109,18 @@ public class ReferenceManager {
 
 	private void cleanReferenceNeighbours() {
 		if (toReferenceGraphy.size() > 30) {
-			double bestDistance = Double.MAX_VALUE;
-			ImgDescriptor closestDescriptor = null;
+			double maxDistance = 0;
+			ImgDescriptor worstDescriptor = null;
 			for (Entry<ImgDescriptor, Mat> entry : toReferenceGraphy.entrySet()) {
-				if (!entry.getKey().equals(reference)) {
+				if (!entry.getKey().equals(reference) && !entry.getKey().equals(toReferenceGraphy.firstKey())) {
 					double distance = distance(entry.getValue());
-					if (distance < bestDistance) {
-						bestDistance = distance;
-						closestDescriptor = entry.getKey();
+					if (distance > maxDistance) {
+						maxDistance = distance;
+						worstDescriptor = entry.getKey();
 					}
 				}
 			}
-			toReferenceGraphy.remove(closestDescriptor);
+			toReferenceGraphy.remove(worstDescriptor);
 		}
 	}
 
@@ -157,17 +160,6 @@ public class ReferenceManager {
 			}
 		}
 		return bestDescriptor;
-
-		// double minArea = Double.MAX_VALUE;
-		// ImgDescriptor bestDescriptor = null;
-		// for (Entry<ImgDescriptor, Mat> entry : toReferenceGraphy.entrySet()) {
-		// double surface = entry.getKey().getSurface();
-		// if (surface < minArea) {
-		// minArea = surface;
-		// bestDescriptor = entry.getKey();
-		// }
-		// }
-		// return bestDescriptor;
 	}
 
 	public List<Rect> getResizedFieldsRects() {
@@ -267,42 +259,6 @@ public class ReferenceManager {
 			fieldsList.removeIf(predicate);
 		}
 
-		// public double getMinX() {
-		// double minX = Double.MAX_VALUE;
-		// for (Field f : fieldsList) {
-		// if (f.getRect().tl().x < minX)
-		// minX = f.getRect().tl().x;
-		// }
-		// return minX;
-		// }
-		//
-		// public double getMaxX() {
-		// double maxX = 0.0;
-		// for (Field f : fieldsList) {
-		// if (f.getRect().br().x > maxX)
-		// maxX = f.getRect().br().x;
-		// }
-		// return maxX;
-		// }
-		//
-		// public double getMinY() {
-		// double minY = Double.MAX_VALUE;
-		// for (Field f : fieldsList) {
-		// if (f.getRect().tl().y < minY)
-		// minY = f.getRect().tl().y;
-		// }
-		// return minY;
-		// }
-		//
-		// public double getMaxY() {
-		// double maxY = 0.0;
-		// for (Field f : fieldsList) {
-		// if (f.getRect().br().y > maxY)
-		// maxY = f.getRect().br().y;
-		// }
-		// return maxY;
-		// }
-
 		public void shift(Mat homoInv) {
 			fieldsList.forEach(field -> field.shift(homoInv));
 		}
@@ -400,6 +356,7 @@ public class ReferenceManager {
 			double deltaY = newPointList.get(i).y - oldPointList.get(i).y;
 			error += deltaX * deltaX + deltaY * deltaY;
 		}
+
 		return Math.sqrt(error) / oldPointList.size();
 	}
 
@@ -411,5 +368,15 @@ public class ReferenceManager {
 		reference = null;
 		toReferenceGraphy.clear();
 		fields.clean(field -> true);
+	}
+
+	public Mat getHomography(ImgDescriptor imgDescriptor) {
+		return toReferenceGraphy.get(imgDescriptor);
+	}
+
+	public Mat dewarp(ImgDescriptor imgDescriptor, Mat homography) {
+		Mat result = new Mat();
+		Imgproc.warpPerspective(imgDescriptor.getFrame().getSrc(), result, homography, imgDescriptor.getFrame().size(), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(0));
+		return result;
 	}
 }

@@ -1,4 +1,4 @@
-package org.genericsystem.cv.application;
+package org.genericsystem.cv.application.textdetection;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -7,6 +7,10 @@ import java.util.concurrent.TimeUnit;
 
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
+import org.genericsystem.cv.application.BoundedScheduledThreadPoolExecutor;
+import org.genericsystem.cv.application.Config;
+import org.genericsystem.cv.application.GSCapture;
+import org.genericsystem.cv.application.GSVideoCapture;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;

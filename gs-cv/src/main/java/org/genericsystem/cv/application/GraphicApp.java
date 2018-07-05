@@ -14,6 +14,9 @@ import java.util.stream.DoubleStream;
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.Ocr;
+import org.genericsystem.cv.application.fht.FHTManager;
+import org.genericsystem.cv.application.stabilizer.ImgDescriptor;
+import org.genericsystem.cv.application.stabilizer.ReferenceManager;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
@@ -320,7 +323,7 @@ public class GraphicApp extends AbstractApp {
 			System.out.println("Empty descriptors");
 			return null;
 		}
-		referenceManager.submit(newImgDescriptor, spanRects);
+		referenceManager.submit(newImgDescriptor);
 
 		List<Rect> referenceRects = referenceManager.getReferenceRects();
 		Mat referenceTemplate = Mat.zeros(flat.size(), CvType.CV_8UC1);// new SuperTemplate(referenceManager.getReference().getSuperFrame(), CvType.CV_8UC1, SuperFrameImg::getFrame);

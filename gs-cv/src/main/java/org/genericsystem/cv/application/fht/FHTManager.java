@@ -1,4 +1,4 @@
-package org.genericsystem.cv.application;
+package org.genericsystem.cv.application.fht;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -6,6 +6,12 @@ import java.util.stream.Stream;
 
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.genericsystem.cv.Img;
+import org.genericsystem.cv.application.GeneralInterpolator;
+import org.genericsystem.cv.application.OrientedPoint;
+import org.genericsystem.cv.application.ProjectionLines;
+import org.genericsystem.cv.application.Segment;
+import org.genericsystem.cv.application.SplineInterpolator;
+import org.genericsystem.cv.application.TrajectStep;
 import org.genericsystem.cv.application.mesh.MeshManager;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;

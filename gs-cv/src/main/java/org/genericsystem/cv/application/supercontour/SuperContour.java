@@ -1,4 +1,4 @@
-package org.genericsystem.cv.application;
+package org.genericsystem.cv.application.supercontour;
 
 import org.opencv.core.Core;
 import org.opencv.core.CvType;

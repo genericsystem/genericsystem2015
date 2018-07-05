@@ -1,9 +1,11 @@
-package org.genericsystem.cv.application;
+package org.genericsystem.cv.application.stabilizer;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.genericsystem.cv.Img;
+import org.genericsystem.cv.application.GraphicApp;
+import org.genericsystem.cv.application.Reconciliation;
 import org.genericsystem.cv.application.GraphicApp.Label;
 import org.opencv.calib3d.Calib3d;
 import org.opencv.core.Core;
