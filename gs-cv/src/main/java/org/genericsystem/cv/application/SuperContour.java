@@ -5,7 +5,6 @@ import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
-import org.opencv.core.Range;
 import org.opencv.core.Rect;
 import org.opencv.imgproc.Imgproc;
 
@@ -25,12 +24,12 @@ public class SuperContour implements Comparable<SuperContour> {
 	public final double lxmin, lxmax;
 	public final double lymin, lymax;
 	public final double dx, dy;
-	public final boolean isLeaf;
-	public double vertical;
-	public Point vTop;
-	public Point vBottom;
+	// public final boolean isLeaf;
+	// public double vertical;
+	// public Point vTop;
+	// public Point vBottom;
 
-	public SuperContour(MatOfPoint contour, boolean isLeaf) {
+	public SuperContour(MatOfPoint contour) {
 
 		this.contour = contour;
 		this.rect = Imgproc.boundingRect(contour);
@@ -63,54 +62,53 @@ public class SuperContour implements Comparable<SuperContour> {
 		this.angle = Math.atan2(tangent.y, tangent.x);
 		this.antiAngle = Math.atan2(antiTangent.y, antiTangent.x);
 
-		this.isLeaf = isLeaf;
 		this.dx = lxmax - lxmin;
 		this.dy = lymax - lymin;
 	}
 
-	private int computeDistance(int ind, int other, int nBin) {
-		return Math.min(Math.min(Math.abs(ind - other), Math.abs(ind - other - nBin)), Math.abs(ind - other + nBin));
-	}
+	// private int computeDistance(int ind, int other, int nBin) {
+	// return Math.min(Math.min(Math.abs(ind - other), Math.abs(ind - other - nBin)), Math.abs(ind - other + nBin));
+	// }
 
-	int computeHisto(Mat mag, int[][] bin, int nBin, DirectionalFilter df, double squareSize) {
-		double tlx = center.x - squareSize / 2;
-		double tly = center.y - squareSize / 2;
-		double brx = center.x + squareSize / 2;
-		double bry = center.y + squareSize / 2;
-
-		tlx = tlx > 0 ? tlx : 0;
-		tly = tly > 0 ? tly : 0;
-
-		brx = brx < mag.width() ? brx : mag.width();
-		bry = bry < mag.height() ? bry : mag.height();
-
-		Range rangey = new Range((int) tly, (int) bry);
-		Range rangex = new Range((int) tlx, (int) brx);
-
-		double[] histos = df.getHistogram(new Mat(mag, rangey, rangex), df.subArray(bin, rangey, rangex), nBin);
-		int targetAngle = (int) (antiAngle / Math.PI * 64);
-		// System.out.println("Angle " + angle / Math.PI * 180 + " Antiangle : " + antiAngle / Math.PI * 180);
-		double max = Double.NEGATIVE_INFINITY;
-		int k = -1;
-		// System.out.println(targetAngle);
-		for (int i = 0; i < histos.length; i++) {
-
-			if (computeDistance(i, targetAngle, nBin) < 12) {
-				// System.out.println(i);
-				if (histos[i] > max) {
-					max = histos[i];
-					k = i;
-				}
-			}
-		}
-		vertical = (Integer.valueOf(k).doubleValue() / 64) * Math.PI + Math.PI / 2;
-		// if (vertical > Math.PI)
-		// vertical = vertical - Math.PI;
-		vTop = new Point(center.x - dy * Math.cos(vertical), center.y - dy * Math.sin(vertical));
-		vBottom = new Point(center.x + dy * Math.cos(vertical), center.y + dy * Math.sin(vertical));
-		// System.out.println(vertical / Math.PI * 180 + " " + antiAngle / Math.PI * 180);
-		return k;
-	}
+	// int computeHisto(Mat mag, int[][] bin, int nBin, DirectionalFilter df, double squareSize) {
+	// double tlx = center.x - squareSize / 2;
+	// double tly = center.y - squareSize / 2;
+	// double brx = center.x + squareSize / 2;
+	// double bry = center.y + squareSize / 2;
+	//
+	// tlx = tlx > 0 ? tlx : 0;
+	// tly = tly > 0 ? tly : 0;
+	//
+	// brx = brx < mag.width() ? brx : mag.width();
+	// bry = bry < mag.height() ? bry : mag.height();
+	//
+	// Range rangey = new Range((int) tly, (int) bry);
+	// Range rangex = new Range((int) tlx, (int) brx);
+	//
+	// double[] histos = df.getHistogram(new Mat(mag, rangey, rangex), df.subArray(bin, rangey, rangex), nBin);
+	// int targetAngle = (int) (antiAngle / Math.PI * 64);
+	// // System.out.println("Angle " + angle / Math.PI * 180 + " Antiangle : " + antiAngle / Math.PI * 180);
+	// double max = Double.NEGATIVE_INFINITY;
+	// int k = -1;
+	// // System.out.println(targetAngle);
+	// for (int i = 0; i < histos.length; i++) {
+	//
+	// if (computeDistance(i, targetAngle, nBin) < 12) {
+	// // System.out.println(i);
+	// if (histos[i] > max) {
+	// max = histos[i];
+	// k = i;
+	// }
+	// }
+	// }
+	// vertical = (Integer.valueOf(k).doubleValue() / 64) * Math.PI + Math.PI / 2;
+	// // if (vertical > Math.PI)
+	// // vertical = vertical - Math.PI;
+	// vTop = new Point(center.x - dy * Math.cos(vertical), center.y - dy * Math.sin(vertical));
+	// vBottom = new Point(center.x + dy * Math.cos(vertical), center.y + dy * Math.sin(vertical));
+	// // System.out.println(vertical / Math.PI * 180 + " " + antiAngle / Math.PI * 180);
+	// return k;
+	// }
 
 	Mat convertContourToMat(MatOfPoint contour) {
 		Point[] pts = contour.toArray();

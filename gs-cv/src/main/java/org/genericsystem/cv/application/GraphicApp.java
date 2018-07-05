@@ -261,29 +261,6 @@ public class GraphicApp extends AbstractApp {
 		// System.out.println("surface : " + surface + " " + surfaceLayout.area(flatBinarized) + " " + surfaceLayout.computeTotalSurface(flatBinarized));
 		// Imgproc.putText(flatDisplay.getSrc(), String.valueOf(surface), new Point(flatDisplay.width() / 2, 20), Core.FONT_HERSHEY_PLAIN, 1, new Scalar(255, 255, 255), 1);
 
-		// SuperTemplate superReferenceTemplate4 = new SuperTemplate(frame, CvType.CV_8UC3, SuperFrameImg::getFrame);
-		//
-		// List<SuperContour> detectedSuperContours = superReferenceTemplate4.detectSuperContours(20).stream().filter(sc -> Math.abs(sc.angle) < Math.PI / 4).collect(Collectors.toList());
-		// detectedSuperContours.stream().forEach(c -> Imgproc.line(superReferenceTemplate4.getDisplay().getSrc(), c.top, c.bottom, new Scalar(255, 255, 255), 1));
-		// detectedSuperContours.stream().forEach(c -> Imgproc.line(superReferenceTemplate4.getDisplay().getSrc(), c.left, c.right, new Scalar(255, 255, 255), 1));
-		// detectedSuperContours.stream().map(sc -> sc.center).forEach(pt -> Imgproc.circle(superReferenceTemplate4.getDisplay().getSrc(), pt, 3, new Scalar(255, 0, 0), -1));
-		// detectedSuperContours.stream().map(sc -> sc.left).forEach(pt -> Imgproc.circle(superReferenceTemplate4.getDisplay().getSrc(), pt, 3, new Scalar(0, 255, 0), -1));
-		// detectedSuperContours.stream().map(sc -> sc.right).forEach(pt -> Imgproc.circle(superReferenceTemplate4.getDisplay().getSrc(), pt, 3, new Scalar(0, 0, 255), -1));
-		// detectedSuperContours.stream().map(sc -> sc.top).forEach(pt -> Imgproc.circle(superReferenceTemplate4.getDisplay().getSrc(), pt, 3, new Scalar(0, 255, 255), -1));
-		// detectedSuperContours.stream().map(sc -> sc.bottom).forEach(pt -> Imgproc.circle(superReferenceTemplate4.getDisplay().getSrc(), pt, 3, new Scalar(255, 0, 255), -1));
-		//
-		// images[3] = superReferenceTemplate4.getDisplay().toJfxImage();
-		//
-		// SuperTemplate superReferenceTemplate5 = new SuperTemplate(frame, CvType.CV_8UC3, SuperFrameImg::getFrame) {
-		// @Override
-		// protected org.genericsystem.cv.Img buildDisplay() {
-		// return new Img(getFrame().getSrc(), true);
-		// };
-		// };
-		//
-		// List<SuperContour> filteredSuperContour = new ArrayList<>(
-		// TextOrientationLinesDetector.selectRandomObjects(superReferenceTemplate5.detectSuperContours(20).stream().filter(sc -> Math.abs(sc.angle) < Math.PI / 4 && sc.dx > 2 * sc.dy).collect(Collectors.toList()), 200));
-		//
 		// DirectionalFilter df = new DirectionalFilter();
 		// int nBin = 64;
 		// Mat gray = superReferenceTemplate5.getFrame().bgr2Gray().getSrc();
@@ -295,6 +272,7 @@ public class GraphicApp extends AbstractApp {
 		// Core.cartToPolar(gx, gy, mag, ori);
 		//
 		// int[][] bin = df.bin(ori, nBin);
+		// sc.computeHisto(mag, bin, nBin, df, 100)
 		// List<Span> spans = superReferenceTemplate5.assembleContours(filteredSuperContour, c -> true, 100, 30, 70);
 		// // filteredSuperContour = spans.stream().flatMap(span -> span.getContours().stream()).collect(Collectors.toList());
 		// double regionSize = 100;
