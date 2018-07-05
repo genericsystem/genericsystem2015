@@ -1,15 +1,12 @@
 package org.genericsystem.cv.application;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.genericsystem.cv.Img;
 import org.genericsystem.cv.application.GraphicApp.Label;
-import org.genericsystem.cv.application.GraphicApp.Labels;
-import org.genericsystem.cv.lm.LevenbergImpl;
+import org.opencv.calib3d.Calib3d;
 import org.opencv.core.Core;
-import org.opencv.core.CvType;
 import org.opencv.core.DMatch;
 import org.opencv.core.KeyPoint;
 import org.opencv.core.Mat;
@@ -31,11 +28,9 @@ public class ImgDescriptor {
 	private final MatOfKeyPoint keypoints = new MatOfKeyPoint();
 	private final Mat descriptors;
 	private final long timeStamp;
-	private final Labels labels;
 
-	public ImgDescriptor(Img frame, Labels labels) {
+	public ImgDescriptor(Img frame) {
 		this.frame = frame;
-		this.labels = labels;
 		detector.detect(frame.getSrc(), keypoints);
 		assert keypoints != null && !keypoints.empty();
 		descriptors = new Mat();
@@ -90,18 +85,6 @@ public class ImgDescriptor {
 
 	public Reconciliation computeReconciliation(ImgDescriptor reference) {
 
-		Labels labels = new Labels(this.labels);
-		Labels referenceLabels = new Labels(reference.getLabels());
-
-		List<Link> links = new ArrayList<>();
-		for (int i = 0; i < labels.getLabels().size(); i++)
-			for (int j = 0; j < referenceLabels.getLabels().size(); j++)
-				links.add(new Link(labels.getLabels().get(i), referenceLabels.getLabels().get(j)));
-		// links.removeIf(link -> !link.label1.getLabel().equals(link.label2.getLabel()));
-		links.removeIf(link -> link.distance() > 20);
-
-		System.out.println(links);
-
 		MatOfDMatch matches = new MatOfDMatch();
 		matcher.match(getDescriptors(), reference.getDescriptors(), matches);
 
@@ -116,33 +99,33 @@ public class ImgDescriptor {
 			}
 		if (referencePts.size() > 50) {
 
-			List<Point[]> pairedPoints = new ArrayList<>();
-			for (int i = 0; i < pts.size(); i++)
-				pairedPoints.add(new Point[] { pts.get(i), referencePts.get(i) });
+			// List<Point[]> pairedPoints = new ArrayList<>();
+			// for (int i = 0; i < pts.size(); i++)
+			// pairedPoints.add(new Point[] { pts.get(i), referencePts.get(i) });
 
-			double[] transScaleParams = new LevenbergImpl<>((points, params) -> distance(points, params), pairedPoints, new double[] { 1, 1, 0, 0 }).getParams();
-			System.out.println("params " + Arrays.toString(transScaleParams));
-			Mat result = Mat.zeros(3, 3, CvType.CV_64FC1);
-			result.put(0, 0, transScaleParams[0]);
-			result.put(1, 1, transScaleParams[1]);
-			result.put(0, 2, transScaleParams[2] * transScaleParams[0]);
-			result.put(1, 2, transScaleParams[3] * transScaleParams[1]);
-			result.put(2, 2, 1);
-			// Mat result = Calib3d.findHomography(new MatOfPoint2f(pts.stream().toArray(Point[]::new)), new MatOfPoint2f(referencePts.stream().toArray(Point[]::new)), Calib3d.RANSAC, 1);
+			// double[] transScaleParams = new LevenbergImpl<>((points, params) -> distance(points, params), pairedPoints, new double[] { 1, 1, 0, 0 }).getParams();
+			// System.out.println("params " + Arrays.toString(transScaleParams));
+			// Mat result = Mat.zeros(3, 3, CvType.CV_64FC1);
+			// result.put(0, 0, transScaleParams[0]);
+			// result.put(1, 1, transScaleParams[1]);
+			// result.put(0, 2, transScaleParams[2] * transScaleParams[0]);
+			// result.put(1, 2, transScaleParams[3] * transScaleParams[1]);
+			// result.put(2, 2, 1);
+			Mat result = Calib3d.findHomography(new MatOfPoint2f(pts.stream().toArray(Point[]::new)), new MatOfPoint2f(referencePts.stream().toArray(Point[]::new)), Calib3d.RANSAC, 1);
 			if (result.size().empty()) {
 				System.out.println("Stabilization homography is empty");
 				return null;
 			}
-			double error = 0;
-			for (Point[] points : pairedPoints) {
-				error += Math.pow(distance(points, transScaleParams), 2);
-			}
-			error = Math.sqrt(error) / pairedPoints.size();
-			if (error > 5) {
-				System.out.println("error too big : " + error + " match size : " + pairedPoints.size());
-				return null;
-			}
-			System.out.println("error : " + error + " match size : " + pairedPoints.size());
+			// double error = 0;
+			// for (Point[] points : pairedPoints) {
+			// error += Math.pow(distance(points, transScaleParams), 2);
+			// }
+			// error = Math.sqrt(error) / pairedPoints.size();
+			// if (error > 5) {
+			// System.out.println("error too big : " + error + " match size : " + pairedPoints.size());
+			// return null;
+			// }
+			// System.out.println("error : " + error + " match size : " + pairedPoints.size());
 			if (!isValidHomography(result)) {
 				System.out.println("Not a valid homography");
 				return null;
@@ -154,9 +137,9 @@ public class ImgDescriptor {
 		}
 	}
 
-	private Labels getLabels() {
-		return labels;
-	}
+	// private Labels getLabels() {
+	// return labels;
+	// }
 
 	private double distance(Point[] points, double[] params) {
 		double sx = params[0];

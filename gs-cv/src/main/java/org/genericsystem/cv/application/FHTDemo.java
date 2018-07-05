@@ -42,8 +42,8 @@ public class FHTDemo extends AbstractApp {
 	public FHTDemo() {
 		addIntegerSliderProperty("hBlurSize", fhtManager.gethBlurSize(), 0, 200);
 		addIntegerSliderProperty("vBlurSize", fhtManager.getvBlurSize(), 0, 200);
-		addDoubleSliderProperty("hNeighbourPenality", fhtManager.gethNeighbourPenality(), -5000, 0);
-		addDoubleSliderProperty("vNeighbourPenality", fhtManager.getvNeighbourPenality(), -5000, 0);
+		// addDoubleSliderProperty("hNeighbourPenality", fhtManager.gethNeighbourPenality(), -5000, 0);
+		// addDoubleSliderProperty("vNeighbourPenality", fhtManager.getvNeighbourPenality(), -5000, 0);
 		addDoubleSliderProperty("hAnglePenality", fhtManager.gethAnglePenality(), -1, 0);
 		addDoubleSliderProperty("vAnglePenality", fhtManager.getvAnglePenality(), -1, 0);
 		addDoubleSliderProperty("vRecover", fhtManager.getvRecover(), 0, 1);
@@ -60,7 +60,7 @@ public class FHTDemo extends AbstractApp {
 		addDoubleSliderProperty("interpolatorMinDist", fhtManager.getInterpolatorMinDist(), 0, 10);
 		addIntegerSliderProperty("halfGridWidth", fhtManager.getHalfGridWidth(), 1, 32);
 		addIntegerSliderProperty("halfGridHeight", fhtManager.getHalfGridHeight(), 1, 32);
-		addIntegerSliderProperty("optimizationsCount", fhtManager.getOptimisationsCount(), 0, 32);
+		// addIntegerSliderProperty("optimizationsCount", fhtManager.getOptimisationsCount(), 0, 32);
 		addDoubleSliderProperty("focale", fhtManager.getFocale(), 0, 1500);
 	}
 
@@ -132,9 +132,9 @@ public class FHTDemo extends AbstractApp {
 		List<List<TrajectStep>> hHoughTrajs = fhtManager.gethHoughTrajs();
 		ref = trace("Compute trajects", ref);
 
-		vHoughTrajs = fhtManager.getOptimizedvHoughTrajs();// StripTractor.optimize(vHoughs, 81, -0.05, -100, vHoughTrajs, fhtManager.getvStep().get());
-		hHoughTrajs = fhtManager.getOptimizedhHoughTrajs();// StripTractor.optimize(hHoughs, 81, -0.05, -100, hHoughTrajs, fhtManager.gethStep().get());
-		ref = trace("Optimize trajects", ref);
+		// vHoughTrajs = fhtManager.getOptimizedvHoughTrajs();// StripTractor.optimize(vHoughs, 81, -0.05, -100, vHoughTrajs, fhtManager.getvStep().get());
+		// hHoughTrajs = fhtManager.getOptimizedhHoughTrajs();// StripTractor.optimize(hHoughs, 81, -0.05, -100, hHoughTrajs, fhtManager.gethStep().get());
+		// ref = trace("Optimize trajects", ref);
 
 		List<List<OrientedPoint>[]> fhtHorizontals = fhtManager.getFhtHorizontals();// ProjectionLines.toHorizontalsOrientedPoints(vHoughTrajs, fhtManager.getvStep().get(), 0.5, 0.05);
 		List<List<OrientedPoint>[]> fhtVerticals = fhtManager.getFhtVerticals();// ProjectionLines.toVerticalsOrientedPoints(hHoughTrajs, fhtManager.gethStep().get(), 0.5, 0.05);

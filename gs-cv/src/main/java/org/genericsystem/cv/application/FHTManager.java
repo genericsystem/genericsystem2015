@@ -22,8 +22,8 @@ public class FHTManager {
 
 	private IntegerProperty vBlurSize = new SimpleIntegerProperty(81);
 	private IntegerProperty hBlurSize = new SimpleIntegerProperty(81);
-	private DoubleProperty vNeighbourPenality = new SimpleDoubleProperty(-100);
-	private DoubleProperty hNeighbourPenality = new SimpleDoubleProperty(-100);
+	// private DoubleProperty vNeighbourPenality = new SimpleDoubleProperty(-100);
+	// private DoubleProperty hNeighbourPenality = new SimpleDoubleProperty(-100);
 	private DoubleProperty vAnglePenality = new SimpleDoubleProperty(-0.08);
 	private DoubleProperty hAnglePenality = new SimpleDoubleProperty(-0.08);
 	private DoubleProperty vRecover = new SimpleDoubleProperty(0.75);
@@ -45,7 +45,6 @@ public class FHTManager {
 	private DoubleProperty interpolatorMinDist = new SimpleDoubleProperty(0.0001);
 	private IntegerProperty halfGridWidth = new SimpleIntegerProperty(8);
 	private IntegerProperty halfGridHeight = new SimpleIntegerProperty(8);
-	private IntegerProperty optimizationsCount = new SimpleIntegerProperty(0);
 	private DoubleProperty focale;
 
 	private final Size binarySize;
@@ -150,22 +149,22 @@ public class FHTManager {
 		return hHoughTrajs != null ? hHoughTrajs : (hHoughTrajs = gethHoughs().stream().map(projectionMap -> FHT.bestTrajectFHT(projectionMap, hBlurSize.getValue(), hAnglePenality.getValue())).collect(Collectors.toList()));
 	}
 
-	public List<List<TrajectStep>> getOptimizedvHoughTrajs() {
-		return optimizedVHoughTrajs != null ? optimizedVHoughTrajs
-				: (optimizedVHoughTrajs = StripTractor.optimize(getvHoughs(), vBlurSize.getValue(), vAnglePenality.getValue(), vNeighbourPenality.get(), getvHoughTrajs(), vStep.get(), optimizationsCount.get()));
-	}
-
-	public List<List<TrajectStep>> getOptimizedhHoughTrajs() {
-		return optimizedHHoughTrajs != null ? optimizedHHoughTrajs
-				: (optimizedHHoughTrajs = StripTractor.optimize(gethHoughs(), hBlurSize.getValue(), hAnglePenality.getValue(), hNeighbourPenality.get(), gethHoughTrajs(), hStep.get(), optimizationsCount.get()));
-	}
+	// public List<List<TrajectStep>> getOptimizedvHoughTrajs() {
+	// return optimizedVHoughTrajs != null ? optimizedVHoughTrajs
+	// : (optimizedVHoughTrajs = StripTractor.optimize(getvHoughs(), vBlurSize.getValue(), vAnglePenality.getValue(), vNeighbourPenality.get(), getvHoughTrajs(), vStep.get(), optimizationsCount.get()));
+	// }
+	//
+	// public List<List<TrajectStep>> getOptimizedhHoughTrajs() {
+	// return optimizedHHoughTrajs != null ? optimizedHHoughTrajs
+	// : (optimizedHHoughTrajs = StripTractor.optimize(gethHoughs(), hBlurSize.getValue(), hAnglePenality.getValue(), hNeighbourPenality.get(), gethHoughTrajs(), hStep.get(), optimizationsCount.get()));
+	// }
 
 	public List<List<OrientedPoint>[]> getFhtHorizontals() {
-		return fhtHorizontals != null ? fhtHorizontals : (fhtHorizontals = ProjectionLines.toHorizontalsOrientedPoints(getOptimizedvHoughTrajs(), vStep.get(), vLocalThreshold.get(), vGlobalThreshold.get()));
+		return fhtHorizontals != null ? fhtHorizontals : (fhtHorizontals = ProjectionLines.toHorizontalsOrientedPoints(getvHoughTrajs(), vStep.get(), vLocalThreshold.get(), vGlobalThreshold.get()));
 	}
 
 	public List<List<OrientedPoint>[]> getFhtVerticals() {
-		return fhtVerticals != null ? fhtVerticals : (fhtVerticals = ProjectionLines.toVerticalsOrientedPoints(getOptimizedhHoughTrajs(), hStep.get(), hLocalThreshold.get(), hGlobalThreshold.get()));
+		return fhtVerticals != null ? fhtVerticals : (fhtVerticals = ProjectionLines.toVerticalsOrientedPoints(gethHoughTrajs(), hStep.get(), hLocalThreshold.get(), hGlobalThreshold.get()));
 	}
 
 	public List<List<Segment>>[] getHorizontalSegments() {
@@ -217,13 +216,13 @@ public class FHTManager {
 		return hBlurSize;
 	}
 
-	public DoubleProperty gethNeighbourPenality() {
-		return hNeighbourPenality;
-	}
+	// public DoubleProperty gethNeighbourPenality() {
+	// return hNeighbourPenality;
+	// }
 
-	public DoubleProperty getvNeighbourPenality() {
-		return vNeighbourPenality;
-	}
+	// public DoubleProperty getvNeighbourPenality() {
+	// return vNeighbourPenality;
+	// }
 
 	public DoubleProperty getvAnglePenality() {
 		return vAnglePenality;
@@ -303,10 +302,6 @@ public class FHTManager {
 
 	public DoubleProperty getInterpolatorPow() {
 		return interpolatorPow;
-	}
-
-	public IntegerProperty getOptimisationsCount() {
-		return optimizationsCount;
 	}
 
 	public DoubleProperty getFocale() {

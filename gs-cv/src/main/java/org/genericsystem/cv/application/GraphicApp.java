@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
 
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
@@ -66,8 +67,6 @@ public class GraphicApp extends AbstractApp {
 
 		addIntegerSliderProperty("hBlurSize", fhtManager.gethBlurSize(), 0, 200);
 		addIntegerSliderProperty("vBlurSize", fhtManager.getvBlurSize(), 0, 200);
-		addDoubleSliderProperty("hNeighbourPenality", fhtManager.gethNeighbourPenality(), -5000, 0);
-		addDoubleSliderProperty("vNeighbourPenality", fhtManager.getvNeighbourPenality(), -5000, 0);
 		addDoubleSliderProperty("hAnglePenality", fhtManager.gethAnglePenality(), -1, 0);
 		addDoubleSliderProperty("vAnglePenality", fhtManager.getvAnglePenality(), -1, 0);
 
@@ -136,13 +135,19 @@ public class GraphicApp extends AbstractApp {
 
 	private static class ConnectedRects implements Comparable<ConnectedRects> {
 
-		// private final double penalityCoeff = 100;
 		private final SuperRect rect1;
 		private final SuperRect rect2;
+		private final double distance;
+		private final double coeff = 9;
 
 		public ConnectedRects(SuperRect rect1, SuperRect rect2) {
 			this.rect1 = rect1;
 			this.rect2 = rect2;
+			double dx = rect2.rect.tl().x - rect1.rect.br().x;
+			dx = dx >= 0 ? dx : 0;
+			double dy = (rect1.rect.tl().y + rect1.rect.br().y) / 2 - (rect2.rect.tl().y + rect2.rect.br().y) / 2;
+			distance = Math.sqrt(dx * dx + coeff * dy * dy);
+
 		}
 
 		public SuperRect getRect1() {
@@ -159,23 +164,8 @@ public class GraphicApp extends AbstractApp {
 		}
 
 		private double distance() {
-			double dx = rect2.rect.tl().x - rect1.rect.br().x;
-			dx = dx >= 0 ? dx : 0;// -dx / 1000;
-			return Math.sqrt(Math.pow(dx, 2) + Math.pow((rect1.rect.tl().y + rect1.rect.br().y) / 2 - (rect2.rect.tl().y + rect2.rect.br().y) / 2, 2));
+			return distance;
 		}
-
-		// private Point getRect1MidRightPt() {
-		// return new Point(rect1.rect.br().x, (rect1.rect.tl().y + rect1.rect.br().y) / 2);
-		// }
-		//
-		// private Point getRect2MidLeftPt() {
-		// return new Point(rect2.rect.tl().x, (rect2.rect.br().y + rect2.rect.tl().y) / 2);
-		// }
-		//
-		// private double euclid(Point p1, Point p2) {
-		// return Math.abs((p2.x - p1.x));// * (p2.x - p1.x) + penalityCoeff * (p2.y - p1.y) * (p2.y - p1.y));
-		// }
-
 	}
 
 	private Image[] doWork() {
@@ -229,36 +219,32 @@ public class GraphicApp extends AbstractApp {
 
 		// links.removeIf(link -> link.distance() > 20);
 		List<RectSpan> spans = assemble(rects);
+		List<Rect> spanRects = spans.stream().map(span -> span.getRect()).collect(Collectors.toList());
 		Mat assembleMask = Mat.zeros(flat.size(), CvType.CV_8UC3);
 		spans.forEach(span -> {
 			Scalar color = new Scalar(Math.random() * 255, Math.random() * 255, Math.random() * 255);
 			span.getRects().forEach(superRect -> Imgproc.rectangle(assembleMask, superRect.rect, color, -1));
+			Imgproc.rectangle(assembleMask, span.getRect(), color, 1);
 		});
 		images[2] = new Img(assembleMask, false).toJfxImage();
 		ref = trace("Assemblage", ref);
 
-		Mat mask = Mat.zeros(flat.size(), CvType.CV_8UC1);
-		rects.forEach(rect -> Imgproc.rectangle(mask, rect, new Scalar(255, 0, 0), -1));
-		// images[2] = new Img(mask, false).toJfxImage();
-		ref = trace("Mask", ref);
-		// RobustTextDetectorManager rbm = new RobustTextDetectorManager(flat.bgr2Gray().getSrc(), 1);
-		// Img mserMask = new Img(rbm.getMserMask(), false);
-		// images[2] = mserMask.toJfxImage();
-		//
-		Mat closed = new Mat();
-		Imgproc.morphologyEx(mask, closed, Imgproc.MORPH_CLOSE, Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(5, 1)));
-		List<Rect> detectedClosedRects = detectRects(closed, 8, 20000);
-		Mat closedMask = Mat.zeros(flat.size(), CvType.CV_8UC1);
-		detectedClosedRects.forEach(rect -> Imgproc.rectangle(closedMask, rect, new Scalar(255), -1));
+		// Mat mask = Mat.zeros(flat.size(), CvType.CV_8UC1);
+		// rects.forEach(rect -> Imgproc.rectangle(mask, rect, new Scalar(255, 0, 0), -1));
+		// // images[2] = new Img(mask, false).toJfxImage();
+		// ref = trace("Mask", ref);
+
+		Mat spanMask = Mat.zeros(flat.size(), CvType.CV_8UC1);
+		spanRects.forEach(rect -> Imgproc.rectangle(spanMask, rect, new Scalar(255), -1));
 
 		Mat flatDisplay = Mat.zeros(flat.size(), flat.type());
-		flat.getSrc().copyTo(flatDisplay, closedMask);
-		detectedClosedRects.forEach(rect -> Imgproc.rectangle(flatDisplay, rect.tl(), rect.br(), new Scalar(0, 255, 0), 1));
+		flat.getSrc().copyTo(flatDisplay, spanMask);
+		spanRects.forEach(rect -> Imgproc.rectangle(flatDisplay, rect.tl(), rect.br(), new Scalar(0, 255, 0), 1));
 		images[3] = new Img(flatDisplay, false).toJfxImage();
 		ref = trace("Close mask", ref);
 
 		Mat flatDisplay2 = Mat.zeros(flat.size(), flat.type());
-		Labels labels = new Labels(detectedClosedRects);
+		Labels labels = new Labels(spanRects);
 		labels.ocr(flat.getSrc(), 0, 1, 2, 2);
 		labels.putOcr(flatDisplay2);
 		Imgproc.putText(flatDisplay2, "Quality : " + (int) QualityManager.quality(flat.bgr2Gray().getSrc()), new Point(50, 50), Core.FONT_HERSHEY_PLAIN, 1, new Scalar(0, 0, 255), 1);
@@ -351,12 +337,13 @@ public class GraphicApp extends AbstractApp {
 		//
 		// images[6] = superReferenceTemplate2.getDisplay().toJfxImage();
 
-		ImgDescriptor newImgDescriptor = new ImgDescriptor(flat, labels);
+		ImgDescriptor newImgDescriptor = new ImgDescriptor(flat);
 		if (newImgDescriptor.getDescriptors().empty()) {
 			System.out.println("Empty descriptors");
 			return null;
 		}
-		referenceManager.submit(newImgDescriptor, detectedClosedRects);
+		referenceManager.submit(newImgDescriptor, spanRects);
+
 		List<Rect> referenceRects = referenceManager.getReferenceRects();
 		Mat referenceTemplate = Mat.zeros(flat.size(), CvType.CV_8UC1);// new SuperTemplate(referenceManager.getReference().getSuperFrame(), CvType.CV_8UC1, SuperFrameImg::getFrame);
 		referenceRects.forEach(rect -> Imgproc.rectangle(referenceTemplate, rect, new Scalar(255), -1));
@@ -378,6 +365,7 @@ public class GraphicApp extends AbstractApp {
 
 	public static class RectSpan {
 		private List<SuperRect> rects = new ArrayList<>();
+		private Rect rect;
 
 		public void add(SuperRect rect) {
 			rects.add(rect);
@@ -385,6 +373,32 @@ public class GraphicApp extends AbstractApp {
 
 		public List<SuperRect> getRects() {
 			return rects;
+		}
+
+		public Rect getRect() {
+			return rect != null ? rect : (rect = buildRect());
+		}
+
+		private Rect buildRect() {
+			double[] tops = getRects().stream().mapToDouble(rect -> rect.rect.tl().y).toArray();
+			double topYAverage = DoubleStream.of(tops).average().getAsDouble();
+			double topYVariance = 0;
+			for (double top : tops)
+				topYVariance += (top - topYAverage) * (top - topYAverage);
+			topYVariance /= getRects().size();
+
+			double[] bottoms = getRects().stream().mapToDouble(rect -> rect.rect.br().y).toArray();
+			double bottomYAverage = DoubleStream.of(bottoms).average().getAsDouble();
+			double bottomYVariance = 0;
+			for (double bottom : bottoms)
+				bottomYVariance += (bottom - bottomYAverage) * (bottom - bottomYAverage);
+			bottomYVariance /= getRects().size();
+
+			double yMin = topYAverage - Math.sqrt(topYVariance);// DoubleStream.of(tops).min().getAsDouble();
+			double yMax = bottomYAverage + Math.sqrt(bottomYVariance);// DoubleStream.of(bottoms).max().getAsDouble();
+			double xMin = getRects().get(0).rect.tl().x;
+			double xMax = getRects().get(getRects().size() - 1).rect.br().x;
+			return new Rect(new Point(xMin, yMin), new Point(xMax, yMax));
 		}
 
 	}
@@ -412,7 +426,6 @@ public class GraphicApp extends AbstractApp {
 		Collections.sort(superRects);
 		System.out.println("superRects size " + superRects.size());
 		List<ConnectedRects> connectedRectsList = new ArrayList<>();
-		double verticalShift = 0;
 		for (int i = 0; i < superRects.size(); i++)
 			for (int j = 0; j < i; j++)
 				if (i != j) {
@@ -424,12 +437,10 @@ public class GraphicApp extends AbstractApp {
 						rect1 = rect2;
 						rect2 = tmp;
 					}
-					// if ((rect1.rect.br().x + rect1.rect.tl().x) < (rect2.rect.br().x + rect2.rect.tl().x))
-					// if (!((rect1.rect.tl().y - rect2.rect.br().y) < verticalShift || (rect1.rect.tl().y - rect2.rect.br().y) > verticalShift))
 					if (yOverlaps(rect1.rect.tl().y, rect1.rect.br().y, rect2.rect.tl().y, rect2.rect.br().y))
 						connectedRectsList.add(new ConnectedRects(rect1, rect2));
 				}
-		double maxConnectedDistance = 30;
+		double maxConnectedDistance = 25;
 		connectedRectsList = connectedRectsList.stream().filter(connectedRects -> connectedRects.distance() < maxConnectedDistance).collect(Collectors.toList());
 		System.out.println("connectedRectsList size " + connectedRectsList.size());
 		Collections.sort(connectedRectsList);

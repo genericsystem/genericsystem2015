@@ -148,44 +148,44 @@ public class FHT {
 		return Arrays.asList(buildResult2(derivatives, score, prevDerivatives, stripWidth, houghTransform, step));
 	}
 
-	public static List<TrajectStep> bestInfluencedTrajectFHT(Mat houghTransform, int blurSize, double anglePenality, double neigbourPenality, StripTractor[] prevStripInfluences, StripTractor[] nextStripInfluences) {
-		int stripWidth = (houghTransform.cols() + 1) / 2;
-		Mat adaptivHough = adaptivHough(houghTransform, blurSize);
-		List<Double> deltaAngle = IntStream.range(0, adaptivHough.cols()).mapToObj(col -> Math.abs(Math.atan((double) (col - stripWidth + 1) / (stripWidth - 1)) - Math.atan((double) (col - stripWidth + 2) / (stripWidth - 1))) * 180 / Math.PI)
-				.collect(Collectors.toList());
-		double[][] score = new double[adaptivHough.rows()][adaptivHough.cols()];
-		int[][] previousCols = new int[adaptivHough.rows()][adaptivHough.cols()];
-		for (int col = 0; col < adaptivHough.cols(); col++)
-			score[0][col] = adaptivHough.get(0, col)[0];
-		for (int row = 1; row < adaptivHough.rows(); row++) {
-			double[] adaptivHoughRow = new double[adaptivHough.cols()];
-			adaptivHough.row(row).get(0, 0, adaptivHoughRow);
-
-			for (int col = 0; col < adaptivHoughRow.length; col++) {
-				double adaptiveMagnitude = adaptivHoughRow[col];
-
-				double previousColScore = col == 0 ? Double.NEGATIVE_INFINITY : score[row - 1][col - 1] + anglePenality * deltaAngle.get(col - 1);
-				double sameColScore = score[row - 1][col];
-				double nextColScore = col == adaptivHoughRow.length - 1 ? Double.NEGATIVE_INFINITY : score[row - 1][col + 1] + anglePenality * deltaAngle.get(col);
-
-				double bestScore = -1;
-				if (sameColScore >= previousColScore && sameColScore >= nextColScore) {
-					bestScore = sameColScore;
-					previousCols[row][col] = col;
-				} else if (previousColScore >= sameColScore && previousColScore >= nextColScore) {
-					bestScore = previousColScore;
-					previousCols[row][col] = col - 1;
-				} else {
-					bestScore = nextColScore;
-					previousCols[row][col] = col + 1;
-				}
-				double derivative = (double) (col - stripWidth + 1) / (stripWidth - 1);
-				score[row][col] = adaptiveMagnitude + bestScore + neigbourPenality * prevStripInfluences[row].getInfluence(derivative) + neigbourPenality * (nextStripInfluences[row].getInfluence(derivative));
-			}
-		}
-		adaptivHough.release();
-		return Arrays.asList(buildResult(score, previousCols, stripWidth, houghTransform));
-	}
+	// public static List<TrajectStep> bestInfluencedTrajectFHT(Mat houghTransform, int blurSize, double anglePenality, double neigbourPenality, StripTractor[] prevStripInfluences, StripTractor[] nextStripInfluences) {
+	// int stripWidth = (houghTransform.cols() + 1) / 2;
+	// Mat adaptivHough = adaptivHough(houghTransform, blurSize);
+	// List<Double> deltaAngle = IntStream.range(0, adaptivHough.cols()).mapToObj(col -> Math.abs(Math.atan((double) (col - stripWidth + 1) / (stripWidth - 1)) - Math.atan((double) (col - stripWidth + 2) / (stripWidth - 1))) * 180 / Math.PI)
+	// .collect(Collectors.toList());
+	// double[][] score = new double[adaptivHough.rows()][adaptivHough.cols()];
+	// int[][] previousCols = new int[adaptivHough.rows()][adaptivHough.cols()];
+	// for (int col = 0; col < adaptivHough.cols(); col++)
+	// score[0][col] = adaptivHough.get(0, col)[0];
+	// for (int row = 1; row < adaptivHough.rows(); row++) {
+	// double[] adaptivHoughRow = new double[adaptivHough.cols()];
+	// adaptivHough.row(row).get(0, 0, adaptivHoughRow);
+	//
+	// for (int col = 0; col < adaptivHoughRow.length; col++) {
+	// double adaptiveMagnitude = adaptivHoughRow[col];
+	//
+	// double previousColScore = col == 0 ? Double.NEGATIVE_INFINITY : score[row - 1][col - 1] + anglePenality * deltaAngle.get(col - 1);
+	// double sameColScore = score[row - 1][col];
+	// double nextColScore = col == adaptivHoughRow.length - 1 ? Double.NEGATIVE_INFINITY : score[row - 1][col + 1] + anglePenality * deltaAngle.get(col);
+	//
+	// double bestScore = -1;
+	// if (sameColScore >= previousColScore && sameColScore >= nextColScore) {
+	// bestScore = sameColScore;
+	// previousCols[row][col] = col;
+	// } else if (previousColScore >= sameColScore && previousColScore >= nextColScore) {
+	// bestScore = previousColScore;
+	// previousCols[row][col] = col - 1;
+	// } else {
+	// bestScore = nextColScore;
+	// previousCols[row][col] = col + 1;
+	// }
+	// double derivative = (double) (col - stripWidth + 1) / (stripWidth - 1);
+	// score[row][col] = adaptiveMagnitude + bestScore + neigbourPenality * prevStripInfluences[row].getInfluence(derivative) + neigbourPenality * (nextStripInfluences[row].getInfluence(derivative));
+	// }
+	// }
+	// adaptivHough.release();
+	// return Arrays.asList(buildResult(score, previousCols, stripWidth, houghTransform));
+	// }
 
 	private static TrajectStep[] buildResult2(List<Double> derivativeFromIndex, double[][] score, int[][] thetaPrev, int stripWidth, Mat houghTransform, double step) {
 		int prevTheta = getBestScoreCol(score);
