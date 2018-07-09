@@ -95,7 +95,7 @@ public class ReferenceManager {
 		Core.gemm(bestReconciliation.getHomography(), toReferenceGraphy.get(bestImgDescriptor), 1, new Mat(), 0, homographyToReference);
 		toReferenceGraphy.put(newImgDescriptor, homographyToReference);
 		// consolidate(shift(detectedrects, homographyToReference), frameSize);
-		// updateReference();
+		updateReference();
 		cleanReferenceNeighbours();
 		return true;
 	}
@@ -109,18 +109,18 @@ public class ReferenceManager {
 
 	private void cleanReferenceNeighbours() {
 		if (toReferenceGraphy.size() > 30) {
-			double maxDistance = 0;
-			ImgDescriptor worstDescriptor = null;
+			double minDistance = Double.MAX_VALUE;
+			ImgDescriptor closestDescriptor = null;
 			for (Entry<ImgDescriptor, Mat> entry : toReferenceGraphy.entrySet()) {
-				if (!entry.getKey().equals(reference) && !entry.getKey().equals(toReferenceGraphy.firstKey())) {
+				if (!entry.getKey().equals(reference) && !entry.getKey().equals(toReferenceGraphy.lastKey())) {
 					double distance = distance(entry.getValue());
-					if (distance > maxDistance) {
-						maxDistance = distance;
-						worstDescriptor = entry.getKey();
+					if (distance < minDistance) {
+						minDistance = distance;
+						closestDescriptor = entry.getKey();
 					}
 				}
 			}
-			toReferenceGraphy.remove(worstDescriptor);
+			toReferenceGraphy.remove(closestDescriptor);
 		}
 	}
 
@@ -378,5 +378,9 @@ public class ReferenceManager {
 		Mat result = new Mat();
 		Imgproc.warpPerspective(imgDescriptor.getFrame().getSrc(), result, homography, imgDescriptor.getFrame().size(), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(0));
 		return result;
+	}
+
+	public TreeMap<ImgDescriptor, Mat> getToReferenceGraphy() {
+		return toReferenceGraphy;
 	}
 }

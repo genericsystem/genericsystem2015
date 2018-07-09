@@ -21,6 +21,7 @@ import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
+import org.opencv.core.Range;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
@@ -124,8 +125,28 @@ public class StabilizerDemo extends AbstractApp {
 			return null;
 		}
 
-		images[1] = new Img(referenceManager.dewarp(newImgDescriptor, homography), false).toJfxImage();
+		Mat stabilized = referenceManager.dewarp(newImgDescriptor, homography);
+		// Mat binarized = new Img(stabilized, false).adaptativeGaussianInvThreshold(7, 5).getSrc();
+		// fhtManager.init(stabilized, binarized);
+		// Mat copy = fhtManager.getMeshManager().drawOnCopy(new Scalar(255, 0, 0), new Scalar(0, 255, 0));
+		images[1] = new Img(stabilized, false).toJfxImage();
 
+		Mat patch = Mat.zeros(frame.size(), frame.type());
+		int deltaX = (int) (frame.size().width / 8);
+		int deltaY = (int) (frame.size().height / 4);
+		Iterator<ImgDescriptor> it = referenceManager.getToReferenceGraphy().keySet().iterator();
+		System.out.println("start");
+		for (int row = 0; (row + deltaY) <= frame.size().height; row += deltaY)
+			for (int col = 0; (col + deltaX) <= frame.size().width; col += deltaX) {
+				Mat cell = new Mat(patch, new Range(row, row + deltaY), new Range(col, col + deltaX));
+				Mat resized = new Mat();
+				if (it.hasNext()) {
+					Imgproc.resize(it.next().getFrame().getSrc(), resized, new Size(deltaX, deltaY));
+					resized.copyTo(cell);
+				}
+
+			}
+		images[2] = new Img(patch, false).toJfxImage();
 		return images;
 	}
 

@@ -73,13 +73,6 @@ public class Mesh3D extends AbstractMesh<Point3> {
 		return new Scalar(c);
 	}
 
-	public void normalize(double[] sizes, double originalWidth, int midSize) {
-		double width = 2 * Math.min(DoubleStream.of(sizes).limit(midSize).sum(), DoubleStream.of(sizes).skip(midSize).sum());
-		double coefWidth = originalWidth / width;
-		for (int i = 0; i < sizes.length; i++)
-			sizes[i] *= coefWidth;
-	}
-
 	public double[] getWidths() {
 		double[] widths = new double[halfWidth * 2];
 		for (int j = 0; j < widths.length; j++) {
@@ -115,9 +108,18 @@ public class Mesh3D extends AbstractMesh<Point3> {
 
 	public Mat dewarp(Mat src, Size originalSize) {
 		double[] heights = getHeights();
-		normalize(heights, originalSize.height, halfHeight);
 		double[] widths = getWidths();
-		normalize(widths, originalSize.width, halfWidth);
+
+		double height = 2 * Math.min(DoubleStream.of(heights).limit(halfHeight).sum(), DoubleStream.of(heights).skip(halfHeight).sum());
+		double width = 2 * Math.min(DoubleStream.of(widths).limit(halfWidth).sum(), DoubleStream.of(widths).skip(halfWidth).sum());
+
+		double coef = Math.max(originalSize.height / height, originalSize.width / width);
+		for (int i = 0; i < heights.length; i++)
+			heights[i] *= coef;
+		for (int i = 0; i < widths.length; i++)
+			widths[i] *= coef;
+
+		// normalize(widths, originalSize.width, halfWidth);
 
 		System.out.println(Arrays.toString(heights));
 		System.out.println(Arrays.toString(widths));

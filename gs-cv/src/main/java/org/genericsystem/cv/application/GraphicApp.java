@@ -324,6 +324,7 @@ public class GraphicApp extends AbstractApp {
 			return null;
 		}
 		referenceManager.submit(newImgDescriptor);
+		// Calib3d.solvePnPRansac(objectPoints, imagePoints, cameraMatrix, distCoeffs, rvec, tvec, useExtrinsicGuess, iterationsCount, reprojectionError, confidence, inliers, flags)
 
 		List<Rect> referenceRects = referenceManager.getReferenceRects();
 		Mat referenceTemplate = Mat.zeros(flat.size(), CvType.CV_8UC1);// new SuperTemplate(referenceManager.getReference().getSuperFrame(), CvType.CV_8UC1, SuperFrameImg::getFrame);
@@ -366,7 +367,7 @@ public class GraphicApp extends AbstractApp {
 			double topYVariance = 0;
 			for (double top : tops)
 				topYVariance += (top - topYAverage) * (top - topYAverage);
-			topYVariance /= getRects().size();
+			topYVariance /= getRects().size() - 1;
 
 			double[] bottoms = getRects().stream().mapToDouble(rect -> rect.rect.br().y).toArray();
 			double bottomYAverage = DoubleStream.of(bottoms).average().getAsDouble();
