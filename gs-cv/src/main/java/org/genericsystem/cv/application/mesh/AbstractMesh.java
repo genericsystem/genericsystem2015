@@ -79,4 +79,12 @@ public abstract class AbstractMesh<T> {
 		// return internal.get(new Key(i + halfHeight, j + halfWidth));
 	}
 
+	public int getHalfWidth() {
+		return halfWidth;
+	}
+
+	public int getHalfHeight() {
+		return halfHeight;
+	}
+
 }

@@ -43,13 +43,13 @@ public class MeshManager {
 
 		xBorder = 2 * (int) deltaX;
 		yBorder = 2 * (int) deltaY;
-		this.enlargedSize = new Size(frameSize.width + 2 * xBorder, frameSize.height + 2 * yBorder);
+		this.enlargedSize = new Size(frameSize.width + 2 * getxBorder(), frameSize.height + 2 * yBorder);
 		this.halfHeight = halfHeight;
 		this.halfWidth = halfWidth;
 	}
 
 	public Points getPoints() {
-		return points != null ? points : (points = new CandidatePoints(new Point(enlargedSize.width / 2, enlargedSize.height / 2), halfWidth, halfHeight, deltaX, deltaY, xBorder, yBorder, interpolator));
+		return points != null ? points : (points = new CandidatePoints(new Point(enlargedSize.width / 2, enlargedSize.height / 2), halfWidth, halfHeight, deltaX, deltaY, getxBorder(), yBorder, interpolator));
 	}
 
 	private Mesh getMesh() {
@@ -64,55 +64,28 @@ public class MeshManager {
 		return reverseMesh != null ? reverseMesh : (reverseMesh = getMesh3D().reverseMesh());
 	}
 
-	// private void reverseCoeffs(double[] coeffs) {
-	// for (int i = 0; i < coeffs.length; i++)
-	// coeffs[i] = 1 / coeffs[i];
-	// }
-
-	// public void recomputeGrid() {
-	// double[] widths = mesh3D.getWidths();
-	// reverseCoeffs(widths);
-	// mesh3D.normalize(widths, getOriginalSize().width);
-	//
-	// double[] heights = mesh3D.getHeights();
-	// reverseCoeffs(heights);
-	// mesh3D.normalize(heights, getOriginalSize().height);
-	// points = new Points(new Point(image.width() / 2, image.height() / 2), halfWidth, halfHeight, deltaX, deltaY, xBorder, yBorder, interpolator) {
-	// @Override
-	// double getHeightCoeff(double deltaY, int j) {
-	// return heights[j];
-	// }
-	//
-	// @Override
-	// double getWidthCoeff(double deltaX, int j) {
-	// return widths[j];
-	// }
-	// };
-	// mesh = null;
-	// mesh3D = null;
-	// }
-
-	// --------------------------------------------------
-
 	public Mat draw(Mat image, Scalar meshColor, Scalar ptsColor) {
 		Mat enlarged = new Mat();
-		Core.copyMakeBorder(image, enlarged, yBorder, yBorder, xBorder, xBorder, Core.BORDER_REPLICATE);
+		Core.copyMakeBorder(image, enlarged, yBorder, yBorder, getxBorder(), getxBorder(), Core.BORDER_REPLICATE);
 		getMesh().draw(enlarged, meshColor, ptsColor);
 		getReverseMesh().draw(enlarged, new Scalar(0, 0, 255), new Scalar(255, 0, 0));
 		return enlarged;
 	}
 
 	public Mat drawReverse(Mat image, Scalar meshColor, Scalar ptsColor) {
-		Mat enlarged = new Mat();
-		Core.copyMakeBorder(image, enlarged, yBorder, yBorder, xBorder, xBorder, Core.BORDER_REPLICATE);
+		Mat enlarged = buildEnlarged(image);
 		getReverseMesh().draw(enlarged, meshColor, ptsColor);
 		return enlarged;
 	}
 
-	public Mat dewarpReverse(Mat image) {
+	public Mat buildEnlarged(Mat image) {
 		Mat enlarged = new Mat();
-		Core.copyMakeBorder(image, enlarged, yBorder, yBorder, xBorder, xBorder, Core.BORDER_REPLICATE);
-		return getReverseMesh().dewarp(enlarged, image.size());
+		Core.copyMakeBorder(image, enlarged, yBorder, yBorder, getxBorder(), getxBorder(), Core.BORDER_REPLICATE);
+		return enlarged;
+	}
+
+	public Mat dewarpReverse(Mat image) {
+		return getReverseMesh().dewarp(buildEnlarged(image), image.size());
 	}
 
 	private Size getOriginalSize() {
@@ -125,14 +98,22 @@ public class MeshManager {
 
 	public Mat dewarp(Mat image) {
 		Mat enlarged = new Mat();
-		Core.copyMakeBorder(image, enlarged, yBorder, yBorder, xBorder, xBorder, Core.BORDER_REPLICATE);
+		Core.copyMakeBorder(image, enlarged, yBorder, yBorder, getxBorder(), getxBorder(), Core.BORDER_REPLICATE);
 		return getMesh().dewarp(enlarged, getOriginalSize());
 	}
 
 	public Mat dewarp3D(Mat image) {
 		Mat enlarged = new Mat();
-		Core.copyMakeBorder(image, enlarged, yBorder, yBorder, xBorder, xBorder, Core.BORDER_REPLICATE);
+		Core.copyMakeBorder(image, enlarged, yBorder, yBorder, getxBorder(), getxBorder(), Core.BORDER_REPLICATE);
 		return getMesh3D().dewarp(enlarged, getOriginalSize());
+	}
+
+	public int getxBorder() {
+		return xBorder;
+	}
+
+	public int getyBorder() {
+		return yBorder;
 	}
 
 }

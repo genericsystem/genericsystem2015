@@ -15,11 +15,13 @@ import org.genericsystem.cv.application.Config;
 import org.genericsystem.cv.application.GSCapture;
 import org.genericsystem.cv.application.GSVideoCapture;
 import org.genericsystem.cv.application.fht.FHTManager;
+import org.genericsystem.cv.application.mesh.Points;
 import org.genericsystem.cv.utils.NativeLibraryLoader;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
+import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
@@ -126,13 +128,39 @@ public class StabilizerDemo extends AbstractApp {
 
 		Mat stabilized = referenceManager.dewarp(newImgDescriptor, homography);
 		Mat binarized = new Img(stabilized, false).adaptativeGaussianInvThreshold(7, 5).getSrc();
-		if (!fhtManager.isInitialized() || frameCount % 30 == 0)
-			fhtManager.init(binarized);
+		// if (!fhtManager.isInitialized() || frameCount % 30 == 0)
+		fhtManager.init(binarized);
 		images[1] = new Img(fhtManager.getMeshManager().drawReverse(stabilized, new Scalar(255, 0, 0), new Scalar(0, 255, 0)), false).toJfxImage();
 
 		// Mesh reverseMesh = fhtManager.getMeshManager().getReverseMesh();
 		// Mat result = reverseMesh.dewarp(stabilized, stabilized.size());
 		images[2] = new Img(fhtManager.getMeshManager().dewarpReverse(stabilized), false).toJfxImage();
+
+		int nbrCell = 6;
+		Points pts = fhtManager.getMeshManager().getReverseMesh().getPoints();
+		Point[] basePts = new Point[] { pts.getPoint(-nbrCell, -nbrCell), pts.getPoint(-nbrCell, nbrCell), pts.getPoint(nbrCell, nbrCell), pts.getPoint(nbrCell, -nbrCell) };
+
+		double width = stabilized.size().width / (2 * fhtManager.getHalfGridWidth().get());
+		double height = stabilized.size().height / (2 * fhtManager.getHalfGridHeight().get());
+		Point[] targetPts = new Point[] { new Point(stabilized.size().width / 2 - nbrCell * width, stabilized.size().height / 2 - nbrCell * height), new Point(stabilized.size().width / 2 + nbrCell * width, stabilized.size().height / 2 - nbrCell * height),
+				new Point(stabilized.size().width / 2 + nbrCell * width, stabilized.size().height / 2 + nbrCell * height), new Point(stabilized.size().width / 2 - nbrCell * width, stabilized.size().height / 2 + nbrCell * height) };
+
+		Mat homography2 = Imgproc.getPerspectiveTransform(new MatOfPoint2f(basePts), new MatOfPoint2f(targetPts));
+		Mat stabilized2 = new Mat();
+		Imgproc.warpPerspective(fhtManager.getMeshManager().buildEnlarged(stabilized), stabilized2, homography2, stabilized.size());
+
+		Mat binarized2 = new Img(stabilized2, false).adaptativeGaussianInvThreshold(7, 5).getSrc();
+		// if (!fhtManager.isInitialized() || frameCount % 30 == 0)
+		fhtManager.init(binarized2);
+		images[3] = new Img(fhtManager.getMeshManager().drawReverse(stabilized2, new Scalar(255, 0, 0), new Scalar(0, 255, 0)), false).toJfxImage();
+
+		// Mesh reverseMesh = fhtManager.getMeshManager().getReverseMesh();
+		// Mat result = reverseMesh.dewarp(stabilized, stabilized.size());
+		images[4] = new Img(fhtManager.getMeshManager().dewarpReverse(stabilized2), false).toJfxImage();
+
+		// images[3] = new Img(stabilized2, false).toJfxImage();
+		// Calib3d.findHomography(new MatOfPoint2f(basePts), new MatOfPoint2f(targetPts), Calib3d.RANSAC, 1);
+
 		// Mat patch = Mat.zeros(frame.size(), frame.type());
 		// int deltaX = (int) (frame.size().width / 8);
 		// int deltaY = (int) (frame.size().height / 4);
