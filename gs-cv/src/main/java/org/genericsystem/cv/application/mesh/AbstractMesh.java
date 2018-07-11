@@ -26,15 +26,24 @@ public abstract class AbstractMesh<T> {
 	}
 
 	protected final void deWarp(Mat src, Mat dewarpedImage, Point[] polygon, double x, double y, double rectWidth, double rectHeight) {
+
 		if (inBordedImage(src, polygon)) {
 			Point dewarpedTopLeft = new Point(0, 0);
-			Point dewarpedTopRight = new Point(rectWidth, 0);
-			Point dewarpedBottomRight = new Point(rectWidth, rectHeight);
-			Point dewarpedBottomLeft = new Point(0, rectHeight);
-			Mat homography = Imgproc.getPerspectiveTransform(new MatOfPoint2f(polygon[0], polygon[1], polygon[2], polygon[3]), new MatOfPoint2f(dewarpedTopLeft, dewarpedTopRight, dewarpedBottomRight, dewarpedBottomLeft));
+			Point dewarpedTopRight = new Point(0 + rectWidth, 0);
+			Point dewarpedBottomRight = new Point(0 + rectWidth, 0 + rectHeight);
+			Point dewarpedBottomLeft = new Point(0, 0 + rectHeight);
+			// Point dewarpedTopLeft = new Point(x, y);
+			// Point dewarpedTopRight = new Point(x + rectWidth, y);
+			// Point dewarpedBottomRight = new Point(x + rectWidth, y + rectHeight);
+			// Point dewarpedBottomLeft = new Point(x, y + rectHeight);
+			Mat homography = Imgproc.getPerspectiveTransform(new MatOfPoint2f(polygon), new MatOfPoint2f(dewarpedTopLeft, dewarpedTopRight, dewarpedBottomRight, dewarpedBottomLeft));
 			Mat subDewarpedImage = new Mat(dewarpedImage, new Rect(new Point(x, y), new Point(x + rectWidth, y + rectHeight)));
 			Imgproc.warpPerspective(src, subDewarpedImage, homography, subDewarpedImage.size(), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(0));
 			subDewarpedImage.release();
+
+			// Mat homography = Imgproc.getPerspectiveTransform(new MatOfPoint2f(polygon[0], polygon[1], polygon[2], polygon[3]), new MatOfPoint2f(dewarpedTopLeft, dewarpedTopRight, dewarpedBottomRight, dewarpedBottomLeft));
+			// Imgproc.warpPerspective(src, dewarpedImage, homography, new Size(rectWidth, rectHeight), Imgproc.INTER_LINEAR, Core.BORDER_REPLICATE, Scalar.all(0));
+
 			homography.release();
 		}
 	}

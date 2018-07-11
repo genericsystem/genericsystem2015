@@ -193,9 +193,7 @@ public class GraphicApp extends AbstractApp {
 			return images;
 
 		Img binarized = frame.adaptativeGaussianInvThreshold(7, 5);
-
-		Img flat = fhtManager.init(frame.getSrc(), binarized.getSrc()).getDewarp();
-
+		Img flat = new Img(fhtManager.init(binarized.getSrc()).dewarp(frame.getSrc()), false);
 		images[1] = flat.toJfxImage();
 		ref = trace("Dewarp", ref);
 		// Img flatBinarized = flat.adaptativeGaussianInvThreshold(7, 5);

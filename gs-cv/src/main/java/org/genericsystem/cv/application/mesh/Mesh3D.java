@@ -17,10 +17,12 @@ public class Mesh3D extends AbstractMesh<Point3> {
 
 	private final Mesh mesh;
 	private List<Point3> points3D;
+	private final Size size;
 
 	public Mesh3D(Mesh mesh, Size size, double focal) {
 		super(mesh.halfWidth, mesh.halfHeight);
 		this.mesh = mesh;
+		this.size = size;
 		int[][] indexRects = mesh.values().stream().map(indexedPts -> new int[] { indexedPts[0].getIndex(), indexedPts[1].getIndex(), indexedPts[2].getIndex(), indexedPts[3].getIndex() }).toArray(int[][]::new);
 
 		// System.out.println("Focale : " + focal);
@@ -106,6 +108,26 @@ public class Mesh3D extends AbstractMesh<Point3> {
 		return heights;
 	}
 
+	public Mesh reverseMesh() {
+		double[] heights = getHeights();
+		double[] widths = getWidths();
+
+		double height = 2 * Math.min(DoubleStream.of(heights).limit(halfHeight).sum(), DoubleStream.of(heights).skip(halfHeight).sum());
+		double width = 2 * Math.min(DoubleStream.of(widths).limit(halfWidth).sum(), DoubleStream.of(widths).skip(halfWidth).sum());
+
+		double coef = Math.max(size.height / height, size.width / width);
+		for (int i = 0; i < heights.length; i++)
+			heights[i] *= coef;
+		for (int i = 0; i < widths.length; i++)
+			widths[i] *= coef;
+
+		Points candidatePoints = mesh.getPoints();
+		Point imageCenter = candidatePoints.getPoint(0, 0);
+		ReverseMap reverseMap = new ReverseMap(mesh, halfWidth, halfHeight, imageCenter, widths, heights);
+		Points points = new ReversePoints(reverseMap, candidatePoints.xBorder, candidatePoints.yBorder, imageCenter, halfWidth, halfHeight, size);
+		return new Mesh(points, halfWidth, halfHeight);
+	}
+
 	public Mat dewarp(Mat src, Size originalSize) {
 		double[] heights = getHeights();
 		double[] widths = getWidths();
@@ -152,7 +174,7 @@ public class Mesh3D extends AbstractMesh<Point3> {
 			double x = enlargedImage.width() / 2;
 			for (int j = 0; j < halfWidth; j++) {
 				if (x >= 0 && (x + widths[j + halfWidth] < enlargedImage.width()) && y >= 0 && (y + heights[i + halfHeight] < enlargedImage.height()))
-					deWarp(src, enlargedImage, mesh.getPoints(i, j), x, y, widths[j + halfWidth], heights[i + halfHeight]);
+					deWarp(src, enlargedImage, mesh.getCell(i, j), x, y, widths[j + halfWidth], heights[i + halfHeight]);
 				x += widths[j + halfWidth];
 			}
 
@@ -160,7 +182,7 @@ public class Mesh3D extends AbstractMesh<Point3> {
 			for (int j = -1; j >= -halfWidth; j--) {
 				x -= widths[j + halfWidth];
 				if (x >= 0 && (x + widths[j + halfWidth] < enlargedImage.width()) && y >= 0 && (y + heights[i + halfHeight] < enlargedImage.height()))
-					deWarp(src, enlargedImage, mesh.getPoints(i, j), x, y, widths[j + halfWidth], heights[i + halfHeight]);
+					deWarp(src, enlargedImage, mesh.getCell(i, j), x, y, widths[j + halfWidth], heights[i + halfHeight]);
 			}
 			y += heights[i + halfHeight];
 		}
@@ -170,16 +192,17 @@ public class Mesh3D extends AbstractMesh<Point3> {
 			double x = enlargedImage.width() / 2;
 			for (int j = 0; j < halfWidth; j++) {
 				if (x >= 0 && (x + widths[j + halfWidth] < enlargedImage.width()) && y >= 0 && (y + heights[i + halfHeight] < enlargedImage.height()))
-					deWarp(src, enlargedImage, mesh.getPoints(i, j), x, y, widths[j + halfWidth], heights[i + halfHeight]);
+					deWarp(src, enlargedImage, mesh.getCell(i, j), x, y, widths[j + halfWidth], heights[i + halfHeight]);
 				x += widths[j + halfWidth];
 			}
 			x = enlargedImage.width() / 2;
 			for (int j = -1; j >= -halfWidth; j--) {
 				x -= widths[j + halfWidth];
 				if (x >= 0 && (x + widths[j + halfWidth] < enlargedImage.width()) && y >= 0 && (y + heights[i + halfHeight] < enlargedImage.height()))
-					deWarp(src, enlargedImage, mesh.getPoints(i, j), x, y, widths[j + halfWidth], heights[i + halfHeight]);
+					deWarp(src, enlargedImage, mesh.getCell(i, j), x, y, widths[j + halfWidth], heights[i + halfHeight]);
 			}
 		}
+
 		double xBorder = (enlargedImage.width() - originalSize.width) / 2;
 		double yBorder = (enlargedImage.height() - originalSize.height) / 2;
 		return new Mat(enlargedImage, new Rect(new Point(xBorder, yBorder), new Point(enlargedImage.width() - xBorder, enlargedImage.height() - yBorder)));

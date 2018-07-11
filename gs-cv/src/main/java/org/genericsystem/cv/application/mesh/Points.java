@@ -5,131 +5,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.genericsystem.cv.application.Interpolator;
 import org.opencv.core.Point;
 
-public class Points {
+public abstract class Points {
 	private HashMap<Key, IndexedPoint> internal = new HashMap<>();
 	private List<IndexedPoint> pointIndex = new ArrayList<>();
-	private final Interpolator interpolator;
-	private final int xBorder;
-	private final int yBorder;
-	private final int extraWidth = 1;
-	private final int extraHeight = 1;
 
-	public Points(Point imgCenter, int halfWidth, int halfHeight, double deltaX, double deltaY, int xBorder, int yBorder, Interpolator interpolator) {
-		this.interpolator = interpolator;
+	protected final int xBorder;
+	protected final int yBorder;
+
+	public Points(int xBorder, int yBorder) {
 		this.xBorder = xBorder;
 		this.yBorder = yBorder;
-		put(0, 0, createIndexedPoint(imgCenter));
-		// for (int j = 1; j <= halfWidth; j++)
-		// put(0, j, createIndexedPoint((j <= (halfWidth - extraWidth)) ? horizontalMove(getPoint(0, j - 1), deltaX) : extrapole(getPoint(0, j - 2), getPoint(0, j - 1))));
-		// for (int j = -1; j >= -halfWidth; j--)
-		// put(0, j, createIndexedPoint((j >= (-halfWidth + extraWidth)) ? horizontalMove(getPoint(0, j + 1), -deltaX) : extrapole(getPoint(0, j + 2), getPoint(0, j + 1))));
-		// for (int i = 1; i <= halfHeight; i++) {
-		// put(i, 0, createIndexedPoint((i <= (halfHeight - extraHeight)) ? verticalMove(getPoint(i - 1, 0), deltaY) : extrapole(getPoint(i - 2, 0), getPoint(i - 1, 0))));
-		// for (int j = 1; j <= halfWidth; j++)
-		// put(i, j,
-		// createIndexedPoint((i <= (halfHeight - extraHeight) && (j <= halfWidth - extraWidth)) ? intersect(getPoint(i, j - 1), getPoint(i - 1, j))
-		// : intersectExtra(j != 1 ? getPoint(i, j - 2) : mock(getPoint(i - 1, 0), getPoint(i - 1, 1), getPoint(i, 0)), getPoint(i, j - 1), i != 1 ? getPoint(i - 2, j) : mock(getPoint(0, j - 1), getPoint(1, j - 1), getPoint(0, j)),
-		// getPoint(i - 1, j))));
-		// for (int j = -1; j >= -halfWidth; j--)
-		// put(i, j, createIndexedPoint((i <= (halfHeight - extraHeight) && j >= (-halfWidth + extraWidth)) ? intersect(getPoint(i, j + 1), getPoint(i - 1, j))
-		// : intersectExtra(getPoint(i, j + 2), getPoint(i, j + 1), i != 1 ? getPoint(i - 2, j) : mock(getPoint(0, j + 1), getPoint(1, j + 1), getPoint(0, j)), getPoint(i - 1, j))));
-		// }
-		// for (int i = -1; i >= -halfHeight; i--) {
-		// put(i, 0, createIndexedPoint((i >= (-halfHeight + extraHeight)) ? verticalMove(getPoint(i + 1, 0), -deltaY) : extrapole(getPoint(i + 2, 0), getPoint(i + 1, 0))));
-		// for (int j = 1; j <= halfWidth; j++)
-		// put(i, j, createIndexedPoint(((i >= -halfHeight + extraHeight) && j <= (halfWidth - extraWidth)) ? intersect(getPoint(i, j - 1), getPoint(i + 1, j))
-		// : intersectExtra(j != 1 ? getPoint(i, j - 2) : mock(getPoint(i + 1, 0), getPoint(i + 1, 1), getPoint(i, 0)), getPoint(i, j - 1), getPoint(i + 2, j), getPoint(i + 1, j))));
-		// for (int j = -1; j >= -halfWidth; j--)
-		// put(i, j, createIndexedPoint(
-		// (i >= (-halfHeight + extraHeight) && (j >= -halfWidth + extraWidth)) ? intersect(getPoint(i, j + 1), getPoint(i + 1, j)) : intersectExtra(getPoint(i, j + 2), getPoint(i, j + 1), getPoint(i + 2, j), getPoint(i + 1, j))));
-		// }
 
-		// for (int j = 1; j <= halfWidth; j++)
-		// put(0, j, createIndexedPoint((j <= (halfWidth - extraWidth)) ? horizontalMove(getPoint(0, j - 1), deltaX) : extrapole(getPoint(0, j - 2), getPoint(0, j - 1))));
-		// for (int j = -1; j >= -halfWidth; j--)
-		// put(0, j, createIndexedPoint((j >= (-halfWidth + extraWidth)) ? horizontalMove(getPoint(0, j + 1), -deltaX) : extrapole(getPoint(0, j + 2), getPoint(0, j + 1))));
-		// for (int i = 1; i <= halfHeight; i++) {
-		// put(i, 0, createIndexedPoint((i <= (halfHeight - extraHeight)) ? verticalMove(getPoint(i - 1, 0), deltaY) : extrapole(getPoint(i - 2, 0), getPoint(i - 1, 0))));
-		// for (int j = 1; j <= halfWidth; j++)
-		// put(i, j, createIndexedPoint((i <= (halfHeight - extraHeight) && (j <= halfWidth - extraWidth)) ? intersect(getPoint(i, j - 1), getPoint(i - 1, j))
-		// : intersectExtra(getPoint(i, j - 1), mock(getPoint(i - 1, j - 1), getPoint(i - 1, j), getPoint(i, j - 1)), getPoint(i - 1, j), mock(getPoint(i - 1, j - 1), getPoint(i, j - 1), getPoint(i - 1, j)))));
-		// for (int j = -1; j >= -halfWidth; j--)
-		// put(i, j, createIndexedPoint((i <= (halfHeight - extraHeight) && j >= (-halfWidth + extraWidth)) ? intersect(getPoint(i, j + 1), getPoint(i - 1, j))
-		// : intersectExtra(getPoint(i, j + 1), mock(getPoint(i - 1, j + 1), getPoint(i - 1, j), getPoint(i, j + 1)), getPoint(i - 1, j), mock(getPoint(i - 1, j + 1), getPoint(i, j + 1), getPoint(i - 1, j)))));
-		// }
-		// for (int i = -1; i >= -halfHeight; i--) {
-		// put(i, 0, createIndexedPoint((i >= (-halfHeight + extraHeight)) ? verticalMove(getPoint(i + 1, 0), -deltaY) : extrapole(getPoint(i + 2, 0), getPoint(i + 1, 0))));
-		// for (int j = 1; j <= halfWidth; j++)
-		// put(i, j, createIndexedPoint(((i >= -halfHeight + extraHeight) && j <= (halfWidth - extraWidth)) ? intersect(getPoint(i, j - 1), getPoint(i + 1, j))
-		// : intersectExtra(getPoint(i, j - 1), mock(getPoint(i + 1, j - 1), getPoint(i + 1, j), getPoint(i, j - 1)), getPoint(i + 1, j), mock(getPoint(i + 1, j - 1), getPoint(i, j - 1), getPoint(i + 1, j)))));
-		// for (int j = -1; j >= -halfWidth; j--)
-		// put(i, j, createIndexedPoint((i >= (-halfHeight + extraHeight) && (j >= -halfWidth + extraWidth)) ? intersect(getPoint(i, j + 1), getPoint(i + 1, j))
-		// : intersectExtra(getPoint(i, j + 1), mock(getPoint(i + 1, j + 1), getPoint(i + 1, j), getPoint(i, j + 1)), getPoint(i + 1, j), mock(getPoint(i + 1, j + 1), getPoint(i, j + 1), getPoint(i + 1, j)))));
-		// }
-
-		for (int j = 1; j <= halfWidth; j++)
-			put(0, j, createIndexedPoint(horizontalMove(getPoint(0, j - 1), getWidthCoeff(deltaX, j + halfWidth - 1))));
-		for (int j = -1; j >= -halfWidth; j--)
-			put(0, j, createIndexedPoint(horizontalMove(getPoint(0, j + 1), -getWidthCoeff(deltaX, j + halfWidth))));
-		for (int i = 1; i <= halfHeight; i++) {
-			put(i, 0, createIndexedPoint(verticalMove(getPoint(i - 1, 0), getHeightCoeff(deltaY, i + halfHeight - 1))));
-			for (int j = 1; j <= halfWidth; j++)
-				put(i, j, createIndexedPoint(intersect(getPoint(i, j - 1), getPoint(i - 1, j))));
-			for (int j = -1; j >= -halfWidth; j--)
-				put(i, j, createIndexedPoint(intersect(getPoint(i, j + 1), getPoint(i - 1, j))));
-		}
-		for (int i = -1; i >= -halfHeight; i--) {
-			put(i, 0, createIndexedPoint(verticalMove(getPoint(i + 1, 0), -getHeightCoeff(deltaY, i + halfHeight))));
-			for (int j = 1; j <= halfWidth; j++)
-				put(i, j, createIndexedPoint(intersect(getPoint(i, j - 1), getPoint(i + 1, j))));
-			for (int j = -1; j >= -halfWidth; j--)
-				put(i, j, createIndexedPoint(intersect(getPoint(i, j + 1), getPoint(i + 1, j))));
-		}
-		//
-		// for (int j = halfWidth + 1; j <= halfWidth + extraWidth; j++)
-		// put(0, j, createIndexedPoint(extrapole(getPoint(0, j - 2), getPoint(0, j - 1))));
-		// for (int j = -halfWidth - 1; j >= -halfWidth - extraWidth; j--)
-		// put(0, j, createIndexedPoint(extrapole(getPoint(0, j + 2), getPoint(0, j + 1))));
-		// for (int i = halfHeight + 1; i <= halfHeight + extraHeight; i++) {
-		// put(i, 0, createIndexedPoint(extrapole(getPoint(i - 2, 0), getPoint(i - 1, 0))));
-		// for (int j = 1; j <= halfWidth; j++)
-		// put(i, j, createIndexedPoint(intersectExtra(getPoint(i, j - 1), mock(getPoint(i - 1, j - 1), getPoint(i - 1, j), getPoint(i, j - 1)), getPoint(i - 1, j), mock(getPoint(i - 1, j - 1), getPoint(i, j - 1), getPoint(i - 1, j)))));
-		// for (int j = -1; j >= -halfWidth; j--)
-		// put(i, j, createIndexedPoint(intersectExtra(getPoint(i, j + 1), mock(getPoint(i - 1, j + 1), getPoint(i - 1, j), getPoint(i, j + 1)), getPoint(i - 1, j), mock(getPoint(i - 1, j + 1), getPoint(i, j + 1), getPoint(i - 1, j)))));
-		// }
-		// for (int i = -halfHeight - 1; i >= -halfHeight - extraHeight; i--) {
-		// put(i, 0, createIndexedPoint(extrapole(getPoint(i + 2, 0), getPoint(i + 1, 0))));
-		// for (int j = 1; j <= halfWidth; j++)
-		// put(i, j, createIndexedPoint(intersectExtra(getPoint(i, j - 1), mock(getPoint(i + 1, j - 1), getPoint(i + 1, j), getPoint(i, j - 1)), getPoint(i + 1, j), mock(getPoint(i + 1, j - 1), getPoint(i, j - 1), getPoint(i + 1, j)))));
-		// for (int j = -1; j >= -halfWidth; j--)
-		// put(i, j, createIndexedPoint(intersectExtra(getPoint(i, j + 1), mock(getPoint(i + 1, j + 1), getPoint(i + 1, j), getPoint(i, j + 1)), getPoint(i + 1, j), mock(getPoint(i + 1, j + 1), getPoint(i, j + 1), getPoint(i + 1, j)))));
-		// }
-		// for (int i = 1; i <= halfHeight + extraHeight; i++) {
-		// put(i, 0, createIndexedPoint(extrapole(getPoint(i - 2, 0), getPoint(i - 1, 0))));
-		// for (int j = halfWidth + 1; j <= halfWidth + extraWidth; j++)
-		// put(i, j, createIndexedPoint(intersectExtra(getPoint(i, j - 1), mock(getPoint(i - 1, j - 1), getPoint(i - 1, j), getPoint(i, j - 1)), getPoint(i - 1, j), mock(getPoint(i - 1, j - 1), getPoint(i, j - 1), getPoint(i - 1, j)))));
-		// for (int j = -halfWidth - 1; j >= -halfWidth - extraWidth; j--)
-		// put(i, j, createIndexedPoint(intersectExtra(getPoint(i, j + 1), mock(getPoint(i - 1, j + 1), getPoint(i - 1, j), getPoint(i, j + 1)), getPoint(i - 1, j), mock(getPoint(i - 1, j + 1), getPoint(i, j + 1), getPoint(i - 1, j)))));
-		// }
-		// for (int i = -1; i >= -halfHeight - extraHeight; i--) {
-		// put(i, 0, createIndexedPoint(extrapole(getPoint(i + 2, 0), getPoint(i + 1, 0))));
-		// for (int j = halfWidth + 1; j <= halfWidth + extraWidth; j++)
-		// put(i, j, createIndexedPoint(intersectExtra(getPoint(i, j - 1), mock(getPoint(i + 1, j - 1), getPoint(i + 1, j), getPoint(i, j - 1)), getPoint(i + 1, j), mock(getPoint(i + 1, j - 1), getPoint(i, j - 1), getPoint(i + 1, j)))));
-		// for (int j = -halfWidth - 1; j >= -halfWidth - extraWidth; j--)
-		// put(i, j, createIndexedPoint(intersectExtra(getPoint(i, j + 1), mock(getPoint(i + 1, j + 1), getPoint(i + 1, j), getPoint(i, j + 1)), getPoint(i + 1, j), mock(getPoint(i + 1, j + 1), getPoint(i, j + 1), getPoint(i + 1, j)))));
-		// }
-
-	}
-
-	double getWidthCoeff(double deltaX, int j) {
-		return deltaX;
-	}
-
-	double getHeightCoeff(double deltaY, int j) {
-		return deltaY;
 	}
 
 	private Point mock(Point p1, Point p2, Point p3) {
@@ -168,60 +56,10 @@ public class Points {
 		return new double[] { a[0] / a[2], a[1] / a[2], 1 };
 	}
 
-	private IndexedPoint createIndexedPoint(Point point) {
+	protected IndexedPoint createIndexedPoint(Point point) {
 		IndexedPoint indexedPoint = new IndexedPoint(pointIndex.size(), point);
 		pointIndex.add(indexedPoint);
 		return indexedPoint;
-	}
-
-	private Point intersect(Point hPoint, Point vPoint) { // intersection de la ligne horizontale partant de hPoint avec la ligne verticale partant de vPoint
-		double xDiff = xDiff(hPoint, vPoint);
-		double yDiff = yDiff(vPoint, hPoint);
-		while (Math.abs(xDiff) > 1 || Math.abs(yDiff) > 1) {
-			xDiff = xDiff(hPoint, vPoint);
-			yDiff = yDiff(vPoint, hPoint);
-			hPoint = horizontalMove(hPoint, xDiff);
-			vPoint = verticalMove(vPoint, yDiff);
-		}
-		if (Math.abs(xDiff) <= 1 && Math.abs(yDiff) <= 1)
-			return new Point(0.5 * (hPoint.x + vPoint.x), 0.5 * (hPoint.y + vPoint.y));
-		throw new IllegalStateException(xDiff + " " + yDiff);
-	}
-
-	private double xDiff(Point pt1, Point pt2) {
-		return pt2.x - pt1.x;
-	}
-
-	private double yDiff(Point pt1, Point pt2) {
-		return pt2.y - pt1.y;
-	}
-
-	private Point verticalMove(Point startingPoint, double deltaY) {
-		if (deltaY == 0)
-			return startingPoint;
-		double dY = Math.signum(deltaY);
-		double x = startingPoint.x, y = startingPoint.y;
-		while (Math.abs(y - startingPoint.y - deltaY) >= 1) {
-			double dX = interpolator.interpolateVerticals(x - xBorder, y - yBorder) * dY;
-			assert Double.isFinite(dX) : interpolator.interpolateVerticals(x - xBorder, y - yBorder);
-			x += dX;
-			y += dY;
-		}
-		return new Point(x, y);
-	}
-
-	private Point horizontalMove(Point startingPoint, double deltaX) {
-		if (deltaX == 0)
-			return startingPoint;
-		double dX = Math.signum(deltaX);
-		double x = startingPoint.x, y = startingPoint.y;
-		while (Math.abs(x - startingPoint.x - deltaX) >= 1) {
-			double dY = interpolator.interpolateHorizontals(x - xBorder, y - yBorder) * dX;
-			assert Double.isFinite(dY) : interpolator.interpolateHorizontals(x - xBorder, y - yBorder);
-			x += dX;
-			y += dY;
-		}
-		return new Point(x, y);
 	}
 
 	// points = new Point[2 * halfHeight + 1][2 * halfWidth + 1];

@@ -119,7 +119,7 @@ public class FHTDemo extends AbstractApp {
 		if (frameCount < 30)
 			return images;
 
-		fhtManager.init(frame.getSrc(), binarized.getSrc());
+		fhtManager.init(binarized.getSrc());
 		ref = trace("FHT init", ref);
 
 		double minVerticalAccuracy = 180 * (Math.atan(1 / (fhtManager.getStripWidth().get() - 1))) / Math.PI;
@@ -173,13 +173,13 @@ public class FHTDemo extends AbstractApp {
 		ref = trace("Prepare interpolator", ref);
 
 		MeshManager meshManager = fhtManager.getMeshManager();
-		images[4] = new Img(meshManager.drawOnCopy(new Scalar(0, 255, 0), new Scalar(0, 0, 255)), false).toJfxImage();
+		images[4] = new Img(meshManager.draw(frame.getSrc().clone(), new Scalar(0, 255, 0), new Scalar(0, 0, 255)), false).toJfxImage();
 		ref = trace("Build and draw mesh", ref);
 
 		images[5] = new Img(meshManager.draw3Dsurface(new Scalar(0, 255, 0), new Scalar(0, 0, 255)), false).toJfxImage();
 		ref = trace("3D surface / svd", ref);
 
-		Img dewarpFHT3D = fhtManager.getDewarp();
+		Img dewarpFHT3D = new Img(fhtManager.dewarp(frame.getSrc().clone()));
 		images[6] = dewarpFHT3D.toJfxImage();
 		ref = trace("Dewarp 3D", ref);
 

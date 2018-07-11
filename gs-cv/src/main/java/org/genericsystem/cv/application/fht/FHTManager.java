@@ -5,7 +5,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
-import org.genericsystem.cv.Img;
 import org.genericsystem.cv.application.GeneralInterpolator;
 import org.genericsystem.cv.application.OrientedPoint;
 import org.genericsystem.cv.application.ProjectionLines;
@@ -54,7 +53,7 @@ public class FHTManager {
 	private DoubleProperty focale;
 
 	private final Size binarySize;
-	private Mat frame;
+	// private Mat frame;
 	private Mat binarized;
 	private Mat transposedBinarized;
 
@@ -67,9 +66,13 @@ public class FHTManager {
 		focale = new SimpleDoubleProperty(Math.max(binarySize.width, binarySize.height) / Math.tan((60d / 180) * Math.PI / 2) / 2);
 	}
 
-	public FHTManager init(Mat frame, Mat binarized) {
-		this.frame = frame;
+	public boolean isInitialized() {
+		return binarized != null;
+	}
+
+	public FHTManager init(Mat binarized) {
 		this.binarized = binarized;
+		assert binarized.size().equals(binarySize);
 		transposedBinarized = new Mat();
 		Core.transpose(binarized, transposedBinarized);
 		vStrips = null;
@@ -80,9 +83,6 @@ public class FHTManager {
 
 		vHoughTrajs = null;
 		hHoughTrajs = null;
-
-		optimizedVHoughTrajs = null;
-		optimizedHHoughTrajs = null;
 
 		fhtHorizontals = null;
 		fhtVerticals = null;
@@ -98,7 +98,6 @@ public class FHTManager {
 		interpolatorFHT = null;
 		superInterpolator = null;
 		meshManager = null;
-		dewarp = null;
 		return this;
 	}
 
@@ -110,9 +109,6 @@ public class FHTManager {
 
 	private List<List<TrajectStep>> vHoughTrajs;
 	private List<List<TrajectStep>> hHoughTrajs;
-
-	private List<List<TrajectStep>> optimizedVHoughTrajs;
-	private List<List<TrajectStep>> optimizedHHoughTrajs;
 
 	private List<List<OrientedPoint>[]> fhtHorizontals;
 	private List<List<OrientedPoint>[]> fhtVerticals;
@@ -129,7 +125,6 @@ public class FHTManager {
 	private GeneralInterpolator interpolatorFHT;
 	private SplineInterpolator superInterpolator;
 	private MeshManager meshManager;
-	private Img dewarp;
 
 	public List<Mat> getVStrips() {
 		return vStrips != null ? vStrips : (vStrips = FHT.extractStrips(binarized, vStripsNumber.get(), stripWidth.get(), vStep.get()));
@@ -207,11 +202,11 @@ public class FHTManager {
 	}
 
 	public MeshManager getMeshManager() {
-		return meshManager != null ? meshManager : (meshManager = new MeshManager(halfGridWidth.get(), halfGridHeight.get(), getSuperInterpolator(), frame, focale.get()));
+		return meshManager != null ? meshManager : (meshManager = new MeshManager(halfGridWidth.get(), halfGridHeight.get(), getSuperInterpolator(), binarySize, focale.get()));
 	}
 
-	public Img getDewarp() {
-		return dewarp != null ? dewarp : (dewarp = new Img(getMeshManager().dewarp3D()));
+	public Mat dewarp(Mat img) {
+		return getMeshManager().dewarp3D(img);
 	}
 
 	public IntegerProperty getvBlurSize() {

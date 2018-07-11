@@ -95,7 +95,7 @@ public class ReferenceManager {
 		Core.gemm(bestReconciliation.getHomography(), toReferenceGraphy.get(bestImgDescriptor), 1, new Mat(), 0, homographyToReference);
 		toReferenceGraphy.put(newImgDescriptor, homographyToReference);
 		// consolidate(shift(detectedrects, homographyToReference), frameSize);
-		updateReference();
+		// updateReference();
 		cleanReferenceNeighbours();
 		return true;
 	}
