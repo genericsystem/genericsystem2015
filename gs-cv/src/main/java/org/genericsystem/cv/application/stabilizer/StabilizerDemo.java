@@ -3,10 +3,13 @@ package org.genericsystem.cv.application.stabilizer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import org.genericsystem.cv.AbstractApp;
 import org.genericsystem.cv.Img;
@@ -161,15 +164,51 @@ public class StabilizerDemo extends AbstractApp {
 
 		if (!fhtManager.isInitialized() || frameCount % 30 == 0)
 			fhtManager.init(binarized);
-		images[2] = new Img(fhtManager.getMeshManager().drawReverse(stabilized, new Scalar(255, 0, 0), new Scalar(0, 255, 0)), false).toJfxImage();
+		// images[2] = new Img(fhtManager.getMeshManager().drawReverse(stabilized, new Scalar(255, 0, 0), new Scalar(0, 255, 0)), false).toJfxImage();
 		// if (!fhtManager.isInitialized() || frameCount % 30 == 0)
 		fhtManager.init(binarized);
+
 		images[1] = new Img(fhtManager.getMeshManager().drawReverse(stabilized, new Scalar(255, 0, 0), new Scalar(0, 255, 0)), false).toJfxImage();
 
-		// Mesh reverseMesh = fhtManager.getMeshManager().getReverseMesh();
-		// Mat result = reverseMesh.dewarp(stabilized, stabilized.size());
+		Img dewarped = new Img(fhtManager.getMeshManager().dewarpReverse(stabilized), false);
+		images[2] = dewarped.toJfxImage();
 
-		images[2] = new Img(fhtManager.getMeshManager().dewarpReverse(stabilized), false).toJfxImage();
+		Img dewarpedBinary = dewarped.adaptativeGaussianInvThreshold(7, 5);
+		Mat horizontalHisto = new Mat();
+		Core.reduce(dewarpedBinary.getSrc(), horizontalHisto, 1, Core.REDUCE_SUM, CvType.CV_64FC1);
+		Mat verticalHisto = new Mat();
+		Core.reduce(dewarpedBinary.getSrc(), verticalHisto, 0, Core.REDUCE_SUM, CvType.CV_64FC1);
+
+		// Core.divide(dewarpedBinary.width(), dst, dst);
+		Core.normalize(horizontalHisto, horizontalHisto, 0, 255, Core.NORM_MINMAX);
+		Mat transposedVerticalHisto = verticalHisto.t();
+		Core.normalize(transposedVerticalHisto, transposedVerticalHisto, 0, 255, Core.NORM_MINMAX);
+
+		Mat hHisto = Mat.zeros(new Size(255, dewarpedBinary.height()), CvType.CV_8UC1);
+		// for (int row = 0; row < horizontalHisto.rows(); row++)
+		// Imgproc.line(hHisto, new Point(0, row), new Point(horizontalHisto.get(row, 0)[0], row), new Scalar(255), 1);
+
+		List<Mag> magnitudes = new ArrayList<>();
+		for (int index = 0; index < horizontalHisto.rows(); index++)
+			magnitudes.add(new Mag(index, horizontalHisto.get(index, 0)[0]));
+		List<Mag[]> histoLines = getHistoLines(magnitudes, 0.3, 0.1);
+		for (Mag[] mags : histoLines)
+			Imgproc.rectangle(hHisto, new Rect(new Point(0, mags[0].index), new Point(255, mags[1].index)), new Scalar(255), -1);
+
+		images[3] = new Img(hHisto, false).toJfxImage();
+
+		Mat vHisto = Mat.zeros(new Size(dewarpedBinary.width(), 255), CvType.CV_8UC1);
+		// for (int col = 0; col < transposedVerticalHisto.rows(); col++)
+		// Imgproc.line(vHisto, new Point(col, 0), new Point(col, transposedVerticalHisto.get(col, 0)[0]), new Scalar(255), 1);
+
+		List<Mag> vMagnitudes = new ArrayList<>();
+		for (int index = 0; index < transposedVerticalHisto.rows(); index++)
+			vMagnitudes.add(new Mag(index, transposedVerticalHisto.get(index, 0)[0]));
+		histoLines = getHistoLines(vMagnitudes, 0.5, 0.3);
+		for (Mag[] mags : histoLines)
+			Imgproc.rectangle(vHisto, new Rect(new Point(mags[0].index, 0), new Point(mags[1].index, 255)), new Scalar(255), -1);
+
+		images[4] = new Img(vHisto, false).toJfxImage();
 
 		int nbrCell = 6;
 		Points pts = fhtManager.getMeshManager().getReverseMesh().getPoints();
@@ -187,11 +226,11 @@ public class StabilizerDemo extends AbstractApp {
 		Mat binarized2 = new Img(stabilized2, false).adaptativeGaussianInvThreshold(7, 5).getSrc();
 		// if (!fhtManager.isInitialized() || frameCount % 30 == 0)
 		fhtManager.init(binarized2);
-		images[3] = new Img(fhtManager.getMeshManager().drawReverse(stabilized2, new Scalar(255, 0, 0), new Scalar(0, 255, 0)), false).toJfxImage();
+		images[5] = new Img(fhtManager.getMeshManager().drawReverse(stabilized2, new Scalar(255, 0, 0), new Scalar(0, 255, 0)), false).toJfxImage();
 
 		// Mesh reverseMesh = fhtManager.getMeshManager().getReverseMesh();
 		// Mat result = reverseMesh.dewarp(stabilized, stabilized.size());
-		images[4] = new Img(fhtManager.getMeshManager().dewarpReverse(stabilized2), false).toJfxImage();
+		images[6] = new Img(fhtManager.getMeshManager().dewarpReverse(stabilized2), false).toJfxImage();
 
 		// images[3] = new Img(stabilized2, false).toJfxImage();
 		// Calib3d.findHomography(new MatOfPoint2f(basePts), new MatOfPoint2f(targetPts), Calib3d.RANSAC, 1);
@@ -212,6 +251,60 @@ public class StabilizerDemo extends AbstractApp {
 		// }
 		// images[2] = new Img(patch, false).toJfxImage();
 		return images;
+	}
+
+	public static class Mag implements Comparable<Mag> {
+		private final double magnitude;
+		private final int index;
+
+		public Mag(int index, double magnitude) {
+			this.index = index;
+			this.magnitude = magnitude;
+		}
+
+		@Override
+		public int compareTo(Mag mag) {
+			int result = Double.compare(mag.magnitude, magnitude);
+			return result != 0 ? result : Double.compare(mag.index, index);
+		}
+	}
+
+	public static List<Mag[]> getHistoLines(List<Mag> magnitudes, double localTheshold, double globalTheshold) {
+		Set<Mag> alreadyComputed = new HashSet<>();
+		double max = magnitudes.stream().mapToDouble(ts -> ts.magnitude).max().getAsDouble();
+		// System.out.println("Max : " + max);
+		List<Mag[]> result = new ArrayList<>();
+		for (Mag mag : magnitudes.stream().sorted().collect(Collectors.toList())) {
+			if (mag.magnitude < globalTheshold * max)
+				break;
+			if (!alreadyComputed.contains(mag)) {
+				double tAlpha = localTheshold * mag.magnitude;
+
+				int y1 = mag.index;
+				while (y1 >= 0 && magnitudes.get(y1).magnitude >= tAlpha)
+					y1--;
+				if (y1 != 0)
+					y1++;
+
+				int y2 = mag.index;
+				while (y2 < magnitudes.size() && magnitudes.get(y2).magnitude >= tAlpha)
+					y2++;
+				if (y2 != magnitudes.size() - 1)
+					y2--;
+
+				boolean alreadyVisited = false;
+				for (int y = y1; y <= y2; y++)
+					if (alreadyComputed.contains(magnitudes.get(y))) {
+						alreadyVisited = true;
+						break;
+					}
+				for (int y = y1; y <= y2; y++)
+					alreadyComputed.add(magnitudes.get(y));
+				if (!alreadyVisited)
+					result.add(new Mag[] { magnitudes.get(y1), magnitudes.get(y2) });
+			}
+		}
+		return result;
 	}
 
 	@Override
