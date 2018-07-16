@@ -125,14 +125,44 @@ public class StabilizerDemo extends AbstractApp {
 		}
 
 		Mat stabilized = referenceManager.dewarp(newImgDescriptor, homography);
+		MatOfPoint trackedFeatures = new MatOfPoint();
+		MatOfPoint corners = new MatOfPoint();// global
+		Imgproc.goodFeaturesToTrack(new Img(stabilized, false).bgr2Gray().getSrc(), trackedFeatures, 300, 0.01, 10);
+		Mat stabilizedDisplay = stabilized.clone();
+		Arrays.stream(trackedFeatures.toArray()).forEach(corner -> Imgproc.circle(stabilizedDisplay, corner, 3, new Scalar(0, 255, 0)));
+
+		// Mat gray = new Img(xxx, false).bgr2Gray().getSrc();
+		// MatOfByte status = new MatOfByte();
+		// MatOfFloat errors = new MatOfFloat();
+		// Mat prevGray = gray;
+		//
+		// Video.calcOpticalFlowPyrLK(prevGray, gray, new MatOfPoint2f(trackedFeatures.toArray()), new MatOfPoint2f(corners.toArray()), status, errors, new Size(10, 10), 3, new TermCriteria(TermCriteria.COUNT + TermCriteria.EPS, 30, 0.01), 0, 0.0001);
+		// // size 21*21 ?
+		//
+		// Mat newRigidTransform = estimateRigidTransform(trackedFeatures, corners, false);
+		// Mat nrt33 = Mat.eye(3, 3, CvType.CV_32SC1);
+		// newRigidTransform.copyTo(nrt33.rowRange(0, 2));
+		// Mat rigidTransform = new Mat();// global var
+		// Core.gemm(rigidTransform, nrt33, 1, new Mat(), 0, rigidTransform);
+		//
+		// Mat invTrans = rigidTransform.inv();// DECOMP_SVD
+		// Imgproc.warpAffine(frame.getSrc(), stabilizedDisplay, invTrans.rowRange(0, 2), frame.getSrc().size());
+
+		images[1] = new Img(stabilizedDisplay, false).toJfxImage();
+
+		// Mat rvec1, tvec1;
+		// solvePnP(objectPoints, corners1, cameraMatrix, distCoeffs, rvec1, tvec1);
+		// Mat rvec2, tvec2;
+		// solvePnP(objectPoints, corners2, cameraMatrix, distCoeffs, rvec2, tvec2);
+
 		Mat binarized = new Img(stabilized, false).adaptativeGaussianInvThreshold(7, 5).getSrc();
 		if (!fhtManager.isInitialized() || frameCount % 30 == 0)
 			fhtManager.init(binarized);
-		images[1] = new Img(fhtManager.getMeshManager().drawReverse(stabilized, new Scalar(255, 0, 0), new Scalar(0, 255, 0)), false).toJfxImage();
+		images[2] = new Img(fhtManager.getMeshManager().drawReverse(stabilized, new Scalar(255, 0, 0), new Scalar(0, 255, 0)), false).toJfxImage();
 
 		// Mesh reverseMesh = fhtManager.getMeshManager().getReverseMesh();
 		// Mat result = reverseMesh.dewarp(stabilized, stabilized.size());
-		images[2] = new Img(fhtManager.getMeshManager().dewarpReverse(stabilized), false).toJfxImage();
+		images[3] = new Img(fhtManager.getMeshManager().dewarpReverse(stabilized), false).toJfxImage();
 		// Mat patch = Mat.zeros(frame.size(), frame.type());
 		// int deltaX = (int) (frame.size().width / 8);
 		// int deltaY = (int) (frame.size().height / 4);

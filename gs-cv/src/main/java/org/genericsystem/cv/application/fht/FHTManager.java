@@ -29,12 +29,12 @@ public class FHTManager {
 	private IntegerProperty hBlurSize = new SimpleIntegerProperty(81);
 	// private DoubleProperty vNeighbourPenality = new SimpleDoubleProperty(-100);
 	// private DoubleProperty hNeighbourPenality = new SimpleDoubleProperty(-100);
-	private DoubleProperty vAnglePenality = new SimpleDoubleProperty(-0.08);
-	private DoubleProperty hAnglePenality = new SimpleDoubleProperty(-0.08);
-	private DoubleProperty vRecover = new SimpleDoubleProperty(0.75);
-	private DoubleProperty hRecover = new SimpleDoubleProperty(0.75);
+	private DoubleProperty vAnglePenality = new SimpleDoubleProperty(-0.12);
+	private DoubleProperty hAnglePenality = new SimpleDoubleProperty(-0.12);
+	private DoubleProperty vRecover = new SimpleDoubleProperty(0.6);
+	private DoubleProperty hRecover = new SimpleDoubleProperty(0.6);
 	private IntegerProperty vStripsNumber = new SimpleIntegerProperty(16);
-	private IntegerProperty hStripsNumber = new SimpleIntegerProperty(8);
+	private IntegerProperty hStripsNumber = new SimpleIntegerProperty(10);
 	private DoubleBinding stripWidth;
 	private DoubleBinding stripHeight;
 	private DoubleBinding vStep;

@@ -17,16 +17,16 @@ public class Mesh3D extends AbstractMesh<Point3> {
 
 	private final Mesh mesh;
 	private List<Point3> points3D;
-	private final Size size;
+	private final Size enlargedSize;
 
-	public Mesh3D(Mesh mesh, Size size, double focal) {
+	public Mesh3D(Mesh mesh, Size enlargedSize, double focal) {
 		super(mesh.halfWidth, mesh.halfHeight);
 		this.mesh = mesh;
-		this.size = size;
+		this.enlargedSize = enlargedSize;
 		int[][] indexRects = mesh.values().stream().map(indexedPts -> new int[] { indexedPts[0].getIndex(), indexedPts[1].getIndex(), indexedPts[2].getIndex(), indexedPts[3].getIndex() }).toArray(int[][]::new);
 
 		// System.out.println("Focale : " + focal);
-		List<Point> focalizedPts = mesh.getPointIndex().stream().map(pts -> new Point((pts.x - size.width / 2) / focal, (pts.y - size.height / 2) / focal)).collect(Collectors.toList());
+		List<Point> focalizedPts = mesh.getPointIndex().stream().map(pts -> new Point((pts.x - enlargedSize.width / 2) / focal, (pts.y - enlargedSize.height / 2) / focal)).collect(Collectors.toList());
 
 		points3D = Svd.solve(focalizedPts, indexRects);
 		for (int i = -halfHeight; i < halfHeight; i++)
@@ -46,6 +46,7 @@ public class Mesh3D extends AbstractMesh<Point3> {
 		double yMax = points3D.stream().mapToDouble(p -> p.y + p.z).max().getAsDouble();
 		double zMax = points3D.stream().mapToDouble(p -> p.z).max().getAsDouble();
 
+		System.out.println("Z : " + zMin + " " + zMax);
 		int newWidth = (int) size.width;
 		int newHeight = (int) Math.ceil((yMax - yMin) * size.width / (xMax - xMin));
 		Mat result = new Mat(newHeight, newWidth, CvType.CV_8UC3, new Scalar(0, 0, 0));
@@ -115,7 +116,7 @@ public class Mesh3D extends AbstractMesh<Point3> {
 		double height = 2 * Math.min(DoubleStream.of(heights).limit(halfHeight).sum(), DoubleStream.of(heights).skip(halfHeight).sum());
 		double width = 2 * Math.min(DoubleStream.of(widths).limit(halfWidth).sum(), DoubleStream.of(widths).skip(halfWidth).sum());
 
-		double coef = Math.max(size.height / height, size.width / width);
+		double coef = Math.max(enlargedSize.height / height, enlargedSize.width / width);
 		for (int i = 0; i < heights.length; i++)
 			heights[i] *= coef;
 		for (int i = 0; i < widths.length; i++)
@@ -124,7 +125,7 @@ public class Mesh3D extends AbstractMesh<Point3> {
 		Points candidatePoints = mesh.getPoints();
 		Point imageCenter = candidatePoints.getPoint(0, 0);
 		ReverseMap reverseMap = new ReverseMap(mesh, halfWidth, halfHeight, imageCenter, widths, heights);
-		Points points = new ReversePoints(reverseMap, candidatePoints.xBorder, candidatePoints.yBorder, imageCenter, halfWidth, halfHeight, size);
+		Points points = new ReversePoints(reverseMap, candidatePoints.xBorder, candidatePoints.yBorder, imageCenter, halfWidth, halfHeight, enlargedSize);
 		return new Mesh(points, halfWidth, halfHeight);
 	}
 
