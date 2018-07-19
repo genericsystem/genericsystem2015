@@ -99,7 +99,17 @@ public class ImgDescriptor {
 				pts.add(keyPoints.get(goodMatch.queryIdx).pt);
 			}
 		if (referencePts.size() > 50) {
-
+			Mat mask = new Mat();
+			Mat result = Calib3d.findHomography(new MatOfPoint2f(pts.stream().toArray(Point[]::new)), new MatOfPoint2f(referencePts.stream().toArray(Point[]::new)), Calib3d.RANSAC, 1, mask, 2000, 0.9);
+			if (result.size().empty()) {
+				System.out.println("Stabilization homography is empty");
+				return null;
+			}
+			System.out.println("homography : " + Core.countNonZero(mask) + " " + (double) Core.countNonZero(mask) / mask.rows());
+			// for (int i = 0; i < mask.rows(); i++) {
+			// if (mask.get(i, 0)[0] == 1)
+			// Imgproc.circle(frame.getSrc(), pts.get(i), 3, new Scalar(0, 0, 255));
+			// }
 			// List<Point[]> pairedPoints = new ArrayList<>();
 			// for (int i = 0; i < pts.size(); i++)
 			// pairedPoints.add(new Point[] { pts.get(i), referencePts.get(i) });
@@ -112,11 +122,6 @@ public class ImgDescriptor {
 			// result.put(0, 2, transScaleParams[2] * transScaleParams[0]);
 			// result.put(1, 2, transScaleParams[3] * transScaleParams[1]);
 			// result.put(2, 2, 1);
-			Mat result = Calib3d.findHomography(new MatOfPoint2f(pts.stream().toArray(Point[]::new)), new MatOfPoint2f(referencePts.stream().toArray(Point[]::new)), Calib3d.RANSAC, 1, new Mat(), 2000, 0.9);
-			if (result.size().empty()) {
-				System.out.println("Stabilization homography is empty");
-				return null;
-			}
 			// double error = 0;
 			// for (Point[] points : pairedPoints) {
 			// error += Math.pow(distance(points, transScaleParams), 2);

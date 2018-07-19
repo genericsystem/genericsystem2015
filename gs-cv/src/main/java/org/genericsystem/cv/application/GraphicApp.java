@@ -33,6 +33,8 @@ import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
 
 import javafx.application.Platform;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
@@ -49,8 +51,12 @@ public class GraphicApp extends AbstractApp {
 	private FHTManager fhtManager = new FHTManager(gsCapture.getResize());
 	private ImageView[][] imageViews = new ImageView[][] { new ImageView[3], new ImageView[3], new ImageView[3] };
 	private int frameCount = 0;
-	private final MSER detector = MSER.create(1, 10, 200, 0.25, 0.2, 200, 1.01, 0.03, 5);
+	private final MSER detector = MSER.create(1, 6, 50, 1, 0.2, 200, 1.01, 0.03, 5);
 	private final QualityManager qualityManager = new QualityManager(3, 1.0);
+	private DoubleProperty sigma = new SimpleDoubleProperty(2);
+	private DoubleProperty threshold = new SimpleDoubleProperty(5);
+	private DoubleProperty amount = new SimpleDoubleProperty(2);
+	private DoubleProperty sharpConvLevel = new SimpleDoubleProperty(0);
 
 	public static void main(String[] args) {
 		launch(args);
@@ -68,10 +74,11 @@ public class GraphicApp extends AbstractApp {
 	@Override
 	protected void fillGrid(GridPane mainGrid) {
 
-		addIntegerSliderProperty("hBlurSize", fhtManager.gethBlurSize(), 0, 200);
-		addIntegerSliderProperty("vBlurSize", fhtManager.getvBlurSize(), 0, 200);
-		addDoubleSliderProperty("hAnglePenality", fhtManager.gethAnglePenality(), -1, 0);
-		addDoubleSliderProperty("vAnglePenality", fhtManager.getvAnglePenality(), -1, 0);
+		addDoubleSliderProperty("sharp sigma", sigma, 0, 5);
+		addDoubleSliderProperty("threshold", threshold, 0, 10);
+		addDoubleSliderProperty("amount", amount, 0, 5);
+
+		addDoubleSliderProperty("sharp conv level", sharpConvLevel, 0, 10);
 
 		double displaySizeReduction = 1;
 		for (int col = 0; col < imageViews.length; col++)
@@ -140,17 +147,12 @@ public class GraphicApp extends AbstractApp {
 
 		private final SuperRect rect1;
 		private final SuperRect rect2;
-		private final double distance;
-		private final double coeff = 9;
+		private Double distance;
+		private final double coeff = 4;
 
 		public ConnectedRects(SuperRect rect1, SuperRect rect2) {
 			this.rect1 = rect1;
 			this.rect2 = rect2;
-			double dx = rect2.rect.tl().x - rect1.rect.br().x;
-			dx = dx >= 0 ? dx : 0;
-			double dy = (rect1.rect.tl().y + rect1.rect.br().y) / 2 - (rect2.rect.tl().y + rect2.rect.br().y) / 2;
-			distance = Math.sqrt(dx * dx + coeff * dy * dy);
-
 		}
 
 		public SuperRect getRect1() {
@@ -167,8 +169,43 @@ public class GraphicApp extends AbstractApp {
 		}
 
 		private double distance() {
-			return distance;
+			return distance != null ? distance : buildDistance();
 		}
+
+		private Double buildDistance() {
+			double dx = rect2.rect.tl().x - rect1.rect.br().x;
+			dx = dx >= 0 ? dx : 0;
+			double dy = (rect1.rect.tl().y + rect1.rect.br().y) / 2 - (rect2.rect.tl().y + rect2.rect.br().y) / 2;
+			return Math.sqrt(dx * dx + coeff * dy * dy);
+		}
+	}
+
+	private Mat sharpen(Mat img, double sigma, double threshold, double amount) {
+		Mat blurred = new Mat();
+		Imgproc.GaussianBlur(img, blurred, new Size(0, 0), sigma, sigma);
+		Mat lowContrastMask = new Mat();
+		Core.absdiff(img, blurred, lowContrastMask);
+		Imgproc.threshold(lowContrastMask, lowContrastMask, threshold, 255, Imgproc.THRESH_BINARY_INV);
+		Mat sharpened = new Mat();
+		Core.addWeighted(img, 1 + amount, blurred, -amount, 0, sharpened);
+		img.copyTo(sharpened, lowContrastMask);
+		return sharpened;
+	}
+
+	private Mat sharpen2(Mat img, double alpha) {
+		Mat sharpenConv = Mat.zeros(new Size(3, 3), CvType.CV_64FC1);
+		sharpenConv.put(0, 1, -alpha / 4);
+		sharpenConv.put(1, 0, -alpha / 4);
+		sharpenConv.put(1, 1, alpha + 1);
+		sharpenConv.put(1, 2, -alpha / 4);
+		sharpenConv.put(2, 1, -alpha / 4);
+		Mat sharpen = new Mat();
+		Imgproc.filter2D(img, sharpen, -1, sharpenConv);
+		return sharpen;
+	}
+
+	private boolean isOverlapping(Rect first, Rect other) {
+		return first.tl().x < other.br().x && other.tl().x < first.br().x && first.tl().y < other.br().y && other.tl().y < first.br().y;
 	}
 
 	private Image[] doWork() {
@@ -185,7 +222,6 @@ public class GraphicApp extends AbstractApp {
 			System.out.println("Not enough quality");
 			return null;
 		}
-
 		Image[] images = new Image[10];
 		images[0] = frame.toJfxImage();
 
@@ -196,30 +232,71 @@ public class GraphicApp extends AbstractApp {
 		Img flat = new Img(fhtManager.init(binarized.getSrc()).dewarp(frame.getSrc()), false);
 		images[1] = flat.toJfxImage();
 		ref = trace("Dewarp", ref);
-		// Img flatBinarized = flat.adaptativeGaussianInvThreshold(7, 5);
-		// Img gray = flat.bgr2Gray().gaussianBlur(new Size(3, 3));
-		// Core.absdiff(gray.getSrc(), new Scalar(100), gray.getSrc());
-		// Imgproc.adaptiveThreshold(gray.getSrc(), gray.getSrc(), 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY_INV, 7, 3);
-		// Img flatBinarized = new Img(gray.getSrc(), false);
-		// images[2] = flatBinarized.toJfxImage();
+
+		Mat flatSharpened = sharpen(flat.getSrc(), sigma.get(), threshold.get(), amount.get());
+		Img flatSharpImg = new Img(flatSharpened, false);
+
+		images[1] = flatSharpImg.toJfxImage();
+
+		Img flatGray = flat.bgr2Gray();// .gaussianBlur(new Size(3, 3));
+		// Core.absdiff(flatGgray.getSrc(), new Scalar(150), gray.getSrc());
+		Mat flatBinarized = new Mat();
+		Imgproc.adaptiveThreshold(flatGray.getSrc(), flatBinarized, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY_INV, 7, 5);
+		images[2] = new Img(flatBinarized, false).toJfxImage();
 
 		ArrayList<MatOfPoint> regions = new ArrayList<>();
 		MatOfRect mor = new MatOfRect();
 		detector.detectRegions(flat.bgr2Gray().getSrc(), regions, mor);
 		List<Rect> rects = new ArrayList<>();
 		Converters.Mat_to_vector_Rect(mor, rects);
+		List<Rect> distinctRects = rects.stream().distinct().collect(Collectors.toList());
 
-		rects.removeIf(rect -> {
-			for (Rect rect_ : rects)
-				if (!rect_.equals(rect) && contains(rect_, rect))
-					return true;
+		// rects.removeIf(rect -> {
+		// for (Rect rect_ : rects)
+		// if (!rect_.equals(rect) && contains(rect_, rect))
+		// return true;
+		// return false;
+		// });
+
+		Mat dislayMser = flatSharpImg.getSrc().clone();
+		distinctRects.removeIf(rect -> {
+			for (Rect other : distinctRects)
+				if (!other.equals(rect)) {
+					if (contains(other, rect))
+						return true;
+				}
 			return false;
 		});
+		distinctRects.sort((rect1, rect2) -> Double.compare(rect1.area(), rect2.area()));
+		distinctRects.removeIf(rect -> {
+			List<Rect> overlappings = distinctRects.stream().filter(other -> !other.equals(rect) && isOverlapping(rect, other)).collect(Collectors.toList());
+			if (overlappings.size() > 1) {
+				System.out.println("------------------");
+				overlappings.forEach(overlap -> {
+					System.out.println("Blue : " + overlap);
+					// Imgproc.rectangle(dislayMser, overlap, new Scalar(255, 0, 0), -1);
+				});
+				System.out.println("Red : " + rect);
+				Imgproc.rectangle(dislayMser, rect, new Scalar(0, 0, 255), 1);
+				return true;
+			}
+			return false;
+		});
+		// rects.removeIf(rect -> {
+		// List<Rect> overlappings = rects.stream().filter(other -> !other.equals(rect) && isOverlapping(rect, other)).collect(Collectors.toList());
+		// if (!overlappings.isEmpty() && rect.area() < overlappings.get(0).area()) {
+		// Imgproc.rectangle(dislayMser, rect, new Scalar(255, 0, 0), 1);
+		// return true;
+		// }
+		// return false;
+		// });
 
+		distinctRects.forEach(rect -> Imgproc.rectangle(dislayMser, rect, new Scalar(0, 255, 0), 1));
+		images[3] = new Img(dislayMser, false).toJfxImage();
 		// links.removeIf(link -> !link.label1.getLabel().equals(link.label2.getLabel()));
 
 		// links.removeIf(link -> link.distance() > 20);
-		List<RectSpan> spans = assemble(rects);
+		List<RectSpan> spans = assemble(distinctRects, 25, 10);
 		List<Rect> spanRects = spans.stream().map(span -> span.getRect()).collect(Collectors.toList());
 		Mat assembleMask = Mat.zeros(flat.size(), CvType.CV_8UC3);
 		spans.forEach(span -> {
@@ -227,8 +304,10 @@ public class GraphicApp extends AbstractApp {
 			span.getRects().forEach(superRect -> Imgproc.rectangle(assembleMask, superRect.rect, color, -1));
 			Imgproc.rectangle(assembleMask, span.getRect(), color, 1);
 		});
-		images[2] = new Img(assembleMask, false).toJfxImage();
-		ref = trace("Assemblage", ref);
+		images[4] = new Img(assembleMask, false).toJfxImage();
+		ref =
+
+				trace("Assemblage", ref);
 
 		// Mat mask = Mat.zeros(flat.size(), CvType.CV_8UC1);
 		// rects.forEach(rect -> Imgproc.rectangle(mask, rect, new Scalar(255, 0, 0), -1));
@@ -239,17 +318,17 @@ public class GraphicApp extends AbstractApp {
 		spanRects.forEach(rect -> Imgproc.rectangle(spanMask, rect, new Scalar(255), -1));
 
 		Mat flatDisplay = Mat.zeros(flat.size(), flat.type());
-		flat.getSrc().copyTo(flatDisplay, spanMask);
+		flatSharpImg.getSrc().copyTo(flatDisplay, spanMask);
 		spanRects.forEach(rect -> Imgproc.rectangle(flatDisplay, rect.tl(), rect.br(), new Scalar(0, 255, 0), 1));
-		images[3] = new Img(flatDisplay, false).toJfxImage();
+		images[5] = new Img(flatDisplay, false).toJfxImage();
 		ref = trace("Close mask", ref);
 
 		Mat flatDisplay2 = Mat.zeros(flat.size(), flat.type());
 		Labels labels = new Labels(spanRects);
-		labels.ocr(flat.getSrc(), 0, 1, 2, 2);
+		labels.ocr(flatSharpened, 10, 1, 2, 2);
 		labels.putOcr(flatDisplay2);
-		Imgproc.putText(flatDisplay2, "Quality : " + (int) QualityManager.quality(flat.bgr2Gray().getSrc()), new Point(50, 50), Core.FONT_HERSHEY_PLAIN, 1, new Scalar(0, 0, 255), 1);
-		images[4] = new Img(flatDisplay2, false).toJfxImage();
+		Imgproc.putText(flatDisplay2, "Quality : " + (int) QualityManager.quality(flatSharpImg.bgr2Gray().getSrc()), new Point(50, 50), Core.FONT_HERSHEY_PLAIN, 1, new Scalar(0, 0, 255), 1);
+		images[6] = new Img(flatDisplay2, false).toJfxImage();
 		ref = trace("Ocr", ref);
 
 		// Layout layout = mserMask.buildLayout(new Size(0, 0), new Size(0.08, 0.001), 8);
@@ -327,11 +406,11 @@ public class GraphicApp extends AbstractApp {
 		List<Rect> referenceRects = referenceManager.getReferenceRects();
 		Mat referenceTemplate = Mat.zeros(flat.size(), CvType.CV_8UC1);// new SuperTemplate(referenceManager.getReference().getSuperFrame(), CvType.CV_8UC1, SuperFrameImg::getFrame);
 		referenceRects.forEach(rect -> Imgproc.rectangle(referenceTemplate, rect, new Scalar(255), -1));
-		images[6] = new Img(referenceTemplate, false).toJfxImage();
+		images[7] = new Img(referenceTemplate, false).toJfxImage();
 
 		Mat display = Mat.zeros(frame.size(), CvType.CV_8UC1);
 		referenceManager.getResizedFieldsRects().forEach(rect -> Imgproc.rectangle(display, rect, new Scalar(255), -1));
-		images[7] = new Img(display, false).toJfxImage();
+		images[8] = new Img(display, false).toJfxImage();
 		//
 		// SuperTemplate layoutTemplate = new SuperTemplate(referenceTemplate, CvType.CV_8UC3, SuperFrameImg::getDisplay);
 		// Layout layout = layoutTemplate.layout();
@@ -372,7 +451,7 @@ public class GraphicApp extends AbstractApp {
 			double bottomYVariance = 0;
 			for (double bottom : bottoms)
 				bottomYVariance += (bottom - bottomYAverage) * (bottom - bottomYAverage);
-			bottomYVariance /= getRects().size();
+			bottomYVariance /= getRects().size() - 1;
 
 			double yMin = topYAverage - Math.sqrt(topYVariance);// DoubleStream.of(tops).min().getAsDouble();
 			double yMax = bottomYAverage + Math.sqrt(bottomYVariance);// DoubleStream.of(bottoms).max().getAsDouble();
@@ -401,7 +480,7 @@ public class GraphicApp extends AbstractApp {
 
 	}
 
-	private List<RectSpan> assemble(List<Rect> rects) {
+	private List<RectSpan> assemble(List<Rect> rects, double maxConnectedDistance, double alignTolerance) {
 		List<SuperRect> superRects = rects.stream().map(SuperRect::new).collect(Collectors.toList());
 		Collections.sort(superRects);
 		System.out.println("superRects size " + superRects.size());
@@ -417,10 +496,10 @@ public class GraphicApp extends AbstractApp {
 						rect1 = rect2;
 						rect2 = tmp;
 					}
-					if (yOverlaps(rect1.rect.tl().y, rect1.rect.br().y, rect2.rect.tl().y, rect2.rect.br().y))
+					if (yOverlaps(rect1.rect.tl().y, rect1.rect.br().y, rect2.rect.tl().y, rect2.rect.br().y, alignTolerance))
 						connectedRectsList.add(new ConnectedRects(rect1, rect2));
 				}
-		double maxConnectedDistance = 25;
+
 		connectedRectsList = connectedRectsList.stream().filter(connectedRects -> connectedRects.distance() < maxConnectedDistance).collect(Collectors.toList());
 		System.out.println("connectedRectsList size " + connectedRectsList.size());
 		Collections.sort(connectedRectsList);
@@ -446,8 +525,8 @@ public class GraphicApp extends AbstractApp {
 		return spans;
 	}
 
-	private boolean yOverlaps(double top1, double bottom1, double top2, double bottom2) {
-		return !(bottom1 < top2 || bottom2 < top1);
+	private boolean yOverlaps(double top1, double bottom1, double top2, double bottom2, double alignTolerance) {
+		return !((bottom1 + alignTolerance) < top2 || (bottom2 + alignTolerance) < top1);
 	}
 
 	public static class Label {
@@ -463,7 +542,8 @@ public class GraphicApp extends AbstractApp {
 			double newTly = rect.tl().y - dy >= 0 ? rect.tl().y - dy : 0;
 			double newBrx = rect.br().x + dx <= img.width() ? rect.br().x + dx : img.width();
 			double newBry = rect.br().y + dy <= img.height() ? rect.br().y + dy : img.height();
-			label = Ocr.doWork(new Mat(img, new Rect(new Point(newTlx, newTly), new Point(newBrx, newBry))), confidence, componentLevel);
+			Mat roi = new Mat(img, new Rect(new Point(newTlx, newTly), new Point(newBrx, newBry)));
+			label = Ocr.doWork(roi, confidence, componentLevel);
 			// System.out.println(label);
 		}
 
